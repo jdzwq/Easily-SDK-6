@@ -1,0 +1,771 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="源文件">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="头文件">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="资源文件">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="头文件\windows">
+      <UniqueIdentifier>{99ee73c8-0fa8-45e4-90d0-34bdf693c9a0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\inf">
+      <UniqueIdentifier>{e68a20cd-5a61-45ed-991f-8613ca2fc1cb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\gdi">
+      <UniqueIdentifier>{601b44c5-027c-4e3c-b0a4-614a16c3e564}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\gdi">
+      <UniqueIdentifier>{f7adac5d-dfc8-48af-b956-974eb2576b83}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\bio">
+      <UniqueIdentifier>{a49e9092-650d-479a-93fa-6066ffaaefa8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\bio">
+      <UniqueIdentifier>{b26fd6d9-c73a-4519-a8e9-eaabcbfb4aba}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\bag">
+      <UniqueIdentifier>{4adb4aa2-9982-4206-96d3-837068d79746}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\bag">
+      <UniqueIdentifier>{2902cca5-f20a-47ec-b6fa-8acc1f085910}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\tio">
+      <UniqueIdentifier>{741fa2c6-59ab-477d-9e8a-85565172a978}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\ing">
+      <UniqueIdentifier>{4a57871b-d1a9-4c68-a372-717bbb69c43c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\par">
+      <UniqueIdentifier>{10fb8333-6e9b-4098-b323-393f470e6157}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\ing">
+      <UniqueIdentifier>{c079de55-4c35-4123-8dc6-ab7827a7b899}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\tio">
+      <UniqueIdentifier>{0c6171b3-e514-4f2f-9139-2a1dcd5f024e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\par">
+      <UniqueIdentifier>{637424df-b2b2-4914-8437-203ab8fca8ec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\scan">
+      <UniqueIdentifier>{8f76d8af-3d19-4876-ac43-d8f13d7e0a10}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\scan">
+      <UniqueIdentifier>{523a3f59-487e-49fb-86f5-dd35c8c5c173}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\hint">
+      <UniqueIdentifier>{d5bd9f90-5908-40dd-b2be-4cddaeef5d70}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\hint">
+      <UniqueIdentifier>{f419928c-d744-4f40-a514-79497e01cef9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\doc">
+      <UniqueIdentifier>{1ff1b8fb-a266-47c1-b512-947c6c248d24}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\doc">
+      <UniqueIdentifier>{df8bd54b-fcf1-4623-a52b-3c64082f44ac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\view">
+      <UniqueIdentifier>{bc64523c-eac4-4582-97f9-2a809916f82a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\view">
+      <UniqueIdentifier>{b6890010-2762-42c8-8f7e-a8b058c5c620}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\attr">
+      <UniqueIdentifier>{1661fe44-a103-46f8-8a1e-16a0cc831221}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\mis">
+      <UniqueIdentifier>{fb2925ec-7a6b-49bc-82b1-d6e0acad56b5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\mis">
+      <UniqueIdentifier>{d2e5f4b5-3544-4939-9d7c-11235e4ea150}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\xdb">
+      <UniqueIdentifier>{1bccb1cd-e7d9-41cc-bfa6-8da0f77d1c2c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\xdb">
+      <UniqueIdentifier>{325921e1-a6b3-4637-84c1-5a536b2350ee}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\xdl\windows\_cfg_win32.h">
+      <Filter>头文件\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\inf\fileinf.h">
+      <Filter>头文件\inf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\inf\gdiinf.h">
+      <Filter>头文件\inf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\inf\xdbinf.h">
+      <Filter>头文件\inf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\inf\xmlinf.h">
+      <Filter>头文件\inf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\gdi\svggdi.h">
+      <Filter>头文件\gdi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\bio\formbio.h">
+      <Filter>头文件\bio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\bio\gridbio.h">
+      <Filter>头文件\bio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\bio\imagesbio.h">
+      <Filter>头文件\bio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\bio\jsonbio.h">
+      <Filter>头文件\bio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\bio\memobio.h">
+      <Filter>头文件\bio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\bio\metabio.h">
+      <Filter>头文件\bio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\bio\properbio.h">
+      <Filter>头文件\bio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\bio\textbio.h">
+      <Filter>头文件\bio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\bio\xmlbio.h">
+      <Filter>头文件\bio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\bag\gridbag.h">
+      <Filter>头文件\bag</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\bag\properbag.h">
+      <Filter>头文件\bag</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\bag\schemabag.h">
+      <Filter>头文件\bag</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\bag\svgbag.h">
+      <Filter>头文件\bag</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\inf\tioinf.h">
+      <Filter>头文件\inf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\tio\buffertio.h">
+      <Filter>头文件\tio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\tio\memotio.h">
+      <Filter>头文件\tio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\tio\streamtio.h">
+      <Filter>头文件\tio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\tio\stringtio.h">
+      <Filter>头文件\tio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\gdi\svgcanv.h">
+      <Filter>头文件\gdi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\bag\httpbag.h">
+      <Filter>头文件\bag</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\ing\coding.h">
+      <Filter>头文件\ing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\ing\dataing.h">
+      <Filter>头文件\ing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\ing\focusing.h">
+      <Filter>头文件\ing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\ing\framing.h">
+      <Filter>头文件\ing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\ing\gizmoing.h">
+      <Filter>头文件\ing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\ing\jioning.h">
+      <Filter>头文件\ing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\ing\shaping.h">
+      <Filter>头文件\ing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\ing\texting.h">
+      <Filter>头文件\ing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\tio\xmltio.h">
+      <Filter>头文件\tio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\par\jsonparser.h">
+      <Filter>头文件\par</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\par\ubbparser.h">
+      <Filter>头文件\par</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\par\xmlparser.h">
+      <Filter>头文件\par</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\scan\scanner.h">
+      <Filter>头文件\scan</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\hint\hintner.h">
+      <Filter>头文件\hint</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\doc\annodoc.h">
+      <Filter>头文件\doc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\doc\archdoc.h">
+      <Filter>头文件\doc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\doc\calendardoc.h">
+      <Filter>头文件\doc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\doc\diagramdoc.h">
+      <Filter>头文件\doc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\doc\dialogdoc.h">
+      <Filter>头文件\doc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\doc\domdoc.h">
+      <Filter>头文件\doc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\doc\eventdoc.h">
+      <Filter>头文件\doc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\doc\formdoc.h">
+      <Filter>头文件\doc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\doc\funcdoc.h">
+      <Filter>头文件\doc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\doc\griddoc.h">
+      <Filter>头文件\doc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\doc\imagesdoc.h">
+      <Filter>头文件\doc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\doc\jsondoc.h">
+      <Filter>头文件\doc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\doc\labeldoc.h">
+      <Filter>头文件\doc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\doc\listdoc.h">
+      <Filter>头文件\doc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\doc\memodoc.h">
+      <Filter>头文件\doc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\doc\menudoc.h">
+      <Filter>头文件\doc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\doc\metadoc.h">
+      <Filter>头文件\doc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\doc\notesdoc.h">
+      <Filter>头文件\doc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\doc\plotdoc.h">
+      <Filter>头文件\doc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\doc\properdoc.h">
+      <Filter>头文件\doc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\doc\richdoc.h">
+      <Filter>头文件\doc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\doc\schemadoc.h">
+      <Filter>头文件\doc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\doc\soapdoc.h">
+      <Filter>头文件\doc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\doc\splitdoc.h">
+      <Filter>头文件\doc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\doc\statisdoc.h">
+      <Filter>头文件\doc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\doc\statusdoc.h">
+      <Filter>头文件\doc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\doc\svgdoc.h">
+      <Filter>头文件\doc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\doc\tagdoc.h">
+      <Filter>头文件\doc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\doc\taskdoc.h">
+      <Filter>头文件\doc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\doc\titledoc.h">
+      <Filter>头文件\doc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\doc\tooldoc.h">
+      <Filter>头文件\doc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\doc\topogdoc.h">
+      <Filter>头文件\doc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\doc\treedoc.h">
+      <Filter>头文件\doc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\doc\wsdldoc.h">
+      <Filter>头文件\doc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\doc\xmldoc.h">
+      <Filter>头文件\doc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\view\annoview.h">
+      <Filter>头文件\view</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\view\boxview.h">
+      <Filter>头文件\view</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\view\calendarview.h">
+      <Filter>头文件\view</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\view\diagramview.h">
+      <Filter>头文件\view</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\view\dialogview.h">
+      <Filter>头文件\view</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\view\formview.h">
+      <Filter>头文件\view</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\view\gridview.h">
+      <Filter>头文件\view</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\view\imagesview.h">
+      <Filter>头文件\view</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\view\labelview.h">
+      <Filter>头文件\view</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\view\listview.h">
+      <Filter>头文件\view</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\view\menuview.h">
+      <Filter>头文件\view</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\view\plotview.h">
+      <Filter>头文件\view</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\view\properview.h">
+      <Filter>头文件\view</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\view\splitview.h">
+      <Filter>头文件\view</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\view\statisview.h">
+      <Filter>头文件\view</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\view\statusview.h">
+      <Filter>头文件\view</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\view\svgview.h">
+      <Filter>头文件\view</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\view\tableview.h">
+      <Filter>头文件\view</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\view\titleview.h">
+      <Filter>头文件\view</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\view\toolview.h">
+      <Filter>头文件\view</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\view\topogview.h">
+      <Filter>头文件\view</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\view\treeview.h">
+      <Filter>头文件\view</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\attr\cssattr.h">
+      <Filter>头文件\attr</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\attr\docattr.h">
+      <Filter>头文件\attr</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\attr\svgattr.h">
+      <Filter>头文件\attr</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\mis\filetag.h">
+      <Filter>头文件\mis</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\mis\gridsql.h">
+      <Filter>头文件\mis</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\mis\misce.h">
+      <Filter>头文件\mis</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\xdldef.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\xdldoc.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\xdlgdi.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\xdlutil.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\xdlview.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\xdloop.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\attr\xmlattr.h">
+      <Filter>头文件\attr</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\xdlbio.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\scan\memoscan.h">
+      <Filter>头文件\scan</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\scan\tagscan.h">
+      <Filter>头文件\scan</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\scan\textscan.h">
+      <Filter>头文件\scan</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\inf\hintinf.h">
+      <Filter>头文件\inf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\gdi\svgiml.h">
+      <Filter>头文件\gdi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\bio\fileiml.h">
+      <Filter>头文件\bio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\xdb\xdbiml.h">
+      <Filter>头文件\xdb</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\inf\scaninf.h">
+      <Filter>头文件\inf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\scan\richscan.h">
+      <Filter>头文件\scan</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdl\gdi\mgciml.h">
+      <Filter>头文件\gdi</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\xdl\gdi\svggdi.c">
+      <Filter>源文件\gdi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\bio\formbio.c">
+      <Filter>源文件\bio</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\bio\gridbio.c">
+      <Filter>源文件\bio</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\bio\imagesbio.c">
+      <Filter>源文件\bio</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\bio\jsonbio.c">
+      <Filter>源文件\bio</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\bio\memobio.c">
+      <Filter>源文件\bio</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\bio\metabio.c">
+      <Filter>源文件\bio</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\bio\properbio.c">
+      <Filter>源文件\bio</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\bio\textbio.c">
+      <Filter>源文件\bio</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\bio\xmlbio.c">
+      <Filter>源文件\bio</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\bag\gridbag.c">
+      <Filter>源文件\bag</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\bag\properbag.c">
+      <Filter>源文件\bag</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\bag\schemabag.c">
+      <Filter>源文件\bag</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\bag\svgbag.c">
+      <Filter>源文件\bag</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\tio\buffertio.c">
+      <Filter>源文件\tio</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\tio\memotio.c">
+      <Filter>源文件\tio</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\tio\streamtio.c">
+      <Filter>源文件\tio</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\tio\stringtio.c">
+      <Filter>源文件\tio</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\gdi\svgcanv.c">
+      <Filter>源文件\gdi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\bag\httpbag.c">
+      <Filter>源文件\bag</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\ing\coding.c">
+      <Filter>源文件\ing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\ing\dataing.c">
+      <Filter>源文件\ing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\ing\focusing.c">
+      <Filter>源文件\ing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\ing\framing.c">
+      <Filter>源文件\ing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\ing\gizmoing.c">
+      <Filter>源文件\ing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\ing\jioning.c">
+      <Filter>源文件\ing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\ing\shaping.c">
+      <Filter>源文件\ing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\ing\texting.c">
+      <Filter>源文件\ing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\tio\xmltio.c">
+      <Filter>源文件\tio</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\par\jsonparser.c">
+      <Filter>源文件\par</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\par\ubbparser.c">
+      <Filter>源文件\par</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\par\xmlparser.c">
+      <Filter>源文件\par</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\scan\scanner.c">
+      <Filter>源文件\scan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\hint\hintner.c">
+      <Filter>源文件\hint</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\doc\annodoc.c">
+      <Filter>源文件\doc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\doc\archdoc.c">
+      <Filter>源文件\doc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\doc\calendardoc.c">
+      <Filter>源文件\doc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\doc\diagramdoc.c">
+      <Filter>源文件\doc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\doc\dialogdoc.c">
+      <Filter>源文件\doc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\doc\domdoc.c">
+      <Filter>源文件\doc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\doc\eventdoc.c">
+      <Filter>源文件\doc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\doc\formdoc.c">
+      <Filter>源文件\doc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\doc\funcdoc.c">
+      <Filter>源文件\doc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\doc\griddoc.c">
+      <Filter>源文件\doc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\doc\imagesdoc.c">
+      <Filter>源文件\doc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\doc\jsondoc.c">
+      <Filter>源文件\doc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\doc\labeldoc.c">
+      <Filter>源文件\doc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\doc\listdoc.c">
+      <Filter>源文件\doc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\doc\memodoc.c">
+      <Filter>源文件\doc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\doc\menudoc.c">
+      <Filter>源文件\doc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\doc\metadoc.c">
+      <Filter>源文件\doc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\doc\notesdoc.c">
+      <Filter>源文件\doc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\doc\plotdoc.c">
+      <Filter>源文件\doc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\doc\properdoc.c">
+      <Filter>源文件\doc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\doc\richdoc.c">
+      <Filter>源文件\doc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\doc\schemadoc.c">
+      <Filter>源文件\doc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\doc\soapdoc.c">
+      <Filter>源文件\doc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\doc\splitdoc.c">
+      <Filter>源文件\doc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\doc\statisdoc.c">
+      <Filter>源文件\doc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\doc\statusdoc.c">
+      <Filter>源文件\doc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\doc\svgdoc.c">
+      <Filter>源文件\doc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\doc\tagdoc.c">
+      <Filter>源文件\doc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\doc\taskdoc.c">
+      <Filter>源文件\doc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\doc\titledoc.c">
+      <Filter>源文件\doc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\doc\tooldoc.c">
+      <Filter>源文件\doc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\doc\topogdoc.c">
+      <Filter>源文件\doc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\doc\treedoc.c">
+      <Filter>源文件\doc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\doc\wsdldoc.c">
+      <Filter>源文件\doc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\doc\xmldoc.c">
+      <Filter>源文件\doc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\view\annoview.c">
+      <Filter>源文件\view</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\view\boxview.c">
+      <Filter>源文件\view</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\view\calendarview.c">
+      <Filter>源文件\view</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\view\diagramview.c">
+      <Filter>源文件\view</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\view\dialogview.c">
+      <Filter>源文件\view</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\view\formview.c">
+      <Filter>源文件\view</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\view\gridview.c">
+      <Filter>源文件\view</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\view\imagesview.c">
+      <Filter>源文件\view</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\view\labelview.c">
+      <Filter>源文件\view</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\view\listview.c">
+      <Filter>源文件\view</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\view\menuview.c">
+      <Filter>源文件\view</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\view\plotview.c">
+      <Filter>源文件\view</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\view\properview.c">
+      <Filter>源文件\view</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\view\splitview.c">
+      <Filter>源文件\view</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\view\statisview.c">
+      <Filter>源文件\view</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\view\statusview.c">
+      <Filter>源文件\view</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\view\svgview.c">
+      <Filter>源文件\view</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\view\tableview.c">
+      <Filter>源文件\view</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\view\titleview.c">
+      <Filter>源文件\view</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\view\toolview.c">
+      <Filter>源文件\view</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\view\topogview.c">
+      <Filter>源文件\view</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\view\treeview.c">
+      <Filter>源文件\view</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\mis\filetag.c">
+      <Filter>源文件\mis</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\mis\gridsql.c">
+      <Filter>源文件\mis</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\mis\misce.c">
+      <Filter>源文件\mis</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\scan\memoscan.c">
+      <Filter>源文件\scan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\scan\richscan.c">
+      <Filter>源文件\scan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\scan\tagscan.c">
+      <Filter>源文件\scan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\scan\textscan.c">
+      <Filter>源文件\scan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\xdb\xdbiml.c">
+      <Filter>源文件\xdb</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\bio\fileiml.c">
+      <Filter>源文件\bio</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\gdi\svgiml.c">
+      <Filter>源文件\gdi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdl\gdi\mgciml.c">
+      <Filter>源文件\gdi</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

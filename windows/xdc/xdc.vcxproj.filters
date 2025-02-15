@@ -1,0 +1,393 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="源文件">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="头文件">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="资源文件">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="头文件\lang">
+      <UniqueIdentifier>{2460d26b-9f97-41a5-9482-18b95c1142ee}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\imp">
+      <UniqueIdentifier>{2f860528-e509-4a9e-9faf-64835ae0fb4f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\box">
+      <UniqueIdentifier>{c175a154-09f3-43be-9c83-8a35a33d1645}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\imp">
+      <UniqueIdentifier>{94b56120-0145-41bb-b192-27de2751b810}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\box">
+      <UniqueIdentifier>{57d9f1c0-b779-4e2b-8141-80e9e65b8919}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\hand">
+      <UniqueIdentifier>{6bf980c8-1c03-4ef2-b0c8-098d04f13095}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\hand">
+      <UniqueIdentifier>{22c64a3f-733b-4c2b-8c76-3309cd4d8d2b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\bag">
+      <UniqueIdentifier>{a24ee568-961a-4656-9e6a-785c870f8f51}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\bag">
+      <UniqueIdentifier>{d8b38054-1b12-4921-b04b-8da4d636ab5a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\ctrl">
+      <UniqueIdentifier>{361aa9d3-3467-4342-bc8b-d1b4d00f7a5c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\edit">
+      <UniqueIdentifier>{abbfeb5a-fa38-4e20-a263-aa9badf0b6d9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\edit">
+      <UniqueIdentifier>{351c0561-dfd9-4ca6-a87a-6f61067d2909}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\dlg">
+      <UniqueIdentifier>{f818a384-4eef-40b0-b914-4de6fbe863b9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\dlg">
+      <UniqueIdentifier>{9bb12e86-10a5-4843-bbb7-fbd7405cdde8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\menu">
+      <UniqueIdentifier>{e3adf3d1-4874-4611-8234-c31918e679ab}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\menu">
+      <UniqueIdentifier>{9ee85480-335a-45c2-921a-4f1e06b8475e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\ctrl">
+      <UniqueIdentifier>{859f92bc-f04e-46b0-b7d5-d48851b85841}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\xdc\xdcinit.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\imp\gdicanv.c">
+      <Filter>源文件\imp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\imp\gdiface.c">
+      <Filter>源文件\imp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\imp\impbitmap.c">
+      <Filter>源文件\imp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\imp\impclip.c">
+      <Filter>源文件\imp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\imp\impcontext.c">
+      <Filter>源文件\imp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\imp\impgdi.c">
+      <Filter>源文件\imp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\imp\impshell.c">
+      <Filter>源文件\imp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\imp\impwidget.c">
+      <Filter>源文件\imp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\imp\widgetex.c">
+      <Filter>源文件\imp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\imp\widgetnc.c">
+      <Filter>源文件\imp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\box\checkbox.c">
+      <Filter>源文件\box</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\box\datebox.c">
+      <Filter>源文件\box</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\box\dropbox.c">
+      <Filter>源文件\box</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\box\editbox.c">
+      <Filter>源文件\box</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\box\horzbox.c">
+      <Filter>源文件\box</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\box\iconbox.c">
+      <Filter>源文件\box</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\box\keybox.c">
+      <Filter>源文件\box</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\box\listbox.c">
+      <Filter>源文件\box</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\box\menubox.c">
+      <Filter>源文件\box</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\box\navibox.c">
+      <Filter>源文件\box</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\box\numbox.c">
+      <Filter>源文件\box</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\box\printbox.c">
+      <Filter>源文件\box</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\box\pushbox.c">
+      <Filter>源文件\box</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\box\radiobox.c">
+      <Filter>源文件\box</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\box\shapebox.c">
+      <Filter>源文件\box</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\box\slidebox.c">
+      <Filter>源文件\box</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\box\spinbox.c">
+      <Filter>源文件\box</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\box\staticbox.c">
+      <Filter>源文件\box</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\box\timebox.c">
+      <Filter>源文件\box</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\box\tipbox.c">
+      <Filter>源文件\box</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\box\vertbox.c">
+      <Filter>源文件\box</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\box\wordsbox.c">
+      <Filter>源文件\box</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\hand\docker.c">
+      <Filter>源文件\hand</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\hand\splitor.c">
+      <Filter>源文件\hand</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\hand\textor.c">
+      <Filter>源文件\hand</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\bag\printbag.c">
+      <Filter>源文件\bag</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\edit\firecheck.c">
+      <Filter>源文件\edit</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\edit\firedate.c">
+      <Filter>源文件\edit</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\edit\fireedit.c">
+      <Filter>源文件\edit</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\edit\firegrid.c">
+      <Filter>源文件\edit</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\edit\firelist.c">
+      <Filter>源文件\edit</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\edit\firenum.c">
+      <Filter>源文件\edit</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\edit\firetime.c">
+      <Filter>源文件\edit</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\edit\firewords.c">
+      <Filter>源文件\edit</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\dlg\annodlg.c">
+      <Filter>源文件\dlg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\dlg\griddlg.c">
+      <Filter>源文件\dlg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\dlg\inputdlg.c">
+      <Filter>源文件\dlg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\dlg\listdlg.c">
+      <Filter>源文件\dlg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\dlg\msgdlg.c">
+      <Filter>源文件\dlg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\dlg\previewdlg.c">
+      <Filter>源文件\dlg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\dlg\properdlg.c">
+      <Filter>源文件\dlg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\dlg\tabledlg.c">
+      <Filter>源文件\dlg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\dlg\textdlg.c">
+      <Filter>源文件\dlg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\dlg\popdlg.c">
+      <Filter>源文件\dlg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\menu\menu.c">
+      <Filter>源文件\menu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\ctrl\calendarctrl.c">
+      <Filter>源文件\ctrl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\ctrl\curvectrl.c">
+      <Filter>源文件\ctrl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\ctrl\diagramctrl.c">
+      <Filter>源文件\ctrl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\ctrl\dialogctrl.c">
+      <Filter>源文件\ctrl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\ctrl\formctrl.c">
+      <Filter>源文件\ctrl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\ctrl\gridctrl.c">
+      <Filter>源文件\ctrl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\ctrl\imagesctrl.c">
+      <Filter>源文件\ctrl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\ctrl\labelctrl.c">
+      <Filter>源文件\ctrl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\ctrl\listctrl.c">
+      <Filter>源文件\ctrl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\ctrl\memoctrl.c">
+      <Filter>源文件\ctrl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\ctrl\modelctrl.c">
+      <Filter>源文件\ctrl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\ctrl\notesctrl.c">
+      <Filter>源文件\ctrl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\ctrl\ownerctrl.c">
+      <Filter>源文件\ctrl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\ctrl\panelctrl.c">
+      <Filter>源文件\ctrl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\ctrl\photoctrl.c">
+      <Filter>源文件\ctrl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\ctrl\plotctrl.c">
+      <Filter>源文件\ctrl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\ctrl\properctrl.c">
+      <Filter>源文件\ctrl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\ctrl\richctrl.c">
+      <Filter>源文件\ctrl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\ctrl\staticctrl.c">
+      <Filter>源文件\ctrl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\ctrl\statusctrl.c">
+      <Filter>源文件\ctrl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\ctrl\svgctrl.c">
+      <Filter>源文件\ctrl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\ctrl\tablectrl.c">
+      <Filter>源文件\ctrl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\ctrl\tagctrl.c">
+      <Filter>源文件\ctrl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\ctrl\titlectrl.c">
+      <Filter>源文件\ctrl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\ctrl\toolctrl.c">
+      <Filter>源文件\ctrl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\ctrl\topogctrl.c">
+      <Filter>源文件\ctrl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xdc\ctrl\treectrl.c">
+      <Filter>源文件\ctrl</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\xdc\xdcdef.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdc\lang\_xdc_ansi.h">
+      <Filter>头文件\lang</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdc\xdcinit.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdc\xdcimp.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdc\imp\gdicanv.h">
+      <Filter>头文件\imp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdc\imp\gdiface.h">
+      <Filter>头文件\imp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdc\imp\impbitmap.h">
+      <Filter>头文件\imp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdc\imp\impclip.h">
+      <Filter>头文件\imp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdc\imp\impcontext.h">
+      <Filter>头文件\imp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdc\imp\impgdi.h">
+      <Filter>头文件\imp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdc\imp\impshell.h">
+      <Filter>头文件\imp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdc\imp\impwidget.h">
+      <Filter>头文件\imp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdc\imp\widgetex.h">
+      <Filter>头文件\imp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdc\imp\widgetnc.h">
+      <Filter>头文件\imp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdc\hand\docker.h">
+      <Filter>头文件\hand</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdc\hand\splitor.h">
+      <Filter>头文件\hand</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdc\hand\textor.h">
+      <Filter>头文件\hand</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdc\bag\printbag.h">
+      <Filter>头文件\bag</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdc\ctrl\ctrl.h">
+      <Filter>头文件\ctrl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdc\box\box.h">
+      <Filter>头文件\box</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdc\edit\editor.h">
+      <Filter>头文件\edit</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdc\dlg\dlg.h">
+      <Filter>头文件\dlg</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdc\menu\menu.h">
+      <Filter>头文件\menu</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xdc\xdcutil.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

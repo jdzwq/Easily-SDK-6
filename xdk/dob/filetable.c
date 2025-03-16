@@ -101,7 +101,7 @@ static bool_t _init_block_map(block_map_t* pmt, int block_size, bool_t write)
 
 static bool_t _flush_file_head(file_table_context* ppt, bool_t b_save)
 {
-	byte_t head[PAGE_SIZE] = { 0 };
+	byte_t head[PAGE_SIZE];
 
 	if (b_save)
 	{

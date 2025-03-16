@@ -39,9 +39,9 @@ LICENSE.GPL3 for more details.
 #define _OS_UNKNOW
 #endif
 
-#if defined(_WIN64) || defined(__x86_64__) || defined(__amd64__)
+#if defined(_WIN64) || defined(__x86_64__) || defined(__amd64__) || defined(__aarch64__)
 #define _OS_64
-#else
+#elif defined(_WIN32) || defined(__i386__) || defined(__arm__)
 #define _OS_32
 #endif
 
@@ -59,7 +59,7 @@ LICENSE.GPL3 for more details.
 #define	BIG_ENDIAN	4321	/* most-significant byte first (IBM, net) */
 #define	PDP_ENDIAN	3412	/* LSB first in word, MSW first in int (pdp)*/
 
-#if defined(_WIN32) || defined(_WIN64) || defined(__i386__) || defined(__x86_64__) || defined(__amd64__) || \
+#if defined(_WIN32) || defined(_WIN64) || defined(__i386__) || defined(__arm__) || defined(__x86_64__) || defined(__amd64__) || defined(__aarch64__) ||\
    defined(vax) || defined(ns32000) || defined(sun386) || \
    defined(MIPSEL) || defined(_MIPSEL) || defined(BIT_ZERO_ON_RIGHT) || \
    defined(__alpha__) || defined(__alpha)

@@ -635,7 +635,7 @@ static void mask_rect(device_t dev, const xrect_t* pxr, const xcolor_t* pxc, int
 	bitmap_device_t* pdev = (bitmap_device_t*)dev;
 
 	PIXELVAL src, dst;
-	BYTE r, g, b;
+	byte_t r, g, b;
 	int x, y;
 	float f;
 
@@ -653,9 +653,9 @@ static void mask_rect(device_t dev, const xrect_t* pxr, const xcolor_t* pxc, int
 			{
 				src = (pdev->driver->getPixel)(pdev->handle, x, y);
 
-				r = (BYTE)((float)GET_PIXVAL_R(src) * (1.0-f) + (float)pxc->r * f);
-				g = (BYTE)((float)GET_PIXVAL_G(src) * (1.0-f) + (float)pxc->g * f);
-				b = (BYTE)((float)GET_PIXVAL_B(src) * (1.0-f) + (float)pxc->b * f);
+				r = (byte_t)((float)GET_PIXVAL_R(src) * (1.0-f) + (float)pxc->r * f);
+				g = (byte_t)((float)GET_PIXVAL_G(src) * (1.0-f) + (float)pxc->g * f);
+				b = (byte_t)((float)GET_PIXVAL_B(src) * (1.0-f) + (float)pxc->b * f);
 
 				dst = PUT_PIXVAL(0, r, g, b);
 				(pdev->driver->putPixel)(pdev->handle, x, y, dst, ROP_COPY);

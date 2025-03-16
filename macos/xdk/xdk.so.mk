@@ -1,5 +1,5 @@
-CC = gcc
-CFLAGS = -g -Wall -fPIC
+CC = clang
+CFLAGS = -Wall -Wextra -std=c11 -fPIC
 
 VER = 6.0
 SRV_PATH = /usr/local/xService
@@ -7,11 +7,11 @@ LNK_PATH = /usr/local/lib
 
 INC_PATH = ../../include
 SRC_PATH = ../../xdk
-OUT_PATH = ~/Easily-app-6/linux/sbin/api
+OUT_PATH = ~/工程/Easily-app-6/macos/sbin/api
 
-LIBS = -lm -ldl -lutil -lrt
+LIBS = -lm -ldl -lutil
 DIRS = $(wildcard \
-		$(SRC_PATH)/linux/*.c \
+		$(SRC_PATH)/macos/*.c \
 		$(SRC_PATH)/imp/*.c \
 		$(SRC_PATH)/acp/*.c \
 		$(SRC_PATH)/crypt/*.c \
@@ -19,11 +19,8 @@ DIRS = $(wildcard \
 		$(SRC_PATH)/jpg/*.c \
 		$(SRC_PATH)/png/*.c \
 		$(SRC_PATH)/img/*.c \
-		$(SRC_PATH)/lua/*.c \
-		$(SRC_PATH)/nmath/*.c \
 		$(SRC_PATH)/bar/*.c \
 		$(SRC_PATH)/enc/*.c \
-		$(SRC_PATH)/geo/*.c \
 		$(SRC_PATH)/gob/*.c \
 		$(SRC_PATH)/mob/*.c \
 		$(SRC_PATH)/dob/*.c \
@@ -46,7 +43,7 @@ OBJS = $(patsubst %.c, %.o, $(SRCS))
 MODULE = libxdk.so
 TARGET = $(OUT_PATH)/$(MODULE).$(VER)
 
-%.o : $(SRC_PATH)/linux/%.c
+%.o : $(SRC_PATH)/macos/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
 
 %.o : $(SRC_PATH)/imp/%.c
@@ -70,19 +67,10 @@ TARGET = $(OUT_PATH)/$(MODULE).$(VER)
 %.o : $(SRC_PATH)/img/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
 
-%.o : $(SRC_PATH)/lua/%.c
-	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
-
-%.o : $(SRC_PATH)/nmath/%.c
-	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
-
 %.o : $(SRC_PATH)/bar/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
 
 %.o : $(SRC_PATH)/enc/%.c
-	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
-
-%.o : $(SRC_PATH)/geo/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
 
 %.o : $(SRC_PATH)/gob/%.c

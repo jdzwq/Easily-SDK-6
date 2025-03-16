@@ -517,7 +517,7 @@ typedef struct _if_share_t{
 #ifdef XDK_SUPPORT_PIPE
 /*pipe interface*/
 typedef res_file_t (*PF_PIPE_SRV)(const tchar_t*, dword_t);
-typedef bool_t(*PF_PIPE_LISTEN)(res_file_t, async_t*);
+typedef wait_t(*PF_PIPE_LISTEN)(res_file_t, async_t*);
 typedef void(*PF_PIPE_STOP)(res_file_t);
 typedef res_file_t (*PF_PIPE_CLI)(const tchar_t*, dword_t);
 typedef void(*PF_PIPE_CLOSE)(const tchar_t*, res_file_t);

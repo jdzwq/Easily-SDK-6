@@ -1,15 +1,20 @@
 ﻿/***********************************************************************
-	Easily SDK v6.0
+	Easily xdk v5.5
 
-	(c) 2013-2016 JianDe LiFang Technology Corporation.  All Rights Reserved.
+	(c) 2005-2016 JianDe LiFang Technology Corporation.  All Rights Reserved.
 
 	@author ZhangWenQuan, JianDe HangZhou ZheJiang China, Mail: powersuite@hotmaol.com
 
 	@doc error system call document
 
-	@module	_if_error.c | linux implement file
+	@module	_if_error.c | error system call macos implement file
 
-	@devnote 张文权 2021.01 - 2021.12	v6.0
+	@devnote 张文权 2005.01 - 2007.12	v3.0
+	@devnote 张文权 2008.01 - 2009.12	v3.5
+	@devnote 张文权 2012.01 - 2015.12	v4.0
+	@devnote 张文权 2016.01 - 2016.12	v4.5
+	@devnote 张文权 2017.01 - 2017.12	v5.0
+ 	@devnote 张文权 2018.01 - 2018.12	v5.5
 ***********************************************************************/
 
 /**********************************************************************
@@ -30,7 +35,7 @@ LICENSE.GPL3 for more details.
 
 int _error_text(tchar_t* buf, int max)
 {
-	strncpy(buf, ((errno)? strerror(errno) : _T("")), max);
+    strncpy(buf, ((errno)? strerror(errno) : _T("")), max);
 	return (int)strlen(buf);
 }
 
@@ -41,11 +46,12 @@ void _error_exit(void)
 
 void _error_debug(const char* src, const char* func, unsigned int line, const char* str)
 {
-	if(str) perror(str);
+    if(str) printf("%s\n", str);
 }
 
-void _error_print(const tchar_t* str)
+void _error_print(const char* str)
 {
-    if(str) perror(str);
+    if(str) printf("%s\n", str);
 }
+
 #endif //XDK_SUPPORT_ERROR

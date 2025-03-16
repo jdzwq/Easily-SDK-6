@@ -40,7 +40,7 @@ PixelFormat32bppARGB 每个像素占用32位的真彩色图像，增加了alpha�
 PixelFormat32bppPARGB 是每个像素占用32位的真彩色图像，P表示RBG分量被预乘以alpha透明分量
 ***********************************************************************/
 
-static _find_quad(const bitmap_quad_t* pbq, int n, const xcolor_t* pxc)
+static int _find_quad(const bitmap_quad_t* pbq, int n, const xcolor_t* pxc)
 {
 	int i;
 

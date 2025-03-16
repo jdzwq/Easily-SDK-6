@@ -5,9 +5,9 @@
 
 	@author ZhangWenQuan, JianDe HangZhou ZheJiang China, Mail: powersuite@hotmaol.com
 
-	@doc xdl linux definition document
+	@doc xdl macos definition document
 
-	@module	_xdl_linux.h | linux definition interface file
+	@module	_xdl_macos.h | macos definition interface file
 
 	@devnote 张文权 2005.01 - 2007.12	v3.0
 	@devnote 张文权 2008.01 - 2009.12	v3.5
@@ -29,17 +29,18 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
 LICENSE.GPL3 for more details.
 ***********************************************************************/
 
-#ifndef _XDK_LINUX_H
-#define _XDK_LINUX_H
+#ifndef _XDK_MACOS_H
+#define _XDK_MACOS_H
 
 #define XDK_SUPPORT_MEMO_HEAP
 #define XDK_SUPPORT_MEMO_PAGE
+#define XDK_SUPPORT_MEMO_GLOB
+#define XDK_SUPPORT_MEMO_LOCAL
 #define XDK_SUPPORT_MEMO_CACHE
 #define XDK_SUPPORT_MEMO
 #define XDK_SUPPORT_ERROR
 #define XDK_SUPPORT_DATE
-//#define XDK_SUPPORT_MBCS
-#define XDK_SUPPORT_ACP
+#define XDK_SUPPORT_MBCS
 #define XDK_SUPPORT_ASYNC
 #define XDK_SUPPORT_THREAD_EVENT
 #define XDK_SUPPORT_THREAD_CRITI
@@ -57,7 +58,6 @@ LICENSE.GPL3 for more details.
 #define XDK_SUPPORT_SOCK
 #define XDK_SUPPORT_TIMER
 #define XDK_SUPPORT_RANDOM
-#define XDK_SUPPORT_GLYPH
 
 #include <stdio.h>
 #include <wchar.h>
@@ -66,27 +66,23 @@ LICENSE.GPL3 for more details.
 #include <assert.h>
 #include <errno.h>
 #include <locale.h>
-#include <setjmp.h>
-#include <stdarg.h>
-#include <stdio.h>
-#include <limits.h>
-#include <math.h>
-#include <float.h>
-#include <stdint.h>
 
+#include <malloc/malloc.h>
 #include <sys/types.h>
 #include <sys/time.h>
-#include <sys/wait.h>
 #include <sys/stat.h>
+#include <sys/event.h>
 #include <sys/syscall.h>
 #include <sys/mman.h>
 #include <sys/ioctl.h>
+#include <sys/ttycom.h>
 #include <sys/socket.h>
 #if __GLIBC__ <= 2 && __GLIBC_MINOR__ < 32
 #include <sys/sysctl.h>
 #endif
-#include <sys/epoll.h>
-#include <sys/timerfd.h>
+#include <sys/poll.h>
+#include <sys/event.h>
+#include <setjmp.h>
 #include <semaphore.h>
 #include <signal.h>
 #include <time.h>
@@ -97,15 +93,14 @@ LICENSE.GPL3 for more details.
 #include <netdb.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-
+#include <util.h>
 #include <termios.h>
-#include <pthread.h>
+#include <pthread.h> 
+//macos
+#include <mach-o/dyld.h>
+#include <math.h>
 
-//linux
-
-#define PACK( __Declaration__ ) __Declaration__ __attribute__((__packed__))
-
-typedef int		    res_queue_t;
+typedef int         res_queue_t;
 
 #ifdef XDK_SUPPORT_SOCK
 typedef struct sockaddr_in	net_addr_t;
@@ -129,8 +124,10 @@ typedef void*		res_find_t;
 #endif
 #endif
 
+#define INVALID_FILE	((int)(-1))
+
 #ifdef XDK_SUPPORT_CONS
-typedef void(*GNU_SIGNAL_HANDLER)(int sig);
+typedef void(*MAC_SIGNAL_HANDLER)(int sig);
 #endif
 
 #ifdef XDK_SUPPORT_THREAD
@@ -149,7 +146,7 @@ typedef void*       res_crit_t;
 #ifdef XDK_SUPPORT_THREAD_SEMAP
 typedef void*       res_sema_t;
 #endif
-typedef void*(*GNU_THREAD_PROC)(void* param);
+typedef void*(*MAC_THREAD_PROC)(void* param);
 #endif
 
 #ifdef XDK_SUPPORT_PROCESS
@@ -158,11 +155,10 @@ typedef void*		res_modu_t;
 #endif
 
 #ifdef XDK_SUPPORT_TIMER
-typedef int			res_timer_t;
-typedef void(*GNU_TIMER_PROC)(void* param, unsigned char wait);
+typedef void*		res_timer_t;
+typedef void(*MAC_TIMER_PROC)(void* param, unsigned char wait);
 #endif
 
-#define INVALID_FILE	((int)(-1))
 
 #ifdef XDK_SUPPORT_COMM
 #define COMM_EVNET_RING		TIOCM_RNG
@@ -215,11 +211,9 @@ typedef void(*GNU_TIMER_PROC)(void* param, unsigned char wait);
 #define INFINITE        0xFFFFFFFF
 #endif
 
-
 #ifndef LPSIZE
 typedef size_t*     LPSIZE;
 #endif
 
-#define XDK_SUPPORT_TEST
 
-#endif //_XDK_LINUX_H
+#endif //_XDK_MACOS_H

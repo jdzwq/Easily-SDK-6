@@ -5,9 +5,9 @@
 
 	@author ZhangWenQuan, JianDe HangZhou ZheJiang China, Mail: powersuite@hotmaol.com
 
-	@doc error system call document
+	@doc random system call document
 
-	@module	_if_error.c | linux implement file
+	@module	_if_random.c | macos implement file
 
 	@devnote 张文权 2021.01 - 2021.12	v6.0
 ***********************************************************************/
@@ -26,26 +26,11 @@ LICENSE.GPL3 for more details.
 
 #include "../xdkloc.h"
 
-#ifdef XDK_SUPPORT_ERROR
+#ifdef XDK_SUPPORT_RANDOM
 
-int _error_text(tchar_t* buf, int max)
+bool_t _system_random(byte_t *output, dword_t len)
 {
-	strncpy(buf, ((errno)? strerror(errno) : _T("")), max);
-	return (int)strlen(buf);
+	return (0);
 }
 
-void _error_exit(void)
-{
-	exit(-1);
-}
-
-void _error_debug(const char* src, const char* func, unsigned int line, const char* str)
-{
-	if(str) perror(str);
-}
-
-void _error_print(const tchar_t* str)
-{
-    if(str) perror(str);
-}
-#endif //XDK_SUPPORT_ERROR
+#endif //XDK_SUPPORT_RANDOM

@@ -37,24 +37,7 @@ LICENSE.GPL3 for more details.
 #define BIG_GETHCHAR(sw)		(unsigned char)((unsigned short)(sw) & 0x00FF)
 #define BIG_GETLCHAR(sw)		(unsigned char)(((unsigned short)(sw) >> 8) & 0x00FF) 
 
-#if defined(_WIN32) || defined(_WIN64) || defined(__i386__) || defined(__x86_64__) || defined(__amd64__) || \
-   defined(vax) || defined(ns32000) || defined(sun386) || \
-   defined(MIPSEL) || defined(_MIPSEL) || defined(BIT_ZERO_ON_RIGHT) || \
-   defined(__alpha__) || defined(__alpha)
-#define ACP_BYTE_ORDER    1234
-#endif
-
-#if defined(sel) || defined(pyr) || defined(mc68000) || defined(sparc) || \
-    defined(is68k) || defined(tahoe) || defined(ibm032) || defined(ibm370) || \
-    defined(MIPSEB) || defined(_MIPSEB) || defined(_IBMR2) || defined(DGUX) ||\
-    defined(apollo) || defined(__convex__) || defined(_CRAY) || \
-    defined(__hppa) || defined(__hp9000) || \
-    defined(__hp9000s300) || defined(__hp9000s700) || \
-    defined (BIT_ZERO_ON_LEFT) || defined(m68k) || defined(__sparc)
-#define ACP_BYTE_ORDER	4321
-#endif
-
-#if ACP_BYTE_ORDER == 4321
+#if ACP_BYTE_ORDER == BIG_ENDIAN
 #define MAKESHORT			BIG_MAKESHORT
 #define GETLCHAR			BIG_GETLCHAR
 #define GETHCHAR			BIG_GETHCHAR
@@ -75,6 +58,18 @@ LICENSE.GPL3 for more details.
 #define LITBOM		0xFEFF
 #define DEFBOM		LITBOM
 #endif
+
+/*define gb2312 range*/
+#define MIN_CHS_GB2312		0xA1A1
+#define MAX_CHS_GB2312		0xFEFF
+#define CHS_GB2312_COUNT	8836
+#define GB2312_CODE_INDEX(sw)		 ((GETHBYTE(sw) - 161) * 94 + GETLBYTE(sw) - 161)
+
+/*define unicode range*/
+#define MIN_CHS_UNICODE		0x4E00
+#define MAX_CHS_UNICODE		0x9FA5
+#define CHS_UNICODE_COUNT	20902
+#define UNICODE_CODE_INDEX(sw)		 (sw - MIN_CHS_UNICODE)
 
 /*code range*/
 #define _ACP_GBKMIN			0xa1a0
@@ -104,80 +99,78 @@ LOC_API int table_unicode_seek_help(unsigned short ucs, unsigned short* hlp);
 LOC_API int table_gb2312_seek_help(const unsigned char* mbs, unsigned char* hlp);
 LOC_API int table_unicode_seek_gb2312(unsigned short ucs, unsigned char* mbs);
 LOC_API int table_gb2312_seek_unicode(unsigned char* mbs, unsigned short* ucs);
+
+EXP_API void unicode_gb2312_code(int index, unsigned short* code, unsigned short* val, unsigned short* key);
+EXP_API void gb2312_unicode_code(int index, unsigned short* code, unsigned short* val, unsigned short* key);
+EXP_API bool_t save_gb2312_table(const tchar_t* fname);
+EXP_API bool_t save_unicode_table(const tchar_t* fname);
 #else
 LOC_API int share_unicode_seek_help(unsigned short ucs, unsigned short* hlp);
 LOC_API int share_gb2312_seek_help(const unsigned char* mbs, unsigned char* hlp);
 LOC_API int share_unicode_seek_gb2312(unsigned short ucs, unsigned char* mbs);
 LOC_API int share_gb2312_seek_unicode(unsigned char* mbs, unsigned short* ucs);
+
+LOC_API vword_t share_get_gb2312_code_addr(const byte_t* pch);
+LOC_API bool_t share_set_gb2312_code_addr(const byte_t* pch, vword_t addr);
+LOC_API vword_t share_get_unicode_code_addr(unsigned short ucs);
+LOC_API bool_t share_set_unicode_code_addr(unsigned short ucs, vword_t addr);
+LOC_API bool_t share_acp_init(void);
+LOC_API void share_acp_uninit(void);
 #endif
+
+LOC_API int acp_gb2312_code_sequence(byte_t b);
+
+LOC_API int acp_gb2312_byte_to_unicode(const byte_t* src, wchar_t* dest);
+
+LOC_API int acp_gb2312_to_unicode(const byte_t* src, dword_t slen, wchar_t* dest, int dlen);
+
+LOC_API int acp_unicode_byte_to_gb2312(wchar_t ch, byte_t* dest);
+
+LOC_API int acp_unicode_to_gb2312(const wchar_t* src, int slen, byte_t* dest, dword_t dlen);
+
+LOC_API int acp_utf8_code_sequence(unsigned char b);
+
+LOC_API int acp_utf8_byte_to_unicode(const byte_t* src, wchar_t* dest);
+
+LOC_API int acp_utf8_to_unicode(const byte_t* src, dword_t slen, wchar_t* dest, int dlen);
+
+LOC_API int acp_unicode_byte_to_utf8(wchar_t ch, byte_t* dest);
+
+LOC_API int acp_unicode_to_utf8(const wchar_t* src, int slen, byte_t* dest, dword_t dlen);
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-	EXP_API int gb2312_code_sequence(byte_t b);
+	EXP_API int acp_ascii_code_count(void);
 
-	EXP_API int gb2312_byte_to_unicode(const byte_t* src, wchar_t* dest);
+	EXP_API bool_t acp_next_ascii_char(byte_t *pch);
 
-	EXP_API int gb2312_to_unicode(const byte_t* src, dword_t slen, wchar_t* dest, int dlen);
+	EXP_API int acp_gb2312_code_count(void);
 
-	EXP_API int unicode_byte_to_gb2312(wchar_t ch, byte_t* dest);
+	EXP_API bool_t acp_next_gb2312_char(byte_t *pch);
 
-	EXP_API int unicode_to_gb2312(const wchar_t* src, int slen, byte_t* dest, dword_t dlen);
+	EXP_API int acp_unicode_code_count(void);
 
-	EXP_API int utf8_code_sequence(unsigned char b);
+	EXP_API bool_t acp_next_unicode_char(byte_t *pch);
 
-	EXP_API int utf8_byte_to_unicode(const byte_t* src, wchar_t* dest);
+	EXP_API int w_acp_help_code(const wchar_t* src, int len, wchar_t* buf, int max);
 
-	EXP_API int utf8_to_unicode(const byte_t* src, dword_t slen, wchar_t* dest, int dlen);
+	EXP_API int a_acp_help_code(const schar_t* src, int len, schar_t* buf, int max);
 
-	EXP_API int unicode_byte_to_utf8(wchar_t ch, byte_t* dest);
-
-	EXP_API int unicode_to_utf8(const wchar_t* src, int slen, byte_t* dest, dword_t dlen);
-
-	EXP_API int ascii_code_count(void);
-
-	EXP_API int gb2312_code_count(void);
-
-	EXP_API bool_t next_ascii_char(byte_t* pch);
-
-	EXP_API bool_t next_gb2312_char(byte_t* pch);
-
-	EXP_API vword_t get_gb2312_code_addr(const byte_t* pch);
-
-	EXP_API bool_t set_gb2312_code_addr(const byte_t* pch, vword_t addr);
-
-	EXP_API vword_t get_unicode_code_addr(unsigned short ucs);
-
-	EXP_API bool_t set_unicode_code_addr(unsigned short ucs, vword_t addr);
-
-	EXP_API bool_t acp_init(void);
-
-	EXP_API void acp_uninit(void);
-
-#ifdef XDK_SUPPORT_ACP_TABLE
-
-	EXP_API void unicode_gb2312_code(int index, unsigned short* code, unsigned short* val, unsigned short* key);
-
-	EXP_API void gb2312_unicode_code(int index, unsigned short* code, unsigned short* val, unsigned short* key);
-
-	EXP_API bool_t save_gb2312_table(const tchar_t* fname);
-
-	EXP_API bool_t save_unicode_table(const tchar_t* fname);
-#endif
-
-	EXP_API int w_help_code(const wchar_t* src, int len, wchar_t* buf, int max);
-
-	EXP_API int a_help_code(const schar_t* src, int len, schar_t* buf, int max);
-
-#ifdef _UNICODE
-#define help_code			w_help_code
-#else
-#define help_code			a_help_code
+#if defined (DEBUG) || defined (_DEBUG)
+	EXP_API void share_acp_dump(void);
 #endif
 
 #ifdef __cplusplus
 }
 #endif
+
+#if defined(_UNICODE) || defined(UNICODE)
+#define acp_help_code			w_acp_help_code
+#else
+#define acp_help_code			a_acp_help_code
+#endif
+
 
 #endif /*_ACP_H*/

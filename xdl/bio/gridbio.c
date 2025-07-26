@@ -107,7 +107,7 @@ int format_grid_rowset_to_csv(link_t_ptr ptr, tchar_t* buf, int max)
 		{
 			str = get_cell_text_ptr(rlk, clk);
 			len = xslen(str);
-			enc = csv_char_encode(str, len, NULL, MAX_LONG);
+			csv_token_encode(str, len, NULL, &enc);
 
 			if (size + ((len == enc)? len : enc) > max)
 				return size;
@@ -117,7 +117,7 @@ int format_grid_rowset_to_csv(link_t_ptr ptr, tchar_t* buf, int max)
 				if (len != enc)
 				{
 					esc = xsalloc(enc + 1);
-					csv_char_encode(str, len, esc, enc);
+					csv_token_encode(str, len, esc, &enc);
 
 					xsncpy((buf + size), esc, enc);
 					xsfree(esc);
@@ -241,12 +241,12 @@ int parse_grid_rowset_from_csv(link_t_ptr ptr, const tchar_t* flat, int len)
 			}
 
 			tklen = (int)(token - prev);
-			enc = csv_char_decode(prev, tklen, NULL, MAX_LONG);
+			csv_token_decode(prev, tklen, NULL, &enc);
 
 			if (tklen != enc)
 			{
 				esc = xsalloc(enc + 1);
-				csv_char_decode(prev, tklen, esc, enc);
+				csv_token_decode(prev, tklen, esc, &enc);
 
 				set_cell_text(rlk, clk, esc, enc);
 

@@ -26,7 +26,6 @@ LICENSE.GPL3 for more details.
 
 #include "impmem.h"
 
-#include "../xdkimp.h"
 #include "../xdkstd.h"
 
 #if defined(XDK_SUPPORT_MEMO_DUMP)
@@ -40,7 +39,7 @@ void* xmem_alloc_dump(dword_t size, const char* src, const char* func, unsigned 
 	
 	pif = THREAD_ZONE_INTERFACE;
 
-	p = xmem_alloc_nodump((size + sizeof(vword_t) + sizeof(link_t)));
+	p = xmem_alloc_nodump((size + sizeof(link_t) + sizeof(vword_t)));
 
 	((link_t_ptr)p)->tag = lkDebug;
 	insert_link_after(&pif->if_dump, LINK_LAST, (link_t_ptr)p);
@@ -114,6 +113,16 @@ void xmem_free_dump(void* p)
 	xmem_free_nodump((void*)dump);
 
 	xmem_free_nodump(p);
+}
+
+void xmem_assert(void* p)
+{
+	if (!p)
+		return;
+
+	p = (void*)((byte_t*)p - sizeof(vword_t) - sizeof(link_t));
+
+	XDK_ASSERT(((link_t_ptr)p)->tag == lkDebug);
 }
 
 #endif //XDK_SUPPORT_MEMO_DUMP
@@ -231,10 +240,14 @@ void xmem_zero(void* p, dword_t size)
 	if(!p || !size)
 		return;
 
+#ifdef XDK_SUPPORT_MEMO_CRT
+	memset(p, 0, size);
+#else
 	while (size--)
 	{
 		*(pb++) = 0;
 	}
+#endif
 }
 
 void xmem_set(void* p, byte_t c, dword_t size)
@@ -243,14 +256,17 @@ void xmem_set(void* p, byte_t c, dword_t size)
 
 	if (!p || !size)
 		return;
-
+#ifdef XDK_SUPPORT_MEMO_CRT
+	memset(p, (int)c, size);
+#else
 	while (size--)
 	{
 		*(pb++) = c;
 	}
+#endif
 }
 
-void* xmem_clone(void* src,dword_t bytes)
+void* xmem_clone(const void* src,dword_t bytes)
 {
 	void* p;
 
@@ -264,32 +280,35 @@ void* xmem_clone(void* src,dword_t bytes)
 	return p;
 }
 
-void xmem_copy(void* dest, void* src, dword_t size)
+void xmem_copy(void* dest, const void* src, dword_t size)
 {
 	byte_t* ps = (byte_t*)src;
 	byte_t* pd = (byte_t*)dest;
 
 	if (!dest || !src)
 		return;
-
+#ifdef XDK_SUPPORT_MEMO_CRT
+	memcpy(dest, src, size);
+#else
 	while (size--)
 	{
 		*(pd++) = *(ps++);
 	}
+#endif
 }
 
-int xmem_comp(void* mem1, void* mem2, dword_t size)
+int xmem_comp(const void* mem1, const void* mem2, dword_t size)
 {
 	byte_t *p1, *p2;
 	dword_t len;
 
-	if (!size)
-		return 0;
-	else if (!mem1 && mem2)
-		return -1;
-	else if (mem1 && !mem2)
-		return 1;
+	if (!size) return 0;
+	else if (!mem1 && mem2) return -1;
+	else if (mem1 && !mem2) return 1;
 
+#ifdef XDK_SUPPORT_MEMO_CRT
+	return memcmp(mem1, mem2, size);
+#else
 	p1 = (byte_t*)mem1;
 	p2 = (byte_t*)mem2;
 
@@ -303,7 +322,7 @@ int xmem_comp(void* mem1, void* mem2, dword_t size)
 
 		p1++; p2++;
 	}
-	
+#endif	
 	return 0;
 }
 
@@ -311,58 +330,39 @@ void xmem_move(void* p, dword_t len, int off)
 {
 	byte_t *p1, *p2;
 
-	if (!p || !off)
-		return;
-
+	if (!p || !off) return;
+	
 	if (off > 0)
 	{
 		p1 = (byte_t*)p + len - 1 + off;
 		p2 = (byte_t*)p + len - 1;
-
+	#ifdef XDK_SUPPORT_MEMO_CRT
+		memmove(p1, p2, len);
+	#else
 		while (len--)
 		{
 			*p1 = *p2;
 			p1--;
 			p2--;
 		}
+	#endif
 	}
 	else
 	{
 		p1 = (byte_t*)p + off;
 		p2 = (byte_t*)p;
-
+#ifdef XDK_SUPPORT_MEMO_CRT
+		memmove(p1, p2, len);
+#else
 		while (len--)
 		{
 			*p1 = *p2;
 			p1++;
 			p2++;
 		}
+#endif
 	}
 }
-
-#ifdef XDK_SUPPORT_MEMO_DUMP
-void xmem_assert(void* p)
-{
-	if (!p)
-		return;
-
-	p = (void*)((byte_t*)p - sizeof(dword_t) - sizeof(link_t));
-
-	XDK_ASSERT(((link_t_ptr)p)->tag == lkDebug);
-}
-
-dword_t	xmem_size(void* p)
-{
-	if (!p)
-		return 0;
-
-	XDK_ASSERT(((link_t_ptr)((byte_t*)p - sizeof(dword_t) - sizeof(link_t)))->tag == lkDebug);
-
-	p = (void*)((byte_t*)p - sizeof(dword_t));
-	return *((dword_t*)p);
-}
-
-#endif
 
 //////////////////////////////////////////////////////////////////////////////////////////
 #ifdef XDK_SUPPORT_MEMO_PAGE
@@ -440,17 +440,6 @@ void pmem_unlock(void* p)
 	XDK_ASSERT(pif != NULL);
 
 	(*pif->pf_page_unlock)(p);
-}
-
-bool_t	pmem_protect(void* p, bool_t b)
-{
-	if_memo_t *pif;
-
-	pif = PROCESS_MEMO_INTERFACE;
-
-	XDK_ASSERT(pif != NULL);
-
-	return (*pif->pf_page_protect)(p, b);
 }
 
 #endif

@@ -112,9 +112,8 @@ static void sub_editbox_unsubbing(res_win_t widget, uid_t subid, vword_t delta)
 
 res_win_t fireedit_create(res_win_t widget, const xrect_t* pxr)
 {
-	res_win_t editor = NULL;
+	res_win_t editor = (res_win_t)0;
 	if_subproc_t ev = { 0 };
-	xface_t xa = { 0 };
 
 	/*if (widget_get_touch_mode(widget))
 	{
@@ -126,10 +125,6 @@ res_win_t fireedit_create(res_win_t widget, const xrect_t* pxr)
 	}
 
 	widget_set_user_id(editor, IDC_EDITBOX);
-
-	widget_get_xface(editor, &xa);
-	xscpy(xa.text_wrap, NULL);
-	widget_set_xface(editor, &xa);
 
 	ev.sub_on_keydown = sub_editbox_keydown;
 	ev.sub_on_unsubbing = sub_editbox_unsubbing;

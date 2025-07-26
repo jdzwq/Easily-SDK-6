@@ -24,20 +24,18 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
 LICENSE.GPL3 for more details.
 ***********************************************************************/
 
-#ifndef _XDU_LINUX_H
-#define _XDU_LINUX_H
+#ifndef _XDU_linux_H
+#define _XDU_linux_H
 
 //#define XDU_SUPPORT_BLUT
 #define XDU_SUPPORT_SHELL
 #define XDU_SUPPORT_CONTEXT
-#define XDU_SUPPORT_CONTEXT_REGION
 #define XDU_SUPPORT_CONTEXT_BITMAP
 #define XDU_SUPPORT_CONTEXT_GDI
-//#define XDU_SUPPORT_CONTEXT_CAIRO
 
 #define XDU_SUPPORT_CLIPBOARD
 #define XDU_SUPPORT_WIDGET
-#define XDU_SUPPORT_WIDGET_NC
+//#define XDU_SUPPORT_WIDGET_NC
 
 #ifdef XDU_SUPPORT_BLUT
 #include <bluetooth/bluetooth.h>
@@ -117,6 +115,7 @@ typedef struct _X11_atoms_t{
     Atom wm_take_focus;
     Atom wm_transient_for;
 
+    Atom wm_wchar;
     Atom wm_quit;
     Atom wm_command;
     Atom wm_notice;
@@ -133,11 +132,14 @@ typedef struct _X11_atoms_t{
 
 extern X11_atoms_t  g_atoms;
 
+extern res_queue_t g_queue;
+
 #define XRGB(ch) (unsigned short)((double)ch * 65535.0 / 256.0)
 
+extern XIM          g_xim;
 extern Display*     g_display;
 
-typedef Colormap    res_clr_t;
+typedef Colormap    res_clrmap_t;
 typedef Font		res_font_t;
 #ifdef XDU_SUPPORT_CONTEXT_BITMAP
 typedef struct _x11_bitmap_t{
@@ -145,9 +147,6 @@ typedef struct _x11_bitmap_t{
 
 	XImage* image;
 }X11_bitmap_t;
-#endif
-#ifdef XDU_SUPPORT_CONTEXT_REGION
-typedef Region		res_rgn_t;
 #endif
 
 typedef struct _X11_context_t{
@@ -179,15 +178,34 @@ typedef struct _X11_context_t{
 #endif
 #endif /*XDU_SUPPORT_CLIPBOARD*/
 
+
+#define KEY_BACK		XK_BackSpace
+#define KEY_TAB			XK_Tab
+#define KEY_ENTER		XK_Return
+#define KEY_ESC			XK_Escape
+#define KEY_SPACE		32	//0x20
+#define KEY_PAGEUP		XK_Page_Up
+#define KEY_PAGEDOWN	XK_Page_Down
+#define KEY_END			XK_End
+#define KEY_HOME		XK_Home
+#define KEY_LEFT		XK_Left
+#define KEY_UP			XK_Up
+#define KEY_RIGHT		XK_Right
+#define KEY_DOWN		XK_Down
+#define KEY_INSERT		XK_Insert
+#define KEY_DELETE		XK_Delete
+
 #ifdef XDU_SUPPORT_WIDGET
 
 typedef XEvent      msg_t;
-typedef unsigned long	res_acl_t;
 typedef unsigned int	wparam_t;
 typedef unsigned long   lparam_t;
 typedef int         result_t;
+
 typedef Window      res_win_t;
 typedef Cursor      res_cur_t;
+typedef XIC         res_xic_t;
+typedef void*	    res_acl_t;
 
 #ifdef XDU_SUPPORT_WIDGET_NC
 /*widget nc hit test*/
@@ -225,5 +243,6 @@ typedef Cursor      res_cur_t;
 #endif
 #endif /*XDU_SUPPORT_WIDGET*/
 
+#define SYSTEM_FONTNAME     _T("fixed")
 
-#endif //_XDU_LINUX_H
+#endif //_XDU_linux_H

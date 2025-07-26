@@ -26,7 +26,7 @@ LICENSE.GPL3 for more details.
 
 #include "varstr.h"
 
-#include "../xdkimp.h"
+#include "../xdkobj.h"
 #include "../xdkstd.h"
 
 #define VARSTR_INC	512

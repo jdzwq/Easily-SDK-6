@@ -84,9 +84,9 @@ bool_t _file_write(res_file_t fh, void* buf, dword_t size, async_t* pb)
         ev.events = EPOLLOUT;
         ev.data.fd = fh; 
 
-        epoll_ctl(pb->port, EPOLL_CTL_ADD, fh, &(ev));    
-        rs = epoll_wait(pb->port, &ev, 1, (int)pb->timo);
-        epoll_ctl(pb->port, EPOLL_CTL_DEL, fh, &ev); 
+        epoll_ctl(*((int*)pb->port), EPOLL_CTL_ADD, fh, &(ev));    
+        rs = epoll_wait(*((int*)pb->port), &ev, 1, (int)pb->timo);
+        epoll_ctl(*((int*)pb->port), EPOLL_CTL_DEL, fh, &ev); 
 
         if(rs < 0)
         {
@@ -166,9 +166,9 @@ bool_t _file_read(res_file_t fh, void* buf, dword_t size, async_t* pb)
         ev.events = EPOLLIN;
         ev.data.fd = fh; 
 
-        epoll_ctl(pb->port, EPOLL_CTL_ADD, fh, &ev); 
-        rs = epoll_wait(pb->port, &ev, 1, (int)pb->timo);
-        epoll_ctl(pb->port, EPOLL_CTL_DEL, fh, &ev); 
+        epoll_ctl(*((int*)pb->port), EPOLL_CTL_ADD, fh, &ev); 
+        rs = epoll_wait(*((int*)pb->port), &ev, 1, (int)pb->timo);
+        epoll_ctl(*((int*)pb->port), EPOLL_CTL_DEL, fh, &ev); 
 
         if(rs < 0)
         {
@@ -311,7 +311,7 @@ void* _file_lock_range(res_file_t fh, dword_t hoff, dword_t loff, dword_t size, 
     size_t dlen, flen;
     int prot;
 
-    *ph = NULL;
+    *ph = INVALID_FILE;
 
     _file_size(fh, &dwh, &dwl);
     
@@ -462,7 +462,7 @@ bool_t _file_info(const tchar_t* fname, file_info_t* pxf)
     pxf->create_time.sec = p->tm_sec;
     pxf->create_time.wday = p->tm_wday;
     
-    token = strchr(fname, '/');
+    token = strchr((char*)fname, '/');
     if(token)
         strcpy(pxf->file_name, token + 1);
     else

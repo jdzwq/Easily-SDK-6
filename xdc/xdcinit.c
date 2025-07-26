@@ -58,9 +58,6 @@ void xdc_process_init()
 #ifdef XDU_SUPPORT_CONTEXT_PRINTER
 	xdu_impl_context_printer(&g_xdc_mou.if_context);
 #endif
-#ifdef XDU_SUPPORT_CONTEXT_REGION
-	xdu_impl_context_region(&g_xdc_mou.if_context);
-#endif
 
 	xdu_impl_context_graphic(&g_xdc_mou.if_context);
 
@@ -93,14 +90,14 @@ void xdc_process_uninit()
 	if (!g_xdc_mou.if_ok)
 		return;
 
-#ifdef XDU_SUPPORT_CONTEXT
-	//stop gdi context
-	(*g_xdc_mou.if_context.pf_context_cleanup)();
+#ifdef XDU_SUPPORT_WIDGET
+	//clean widget context
+	(*g_xdc_mou.if_widget.pf_widget_cleanup)();
 #endif
 
-#ifdef XDU_SUPPORT_WIDGET
-	//stop widget context
-	(*g_xdc_mou.if_widget.pf_widget_cleanup)();
+#ifdef XDU_SUPPORT_CONTEXT
+	//clean gdi context
+	(*g_xdc_mou.if_context.pf_context_cleanup)();
 #endif
 
 	memset((void*)&g_xdc_mou, 0, sizeof(xdc_mou_t));

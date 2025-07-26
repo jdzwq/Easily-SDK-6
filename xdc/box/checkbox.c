@@ -31,6 +31,8 @@ LICENSE.GPL3 for more details.
 
 typedef struct _checkbox_delta_t{
 	bool_t on;
+
+	xfont_t xf;
 }checkbox_delta_t;
 
 #define GETCHECKBOXDELTA(ph) 	(checkbox_delta_t*)widget_get_user_delta(ph)
@@ -135,53 +137,51 @@ void hand_checkbox_size(res_win_t widget, int code, const xsize_t* prs)
 	widget_erase(widget, NULL);
 }
 
+void hand_checkbox_xfont(res_win_t widget, const xfont_t* pxf)
+{
+	checkbox_delta_t* ptd = GETCHECKBOXDELTA(widget);
+	
+	xmem_copy((void*)&ptd->xf, (void*)pxf, sizeof(xfont_t));
+}
+
 void hand_checkbox_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 {
 	checkbox_delta_t* ptd = GETCHECKBOXDELTA(widget);
-
-	xrect_t xr;	
-	xfont_t xf;
-	xbrush_t xb;
-	xpen_t xp;
 
 	visual_t rdc;
 	canvas_t canv;
 	const drawing_interface* pif = NULL;
 	drawing_interface ifv = {0};
 
-	widget_get_xfont(widget, &xf);
-	widget_get_xbrush(widget, &xb);
-	widget_get_xpen(widget, &xp);
+	xrect_t xr;	
+
+	clr_mod_t clrs;
+	xbrush_t xb;
+
+	widget_get_color_mode(widget, &clrs);
+	default_xbrush(&xb);
+	format_xcolor(&clrs.clr_bkg, xb.color);
 
 	canv = widget_get_canvas(widget);
 	pif = widget_get_canvas_interface(widget);
-	
-
-	
-	
-	
-	
-	
 
 	widget_get_client_rect(widget, &xr);
 
 	rdc = begin_canvas_paint(canv, dc, xr.w, xr.h);
+	
 	get_visual_interface(rdc, &ifv);
 
 	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
 
-	draw_checkbox(pif, &xf, ptd->on);
-
-	
+	draw_checkbox(pif, &ptd->xf, ptd->on);
 
 	end_canvas_paint(canv, dc, pxr);
-	
 }
 
 /***************************************************************************************/
 res_win_t checkbox_create(res_win_t widget, dword_t style, const xrect_t* pxr)
 {
-	if_event_t ev = { 0 };
+	if_dispatch_t ev = { 0 };
 
 	EVENT_BEGIN_DISPATH(&ev)
 
@@ -196,6 +196,8 @@ res_win_t checkbox_create(res_win_t widget, dword_t style, const xrect_t* pxr)
 
 		EVENT_ON_LBUTTON_DOWN(hand_checkbox_lbutton_down)
 		EVENT_ON_LBUTTON_UP(hand_checkbox_lbutton_up)
+		
+		EVENT_ON_XFONT(hand_checkbox_xfont)
 
 		EVENT_ON_NC_IMPLEMENT
 
@@ -208,15 +210,12 @@ void checkbox_popup_size(res_win_t widget, xsize_t* pxs)
 {
 	checkbox_delta_t* ptd = GETCHECKBOXDELTA(widget);
 	measure_interface im = { 0 };
-	xfont_t xf = { 0 };
 
 	XDK_ASSERT(ptd != NULL);
 
-	widget_get_xfont(widget, &xf);
-
 	get_canvas_measure(widget_get_canvas(widget), &im);
 
-	calc_checkbox_size(&im, &xf, pxs);
+	calc_checkbox_size(&im, &ptd->xf, pxs);
 
 	widget_size_to_pt(widget, pxs);
 

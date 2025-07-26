@@ -36,6 +36,9 @@ typedef struct _status_delta_t{
 
 	bool_t b_step;
 	int n_step;
+
+	xfont_t xf;
+	xface_t xa;
 }status_delta_t;
 
 #define GETSTATUSDELTA(ph) 		(status_delta_t*)widget_get_user_delta(ph)
@@ -176,6 +179,9 @@ int hand_status_create(res_win_t widget, void* data)
 
 	ptd = (status_delta_t*)xmem_alloc(sizeof(status_delta_t));
 	xmem_zero((void*)ptd, sizeof(status_delta_t));
+
+	default_xfont(&ptd->xf);
+	default_xface(&ptd->xa);
 
 	SETSTATUSDELTA(widget, ptd);
 
@@ -357,30 +363,44 @@ void hand_status_keydown(res_win_t widget, dword_t ks, int nKey)
 	}
 }
 
+void hand_status_xfont(res_win_t widget, const xfont_t* pxf)
+{
+	status_delta_t* ptd = GETSTATUSDELTA(widget);
+
+	xmem_copy((void*)&ptd->xf, (void*)pxf, sizeof(xfont_t));
+}
+
+void hand_status_xface(res_win_t widget, const xface_t* pxa)
+{
+	status_delta_t* ptd = GETSTATUSDELTA(widget);
+
+	xmem_copy((void*)&ptd->xa, (void*)pxa, sizeof(xface_t));
+}
+
 void hand_status_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 {
 	status_delta_t* ptd = GETSTATUSDELTA(widget);
 	visual_t rdc;
-	xfont_t xf = { 0 };
-	xface_t xa = { 0 };
-	xbrush_t xb = { 0 };
-	xpen_t xp = { 0 };
-	xcolor_t xc = { 0 };
-	xcolor_t xc_brim = { 0 };
-	xcolor_t xc_core = { 0 };
 	xrect_t xr_step,xr = { 0 };
 
 	canvas_t canv;
 	const drawing_interface* pif = NULL;
 	drawing_interface ifv = {0};
 
-	if (!ptd->status)
-		return;
+	clr_mod_t clrs;
+	xbrush_t xb = { 0 };
+	xpen_t xp = { 0 };
+	xcolor_t xc = { 0 };
+	xcolor_t xc_brim = { 0 };
+	xcolor_t xc_core = { 0 };
 
-	widget_get_xfont(widget, &xf);
-	widget_get_xface(widget, &xa);
-	widget_get_xbrush(widget, &xb);
-	widget_get_xpen(widget, &xp);
+	if (!ptd->status) return;
+
+	widget_get_color_mode(widget, &clrs);
+	default_xbrush(&xb);
+	format_xcolor(&clrs.clr_bkg, xb.color);
+	default_xpen(&xp);
+	format_xcolor(&clrs.clr_frg, xp.color);
 
 	canv = widget_get_canvas(widget);
 	pif = widget_get_canvas_interface(widget);
@@ -412,22 +432,21 @@ void hand_status_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 		draw_progress(pif, &xc, &xr_step, ptd->n_step);
 
 		xr.fx += xr_step.fw;
-		(pif->pf_draw_text)(pif->ctx, &xf, &xa, &xr, get_status_title_ptr(ptd->status), -1);
+		(pif->pf_draw_text)(pif->ctx, &ptd->xf, &ptd->xa, &xr, get_status_title_ptr(ptd->status), -1);
 	}
 	else
 	{
-		(pif->pf_draw_text)(pif->ctx, &xf, &xa, &xr, get_status_title_ptr(ptd->status), -1);
+		(pif->pf_draw_text)(pif->ctx, &ptd->xf, &ptd->xa, &xr, get_status_title_ptr(ptd->status), -1);
 	}
 
 	end_canvas_paint(canv, dc, pxr);
-	
 }
 
 /*******************************************************************************************/
 
 res_win_t statusctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, res_win_t wparent)
 {
-	if_event_t ev = { 0 };
+	if_dispatch_t ev = { 0 };
 
 	EVENT_BEGIN_DISPATH(&ev)
 
@@ -447,6 +466,9 @@ res_win_t statusctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t*
 		EVENT_ON_LBUTTON_UP(hand_status_lbutton_up)
 		EVENT_ON_RBUTTON_DOWN(hand_status_rbutton_down)
 		EVENT_ON_RBUTTON_UP(hand_status_rbutton_up)
+
+		EVENT_ON_XFONT(hand_status_xfont)
+		EVENT_ON_XFACE(hand_status_xface)
 
 		EVENT_ON_NC_IMPLEMENT
 

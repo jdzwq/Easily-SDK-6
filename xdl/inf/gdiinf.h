@@ -83,9 +83,11 @@ typedef void(*PF_DRAW_ICON)(void*, const tchar_t*, const xrect_t*);
 typedef void(*PF_DRAW_THUMB)(void*, const tchar_t*, const xrect_t*);
 typedef void(*PF_DRAW_BITMAP)(void*, bitmap_t, const xpoint_t*);
 
-typedef void(*PF_EXCLUDE_RECT)(void*, const xrect_t*);
 typedef void(*PF_GRADIENT_RECT)(void*, const xcolor_t*, const xcolor_t*, const tchar_t*, const xrect_t*);
 typedef void(*PF_ALPHABLEND_RECT)(void*, const xcolor_t*, const xrect_t*, int);
+typedef void(*PF_INVERT_RECT)(visual_t, const xrect_t*);
+typedef void(*PF_EXCLUDE_RECT)(visual_t, const xrect_t*);
+typedef void(*PF_INCLIP_RECT)(visual_t, const xrect_t*);
 
 typedef visual_t(*PF_GET_VISUAL)(void*);
 
@@ -130,9 +132,11 @@ typedef struct _drawing_interface{
 	PF_DRAW_BITMAP		pf_draw_bitmap;
 
 	//the visual only
-	PF_EXCLUDE_RECT		pf_exclude_rect;
 	PF_GRADIENT_RECT	pf_gradient_rect;
 	PF_ALPHABLEND_RECT	pf_alphablend_rect;
+	PF_INVERT_RECT		pf_invert_rect;
+	PF_EXCLUDE_RECT		pf_exclude_rect;
+	PF_INCLIP_RECT		pf_inclip_rect;
 
 	// the canvas only
 	PF_RECT_PT_TO_TM	pf_rect_pt_to_tm;

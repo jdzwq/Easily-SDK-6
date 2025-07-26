@@ -7,7 +7,7 @@
 
 	@doc gdiplus document
 
-	@module	if_gdiplus_win.c | windows implement file
+	@module	if_gdi_win.c | windows implement file
 
 	@devnote 张文权 2021.01 - 2021.12	v6.0
 ***********************************************************************/
@@ -27,7 +27,7 @@ LICENSE.GPL3 for more details.
 #include "../xduloc.h"
 #include "../xduutil.h"
 
-#if defined(XDU_SUPPORT_CONTEXT_GDIPLUS)
+#if defined(XDU_SUPPORT_CONTEXT_GDI)
 
 static LOGFONT lf_gdiplus = { 0 };
 
@@ -523,7 +523,7 @@ static GraphicsPath* create_path(HDC hDC, const tchar_t* aa, const xpoint_t* pa)
 }
 
 
-void _gdiplus_init(int osv)
+void _gdi_init(int osv)
 {
 	NONCLIENTMETRICS ncm = { 0 };
 
@@ -539,7 +539,7 @@ void _gdiplus_init(int osv)
 	}
 }
 
-void _gdiplus_uninit(void)
+void _gdi_uninit(void)
 {
 	if (g_token)
 	{
@@ -548,7 +548,7 @@ void _gdiplus_uninit(void)
 	}
 }
 
-void _gdiplus_set_point(visual_t rdc, const xcolor_t* pxc, const xpoint_t* ppt)
+void _gdi_set_point(visual_t rdc, const xcolor_t* pxc, const xpoint_t* ppt)
 {
 	win32_context_t* ctx = (win32_context_t*)rdc;
 	HDC hDC = (HDC)(ctx->context);
@@ -559,7 +559,7 @@ void _gdiplus_set_point(visual_t rdc, const xcolor_t* pxc, const xpoint_t* ppt)
 	SetPixel(hDC, ppt->x, ppt->y, clr);
 }
 
-void _gdiplus_get_point(visual_t rdc, xcolor_t* pxc, const xpoint_t* ppt)
+void _gdi_get_point(visual_t rdc, xcolor_t* pxc, const xpoint_t* ppt)
 {
 	win32_context_t* ctx = (win32_context_t*)rdc;
 	HDC hDC = (HDC)(ctx->context);
@@ -572,12 +572,12 @@ void _gdiplus_get_point(visual_t rdc, xcolor_t* pxc, const xpoint_t* ppt)
 	pxc->b = GetBValue(clr);
 }
 
-void _gdiplus_draw_points(visual_t rdc, const xcolor_t* pxc, const xpoint_t* ppt, int n)
+void _gdi_draw_points(visual_t rdc, const xcolor_t* pxc, const xpoint_t* ppt, int n)
 {
 
 }
 
-void _gdiplus_draw_line(visual_t rdc,const xpen_t* pxp, const xpoint_t*ppt1, const xpoint_t* ppt2)
+void _gdi_draw_line(visual_t rdc,const xpen_t* pxp, const xpoint_t*ppt1, const xpoint_t* ppt2)
 {
 	win32_context_t* ctx = (win32_context_t*)rdc;
 	HDC hDC = (HDC)(ctx->context);
@@ -614,7 +614,7 @@ void _gdiplus_draw_line(visual_t rdc,const xpen_t* pxp, const xpoint_t*ppt1, con
 	delete pp;
 }
 
-void _gdiplus_draw_polyline(visual_t rdc, const xpen_t* pxp, const xpoint_t* ppt, int n)
+void _gdi_draw_polyline(visual_t rdc, const xpen_t* pxp, const xpoint_t* ppt, int n)
 {
 	win32_context_t* ctx = (win32_context_t*)rdc;
 	HDC hDC = (HDC)(ctx->context);
@@ -672,7 +672,7 @@ void _gdiplus_draw_polyline(visual_t rdc, const xpen_t* pxp, const xpoint_t* ppt
 	delete pp;
 }
 
-void _gdiplus_draw_arc(visual_t rdc, const xpen_t* pxp, const xpoint_t * ppt1, const xpoint_t* ppt2, const xsize_t* pxs, bool_t sflag, bool_t lflag)
+void _gdi_draw_arc(visual_t rdc, const xpen_t* pxp, const xpoint_t * ppt1, const xpoint_t* ppt2, const xsize_t* pxs, bool_t sflag, bool_t lflag)
 {
 	win32_context_t* ctx = (win32_context_t*)rdc;
 	HDC hDC = (HDC)(ctx->context);
@@ -748,7 +748,7 @@ void _gdiplus_draw_arc(visual_t rdc, const xpen_t* pxp, const xpoint_t * ppt1, c
 	}
 }
 
-void _gdiplus_draw_bezier(visual_t rdc, const xpen_t* pxp, const xpoint_t* ppt1, const xpoint_t* ppt2, const xpoint_t* ppt3, const xpoint_t* ppt4)
+void _gdi_draw_bezier(visual_t rdc, const xpen_t* pxp, const xpoint_t* ppt1, const xpoint_t* ppt2, const xpoint_t* ppt3, const xpoint_t* ppt4)
 {
 	win32_context_t* ctx = (win32_context_t*)rdc;
 	HDC hDC = (HDC)(ctx->context);
@@ -777,7 +777,7 @@ void _gdiplus_draw_bezier(visual_t rdc, const xpen_t* pxp, const xpoint_t* ppt1,
 	delete pp;
 }
 
-void _gdiplus_draw_curve(visual_t rdc, const xpen_t* pxp, const xpoint_t* ppt, int n)
+void _gdi_draw_curve(visual_t rdc, const xpen_t* pxp, const xpoint_t* ppt, int n)
 {
 	win32_context_t* ctx = (win32_context_t*)rdc;
 	HDC hDC = (HDC)(ctx->context);
@@ -810,7 +810,7 @@ void _gdiplus_draw_curve(visual_t rdc, const xpen_t* pxp, const xpoint_t* ppt, i
 	delete pp;
 }
 
-void _gdiplus_draw_rect(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const xrect_t* prt)
+void _gdi_draw_rect(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const xrect_t* prt)
 {
 	win32_context_t* ctx = (win32_context_t*)rdc;
 	HDC hDC = (HDC)(ctx->context);
@@ -880,7 +880,7 @@ void _gdiplus_draw_rect(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, co
 	}
 }
 
-void _gdiplus_draw_round(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const xrect_t* prt, const xsize_t* pxs)
+void _gdi_draw_round(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const xrect_t* prt, const xsize_t* pxs)
 {
 	win32_context_t* ctx = (win32_context_t*)rdc;
 	HDC hDC = (HDC)(ctx->context);
@@ -1002,7 +1002,7 @@ void _gdiplus_draw_round(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, c
 	}
 }
 
-void _gdiplus_draw_ellipse(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const xrect_t* prt)
+void _gdi_draw_ellipse(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const xrect_t* prt)
 {
 	win32_context_t* ctx = (win32_context_t*)rdc;
 	HDC hDC = (HDC)(ctx->context);
@@ -1061,7 +1061,7 @@ void _gdiplus_draw_ellipse(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb,
 	}
 }
 
-void _gdiplus_draw_pie(visual_t rdc, const xpen_t* pxp, const xbrush_t*pxb, const xrect_t* prt, double fang, double tang)
+void _gdi_draw_pie(visual_t rdc, const xpen_t* pxp, const xbrush_t*pxb, const xrect_t* prt, double fang, double tang)
 {
 	win32_context_t* ctx = (win32_context_t*)rdc;
 	HDC hDC = (HDC)(ctx->context);
@@ -1144,7 +1144,7 @@ void _gdiplus_draw_pie(visual_t rdc, const xpen_t* pxp, const xbrush_t*pxb, cons
 	}
 }
 
-void _gdiplus_draw_polygon(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const xpoint_t* ppt, int n)
+void _gdi_draw_polygon(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const xpoint_t* ppt, int n)
 {
 	win32_context_t* ctx = (win32_context_t*)rdc;
 	HDC hDC = (HDC)(ctx->context);
@@ -1253,7 +1253,7 @@ void _gdiplus_draw_polygon(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb,
 	}
 }
 
-void _gdiplus_draw_path(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const tchar_t* aa, const xpoint_t* pa)
+void _gdi_draw_path(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const tchar_t* aa, const xpoint_t* pa)
 {
 	win32_context_t* ctx = (win32_context_t*)rdc;
 	HDC hDC = (HDC)(ctx->context);
@@ -1342,7 +1342,7 @@ void _gdiplus_draw_path(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, co
 	delete path;
 }
 
-void _gdiplus_draw_text(visual_t rdc,const xfont_t* pxf,const xface_t* pxa,const xrect_t* prt,const tchar_t* txt,int len)
+void _gdi_draw_text(visual_t rdc,const xfont_t* pxf,const xface_t* pxa,const xrect_t* prt,const tchar_t* txt,int len)
 {
 	win32_context_t* ctx = (win32_context_t*)rdc;
 	HDC hDC = (HDC)(ctx->context);
@@ -1380,7 +1380,7 @@ void _gdiplus_draw_text(visual_t rdc,const xfont_t* pxf,const xface_t* pxa,const
 	delete ps;
 }
 
-void _gdiplus_text_out(visual_t rdc, const xfont_t* pxf, const xpoint_t* ppt, const tchar_t* txt, int len)
+void _gdi_text_out(visual_t rdc, const xfont_t* pxf, const xpoint_t* ppt, const tchar_t* txt, int len)
 {
 	win32_context_t* ctx = (win32_context_t*)rdc;
 	HDC hDC = (HDC)(ctx->context);
@@ -1436,7 +1436,7 @@ void _gdiplus_text_out(visual_t rdc, const xfont_t* pxf, const xpoint_t* ppt, co
 	DeleteObject(hFont);
 }
 
-void _gdiplus_text_rect(visual_t rdc, const xfont_t* pxf, const xface_t* pxa, const tchar_t* txt, int len, xrect_t* pxr)
+void _gdi_text_rect(visual_t rdc, const xfont_t* pxf, const xface_t* pxa, const tchar_t* txt, int len, xrect_t* pxr)
 {
 	win32_context_t* ctx = (win32_context_t*)rdc;
 
@@ -1502,7 +1502,7 @@ void _gdiplus_text_rect(visual_t rdc, const xfont_t* pxf, const xface_t* pxa, co
 		ReleaseDC(NULL, hDC);
 }
 
-void _gdiplus_text_size(visual_t rdc, const xfont_t* pxf, const tchar_t* txt, int len, xsize_t* pxs)
+void _gdi_text_size(visual_t rdc, const xfont_t* pxf, const tchar_t* txt, int len, xsize_t* pxs)
 {
 	win32_context_t* ctx = (win32_context_t*)rdc;
 
@@ -1569,7 +1569,7 @@ void _gdiplus_text_size(visual_t rdc, const xfont_t* pxf, const tchar_t* txt, in
 	pxs->h = si.cy;
 }
 
-void _gdiplus_text_metric(visual_t rdc, const xfont_t* pxf, xsize_t* pxs)
+void _gdi_text_metric(visual_t rdc, const xfont_t* pxf, xsize_t* pxs)
 {
 	win32_context_t* ctx = (win32_context_t*)rdc;
 
@@ -1633,7 +1633,7 @@ void _gdiplus_text_metric(visual_t rdc, const xfont_t* pxf, xsize_t* pxs)
 	pxs->w = tm.tmMaxCharWidth;
 }
 
-void _gdiplus_draw_image(visual_t rdc,bitmap_t bmp,const xcolor_t* clr,const xrect_t* prt)
+void _gdi_draw_image(visual_t rdc,bitmap_t bmp,const xcolor_t* clr,const xrect_t* prt)
 {
 	win32_context_t* ctx = (win32_context_t*)rdc;
 	HDC hDC = (HDC)(ctx->context);
@@ -1676,7 +1676,7 @@ void _gdiplus_draw_image(visual_t rdc,bitmap_t bmp,const xcolor_t* clr,const xre
 	delete pi;
 }
 
-void _gdiplus_draw_bitmap(visual_t rdc, bitmap_t bmp, const xpoint_t* ppt)
+void _gdi_draw_bitmap(visual_t rdc, bitmap_t bmp, const xpoint_t* ppt)
 {
 	win32_context_t* ctx = (win32_context_t*)rdc;
 	HDC hDC = (HDC)(ctx->context);
@@ -1707,7 +1707,7 @@ void _gdiplus_draw_bitmap(visual_t rdc, bitmap_t bmp, const xpoint_t* ppt)
 	delete pi;
 }
 
-void _gdiplus_alphablend_rect(visual_t rdc, const xcolor_t* pxc, const xrect_t* prt, int opacity)
+void _gdi_alphablend_rect(visual_t rdc, const xcolor_t* pxc, const xrect_t* prt, int opacity)
 {
 	win32_context_t* ctx = (win32_context_t*)rdc;
 	HDC hDC = (HDC)(ctx->context);
@@ -1735,7 +1735,7 @@ void _gdiplus_alphablend_rect(visual_t rdc, const xcolor_t* pxc, const xrect_t* 
 	delete pb;
 }
 
-void _gdiplus_gradient_rect(visual_t rdc, const xcolor_t* clr_brim, const xcolor_t* clr_core, const tchar_t* gradient, const xrect_t* prt)
+void _gdi_gradient_rect(visual_t rdc, const xcolor_t* clr_brim, const xcolor_t* clr_core, const tchar_t* gradient, const xrect_t* prt)
 {
 	win32_context_t* ctx = (win32_context_t*)rdc;
 	HDC hDC = (HDC)(ctx->context);
@@ -1772,7 +1772,21 @@ void _gdiplus_gradient_rect(visual_t rdc, const xcolor_t* clr_brim, const xcolor
 	delete pb;
 }
 
-void _gdiplus_exclude_rect(visual_t rdc, const xrect_t* pxr)
+void _gdi_invert_rect(visual_t rdc, const xrect_t* pxr)
+{
+	win32_context_t* ctx = (win32_context_t*)rdc;
+	HDC hDC = (HDC)(ctx->context);
+	RECT rt;
+
+	rt.left = pxr->x;
+	rt.top = pxr->y;
+	rt.right = pxr->x + pxr->w;
+	rt.bottom = pxr->y + pxr->h;
+
+	InvertRect(hDC, &rt);
+}
+
+void _gdi_exclude_rect(visual_t rdc, const xrect_t* pxr)
 {
 	win32_context_t* ctx = (win32_context_t*)rdc;
 	HDC hDC = (HDC)(ctx->context);
@@ -1780,7 +1794,17 @@ void _gdiplus_exclude_rect(visual_t rdc, const xrect_t* pxr)
 	ExcludeClipRect(hDC, pxr->x, pxr->y, pxr->x + pxr->w, pxr->y + pxr->h);
 }
 
-void _gdiplus_fill_region(visual_t rdc, const xbrush_t* pxb, res_rgn_t rgn)
+void _gdi_inclip_rect(visual_t rdc, const xrect_t* pxr)
+{
+	win32_context_t* ctx = (win32_context_t*)rdc;
+	HDC hDC = (HDC)(ctx->context);
+
+	Gdiplus::Graphics gh(hDC);
+
+	gh.SetClip(Gdiplus::Rect(pxr->x, pxr->y, pxr->w, pxr->h));
+}
+
+void _gdi_fill_region(visual_t rdc, const xbrush_t* pxb, res_rgn_t rgn)
 {
 	win32_context_t* ctx = (win32_context_t*)rdc;
 	HDC hDC = (HDC)(ctx->context);

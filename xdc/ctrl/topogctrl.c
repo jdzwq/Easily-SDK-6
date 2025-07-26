@@ -605,7 +605,7 @@ void noti_topog_reset_scroll(res_win_t widget, bool_t bUpdate)
 	if (widget_is_valid(ptd->vsc))
 	{
 		if (bUpdate)
-			widget_update(ptd->vsc);
+			widget_paint(ptd->vsc);
 		else
 			widget_close(ptd->vsc, 0);
 	}
@@ -613,7 +613,7 @@ void noti_topog_reset_scroll(res_win_t widget, bool_t bUpdate)
 	if (widget_is_valid(ptd->hsc))
 	{
 		if (bUpdate)
-			widget_update(ptd->hsc);
+			widget_paint(ptd->hsc);
 		else
 			widget_close(ptd->hsc, 0);
 	}
@@ -756,14 +756,14 @@ void hand_topogctrl_lbutton_down(res_win_t widget, const xpoint_t* pxp)
 
 	if (nHint == TOPOG_HINT_SPOT)
 	{
-		if (widget_key_state(widget, KEY_CONTROL))
+		if (widget_key_state(widget, KS_WITH_CONTROL))
 		{
 			noti_topog_spot_selected(widget, ilk);
 		}
 	}
 	else if (nHint == TOPOG_HINT_NONE)
 	{
-		if (!widget_key_state(widget, KEY_CONTROL))
+		if (!widget_key_state(widget, KS_WITH_CONTROL))
 		{
 			noti_topog_reset_select(widget);
 		}
@@ -801,7 +801,7 @@ void hand_topogctrl_lbutton_up(res_win_t widget, const xpoint_t* pxp)
 	{
 		bRe = (row == ptd->row && ptd->col == col) ? 1 : 0;
 
-		if (widget_key_state(widget, KEY_CONTROL))
+		if (widget_key_state(widget, KS_WITH_CONTROL))
 		{
 			_topogctrl_reset_matrix(widget, row, col);
 			return;
@@ -892,7 +892,7 @@ void hand_topogctrl_wheel(res_win_t widget, bool_t bHorz, int nDelta)
 			}
 			else
 			{
-				widget_update(ptd->vsc);
+				widget_paint(ptd->vsc);
 			}
 		}
 
@@ -904,7 +904,7 @@ void hand_topogctrl_wheel(res_win_t widget, bool_t bHorz, int nDelta)
 			}
 			else
 			{
-				widget_update(ptd->hsc);
+				widget_paint(ptd->hsc);
 			}
 		}
 
@@ -986,15 +986,15 @@ void hand_topogctrl_keydown(res_win_t widget, dword_t ks, int nKey)
 
 			noti_topog_owner(widget, NC_TOPOGSPOTDROP, ptd->topog, ptd->spot, ptd->row, ptd->col, NULL);
 		}
-		else if ((nKey == _T('z') || nKey == _T('Z')) && widget_key_state(widget, KEY_CONTROL))
+		else if ((nKey == _T('z') || nKey == _T('Z')) && widget_key_state(widget, KS_WITH_CONTROL))
 		{
 			_topogctrl_undo(widget);
 		}
-		else if ((nKey == _T('c') || nKey == _T('C')) && widget_key_state(widget, KEY_CONTROL))
+		else if ((nKey == _T('c') || nKey == _T('C')) && widget_key_state(widget, KS_WITH_CONTROL))
 		{
 			_topogctrl_copy(widget);
 		}
-		else if ((nKey == _T('x') || nKey == _T('X')) && widget_key_state(widget, KEY_CONTROL))
+		else if ((nKey == _T('x') || nKey == _T('X')) && widget_key_state(widget, KS_WITH_CONTROL))
 		{
 			_topogctrl_done(widget);
 
@@ -1003,7 +1003,7 @@ void hand_topogctrl_keydown(res_win_t widget, dword_t ks, int nKey)
 				_topogctrl_discard(widget);
 			}
 		}
-		else if ((nKey == _T('v') || nKey == _T('V')) && widget_key_state(widget, KEY_CONTROL))
+		else if ((nKey == _T('v') || nKey == _T('V')) && widget_key_state(widget, KS_WITH_CONTROL))
 		{
 			_topogctrl_done(widget);
 
@@ -1063,22 +1063,20 @@ void hand_topogctrl_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 {
 	topog_delta_t* ptd = GETTOPOGDELTA(widget);
 	visual_t rdc;
-	xfont_t xf = { 0 };
-	xface_t xa = { 0 };
-	xpen_t xp = { 0 };
-	xbrush_t xb = { 0 };
-	xcolor_t xc = { 0 };
 	xrect_t xr;
 
 	canvas_t canv;
 	const drawing_interface* pif = NULL;
 	drawing_interface ifv = {0};
 
-	widget_get_xfont(widget, &xf);
-	widget_get_xface(widget, &xa);
+	clr_mod_t clrs;
+	xbrush_t xb;
+	xcolor_t xc;
 
-	widget_get_xbrush(widget, &xb);
-	widget_get_xpen(widget, &xp);
+	widget_get_color_mode(widget, &clrs);
+	default_xbrush(&xb);
+	format_xcolor(&clrs.clr_bkg, xb.color);
+	xmem_copy((void*)&xc, (void*)&clrs.clr_bkg, sizeof(xcolor_t));
 
 	canv = widget_get_canvas(widget);
 
@@ -1123,17 +1121,14 @@ void hand_topogctrl_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 			}
 		}
 	}
-			
-	
 
 	end_canvas_paint(canv, dc, pxr);
-	
 }
 
 /***************************************************************************************/
 res_win_t topogctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, res_win_t wparent)
 {
-	if_event_t ev = { 0 };
+	if_dispatch_t ev = { 0 };
 
 	EVENT_BEGIN_DISPATH(&ev)
 
@@ -1252,7 +1247,7 @@ void topogctrl_redraw(res_win_t widget)
 
 	_topogctrl_reset_page(widget);
 
-	widget_update(widget);
+	widget_paint(widget);
 }
 
 void topogctrl_tabskip(res_win_t widget, int nSkip)

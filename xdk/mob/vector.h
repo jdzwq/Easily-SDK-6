@@ -187,10 +187,6 @@ EXP_API vector_t vector_shear(vector_t vt, double sx, double sy);
 
 EXP_API vector_t vector_trans(vector_t vt, matrix_t mt);
 
-#if defined(XDK_SUPPORT_TEST)
-	EXP_API void test_vector(void);
-#endif
-
 #ifdef	__cplusplus
 }
 #endif

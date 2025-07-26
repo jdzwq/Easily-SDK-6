@@ -27,15 +27,10 @@ LICENSE.GPL3 for more details.
 
 #include "xdkinit.h"
 
-#include "xdkimp.h"
 #include "xdkstd.h"
 
-#ifdef XDK_SUPPORT_ACP
+#ifndef XDK_SUPPORT_ACP_TABLE
 #include "acp/acp.h"
-#endif
-
-#ifdef XDK_SUPPORT_GLYPH
-#include "gly/gly.h"
 #endif
 
 xdk_mou_t g_xdk_mou = { 0 };
@@ -310,7 +305,7 @@ void xdk_process_init(dword_t opt)
     g_xdk_mou.if_ok = 1;
 	g_xdk_mou.if_opt = opt;
 
-	//g_xdk_mou.if_big = _is_big_endian();
+	g_xdk_mou.if_big = _is_big_endian();
     
 #ifdef XDK_SUPPORT_PROCESS
     xdk_impl_process(&g_xdk_mou.if_process);
@@ -461,12 +456,8 @@ void xdk_process_init(dword_t opt)
 	}
 #endif
 
-#ifdef XDK_SUPPORT_ACP
-	acp_init();
-#endif
-
-#ifdef XDK_SUPPORT_GLYPH
-	gly_init();
+#ifndef XDK_SUPPORT_ACP_TABLE
+	share_acp_init();
 #endif
 }
 
@@ -480,12 +471,8 @@ void xdk_process_uninit()
 	if (!g_xdk_mou.if_ok)
 		return;
 
-#ifdef XDK_SUPPORT_GLYPH
-	gly_uninit();
-#endif
-
-#ifdef XDK_SUPPORT_ACP
-	acp_uninit();
+#ifndef XDK_SUPPORT_ACP_TABLE
+	share_acp_uninit();
 #endif
 
 #ifdef XDK_SUPPORT_SOCK

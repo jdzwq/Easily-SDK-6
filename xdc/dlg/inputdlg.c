@@ -36,6 +36,8 @@ typedef struct _inputdlg_delta_t{
 	int max;
 	res_win_t editor;
 	res_win_t button;
+
+	xfont_t xf;
 }inputdlg_delta_t;
 
 typedef struct _INPUTPARAM{
@@ -87,6 +89,8 @@ int hand_inputdlg_create(res_win_t widget, void* data)
 
 	SETINPUTDLGDELTA(widget, ptd);
 
+	default_xfont(&ptd->xf);
+
 	if (pim)
 	{
 		ptd->buf = pim->buf;
@@ -94,7 +98,6 @@ int hand_inputdlg_create(res_win_t widget, void* data)
 	}
 	
 	widget_get_color_mode(widget, &ob);
-	widget_get_xfont(widget, &xf);
 
 	widget_get_client_rect(widget, &xr);
 	xr.x = xr.w - xr.h;
@@ -111,7 +114,7 @@ int hand_inputdlg_create(res_win_t widget, void* data)
 	widget_set_user_id(ptd->editor, IDC_FIREEDIT);
 	widget_set_owner(ptd->editor, widget);
 	
-	widget_set_xfont(ptd->editor, &xf);
+	widget_noti_xfont(ptd->editor, &ptd->xf);
 	widget_set_color_mode(ptd->editor, &ob);
 
 	widget_show(ptd->editor, WS_SHOW_NORMAL);
@@ -182,7 +185,7 @@ void hand_inputdlg_size(res_win_t widget, int code, const xsize_t* prs)
 		xr.w = xr.h;
 		widget_move(ptd->button, RECTPOINT(&xr));
 		widget_size(ptd->button, RECTSIZE(&xr));
-		widget_update(ptd->button);
+		widget_paint(ptd->button);
 	}
 
 	if (ptd->editor)
@@ -190,30 +193,34 @@ void hand_inputdlg_size(res_win_t widget, int code, const xsize_t* prs)
 		widget_get_client_rect(widget, &xr);
 		xr.w -= xr.h;
 		widget_size(ptd->editor, RECTSIZE(&xr));
-		widget_update(ptd->editor);
+		widget_paint(ptd->editor);
 	}
 
 	widget_erase(widget, NULL);
+}
+
+void hand_inputdlg_xfont(res_win_t widget, const xfont_t* pxf)
+{
+	inputdlg_delta_t* ptd = GETINPUTDLGDELTA(widget);
+
+	xmem_copy((void*)&ptd->xf, (void*)pxf, sizeof(xfont_t));
 }
 
 void hand_inputdlg_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 {
 	inputdlg_delta_t* ptd = GETINPUTDLGDELTA(widget);
 	visual_t rdc;
-	xfont_t xf = { 0 };
-	xface_t xa = { 0 };
-	xpen_t xp = { 0 };
-	xbrush_t xb = { 0 };
 	xrect_t xr;
 
 	canvas_t canv;
 	drawing_interface ifv = {0};
 
-	widget_get_xfont(widget, &xf);
-	widget_get_xface(widget, &xa);
+	clr_mod_t clrs;
+	xbrush_t xb = { 0 };
+	xcolor_t xc_brim, xc_core;
 
-	widget_get_xbrush(widget, &xb);
-	widget_get_xpen(widget, &xp);
+	widget_get_color_mode(widget, &clrs);
+	default_xbrush(&xb);
 
 	widget_get_client_rect(widget, &xr);
 
@@ -225,15 +232,13 @@ void hand_inputdlg_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 
 	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
 
-	
-
 	end_canvas_paint(canv, dc, pxr);
 }
 
 /***************************************************************************************/
 res_win_t inputdlg_create(const tchar_t* title, tchar_t* buf, int max, res_win_t owner)
 {
-	if_event_t ev = { 0 };
+	if_dispatch_t ev = { 0 };
 	INPUTPARAM pm = { 0 };
 	clr_mod_t clr = { 0 };
 	xrect_t xr = { 0 };
@@ -257,6 +262,8 @@ res_win_t inputdlg_create(const tchar_t* title, tchar_t* buf, int max, res_win_t
 
 		EVENT_ON_MENU_COMMAND(hand_inputdlg_menu_command)
 
+		EVENT_ON_XFONT(hand_inputdlg_xfont)
+
 		EVENT_ON_NC_IMPLEMENT
 
 	EVENT_END_DISPATH
@@ -267,7 +274,7 @@ res_win_t inputdlg_create(const tchar_t* title, tchar_t* buf, int max, res_win_t
 
 	inputdlg_popup_size(dlg, RECTSIZE(&xr));
 	widget_size(dlg, RECTSIZE(&xr));
-	widget_update(dlg);
+	widget_paint(dlg);
 
 	widget_center_window(dlg, owner);
 
@@ -284,13 +291,10 @@ void inputdlg_popup_size(res_win_t widget, xsize_t* pxs)
 {
 	inputdlg_delta_t* ptd = GETINPUTDLGDELTA(widget);
 
-	xfont_t xf = { 0 };
 	xsize_t xs;
 	float pm;
 
-	widget_get_xfont(widget, &xf);
-
-	font_metric_by_pt(xstof(xf.size), &pm, NULL);
+	font_metric_by_pt(xstof(ptd->xf.size), &pm, NULL);
 	xs.fw = pm;
 	xs.fh = pm;
 	widget_size_to_pt(widget, &xs);

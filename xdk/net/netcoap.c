@@ -27,10 +27,8 @@ LICENSE.GPL3 for more details.
 #include "netcoap.h"
 
 #include "../xdknet.h"
-#include "../xdkimp.h"
 #include "../xdkoem.h"
 #include "../xdkstd.h"
-#include "../xdkutil.h"
 
 #if defined(XDK_SUPPORT_SOCK)
 
@@ -171,7 +169,7 @@ static unsigned short _coap_port(havege_state* phs)
 	return port;
 }
 
-static dword_t _coap_parse_opt(byte_t* buf, dword_t max, int* popd, byte_t* opt, dword_t* plen)
+static dword_t _coap_parse_opt(const byte_t* buf, dword_t max, int* popd, byte_t* opt, dword_t* plen)
 {
 	dword_t total = 0;
 	int delta, length;
@@ -358,8 +356,8 @@ static void _coap_clear_pdv(coap_pdu_t* pdu)
 
 static dword_t _coap_parse_pdu(const byte_t* buf, dword_t size, coap_pdu_t* pdu)
 {
-	dword_t dw, total = 0;
-	int opd, tmp, len;
+	dword_t dw, len, total = 0;
+	int opd, tmp;
 	byte_t opt[COAP_MAX_OPT] = { 0 };
 	//header
 	pdu->ver = (int)(buf[total] >> 6);

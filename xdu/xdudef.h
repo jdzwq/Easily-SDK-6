@@ -29,6 +29,7 @@ LICENSE.GPL3 for more details.
 #define	_XDUDEF_H
 
 #include <xdk.h>
+#include <xgc.h>
 
 #if defined(_OS_WINDOWS)
 #include "windows/_xdu_win.h"
@@ -46,27 +47,6 @@ LICENSE.GPL3 for more details.
 #define XDUSUBPROC		_T("XDUSUBPROC")
 #define XDUUSERDELTA	_T("XDUUSERDELTA")
 #define XDUCOREDELTA	_T("XDUCOREDELTA")
-
-/*keyboard*/
-#define KEY_SHIFT		0x10
-#define KEY_CONTROL		0x11
-#define KEY_ALT			0x12
-
-#define KEY_BACK		8	//0x08
-#define KEY_TAB			9	//0x09
-#define KEY_ENTER		13	//0x0D
-#define KEY_ESC			27	//0x1B
-#define KEY_SPACE		32	//0x20
-#define KEY_PAGEUP		33	//0x21
-#define KEY_PAGEDOWN	34	//0x22
-#define KEY_END			35	//0x23
-#define KEY_HOME		36	//0x24
-#define KEY_LEFT		37	//0x25
-#define KEY_UP			38	//0x26
-#define KEY_RIGHT		39	//0x27
-#define KEY_DOWN		40	//0x28
-#define KEY_INSERT		45	//0x2D
-#define KEY_DELETE		46	//0x2E
 
 #define ZERO_WIDTH				0.0f
 #define ZERO_HEIGHT				0.0f
@@ -137,6 +117,8 @@ LICENSE.GPL3 for more details.
 #define KS_WITH_CONTROL		0x0008
 #define KS_WITH_SHIFT		0x0004
 #define KS_WITH_ALT			0x0020
+#define KS_WITH_CAPS		0x0040
+#define KS_WITH_CMD			0x0080
 
 /*mouse track mode*/
 #define MS_TRACK_HOVER		0x00000001
@@ -146,6 +128,7 @@ LICENSE.GPL3 for more details.
 #define WS_SIZE_RESTORE		0
 #define WS_SIZE_MINIMIZED	1
 #define WS_SIZE_MAXIMIZED	2
+#define WS_SIZE_FULLSCREEN	3
 #define WS_SIZE_LAYOUT		9
 
 /*widget position mode*/
@@ -240,15 +223,15 @@ LICENSE.GPL3 for more details.
 #define MSGICO_ERR		0x00040000
 
 /*widget cursor identify*/
-#define CURSOR_ARROW		0
-#define CURSOR_WAIT			1
-#define CURSOR_SIZENS		2
-#define CURSOR_SIZEWE		3
-#define CURSOR_SIZEALL		4
-#define CURSOR_HAND			5
-#define CURSOR_HELP			6
-#define CURSOR_DRAG			7
-#define CURSOR_IBEAM		8
+#define CURSOR_ARROW		1
+#define CURSOR_WAIT			2
+#define CURSOR_SIZENS		3
+#define CURSOR_SIZEWE		4
+#define CURSOR_SIZEALL		5
+#define CURSOR_HAND			6
+#define CURSOR_HELP			7
+#define CURSOR_DRAG			8
+#define CURSOR_IBEAM		9
 
 /*widget icon identify*/
 #define ICON_APPLICATION	_T("application")
@@ -265,6 +248,39 @@ LICENSE.GPL3 for more details.
 #define CONTEXT_MEMORY		1
 #define CONTEXT_SCREEN		2
 #define CONTEXT_PRINTER		3
+
+/*keycode*/
+#define KEY_SHIFT		0x10
+#define KEY_CONTROL		0x11
+#define KEY_ALT			0x12
+
+#define KEY_BACK		0x08
+#define KEY_TAB			0x09
+#define KEY_ENTER		0x0D
+#define KEY_ESC			0x1B
+#define KEY_SPACE		0x20
+#define KEY_PAGEUP		0x21
+#define KEY_PAGEDOWN	0x22
+#define KEY_END			0x23
+#define KEY_HOME		0x24
+#define KEY_LEFT		0x25
+#define KEY_UP			0x26
+#define KEY_RIGHT		0x27
+#define KEY_DOWN		0x28
+#define KEY_INSERT		0x2D
+#define KEY_DELETE		0x2E
+#define KEY_F1			0x70
+#define KEY_F2			0x71
+#define KEY_F3			0x72
+#define KEY_F4			0x73
+#define KEY_F5			0x74
+#define KEY_F6			0x75
+#define KEY_F7			0x76
+#define KEY_F8			0x77
+#define KEY_F9			0x78
+#define KEY_F10			0x79
+#define KEY_F11			0x7A
+#define KEY_F12			0x7B
 
 typedef struct _accel_t{
 	unsigned char vir;
@@ -304,7 +320,7 @@ typedef int(STDCALL *PF_ENUM_WINDOW_PROC)(res_win_t widget, vword_t pv);
 /*define widget notify header*/
 typedef struct _NOTICE{
 	res_win_t widget;
-	unsigned int id;
+	unsigned int user;
 	unsigned int code;
 }NOTICE, *LPNOTICE;
 
@@ -321,7 +337,7 @@ typedef int(*SUB_ON_WHEEL)(res_win_t, bool_t, int, uid_t, vword_t);
 typedef int(*SUB_ON_SCROLL)(res_win_t, bool_t, int, uid_t, vword_t);
 typedef int(*SUB_ON_KEYDOWN)(res_win_t, dword_t, int, uid_t, vword_t);
 typedef int(*SUB_ON_KEYUP)(res_win_t, dword_t, int, uid_t, vword_t);
-typedef int(*SUB_ON_CHAR)(res_win_t, tchar_t, uid_t, vword_t);
+typedef int(*SUB_ON_WCHAR)(res_win_t, wchar_t, uid_t, vword_t);
 typedef int(*SUB_ON_SIZE)(res_win_t, int, const xsize_t*, uid_t, vword_t);
 typedef int(*SUB_ON_MOVE)(res_win_t, const xpoint_t*, uid_t, vword_t);
 typedef int(*SUB_ON_SHOW)(res_win_t, bool_t, uid_t, vword_t);
@@ -361,7 +377,7 @@ typedef struct _if_subproc_t{
 	SUB_ON_WHEEL		sub_on_wheel;
 	SUB_ON_SCROLL		sub_on_scroll;
 	SUB_ON_KEYDOWN		sub_on_keydown;
-	SUB_ON_CHAR			sub_on_char;
+	SUB_ON_WCHAR		sub_on_wchar;
 	SUB_ON_SIZE			sub_on_size;
 	SUB_ON_MOVE			sub_on_move;
 	SUB_ON_SHOW			sub_on_show;
@@ -407,7 +423,7 @@ typedef void(*PF_ON_WHEEL)(res_win_t, bool_t, int);
 typedef void(*PF_ON_SCROLL)(res_win_t, bool_t, int);
 typedef void(*PF_ON_KEYDOWN)(res_win_t, dword_t, int);
 typedef void(*PF_ON_KEYUP)(res_win_t, dword_t, int);
-typedef void(*PF_ON_CHAR)(res_win_t, tchar_t);
+typedef void(*PF_ON_WCHAR)(res_win_t, wchar_t);
 typedef void(*PF_ON_SIZE)(res_win_t, int, const xsize_t*);
 typedef void(*PF_ON_MOVE)(res_win_t, const xpoint_t*);
 typedef void(*PF_ON_SHOW)(res_win_t, bool_t);
@@ -425,9 +441,15 @@ typedef void(*PF_ON_COMMAND_FIND)(res_win_t, str_find_t*);
 typedef void(*PF_ON_COMMAND_REPLACE)(res_win_t, str_replace_t*);
 typedef void(*PF_ON_SYSCMD_CLICK)(res_win_t, const xpoint_t*);
 typedef void(*PF_ON_TIMER)(res_win_t, vword_t);
+typedef void(*PF_ON_IDLE)(res_win_t);
+
+typedef void(*PF_ON_XFONT)(res_win_t, const xfont_t*);
+typedef void(*PF_ON_XFACE)(res_win_t, const xface_t*);
+typedef void(*PF_ON_XBRUSH)(res_win_t, const xbrush_t*);
+typedef void(*PF_ON_XPEN)(res_win_t, const xpen_t*);
 
 /*widget event*/
-typedef struct _if_event_t{
+typedef struct _if_dispatch_t{
 	PF_ON_NCPAINT		pf_on_nc_paint;
 	PF_ON_NCCALCSIZE	pf_on_nc_calcsize;
 	PF_ON_NCHITTEST		pf_on_nc_hittest;
@@ -448,7 +470,7 @@ typedef struct _if_event_t{
 	PF_ON_SCROLL		pf_on_scroll;
 	PF_ON_KEYDOWN		pf_on_keydown;
 	PF_ON_KEYUP			pf_on_keyup;
-	PF_ON_CHAR			pf_on_char;
+	PF_ON_WCHAR			pf_on_wchar;
 	PF_ON_SIZE			pf_on_size;
 	PF_ON_MOVE			pf_on_move;
 	PF_ON_SHOW			pf_on_show;
@@ -468,9 +490,15 @@ typedef struct _if_event_t{
 	PF_ON_SYSCMD_CLICK		pf_on_syscmd_click;
 
 	PF_ON_TIMER			pf_on_timer;
+	PF_ON_IDLE			pf_on_idle;
 
-	void* param;
-}if_event_t;
+	PF_ON_XFONT			pf_on_xfont;
+	PF_ON_XFACE			pf_on_xface;
+	PF_ON_XBRUSH		pf_on_xbrush;
+	PF_ON_XPEN			pf_on_xpen;
+
+	const void* param;
+}if_dispatch_t;
 
 #endif /*XDU_SUPPORT_WIDGET*/
 

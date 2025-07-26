@@ -1,0 +1,17 @@
+SOURCES= \
+../../../Easily-tmp/windows/zlib/x64/Debug/adler32.c \
+../../../Easily-tmp/windows/zlib/x64/Debug/compress.c \
+../../../Easily-tmp/windows/zlib/x64/Debug/crc32_z.c \
+../../../Easily-tmp/windows/zlib/x64/Debug/deflate.c \
+../../../Easily-tmp/windows/zlib/x64/Debug/gzclose.c \
+../../../Easily-tmp/windows/zlib/x64/Debug/gzlib.c \
+../../../Easily-tmp/windows/zlib/x64/Debug/gzread.c \
+../../../Easily-tmp/windows/zlib/x64/Debug/gzwrite.c \
+../../../Easily-tmp/windows/zlib/x64/Debug/infback.c \
+../../../Easily-tmp/windows/zlib/x64/Debug/inffast.c \
+../../../Easily-tmp/windows/zlib/x64/Debug/inflate.c \
+../../../Easily-tmp/windows/zlib/x64/Debug/inftrees.c \
+../../../Easily-tmp/windows/zlib/x64/Debug/lzf.c \
+../../../Easily-tmp/windows/zlib/x64/Debug/trees.c \
+../../../Easily-tmp/windows/zlib/x64/Debug/uncompr.c \
+../../../Easily-tmp/windows/zlib/x64/Debug/zutil.c \

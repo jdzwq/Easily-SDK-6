@@ -74,7 +74,7 @@ void textor_menu(res_win_t widget, const xpoint_t* ppt, int lay)
 
 	widget_show(editmenu, WS_SHOW_NORMAL);
 
-	widget_do_trace(editmenu);
+	widget_do_track(editmenu);
 
 	destroy_menu_doc(ptr_menu);
 }
@@ -125,7 +125,7 @@ void fontname_menu(res_win_t widget, dword_t idc, const xpoint_t* ppt, int lay)
 
 	widget_show(menu, WS_SHOW_NORMAL);
 
-	widget_do_trace(menu);
+	widget_do_track(menu);
 
 	destroy_menu_doc(ptr_menu);
 }
@@ -196,7 +196,7 @@ void fontsize_menu(res_win_t widget, dword_t idc, const xpoint_t* ppt, int lay)
 
 	widget_show(menu, WS_SHOW_NORMAL);
 
-	widget_do_trace(menu);
+	widget_do_track(menu);
 
 	destroy_menu_doc(ptr_menu);
 }
@@ -267,7 +267,7 @@ void fontstyle_menu(res_win_t widget, dword_t idc, const xpoint_t* ppt, int lay)
 
 	widget_show(menu, WS_SHOW_NORMAL);
 
-	widget_do_trace(menu);
+	widget_do_track(menu);
 
 	destroy_menu_doc(ptr_menu);
 }
@@ -338,7 +338,7 @@ void fontweight_menu(res_win_t widget, dword_t idc, const xpoint_t* ppt, int lay
 
 	widget_show(menu, WS_SHOW_NORMAL);
 
-	widget_do_trace(menu);
+	widget_do_track(menu);
 
 	destroy_menu_doc(ptr_menu);
 }
@@ -409,7 +409,7 @@ void color_menu(res_win_t widget, dword_t idc, const xpoint_t* ppt, int lay)
 
 	widget_show(menu, WS_SHOW_NORMAL);
 
-	widget_do_trace(menu);
+	widget_do_track(menu);
 
 	destroy_menu_doc(ptr_menu);
 }
@@ -484,7 +484,7 @@ void shape_menu(res_win_t widget, dword_t idc, const xpoint_t* ppt, int lay)
 
 	widget_show(menu, WS_SHOW_NORMAL);
 
-	widget_do_trace(menu);
+	widget_do_track(menu);
 
 	destroy_menu_doc(ptr_menu);
 }
@@ -537,8 +537,8 @@ void track_popup_menu(res_win_t widget, dword_t idc, link_t_ptr menu, const xpoi
 	clr_mod_t clr;
 	widget_get_color_mode(widget, &clr);
 	widget_set_color_mode(hMenu, &clr);
-	widget_update(hMenu);
+	widget_paint(hMenu);
 	widget_show(hMenu, WS_SHOW_NORMAL);
 
-	widget_do_trace(hMenu);
+	widget_do_track(hMenu);
 }

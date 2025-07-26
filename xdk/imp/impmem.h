@@ -83,7 +83,7 @@ EXP_API void	xmem_set(void* p, byte_t c, dword_t size);
 @INPUT dword_t size: total bytes to copy.
 @RETURN void*: the new memory pointer.
 */
-EXP_API void*	xmem_clone(void* p,dword_t size);
+EXP_API void*	xmem_clone(const void* p,dword_t size);
 
 /*
 @FUNCTION xmem_copy: copy the source memoy content to destent.
@@ -92,7 +92,7 @@ EXP_API void*	xmem_clone(void* p,dword_t size);
 @INPUT dword_t size: the source memory content size in bytes.
 @RETURN void: none
 */
-EXP_API void	xmem_copy(void* dst, void* src, dword_t size);
+EXP_API void	xmem_copy(void* dst, const void* src, dword_t size);
 
 /*
 @FUNCTION xmem_move: move the memoy content.
@@ -111,7 +111,7 @@ EXP_API void	xmem_move(void* p, dword_t len, int off);
 @INPUT dword_t size: total bytes to compare
 @RETURN int: the same content and length will return 0, else if mem1 great then mem2 then return 1, otherwise return -1.
 */
-EXP_API int xmem_comp(void* mem1, void* mem2, dword_t size);
+EXP_API int xmem_comp(const void* mem1, const void* mem2, dword_t size);
 
 #ifdef XDK_SUPPORT_MEMO_DUMP
 EXP_API	void	xmem_assert(void* p);
@@ -171,13 +171,6 @@ EXP_API void*		pmem_lock(void* p);
 */
 EXP_API void		pmem_unlock(void* p);
 
-/*
-@FUNCTION pmem_protect: protect or unprotect the page based memory, let it be READONLY or READWRITE
-@INPUT void* p: the page based memory pointer.
-@INPUT bool_t b: if nonezero protect it, zero unprotect it.
-@RETURN bool_t: if succeeds return nonzero, fails return zero.
-*/
-EXP_API bool_t		pmem_protect(void* p, bool_t b);
 
 #endif
 

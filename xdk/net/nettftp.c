@@ -27,10 +27,9 @@ LICENSE.GPL3 for more details.
 #include "nettftp.h"
 
 #include "../xdknet.h"
-#include "../xdkimp.h"
 #include "../xdkoem.h"
 #include "../xdkstd.h"
-#include "../xdkutil.h"
+#include "../xdkobj.h"
 
 #if defined(XDK_SUPPORT_SOCK)
 

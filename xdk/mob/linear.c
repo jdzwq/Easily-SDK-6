@@ -26,7 +26,7 @@ LICENSE.GPL3 for more details.
 
 #include "linear.h"
 
-#include "../xdkimp.h"
+#include "../xdkobj.h"
 #include "../xdkstd.h"
 
 typedef struct _linear_frame{
@@ -295,24 +295,3 @@ bool_t set_linear_frame(linear_t lin, int seqnum, const byte_t* frame, dword_t s
 	return 1;
 }
 
-#if defined(XDK_SUPPORT_TEST)
-void test_linear()
-{
-	linear_t lin = alloc_linear(3);
-
-	byte_t* buf;
-	int len = 10;
-
-	int i;
-
-	for (i = 0; i < 10; i++)
-	{
-		buf = insert_linear_frame(lin, i + 1, 8);
-
-		if (!((i+1) % 3))
-			clean_linear_frame(lin, i);
-	}
-
-	free_linear(lin);
-}
-#endif

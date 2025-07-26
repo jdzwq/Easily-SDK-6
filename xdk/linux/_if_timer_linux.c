@@ -31,70 +31,63 @@ LICENSE.GPL3 for more details.
 #define MAX_TIMER_LISTEN	64
 
 typedef struct _timer_token_t{
-	int fd;
+	int timer;
+
 	PF_TIMERFUNC pf;
 	void* pa;
+
+	bool_t active;
+	res_even_t ev;
 }timer_token_t;
 
 typedef struct _timer_queue_t{
-	int fd;
-
-	bool_t active;
 	timer_token_t tt[MAX_TIMER_LISTEN];
-
-	res_even_t ev;
 }timer_queue_t;
 
 void* _timer_listen(void* param)
 {
-	timer_queue_t* pqt = (timer_queue_t*)param;
-	int fd_cnt,fd;
-	struct epoll_event evs[MAX_TIMER_LISTEN] = {0}; 
-	int i,j;   
-	uint64_t exp = 0;
+	timer_token_t* ptt = (timer_token_t*)param;
+	struct pollfd pfd;
+	uint64_t expir;
 
-	while (pqt->active)
+	pfd.fd = ptt->timer;
+	pfd.events = POLLIN;
+
+	while (ptt->active)
 	{
-		fd_cnt = epoll_wait(pqt->fd, evs, MAX_TIMER_LISTEN, 512);
-
-		for (i = 0; i < fd_cnt; i++)
+		if(poll(&pfd,1,0) < 0)
 		{
-			fd = evs[i].data.fd;
-			if (evs[i].events & EPOLLIN)
-			{
-				read(fd, &exp, sizeof(uint64_t));
+			_event_sign(ptt->ev, 1);
+			_thread_end();
+		}
 
-				for(j = 0;j<MAX_TIMER_LISTEN;j++)
-				{
-					if(fd == pqt->tt[j].fd)
-					{
-						(*(pqt->tt[j].pf))(pqt->tt[j].pa, 0);
-					}
-				}
+		if(pfd.revents & POLLERR)
+		{
+			_thread_sleep(1);
+			continue;
+		}
+
+		if(pfd.revents & POLLIN)
+		{
+			read(pfd.fd, &expir, sizeof(uint64_t));
+
+			if (ptt->pf)
+			{
+				(*(ptt->pf))(ptt->pa, (res_timer_t)ptt);
 			}
 		}
 	}
 
-	_event_sign(pqt->ev, 1);
+	_event_sign(ptt->ev, 1);
 
 	_thread_end();
 }
 
 res_queue_t _create_timer_queue()
 {
-	int fd;
 	timer_queue_t* pqt;
-	res_thread_t th;
-
-	fd = epoll_create(MAX_TIMER_LISTEN); 
-	if(fd < 0) return (res_queue_t)0;
 
 	pqt = (timer_queue_t*)calloc(1, sizeof(timer_queue_t));
-	pqt->fd = fd;
-	pqt->active = 1;
-	pqt->ev = _event_create();
-
-	_thread_begin(&th, _timer_listen, (void*)pqt);
 
 	return (res_queue_t)pqt;
 }
@@ -104,20 +97,18 @@ void _destroy_timer_queue(res_queue_t rq)
 	timer_queue_t* pqt = (timer_queue_t*)rq;
 	int i;
 
-	pqt->active = 0;
-
-	_event_wait(pqt->ev, -1);
-
 	for(i = 0;i<MAX_TIMER_LISTEN;i++)
 	{
-		if(pqt->tt[i].fd)
+		if(pqt->tt[i].timer)
 		{
-			close(pqt->tt[i].fd);
+			pqt->tt[i].active = 0;
+
+			_event_wait(pqt->tt[i].ev, -1);
+			_event_destroy(pqt->tt[i].ev);
+
+			close(pqt->tt[i].timer);
 		}
 	}
-
-	if(pqt->fd)
-		close((int)pqt->fd);
 
 	free(pqt);
 }
@@ -125,15 +116,26 @@ void _destroy_timer_queue(res_queue_t rq)
 res_timer_t _create_timer(res_queue_t rq, dword_t duetime, dword_t period, PF_TIMERFUNC pf, void* pa)
 {
 	timer_queue_t* pqt = (timer_queue_t*)rq;
+	timer_token_t* ptt;
+
+	res_thread_t th;
 	int fd;
 	struct itimerspec its = {0};
-	struct epoll_event event = {0};
 	int i;
 
+	if(!rq) return (res_timer_t)0;
+
+	for(i = 0;i<MAX_TIMER_LISTEN;i++)
+	{
+		if(pqt->tt[i].timer == 0) break;
+	}
+
+	if(i == MAX_TIMER_LISTEN) return (res_timer_t)0;
+
 	its.it_value.tv_sec = duetime / 1000;
-	its.it_value.tv_nsec = 0;
+	its.it_value.tv_nsec = (duetime % 1000) * 1000000;
 	its.it_interval.tv_sec = period / 1000;
-	its.it_interval.tv_nsec = 0;
+	its.it_interval.tv_nsec = (period % 1000) * 1000000;
    
 	fd = timerfd_create(CLOCK_MONOTONIC, 0);
 	if (fd < 0) return (res_timer_t)0;
@@ -144,27 +146,17 @@ res_timer_t _create_timer(res_queue_t rq, dword_t duetime, dword_t period, PF_TI
 		return (res_timer_t)0;
 	}
 
-	event.data.fd = fd;
-    event.events = EPOLLIN | EPOLLET;
-    if (epoll_ctl(pqt->fd, EPOLL_CTL_ADD, fd, &event) < 0)
-    {
-        close(fd);
-		return (res_timer_t)0;
-    }
+	ptt = &(pqt->tt[i]);
+	ptt->timer = fd;
+	ptt->pf = pf;
+	ptt->pa = pa;
 
-	for(i = 0;i<MAX_TIMER_LISTEN;i++)
-	{
-		if(pqt->tt[i].fd == 0)
-		{
-			pqt->tt[i].fd = fd;
-			pqt->tt[i].pf = pf;
-			pqt->tt[i].pa = pa;
-			
-			break;
-		}
-	}
+	ptt->active = 1;
+	ptt->ev = _event_create();
 
-	return (res_timer_t)(&(pqt->tt[i]));
+	_thread_begin(&th, _timer_listen, (void*)ptt);
+
+	return (res_timer_t)ptt;
 }
 
 void _destroy_timer(res_queue_t rq, res_timer_t rt)
@@ -174,21 +166,27 @@ void _destroy_timer(res_queue_t rq, res_timer_t rt)
 	struct epoll_event event = {0};
 	int i;
 
-	event.data.fd = rt;
-	event.events = EPOLLIN;
-    epoll_ctl(pqt->fd, EPOLL_CTL_DEL, ptt->fd, &event);
+	if(!rt) return;
 
+	if(!rq) return;
+	
 	for(i = 0;i<MAX_TIMER_LISTEN;i++)
 	{
-		if(ptt->fd == pqt->tt[i].fd)
-		{
-			pqt->tt[i].fd = 0;
-			pqt->tt[i].pf = NULL;
-			pqt->tt[i].pa = NULL;
-		}
+		if(ptt->timer == pqt->tt[i].timer) break;
 	}
 
-	close(ptt->fd);
+	if(i == MAX_TIMER_LISTEN) return;
+
+	ptt->active = 0;
+	_event_wait(ptt->ev, -1);
+	_event_destroy(ptt->ev);
+	ptt->ev = (res_even_t)0;
+
+	close(ptt->timer);
+
+	ptt->timer = 0;
+	ptt->pf = NULL;
+	ptt->pa = NULL;
 }
 
 bool_t _alter_timer(res_queue_t rq, res_timer_t rt, dword_t duetime, dword_t period)
@@ -197,11 +195,11 @@ bool_t _alter_timer(res_queue_t rq, res_timer_t rt, dword_t duetime, dword_t per
 	struct itimerspec its = {0};
 
 	its.it_value.tv_sec = duetime / 1000;
-	its.it_value.tv_nsec = 0;
+	its.it_value.tv_nsec = (duetime % 1000) * 1000000;
 	its.it_interval.tv_sec = period / 1000;
-	its.it_interval.tv_nsec = 0;
+	its.it_interval.tv_nsec = (period % 1000) * 1000000;
 
-	return (timerfd_settime((int)(ptt->fd), 0, &its, NULL) < 0)? 0 : 1;
+	return (timerfd_settime((int)(ptt->timer), 0, &its, NULL) < 0)? 0 : 1;
 }
 
 #endif //XDK_SUPPORT_TIMER

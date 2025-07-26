@@ -26,9 +26,10 @@ LICENSE.GPL3 for more details.
 
 #include "varobj.h"
 
-#include "../xdkimp.h"
-#include "../xdkoem.h"
+#include "../xdkobj.h"
 #include "../xdkstd.h"
+#include "../xdkoem.h"
+
 
 #define MIN_NEED_COMPRESS	1024
 
@@ -1082,71 +1083,3 @@ void object_hash128(object_t obj, key128_t* pkey)
 	else
 		xmem_zero((void*)pkey, sizeof(key128_t));
 }
-
-#if defined(XDK_SUPPORT_TEST)
-void test_object(void)
-{
-	object_t obj = object_alloc();
-
-	tchar_t* str;
-	int len;
-
-	string_t s = string_alloc();
-	string_cpy(s, _T("object test 字符对象测试"), -1);
-	len = string_len(s);
-	str = string_ptr(s);
-	_tprintf(_T("string object test: %s\n"), str);
-
-	object_set_string(obj, s);
-	object_set_commpress(obj, 1);
-	len = object_size(obj);
-	_tprintf(_T("string object compressed:%d\n"), len);
-
-	string_empty(s);
-	object_get_string(obj, s);
-	len = string_len(s);
-	str = string_ptr(s);
-	_tprintf(_T("string object unconpressed: %s\n"), str);
-	
-	string_cpy(s, _T("object test 变体对象测试"), -1);
-	len = string_len(s);
-	str = string_ptr(s);
-	_tprintf(_T("variant object test: %s\n"), str);
-
-	variant_t v = variant_alloc(VV_STRING_UTF8);
-	variant_from_string(v, string_ptr(s), string_len(s));
-
-	object_set_variant(obj, v);
-	object_set_commpress(obj, 1);
-	len = object_size(obj);
-	_tprintf(_T("variant object compressed:%d\n"), len);
-
-	variant_to_null(v, VV_STRING_UTF8);
-	object_get_variant(obj, v);
-	len = variant_to_string(v, NULL, MAX_LONG);
-	str = xsalloc(len + 1);
-	variant_to_string(v, str, len);
-	_tprintf(_T("variant object unconpressed: %s\n"), str);
-	xsfree(str);
-
-	byte_t* buf;
-	dword_t dw;
-	dw = object_encode(obj, NULL, MAX_LONG);
-	buf = (byte_t*)xmem_alloc(dw);
-	object_encode(obj, buf, dw);
-
-	object_empty(obj);
-	object_decode(obj, buf);
-	xmem_free(buf);
-
-	object_get_variant(obj, v);
-	len = variant_to_string(v, NULL, MAX_LONG);
-	str = xsalloc(len + 1);
-	variant_to_string(v, str, len);
-	xsfree(str);
-
-	string_free(s);
-	variant_free(v);
-	object_free(obj);
-}
-#endif

@@ -27,7 +27,6 @@ LICENSE.GPL3 for more details.
 #include "netssl.h"
 
 #include "../xdknet.h"
-#include "../xdkimp.h"
 #include "../xdkoem.h"
 #include "../xdkstd.h"
 
@@ -112,43 +111,43 @@ typedef struct _tls12_ciphers_set{
 }tls12_ciphers_set;
 
 static tls12_ciphers_set client_ciphers[] = {
-	{ SSL_ECDHE_RSA_WITH_AES_128_GCM_SHA256, CIPHER_AEAD, BULK_AES, 16, 0, 12, 4 },
-	{ SSL_ECDHE_RSA_WITH_AES_256_CBC_SHA, CIPHER_BLOCK, BULK_AES, 32, 20, 16, 0 },
-	{ SSL_ECDHE_RSA_WITH_AES_128_CBC_SHA256, CIPHER_BLOCK, BULK_AES, 16, 32, 16, 0 },
-	{ SSL_ECDHE_RSA_WITH_AES_128_CBC_SHA, CIPHER_BLOCK, BULK_AES, 16, 20, 16, 0 },
-	{ SSL_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA, CIPHER_BLOCK, BULK_3DES, 24, 20, 8, 0 },
-	{ SSL_DHE_RSA_WITH_AES_256_CBC_SHA256, CIPHER_BLOCK, BULK_AES, 32, 32, 16, 0 },
-	{ SSL_DHE_RSA_WITH_AES_128_CBC_SHA256, CIPHER_BLOCK, BULK_AES, 16, 32, 16, 0 },
-	{ SSL_DHE_RSA_WITH_AES_256_CBC_SHA, CIPHER_BLOCK, BULK_AES, 32, 20, 16, 0 },
-	{ SSL_DHE_RSA_WITH_AES_128_CBC_SHA, CIPHER_BLOCK, BULK_AES, 16, 20, 16, 0 },
-	{ SSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA, CIPHER_BLOCK, BULK_3DES, 24, 20, 8, 0 },
-	{ SSL_RSA_WITH_AES_256_CBC_SHA256, CIPHER_BLOCK, BULK_AES, 32, 32, 16, 0 },
-	{ SSL_RSA_WITH_AES_128_CBC_SHA256, CIPHER_BLOCK, BULK_AES, 16, 32, 16, 0 },
-	{ SSL_RSA_WITH_AES_256_CBC_SHA, CIPHER_BLOCK, BULK_AES, 32, 20, 16, 0 },
-	{ SSL_RSA_WITH_AES_128_CBC_SHA, CIPHER_BLOCK, BULK_AES, 16, 20, 16, 0 },
-	{ SSL_RSA_WITH_3DES_EDE_CBC_SHA, CIPHER_BLOCK, BULK_3DES, 24, 20, 8, 0 },
-	{ SSL_RSA_WITH_RC4_128_SHA, CIPHER_STREAM, BULK_RC4, 16, 20, 0, 0 },
-	{ SSL_RSA_WITH_RC4_128_MD5, CIPHER_STREAM, BULK_RC4, 16, 16, 0, 0 },
+	{ XSSL_ECDHE_RSA_WITH_AES_128_GCM_SHA256, CIPHER_AEAD, BULK_AES, 16, 0, 12, 4 },
+	{ XSSL_ECDHE_RSA_WITH_AES_256_CBC_SHA, CIPHER_BLOCK, BULK_AES, 32, 20, 16, 0 },
+	{ XSSL_ECDHE_RSA_WITH_AES_128_CBC_SHA256, CIPHER_BLOCK, BULK_AES, 16, 32, 16, 0 },
+	{ XSSL_ECDHE_RSA_WITH_AES_128_CBC_SHA, CIPHER_BLOCK, BULK_AES, 16, 20, 16, 0 },
+	{ XSSL_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA, CIPHER_BLOCK, BULK_3DES, 24, 20, 8, 0 },
+	{ XSSL_DHE_RSA_WITH_AES_256_CBC_SHA256, CIPHER_BLOCK, BULK_AES, 32, 32, 16, 0 },
+	{ XSSL_DHE_RSA_WITH_AES_128_CBC_SHA256, CIPHER_BLOCK, BULK_AES, 16, 32, 16, 0 },
+	{ XSSL_DHE_RSA_WITH_AES_256_CBC_SHA, CIPHER_BLOCK, BULK_AES, 32, 20, 16, 0 },
+	{ XSSL_DHE_RSA_WITH_AES_128_CBC_SHA, CIPHER_BLOCK, BULK_AES, 16, 20, 16, 0 },
+	{ XSSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA, CIPHER_BLOCK, BULK_3DES, 24, 20, 8, 0 },
+	{ XSSL_RSA_WITH_AES_256_CBC_SHA256, CIPHER_BLOCK, BULK_AES, 32, 32, 16, 0 },
+	{ XSSL_RSA_WITH_AES_128_CBC_SHA256, CIPHER_BLOCK, BULK_AES, 16, 32, 16, 0 },
+	{ XSSL_RSA_WITH_AES_256_CBC_SHA, CIPHER_BLOCK, BULK_AES, 32, 20, 16, 0 },
+	{ XSSL_RSA_WITH_AES_128_CBC_SHA, CIPHER_BLOCK, BULK_AES, 16, 20, 16, 0 },
+	{ XSSL_RSA_WITH_3DES_EDE_CBC_SHA, CIPHER_BLOCK, BULK_3DES, 24, 20, 8, 0 },
+	{ XSSL_RSA_WITH_RC4_128_SHA, CIPHER_STREAM, BULK_RC4, 16, 20, 0, 0 },
+	{ XSSL_RSA_WITH_RC4_128_MD5, CIPHER_STREAM, BULK_RC4, 16, 16, 0, 0 },
 };
 
 static tls12_ciphers_set server_ciphers[] = {
-	{ SSL_ECDHE_RSA_WITH_AES_128_GCM_SHA256, CIPHER_AEAD, BULK_AES, 16, 0, 12, 4 },
-	{ SSL_ECDHE_RSA_WITH_AES_256_CBC_SHA, CIPHER_BLOCK, BULK_AES, 32, 20, 16, 0 },
-	{ SSL_ECDHE_RSA_WITH_AES_128_CBC_SHA256, CIPHER_BLOCK, BULK_AES, 16, 32, 16, 0 },
-	{ SSL_ECDHE_RSA_WITH_AES_128_CBC_SHA, CIPHER_BLOCK, BULK_AES, 16, 20, 16, 0 },
-	{ SSL_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA, CIPHER_BLOCK, BULK_3DES, 24, 20, 8, 0 },
-	{ SSL_DHE_RSA_WITH_AES_256_CBC_SHA256, CIPHER_BLOCK, BULK_AES, 32, 32, 16, 0 },
-	{ SSL_DHE_RSA_WITH_AES_128_CBC_SHA256, CIPHER_BLOCK, BULK_AES, 16, 32, 16, 0 },
-	{ SSL_DHE_RSA_WITH_AES_256_CBC_SHA, CIPHER_BLOCK, BULK_AES, 32, 20, 16, 0 },
-	{ SSL_DHE_RSA_WITH_AES_128_CBC_SHA, CIPHER_BLOCK, BULK_AES, 16, 20, 16, 0 },
-	{ SSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA, CIPHER_BLOCK, BULK_3DES, 24, 20, 8, 0 },
-	{ SSL_RSA_WITH_AES_256_CBC_SHA256, CIPHER_BLOCK, BULK_AES, 32, 32, 16, 0 },
-	{ SSL_RSA_WITH_AES_128_CBC_SHA256, CIPHER_BLOCK, BULK_AES, 16, 32, 16, 0 },
-	{ SSL_RSA_WITH_AES_256_CBC_SHA, CIPHER_BLOCK, BULK_AES, 32, 20, 16, 0 },
-	{ SSL_RSA_WITH_AES_128_CBC_SHA, CIPHER_BLOCK, BULK_AES, 16, 20, 16, 0 },
-	{ SSL_RSA_WITH_3DES_EDE_CBC_SHA, CIPHER_BLOCK, BULK_3DES, 24, 20, 8, 0 },
-	{ SSL_RSA_WITH_RC4_128_SHA, CIPHER_STREAM, BULK_RC4, 16, 20, 0, 0 },
-	{ SSL_RSA_WITH_RC4_128_MD5, CIPHER_STREAM, BULK_RC4, 16, 16, 0, 0 },
+	{ XSSL_ECDHE_RSA_WITH_AES_128_GCM_SHA256, CIPHER_AEAD, BULK_AES, 16, 0, 12, 4 },
+	{ XSSL_ECDHE_RSA_WITH_AES_256_CBC_SHA, CIPHER_BLOCK, BULK_AES, 32, 20, 16, 0 },
+	{ XSSL_ECDHE_RSA_WITH_AES_128_CBC_SHA256, CIPHER_BLOCK, BULK_AES, 16, 32, 16, 0 },
+	{ XSSL_ECDHE_RSA_WITH_AES_128_CBC_SHA, CIPHER_BLOCK, BULK_AES, 16, 20, 16, 0 },
+	{ XSSL_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA, CIPHER_BLOCK, BULK_3DES, 24, 20, 8, 0 },
+	{ XSSL_DHE_RSA_WITH_AES_256_CBC_SHA256, CIPHER_BLOCK, BULK_AES, 32, 32, 16, 0 },
+	{ XSSL_DHE_RSA_WITH_AES_128_CBC_SHA256, CIPHER_BLOCK, BULK_AES, 16, 32, 16, 0 },
+	{ XSSL_DHE_RSA_WITH_AES_256_CBC_SHA, CIPHER_BLOCK, BULK_AES, 32, 20, 16, 0 },
+	{ XSSL_DHE_RSA_WITH_AES_128_CBC_SHA, CIPHER_BLOCK, BULK_AES, 16, 20, 16, 0 },
+	{ XSSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA, CIPHER_BLOCK, BULK_3DES, 24, 20, 8, 0 },
+	{ XSSL_RSA_WITH_AES_256_CBC_SHA256, CIPHER_BLOCK, BULK_AES, 32, 32, 16, 0 },
+	{ XSSL_RSA_WITH_AES_128_CBC_SHA256, CIPHER_BLOCK, BULK_AES, 16, 32, 16, 0 },
+	{ XSSL_RSA_WITH_AES_256_CBC_SHA, CIPHER_BLOCK, BULK_AES, 32, 20, 16, 0 },
+	{ XSSL_RSA_WITH_AES_128_CBC_SHA, CIPHER_BLOCK, BULK_AES, 16, 20, 16, 0 },
+	{ XSSL_RSA_WITH_3DES_EDE_CBC_SHA, CIPHER_BLOCK, BULK_3DES, 24, 20, 8, 0 },
+	{ XSSL_RSA_WITH_RC4_128_SHA, CIPHER_STREAM, BULK_RC4, 16, 20, 0, 0 },
+	{ XSSL_RSA_WITH_RC4_128_MD5, CIPHER_STREAM, BULK_RC4, 16, 16, 0, 0 },
 };
 
 static char label_client_finished[] = "client finished";
@@ -213,21 +212,21 @@ typedef struct _tls12_cipher_context{
 	sha256_context sha2;
 }tls12_cipher_context;
 
-#define IS_DHE_CIPHER(cipher) ((cipher == SSL_DHE_RSA_WITH_AES_256_CBC_SHA256 || \
-								cipher == SSL_DHE_RSA_WITH_AES_256_CBC_SHA || \
-								cipher == SSL_DHE_RSA_WITH_AES_128_CBC_SHA256 || \
-								cipher == SSL_DHE_RSA_WITH_AES_128_CBC_SHA || \
-								cipher == SSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA) ? 1 : 0)
+#define IS_DHE_CIPHER(cipher) ((cipher == XSSL_DHE_RSA_WITH_AES_256_CBC_SHA256 || \
+								cipher == XSSL_DHE_RSA_WITH_AES_256_CBC_SHA || \
+								cipher == XSSL_DHE_RSA_WITH_AES_128_CBC_SHA256 || \
+								cipher == XSSL_DHE_RSA_WITH_AES_128_CBC_SHA || \
+								cipher == XSSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA) ? 1 : 0)
 
-#define IS_ECDHE_CIPHER(cipher) ((cipher == SSL_ECDHE_RSA_WITH_AES_128_GCM_SHA256 || \
-								cipher == SSL_ECDHE_RSA_WITH_AES_128_CBC_SHA256 || \
-								cipher == SSL_ECDHE_RSA_WITH_AES_256_CBC_SHA || \
-								cipher == SSL_ECDHE_RSA_WITH_AES_128_CBC_SHA || \
-								cipher == SSL_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA)? 1 : 0)
+#define IS_ECDHE_CIPHER(cipher) ((cipher == XSSL_ECDHE_RSA_WITH_AES_128_GCM_SHA256 || \
+								cipher == XSSL_ECDHE_RSA_WITH_AES_128_CBC_SHA256 || \
+								cipher == XSSL_ECDHE_RSA_WITH_AES_256_CBC_SHA || \
+								cipher == XSSL_ECDHE_RSA_WITH_AES_128_CBC_SHA || \
+								cipher == XSSL_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA)? 1 : 0)
 
-#define IS_AEAD_CIPHER(cipher) ((cipher == SSL_ECDHE_RSA_WITH_AES_128_GCM_SHA256)? 1 : 0)
+#define IS_AEAD_CIPHER(cipher) ((cipher == XSSL_ECDHE_RSA_WITH_AES_128_GCM_SHA256)? 1 : 0)
 
-#define IS_GCM_CIPHER(cipher) ((cipher == SSL_ECDHE_RSA_WITH_AES_128_GCM_SHA256)? 1 : 0)
+#define IS_GCM_CIPHER(cipher) ((cipher == XSSL_ECDHE_RSA_WITH_AES_128_GCM_SHA256)? 1 : 0)
 /***********************************************************************************************************************************/
 
 static void _ssl_set_error(int errcode)
@@ -418,32 +417,32 @@ static void _ssl_derive_keys(tls12_cipher_context* pcip, byte_t* premaster, int 
 	//initialize encrypt and decrypt context
 	switch (pcip->cipher)
 	{
-	case SSL_RSA_WITH_RC4_128_MD5:
-	case SSL_RSA_WITH_RC4_128_SHA:
+	case XSSL_RSA_WITH_RC4_128_MD5:
+	case XSSL_RSA_WITH_RC4_128_SHA:
 		arc4_setup((arc4_context *)pcip->ctx_enc, key_enc, pcip->key_size); //the material size is bytes
 		arc4_setup((arc4_context *)pcip->ctx_dec, key_dec, pcip->key_size); //the material size is bytes
 		break;
-	case SSL_RSA_WITH_3DES_EDE_CBC_SHA:
-	case SSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA:
-	case SSL_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA:
+	case XSSL_RSA_WITH_3DES_EDE_CBC_SHA:
+	case XSSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA:
+	case XSSL_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA:
 		des3_set3key_enc((des3_context *)pcip->ctx_enc, key_enc); //the material size is 24 bytes
 		des3_set3key_dec((des3_context *)pcip->ctx_dec, key_dec); //the material size is 24 bytes
 		break;
-	case SSL_RSA_WITH_AES_128_CBC_SHA:
-	case SSL_RSA_WITH_AES_256_CBC_SHA:
-	case SSL_RSA_WITH_AES_128_CBC_SHA256:
-	case SSL_RSA_WITH_AES_256_CBC_SHA256:
-	case SSL_DHE_RSA_WITH_AES_128_CBC_SHA:
-	case SSL_DHE_RSA_WITH_AES_256_CBC_SHA:
-	case SSL_DHE_RSA_WITH_AES_256_CBC_SHA256:
-	case SSL_DHE_RSA_WITH_AES_128_CBC_SHA256:
-	case SSL_ECDHE_RSA_WITH_AES_128_CBC_SHA256:
-	case SSL_ECDHE_RSA_WITH_AES_256_CBC_SHA:
-	case SSL_ECDHE_RSA_WITH_AES_128_CBC_SHA:
+	case XSSL_RSA_WITH_AES_128_CBC_SHA:
+	case XSSL_RSA_WITH_AES_256_CBC_SHA:
+	case XSSL_RSA_WITH_AES_128_CBC_SHA256:
+	case XSSL_RSA_WITH_AES_256_CBC_SHA256:
+	case XSSL_DHE_RSA_WITH_AES_128_CBC_SHA:
+	case XSSL_DHE_RSA_WITH_AES_256_CBC_SHA:
+	case XSSL_DHE_RSA_WITH_AES_256_CBC_SHA256:
+	case XSSL_DHE_RSA_WITH_AES_128_CBC_SHA256:
+	case XSSL_ECDHE_RSA_WITH_AES_128_CBC_SHA256:
+	case XSSL_ECDHE_RSA_WITH_AES_256_CBC_SHA:
+	case XSSL_ECDHE_RSA_WITH_AES_128_CBC_SHA:
 		aes_setkey_enc((aes_context *)pcip->ctx_enc, key_enc, (pcip->key_size * 8)); //the material size is bits
 		aes_setkey_dec((aes_context *)pcip->ctx_dec, key_dec, (pcip->key_size * 8)); //the material size is bits
 		break;
-	case SSL_ECDHE_RSA_WITH_AES_128_GCM_SHA256:
+	case XSSL_ECDHE_RSA_WITH_AES_128_GCM_SHA256:
 		gcm_setkey((gcm_context *)pcip->ctx_enc, key_enc, (pcip->key_size * 8));
 		gcm_setkey((gcm_context *)pcip->ctx_dec, key_dec, (pcip->key_size * 8));
 		break;
@@ -3159,7 +3158,7 @@ static tls12_handshake_states _ssl_write_server_key_exchange(ssl_context *pssl)
 		if (!psec->ecdh_ctx)
 		{
 			psec->ecdh_ctx = (ecdh_context*)xmem_alloc(sizeof(ecdh_context));
-			pec = ecp_curve_info_from_tls_id(TLS_EC_GROUP_SECP256R1);
+			pec = ecp_curve_info_from_tls_id(XTLS_EC_GROUP_SECP256R1);
 			if (!pec)
 			{
 				_ssl_set_error(pses->alert_code = SSL_ALERT_ILLEGAL_PARAMETER);

@@ -39,6 +39,9 @@ typedef struct _print_delta_t{
 
 	res_win_t hsc;
 	res_win_t vsc;
+
+	xfont_t xf;
+	xface_t xa;
 }print_delta_t;
 
 #define GETPRINTDELTA(ph) 		(print_delta_t*)widget_get_user_delta(ph)
@@ -51,17 +54,12 @@ static int _printbox_calc_pages(res_win_t widget)
 
 	xrect_t xr;
 	int pages = 0;
-	xfont_t xf = { 0 };
-	xface_t xa = { 0 };
 
 	canvas_t canv;
 	const drawing_interface* pif = NULL;
 
 	canv = widget_get_canvas(widget);
 	pif = widget_get_canvas_interface(widget);
-
-	widget_get_xface(widget, &xa);
-	widget_get_xfont(widget, &xf);
 
 	if (is_form_doc(ptd->sheet))
 	{
@@ -77,14 +75,12 @@ static int _printbox_calc_pages(res_win_t widget)
 	}
 	else if (is_rich_doc(ptd->sheet))
 	{
-		pages = calc_rich_pages(pif, &xf, &xa, &xr, ptd->sheet);
+		pages = calc_rich_pages(pif, &ptd->xf, &ptd->xa, &xr, ptd->sheet);
 	}
 	else if (is_memo_doc(ptd->sheet))
 	{
-		pages = calc_rich_pages(pif, &xf, &xa, &xr, ptd->sheet);
+		pages = calc_rich_pages(pif, &ptd->xf, &ptd->xa, &xr, ptd->sheet);
 	}
-
-	
 
 	return pages;
 }
@@ -153,6 +149,9 @@ int hand_print_create(res_win_t widget, void* data)
 
 	ptd = (print_delta_t*)xmem_alloc(sizeof(print_delta_t));
 	xmem_zero((void*)ptd, sizeof(print_delta_t));
+
+	default_widget_xfont(&ptd->xf);
+	default_widget_xface(&ptd->xa);
 
 	SETPRINTDELTA(widget, ptd);
 
@@ -294,39 +293,49 @@ void hand_print_wheel(res_win_t widget, bool_t bHorz, int nDelta)
 	}
 }
 
+void hand_print_xfont(res_win_t widget, const xfont_t* pxf)
+{
+	print_delta_t* ptd = GETPRINTDELTA(widget);
+
+	XDK_ASSERT(ptd != NULL);
+
+	xmem_copy((void*)&ptd->xf, (void*)pxf, sizeof(xfont_t));
+}
+
+void hand_print_xface(res_win_t widget, const xface_t* pxa)
+{
+	print_delta_t* ptd = GETPRINTDELTA(widget);
+
+	XDK_ASSERT(ptd != NULL);
+
+	xmem_copy((void*)&ptd->xa, (void*)pxa, sizeof(xface_t));
+}
+
 void hand_print_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 {
 	print_delta_t* ptd = GETPRINTDELTA(widget);
 	visual_t rdc;
-	xfont_t xf = { 0 };
-	xface_t xa = { 0 };
-	xbrush_t xb = { 0 };
-	xpen_t xp = { 0 };
-	xcolor_t xc = { 0 };
+
 	xrect_t xr = { 0 };
 
 	canvas_t canv;
 	const drawing_interface* pif = NULL;
 	drawing_interface ifv = {0};
 
-	if (!ptd->sheet)
-		return;
+	clr_mod_t clrs;
+	xbrush_t xb;
+	xcolor_t xc;
 
-	widget_get_xfont(widget, &xf);
-	widget_get_xface(widget, &xa);
-	widget_get_xbrush(widget, &xb);
-	widget_get_xpen(widget, &xp);
+	if (!ptd->sheet) return;
+
+	widget_get_color_mode(widget, &clrs);
+	default_xbrush(&xb);
+	format_xcolor(&clrs.clr_bkg, xb.color);
+	xmem_copy((void*)&xc, (void*)&clrs.clr_frg, sizeof(xcolor_t));
 
 	canv = widget_get_canvas(widget);
 
 	pif = widget_get_canvas_interface(widget);
-	
-
-	
-	
-	
-	
-	
 
 	widget_get_client_rect(widget, &xr);
 
@@ -338,7 +347,6 @@ void hand_print_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 
 	if (widget_can_paging(widget))
 	{
-		parse_xcolor(&xc, xp.color);
 		lighten_xcolor(&xc, DEF_HARD_DARKEN);
 
 		draw_corner(pif, &xc, (const xrect_t*)&(pif->rect));
@@ -360,25 +368,22 @@ void hand_print_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 		}
 		else if (is_rich_doc(ptd->sheet))
 		{
-			draw_rich_text(pif, &xf, &xa, (xrect_t*)&(pif->rect), ptd->sheet, ptd->page);
+			draw_rich_text(pif, &ptd->xf, &ptd->xa, (xrect_t*)&(pif->rect), ptd->sheet, ptd->page);
 		}
 		else if (is_memo_doc(ptd->sheet))
 		{
-			draw_memo_text(pif, &xf, &xa, (xrect_t*)&(pif->rect), ptd->sheet, ptd->page);
+			draw_memo_text(pif, &ptd->xf, &ptd->xa, (xrect_t*)&(pif->rect), ptd->sheet, ptd->page);
 		}
 	}
 
-	
-
 	end_canvas_paint(canv, dc, pxr);
-	
 }
 
 /*****************************************************************************************************/
 
 res_win_t printbox_create(res_win_t widget, dword_t style, const xrect_t* pxr)
 {
-	if_event_t ev = { 0 };
+	if_dispatch_t ev = { 0 };
 
 	EVENT_BEGIN_DISPATH(&ev)
 
@@ -397,6 +402,9 @@ res_win_t printbox_create(res_win_t widget, dword_t style, const xrect_t* pxr)
 		EVENT_ON_LBUTTON_UP(hand_print_lbutton_up)
 		EVENT_ON_RBUTTON_DOWN(hand_print_rbutton_down)
 		EVENT_ON_RBUTTON_UP(hand_print_rbutton_up)
+
+		EVENT_ON_XFONT(hand_print_xfont)
+		EVENT_ON_XFACE(hand_print_xface)
 
 		EVENT_ON_NC_IMPLEMENT
 
@@ -443,7 +451,7 @@ void printbox_redraw(res_win_t widget)
 
 	_printbox_reset_page(widget);
 
-	widget_update(widget);
+	widget_paint(widget);
 }
 
 void printbox_move_prev_page(res_win_t widget)

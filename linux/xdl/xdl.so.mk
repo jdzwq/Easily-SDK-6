@@ -1,15 +1,31 @@
+#-----------------------------------------------------------------------------
+# begin GNU MAKE file
+# making order:
+# 1. nmake /f xdl.so.mk test --if need to creating some directory or file-list
+# 2. nmake /f xdl.so.mk clean
+# 3. nmake /f xdl.so.mk
+# 4. nmake /f xdl.so.mk install
+#-----------------------------------------------------------------------------
 CC = gcc
-CFLAGS = -g -Wall -fPIC
+CFLAGS = -g -Wall -fPIC -D _DEBUG
+LFLAGS = -shared -fPIC -pthread
+
+MODULE = xdl
+ARCH = aarch64
+VER = 6.0
 
 SRV_PATH = /usr/local/xService
 LNK_PATH = /usr/local/lib
 
-VER = 6.0
 INC_PATH = ../../include
 SRC_PATH = ../../xdl
-OUT_PATH = ~/Easily-app-6/linux/sbin/api
+OUT_PATH = ../../../Easily-app-6/linux/sbin/api
+OBJ_PATH = ../../../Easily-tmp/linux/$(MODULE)/$(ARCH)
 
-LIBS = -lm -L $(LNK_PATH) -lxdk
+TARGET = lib$(MODULE).so.$(VER)
+LINKIT = lib$(MODULE).so
+
+LIBS = -L $(LNK_PATH) -lxdk -lxgc
 DIRS = $(wildcard \
 	$(SRC_PATH)/*.c \
 	$(SRC_PATH)/linux/*.c \
@@ -26,79 +42,85 @@ DIRS = $(wildcard \
 	$(SRC_PATH)/view/*.c \
 	$(SRC_PATH)/xdb/*.c)
 SRCS = $(notdir $(DIRS))
-OBJS = $(patsubst %.c, %.o, $(SRCS))
-MODULE = libxdl.so
-TARGET = $(OUT_PATH)/$(MODULE).$(VER)
+COBS = $(patsubst %.c, %.o, $(SRCS))
+OBJS = $(addprefix $(OBJ_PATH)/,$(COBS))
 
-%.o : $(SRC_PATH)/%.c
+$(OBJ_PATH)/%.o : $(SRC_PATH)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
 
-%.o : $(SRC_PATH)/linux/%.c
+$(OBJ_PATH)/%.o : $(SRC_PATH)/linux/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
 
-%.o : $(SRC_PATH)/bag/%.c
+$(OBJ_PATH)/%.o : $(SRC_PATH)/bag/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
 
-%.o : $(SRC_PATH)/bio/%.c
+$(OBJ_PATH)/%.o : $(SRC_PATH)/bio/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
 
-%.o : $(SRC_PATH)/doc/%.c
+$(OBJ_PATH)/%.o : $(SRC_PATH)/doc/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
 
-%.o : $(SRC_PATH)/gdi/%.c
+$(OBJ_PATH)/%.o : $(SRC_PATH)/gdi/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
 
-%.o : $(SRC_PATH)/hint/%.c
+$(OBJ_PATH)/%.o : $(SRC_PATH)/hint/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
 
-%.o : $(SRC_PATH)/ing/%.c
+$(OBJ_PATH)/%.o : $(SRC_PATH)/ing/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
 
-%.o : $(SRC_PATH)/mis/%.c
+$(OBJ_PATH)/%.o : $(SRC_PATH)/mis/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
 
-%.o : $(SRC_PATH)/par/%.c
+$(OBJ_PATH)/%.o : $(SRC_PATH)/par/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
 
-%.o : $(SRC_PATH)/scan/%.c
+$(OBJ_PATH)/%.o : $(SRC_PATH)/scan/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
 
-%.o : $(SRC_PATH)/tio/%.c
+$(OBJ_PATH)/%.o : $(SRC_PATH)/tio/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
 
-%.o : $(SRC_PATH)/view/%.c
+$(OBJ_PATH)/%.o : $(SRC_PATH)/view/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
 
-%.o : $(SRC_PATH)/xdb/%.c
+$(OBJ_PATH)/%.o : $(SRC_PATH)/xdb/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
 
 all : $(OBJS)
 	rm -f $@
-	$(CC) -shared -fPIC -pthread -o $(TARGET) $(OBJS) $(LIBS)
-	rm -f $(OBJS)
+	$(CC) $(LFLAGS) -o $(OUT_PATH)/$(TARGET) $(OBJS) $(LIBS)
+#	rm -f $(OBJS)
 
 test:
+	if ! test -d $(OBJ_PATH); then \
+	mkdir -p $(OBJ_PATH); \
+	chmod 755 $(OBJ_PATH); \
+	fi
 	@echo $(DIRS)
 	@echo $(SRCS)
 	@echo $(OBJS)
 
 install:
-	if ! test -d $(SRV_PATH); then \
-	sudo mkdir $(SRV_PATH); \
-	fi
 	if ! test -d $(SRV_PATH)/api; then \
-	sudo mkdir $(SRV_PATH)/api; \
+	sudo mkdir -p $(SRV_PATH); \
+	fi
+	if ! test -d $(LNK_PATH); then \
+	sudo mkdir $(LNK_PATH); \
 	fi
 
-	sudo cp -f $(TARGET) $(SRV_PATH)/api;
-	sudo chmod +x $(SRV_PATH)/api/$(MODULE).$(VER);
-	sudo rm -f $(LNK_PATH)/libxdl*;
-	sudo ln -bs $(SRV_PATH)/api/$(MODULE).$(VER) $(LNK_PATH)/$(MODULE);
+	sudo cp -f $(OUT_PATH)/$(TARGET) $(SRV_PATH)/api;
+	sudo chmod 755 $(SRV_PATH)/api/$(TARGET);
+	sudo rm -f $(LNK_PATH)/$(LINKIT);
+	sudo ln -s $(SRV_PATH)/api/$(TARGET) $(LNK_PATH)/$(LINKIT);
 
 uninstall:
-	sudo rm -r $(LNK_PATH)/$(MODULE)*;
-	sudo rm -f $(SRV_PATH)/api/$(MODULE).$(VER)
+	sudo rm -r $(LNK_PATH)/$(LINKIT);
+	sudo rm -f $(SRV_PATH)/api/$(TARGET)
 	
 .PHONY : clean
 clean:
-	-rm -f $(OBJS)
+	rm -f $(OBJS)
+#-----------------------------------------------------------------------------
+# end microsoft NMAKE file
+#-----------------------------------------------------------------------------

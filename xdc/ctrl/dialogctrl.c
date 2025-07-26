@@ -867,7 +867,7 @@ void hand_dialog_lbutton_down(res_win_t widget, const xpoint_t* pxp)
 	switch (nHint)
 	{
 	case DIALOG_HINT_ITEM:
-		if (widget_key_state(widget, KEY_CONTROL))
+		if (widget_key_state(widget, KS_WITH_CONTROL))
 		{
 			noti_dialog_item_selected(widget, ilk);
 		}
@@ -967,7 +967,7 @@ void hand_dialog_keydown(res_win_t widget, dword_t ks, int nKey)
 
 	if ((nKey == KEY_UP || nKey == KEY_DOWN || nKey == KEY_LEFT || nKey == KEY_RIGHT))
 	{
-		ks = widget_key_state(widget, KEY_SHIFT);
+		ks = widget_key_state(widget, KS_WITH_SHIFT);
 		m = 1;
 
 		if (ks)
@@ -1034,15 +1034,15 @@ void hand_dialog_keydown(res_win_t widget, dword_t ks, int nKey)
 		else
 			noti_dialog_owner(widget, NC_DIALOGITEMDROP, ptd->dialog, ptd->item, NULL);
 	}
-	else if ((nKey == _T('z') || nKey == _T('Z')) && widget_key_state(widget, KEY_CONTROL))
+	else if ((nKey == _T('z') || nKey == _T('Z')) && widget_key_state(widget, KS_WITH_CONTROL))
 	{
 		_dialogctrl_undo(widget);
 	}
-	else if ((nKey == _T('c') || nKey == _T('C')) && widget_key_state(widget, KEY_CONTROL))
+	else if ((nKey == _T('c') || nKey == _T('C')) && widget_key_state(widget, KS_WITH_CONTROL))
 	{
 		_dialogctrl_copy(widget);
 	}
-	else if ((nKey == _T('x') || nKey == _T('X')) && widget_key_state(widget, KEY_CONTROL))
+	else if ((nKey == _T('x') || nKey == _T('X')) && widget_key_state(widget, KS_WITH_CONTROL))
 	{
 		_dialogctrl_done(widget);
 
@@ -1051,7 +1051,7 @@ void hand_dialog_keydown(res_win_t widget, dword_t ks, int nKey)
 			_dialogctrl_discard(widget);
 		}
 	}
-	else if ((nKey == _T('v') || nKey == _T('V')) && widget_key_state(widget, KEY_CONTROL))
+	else if ((nKey == _T('v') || nKey == _T('V')) && widget_key_state(widget, KS_WITH_CONTROL))
 	{
 		_dialogctrl_done(widget);
 
@@ -1060,14 +1060,6 @@ void hand_dialog_keydown(res_win_t widget, dword_t ks, int nKey)
 			_dialogctrl_discard(widget);
 		}
 	}
-}
-
-void hand_dialog_char(res_win_t widget, tchar_t nChar)
-{
-	dialog_delta_t* ptd = GETDIALOGDELTA(widget);
-
-	if (!ptd->dialog)
-		return;
 }
 
 void hand_dialog_notice(res_win_t widget, NOTICE* pnt)
@@ -1082,10 +1074,6 @@ void hand_dialog_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 {
 	dialog_delta_t* ptd = GETDIALOGDELTA(widget);
 	xrect_t xr = { 0 };
-	xfont_t xf = { 0 };
-	xbrush_t xb = { 0 };
-	xpen_t xp = { 0 };
-	xcolor_t xc = { 0 };
 	visual_t rdc;
 	link_t_ptr ilk;
 
@@ -1093,12 +1081,18 @@ void hand_dialog_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 	const drawing_interface* pif = NULL;
 	drawing_interface ifv = {0};
 
-	if (!ptd->dialog)
-		return;
+	clr_mod_t clrs;
+	xbrush_t xb;
+	xpen_t xp;
+	xcolor_t xc;
 
-	widget_get_xfont(widget, &xf);
-	widget_get_xbrush(widget, &xb);
-	widget_get_xpen(widget, &xp);
+	if (!ptd->dialog) return;
+
+	widget_get_color_mode(widget, &clrs);
+	default_xbrush(&xb);
+	format_xcolor(&clrs.clr_bkg, xb.color);
+	default_xpen(&xp);
+	format_xcolor(&clrs.clr_frg, &xp.color);
 
 	canv = widget_get_canvas(widget);
 	pif = widget_get_canvas_interface(widget);
@@ -1111,11 +1105,8 @@ void hand_dialog_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 
 	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
 
-	widget_get_xbrush(widget, &xb);
-	widget_get_xpen(widget, &xp);
-
 	draw_dialog(pif, ptd->dialog);
-
+	
 	//draw focus
 	if (ptd->item)
 	{
@@ -1182,7 +1173,7 @@ void hand_dialog_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 
 res_win_t dialogctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, res_win_t wparent)
 {
-	if_event_t ev = { 0 };
+	if_dispatch_t ev = { 0 };
 
 	EVENT_BEGIN_DISPATH(&ev)
 
@@ -1196,7 +1187,6 @@ res_win_t dialogctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t*
 		EVENT_ON_SCROLL(hand_dialog_scroll)
 
 		EVENT_ON_KEYDOWN(hand_dialog_keydown)
-		EVENT_ON_CHAR(hand_dialog_char)
 
 		EVENT_ON_MOUSE_MOVE(hand_dialog_mouse_move)
 		EVENT_ON_MOUSE_HOVER(hand_dialog_mouse_hover)
@@ -1289,7 +1279,7 @@ void dialogctrl_redraw(res_win_t widget)
 
 	_dialogctrl_reset_page(widget);
 
-	widget_update(widget);
+	widget_paint(widget);
 }
 
 void dialogctrl_redraw_item(res_win_t widget, link_t_ptr ilk)

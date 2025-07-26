@@ -31,7 +31,6 @@ LICENSE.GPL3 for more details.
 
 #include "optparser.h"
 
-#include "../xdkimp.h"
 #include "../xdkstd.h"
 
 int parse_options(const tchar_t* str, int len, tchar_t itemfeed, tchar_t linefeed, void* param, PF_OPTIONS_PARSE pf_parse)
@@ -123,7 +122,7 @@ int parse_options(const tchar_t* str, int len, tchar_t itemfeed, tchar_t linefee
 int format_options(tchar_t* buf, int max, tchar_t itemfeed, tchar_t linefeed, void* param, PF_OPTIONS_FORMAT pf_format)
 {
 	int total = 0;
-	tchar_t *key, *val;
+	const tchar_t *key, *val;
 	int klen, vlen;
 
 	key = val = NULL;

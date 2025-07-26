@@ -26,12 +26,11 @@ LICENSE.GPL3 for more details.
 
 #include "impmbcs.h"
 
-#include "../xdkimp.h"
 #include "../xdkstd.h"
 
 #ifdef XDK_SUPPORT_MBCS
 
-int gbk_code_sequence(byte_t b)
+int sys_gbk_code_sequence(byte_t b)
 {
 	if ((b & ~0x7F) == 0)
 		return 1;
@@ -42,7 +41,7 @@ int gbk_code_sequence(byte_t b)
 	return 2;
 }
 
-int gbk_byte_to_ucs(const byte_t* src, wchar_t* dest)
+int sys_gbk_byte_to_ucs(const byte_t* src, wchar_t* dest)
 {
 	if_mbcs_t* pif;
 	int cs;
@@ -51,12 +50,12 @@ int gbk_byte_to_ucs(const byte_t* src, wchar_t* dest)
 
 	XDK_ASSERT(pif != NULL);
 
-	cs = gbk_code_sequence(*src);
+	cs = sys_gbk_code_sequence(*src);
 
 	return (*pif->pf_gbk_to_ucs)((schar_t*)src, cs, dest, 1);
 }
 
-int gbk_to_ucs(const byte_t* src, dword_t slen, wchar_t* dest, int dlen)
+int sys_gbk_to_ucs(const byte_t* src, dword_t slen, wchar_t* dest, int dlen)
 {
 	if_mbcs_t* pif;
 
@@ -67,7 +66,7 @@ int gbk_to_ucs(const byte_t* src, dword_t slen, wchar_t* dest, int dlen)
 	return (*pif->pf_gbk_to_ucs)((schar_t*)src, slen, dest, dlen);
 }
 
-int ucs_byte_to_gbk(wchar_t ch, byte_t* buf)
+int sys_ucs_byte_to_gbk(wchar_t ch, byte_t* buf)
 {
 	if_mbcs_t* pif;
 
@@ -78,7 +77,7 @@ int ucs_byte_to_gbk(wchar_t ch, byte_t* buf)
 	return (*pif->pf_ucs_to_gbk)(&ch, 1, buf, 2);
 }
 
-int ucs_to_gbk(const wchar_t* src, int slen, byte_t* dest, dword_t dlen)
+int sys_ucs_to_gbk(const wchar_t* src, int slen, byte_t* dest, dword_t dlen)
 {
 	if_mbcs_t* pif;
 
@@ -96,7 +95,7 @@ int ucs_to_gbk(const wchar_t* src, int slen, byte_t* dest, dword_t dlen)
 	return (*pif->pf_ucs_to_gbk)(src, slen, dest, dlen);
 }
 
-int utf_code_sequence(byte_t b)
+int sys_utf_code_sequence(byte_t b)
 {
 	if (b == 0xFF) //_UTF16_LIT
 		return 2;
@@ -122,7 +121,7 @@ int utf_code_sequence(byte_t b)
 	return 1;
 }
 
-int utf_byte_to_ucs(const byte_t* src, wchar_t* dest)
+int sys_utf_byte_to_ucs(const byte_t* src, wchar_t* dest)
 {
 	if_mbcs_t* pif;
 	int cs;
@@ -131,12 +130,12 @@ int utf_byte_to_ucs(const byte_t* src, wchar_t* dest)
 
 	XDK_ASSERT(pif != NULL);
 
-	cs = utf_code_sequence(*src);
+	cs = sys_utf_code_sequence(*src);
 
 	return (*pif->pf_utf_to_ucs)((schar_t*)src, cs, dest, 1);
 }
 
-int utf_to_ucs(const byte_t* src, dword_t slen, wchar_t* dest, int dlen)
+int sys_utf_to_ucs(const byte_t* src, dword_t slen, wchar_t* dest, int dlen)
 {
 	if_mbcs_t* pif;
 
@@ -147,7 +146,7 @@ int utf_to_ucs(const byte_t* src, dword_t slen, wchar_t* dest, int dlen)
 	return (*pif->pf_utf_to_ucs)((schar_t*)src, slen, dest, dlen);
 }
 
-int ucs_byte_to_utf(wchar_t ch, byte_t* buf)
+int sys_ucs_byte_to_utf(wchar_t ch, byte_t* buf)
 {
 	if_mbcs_t* pif;
 
@@ -158,7 +157,7 @@ int ucs_byte_to_utf(wchar_t ch, byte_t* buf)
 	return (*pif->pf_ucs_to_utf)(&ch, 1, buf, 3);
 }
 
-int ucs_to_utf(const wchar_t* src, int slen, byte_t* dest, dword_t dlen)
+int sys_ucs_to_utf(const wchar_t* src, int slen, byte_t* dest, dword_t dlen)
 {
 	if_mbcs_t* pif;
 

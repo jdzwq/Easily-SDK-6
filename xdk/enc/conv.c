@@ -26,13 +26,15 @@ LICENSE.GPL3 for more details.
 
 #include "conv.h"
 
-#include "../xdkimp.h"
 #include "../xdkstd.h"
-#include "../xdkoem.h"
 
-bool_t is_ascii(byte_t b)
+bool_t is_ascii(tchar_t c)
 {
-	return ((b & ~0x7F) == 0) ? 1 : 0;
+#if defined(_UNICODE) || defined(UNICODE)
+	return (((unsigned short)c & ~0x007F) == 0) ? 1 : 0;
+#else
+	return ((c & ~0x7F) == 0) ? 1 : 0;
+#endif
 }
 
 int ascii_byte_to_unicode(char b, wchar_t* c)
@@ -137,27 +139,27 @@ int ucs_index(wchar_t wc)
 dword_t gb2312_sequence(byte_t b)
 {
 #ifdef XDK_SUPPORT_MBCS
-	return (dword_t)gbk_code_sequence(b);
+	return (dword_t)sys_gbk_code_sequence(b);
 #else
-	return (dword_t)gb2312_code_sequence(b);
+	return (dword_t)acp_gb2312_code_sequence(b);
 #endif
 }
 
 int gb2312_byte_to_ucs(const byte_t* src, wchar_t* dest)
 {
 #ifdef XDK_SUPPORT_MBCS
-	return gbk_byte_to_ucs(src, dest);
+	return sys_gbk_byte_to_ucs(src, dest);
 #else
-	return gb2312_byte_to_unicode((unsigned char*)src, (unsigned short*)dest);
+	return acp_gb2312_byte_to_unicode(src, dest);
 #endif
 }
 
 int gb2312_to_ucs(const byte_t* src, dword_t slen, wchar_t* dest, int dlen)
 {
 #ifdef XDK_SUPPORT_MBCS
-	return gbk_to_ucs(src, slen, dest, dlen);
+	return sys_gbk_to_ucs(src, slen, dest, dlen);
 #else
-	return gb2312_to_unicode(src, slen, dest, dlen);
+	return acp_gb2312_to_unicode(src, slen, dest, dlen);
 #endif
 }
 
@@ -231,7 +233,7 @@ dword_t gb2312_byte_to_utf8(const byte_t* src, byte_t* dest)
 dword_t gb2312_to_utf8(const byte_t* src, dword_t slen, byte_t* dest, dword_t dlen)
 {
 	dword_t i, total = 0;
-	wchar_t ch;
+	wchar_t pch[2];
 
 	i = 0;
 	while (i < slen)
@@ -239,10 +241,10 @@ dword_t gb2312_to_utf8(const byte_t* src, dword_t slen, byte_t* dest, dword_t dl
 		if (total >= dlen)
 			break;
 
-		gb2312_byte_to_ucs(src + i, &ch);
+		gb2312_byte_to_ucs(src + i, pch);
 		i += gb2312_sequence(*(src + i));
 
-		total += ucs_byte_to_utf8(ch, ((dest) ? (dest + total) : NULL));
+		total += ucs_byte_to_utf8(pch[0], ((dest) ? (dest + total) : NULL));
 	}
 
 	return total;
@@ -327,18 +329,18 @@ int gb2312_to_mbs(const byte_t* src, dword_t slen, schar_t* dest, int dlen)
 dword_t utf8_sequence(byte_t b)
 {
 #ifdef XDK_SUPPORT_MBCS
-	return (dword_t)utf_code_sequence(b);
+	return (dword_t)sys_utf_code_sequence(b);
 #else
-	return (dword_t)utf8_code_sequence(b);
+	return (dword_t)acp_utf8_code_sequence(b);
 #endif
 }
 
 int utf8_byte_to_ucs(const byte_t* src, wchar_t* dest)
 {
 #ifdef XDK_SUPPORT_MBCS
-	return utf_byte_to_ucs(src, dest);
+	return sys_utf_byte_to_ucs(src, dest);
 #else
-	return utf8_byte_to_unicode(src, dest);
+	return acp_utf8_byte_to_unicode(src, dest);
 #endif
 }
 
@@ -430,7 +432,7 @@ dword_t utf8_byte_to_gb2312(const byte_t* src, byte_t* dest)
 dword_t utf8_to_gb2312(const byte_t* src, dword_t slen, byte_t* dest, dword_t dlen)
 {
 	dword_t i, total = 0;
-	wchar_t ch;
+	wchar_t pch[2] = {0};
 
 	i = 0;
 	while (i < slen)
@@ -438,10 +440,10 @@ dword_t utf8_to_gb2312(const byte_t* src, dword_t slen, byte_t* dest, dword_t dl
 		if (total >= dlen)
 			break;
 
-		utf8_byte_to_ucs(src + i, &ch);
+		utf8_byte_to_ucs(src + i, pch);
 		i += utf8_sequence(*(src + i));
 
-		total += ucs_byte_to_gb2312(ch, ((dest) ? (dest + total) : NULL));
+		total += ucs_byte_to_gb2312(pch[0], ((dest) ? (dest + total) : NULL));
 	}
 
 	return total;
@@ -831,27 +833,27 @@ dword_t ucs_sequence(wchar_t ch)
 dword_t ucs_byte_to_gb2312(wchar_t ch, byte_t* dest)
 {
 #ifdef XDK_SUPPORT_MBCS
-	return (dword_t)ucs_byte_to_gbk(ch, dest);
+	return (dword_t)sys_ucs_byte_to_gbk(ch, dest);
 #else
-	return (dword_t)unicode_byte_to_gb2312(ch, dest);
+	return (dword_t)acp_unicode_byte_to_gb2312(ch, dest);
 #endif
 }
 
 dword_t ucs_to_gb2312(const wchar_t* src, int slen, byte_t* dest, dword_t dlen)
 {
 #ifdef XDK_SUPPORT_MBCS
-	return (dword_t)ucs_to_gbk(src, slen, dest, dlen);
+	return (dword_t)sys_ucs_to_gbk(src, slen, dest, dlen);
 #else
-	return (dword_t)unicode_to_gb2312(src, slen, dest, dlen);
+	return (dword_t)acp_unicode_to_gb2312(src, slen, dest, dlen);
 #endif
 }
 
 dword_t ucs_byte_to_utf8(wchar_t ch, byte_t* dest)
 {
 #ifdef XDK_SUPPORT_MBCS
-	return ucs_byte_to_utf(ch, dest);
+	return sys_ucs_byte_to_utf(ch, dest);
 #else
-	return unicode_byte_to_utf8(ch, dest);
+	return acp_unicode_byte_to_utf8(ch, dest);
 #endif
 }
 

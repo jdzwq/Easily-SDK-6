@@ -26,8 +26,8 @@ LICENSE.GPL3 for more details.
 
 #include "stacktable.h"
 
-#include "../xdkimp.h"
 #include "../xdkstd.h"
+#include "../xdkobj.h"
 
 #define STACKTABLE_INC		32
 
@@ -86,7 +86,7 @@ void push_stack_node(link_t_ptr st, void* data)
 	if (pst->index + 1 == pst->size)
 	{
 		pst->size += STACKTABLE_INC;
-		pst->pset = xmem_realloc(pst->pset, sizeof(void*) * pst->size);
+		pst->pset = (void**)xmem_realloc(&(pst->pset[0]), sizeof(void*) * pst->size);
 	}
 
 	pst->pset[pst->index + 1] = data;
@@ -109,7 +109,7 @@ void* pop_stack_node(link_t_ptr st)
 	if (pst->size - pst->index > STACKTABLE_INC)
 	{
 		pst->size -= STACKTABLE_INC;
-		pst->pset = xmem_realloc(pst->pset, sizeof(void*) * pst->size);
+		pst->pset = (void**)xmem_realloc(&(pst->pset[0]), sizeof(void*) * pst->size);
 	}
 
 	return data;
@@ -135,7 +135,7 @@ void* pick_stack_node(link_t_ptr st)
 	if (pst->size - pst->index > STACKTABLE_INC)
 	{
 		pst->size -= STACKTABLE_INC;
-		pst->pset = xmem_realloc(pst->pset, sizeof(void*) * pst->size);
+		pst->pset = (void**)xmem_realloc(&(pst->pset[0]), sizeof(void*) * pst->size);
 	}
 
 	return data;

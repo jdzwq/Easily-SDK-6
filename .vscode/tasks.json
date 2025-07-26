@@ -1,25 +1,24 @@
 {
     "tasks": [
         {
-            "type": "shell",
-            "label": "C/C++: gcc build active file",
-            "command": "/usr/bin/gcc",
+            "type": "cppbuild",
+            "label": "C/C++: cl.exe build active file",
+            "command": "cl.exe",
             "args": [
-                "-g",
-                "${file}",
-                "-o",
-                "${fileDirname}/${fileBasenameNoExtension}"
+                "/Zi",
+                "/EHsc",
+                "/nologo",
+                "/Fe${fileDirname}\\${fileBasenameNoExtension}.exe",
+                "${file}"
             ],
             "options": {
-                "cwd": "${workspaceFolder}"
+                "cwd": "${fileDirname}"
             },
             "problemMatcher": [
-                "$gcc"
+                "$msCompile"
             ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            }
+            "group": "build",
+            "detail": "compiler: cl.exe"
         }
     ],
     "version": "2.0.0"

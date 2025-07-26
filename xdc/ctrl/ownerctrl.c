@@ -64,7 +64,7 @@ void noti_owner_reset_scroll(res_win_t widget, bool_t bUpdate)
 	if (widget_is_valid(ptd->vsc))
 	{
 		if (bUpdate)
-			widget_update(ptd->vsc);
+			widget_paint(ptd->vsc);
 		else
 			widget_close(ptd->vsc, 0);
 	}
@@ -72,7 +72,7 @@ void noti_owner_reset_scroll(res_win_t widget, bool_t bUpdate)
 	if (widget_is_valid(ptd->hsc))
 	{
 		if (bUpdate)
-			widget_update(ptd->hsc);
+			widget_paint(ptd->hsc);
 		else
 			widget_close(ptd->hsc, 0);
 	}
@@ -259,7 +259,7 @@ void hand_owner_wheel(res_win_t widget, bool_t bHorz, int nDelta)
 			}
 			else
 			{
-				widget_update(ptd->vsc);
+				widget_paint(ptd->vsc);
 			}
 		}
 
@@ -271,7 +271,7 @@ void hand_owner_wheel(res_win_t widget, bool_t bHorz, int nDelta)
 			}
 			else
 			{
-				widget_update(ptd->hsc);
+				widget_paint(ptd->hsc);
 			}
 		}
 
@@ -294,13 +294,17 @@ void hand_owner_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 	canvas_t canv;
 	xrect_t xr = { 0 };
 	viewbox_t vb = { 0 };
-	xbrush_t xb = { 0 };
 
 	drawing_interface ifv = {0};
 
+	clr_mod_t clrs;
+	xbrush_t xb;
+
 	XDK_ASSERT(ptd != NULL);
 
-	widget_get_xbrush(widget, &xb);
+	widget_get_color_mode(widget, &clrs);
+	default_xbrush(&xb);
+	format_xcolor(&clrs.clr_bkg, xb.color);
 	
 	widget_get_client_rect(widget, &xr);
 
@@ -312,8 +316,6 @@ void hand_owner_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 
 	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
 
-	
-
 	widget_get_view_rect(widget, &vb);
 
 	noti_owner_owner(widget, NC_OWNERDRAW, (void*)rdc);
@@ -324,7 +326,7 @@ void hand_owner_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 /************************************************************************************************/
 res_win_t ownerctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, res_win_t wparent)
 {
-	if_event_t ev = { 0 };
+	if_dispatch_t ev = { 0 };
 
 	EVENT_BEGIN_DISPATH(&ev)
 
@@ -363,7 +365,7 @@ void ownerctrl_redraw(res_win_t widget)
 
 	_ownerctrl_reset_page(widget);
 
-	widget_update(widget);
+	widget_paint(widget);
 
 	widget_erase(widget, NULL);
 }

@@ -37,6 +37,9 @@ typedef struct _TIPBOX_DATA{
 typedef struct _tipbox_delta_t{
 	int n_type;
 	tchar_t* sz_text;
+
+	xfont_t xf;
+	xface_t xa;
 }tipbox_delta_t;
 
 #define GETTIPBOXDELTA(ph) 	(tipbox_delta_t*)widget_get_user_delta(ph)
@@ -57,6 +60,9 @@ int hand_tipbox_create(res_win_t widget, void* data)
 	ptd->n_type = ppd->type;
 	ptd->sz_text = xsalloc(xslen(ppd->text) + 1);
 	xscpy(ptd->sz_text, ppd->text);
+
+	default_widget_xfont(&ptd->xf);
+	default_widget_xface(&ptd->xa);
 
 	SETTIPBOXDELTA(widget, ptd);
 
@@ -104,6 +110,24 @@ void hand_tipbox_timer(res_win_t widget, vword_t tid)
 	widget_close(widget, 0);
 }
 
+void hand_tipbox_xfont(res_win_t widget, const xfont_t* pxf)
+{
+	tipbox_delta_t* ptd = GETTIPBOXDELTA(widget);
+
+	XDK_ASSERT(ptd != NULL);
+
+	xmem_copy((void*)&ptd->xf, (void*)pxf, sizeof(xfont_t));
+}
+
+void hand_tipbox_xface(res_win_t widget, const xface_t* pxa)
+{
+	tipbox_delta_t* ptd = GETTIPBOXDELTA(widget);
+
+	XDK_ASSERT(ptd != NULL);
+
+	xmem_copy((void*)&ptd->xa, (void*)pxa, sizeof(xface_t));
+}
+
 void hand_tipbox_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 {
 	tipbox_delta_t* ptd = GETTIPBOXDELTA(widget);
@@ -112,19 +136,16 @@ void hand_tipbox_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 	xrect_t xr;
 	const tchar_t *token;
 
-	xfont_t xf = { 0 };
-	xface_t xa = { 0 };
-	xbrush_t xb = { 0 };
-	xpen_t xp = { 0 };
-
 	canvas_t canv;
 	const drawing_interface* pif = NULL;
 	drawing_interface ifv = {0};
 
-	widget_get_xfont(widget, &xf);
-	widget_get_xface(widget, &xa);
-	widget_get_xbrush(widget, &xb);
-	widget_get_xpen(widget, &xp);
+	clr_mod_t clrs;
+	xbrush_t xb;
+
+	widget_get_color_mode(widget, &clrs);
+	default_xbrush(&xb);
+	format_xcolor(&clrs.clr_bkg, xb.color);
 
 	widget_get_client_rect(widget, &xr);
 
@@ -135,25 +156,19 @@ void hand_tipbox_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 
 	get_visual_interface(rdc, &ifv);
 
-	xp.adorn.feed = 2;
-	xp.adorn.size = 2;
-	(*ifv.pf_draw_rect)(ifv.ctx, &xp, &xb, &xr);
+	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
 
 	token = ptd->sz_text;
 
-	xscpy(xa.line_align, GDI_ATTR_TEXT_ALIGN_CENTER);
+	(*ifv.pf_draw_text)(ifv.ctx, &ptd->xf, &ptd->xa, &xr, token, -1);
 
-	(*ifv.pf_draw_text)(ifv.ctx, &xf, &xa, &xr, token, -1);
-
-	
 	end_canvas_paint(canv, dc, pxr);
-	
 }
 
 /***************************************************************************************/
 res_win_t tipbox_create(res_win_t widget, dword_t style, const xrect_t* pxr, int type, const tchar_t* text)
 {
-	if_event_t ev = { 0 };
+	if_dispatch_t ev = { 0 };
 	TIPBOX_DATA pd = { 0 };
 
 	pd.type = type;
@@ -173,6 +188,9 @@ res_win_t tipbox_create(res_win_t widget, dword_t style, const xrect_t* pxr, int
 		EVENT_ON_MOUSE_MOVE(hand_tipbox_mouse_move)
 
 		EVENT_ON_TIMER(hand_tipbox_timer)
+
+		EVENT_ON_XFONT(hand_tipbox_xfont)
+		EVENT_ON_XFACE(hand_tipbox_xface)
 
 		EVENT_ON_NC_IMPLEMENT
 
@@ -195,22 +213,16 @@ void tipbox_set_text(res_win_t widget, const tchar_t* sz_text)
 void tipbox_popup_size(res_win_t widget, xsize_t* pxs)
 {
 	tipbox_delta_t* ptd = GETTIPBOXDELTA(widget);
-	xfont_t xf;
-	xface_t xa;
+
 	visual_t rdc;
 	xrect_t xr = { 0 };
 	drawing_interface ifv = {0};
-
-	widget_get_xfont(widget, &xf);
-	widget_get_xface(widget, &xa);
 
 	rdc = widget_client_ctx(widget);
 
 	get_visual_interface(rdc, &ifv);
 
-	(*ifv.pf_text_rect)(ifv.ctx, &xf, &xa, ptd->sz_text, -1, &xr);
-
-	
+	(*ifv.pf_text_rect)(ifv.ctx, &ptd->xf, &ptd->xa, ptd->sz_text, -1, &xr);
 
 	widget_release_ctx(widget, rdc);
 
@@ -228,9 +240,8 @@ res_win_t show_toolbox(const xpoint_t* ppt, const tchar_t* sz_text)
 	xsize_t xs = { 0 };
 	clr_mod_t clr;
 
-	wt = tipbox_create(NULL, WD_STYLE_POPUP | WD_STYLE_NOACTIVE, &xr, 1, sz_text);
-	if (!wt)
-		return NULL;
+	wt = tipbox_create((res_win_t)0, WD_STYLE_POPUP | WD_STYLE_NOACTIVE, &xr, 1, sz_text);
+	if (!wt) return (res_win_t)0;
 
 	tipbox_popup_size(wt, RECTSIZE(&xr));
 
@@ -254,7 +265,7 @@ res_win_t show_toolbox(const xpoint_t* ppt, const tchar_t* sz_text)
 	widget_move(wt, RECTPOINT(&xr));
 	widget_size(wt, RECTSIZE(&xr));
 	widget_take(wt, (int)WS_TAKE_TOPMOST);
-	widget_update(wt);
+	widget_paint(wt);
 
 	widget_set_timer(wt, DEF_TIPTIME);
 
@@ -294,7 +305,7 @@ bool_t reset_toolbox(res_win_t widget, const xpoint_t* ppt, const tchar_t* sz_te
 	widget_move(widget, RECTPOINT(&xr));
 	widget_size(widget, RECTSIZE(&xr));
 	widget_take(widget, (int)WS_TAKE_TOPMOST);
-	widget_update(widget);
+	widget_paint(widget);
 
 	widget_set_timer(widget, DEF_TIPTIME);
 

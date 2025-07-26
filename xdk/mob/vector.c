@@ -26,7 +26,7 @@ LICENSE.GPL3 for more details.
 
 #include "vector.h"
 
-#include "../xdkimp.h"
+#include "../xdkobj.h"
 #include "../xdkstd.h"
 
 typedef struct _vector_context{
@@ -663,84 +663,3 @@ dword_t vector_decode(vector_t vec, const byte_t* buf)
 
 	return (n + 4);
 }
-
-#if defined(XDK_SUPPORT_TEST)
-void test_vector()
-{
-	tchar_t* buf;
-	int len;
-
-	vector_t pvt;
-
-	pvt = vector_alloc(10, 1);
-	vector_parse(pvt, _T("{(0),(1), (2),(3), (4) ,(5)(6), (7) ,(8),(9)}"), -1);
-	len = vector_format(pvt, NULL, MAX_LONG);
-	buf = xsalloc(len + 1);
-	vector_format(pvt, buf, len);
-	_tprintf(_T("%s\n"), buf);
-	xsfree(buf);
-	vector_free(pvt);
-
-	pvt = vector_alloc(5,2);
-	vector_parse(pvt, _T(" {(0,1) ,(2,3),(4, 5) ,(6, 7) ,(8,9)}"), -1);
-	len = vector_format(pvt, NULL, MAX_LONG);
-	buf = xsalloc(len + 1);
-	vector_format(pvt, buf, len);
-	_tprintf(_T("%s\n"), buf);
-	xsfree(buf);
-	vector_free(pvt);
-
-	pvt = vector_alloc(4,3);
-	vector_parse(pvt, _T(" {(0,1, 2), (3,4,5),(6,7), (8))}"), -1);
-	len = vector_format(pvt, NULL, MAX_LONG);
-	buf = xsalloc(len + 1);
-	vector_format(pvt, buf, len);
-	_tprintf(_T("%s\n"), buf);
-	xsfree(buf);
-
-	vector_t pv = vector_shift(pvt, (double)1, (double)2, (double)3);
-	len = vector_format(pv, NULL, MAX_LONG);
-	buf = xsalloc(len + 1);
-	vector_format(pv, buf, len);
-	_tprintf(_T("%s\n"), buf);
-	xsfree(buf);
-	vector_free(pv);
-
-	vector_free(pvt);
-
-	pvt = vector_alloc(4,2);
-	vector_parse(pvt, _T(" {(1,1) ,(-1,1),(-1, -1) ,(1, -1)}"), -1);
-	len = vector_format(pvt, NULL, MAX_LONG);
-	buf = xsalloc(len + 1);
-	vector_format(pvt, buf, len);
-	_tprintf(_T("%s\n"), buf);
-	xsfree(buf);
-
-	pv = vector_rotate(pvt, XPI / 4);
-	len = vector_format(pv, NULL, MAX_LONG);
-	buf = xsalloc(len + 1);
-	vector_format(pv, buf, len);
-	_tprintf(_T("%s\n"), buf);
-	xsfree(buf);
-	vector_free(pv);
-
-	pv = vector_scale(pvt, 2.0, 0.5);
-	len = vector_format(pv, NULL, MAX_LONG);
-	buf = xsalloc(len + 1);
-	vector_format(pv, buf, len);
-	_tprintf(_T("%s\n"), buf);
-	xsfree(buf);
-	vector_free(pv);
-
-	pv = vector_shear(pvt, 1.0, 0.5);
-	len = vector_format(pv, NULL, MAX_LONG);
-	buf = xsalloc(len + 1);
-	vector_format(pv, buf, len);
-	_tprintf(_T("%s\n"), buf);
-	xsfree(buf);
-	vector_free(pv);
-
-	vector_free(pvt);
-
-}
-#endif

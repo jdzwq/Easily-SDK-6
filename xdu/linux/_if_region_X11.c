@@ -30,7 +30,20 @@ LICENSE.GPL3 for more details.
 
 res_rgn_t _create_region(const tchar_t* shape, const xrect_t* pxr)
 {
-    return XCreateRegion();
+	Region region;
+
+	XRectangle clip_rect = {
+		.x = pxr->x,
+		.y = pxr->y,
+		.width = pxr->w,
+		.height = pxr->h
+	};
+
+    region = XCreateRegion();
+
+	XUnionRectWithRegion(&clip_rect, region, region);
+
+	return (res_rgn_t)region;
 }
 
 void _delete_region(res_rgn_t rgn)

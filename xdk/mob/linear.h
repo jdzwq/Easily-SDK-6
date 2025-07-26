@@ -52,10 +52,6 @@ extern "C" {
 
 	EXP_API int get_linear_top(linear_t lin);
 
-#if defined(XDK_SUPPORT_TEST)
-	EXP_API void test_linear();
-#endif
-
 #ifdef	__cplusplus
 }
 #endif

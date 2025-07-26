@@ -370,25 +370,26 @@ void hand_title_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 {
 	title_delta_t* ptd = GETTITLEDELTA(widget);
 	visual_t rdc;
-	xfont_t xf = { 0 };
-	xbrush_t xb = { 0 };
-	xpen_t xp = { 0 };
-	xrect_t xr = { 0 };
-	xcolor_t xc_brim = { 0 };
-	xcolor_t xc_core = { 0 };
 	tchar_t token[RES_LEN + 1] = { 0 };
 	const tchar_t* orita;
+	xrect_t xr = { 0 };
 
 	canvas_t canv;
 	const drawing_interface* pif = NULL;
 	drawing_interface ifv = {0};
 
-	if (!ptd->title)
-		return;
+	clr_mod_t clrs;
+	xbrush_t xb;
+	xcolor_t xc_brim = { 0 };
+	xcolor_t xc_core = { 0 };
 
-	widget_get_xfont(widget, &xf);
-	widget_get_xbrush(widget, &xb);
-	widget_get_xpen(widget, &xp);
+	if (!ptd->title) return;
+
+	widget_get_color_mode(widget, &clrs);
+	default_xbrush(&xb);
+	format_xcolor(&clrs.clr_bkg, xb.color);
+	xmem_copy((void*)&xc_brim, (void*)&clrs.clr_bkg, sizeof(xcolor_t));
+	xmem_copy((void*)&xc_core, (void*)&clrs.clr_bkg, sizeof(xcolor_t));
 
 	canv = widget_get_canvas(widget);
 	pif = widget_get_canvas_interface(widget);
@@ -401,9 +402,7 @@ void hand_title_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 
 	get_visual_interface(rdc, &ifv);
 
-	parse_xcolor(&xc_brim, xb.color);
 	lighten_xbrush(&xb, DEF_SOFT_DARKEN);
-	parse_xcolor(&xc_core, xb.color);
 
 	if (compare_text(orita, -1, ATTR_ORITATION_BOTTOM, -1, 0) == 0 || compare_text(orita, -1, ATTR_ORITATION_TOP, -1, 0) == 0)
 		xscpy(token, GDI_ATTR_GRADIENT_VERT);
@@ -421,7 +420,7 @@ void hand_title_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 
 res_win_t titlectrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, res_win_t wparent)
 {
-	if_event_t ev = { 0 };
+	if_dispatch_t ev = { 0 };
 
 	EVENT_BEGIN_DISPATH(&ev)
 

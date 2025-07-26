@@ -31,13 +31,13 @@ LICENSE.GPL3 for more details.
 
 res_win_t create_dialog(link_t_ptr ptr_dlg, res_win_t owner)
 {
-	res_win_t dlg,box = NULL;
+	res_win_t dlg,box = (res_win_t)0;
 	xrect_t xr = { 0 };
 	xspan_t xn;
 	link_t_ptr ilk;
 	const tchar_t* type;
 	visual_t rdc;
-	if_event_t ev = { 0 };
+	if_dispatch_t ev = { 0 };
 
 	EVENT_BEGIN_DISPATH(&ev)
 		EVENT_ON_NC_IMPLEMENT
@@ -169,7 +169,7 @@ res_win_t create_dialog(link_t_ptr ptr_dlg, res_win_t owner)
 			else if (compare_text(get_dialog_item_text_ptr(ilk), -1, ATTR_CONTROL_TOPOGCTRL, -1, 1) == 0)
 				box = topogctrl_create(get_dialog_item_name_ptr(ilk), WD_STYLE_CONTROL | WD_STYLE_HSCROLL | WD_STYLE_VSCROLL, &xr, dlg);
 			else
-				box = NULL;
+				box = (res_win_t)0;
 		}
 
 		if (box)
@@ -195,7 +195,7 @@ res_win_t create_dialog(link_t_ptr ptr_dlg, res_win_t owner)
 
 	widget_adjust_size(WD_STYLE_DIALOG, RECTSIZE(&xr));
 	widget_size(dlg, RECTSIZE(&xr));
-	widget_update(dlg);
+	widget_paint(dlg);
 	widget_center_window(dlg, owner);
 
 	return dlg;
@@ -207,14 +207,17 @@ int sub_dialog_on_paint(res_win_t widget, visual_t dc, const xrect_t* pxr, uid_t
 	visual_t rdc;
 	xrect_t xr;
 
-	xbrush_t xb = { 0 };
-
 	canvas_t canv;
 	const drawing_interface* pif = NULL;
 	drawing_interface ifv = {0};
 
-	widget_get_xbrush(widget, &xb);
+	clr_mod_t clrs;
+	xbrush_t xb;
 
+	widget_get_color_mode(widget, &clrs);
+	default_xbrush(&xb);
+	format_xcolor(&clrs.clr_bkg, xb.color);
+	
 	widget_get_client_rect(widget, &xr);
 
 	canv = widget_get_canvas(widget);

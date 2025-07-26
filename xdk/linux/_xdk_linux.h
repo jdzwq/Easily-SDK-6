@@ -34,12 +34,14 @@ LICENSE.GPL3 for more details.
 
 #define XDK_SUPPORT_MEMO_HEAP
 #define XDK_SUPPORT_MEMO_PAGE
+//#define XDK_SUPPORT_MEMO_GLOB
+#define XDK_SUPPORT_MEMO_LOCAL
 #define XDK_SUPPORT_MEMO_CACHE
 #define XDK_SUPPORT_MEMO
 #define XDK_SUPPORT_ERROR
 #define XDK_SUPPORT_DATE
-//#define XDK_SUPPORT_MBCS
-#define XDK_SUPPORT_ACP
+#define XDK_SUPPORT_MBCS
+//#define XDK_SUPPORT_ACP_TABLE
 #define XDK_SUPPORT_ASYNC
 #define XDK_SUPPORT_THREAD_EVENT
 #define XDK_SUPPORT_THREAD_CRITI
@@ -57,9 +59,13 @@ LICENSE.GPL3 for more details.
 #define XDK_SUPPORT_SOCK
 #define XDK_SUPPORT_TIMER
 #define XDK_SUPPORT_RANDOM
-#define XDK_SUPPORT_GLYPH
+
+#if defined(XDK_SUPPORT_FILE) && (defined(_DEBUG) || defined(DEBUG))
+#define XDK_SUPPORT_MEMO_DUMP
+#endif
 
 #include <stdio.h>
+#include <malloc.h>
 #include <wchar.h>
 #include <string.h>
 #include <stdlib.h>
@@ -79,12 +85,14 @@ LICENSE.GPL3 for more details.
 #include <sys/wait.h>
 #include <sys/stat.h>
 #include <sys/syscall.h>
+#include <sys/sysinfo.h>
 #include <sys/mman.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #if __GLIBC__ <= 2 && __GLIBC_MINOR__ < 32
 #include <sys/sysctl.h>
 #endif
+#include <sys/poll.h>
 #include <sys/epoll.h>
 #include <sys/timerfd.h>
 #include <semaphore.h>
@@ -100,12 +108,13 @@ LICENSE.GPL3 for more details.
 
 #include <termios.h>
 #include <pthread.h>
+#include <pty.h>
 
 //linux
 
 #define PACK( __Declaration__ ) __Declaration__ __attribute__((__packed__))
 
-typedef int		    res_queue_t;
+typedef void*		   res_queue_t;
 
 #ifdef XDK_SUPPORT_SOCK
 typedef struct sockaddr_in	net_addr_t;
@@ -158,8 +167,8 @@ typedef void*		res_modu_t;
 #endif
 
 #ifdef XDK_SUPPORT_TIMER
-typedef int			res_timer_t;
-typedef void(*GNU_TIMER_PROC)(void* param, unsigned char wait);
+typedef void*			res_timer_t;
+typedef void(*GNU_TIMER_PROC)(void* param, res_timer_t tid);
 #endif
 
 #define INVALID_FILE	((int)(-1))

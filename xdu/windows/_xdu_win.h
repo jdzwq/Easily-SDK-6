@@ -34,17 +34,11 @@ LICENSE.GPL3 for more details.
 
 #define XDU_SUPPORT_CONTEXT_BITMAP
 #define XDU_SUPPORT_CONTEXT_PRINTER
-#define XDU_SUPPORT_CONTEXT_REGION
 //#define XDU_SUPPORT_CONTEXT_OPENGL
-#if defined(_UNICODE) || defined(UNICODE)
-#define XDU_SUPPORT_CONTEXT_GDIPLUS
-#else
 #define XDU_SUPPORT_CONTEXT_GDI
-#endif
 #define XDU_SUPPORT_CONTEXT
 
 #define XDU_SUPPORT_WIDGET_NC
-#define XDU_SUPPORT_WIDGET_REGION
 #define XDU_SUPPORT_WIDGET
 
 #if defined(WINCE)
@@ -125,8 +119,6 @@ typedef struct _win32_context_t{
 	int type;
 }win32_context_t;
 
-typedef COLORREF	res_clr_t;
-typedef HFONT		res_font_t;
 #ifdef XDU_SUPPORT_CONTEXT_BITMAP
 typedef struct _win32_bitmap_t{
 	handle_head head;
@@ -134,18 +126,20 @@ typedef struct _win32_bitmap_t{
 	HBITMAP bitmap;
 }win32_bitmap_t;
 #endif
-#ifdef XDU_SUPPORT_CONTEXT_REGION
-typedef HRGN		res_rgn_t;
-#endif
+
+typedef HFONT		res_font_t;
+
 #ifdef XDU_SUPPORT_CONTEXT_OPENGL
 typedef HGLRC		res_glc_t;
 #endif
 #endif
 
 #ifdef XDU_SUPPORT_WIDGET
-typedef MSG			msg_t;
 typedef HACCEL		res_acl_t;
 typedef HWND		res_win_t;
+
+typedef COLORREF	pixel_t;
+typedef MSG			msg_t;
 typedef WPARAM		uparam_t;
 typedef LPARAM		lparam_t;
 typedef LRESULT		result_t;
@@ -201,5 +195,6 @@ typedef LRESULT		result_t;
 #endif
 #endif
 
+#define SYSTEM_FONTNAME     _T("Helvetica")
 
 #endif //_XDU_WIN_H

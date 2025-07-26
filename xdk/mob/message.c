@@ -26,8 +26,7 @@ LICENSE.GPL3 for more details.
 
 #include "message.h"
 
-#include "../xdkimp.h"
-#include "../xdkoem.h"
+#include "../xdkobj.h"
 #include "../xdkstd.h"
 
 
@@ -271,34 +270,3 @@ dword_t message_encode(message_t msg, byte_t* buf, dword_t max)
 
 	return len;
 }
-
-#if defined(XDK_SUPPORT_TEST)
-void test_message(void)
-{
-	byte_t buf[] = "hello world!";
-
-	msg_hdr_t hdr = { 0 };
-
-	message_t msg = message_alloc();
-
-	hdr.ver = MSGVER_SENSOR;
-	hdr.qos = 0x02;
-	
-	byte_t tmp[100] = { 0 };
-	int i;
-
-	for (i = 0; i < 100; i++)
-	{
-		hdr.seq = i;
-		hdr.utc = get_timestamp();
-
-		message_write(msg, &hdr, buf, a_xslen((schar_t*)buf));
-
-		message_read(msg, &hdr, tmp, 100);
-
-		printf("ver:0x%08x qos:%c seq:%d utc:%llu msg:%s\n", hdr.ver, hdr.qos, hdr.seq, hdr.utc,tmp);
-	}
-
-	message_free(msg);
-}
-#endif

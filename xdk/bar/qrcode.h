@@ -33,9 +33,9 @@ LICENSE.GPL3 for more details.
 extern "C" {
 #endif
 
-	EXP_API dword_t qr_encode(const byte_t* token, dword_t len, byte_t* buf, dword_t max, int* prows, int* pcols);
+EXP_API dword_t qr_encode(const byte_t* token, dword_t len, byte_t* buf, dword_t max, int* prows, int* pcols);
 
-	EXP_API int qr_units(const byte_t* bar_buf, int rows, int cols);
+EXP_API int qr_units(const byte_t* bar_buf, int rows, int cols);
 
 #ifdef	__cplusplus
 }

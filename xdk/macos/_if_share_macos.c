@@ -41,6 +41,8 @@ res_file_t _share_srv(const tchar_t* sname, const tchar_t* fpath, dword_t hoff, 
     struct stat st = {0};
     void *p = NULL;
     
+    shm_unlink(sname);
+    
     fd = open(fpath, O_RDONLY, S_IRWXU | S_IXGRP | S_IROTH | S_IXOTH);
     if(fd < 0)
         goto ERRRET;
@@ -221,16 +223,23 @@ bool_t _share_read(res_file_t fh, dword_t off, void* buf, dword_t size, dword_t*
 
 void* _share_lock(res_file_t fh, dword_t off, dword_t size)
 {
+    int flags;
     void* p = NULL;
-    
     dword_t loff, poff;
     size_t dlen;
+
+    if((flags = fcntl(fh, F_GETFL)) < 0)
+        return NULL;
 
     poff = (off % PAGE_GRAN);
     loff = (off / PAGE_GRAN) * PAGE_GRAN;
     dlen = poff + size;
     
-    p = mmap(NULL, dlen, PROT_READ, MAP_SHARED, fh, MAKESIZE(loff, 0));
+    if((flags & O_ACCMODE) == O_RDONLY)
+        p = mmap(NULL, dlen, PROT_READ, MAP_SHARED, fh, MAKESIZE(loff, 0));
+    else
+        p = mmap(NULL, dlen, PROT_WRITE | PROT_READ, MAP_SHARED, fh, MAKESIZE(loff, 0));
+    
     if(p == MAP_FAILED)
         return NULL;
 

@@ -56,7 +56,7 @@ LICENSE.GPL3 for more details.
 #define BIG_GETHDWORD(ll)		(dword_t)((lword_t)(ll) & 0x00000000FFFFFFFF)
 #define BIG_GETLDWORD(ll)		(dword_t)(((lword_t)(ll) >> 32) & 0x00000000FFFFFFFF)
 
-#if BYTE_ORDER == BIG_ENDIAN
+#if ACP_BYTE_ORDER == BIG_ENDIAN
 #define MAKELWORD			BIG_MAKELWORD
 #define GETLDWORD			BIG_GETLDWORD
 #define GETHDWORD			BIG_GETHDWORD
@@ -114,7 +114,7 @@ LICENSE.GPL3 for more details.
 #define PUT_THREEBYTE_NET	PUT_THREEBYTE_BIG
 #define GET_THREEBYTE_NET	GET_THREEBYTE_BIG
 
-#if BYTE_ORDER == BIG_ENDIAN
+#if ACP_BYTE_ORDER == BIG_ENDIAN
 #define PUT_SWORD_LOC		PUT_SWORD_BIG
 #define GET_SWORD_LOC		GET_SWORD_BIG
 #define PUT_DWORD_LOC		PUT_DWORD_BIG
@@ -143,7 +143,7 @@ LICENSE.GPL3 for more details.
 #define BIG_GETSIZEH(ll)		(unsigned int)((size_t)(ll) & 0x00000000FFFFFFFF)
 #define BIG_GETSIZEL(ll)		(unsigned int)(((size_t)(ll) >> 32) & 0x00000000FFFFFFFF)
 
-#if BYTE_ORDER == BIG_ENDIAN
+#if ACP_BYTE_ORDER == BIG_ENDIAN
 #define MAKESIZE			BIG_MAKESIZE
 #define GETSIZEH			BIG_GETSIZEH
 #define GETSIZEL			BIG_GETSIZEL

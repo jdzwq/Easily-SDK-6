@@ -34,6 +34,8 @@ typedef struct _iconbox_delta_t{
 
 	tchar_t layer[RES_LEN + 1];
 	tchar_t align[RES_LEN + 1];
+
+	xfont_t xf;
 }iconbox_delta_t;
 
 #define GETICONBOXDELTA(ph) 	(iconbox_delta_t*)widget_get_user_delta(ph)
@@ -44,11 +46,8 @@ void _iconbox_item_rect(res_win_t widget, link_t_ptr ent, xrect_t* pxr)
 {
 	iconbox_delta_t* ptd = GETICONBOXDELTA(widget);
 	measure_interface im = { 0 };
-	xfont_t xf = { 0 };
 	xsize_t xs;
 	canvbox_t cb;
-
-	widget_get_xfont(widget, &xf);
 
 	get_canvas_measure(widget_get_canvas(widget), &im);
 
@@ -56,7 +55,7 @@ void _iconbox_item_rect(res_win_t widget, link_t_ptr ent, xrect_t* pxr)
 	xs.fw = cb.fw;
 	xs.fh = cb.fh;
 
-	calc_iconbox_item_rect(&im, &xf, ptd->layer, ptd->align, &xs, ptd->string, ent, pxr);
+	calc_iconbox_item_rect(&im, &ptd->xf, ptd->layer, ptd->align, &xs, ptd->string, ent, pxr);
 	widget_rect_to_tm(widget, pxr);
 }
 
@@ -66,7 +65,6 @@ void _iconbox_reset_page(res_win_t widget)
 	int vw, vh, lw, lh;
 	xrect_t xr;
 	xsize_t xs;
-	xfont_t xf;
 
 	canvas_t canv;
 	const drawing_interface* pif = NULL;
@@ -77,17 +75,13 @@ void _iconbox_reset_page(res_win_t widget)
 
 	(pif->pf_get_measure)(pif->ctx, &im);
 
-	widget_get_xfont(widget, &xf);
-
-	(pif->pf_text_metric)(pif->ctx, &xf, &xs);
-
-	
+	(pif->pf_text_metric)(pif->ctx, &ptd->xf, &xs);
 
 	widget_size_to_pt(widget, &xs);
 	lw = xs.w;
 	lh = xs.h;
 
-	calc_iconbox_size(&im, &xf, ptd->layer, ptd->align, ptd->string, &xs);
+	calc_iconbox_size(&im, &ptd->xf, ptd->layer, ptd->align, ptd->string, &xs);
 	widget_size_to_pt(widget, &xs);
 	vw = xs.w;
 	vh = xs.h;
@@ -127,6 +121,8 @@ int hand_iconbox_create(res_win_t widget, void* data)
 	xmem_zero((void*)ptd, sizeof(iconbox_delta_t));
 
 	ptd->string = create_string_table(0);
+	
+	default_widget_xfont(&ptd->xf);
 
 	SETICONBOXDELTA(widget, ptd);
 
@@ -170,7 +166,7 @@ void hand_iconbox_lbutton_up(res_win_t widget, const xpoint_t* pxp)
 
 	widget_point_to_tm(widget, &pt);
 
-	widget_get_xfont(widget, &xf);
+	default_xfont(&xf);
 
 	get_canvas_measure(widget_get_canvas(widget), &im);
 
@@ -195,6 +191,15 @@ void hand_iconbox_size(res_win_t widget, int code, const xsize_t* prs)
 	widget_erase(widget, NULL);
 }
 
+void hand_iconbox_xfont(res_win_t widget, const xfont_t* pxf)
+{
+	iconbox_delta_t* ptd = GETICONBOXDELTA(widget);
+
+	XDK_ASSERT(ptd != NULL);
+
+	xmem_copy((void*)&ptd->xf, (void*)pxf, sizeof(xfont_t));
+}
+
 void hand_iconbox_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 {
 	iconbox_delta_t* ptd = GETICONBOXDELTA(widget);
@@ -204,43 +209,33 @@ void hand_iconbox_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 	const drawing_interface* pif = NULL;
 	drawing_interface ifv = {0};
 
-	xfont_t xf;
+	clr_mod_t clrs;
 	xbrush_t xb;
-	xpen_t xp;
 
-	widget_get_xfont(widget, &xf);
-	widget_get_xbrush(widget, &xb);
-	widget_get_xpen(widget, &xp);
+	widget_get_color_mode(widget, &clrs);
+	default_xbrush(&xb);
+	format_xcolor(&clrs.clr_bkg, xb.color);
 
 	canv = widget_get_canvas(widget);
 	pif = widget_get_canvas_interface(widget);
-	
-
-	
-	
-	
-	
-	
 
 	widget_get_client_rect(widget, &xr);
 
 	rdc = begin_canvas_paint(canv, dc, xr.w, xr.h);
+
 	get_visual_interface(rdc, &ifv);
 
 	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
 
-	draw_iconbox(pif, &xf, ptd->layer, ptd->align, ptd->string);
-
-	
+	draw_iconbox(pif, &ptd->xf, ptd->layer, ptd->align, ptd->string);
 
 	end_canvas_paint(canv, dc, pxr);
-	
 }
 
 /***************************************************************************************/
 res_win_t iconbox_create(res_win_t widget, dword_t style, const xrect_t* pxr)
 {
-	if_event_t ev = { 0 };
+	if_dispatch_t ev = { 0 };
 
 	EVENT_BEGIN_DISPATH(&ev)
 
@@ -253,6 +248,8 @@ res_win_t iconbox_create(res_win_t widget, dword_t style, const xrect_t* pxr)
 
 		EVENT_ON_LBUTTON_DOWN(hand_iconbox_lbutton_down)
 		EVENT_ON_LBUTTON_UP(hand_iconbox_lbutton_up)
+
+		EVENT_ON_XFONT(hand_iconbox_xfont)
 
 		EVENT_ON_NC_IMPLEMENT
 
@@ -316,7 +313,7 @@ void iconbox_popup_size(res_win_t widget, xsize_t* pxs)
 
 	XDK_ASSERT(ptd != NULL);
 
-	widget_get_xfont(widget, &xf);
+	default_xfont(&xf);
 
 	get_canvas_measure(widget_get_canvas(widget), &im);
 

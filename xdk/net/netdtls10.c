@@ -27,9 +27,9 @@ LICENSE.GPL3 for more details.
 #include "netdtls.h"
 
 #include "../xdknet.h"
-#include "../xdkimp.h"
 #include "../xdkoem.h"
 #include "../xdkstd.h"
+#include "../xdkobj.h"
 
 #if defined(XDK_SUPPORT_SOCK)
 
@@ -79,21 +79,21 @@ typedef struct _dtls10_ciphers_set{
 
 
 static dtls10_ciphers_set client_ciphers[] = {
-	{ SSL_DHE_RSA_WITH_AES_256_CBC_SHA, CIPHER_BLOCK, BULK_AES, 32, 20, 16 },
-	{ SSL_DHE_RSA_WITH_AES_128_CBC_SHA, CIPHER_BLOCK, BULK_AES, 16, 20, 16 },
-	{ SSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA, CIPHER_BLOCK, BULK_3DES, 24, 20, 8 },
-	{ SSL_RSA_WITH_AES_256_CBC_SHA, CIPHER_BLOCK, BULK_AES, 32, 20, 16 },
-	{ SSL_RSA_WITH_AES_128_CBC_SHA, CIPHER_BLOCK, BULK_AES, 16, 20, 16 },
-	{ SSL_RSA_WITH_3DES_EDE_CBC_SHA, CIPHER_BLOCK, BULK_3DES, 24, 20, 8 },
+	{ XSSL_DHE_RSA_WITH_AES_256_CBC_SHA, CIPHER_BLOCK, BULK_AES, 32, 20, 16 },
+	{ XSSL_DHE_RSA_WITH_AES_128_CBC_SHA, CIPHER_BLOCK, BULK_AES, 16, 20, 16 },
+	{ XSSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA, CIPHER_BLOCK, BULK_3DES, 24, 20, 8 },
+	{ XSSL_RSA_WITH_AES_256_CBC_SHA, CIPHER_BLOCK, BULK_AES, 32, 20, 16 },
+	{ XSSL_RSA_WITH_AES_128_CBC_SHA, CIPHER_BLOCK, BULK_AES, 16, 20, 16 },
+	{ XSSL_RSA_WITH_3DES_EDE_CBC_SHA, CIPHER_BLOCK, BULK_3DES, 24, 20, 8 },
 };
 
 static dtls10_ciphers_set server_ciphers[] = {
-	{ SSL_DHE_RSA_WITH_AES_256_CBC_SHA, CIPHER_BLOCK, BULK_AES, 32, 20, 16 },
-	{ SSL_DHE_RSA_WITH_AES_128_CBC_SHA, CIPHER_BLOCK, BULK_AES, 16, 20, 16 },
-	{ SSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA, CIPHER_BLOCK, BULK_3DES, 24, 20, 8 },
-	{ SSL_RSA_WITH_AES_256_CBC_SHA, CIPHER_BLOCK, BULK_AES, 32, 20, 16 },
-	{ SSL_RSA_WITH_AES_128_CBC_SHA, CIPHER_BLOCK, BULK_AES, 16, 20, 16 },
-	{ SSL_RSA_WITH_3DES_EDE_CBC_SHA, CIPHER_BLOCK, BULK_3DES, 24, 20, 8 },
+	{ XSSL_DHE_RSA_WITH_AES_256_CBC_SHA, CIPHER_BLOCK, BULK_AES, 32, 20, 16 },
+	{ XSSL_DHE_RSA_WITH_AES_128_CBC_SHA, CIPHER_BLOCK, BULK_AES, 16, 20, 16 },
+	{ XSSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA, CIPHER_BLOCK, BULK_3DES, 24, 20, 8 },
+	{ XSSL_RSA_WITH_AES_256_CBC_SHA, CIPHER_BLOCK, BULK_AES, 32, 20, 16 },
+	{ XSSL_RSA_WITH_AES_128_CBC_SHA, CIPHER_BLOCK, BULK_AES, 16, 20, 16 },
+	{ XSSL_RSA_WITH_3DES_EDE_CBC_SHA, CIPHER_BLOCK, BULK_3DES, 24, 20, 8 },
 };
 
 static char label_client_finished[] = "client finished";
@@ -158,9 +158,9 @@ typedef struct _dtls10_cipher_context{
 #define DTLS0_RECORD_SEQNUM(ptr)	(GET_LWORD_NET(prec->snd_hdr, 3) & 0x0000FFFFFFFFFFFF)
 
 
-#define IS_DHE_CIPHER(cipher) ((cipher == SSL_DHE_RSA_WITH_AES_256_CBC_SHA || \
-								cipher == SSL_DHE_RSA_WITH_AES_128_CBC_SHA || \
-								cipher == SSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA) ? 1 : 0)
+#define IS_DHE_CIPHER(cipher) ((cipher == XSSL_DHE_RSA_WITH_AES_256_CBC_SHA || \
+								cipher == XSSL_DHE_RSA_WITH_AES_128_CBC_SHA || \
+								cipher == XSSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA) ? 1 : 0)
 /***********************************************************************************************************************************/
 
 static bool_t _dtls_choose_cipher(dtls10_cipher_context* pcip, int ciph)
@@ -268,15 +268,15 @@ static void _dtls_derive_keys(dtls10_cipher_context* pcip, byte_t* premaster, in
 	//initialize encrypt and decrypt context
 	switch (pcip->cipher)
 	{
-	case SSL_RSA_WITH_3DES_EDE_CBC_SHA:
-	case SSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA:
+	case XSSL_RSA_WITH_3DES_EDE_CBC_SHA:
+	case XSSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA:
 		des3_set3key_enc((des3_context *)pcip->ctx_enc, key_enc); //the material size is 24 bytes
 		des3_set3key_dec((des3_context *)pcip->ctx_dec, key_dec); //the material size is 24 bytes
 		break;
-	case SSL_RSA_WITH_AES_128_CBC_SHA:
-	case SSL_RSA_WITH_AES_256_CBC_SHA:
-	case SSL_DHE_RSA_WITH_AES_128_CBC_SHA:
-	case SSL_DHE_RSA_WITH_AES_256_CBC_SHA:
+	case XSSL_RSA_WITH_AES_128_CBC_SHA:
+	case XSSL_RSA_WITH_AES_256_CBC_SHA:
+	case XSSL_DHE_RSA_WITH_AES_128_CBC_SHA:
+	case XSSL_DHE_RSA_WITH_AES_256_CBC_SHA:
 		aes_setkey_enc((aes_context *)pcip->ctx_enc, key_enc, (pcip->key_size * 8)); //the material size is bits
 		aes_setkey_dec((aes_context *)pcip->ctx_dec, key_dec, (pcip->key_size * 8)); //the material size is bits
 		break;
@@ -474,7 +474,7 @@ static int _dtls_write_snd_msg(dtls_context *pdtls)
 	int total;
 
 	byte_t* lin_buf;
-	int lin_len, frm_off, frm_len;
+	dword_t lin_len, frm_off, frm_len;
 
 	/*
 	struct {
@@ -1235,7 +1235,7 @@ static dtls10_handshake_states _dtls_parse_server_hello(dtls_context *pdtls)
 	*/
 	ciph = GET_SWORD_NET(prec->rcv_msg, msglen + seslen);
 
-	if (pses->session_resumed == 0 || pcip->cipher != ciph || a_xslen(pses->ses_id) != seslen || xmem_comp(pses->ses_id, prec->rcv_msg + msglen, seslen) != 0)
+	if (pses->session_resumed == 0 || pcip->cipher != ciph || a_xslen((schar_t*)pses->ses_id) != seslen || xmem_comp(pses->ses_id, prec->rcv_msg + msglen, seslen) != 0)
 	{
 		pses->session_resumed = 0;
 		xmem_copy(pses->ses_id, prec->rcv_msg + msglen, seslen);
@@ -1293,9 +1293,9 @@ static dtls10_handshake_states _dtls_parse_server_certificate(dtls_context *pdtl
 	dtls_record_context* prec = (dtls_record_context*)(pses->rcv_record);
 	dtls10_cipher_context* pcip = (dtls10_cipher_context*)pses->cipher_context;
 
-	int  ret, n;
+	int  n;
 	int msglen, haslen, crtlen;
-	int num, off, len;
+	dword_t num, off, len, ret;
 
 	if (prec->rcv_msg[0] != SSL_HS_CERTIFICATE)
 	{
@@ -1837,7 +1837,7 @@ static int _dtls_write_client_key_exchange(dtls_context *pdtls)
 
 	int pos, n, msglen;
 	byte_t premaster[DTLS_BLK_SIZE] = {0};
-	int prelen = DTLS_MST_SIZE;
+	dword_t prelen = DTLS_MST_SIZE;
 	size_t m;
 
 	/*
@@ -2261,7 +2261,7 @@ static dtls10_handshake_states _dtls_parse_server_finished(dtls_context *pdtls)
 bool_t dtls10_handshake_client(dtls_context *pdtls)
 {
 	dtls_session_context* pses;
-	dtls10_handshake_states state = SSL_HELLO_REQUEST;
+	int state = SSL_HELLO_REQUEST;
 	int TRY_MAX = DTLS_TRY_MAX;
 
 	/* Flight 1 with none cookie
@@ -2927,7 +2927,7 @@ static dtls10_handshake_states _dtls_write_server_key_exchange(dtls_context *pdt
 	dtls_record_context* prec = (dtls_record_context*)(pses->snd_record);
 	dtls10_cipher_context* pcip = (dtls10_cipher_context*)pses->cipher_context;
 
-	int n, msglen;
+	dword_t n, msglen;
 	size_t m;
 	byte_t hash[36] = { 0 };
 	md5_context md5;
@@ -3030,7 +3030,7 @@ static dtls10_handshake_states _dtls_write_server_key_exchange(dtls_context *pdt
 			mpi_free(&K);
 
 			n = 0;
-			if (C_OK != rsa_export_pubkey(psec->rsa_ctx, prec->snd_msg + msglen, &n, 1))
+			if (C_OK != rsa_export_pubkey(psec->rsa_ctx, prec->snd_msg + msglen, (int*)&n, 1))
 			{
 				set_last_error(_T("_dtls_write_server_key_exchange"), _T("make rsa params faild"), -1);
 				return SSL_HANDSHAKE_ERROR;
@@ -3244,7 +3244,7 @@ static dtls10_handshake_states _dtls_parse_client_certificate(dtls_context *pdtl
 	dtls10_cipher_context* pcip = (dtls10_cipher_context*)pses->cipher_context;
 
 	int msglen, haslen, crtlen;
-	int n, ret;
+	dword_t n, ret;
 	int num, off, len;
 
 	if (prec->rcv_msg[0] != SSL_HS_CERTIFICATE && (prec->rcv_msg[0] != SSL_LEVEL_WARNING || prec->snd_msg[1] != SSL_ALERT_NO_CERTIFICATE))
@@ -3394,7 +3394,7 @@ static dtls10_handshake_states _dtls_parse_client_key_exchange(dtls_context *pdt
 
 	int haslen, n, msglen;
 	byte_t premaster[DTLS_BLK_SIZE] = { 0 };
-	int prelen = DTLS_MST_SIZE;
+	dword_t prelen = DTLS_MST_SIZE;
 	int num, off, len;
 
 	if (prec->rcv_msg[0] != SSL_HS_CLIENT_KEY_EXCHANGE)

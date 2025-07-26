@@ -449,7 +449,7 @@ void noti_list_commit_edit(res_win_t widget)
 	}
 
 	editctrl = ptd->editor;
-	ptd->editor = NULL;
+	ptd->editor = (res_win_t)0;
 
 	widget_destroy(editctrl);
 	widget_set_focus(widget);
@@ -468,7 +468,7 @@ void noti_list_rollback_edit(res_win_t widget)
 	noti_list_owner(widget, NC_LISTITEMROLLBACK, ptd->list, ptd->item, NULL);
 
 	editctrl = ptd->editor;
-	ptd->editor = NULL;
+	ptd->editor = (res_win_t)0;
 
 	widget_destroy(editctrl);
 	widget_set_focus(widget);
@@ -494,7 +494,7 @@ void noti_list_reset_scroll(res_win_t widget, bool_t bUpdate)
 	if (widget_is_valid(ptd->vsc))
 	{
 		if (bUpdate)
-			widget_update(ptd->vsc);
+			widget_paint(ptd->vsc);
 		else
 			widget_close(ptd->vsc, 0);
 	}
@@ -502,7 +502,7 @@ void noti_list_reset_scroll(res_win_t widget, bool_t bUpdate)
 	if (widget_is_valid(ptd->hsc))
 	{
 		if (bUpdate)
-			widget_update(ptd->hsc);
+			widget_paint(ptd->hsc);
 		else
 			widget_close(ptd->hsc, 0);
 	}
@@ -609,7 +609,7 @@ void hand_list_wheel(res_win_t widget, bool_t bHorz, int nDelta)
 			}
 			else
 			{
-				widget_update(ptd->vsc);
+				widget_paint(ptd->vsc);
 			}
 		}
 
@@ -621,7 +621,7 @@ void hand_list_wheel(res_win_t widget, bool_t bHorz, int nDelta)
 			}
 			else
 			{
-				widget_update(ptd->hsc);
+				widget_paint(ptd->hsc);
 			}
 		}
 
@@ -768,7 +768,7 @@ void hand_list_lbutton_down(res_win_t widget, const xpoint_t* pxp)
 	}
 	else if (nHint == LIST_HINT_NONE)
 	{
-		if (!widget_key_state(widget, KEY_CONTROL))
+		if (!widget_key_state(widget, KS_WITH_CONTROL))
 		{
 			noti_list_reset_check(widget);
 		}
@@ -885,7 +885,7 @@ void hand_list_keydown(res_win_t widget, dword_t ks, int nKey)
 	}
 }
 
-void hand_list_char(res_win_t widget, tchar_t ch)
+void hand_list_wchar(res_win_t widget, wchar_t ch)
 {
 	list_delta_t* ptd = GETLISTDELTA(widget);
 
@@ -924,32 +924,25 @@ void hand_list_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 {
 	list_delta_t* ptd = GETLISTDELTA(widget);
 	visual_t rdc;
-	xfont_t xf = { 0 };
-	xbrush_t xb = { 0 };
-	xpen_t xp = { 0 };
-	xcolor_t xc = { 0 };
 	xrect_t xr = { 0 };
 
 	canvas_t canv;
 	const drawing_interface* pif = NULL;
 	drawing_interface ifv = {0};
 
-	if (!ptd->list)
-		return;
+	clr_mod_t clrs;
+	xbrush_t xb;
+	xcolor_t xc;
 
-	widget_get_xfont(widget, &xf);
-	widget_get_xbrush(widget, &xb);
-	widget_get_xpen(widget, &xp);
+	if (!ptd->list) return;
+
+	widget_get_color_mode(widget, &clrs);
+	default_xbrush(&xb);
+	format_xcolor(&clrs.clr_bkg, xb.color);
+	xmem_copy((void*)&xc,(void*)&clrs.clr_frg, sizeof(xcolor_t));
 
 	canv = widget_get_canvas(widget);
 	pif = widget_get_canvas_interface(widget);
-	
-
-	
-	
-	
-	
-	
 
 	widget_get_client_rect(widget, &xr);
 
@@ -973,17 +966,14 @@ void hand_list_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 		draw_focus_raw(&ifv, &xc, &xr, ALPHA_TRANS);
 	}
 
-	
-
 	end_canvas_paint(canv, dc, pxr);
-	
 }
 
 /**************************************************************************************************/
 
 res_win_t listctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, res_win_t wparent)
 {
-	if_event_t ev = { 0 };
+	if_dispatch_t ev = { 0 };
 
 	EVENT_BEGIN_DISPATH(&ev)
 
@@ -998,7 +988,7 @@ res_win_t listctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* p
 		EVENT_ON_WHEEL(hand_list_wheel)
 
 		EVENT_ON_KEYDOWN(hand_list_keydown)
-		EVENT_ON_CHAR(hand_list_char)
+		EVENT_ON_WCHAR(hand_list_wchar)
 
 		EVENT_ON_MOUSE_MOVE(hand_list_mouse_move)
 		EVENT_ON_MOUSE_HOVER(hand_list_mouse_hover)
@@ -1120,7 +1110,7 @@ void listctrl_redraw(res_win_t widget)
 
 	_listctrl_reset_page(widget);
 
-	widget_update(widget);
+	widget_paint(widget);
 }
 
 void listctrl_tabskip(res_win_t widget, int nSkip)

@@ -26,7 +26,6 @@ LICENSE.GPL3 for more details.
 
 #include "strutil.h"
 
-#include "../xdkimp.h"
 #include "../xdkstd.h"
 
 #define A_IS_TOKEN_SPLIT(ch) (ch == (' ') || ch == ('\t') || ch == ('\n') || ch == (',') || ch == (';') || ch == ('~') || ch == (':'))
@@ -673,7 +672,7 @@ int w_parse_param_name(const wchar_t* param, int len, wchar_t itemdot, wchar_t**
 		total++;
 	}
 
-	*pkey = token;
+	*pkey = (wchar_t*)token;
 	while (*(token + *plen) != L' ' && total < len)
 	{
 		total++;
@@ -722,7 +721,7 @@ int a_parse_param_name(const schar_t* param, int len, schar_t itemdot, schar_t**
 		total++;
 	}
 
-	*pkey = token;
+	*pkey = (schar_t*)token;
 	while (*(token + *plen) != (' ') && total < len)
 	{
 		total++;

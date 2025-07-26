@@ -26,7 +26,6 @@ LICENSE.GPL3 for more details.
 
 #include "acp.h"
 
-#include "../xdkimp.h"
 #include "../xdkstd.h"
 
 xhand_t acp_gb2312 = NULL;
@@ -39,7 +38,7 @@ int share_gb2312_seek_unicode(unsigned char* mbs, unsigned short* ucs)
 	int ind;
 	byte_t* pb;
 
-	len = gb2312_code_sequence(*mbs);
+	len = acp_gb2312_code_sequence(*mbs);
 
 	if (len == 1)
 	{
@@ -71,7 +70,7 @@ int share_gb2312_seek_unicode(unsigned char* mbs, unsigned short* ucs)
 		return 1;
 	}
 
-	pb = xshare_lock(acp_gb2312, ind * sizeof(acp_table_t), sizeof(acp_table_t));
+	pb = (byte_t*)xshare_lock(acp_gb2312, ind * sizeof(acp_table_t), sizeof(acp_table_t));
 	if (!pb)
 	{
 		if (ucs)
@@ -98,7 +97,7 @@ int share_gb2312_seek_help(const unsigned char* mbs, unsigned char* hlp)
 	int ind;
 	byte_t* pb;
 
-	len = gb2312_code_sequence(*mbs);
+	len = acp_gb2312_code_sequence(*mbs);
 	if (len == 1)
 	{
 		if (*mbs >= 0x00 && *mbs <= 0x7F)
@@ -121,7 +120,7 @@ int share_gb2312_seek_help(const unsigned char* mbs, unsigned char* hlp)
 			bc = 0;
 		}
 
-		if (hlp) *hlp = bc;
+		if (bc && hlp) *hlp = bc;
 
 		return (bc) ? 1 : 0;
 	}
@@ -142,7 +141,7 @@ int share_gb2312_seek_help(const unsigned char* mbs, unsigned char* hlp)
 		return 0;
 	}
 
-	pb = xshare_lock(acp_gb2312, ind * sizeof(acp_table_t), sizeof(acp_table_t));
+	pb = (byte_t*)xshare_lock(acp_gb2312, ind * sizeof(acp_table_t), sizeof(acp_table_t));
 	if (!pb)
 	{
 		if (hlp) *hlp = 0;
@@ -153,12 +152,12 @@ int share_gb2312_seek_help(const unsigned char* mbs, unsigned char* hlp)
 	bc = (unsigned char)GET_SWORD_LOC(pb, 2);
 	xshare_unlock(acp_gb2312, ind * sizeof(acp_table_t), sizeof(acp_table_t), pb);
 
-	if (hlp) *hlp = bc;
+	if (bc && hlp) *hlp = bc;
 
 	return (bc) ? 1 : 0;
 }
 
-vword_t get_gb2312_code_addr(const byte_t* mbs)
+vword_t share_get_gb2312_code_addr(const byte_t* mbs)
 {
 	int len;
 	unsigned short ch;
@@ -166,7 +165,7 @@ vword_t get_gb2312_code_addr(const byte_t* mbs)
 	int ind;
 	byte_t* pb;
 
-	len = gb2312_code_sequence(*mbs);
+	len = acp_gb2312_code_sequence(*mbs);
 	if (len == 1)
 	{
 		return 0;
@@ -184,7 +183,7 @@ vword_t get_gb2312_code_addr(const byte_t* mbs)
 		return 0;
 	}
 
-	pb = xshare_lock(acp_gb2312, ind * sizeof(acp_table_t), sizeof(acp_table_t));
+	pb = (byte_t*)xshare_lock(acp_gb2312, ind * sizeof(acp_table_t), sizeof(acp_table_t));
 	if (!pb)
 	{
 		return 0;
@@ -196,14 +195,14 @@ vword_t get_gb2312_code_addr(const byte_t* mbs)
 	return bc;
 }
 
-bool_t set_gb2312_code_addr(const byte_t* mbs, vword_t addr)
+bool_t share_set_gb2312_code_addr(const byte_t* mbs, vword_t addr)
 {
 	int len;
 	unsigned short ch;
 	int ind;
 	byte_t* pb;
 
-	len = gb2312_code_sequence(*mbs);
+	len = acp_gb2312_code_sequence(*mbs);
 	if (len == 1)
 	{
 		return bool_false;
@@ -221,7 +220,7 @@ bool_t set_gb2312_code_addr(const byte_t* mbs, vword_t addr)
 		return bool_false;
 	}
 
-	pb = xshare_lock(acp_gb2312, ind * sizeof(acp_table_t), sizeof(acp_table_t));
+	pb = (byte_t*)xshare_lock(acp_gb2312, ind * sizeof(acp_table_t), sizeof(acp_table_t));
 	if (!pb)
 	{
 		return bool_false;
@@ -276,7 +275,7 @@ int share_unicode_seek_gb2312(unsigned short ucs, unsigned char* mbs)
 		return 1;
 	}
 
-	pb = xshare_lock(acp_unicode, ind * sizeof(acp_table_t), sizeof(acp_table_t));
+	pb = (byte_t*)xshare_lock(acp_unicode, ind * sizeof(acp_table_t), sizeof(acp_table_t));
 	if (!pb)
 	{
 		if (mbs)
@@ -318,7 +317,7 @@ int share_unicode_seek_help(unsigned short ucs, unsigned short* hlp)
 			bc = 0;
 		}
 
-		if (hlp) *hlp = bc;
+		if (bc && hlp) *hlp = bc;
 
 		return (bc) ? 1 : 0;
 	}
@@ -338,7 +337,7 @@ int share_unicode_seek_help(unsigned short ucs, unsigned short* hlp)
 		return 0;
 	}
 
-	pb = xshare_lock(acp_unicode, ind * sizeof(acp_table_t), sizeof(acp_table_t));
+	pb = (byte_t*)xshare_lock(acp_unicode, ind * sizeof(acp_table_t), sizeof(acp_table_t));
 	if (!pb)
 	{
 		if (hlp) *hlp = 0;
@@ -348,12 +347,12 @@ int share_unicode_seek_help(unsigned short ucs, unsigned short* hlp)
 	bc = GET_SWORD_LOC(pb, 2);
 	xshare_unlock(acp_gb2312, ind * sizeof(acp_table_t), sizeof(acp_table_t), pb);
 
-	if (hlp) *hlp = bc;
+	if (bc && hlp) *hlp = bc;
 
 	return (bc) ? 1 : 0;
 }
 
-vword_t get_unicode_code_addr(unsigned short ucs)
+vword_t share_get_unicode_code_addr(unsigned short ucs)
 {
 	int ind;
 	byte_t* pb;
@@ -375,7 +374,7 @@ vword_t get_unicode_code_addr(unsigned short ucs)
 		return 0;
 	}
 
-	pb = xshare_lock(acp_unicode, ind * sizeof(acp_table_t), sizeof(acp_table_t));
+	pb = (byte_t*)xshare_lock(acp_unicode, ind * sizeof(acp_table_t), sizeof(acp_table_t));
 	if (!pb)
 	{
 		return 0;
@@ -386,7 +385,7 @@ vword_t get_unicode_code_addr(unsigned short ucs)
 	return bc;
 }
 
-bool_t set_unicode_code_addr(unsigned short ucs, vword_t addr)
+bool_t share_set_unicode_code_addr(unsigned short ucs, vword_t addr)
 {
 	int ind;
 	byte_t* pb;
@@ -407,7 +406,7 @@ bool_t set_unicode_code_addr(unsigned short ucs, vword_t addr)
 		return 0;
 	}
 
-	pb = xshare_lock(acp_unicode, ind * sizeof(acp_table_t), sizeof(acp_table_t));
+	pb = (byte_t*)xshare_lock(acp_unicode, ind * sizeof(acp_table_t), sizeof(acp_table_t));
 	if (!pb)
 	{
 		return 0;
@@ -418,7 +417,7 @@ bool_t set_unicode_code_addr(unsigned short ucs, vword_t addr)
 	return bool_true;
 }
 
-static xhand_t load_acp_gb2312(const tchar_t* acp_file, const tchar_t* sha_file)
+static xhand_t share_load_acp_gb2312(const tchar_t* acp_file, const tchar_t* sha_file)
 {
 	xhand_t ah = NULL;
 	xhand_t sh = NULL;
@@ -480,7 +479,7 @@ static xhand_t load_acp_gb2312(const tchar_t* acp_file, const tchar_t* sha_file)
 			nxt++;
 			n++;
 		}
-		sw = a_hexntol(pre, n);
+		sw = a_hexntol((schar_t*)pre, n);
 		if (*nxt == ',')
 		{
 			nxt++;
@@ -498,7 +497,7 @@ static xhand_t load_acp_gb2312(const tchar_t* acp_file, const tchar_t* sha_file)
 			nxt++;
 			n++;
 		}
-		sw = a_hexntol(pre, n);
+		sw = a_hexntol((schar_t*)pre, n);
 		PUT_SWORD_LOC(pch, 0, sw);
 		if (*nxt == ',')
 		{
@@ -556,7 +555,7 @@ ONERROR:
 	return NULL;
 }
 
-static xhand_t load_acp_unicode(const tchar_t* acp_file, const tchar_t* sha_file)
+static xhand_t share_load_acp_unicode(const tchar_t* acp_file, const tchar_t* sha_file)
 {
 	xhand_t ah = NULL;
 	xhand_t sh = NULL;
@@ -618,7 +617,7 @@ static xhand_t load_acp_unicode(const tchar_t* acp_file, const tchar_t* sha_file
 			nxt++;
 			n++;
 		}
-		sw = a_hexntol(pre, n);
+		sw = a_hexntol((schar_t*)pre, n);
 		if (*nxt == ',')
 		{
 			nxt++;
@@ -636,7 +635,7 @@ static xhand_t load_acp_unicode(const tchar_t* acp_file, const tchar_t* sha_file
 			nxt++;
 			n++;
 		}
-		sw = a_hexntol(pre, n);
+		sw = a_hexntol((schar_t*)pre, n);
 		PUT_SWORD_LOC(pch, 0, sw);
 		if (*nxt == ',')
 		{
@@ -694,8 +693,7 @@ ONERROR:
 	return NULL;
 }
 
-
-bool_t acp_init()
+bool_t share_acp_init()
 {
 	tchar_t fpath[PATH_LEN + 1] = { 0 };
 
@@ -705,7 +703,7 @@ bool_t acp_init()
 	else
 		xscat(fpath, _T("/acp/gb2312.acp"));
 
-	acp_gb2312 = load_acp_gb2312(fpath, SHARE_GB2312_CODEPAGE);
+	acp_gb2312 = share_load_acp_gb2312(fpath, SHARE_GB2312_CODEPAGE);
 
 	get_runpath(NULL, fpath, PATH_LEN);
 	if (is_null(fpath))
@@ -713,12 +711,12 @@ bool_t acp_init()
 	else
 		xscat(fpath, _T("/acp/unicode.acp"));
 
-	acp_unicode = load_acp_unicode(fpath, SHARE_UNICODE_CODEPAGE);
+	acp_unicode = share_load_acp_unicode(fpath, SHARE_UNICODE_CODEPAGE);
 
 	return (acp_gb2312 && acp_unicode) ? bool_true : bool_false;
 }
 
-void acp_uninit()
+void share_acp_uninit()
 {
 	if (acp_gb2312)
 	{
@@ -733,4 +731,59 @@ void acp_uninit()
 	}
 }
 
+#if defined (DEBUG) || defined (_DEBUG)
+
+void share_acp_dump()
+{
+	byte_t* pb;
+	dword_t n;
+	int i;
+	acp_table_t* pt;
+	wchar_t wc[4] = {0};
+	schar_t sc[4] = {0};
+	schar_t py[2] = {0};
+
+	if (acp_gb2312)
+	{
+		n = CHS_GB2312_COUNT * sizeof(acp_table_t);
+		pb = (byte_t*)xshare_lock(acp_gb2312, 0, n);
+		if (pb)
+		{
+			for (i = 0; i < CHS_GB2312_COUNT; i++)
+			{
+				pt = (acp_table_t*)(pb + i * sizeof(acp_table_t));
+				wc[0] = GET_SWORD_LOC((byte_t*)pt, 0);
+				py[0] = (unsigned char)GET_SWORD_LOC((byte_t*)pt, 2);
+				if(wc[0]){
+					ucs_to_utf8(wc, 1, (byte_t *)sc, 4);
+					_tprintf(_T("unicode: %s, py: %s\n"), sc, py);
+				}
+			}
+			xshare_unlock(acp_gb2312, 0, n, pb);
+		}
+	}
+
+	if (acp_unicode)
+	{
+		n = CHS_UNICODE_COUNT * sizeof(acp_table_t);
+		pb = (byte_t*)xshare_lock(acp_unicode, 0, n);
+		if (pb)
+		{
+			for (i = 0; i < CHS_UNICODE_COUNT; i++)
+			{
+				pt = (acp_table_t*)(pb + i * sizeof(acp_table_t));
+				sc[0] = GETLBYTE(GET_SWORD_LOC((byte_t*)pt, 0));
+				sc[1] = GETHBYTE(GET_SWORD_LOC((byte_t*)pt, 0));
+				py[0] = (unsigned char)GET_SWORD_LOC((byte_t*)pt, 2);
+				if(sc[0] && sc[1]){
+					gb2312_to_utf8((byte_t *)sc, 2, (byte_t *)wc, 4);
+					_tprintf(_T("gb2312: %s, py: %s\n"), (char *)wc, py);
+				}
+			}
+			xshare_unlock(acp_unicode, 0, n, pb);
+		}
+	}
+}
+
+#endif
 

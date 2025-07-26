@@ -73,7 +73,7 @@ static int sub_editbox_keydown(res_win_t widget, dword_t ks, int nKey, uid_t sub
 	return 0;
 }
 
-static int sub_editbox_char(res_win_t widget, tchar_t ch, uid_t subid, vword_t delta)
+static int sub_editbox_wchar(res_win_t widget, wchar_t ch, uid_t subid, vword_t delta)
 {
 	res_win_t ctrl;
 	int index;
@@ -156,7 +156,7 @@ static int sub_editbox_self_command(res_win_t widget, int code, vword_t data, ui
 		if (widget_is_valid(ctrl))
 		{
 			widget_set_color_mode(ctrl, (clr_mod_t*)data);
-			widget_update(ctrl);
+			widget_paint(ctrl);
 		}
 		return 1;
 	case COMMAND_COMMIT:
@@ -251,16 +251,15 @@ static void sub_wordsbox_unsubbing(res_win_t widget, uid_t subid, vword_t delta)
 
 res_win_t firewords_create(res_win_t widget, const xrect_t* pxr, link_t_ptr data)
 {
-	res_win_t editor,ctrlbox = NULL;
+	res_win_t editor,ctrlbox = (res_win_t)0;
 	xsize_t xs;
 	xrect_t xr_ed, xr = { 0 };
 
 	if_subproc_t ev = { 0 };
-	xface_t xa = { 0 };
 
 	ev.sub_on_scroll = sub_editbox_scroll;
 	ev.sub_on_keydown = sub_editbox_keydown;
-	ev.sub_on_char = sub_editbox_char;
+	ev.sub_on_wchar = sub_editbox_wchar;
 	ev.sub_on_self_command = sub_editbox_self_command;
 	ev.sub_on_unsubbing = sub_editbox_unsubbing;
 	ev.sub_on_show = sub_editbox_show;
@@ -275,10 +274,6 @@ res_win_t firewords_create(res_win_t widget, const xrect_t* pxr, link_t_ptr data
 	}
 	widget_set_user_id(editor, IDC_EDITBOX);
 	widget_set_subproc(editor, IDS_EDITBOX, &ev);
-
-	widget_get_xface(editor, &xa);
-	xscpy(xa.text_wrap, NULL);
-	widget_set_xface(editor, &xa);
 
 	if (data)
 	{
@@ -321,7 +316,7 @@ res_win_t firewords_create(res_win_t widget, const xrect_t* pxr, link_t_ptr data
 
 		widget_move(ctrlbox, RECTPOINT(&xr));
 		widget_size(ctrlbox, RECTSIZE(&xr));
-		widget_update(ctrlbox);
+		widget_paint(ctrlbox);
 	}
 
 	return editor;

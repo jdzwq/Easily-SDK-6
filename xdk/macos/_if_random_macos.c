@@ -28,9 +28,19 @@ LICENSE.GPL3 for more details.
 
 #ifdef XDK_SUPPORT_RANDOM
 
-bool_t _system_random(byte_t *output, dword_t len)
+void _system_random32(dword_t* pn)
 {
-	return (0);
+	srand(time(NULL));
+
+	*pn = rand();
+}
+
+void _system_random64(lword_t* pn)
+{
+	srand(time(NULL));
+
+	*pn = rand() << 32;
+	*pn |= rand();
 }
 
 #endif //XDK_SUPPORT_RANDOM

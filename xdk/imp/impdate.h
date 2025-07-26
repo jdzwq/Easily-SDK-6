@@ -31,15 +31,6 @@ LICENSE.GPL3 for more details.
 
 #ifdef XDK_SUPPORT_DATE
 
-#define CALENDAR_COL	7
-#define CALENDAR_ROW	6
-
-typedef struct _calendar_t
-{
-	tchar_t calen_week[CALENDAR_COL][UTF_LEN + 1];
-	int calen_days[CALENDAR_ROW][CALENDAR_COL];
-}calendar_t;
-
 #ifdef	__cplusplus
 extern "C" {
 #endif
@@ -127,10 +118,6 @@ EXP_API void utc_date_from_ticks(xdate_t* pxd, lword_t ts);
 @RETURN void: none.
 */
 EXP_API void utc_date_from_timestamp(xdate_t* pxd, lword_t ts);
-
-EXP_API void default_calendar(calendar_t* pca);
-
-EXP_API void fill_calendar(calendar_t* pca, const xdate_t* pdt);
 
 #ifdef	__cplusplus
 }

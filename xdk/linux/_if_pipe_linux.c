@@ -79,9 +79,9 @@ wait_t _pipe_listen(res_file_t pip, async_t* pb)
         ev.events = EPOLLIN;
         ev.data.fd = pip; 
 
-        epoll_ctl(pb->port, EPOLL_CTL_ADD, pip, &ev);       
-        rs = epoll_wait(pb->port, &ev, 1, (int)pb->timo);
-        epoll_ctl(pb->port, EPOLL_CTL_DEL, pip, &ev); 
+        epoll_ctl(*((int*)pb->port), EPOLL_CTL_ADD, pip, &ev);       
+        rs = epoll_wait(*((int*)pb->port), &ev, 1, (int)pb->timo);
+        epoll_ctl(*((int*)pb->port), EPOLL_CTL_DEL, pip, &ev); 
 
         if(rs <= 0)
         {

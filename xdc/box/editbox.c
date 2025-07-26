@@ -37,6 +37,9 @@ typedef struct _editbox_delta_t{
 
 	bool_t b_lock;
 	bool_t b_auto;
+
+	xfont_t xf;
+	xface_t xa;
 }editbox_delta_t;
 
 #define GETEDITBOXDELTA(ph) 	(editbox_delta_t*)widget_get_user_delta(ph)
@@ -82,12 +85,9 @@ void _editbox_auto_resize(res_win_t widget)
 	xsize_t xs;
 	xrect_t xr;
 	int cx;
-	const xfont_t* pxf;
 	drawing_interface ifv = {0};
 
 	XDK_ASSERT(ptd != NULL);
-
-	pxf = widget_get_xfont_ptr(widget);
 
 	widget_get_window_rect(widget, &xr);
 
@@ -95,9 +95,9 @@ void _editbox_auto_resize(res_win_t widget)
 
 	get_visual_interface(ptd->textor.cdc, &ifv);
 
-	(*ifv.pf_text_metric)(ifv.ctx, pxf, &xs);
+	(*ifv.pf_text_metric)(ifv.ctx, &ptd->xf, &xs);
 	cx = xs.w;
-	(*ifv.pf_text_size)(ifv.ctx, pxf, string_ptr(vs), string_len(vs), &xs);
+	(*ifv.pf_text_size)(ifv.ctx, &ptd->xf, string_ptr(vs), string_len(vs), &xs);
 
 	if (xs.w + cx > xr.w)
 	{
@@ -105,7 +105,7 @@ void _editbox_auto_resize(res_win_t widget)
 		xs.h = xr.h;
 
 		widget_size(widget, &xs);
-		widget_update(widget);
+		widget_paint(widget);
 	}
 }
 
@@ -130,6 +130,9 @@ int hand_editbox_create(res_win_t widget, void* data)
 	ptd = (editbox_delta_t*)xmem_alloc(sizeof(editbox_delta_t));
 	xmem_zero((void*)ptd, sizeof(editbox_delta_t));
 
+	default_textor_xfont(&ptd->xf);
+	default_textor_xface(&ptd->xa);
+
 	ptd->textor.widget = widget;
 	ptd->textor.cdc = widget_client_ctx(widget);
 	ptd->textor.data = (void*)string_alloc();
@@ -139,6 +142,9 @@ int hand_editbox_create(res_win_t widget, void* data)
 	ptd->textor.pf_get_paging = _editbox_get_paging;
 	ptd->textor.max_undo = 1024;
 	ptd->textor.page = 1;
+
+	ptd->textor.pxf = &ptd->xf;
+	ptd->textor.pxa = &ptd->xa;
 
 	SETEDITBOXDELTA(widget, ptd);
 
@@ -168,7 +174,6 @@ void hand_editbox_destroy(res_win_t widget)
 	if (widget_is_valid(keybox))
 		widget_destroy(keybox);
 }
-
 
 void hand_editbox_copy(res_win_t widget)
 {
@@ -253,7 +258,6 @@ void hand_editbox_kill_focus(res_win_t widget, res_win_t wt)
 void hand_editbox_keydown(res_win_t widget, dword_t ks, int key)
 {
 	editbox_delta_t* ptd = GETEDITBOXDELTA(widget);
-	const xface_t* pxa;
 
 	switch (key)
 	{
@@ -278,8 +282,7 @@ void hand_editbox_keydown(res_win_t widget, dword_t ks, int key)
 	case KEY_ENTER:
 		if (widget_is_editor(widget))
 		{
-			pxa = widget_get_xface_ptr(widget);
-			if (is_null(pxa->text_wrap))
+			if (is_null(ptd->xa.text_wrap))
 			{
 				noti_editbox_command(widget, COMMAND_COMMIT, (vword_t)NULL);
 			}
@@ -301,8 +304,7 @@ void hand_editbox_keydown(res_win_t widget, dword_t ks, int key)
 
 		if (widget_is_editor(widget))
 		{
-			pxa = widget_get_xface_ptr(widget);
-			if (is_null(pxa->text_wrap))
+			if (is_null(ptd->xa.text_wrap))
 			{
 				noti_editbox_command(widget, COMMAND_TABORDER, (vword_t)TABORDER_UP);
 			}
@@ -313,8 +315,7 @@ void hand_editbox_keydown(res_win_t widget, dword_t ks, int key)
 
 		if (widget_is_editor(widget))
 		{
-			pxa = widget_get_xface_ptr(widget);
-			if (is_null(pxa->text_wrap))
+			if (is_null(ptd->xa.text_wrap))
 			{
 				noti_editbox_command(widget, COMMAND_TABORDER, (vword_t)TABORDER_DOWN);
 			}
@@ -322,28 +323,28 @@ void hand_editbox_keydown(res_win_t widget, dword_t ks, int key)
 		break;
 	case _T('c'):
 	case _T('C'):
-		if (widget_key_state(widget, KEY_CONTROL))
+		if (widget_key_state(widget, KS_WITH_CONTROL))
 		{
 			hand_editbox_copy(widget);
 		}
 		break;
 	case _T('x'):
 	case _T('X'):
-		if (widget_key_state(widget, KEY_CONTROL))
+		if (widget_key_state(widget, KS_WITH_CONTROL))
 		{
 			hand_editbox_cut(widget);
 		}
 		break;
 	case _T('v'):
 	case _T('V'):
-		if (widget_key_state(widget, KEY_CONTROL))
+		if (widget_key_state(widget, KS_WITH_CONTROL))
 		{
 			hand_editbox_paste(widget);
 		}
 		break;
 	case _T('z'):
 	case _T('Z'):
-		if (widget_key_state(widget, KEY_CONTROL))
+		if (widget_key_state(widget, KS_WITH_CONTROL))
 		{
 			hand_editbox_undo(widget);
 		}
@@ -351,7 +352,7 @@ void hand_editbox_keydown(res_win_t widget, dword_t ks, int key)
 	}
 }
 
-void hand_editbox_char(res_win_t widget, tchar_t ch)
+void hand_editbox_wchar(res_win_t widget, wchar_t ch)
 {
 	editbox_delta_t* ptd = GETEDITBOXDELTA(widget);
 
@@ -483,6 +484,20 @@ void hand_editbox_menu_command(res_win_t widget, int code, int cid, vword_t data
 	}
 }
 
+void hand_editbox_xfont(res_win_t widget, const xfont_t* pxf)
+{
+	editbox_delta_t* ptd = GETEDITBOXDELTA(widget);
+
+	xmem_copy((void*)&ptd->xf, (void*)pxf, sizeof(xfont_t));
+}
+
+void hand_editbox_xface(res_win_t widget, const xface_t* pxa)
+{
+	editbox_delta_t* ptd = GETEDITBOXDELTA(widget);
+
+	xmem_copy((void*)&ptd->xa, (void*)pxa, sizeof(xface_t));
+}
+
 void hand_editbox_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 {
 	editbox_delta_t* ptd = GETEDITBOXDELTA(widget);
@@ -508,7 +523,7 @@ void hand_editbox_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 
 res_win_t editbox_create(res_win_t widget, dword_t style, const xrect_t* pxr)
 {
-	if_event_t ev = { 0 };
+	if_dispatch_t ev = { 0 };
 	res_win_t wt;
 
 	EVENT_BEGIN_DISPATH(&ev)
@@ -522,7 +537,7 @@ res_win_t editbox_create(res_win_t widget, dword_t style, const xrect_t* pxr)
 		EVENT_ON_SCROLL(hand_editbox_scroll)
 
 		EVENT_ON_KEYDOWN(hand_editbox_keydown)
-		EVENT_ON_CHAR(hand_editbox_char)
+		EVENT_ON_WCHAR(hand_editbox_wchar)
 
 		EVENT_ON_MOUSE_MOVE(hand_editbox_mousemove)
 		EVENT_ON_LBUTTON_DBCLICK(hand_editbox_lbutton_dbclick)
@@ -536,13 +551,15 @@ res_win_t editbox_create(res_win_t widget, dword_t style, const xrect_t* pxr)
 		EVENT_ON_SET_FOCUS(hand_editbox_set_focus)
 		EVENT_ON_KILL_FOCUS(hand_editbox_kill_focus)
 
+		EVENT_ON_XFONT(hand_editbox_xfont)
+		EVENT_ON_XFACE(hand_editbox_xface)
+
 		EVENT_ON_NC_IMPLEMENT
 
 	EVENT_END_DISPATH
 
 	wt = widget_create(NULL, style, pxr, widget, &ev);
-	if (!wt)
-		return NULL;
+	if (!wt) return (res_win_t)0;
 
 	/*widget_get_xface(wt, &xa);
 	xscpy(xa.text_wrap, GDI_ATTR_TEXT_WRAP_LINEBREAK);
@@ -633,13 +650,10 @@ bool_t editbox_is_select(res_win_t widget)
 bool_t editbox_is_multiline(res_win_t widget)
 {
 	editbox_delta_t* ptd = GETEDITBOXDELTA(widget);
-	xface_t xa = { 0 };
 
 	XDK_ASSERT(ptd != NULL);
 
-	widget_get_xface(widget, &xa);
-
-	return is_null(xa.text_wrap) ? 0 : 1;
+	return is_null(ptd->xa.text_wrap) ? 0 : 1;
 }
 
 void editbox_auto_size(res_win_t widget, bool_t bSize)
@@ -690,7 +704,7 @@ res_win_t editbox_create_keybox(res_win_t widget, dword_t style, const xrect_t* 
 
 	widget_size(keybox, RECTSIZE(&xr));
 	widget_take(keybox, (int)WS_TAKE_TOP);
-	widget_update(keybox);
+	widget_paint(keybox);
 	widget_show(keybox, WS_SHOW_NORMAL);
 
 	widget_set_user_prop(editbox, XDCKEYBOX, (vword_t)keybox);
@@ -702,4 +716,3 @@ res_win_t editbox_get_keybox(res_win_t widget)
 {
 	return (res_win_t)widget_get_user_prop(widget, XDCKEYBOX);
 }
-

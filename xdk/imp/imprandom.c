@@ -26,12 +26,11 @@ LICENSE.GPL3 for more details.
 
 #include "imprandom.h"
 
-#include "../xdkimp.h"
 #include "../xdkstd.h"
 
 #ifdef XDK_SUPPORT_RANDOM
 
-bool_t system_random(byte_t* buf, dword_t size)
+void system_random32(dword_t* pn)
 {
 	if_random_t* pif;
 
@@ -39,8 +38,20 @@ bool_t system_random(byte_t* buf, dword_t size)
 
 	XDK_ASSERT(pif != NULL);
 
-	return (*pif->pf_system_random)(buf, size);
+	return (*pif->pf_system_random32)(pn);
 }
+
+void system_random64(lword_t* pn)
+{
+	if_random_t* pif;
+
+	pif = PROCESS_RANDOM_INTERFACE;
+
+	XDK_ASSERT(pif != NULL);
+
+	return (*pif->pf_system_random64)(pn);
+}
+
 
 
 #endif /*XDK_SUPPORT_RANDOM*/

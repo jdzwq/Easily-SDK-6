@@ -602,15 +602,31 @@ LOC_API void	draw_bitmap_raw(visual_t rdc, bitmap_t bmp, const xpoint_t* ppt);
 */
 LOC_API void	draw_bitmap(canvas_t canv, bitmap_t bmp, const xpoint_t* ppt);
 
+
 /****************************************************************************************************************************/
+/*
+@FUNCTION invert_rect_raw: invert draw the rect in memory or device context using points coordinate.
+@INPUT visual_t rdc: the context resource handle.
+@INPUT const xrect_t* pxr: the rect struct using integer member.
+@RETURN void: none.
+*/
+LOC_API void	invert_rect_raw(visual_t rdc, const xrect_t* pxr);
 
 /*
-@FUNCTION exclip_rect_raw: clip the rect outside in memory or device context using points coordinate.
+@FUNCTION exclip_rect_raw: exclude the rect outside drawing face in memory or device context using points coordinate.
 @INPUT visual_t rdc: the context resource handle.
 @INPUT const xrect_t* pxr: the rect struct using integer member.
 @RETURN void: none.
 */
 LOC_API void	exclude_rect_raw(visual_t rdc, const xrect_t* pxr);
+
+/*
+@FUNCTION inclip_rect_raw: clip the rect inside drawing face in memory or device context using points coordinate.
+@INPUT visual_t rdc: the context resource handle.
+@INPUT const xrect_t* pxr: the rect struct using integer member.
+@RETURN void: none.
+*/
+LOC_API void	inclip_rect_raw(visual_t rdc, const xrect_t* pxr);
 
 /*
 @FUNCTION gradient_rect_raw: gradient a rect in memory or device context using points coordinate.
@@ -632,15 +648,6 @@ LOC_API void	gradient_rect_raw(visual_t rdc, const xcolor_t* xc_brim, const xcol
 @RETURN void: none.
 */
 LOC_API void	alphablend_rect_raw(visual_t rdc, const xcolor_t* pxc, const xrect_t* prt, int opacity);
-
-/*
-@FUNCTION fill_region_raw: fill the windows region in memory or device context using points coordinate.
-@INPUT visual_t rdc: the context resource handle.
-@INPUT const xbrush_t* pxb: the brush struct.
-@INPUT res_rgn_t rgn: the resion resource handle.
-@RETURN void: none.
-*/
-LOC_API void	fill_region_raw(visual_t rdc, const xbrush_t* pxb, res_rgn_t rgn);
 
 #ifdef	__cplusplus
 }

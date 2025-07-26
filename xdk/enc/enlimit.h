@@ -43,6 +43,8 @@ LICENSE.GPL3 for more details.
 #define ROUNDINT(d)		(int)((d<0.0)? (d - 0.5) : (d + 0.5))
 
 /*define max integer value*/
+#define MAX_LONGLONG	9223372036854775807 //0x7fffffffffffffff
+#define MIN_LONGLONG	-9223372036854775808 //0x8000000000000000
 #define MAX_LONG        2147483647		//0x7fffffff
 #define MIN_LONG		-2147483648		//0x80000000
 #define MAX_SHORT       32767			//0x7fff

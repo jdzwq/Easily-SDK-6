@@ -69,9 +69,6 @@ extern "C" {
 
 	EXP_API dword_t message_decode(message_t msg, const byte_t* data);
 
-#if defined(XDK_SUPPORT_TEST)
-	EXP_API void test_message(void);
-#endif
 
 #ifdef	__cplusplus
 }

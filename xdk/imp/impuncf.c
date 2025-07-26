@@ -26,9 +26,7 @@ LICENSE.GPL3 for more details.
 
 #include "impuncf.h"
 
-#include "../xdkimp.h"
 #include "../xdkstd.h"
-#include "../xdkutil.h"
 
 #ifdef XDK_SUPPORT_FILE
 
@@ -134,7 +132,7 @@ int xuncf_file_encode(const secu_desc_t* psd, const tchar_t* fname)
 		return 0;
 
 	dw = 3;
-	if (!xuncf_read_file(xh, (void*)ba, &dw))
+	if (!xuncf_read_file(xh, ba, &dw))
 		return 0;
 
 	xuncf_close_file(xh);
@@ -446,7 +444,7 @@ void xuncf_unlock_file_range(xhand_t unc, dword_t hoff, dword_t loff, dword_t dw
 	(*pif->pf_file_unlock_range)(mh, hoff, loff, dw, p);
 }
 
-bool_t uncf_contextruncate(xhand_t unc, dword_t hoff, dword_t loff)
+bool_t xuncf_truncate(xhand_t unc, dword_t hoff, dword_t loff)
 {
 	uncf_context* pcf = TypePtrFromHead(uncf_context, unc);
 
@@ -609,7 +607,7 @@ bool_t xuncf_list_file(const secu_desc_t* psd, const tchar_t* path, CALLBACK_LIS
 	}
 
 	do{
-		if (compare_text(fi.file_name, -1, _T("."), -1, 0) == 0 || compare_text(fi.file_name, -1, _T(".."), -1, 0) == 0)
+		if (xsncmp(fi.file_name, _T("."), 1) == 0 || xsncmp(fi.file_name, _T(".."), 2) == 0)
 		{
 			continue;
 		}

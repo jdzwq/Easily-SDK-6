@@ -26,7 +26,6 @@ LICENSE.GPL3 for more details.
 
 #include "impcache.h"
 
-#include "../xdkimp.h"
 #include "../xdkstd.h"
 
 
@@ -155,6 +154,20 @@ bool_t xcache_write(xhand_t cache, const byte_t* buf, dword_t* pb)
 	}
 
 	return rt;
+}
+
+bool_t xcache_protect(xhand_t cache,  bool_t b)
+{
+	cache_context* ppt = TypePtrFromHead(cache_context, cache);
+	if_memo_t* pif;
+
+	XDK_ASSERT(cache && cache->tag == _HANDLE_CACHE);
+
+	pif = PROCESS_MEMO_INTERFACE;
+
+	XDK_ASSERT(pif != NULL);
+
+	return (*pif->pf_cache_protect)(ppt->cache, b);
 }
 
 #endif //XDK_SUPPORT_MEMO_CACHE

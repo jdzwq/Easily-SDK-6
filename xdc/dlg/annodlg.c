@@ -454,7 +454,7 @@ void hand_annodlg_size(res_win_t widget, int code, const xsize_t* prs)
 	{
 		widget_move(ctrl, RECTPOINT(&xr));
 		widget_size(ctrl, RECTSIZE(&xr));
-		widget_update(ctrl);
+		widget_paint(ctrl);
 	}
 
 	xs.fw = ANNODLG_BUTTON_WIDTH;
@@ -470,7 +470,7 @@ void hand_annodlg_size(res_win_t widget, int code, const xsize_t* prs)
 	{
 		widget_move(ctrl, RECTPOINT(&xr));
 		widget_size(ctrl, RECTSIZE(&xr));
-		widget_update(ctrl);
+		widget_paint(ctrl);
 	}
 
 	widget_get_client_rect(widget, &xr);
@@ -491,7 +491,7 @@ void hand_annodlg_size(res_win_t widget, int code, const xsize_t* prs)
 	{
 		widget_move(ctrl, RECTPOINT(&xr));
 		widget_size(ctrl, RECTSIZE(&xr));
-		widget_update(ctrl);
+		widget_paint(ctrl);
 	}
 
 	xr.x -= (xr.w + nSplit);
@@ -501,7 +501,7 @@ void hand_annodlg_size(res_win_t widget, int code, const xsize_t* prs)
 	{
 		widget_move(ctrl, RECTPOINT(&xr));
 		widget_size(ctrl, RECTSIZE(&xr));
-		widget_update(ctrl);
+		widget_paint(ctrl);
 	}
 
 	xs.fw = ANNODLG_BUTTON_WIDTH;
@@ -520,7 +520,7 @@ void hand_annodlg_size(res_win_t widget, int code, const xsize_t* prs)
 	{
 		widget_move(ctrl, RECTPOINT(&xr));
 		widget_size(ctrl, RECTSIZE(&xr));
-		widget_update(ctrl);
+		widget_paint(ctrl);
 	}
 
 	xr.x += (xr.w + nSplit);
@@ -530,7 +530,7 @@ void hand_annodlg_size(res_win_t widget, int code, const xsize_t* prs)
 	{
 		widget_move(ctrl, RECTPOINT(&xr));
 		widget_size(ctrl, RECTSIZE(&xr));
-		widget_update(ctrl);
+		widget_paint(ctrl);
 	}
 
 	widget_erase(widget, NULL);
@@ -608,7 +608,7 @@ void hand_annodlg_notice(res_win_t widget, NOTICE* pnt)
 	if (!ptd->photo)
 		return;
 
-	if (pnt->id == IDC_ANNODLG_PHOTO)
+	if (pnt->user == IDC_ANNODLG_PHOTO)
 	{
 		pnp = (NOTICE_PHOTO*)pnt;
 		switch (pnp->code)
@@ -624,11 +624,6 @@ void hand_annodlg_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 {
 	annodlg_delta_t* ptd = GETANNODLGDELTA(widget);
 
-	xfont_t xf = { 0 };
-	xface_t xa = { 0 };
-	xpen_t xp = { 0 };
-	xbrush_t xb = { 0 };
-	xcolor_t xc_brim, xc_core;
 	xrect_t xr,xr_bar;
 	xsize_t xs;
 
@@ -636,11 +631,15 @@ void hand_annodlg_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 	canvas_t canv;
 	drawing_interface ifv = {0};
 
-	widget_get_xfont(widget, &xf);
-	widget_get_xface(widget, &xa);
+	clr_mod_t clrs;
+	xbrush_t xb = { 0 };
+	xcolor_t xc_brim, xc_core;
 
-	widget_get_xbrush(widget, &xb);
-	widget_get_xpen(widget, &xp);
+	widget_get_color_mode(widget, &clrs);
+	default_xbrush(&xb);
+	format_xcolor(&clrs.clr_bkg, xb.color);
+	xmem_copy((void*)&xc_brim, (void*)&clrs.clr_bkg, sizeof(xcolor_t));
+	xmem_copy((void*)&xc_core, (void*)&clrs.clr_bkg, sizeof(xcolor_t));
 
 	widget_get_client_rect(widget, &xr);
 
@@ -674,7 +673,7 @@ void hand_annodlg_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 /***************************************************************************************/
 res_win_t annodlg_create(const tchar_t* title, string_t var, res_win_t owner)
 {
-	if_event_t ev = { 0 };
+	if_dispatch_t ev = { 0 };
 	clr_mod_t clr = { 0 };
 	xrect_t xr = { 0 };
 	xsize_t xs = { 0 };
@@ -699,8 +698,7 @@ res_win_t annodlg_create(const tchar_t* title, string_t var, res_win_t owner)
 	EVENT_END_DISPATH
 
 	dlg = widget_create(NULL, WD_STYLE_DIALOG, &xr, owner, &ev);	
-	if (!dlg)
-		return NULL;
+	if (!dlg) return (res_win_t)0;
 
 	widget_set_owner(dlg, owner);
 	widget_set_user_id(dlg, IDC_ANNODLG);
@@ -713,7 +711,7 @@ res_win_t annodlg_create(const tchar_t* title, string_t var, res_win_t owner)
 	widget_adjust_size(WD_STYLE_DIALOG, &xs);
 
 	widget_size(dlg, &xs);
-	widget_update(dlg);
+	widget_paint(dlg);
 
 	widget_center_window(dlg, owner);
 

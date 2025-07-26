@@ -33,60 +33,111 @@ LICENSE.GPL3 for more details.
 
 #ifdef XDK_SUPPORT_MBCS
 
+
 int c_gbk_to_ucs(const schar_t* gbk, int len, wchar_t* ucs, int max)
 {
+    int n, total = 0;
+
     if(len < 0)
         len = (int)strlen(gbk);
     
-    setlocale(P_ALL, "zh_CN.GBK");
+    setlocale(P_ALL, "zh_CN.GB2312");
     
-    len = (int)mbstowcs(ucs, gbk, len);
+    while(len && total < max)
+    {
+        n = mblen(gbk, len);
+        if(ucs)
+        {
+            mbtowc(ucs + total, gbk, n);
+        }
+	    total ++;
+        len -= n;
+        gbk += n;
+    }
     
     setlocale(P_ALL, "");
     
-    return len;
+    return total;
 }
 
 int c_ucs_to_gbk(const wchar_t* ucs, int len, schar_t* gbk, int max)
 {
+    int n, total = 0;
+    char chs[4];
+
 	if(len < 0)
         len = (int)wcslen(ucs);
     
-    setlocale(P_ALL, "zh_CN.GBK");
+    setlocale(P_ALL, "zh_CN.GB2312");
     
-    len = (int)wcstombs(gbk, ucs, len);
+   while(len && total < max)
+    {
+        if(gbk)
+            n = wctomb(gbk + total, *ucs);
+        else
+            n = wctomb(chs, *ucs);
+
+        total += n;
+        len --;
+        ucs ++;
+    }
     
     setlocale(P_ALL, "");
-   
-    return len;
+
+    return total;
 }
 
 int c_utf_to_ucs(const schar_t* utf, int len, wchar_t* ucs, int max)
 {
+    int n, total = 0;
+
     if(len < 0)
         len = (int)strlen(utf);
     
     setlocale(P_ALL, "zh_CN.UTF-8");
     
-	len = (int)mbstowcs(ucs, utf, len);
+    while(len && total < max)
+    {
+        n = mblen(utf, len);
+        if(ucs)
+        {
+            mbtowc(ucs + total, utf, n);
+        }
+	    total ++;
+        len -= n;
+        utf += n;
+    }
     
     setlocale(P_ALL, "");
     
-    return len;
+    return total;
 }
 
 int c_ucs_to_utf(const wchar_t* ucs, int len, schar_t* utf, int max)
 {
+    int n, total = 0;
+    char chs[4];
+
     if(len < 0)
         len = (int)wcslen(ucs);
     
     setlocale(P_ALL, "zh_CN.UTF-8");
     
-    len = (int)wcstombs(utf, ucs, len);
-    
+    while(len && total < max)
+    {
+        if(utf)
+            n = wctomb(utf + total, *ucs);
+        else
+            n = wctomb(chs, *ucs);
+
+        total += n;
+        len --;
+        ucs ++;
+    }
+   
     setlocale(P_ALL, "");
     
-    return len;
+    return total;
 }
 
 #endif

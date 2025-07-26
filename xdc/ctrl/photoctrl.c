@@ -289,16 +289,20 @@ static bitmap_t _photoctrl_merge_anno(res_win_t widget)
 
 	visual_t rdc, memdc;
 	bitmap_t membm;
-	xcolor_t xc = { 0 };
-	xbrush_t xb = { 0 };
 	xrect_t xr = { 0 };
 	xsize_t xs;
 	link_t_ptr ilk;
 	drawing_interface ifv = {0};
 
-	if (!ptd->bmp && !ptd->anno)
-		return NULL;
+	clr_mod_t clrs;
+	xbrush_t xb;
 
+	if (!ptd->bmp && !ptd->anno) return NULL;
+
+	widget_get_color_mode(widget, &clrs);
+	default_xbrush(&xb);
+	format_xcolor(&clrs.clr_bkg, xb.color);
+	
 	rdc = widget_client_ctx(widget);
 
 	get_bitmap_size(ptd->bmp, &xs.w, &xs.h);
@@ -312,7 +316,6 @@ static bitmap_t _photoctrl_merge_anno(res_win_t widget)
 	xr.w = xs.w;
 	xr.h = xs.h;
 
-	widget_get_xbrush(widget, &xb);
 	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
 
 	(*ifv.pf_draw_bitmap)(ifv.ctx, ptd->bmp, RECTPOINT(&xr));
@@ -606,7 +609,7 @@ void noti_photo_commit_edit(res_win_t widget)
 	}
 
 	editctrl = ptd->editor;
-	ptd->editor = NULL;
+	ptd->editor = (res_win_t)0;
 
 	widget_destroy(editctrl);
 
@@ -632,7 +635,7 @@ void noti_photo_rollback_edit(res_win_t widget)
 	noti_photo_owner(widget, NC_PHOTOANNOROLLBACK, ptd->arti, NULL, NULL);
 
 	editctrl = ptd->editor;
-	ptd->editor = NULL;
+	ptd->editor = (res_win_t)0;
 
 	widget_destroy(editctrl);
 	widget_set_focus(widget);
@@ -658,7 +661,7 @@ void noti_photo_reset_scroll(res_win_t widget, bool_t bUpdate)
 	if (widget_is_valid(ptd->vsc))
 	{
 		if (bUpdate)
-			widget_update(ptd->vsc);
+			widget_paint(ptd->vsc);
 		else
 			widget_close(ptd->vsc, 0);
 	}
@@ -666,7 +669,7 @@ void noti_photo_reset_scroll(res_win_t widget, bool_t bUpdate)
 	if (widget_is_valid(ptd->hsc))
 	{
 		if (bUpdate)
-			widget_update(ptd->hsc);
+			widget_paint(ptd->hsc);
 		else
 			widget_close(ptd->hsc, 0);
 	}
@@ -923,7 +926,7 @@ void hand_photo_wheel(res_win_t widget, bool_t bHorz, int nDelta)
 			}
 			else
 			{
-				widget_update(ptd->vsc);
+				widget_paint(ptd->vsc);
 			}
 		}
 
@@ -935,7 +938,7 @@ void hand_photo_wheel(res_win_t widget, bool_t bHorz, int nDelta)
 			}
 			else
 			{
-				widget_update(ptd->hsc);
+				widget_paint(ptd->hsc);
 			}
 		}
 
@@ -958,14 +961,14 @@ void hand_photo_keydown(res_win_t widget, dword_t ks, int key)
 	{
 		noti_photo_begin_edit(widget);
 	}
-	else if ((key == _T('z') || key == _T('Z')) && widget_key_state(widget, KEY_CONTROL))
+	else if ((key == _T('z') || key == _T('Z')) && widget_key_state(widget, KS_WITH_CONTROL))
 	{
 		_photoctrl_undo(widget);
-	}else if ((key == _T('c') || key == _T('C')) && widget_key_state(widget, KEY_CONTROL))
+	}else if ((key == _T('c') || key == _T('C')) && widget_key_state(widget, KS_WITH_CONTROL))
 	{
 		_photoctrl_copy(widget);
 	}
-	else if ((key == _T('x') || key == _T('X')) && widget_key_state(widget, KEY_CONTROL))
+	else if ((key == _T('x') || key == _T('X')) && widget_key_state(widget, KS_WITH_CONTROL))
 	{
 		_photoctrl_done(widget);
 
@@ -974,7 +977,7 @@ void hand_photo_keydown(res_win_t widget, dword_t ks, int key)
 			_photoctrl_discard(widget);
 		}
 	}
-	else if ((key == _T('v') || key == _T('V')) && widget_key_state(widget, KEY_CONTROL))
+	else if ((key == _T('v') || key == _T('V')) && widget_key_state(widget, KS_WITH_CONTROL))
 	{
 		_photoctrl_done(widget);
 
@@ -1039,31 +1042,26 @@ void hand_photo_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 {
 	photo_delta_t* ptd = GETPHOTODELTA(widget);
 	visual_t rdc;
-	xfont_t xf = { 0 };
-	xface_t xa = { 0 };
-	xpen_t xp = { 0 };
-	xbrush_t xb = { 0 };
-	xcolor_t xc = { 0 };
 	xrect_t xr;
 
 	canvas_t canv;
 	const drawing_interface* pif = NULL;
 	drawing_interface ifv = {0};
 
-	widget_get_xfont(widget, &xf);
-	widget_get_xface(widget, &xa);
+	clr_mod_t clrs;
+	xbrush_t xb;
+	xcolor_t xc;
 
-	widget_get_xbrush(widget, &xb);
-	widget_get_xpen(widget, &xp);
+	widget_get_color_mode(widget, &clrs);
+	format_xcolor(&clrs.clr_bkg, xb.color);
 
 	widget_get_client_rect(widget, &xr);
 
 	canv = widget_get_canvas(widget);
 	pif = widget_get_canvas_interface(widget);
 	
-
 	rdc = begin_canvas_paint(canv, dc, xr.w, xr.h);
-		
+	
 	get_visual_interface(rdc, &ifv);
 	
 	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
@@ -1088,20 +1086,15 @@ void hand_photo_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 
 		parse_xcolor(&xc, DEF_ALARM_COLOR);
 		draw_select_raw(&ifv, &xc, &xr, ALPHA_SOLID);
-
-
 	}
-		
 	
-
 	end_canvas_paint(canv, dc, pxr);
-	
 }
 
 /***************************************************************************************/
 res_win_t photoctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, res_win_t wparent)
 {
-	if_event_t ev = { 0 };
+	if_dispatch_t ev = { 0 };
 
 	EVENT_BEGIN_DISPATH(&ev)
 

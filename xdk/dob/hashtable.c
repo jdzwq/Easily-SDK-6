@@ -26,10 +26,8 @@ LICENSE.GPL3 for more details.
 
 #include "hashtable.h"
 
-#include "../xdkimp.h"
-#include "../xdkoem.h"
 #include "../xdkstd.h"
-#include "../xdkutil.h"
+#include "../xdkobj.h"
 
 typedef struct _hash_entity_t{
 	link_t lk;				/* entity self link component*/
@@ -1233,46 +1231,3 @@ int hash_table_format_options(link_t_ptr ptr, tchar_t* buf, int max, tchar_t ite
 
 	return format_options(buf, max, itemfeed, linefeed, (void*)&he, _on_format_token);
 }
-
-
-#if defined(XDK_SUPPORT_TEST)
-void test_hash_table()
-{
-	key32_t i,total = 0;
-	int min,max,count, zero = 0;
-	link_t_ptr ptr;
-	hash_table_t* pht;
-
-	ptr = create_hash_table();
-
-	for (i = 0x4E00; i <= 0x9FA5; i++)
-	{
-		write_hash_attr(ptr, (tchar_t*)&i, 1, NULL, 0);
-	}
-
-	pht = HashTableFromLink(ptr);
-	min = pht->size;
-	max = 0;
-
-	for (i = 0; i < pht->size; i++)
-	{
-		count = get_link_count(&((pht->pp)[i]));
-		printf("entity size is:%d\n", count);
-		total += count;
-		if (!count)
-			zero++;
-		if (min > count)
-			min = count;
-		if (max < count)
-			max = count;
-	}
-
-	printf("table size is:%d\n", pht->size);
-	printf("zero eintities is:%d\n", zero);
-	printf("max eintities is:%d\n", max);
-	printf("min eintities is:%d\n", min);
-	printf("total entities is:%d\n", total);
-
-	destroy_hash_table(ptr);
-}
-#endif

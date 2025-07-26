@@ -26,7 +26,6 @@ LICENSE.GPL3 for more details.
 
 #include "impshare.h"
 
-#include "../xdkimp.h"
 #include "../xdkstd.h"
 
 #ifdef XDK_SUPPORT_SHARE

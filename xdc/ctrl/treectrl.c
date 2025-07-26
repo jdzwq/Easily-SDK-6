@@ -362,7 +362,6 @@ void noti_tree_begin_edit(res_win_t widget)
 	xrect_t xr = { 0 };
 
 	clr_mod_t ob = { 0 };
-	xfont_t xf = { 0 };
 
 	XDK_ASSERT(ptd->item);
 
@@ -374,9 +373,6 @@ void noti_tree_begin_edit(res_win_t widget)
 
 	if (get_tree_item_locked(ptd->item))
 		return;
-
-	widget_get_xfont(widget, &xf);
-	parse_xfont_from_style(&xf, get_tree_style_ptr(ptd->tree));
 
 	widget_get_color_mode(widget, &ob);
 
@@ -393,7 +389,6 @@ void noti_tree_begin_edit(res_win_t widget)
 	widget_set_owner(ptd->editor, widget);
 	editbox_auto_size(ptd->editor, 1);
 
-	widget_set_xfont(ptd->editor, &xf);
 	widget_set_color_mode(ptd->editor, &ob);
 
 	widget_show(ptd->editor, WS_SHOW_NORMAL);
@@ -423,7 +418,7 @@ void noti_tree_commit_edit(res_win_t widget)
 	}
 
 	editctrl = ptd->editor;
-	ptd->editor = NULL;
+	ptd->editor = (res_win_t)0;
 
 	widget_destroy(editctrl);
 	widget_set_focus(widget);
@@ -442,7 +437,7 @@ void noti_tree_rollback_edit(res_win_t widget)
 	noti_tree_owner(widget, NC_TREEITEMROLLBACK, ptd->tree, ptd->item, NULL);
 
 	editctrl = ptd->editor;
-	ptd->editor = NULL;
+	ptd->editor = (res_win_t)0;
 
 	widget_destroy(editctrl);
 	widget_set_focus(widget);
@@ -468,7 +463,7 @@ void noti_tree_reset_scroll(res_win_t widget, bool_t bUpdate)
 	if (widget_is_valid(ptd->vsc))
 	{
 		if (bUpdate)
-			widget_update(ptd->vsc);
+			widget_paint(ptd->vsc);
 		else
 			widget_close(ptd->vsc, 0);
 	}
@@ -762,14 +757,6 @@ void hand_tree_keydown(res_win_t widget, dword_t ks, int nKey)
 	}
 }
 
-void hand_tree_char(res_win_t widget, tchar_t nChar)
-{
-	tree_delta_t* ptd = GETTREEDELTA(widget);
-
-	if (!ptd->tree)
-		return;
-}
-
 void hand_tree_scroll(res_win_t widget, bool_t bHorz, int nLine)
 {
 	tree_delta_t* ptd = GETTREEDELTA(widget);
@@ -811,7 +798,7 @@ void hand_tree_wheel(res_win_t widget, bool_t bHorz, int nDelta)
 			}
 			else
 			{
-				widget_update(ptd->vsc);
+				widget_paint(ptd->vsc);
 			}
 		}
 
@@ -845,22 +832,22 @@ void hand_tree_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 {
 	tree_delta_t* ptd = GETTREEDELTA(widget);
 	visual_t rdc;
-	xfont_t xf = { 0 };
-	xbrush_t xb = { 0 };
-	xpen_t xp = { 0 };
-	xcolor_t xc = { 0 };
 	xrect_t xr = { 0 };
 
 	canvas_t canv;
 	const drawing_interface* pif = NULL;
 	drawing_interface ifv = {0};
 
-	if (!ptd->tree)
-		return;
+	clr_mod_t clrs;
+	xbrush_t xb;
+	xcolor_t xc;
 
-	widget_get_xfont(widget, &xf);
-	widget_get_xbrush(widget, &xb);
-	widget_get_xpen(widget, &xp);
+	if (!ptd->tree) return;
+
+	widget_get_color_mode(widget, &clrs);
+	default_xbrush(&xb);
+	format_xcolor(&clrs.clr_bkg, xb.color);
+	xmem_copy((void*)&xc, (void*)&clrs.clr_bkg, sizeof(xcolor_t));
 
 	canv = widget_get_canvas(widget);
 
@@ -897,7 +884,7 @@ void hand_tree_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 
 res_win_t treectrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, res_win_t wparent)
 {
-	if_event_t ev = { 0 };
+	if_dispatch_t ev = { 0 };
 
 	EVENT_BEGIN_DISPATH(&ev)
 
@@ -912,7 +899,6 @@ res_win_t treectrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* p
 		EVENT_ON_WHEEL(hand_tree_wheel)
 
 		EVENT_ON_KEYDOWN(hand_tree_keydown)
-		EVENT_ON_CHAR(hand_tree_char)
 
 		EVENT_ON_MOUSE_MOVE(hand_tree_mouse_move)
 		EVENT_ON_MOUSE_HOVER(hand_tree_mouse_hover)
@@ -1036,7 +1022,7 @@ void treectrl_redraw(res_win_t widget)
 
 	_treectrl_reset_page(widget);
 
-	widget_update(widget);
+	widget_paint(widget);
 }
 
 void treectrl_redraw_item(res_win_t widget, link_t_ptr ilk)

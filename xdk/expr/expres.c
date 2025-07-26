@@ -31,8 +31,8 @@ LICENSE.GPL3 for more details.
 
 #include "expres.h"
 
-#include "../xdkimp.h"
 #include "../xdkstd.h"
+#include "../xdkobj.h"
 
 /*define some exption operator reserve words function*/
 #define OP_AND		_T("AND")

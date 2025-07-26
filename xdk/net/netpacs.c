@@ -27,10 +27,9 @@ LICENSE.GPL3 for more details.
 #include "netpacs.h"
 
 #include "../xdknet.h"
-#include "../xdkimp.h"
 #include "../xdkoem.h"
 #include "../xdkstd.h"
-#include "../xdkutil.h"
+#include "../xdkobj.h"
 
 pnet_t* pnet_scu(xhand_t bio)
 {

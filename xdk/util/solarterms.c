@@ -26,9 +26,7 @@ LICENSE.GPL3 for more details.
 
 #include "solarterms.h"
 
-#include "../xdkimp.h"
 #include "../xdkstd.h"
-#include "../xdkutil.h"
 
 typedef struct _SOLARTERMS{
 	tchar_t date[DATE_LEN + 1];

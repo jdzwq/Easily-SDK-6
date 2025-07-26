@@ -28,24 +28,50 @@ LICENSE.GPL3 for more details.
 
 #ifdef XDK_SUPPORT_RANDOM
 
-bool_t _system_random(byte_t *output, dword_t len)
+void _system_random32(dword_t* pn)
 {
 	HCRYPTPROV provider;
+	BYTE buf[4];
 
 	if (CryptAcquireContext(&provider, NULL, NULL, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT) == FALSE)
 	{
-		return 0;
+		*pn = 0;
+		return;
 	}
 
-	if (CryptGenRandom(provider, (DWORD)len, output) == FALSE)
+	if (CryptGenRandom(provider, 4, buf) == FALSE)
 	{
 		CryptReleaseContext(provider, 0);
-		return 0;
+		*pn = 0;
+		return;
 	}
 
-	CryptReleaseContext(provider, 0);
+	*pn = GET_DWORD_LIT(buf, 0);
 
-	return 1;
+	CryptReleaseContext(provider, 0);
+}
+
+void _system_random64(lword_t* pn)
+{
+	HCRYPTPROV provider;
+	BYTE buf[8];
+
+	if (CryptAcquireContext(&provider, NULL, NULL, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT) == FALSE)
+	{
+		*pn = 0;
+		return;
+	}
+
+	if (CryptGenRandom(provider, 8, buf) == FALSE)
+	{
+		CryptReleaseContext(provider, 0);
+		*pn = 0;
+		return;
+	}
+
+	*pn = GET_LWORD_LIT(buf, 0);
+
+	CryptReleaseContext(provider, 0);
 }
 
 #endif //XDK_SUPPORT_RANDOM

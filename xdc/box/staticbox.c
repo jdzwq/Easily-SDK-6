@@ -31,8 +31,9 @@ LICENSE.GPL3 for more details.
 
 typedef struct _staticbox_delta_t{
 	tchar_t* text;
-
 	int bw,bh;
+
+	xfont_t xf;
 }staticbox_delta_t;
 
 #define GETSTATICBOXDELTA(ph) 	(staticbox_delta_t*)widget_get_user_delta(ph)
@@ -48,6 +49,8 @@ int hand_staticbox_create(res_win_t widget, void* data)
 
 	ptd = (staticbox_delta_t*)xmem_alloc(sizeof(staticbox_delta_t));
 	xmem_zero((void*)ptd, sizeof(staticbox_delta_t));
+
+	default_widget_xfont(&ptd->xf);
 
 	SETSTATICBOXDELTA(widget, ptd);
 
@@ -97,22 +100,32 @@ void hand_staticbox_size(res_win_t widget, int code, const xsize_t* prs)
 	widget_erase(widget, NULL);
 }
 
+void hand_staticbox_xfont(res_win_t widget, const xfont_t* pxf)
+{
+	staticbox_delta_t* ptd = GETSTATICBOXDELTA(widget);
+
+	XDK_ASSERT(ptd != NULL);
+
+	xmem_copy((void*)&ptd->xf, (void*)pxf, sizeof(xfont_t));
+}
+
 void hand_staticbox_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 {
 	staticbox_delta_t* ptd = GETSTATICBOXDELTA(widget);
 	visual_t rdc;
 
 	xrect_t xr;
-	xfont_t xf;
-	xface_t xa;
-	xbrush_t xb;
-
 	canvas_t canv;
 	drawing_interface ifv = {0};
 
-	widget_get_xfont(widget, &xf);
-	widget_get_xface(widget, &xa);
-	widget_get_xbrush(widget, &xb);
+	clr_mod_t clrs;
+	xbrush_t xb;
+	xface_t xa;
+	
+	widget_get_color_mode(widget, &clrs);
+	default_xbrush(&xb);
+	format_xcolor(&clrs.clr_bkg, xb.color);
+	default_xface(&xa);
 
 	widget_get_client_rect(widget, &xr);
 
@@ -124,10 +137,7 @@ void hand_staticbox_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 
 	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
 
-	widget_get_client_rect(widget, &xr);
-	(*ifv.pf_draw_text)(ifv.ctx, &xf, &xa, &xr, ptd->text, -1);
-
-	
+	(*ifv.pf_draw_text)(ifv.ctx, &ptd->xf, &xa, &xr, ptd->text, -1);
 
 	end_canvas_paint(canv, dc, pxr);
 }
@@ -135,7 +145,7 @@ void hand_staticbox_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 /***************************************************************************************/
 res_win_t staticbox_create(res_win_t widget, dword_t style, const xrect_t* pxr)
 {
-	if_event_t ev = { 0 };
+	if_dispatch_t ev = { 0 };
 
 	EVENT_BEGIN_DISPATH(&ev)
 
@@ -148,6 +158,8 @@ res_win_t staticbox_create(res_win_t widget, dword_t style, const xrect_t* pxr)
 
 		EVENT_ON_LBUTTON_DOWN(hand_staticbox_lbutton_down)
 		EVENT_ON_LBUTTON_UP(hand_staticbox_lbutton_up)
+
+		EVENT_ON_XFONT(hand_staticbox_xfont)
 
 		EVENT_ON_NC_IMPLEMENT
 

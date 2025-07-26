@@ -42,15 +42,6 @@ typedef enum {
 	FILE_SINCE_ETAG = 2
 }FILE_SINCE;
 
-typedef struct _secu_desc_t {
-	tchar_t scr_uid[KEY_LEN + 1];	/*user id or public key*/
-	tchar_t scr_key[KEY_LEN + 1];	/*user key or private key*/
-}secu_desc_t;
-
-
-/*list file node callback function*/
-typedef void(*CALLBACK_LISTFILE)(const file_info_t* pfi, void* pv);
-
 #ifdef	__cplusplus
 extern "C" {
 #endif

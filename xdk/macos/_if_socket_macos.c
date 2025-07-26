@@ -254,7 +254,7 @@ res_file_t _socket_accept(res_file_t so, res_addr_t saddr, int *plen, async_t* p
         
         EV_SET(&(ev), so, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, 0);
         
-        rs = kevent(pb->port, &(ev), 1, &kv, 1, &(tp));
+        rs = kevent(*((int*)pb->port), &(ev), 1, &kv, 1, &(tp));
         if(rs <= 0)
         {
             *plen = 0;
@@ -318,7 +318,7 @@ bool_t _socket_sendto(res_file_t so, res_addr_t saddr, int alen, void* buf, dwor
         
         EV_SET(&(ev), so, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, 0);
         
-        rs = kevent(pb->port, &(ev), 1, &kv, 1, &(tp));
+        rs = kevent(*((int*)pb->port), &(ev), 1, &kv, 1, &(tp));
         if(rs < 0)
         {
             *pcb = 0;
@@ -395,7 +395,7 @@ bool_t _socket_recvfrom(res_file_t so, res_addr_t saddr, int* plen, void* buf, d
         
         EV_SET(&(ev), so, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, 0);
         
-        rs = kevent(pb->port, &(ev), 1, &kv, 1, &(tp));
+        rs = kevent(*((int*)pb->port), &(ev), 1, &kv, 1, &(tp));
         if(rs < 0)
         {
             *pcb = 0;
@@ -477,7 +477,7 @@ bool_t _socket_send(res_file_t so, void* buf, dword_t size, async_t* pb)
         
         EV_SET(&(ev), so, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, 0);
         
-        rs = kevent(pb->port, &(ev), 1, &kv, 1, &(tp));
+        rs = kevent(*((int*)pb->port), &(ev), 1, &kv, 1, &(tp));
         if(rs < 0)
         {
             *pcb = 0;
@@ -556,7 +556,7 @@ bool_t _socket_recv(res_file_t so, void* buf, dword_t size, async_t* pb)
         
         EV_SET(&(ev), so, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, 0);
         
-        rs = kevent(pb->port, &(ev), 1, &kv, 1, &(tp));
+        rs = kevent(*((int*)pb->port), &(ev), 1, &kv, 1, &(tp));
         if(rs < 0)
         {
             *pcb = 0;

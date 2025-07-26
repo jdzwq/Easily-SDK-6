@@ -26,7 +26,6 @@ LICENSE.GPL3 for more details.
 
 #include "others.h"
 
-#include "../xdkimp.h"
 #include "../xdkstd.h"
 
 void bytes_turn(byte_t* ba, int n)

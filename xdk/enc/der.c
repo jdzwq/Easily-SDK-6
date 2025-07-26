@@ -26,8 +26,6 @@ LICENSE.GPL3 for more details.
 
 #include "der.h"
 
-#include "../xdkimp.h"
-#include "../xdkoem.h"
 #include "../xdkstd.h"
 
 /*
@@ -865,7 +863,7 @@ void test_der()
 	printf("write: NULL\n", n);
 
 	const char str[] = "OCTET TOKEN";
-	total += der_write_octet_string((tmp + total), str, a_xslen(str));
+	total += der_write_octet_string((tmp + total), (byte_t*)str, a_xslen(str));
 	printf("write: %s\n", str);
 
 	total = 0;
@@ -877,7 +875,7 @@ void test_der()
 		printf("read error: NULL\n", n);
 
 	byte_t* buf = { 0 };
-	total += der_read_octet_string((tmp + total), &buf, &n);
+	total += der_read_octet_string((tmp + total), &buf, (dword_t*)&n);
 	printf("rad: %s\n", buf);
 }
 

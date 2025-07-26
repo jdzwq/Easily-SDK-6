@@ -96,11 +96,6 @@ EXP_API void insert_string(tchar_t** sa, int index, const tchar_t* token, int le
 */
 EXP_API void delete_string(tchar_t** sa, int index);
 
-#if defined(_DEBUG) || defined(DEBUG)
-
-EXP_API void test_string_array(void);
-
-#endif
 
 #ifdef	__cplusplus
 }

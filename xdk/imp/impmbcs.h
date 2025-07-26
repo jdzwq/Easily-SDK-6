@@ -35,25 +35,25 @@ LICENSE.GPL3 for more details.
 extern "C" {
 #endif
 
-	EXP_API int gbk_code_sequence(byte_t b);
+	EXP_API int sys_gbk_code_sequence(byte_t b);
 
-	EXP_API int gbk_byte_to_ucs(const byte_t* src, wchar_t* dest);
+	EXP_API int sys_gbk_byte_to_ucs(const byte_t* src, wchar_t* dest);
 
-	EXP_API int gbk_to_ucs(const byte_t* src, dword_t slen, wchar_t* dest, int dlen);
+	EXP_API int sys_gbk_to_ucs(const byte_t* src, dword_t slen, wchar_t* dest, int dlen);
 
-	EXP_API int ucs_byte_to_gbk(wchar_t ch, byte_t* dest);
+	EXP_API int sys_ucs_byte_to_gbk(wchar_t ch, byte_t* dest);
 
-	EXP_API int ucs_to_gbk(const wchar_t* src, int slen, byte_t* dest, dword_t dlen);
+	EXP_API int sys_ucs_to_gbk(const wchar_t* src, int slen, byte_t* dest, dword_t dlen);
 
-	EXP_API int utf_code_sequence(byte_t b);
+	EXP_API int sys_utf_code_sequence(byte_t b);
 
-	EXP_API int utf_byte_to_ucs(const byte_t* src, wchar_t* dest);
+	EXP_API int sys_utf_byte_to_ucs(const byte_t* src, wchar_t* dest);
 
-	EXP_API int utf_to_ucs(const byte_t* src, dword_t slen, wchar_t* dest, int dlen);
+	EXP_API int sys_utf_to_ucs(const byte_t* src, dword_t slen, wchar_t* dest, int dlen);
 
-	EXP_API int ucs_byte_to_utf(wchar_t ch, byte_t* dest);
+	EXP_API int sys_ucs_byte_to_utf(wchar_t ch, byte_t* dest);
 
-	EXP_API int ucs_to_utf(const wchar_t* src, int slen, byte_t* dest, dword_t dlen);
+	EXP_API int sys_ucs_to_utf(const wchar_t* src, int slen, byte_t* dest, dword_t dlen);
 
 
 #ifdef	__cplusplus

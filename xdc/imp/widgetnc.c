@@ -103,6 +103,7 @@ static void _WidgetDrawEdge(res_win_t wt, visual_t rdc)
 	border_t bd = { 0 };
 	dword_t ws;
 	xbrush_t xb;
+	clr_mod_t clrs;
 	xrect_t rtWnd, rtScr;
 
 	drawing_interface ifv = {0};
@@ -123,7 +124,9 @@ static void _WidgetDrawEdge(res_win_t wt, visual_t rdc)
 	widget_get_window_rect(wt, &rtWnd);
 	rtWnd.x = rtWnd.y = 0;
 
-	widget_get_xbrush(wt, &xb);
+	widget_get_color_mode(wt, &clrs);
+	default_xbrush(&xb);
+	format_xcolor(&clrs.clr_bkg, xb.color);
 	lighten_xbrush(&xb, DEF_HARD_DARKEN);
 
 	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &rtWnd);
@@ -138,6 +141,7 @@ static void _WidgetDrawHScroll(res_win_t wt, visual_t rdc)
 
 	xbrush_t xb = { 0 };
 	xpen_t xp = { 0 };
+	clr_mod_t clrs;
 
 	drawing_interface ifv = {0};
 
@@ -153,8 +157,11 @@ static void _WidgetDrawHScroll(res_win_t wt, visual_t rdc)
 	widget_get_window_rect(wt, &rtWnd);
 	rtWnd.x = rtWnd.y = 0;
 
-	widget_get_xbrush(wt, &xb);
-	widget_get_xpen(wt, &xp);
+	widget_get_color_mode(wt, &clrs);
+	default_xbrush(&xb);
+	format_xcolor(&clrs.clr_bkg, xb.color);
+	default_xpen(&xp);
+	format_xcolor(&clrs.clr_frg, xp.color);
 
 	rtScr.x = rtWnd.x + bd.edge;
 	rtScr.w = rtWnd.w - 2 * bd.edge - bd.vscroll;
@@ -227,6 +234,7 @@ static void _WidgetDrawVScroll(res_win_t wt, visual_t rdc)
 
 	xbrush_t xb = { 0 };
 	xpen_t xp = { 0 };
+	clr_mod_t clrs;
 
 	drawing_interface ifv = {0};
 
@@ -242,8 +250,11 @@ static void _WidgetDrawVScroll(res_win_t wt, visual_t rdc)
 	widget_get_window_rect(wt, &rtWnd);
 	rtWnd.x = rtWnd.y = 0;
 
-	widget_get_xbrush(wt, &xb);
-	widget_get_xpen(wt, &xp);
+	widget_get_color_mode(wt, &clrs);
+	default_xbrush(&xb);
+	format_xcolor(&clrs.clr_bkg, xb.color);
+	default_xpen(&xp);
+	format_xcolor(&clrs.clr_frg, xp.color);
 
 	rtScr.x = rtWnd.x + rtWnd.w - bd.edge - bd.vscroll;
 	rtScr.w = bd.vscroll;
@@ -346,6 +357,7 @@ static void _WidgetDrawTitleBar(res_win_t wt, visual_t rdc)
 	tchar_t txt[RES_LEN + 1] = { 0 };
 	int len;
 
+	clr_mod_t clrs;
 	xbrush_t xb_shadow = { 0 };
 	xpen_t xp_shadow = { 0 };
 	tchar_t aa[8] = { 0 };
@@ -381,10 +393,14 @@ static void _WidgetDrawTitleBar(res_win_t wt, visual_t rdc)
 	rtScr.w = rtWnd.w - 2 * edge;
 	rtScr.h = title;
 
-	widget_get_xbrush(wt, &xb);
-	widget_get_xpen(wt, &xp);
-	widget_get_xfont(wt, &xf);
-	widget_get_xface(wt, &xa);
+	widget_get_color_mode(wt, &clrs);
+	default_xbrush(&xb);
+	format_xcolor(&clrs.clr_bkg, xb.color);
+	default_xpen(&xp);
+	format_xcolor(&clrs.clr_frg, xp.color);
+	default_xfont(&xf);
+	format_xcolor(&clrs.clr_txt, xf.color);
+	default_xface(&xa);
 
 	rtScr.x = rtWnd.x + edge;
 	rtScr.y = rtWnd.y + edge;
@@ -553,6 +569,7 @@ static void _WidgetDrawMenuBar(res_win_t wt, visual_t rdc)
 	xfont_t xf = { 0 };
 	xface_t xa = { 0 };
 	xcolor_t xc = { 0 };
+	clr_mod_t clrs;
 
 	link_t_ptr ptr, ilk;
 	const tchar_t* text;
@@ -576,12 +593,17 @@ static void _WidgetDrawMenuBar(res_win_t wt, visual_t rdc)
 	widget_get_window_rect(wt, &rtWnd);
 	rtWnd.x = rtWnd.y = 0;
 
-	widget_get_xbrush(wt, &xb);
+	widget_get_color_mode(wt, &clrs);
+	default_xbrush(&xb);
+	format_xcolor(&clrs.clr_bkg, xb.color);
+	default_xpen(&xp);
+	format_xcolor(&clrs.clr_frg, xp.color);
+	default_xfont( &xf);
+	format_xcolor(&clrs.clr_txt, xf.color);
+	default_xface(&xa);
+	xmem_copy((void*)&xc, (void*)&clrs.clr_ico, sizeof(xcolor_t));
+
 	lighten_xbrush(&xb, DEF_SOFT_DARKEN);
-	widget_get_xpen(wt, &xp);
-	widget_get_xfont(wt, &xf);
-	widget_get_xface(wt, &xa);
-	widget_get_iconic(wt, &xc);
 
 	if (!is_null(xf.size))
 	{

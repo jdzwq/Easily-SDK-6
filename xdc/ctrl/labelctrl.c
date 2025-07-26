@@ -245,7 +245,7 @@ void noti_label_reset_scroll(res_win_t widget, bool_t bUpdate)
 	if (widget_is_valid(ptd->vsc))
 	{
 		if (bUpdate)
-			widget_update(ptd->vsc);
+			widget_paint(ptd->vsc);
 		else
 			widget_close(ptd->vsc, 0);
 	}
@@ -253,7 +253,7 @@ void noti_label_reset_scroll(res_win_t widget, bool_t bUpdate)
 	if (widget_is_valid(ptd->hsc))
 	{
 		if (bUpdate)
-			widget_update(ptd->hsc);
+			widget_paint(ptd->hsc);
 		else
 			widget_close(ptd->hsc, 0);
 	}
@@ -342,7 +342,7 @@ void hand_label_wheel(res_win_t widget, bool_t bHorz, int nDelta)
 			}
 			else
 			{
-				widget_update(ptd->vsc);
+				widget_paint(ptd->vsc);
 			}
 		}
 
@@ -354,7 +354,7 @@ void hand_label_wheel(res_win_t widget, bool_t bHorz, int nDelta)
 			}
 			else
 			{
-				widget_update(ptd->hsc);
+				widget_paint(ptd->hsc);
 			}
 		}
 
@@ -557,31 +557,24 @@ void hand_label_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 	label_delta_t* ptd = GETLABELDELTA(widget);
 	visual_t rdc;
 	xrect_t xr = { 0 };
-	xfont_t xf = { 0 };
-	xpen_t xp = { 0 };
-	xbrush_t xb = { 0 };
-	xcolor_t xc = { 0 };
 
 	canvas_t canv;
 	const drawing_interface* pif = NULL;
 	drawing_interface ifv = {0};
 
-	if (!ptd->label)
-		return;
+	clr_mod_t clrs;
+	xbrush_t xb;
+	xcolor_t xc;
 
-	widget_get_xfont(widget, &xf);
-	widget_get_xbrush(widget, &xb);
-	widget_get_xpen(widget, &xp);
+	if (!ptd->label) return;
+
+	widget_get_color_mode(widget, &clrs);
+	default_xbrush(&xb);
+	format_xcolor(&clrs.clr_bkg, xb.color);
+	xmem_copy((void*)&xc,(void*)&clrs.clr_frg, sizeof(xcolor_t));
 
 	canv = widget_get_canvas(widget);
 	pif = widget_get_canvas_interface(widget);
-	
-
-	
-	
-	
-	
-	
 
 	widget_get_client_rect(widget, &xr);
 
@@ -603,16 +596,13 @@ void hand_label_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 		draw_focus_raw(&ifv, &xc, &xr, ALPHA_SOLID);
 	}
 
-	
-
 	end_canvas_paint(canv, dc, pxr);
-	
 }
 
 /**********************************************control method****************************************/
 res_win_t labelctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, res_win_t wparent)
 {
-	if_event_t ev = { 0 };
+	if_dispatch_t ev = { 0 };
 
 	EVENT_BEGIN_DISPATH(&ev)
 
@@ -732,7 +722,7 @@ void labelctrl_redraw(res_win_t widget)
 
 	_labelctrl_reset_page(widget);
 
-	widget_update(widget);
+	widget_paint(widget);
 }
 
 void labelctrl_tabskip(res_win_t widget, int nSkip)

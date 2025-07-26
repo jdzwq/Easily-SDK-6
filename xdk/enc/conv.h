@@ -33,7 +33,7 @@ LICENSE.GPL3 for more details.
 extern "C" {
 #endif
 
-	EXP_API bool_t is_ascii(byte_t b);
+	EXP_API bool_t is_ascii(tchar_t c);
 
 	EXP_API int ascii_byte_to_unicode(char b, wchar_t* c);
 

@@ -1,0 +1,11 @@
+SOURCES= \
+../../../Easily-tmp/windows/bar/x64/Debug/barencode.c \
+../../../Easily-tmp/windows/bar/x64/Debug/bitstream.c \
+../../../Easily-tmp/windows/bar/x64/Debug/mask.c \
+../../../Easily-tmp/windows/bar/x64/Debug/mmask.c \
+../../../Easily-tmp/windows/bar/x64/Debug/mqrspec.c \
+../../../Easily-tmp/windows/bar/x64/Debug/qrencode.c \
+../../../Easily-tmp/windows/bar/x64/Debug/qrinput.c \
+../../../Easily-tmp/windows/bar/x64/Debug/qrspec.c \
+../../../Easily-tmp/windows/bar/x64/Debug/rscode.c \
+../../../Easily-tmp/windows/bar/x64/Debug/split.c \

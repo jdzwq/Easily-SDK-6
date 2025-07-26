@@ -368,7 +368,7 @@ void _semap_unlock(res_sema_t sem)
 #ifdef XDK_SUPPORT_THREAD_QUEUE
 res_queue_t _queue_create(res_queue_t kp, res_file_t fd, int max)
 {
-    int ep;
+    int ep, *pep;
     struct epoll_event ev;
 
     ep = epoll_create(MAX_EVENT);
@@ -379,12 +379,16 @@ res_queue_t _queue_create(res_queue_t kp, res_file_t fd, int max)
     ev.data.fd = fd; 
     epoll_ctl(ep, EPOLL_CTL_ADD, fd, &ev); 
 
-    return (ep < 0)? 0 : ep;
+    pep = (int*)calloc(1,sizeof(int));
+    *pep = ep;
+
+    return (res_queue_t)pep;
 }
 
 void _queue_destroy(res_queue_t ep)
 {
-    close(ep);
+    close(*(int*)ep);
+    free(ep);
 }
 
 wait_t _queue_wait(res_queue_t ep, int ms)
@@ -392,7 +396,7 @@ wait_t _queue_wait(res_queue_t ep, int ms)
     int rt, n = 0;
     struct epoll_event ev = {0};
 
-    n = epoll_wait(ep, &ev, 1, ms);
+    n = epoll_wait(*(int*)ep, &ev, 1, ms);
 
     if(rt < 0)
         return WAIT_ERR;

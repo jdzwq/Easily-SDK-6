@@ -143,12 +143,6 @@ EXP_API bool_t lock_file_table_block(link_t_ptr pt, dword_t pos, dword_t size, b
 EXP_API bool_t unlock_file_table_block(link_t_ptr pt, dword_t pos, dword_t size, bool_t write, res_file_t mh, void* buf);
 
 
-#if defined(XDK_SUPPORT_TEST)
-EXP_API void test_file_table_alloc(const tchar_t* fname, dword_t mask);
-
-EXP_API void test_file_table_write(const tchar_t* fname, dword_t mask);
-#endif
-
 #ifdef	__cplusplus
 }
 #endif

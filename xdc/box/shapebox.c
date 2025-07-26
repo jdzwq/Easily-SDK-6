@@ -31,6 +31,9 @@ LICENSE.GPL3 for more details.
 
 typedef struct _shapebox_delta_t{
 	tchar_t shape[INT_LEN + 1];
+
+	xbrush_t xb;
+	xpen_t xp;
 }shapebox_delta_t;
 
 #define GETSHAPEBOXDELTA(ph) 	(shapebox_delta_t*)widget_get_user_delta(ph)
@@ -83,44 +86,51 @@ void hand_shapebox_size(res_win_t widget, int code, const xsize_t* prs)
 	widget_erase(widget, NULL);
 }
 
+void hand_shapebox_xbrush(res_win_t widget, const xbrush_t* pxb)
+{
+	shapebox_delta_t* ptd = GETSHAPEBOXDELTA(widget);
+	
+	xmem_copy((void*)&ptd->xb, (void*)pxb, sizeof(xbrush_t));
+}
+
+void hand_shapebox_xpen(res_win_t widget, const xpen_t* pxp)
+{
+	shapebox_delta_t* ptd = GETSHAPEBOXDELTA(widget);
+	
+	xmem_copy((void*)&ptd->xp, (void*)pxp, sizeof(xpen_t));
+}
+
 void hand_shapebox_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 {
 	shapebox_delta_t* ptd = GETSHAPEBOXDELTA(widget);
 	visual_t rdc;
 
 	xrect_t xr;
-	xpen_t xp;
-	xbrush_t xb;
 
 	canvas_t canv;
 	const drawing_interface* pif = NULL;
 	drawing_interface ifv = {0};
-
-	widget_get_xpen(widget, &xp);
-	widget_get_xbrush(widget, &xb);
 
 	widget_get_client_rect(widget, &xr);
 
 	canv = widget_get_canvas(widget);
 	pif = widget_get_canvas_interface(widget);
 	
-
 	rdc = begin_canvas_paint(canv, dc, xr.w, xr.h);
 
 	get_visual_interface(rdc, &ifv);
 
-	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
+	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &ptd->xb, &xr);
 
-	draw_shape(pif, &xp, &xb, (xrect_t*)&(pif->rect), ptd->shape);
+	draw_shape(pif, &ptd->xp, &ptd->xb, (xrect_t*)&(pif->rect), ptd->shape);
 
 	end_canvas_paint(canv, dc, pxr);
-	
 }
 
 /***************************************************************************************/
 res_win_t shapebox_create(res_win_t widget, dword_t style, const xrect_t* pxr)
 {
-	if_event_t ev = { 0 };
+	if_dispatch_t ev = { 0 };
 
 	EVENT_BEGIN_DISPATH(&ev)
 
@@ -133,6 +143,9 @@ res_win_t shapebox_create(res_win_t widget, dword_t style, const xrect_t* pxr)
 
 		EVENT_ON_LBUTTON_DOWN(hand_shapebox_lbutton_down)
 		EVENT_ON_LBUTTON_UP(hand_shapebox_lbutton_up)
+
+		EVENT_ON_XPEN(hand_shapebox_xpen)
+		EVENT_ON_XBRUSH(hand_shapebox_xbrush)
 
 		EVENT_ON_NC_IMPLEMENT
 

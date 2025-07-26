@@ -141,6 +141,8 @@ bool_t _cons_write(res_file_t ch, void* buf, dword_t len, dword_t* pb)
 
 bool_t _cons_flush(res_file_t ch)
 {
+    NOP;
+    
     return 1;
 }
 

@@ -102,14 +102,14 @@ static int sub_editbox_self_command(res_win_t widget, int code, vword_t data, ui
 		if (widget_is_valid(dropbox))
 		{
 			widget_set_color_mode(dropbox, (clr_mod_t*)data);
-			widget_update(dropbox);
+			widget_paint(dropbox);
 		}
 
 		/*keybox = editbox_get_keybox(widget);
 		if (widget_is_valid(keybox))
 		{
 			widget_set_color_mode(keybox, (clr_mod_t*)data);
-			widget_update(keybox);
+			widget_paint(keybox);
 		}*/
 		return 1;
 	case COMMAND_COMMIT:
@@ -221,7 +221,6 @@ res_win_t firelist_create(res_win_t widget, const xrect_t* pxr, link_t_ptr data)
 	xsize_t xs;
 
 	if_subproc_t ev = { 0 };
-	xface_t xa = { 0 };
 
 	ev.sub_on_scroll = sub_editbox_scroll;
 	ev.sub_on_keydown = sub_editbox_keydown;
@@ -234,10 +233,6 @@ res_win_t firelist_create(res_win_t widget, const xrect_t* pxr, link_t_ptr data)
 	widget_set_user_id(editor, IDC_EDITBOX);
 	widget_set_subproc(editor, IDS_EDITBOX, &ev);
 	editbox_set_lock(editor, 1);
-
-	widget_get_xface(editor, &xa);
-	xscpy(xa.text_wrap, NULL);
-	widget_set_xface(editor, &xa);
 
 	widget_get_window_rect(editor, &xr_ed);
 
@@ -276,7 +271,7 @@ res_win_t firelist_create(res_win_t widget, const xrect_t* pxr, link_t_ptr data)
 
 	widget_move(dropbox, RECTPOINT(&xr));
 	widget_size(dropbox, RECTSIZE(&xr));
-	widget_update(dropbox);
+	widget_paint(dropbox);
 
 	return editor;
 }

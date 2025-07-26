@@ -24,7 +24,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
 LICENSE.GPL3 for more details.
 ***********************************************************************/
 
-#include "impplat.h"
+#include "platimp.h"
 
 #include "../xdkloc.h"
 
@@ -58,7 +58,6 @@ void xdk_impl_memo_page(if_memo_t* pif)
 	pif->pf_page_lock = _paged_lock;
 	pif->pf_page_size = _paged_size;
 	pif->pf_page_unlock = _paged_unlock;
-	pif->pf_page_protect = _paged_protect;
 }
 #endif
 
@@ -69,6 +68,7 @@ void xdk_impl_memo_cache(if_memo_t* pif)
 	pif->pf_cache_close = _cache_close;
 	pif->pf_cache_write = _cache_write;
 	pif->pf_cache_read = _cache_read;
+	pif->pf_cache_protect = _cache_protect;
 }
 #endif
 
@@ -180,7 +180,8 @@ void xdk_impl_timer(if_timer_t* pif)
 #ifdef XDK_SUPPORT_RANDOM
 void xdk_impl_random(if_random_t* pif)
 {
-	pif->pf_system_random = _system_random;
+	pif->pf_system_random32 = _system_random32;
+	pif->pf_system_random64 = _system_random64;
 }
 #endif
 

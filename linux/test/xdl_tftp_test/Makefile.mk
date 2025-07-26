@@ -1,27 +1,42 @@
-CC = g++
-CFLAGS = -g -Wall
+#-----------------------------------------------------------------------------
+# begin GNU MAKE file
+# making order:
+# 1. make -f Makefile.mk test --if need to creating some directory or file-list
+# 2. make -f Makefile.mk clean
+# 3. make -f Makefile.mk
+# 4. make -f Makefile.mk install
+#-----------------------------------------------------------------------------
+CC = gcc
+CFLAGS = -g -Wall -D _DEBUG
+
+MODULE = xdl_tftp_test
+ARCH = aarch64
 
 LIB_PATH = /usr/local/lib
 
-XDL_PATH = ~/Easily-sdk-6/xdl
-XDK_PATH = ~/Easily-sdk-6/xdk
 INC_PATH = ~/Easily-sdk-6/include
 SRC_PATH = ~/Easily-sdk-6/test/xdl_tftp_test
+OBJ_PATH = ~/Easily-tmp/linux/$(MODULE)/$(ARCH)
 OUT_PATH = ~/Easily-app-6/linux/bin
 
-SRCS = $(SRC_PATH)/main.cpp
-OBJS = $(patsubst %.cpp, %.o, $(SRCS))
-TARGET = $(OUT_PATH)/xdl_tftp_test
+DIRS = $(wildcard $(SRC_PATH)/*.cc)
+SRCS = $(notdir $(DIRS))
+COBS = $(patsubst %.cc, %.o, $(SRCS))
+OBJS = $(addprefix $(OBJ_PATH)/,$(COBS))
 
-$(SRC_PATH)%.o : $(SRC_PATH)/%.cpp
-	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH) -I $(XDK_PATH)
+$(OBJ_PATH)%.o : $(SRC_PATH)/%.cc
+	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
 
 all : $(OBJS)
 	rm -f $@
-	$(CC) -o $(TARGET) $(OBJS) -L $(LIB_PATH) -lxdk -lxdl
-	rm -f $(OBJS)
+	$(CC) -o $(OUT_PATH)/$(MODULE) $(OBJS) -L $(LIB_PATH) -lxdk
+#	rm -f $(OBJS)
 
 test:
+	if ! test -d $(OBJ_PATH); then \
+	mkdir -p $(OBJ_PATH); \
+	chmod 755 $(OBJ_PATH); \
+	fi
 	@echo $(DIRS)
 	@echo $(SRCS)
 	@echo $(OBJS)
@@ -29,3 +44,6 @@ test:
 .PHONY : clean
 clean:
 	-rm -f $(OBJS)
+#-----------------------------------------------------------------------------
+# end GNU MAKE file
+#-----------------------------------------------------------------------------

@@ -65,7 +65,6 @@ res_win_t firecheck_create(res_win_t widget, const xrect_t* pxr)
 {
 	res_win_t editor;
 	if_subproc_t ev = { 0 };
-	xface_t xa = { 0 };
 
 	ev.sub_on_keydown = sub_checkbox_keydown;
 	ev.sub_on_unsubbing = sub_checkbox_unsubbing;
@@ -73,10 +72,6 @@ res_win_t firecheck_create(res_win_t widget, const xrect_t* pxr)
 	editor = checkbox_create(widget, WD_STYLE_CONTROL | WD_STYLE_EDITOR, pxr);
 	widget_set_user_id(editor, IDC_CHECKBOX);
 	widget_set_subproc(editor, IDS_CHECKBOX, &ev);
-
-	widget_get_xface(editor, &xa);
-	xscpy(xa.text_wrap, NULL);
-	widget_set_xface(editor, &xa);
 
 	return editor;
 }

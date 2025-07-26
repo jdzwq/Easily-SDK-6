@@ -73,7 +73,7 @@ extern "C" {
 		dword_t		if_opt;
 
 		/*big Endian*/
-		//bool_t		if_big;
+		bool_t		if_big;
 
 #ifdef XDK_SUPPORT_MEMO
 		if_memo_t if_memo;

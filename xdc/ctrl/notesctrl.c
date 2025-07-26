@@ -36,8 +36,10 @@ typedef struct _notes_delta_t{
 	int tw, th;
 
 	res_win_t vsc;
-
 	bool_t b_delete;
+
+	xfont_t xf;
+	xface_t xa;
 }notes_delta_t;
 
 #define GETNOTESDELTA(ph) 	(notes_delta_t*)widget_get_user_delta(ph)
@@ -59,16 +61,10 @@ static int _notesctrl_calc_width(res_win_t widget)
 {
 	notes_delta_t* ptd = GETNOTESDELTA(widget);
 	link_t_ptr ilk, doc;
-	xfont_t xf;
-	xface_t xa;
 	visual_t rdc;
 	drawing_interface ifv = {0};
 	xsize_t xs;
 	int pw;
-
-	widget_get_xfont(widget, &xf);
-	widget_get_xface(widget, &xa);
-	xscpy(xa.text_wrap, GDI_ATTR_TEXT_WRAP_WORDBREAK);
 
 	rdc = widget_client_ctx(widget);
 
@@ -84,10 +80,11 @@ static int _notesctrl_calc_width(res_win_t widget)
 
 		if (compare_text(get_notes_type_ptr(doc),-1,ATTR_NOTES_TEXT,-1,0) == 0)
 		{
-			(*ifv.pf_text_size)(ifv.ctx, &xf, get_notes_text_ptr(doc), -1, &xs);
+			(*ifv.pf_text_size)(ifv.ctx, &ptd->xf, get_notes_text_ptr(doc), -1, &xs);
 			if (pw < xs.w)
 				pw = xs.w;
 		}
+		
 		else
 		{
 			if (pw < ptd->tw * NOTESCTRL_SPAN_PLUS)
@@ -96,8 +93,6 @@ static int _notesctrl_calc_width(res_win_t widget)
 
 		ilk = get_arch_next_sibling_item(ilk);
 	}
-
-	
 
 	widget_release_ctx(widget, rdc);
 
@@ -108,8 +103,6 @@ static int _notesctrl_calc_height(res_win_t widget)
 {
 	notes_delta_t* ptd = GETNOTESDELTA(widget);
 	link_t_ptr ilk,doc;
-	xfont_t xf;
-	xface_t xa;
 	visual_t rdc;
 	drawing_interface ifv = {0};
 	xrect_t xr;
@@ -118,10 +111,6 @@ static int _notesctrl_calc_height(res_win_t widget)
 
 	widget_get_client_rect(widget, &xr);
 	pw = xr.w - ptd->tw;
-
-	widget_get_xfont(widget, &xf);
-	widget_get_xface(widget, &xa);
-	xscpy(xa.text_wrap, GDI_ATTR_TEXT_WRAP_WORDBREAK);
 
 	rdc = widget_client_ctx(widget);
 
@@ -140,7 +129,7 @@ static int _notesctrl_calc_height(res_win_t widget)
 			xr.x = xr.y = 0;
 			xr.w = pw;
 			xr.h = ptd->th;
-			(*ifv.pf_text_rect)(ifv.ctx, &xf, &xa, get_notes_text_ptr(doc), -1, &xr);
+			(*ifv.pf_text_rect)(ifv.ctx, &ptd->xf, &ptd->xa, get_notes_text_ptr(doc), -1, &xr);
 
 			n = xr.h / ptd->th;
 			if (xr.h % ptd->th)
@@ -172,14 +161,8 @@ static int _notesctrl_calc_hint(res_win_t widget, const xpoint_t* ppt, link_t_pt
 	int total = 0;
 
 	xrect_t xr;
-	xfont_t xf;
-	xface_t xa;
 	viewbox_t vb;
 	drawing_interface ifv = {0};
-
-	widget_get_xfont(widget, &xf);
-	widget_get_xface(widget, &xa);
-	xscpy(xa.text_wrap, GDI_ATTR_TEXT_WRAP_WORDBREAK);
 
 	widget_get_view_rect(widget, &vb);
 
@@ -236,7 +219,7 @@ static int _notesctrl_calc_hint(res_win_t widget, const xpoint_t* ppt, link_t_pt
 			xr.x = xr.y = 0;
 			xr.w = vb.pw - ptd->tw;
 			xr.h = ptd->th;
-			(*ifv.pf_text_rect)(ifv.ctx, &xf, &xa, get_notes_text_ptr(doc), -1, &xr);
+			(*ifv.pf_text_rect)(ifv.ctx, &ptd->xf, &ptd->xa, get_notes_text_ptr(doc), -1, &xr);
 
 			n = xr.h / ptd->th;
 			if (xr.h % ptd->th)
@@ -263,8 +246,6 @@ static int _notesctrl_calc_hint(res_win_t widget, const xpoint_t* ppt, link_t_pt
 		ilk = get_arch_next_sibling_item(ilk);
 	}
 
-	
-
 	widget_release_ctx(widget, rdc);
 
 	return hint;
@@ -277,17 +258,11 @@ static void _notesctrl_item_rect(res_win_t widget, link_t_ptr plk, xrect_t* pxr)
 	link_t_ptr ilk,doc;
 
 	xrect_t xr;
-	xfont_t xf;
-	xface_t xa;
 	viewbox_t vb;
 	int n,total = 0;
 	drawing_interface ifv = {0};
 
 	xmem_zero((void*)pxr, sizeof(xrect_t));
-
-	widget_get_xfont(widget, &xf);
-	widget_get_xface(widget, &xa);
-	xscpy(xa.text_wrap, GDI_ATTR_TEXT_WRAP_WORDBREAK);
 
 	widget_get_view_rect(widget, &vb);
 
@@ -308,7 +283,7 @@ static void _notesctrl_item_rect(res_win_t widget, link_t_ptr plk, xrect_t* pxr)
 			xr.x = xr.y = 0;
 			xr.w = vb.pw - ptd->tw;
 			xr.h = ptd->th;
-			(*ifv.pf_text_rect)(ifv.ctx, &xf, &xa, get_notes_text_ptr(doc), -1, &xr);
+			(*ifv.pf_text_rect)(ifv.ctx, &ptd->xf, &ptd->xa, get_notes_text_ptr(doc), -1, &xr);
 
 			n = xr.h / ptd->th;
 			if (xr.h % ptd->th)
@@ -474,7 +449,7 @@ void noti_notes_reset_scroll(res_win_t widget, bool_t bUpdate)
 	if (widget_is_valid(ptd->vsc))
 	{
 		if (bUpdate)
-			widget_update(ptd->vsc);
+			widget_paint(ptd->vsc);
 		else
 			widget_close(ptd->vsc, 0);
 	}
@@ -485,28 +460,26 @@ int hand_notes_create(res_win_t widget, void* data)
 	notes_delta_t* ptd;
 	visual_t rdc;
 	drawing_interface ifv = {0};
-	xfont_t xf = { 0 };
 	xsize_t xs;
 
 	widget_hand_create(widget);
 
 	ptd = (notes_delta_t*)xmem_alloc(sizeof(notes_delta_t));
 
-	widget_get_xfont(widget, &xf);
-
 	rdc = widget_client_ctx(widget);
 
 	get_visual_interface(rdc, &ifv);
 
-	(*ifv.pf_text_metric)(ifv.ctx, &xf, &xs);
-
-	
+	(*ifv.pf_text_metric)(ifv.ctx, &ptd->xf, &xs);
 
 	widget_release_ctx(widget, rdc);
 
 	ptd->tw = (int)((float)xs.w * 8);
 	ptd->th = (int)((float)xs.h * 1.25);
 
+	default_textor_xfont(&ptd->xf);
+	default_textor_xface(&ptd->xa);
+	
 	SETNOTESDELTA(widget, ptd);
 
 	return 0;
@@ -728,7 +701,7 @@ void hand_notes_wheel(res_win_t widget, bool_t bHorz, int nDelta)
 			}
 			else
 			{
-				widget_update(ptd->vsc);
+				widget_paint(ptd->vsc);
 			}
 		}
 
@@ -741,6 +714,20 @@ void hand_notes_wheel(res_win_t widget, bool_t bHorz, int nDelta)
 	{
 		widget_scroll(win, bHorz, nLine);
 	}
+}
+
+void hand_notes_xfont(res_win_t widget, const xfont_t* pxf)
+{
+	notes_delta_t* ptd = GETNOTESDELTA(widget);
+
+	xmem_copy((void*)&ptd->xf, (void*)pxf, sizeof(xfont_t));
+}
+
+void hand_notes_xface(res_win_t widget, const xface_t* pxa)
+{
+	notes_delta_t* ptd = GETNOTESDELTA(widget);
+
+	xmem_copy((void*)&ptd->xa, (void*)pxa, sizeof(xface_t));
 }
 
 void hand_notes_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
@@ -758,35 +745,34 @@ void hand_notes_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 	int n;
 
 	viewbox_t vb = { 0 };
-	xfont_t xf_top,xf = { 0 };
-	xface_t xa_top,xa = { 0 };
-	xbrush_t xb_bar, xb = { 0 };
-	xpen_t xp = { 0 };
-	xcolor_t xc = { 0 };
 
 	xdate_t dt,td;
 	tchar_t token[DATE_LEN + 1];
 
+	clr_mod_t clrs;
+	xfont_t xf_top = { 0 };
+	xface_t xa_top = { 0 };
+	xbrush_t xb_bar, xb = { 0 };
+	xpen_t xp = { 0 };
+	xcolor_t xc = { 0 };
+
 	if (!ptd->arch)
 		return;
 
-	widget_get_xfont(widget, &xf);
-	widget_get_xface(widget, &xa);
-	widget_get_xbrush(widget, &xb);
-	widget_get_xpen(widget, &xp);
+	widget_get_color_mode(widget, &clrs);
+	default_xbrush(&xb);
+	format_xcolor(&clrs.clr_bkg, xb.color);
+	default_xpen(&xp);
+	format_xcolor(&clrs.clr_frg, xp.color);
 
 	xscpy(xp.size, _T("2"));
 	xscpy(xp.style, GDI_ATTR_STROKE_STYLE_DASH);
 	parse_xcolor(&xc, xp.color);
 
-	memcpy((void*)&xf_top, (void*)&xf, sizeof(xfont_t));
+	memcpy((void*)&xf_top, (void*)&ptd->xf, sizeof(xfont_t));
 	xscpy(xf_top.weight, GDI_ATTR_FONT_WEIGHT_BOLD);
 
-	memcpy((void*)&xa_top, (void*)&xa, sizeof(xface_t));
-
-	xscpy(xa.text_wrap, GDI_ATTR_TEXT_WRAP_WORDBREAK);
-	xscpy(xa.line_align, GDI_ATTR_TEXT_ALIGN_NEAR);
-
+	memcpy((void*)&xa_top, (void*)&ptd->xa, sizeof(xface_t));
 	xscpy(xa_top.text_wrap, _T(""));
 
 	memcpy((void*)&xb_bar, (void*)&xb, sizeof(xbrush_t));
@@ -797,7 +783,6 @@ void hand_notes_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 	canv = widget_get_canvas(widget);
 	pif = widget_get_canvas_interface(widget);
 	
-
 	rdc = begin_canvas_paint(canv, dc, xr.w, xr.h);
 
 	get_visual_interface(rdc, &ifv);
@@ -876,7 +861,7 @@ void hand_notes_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 			xr_txt.w = vb.pw - xs.w - 3 * ptd->th;
 			xr_txt.h = ptd->th;
 
-			(*ifv.pf_draw_text)(ifv.ctx, &xf, &xa, &xr_txt, get_notes_text_ptr(doc), -1);
+			(*ifv.pf_draw_text)(ifv.ctx, &ptd->xf, &ptd->xa, &xr_txt, get_notes_text_ptr(doc), -1);
 		}
 		else
 		{
@@ -916,7 +901,7 @@ void hand_notes_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 			xr_txt.y = 0;
 			xr_txt.w = vb.pw - ptd->tw;
 			xr_txt.h = ptd->tw;
-			(*ifv.pf_text_rect)(ifv.ctx, &xf, &xa, get_notes_text_ptr(doc), -1, &xr_txt);
+			(*ifv.pf_text_rect)(ifv.ctx, &ptd->xf, &ptd->xa, get_notes_text_ptr(doc), -1, &xr_txt);
 
 			n = xr_txt.h / ptd->tw;
 			if (xr_txt.h % ptd->tw)
@@ -932,7 +917,7 @@ void hand_notes_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 		xr_txt.w = vb.pw - ptd->th;
 		xr_txt.h = n * ptd->th;
 
-		(*ifv.pf_draw_text)(ifv.ctx, &xf, &xa, &xr_txt, get_notes_text_ptr(doc), -1);
+		(*ifv.pf_draw_text)(ifv.ctx, &ptd->xf, &ptd->xa, &xr_txt, get_notes_text_ptr(doc), -1);
 
 		pt_org.x = pt_cur.x;
 		pt_org.y = pt_cur.y;
@@ -942,16 +927,13 @@ void hand_notes_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 		ilk = get_arch_next_sibling_item(ilk);
 	}
 
-	
-
 	end_canvas_paint(canv, dc, pxr);
-	
 }
 
 /************************************************************************************************/
 res_win_t notesctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, res_win_t wparent)
 {
-	if_event_t ev = { 0 };
+	if_dispatch_t ev = { 0 };
 
 	EVENT_BEGIN_DISPATH(&ev)
 
@@ -976,6 +958,9 @@ res_win_t notesctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* 
 		EVENT_ON_LBUTTON_DBCLICK(hand_notes_lbutton_dbclick)
 		EVENT_ON_RBUTTON_DOWN(hand_notes_rbutton_down)
 		EVENT_ON_RBUTTON_UP(hand_notes_rbutton_up)
+
+		EVENT_ON_XFONT(hand_notes_xfont)
+		EVENT_ON_XFACE(hand_notes_xface)
 
 		EVENT_ON_NC_IMPLEMENT
 
@@ -1064,7 +1049,7 @@ void notesctrl_redraw(res_win_t widget)
 
 	_notesctrl_reset_page(widget);
 
-	widget_update(widget);
+	widget_paint(widget);
 }
 
 void notesctrl_redraw_item(res_win_t widget, link_t_ptr ilk)

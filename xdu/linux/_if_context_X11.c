@@ -36,21 +36,31 @@ int _context_startup(void)
     int nVer = 0;
     char* dname;
 
+    XInitThreads();
+    
     dname = getenv("DISPLAY");
     
     g_display = XOpenDisplay(dname);
 
     if(!g_display) return (-1);
 
+    g_xim = XOpenIM(g_display, NULL, NULL, NULL);
+
+    setlocale(LC_ALL, "");
+
 	return nVer;
 }
 
 void _context_cleanup(void)
 {
+    if(g_xim)
+        XCloseIM(g_xim);
+
     if(g_display)
         XCloseDisplay(g_display);
     
-    g_display = NULL;
+    g_xim = 0;
+    g_display = 0;
 }
 
 visual_t _create_display_context(res_win_t wt)

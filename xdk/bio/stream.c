@@ -26,9 +26,8 @@ LICENSE.GPL3 for more details.
 
 #include "stream.h"
 
-#include "../xdkimp.h"
 #include "../xdkstd.h"
-#include "../xdkutil.h"
+#include "../xdkobj.h"
 
 typedef struct _stream_context{
 	handle_head head;

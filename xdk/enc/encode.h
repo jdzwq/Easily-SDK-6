@@ -28,24 +28,13 @@ LICENSE.GPL3 for more details.
 #ifndef _ENCODE_H
 #define	_ENCODE_H
 
-/*define gb2312 range*/
-#define MIN_CHS_GB2312		0xA1A1
-#define MAX_CHS_GB2312		0xFEFF
-#define CHS_GB2312_COUNT	8836
-#define GB2312_CODE_INDEX(sw)		 ((GETHBYTE(sw) - 161) * 94 + GETLBYTE(sw) - 161)
-
-/*define unicode range*/
-#define MIN_CHS_UNICODE		0x4E00
-#define MAX_CHS_UNICODE		0x9FA5
-#define CHS_UNICODE_COUNT	20902
-#define UNICODE_CODE_INDEX(sw)		 (sw - MIN_CHS_UNICODE)
 
 /*define unicode prefix*/
 #ifndef GBKBOM
-#define GBKBOM		0xFFFF
+#define GBKBOM		0xFF
 #endif
 
-#if BYTE_ORDER == BIG_ENDIAN
+#if ACP_BYTE_ORDER == BIG_ENDIAN
 #ifndef BIGBOM
 #define BIGBOM		0xFEFF
 #endif
@@ -81,7 +70,7 @@ LICENSE.GPL3 for more details.
 #define _UTF8           UTFBOM
 #define _UTF16_LIT      LITBOM
 #define _UTF16_BIG      BIGBOM
-#if BYTE_ORDER == BIG_ENDIAN
+#if ACP_BYTE_ORDER == BIG_ENDIAN
 #define _UCS2           _UTF16_BIG
 #else
 #define _UCS2           _UTF16_LIT
@@ -94,17 +83,29 @@ LICENSE.GPL3 for more details.
 #define DEF_MBS			_UTF8
 #endif
 
-#if BYTE_ORDER == BIG_ENDIAN
+#if ACP_BYTE_ORDER == BIG_ENDIAN
 #define DEF_UCS			_UTF16_BIG
 #else
 #define DEF_UCS			_UTF16_LIT
 #endif
 
+#define CHARSET_ASCII		_T("ascii")
 #define CHARSET_GB2312		_T("gb2312")
 #define CHARSET_UTF8		_T("utf-8")
 #define CHARSET_UTF16		_T("utf-16")
 
+/*define max encode bytes*/
+#ifdef _UNICODE
+#define CHS_LEN		1
+#else
+#if DEF_MBS == _GB2312
+#define CHS_LEN		2
+#else
+#define CHS_LEN		3
+#endif
+#endif
 
+#define UTF_LEN		3
 
 #endif	/* _ENCODE_H */
 

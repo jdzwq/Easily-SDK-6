@@ -27,9 +27,9 @@ LICENSE.GPL3 for more details.
 #include "netmqtt.h"
 
 #include "../xdknet.h"
-#include "../xdkimp.h"
 #include "../xdkoem.h"
 #include "../xdkstd.h"
+#include "../xdkobj.h"
 
 typedef struct _mqtt_context{
 	handle_head head;	/*head for xhand_t*/

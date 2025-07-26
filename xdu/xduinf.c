@@ -105,15 +105,6 @@ void xdu_impl_context_bitmap(if_context_t* pif)
 }
 #endif
 
-#ifdef XDU_SUPPORT_CONTEXT_REGION
-void xdu_impl_context_region(if_context_t* pif)
-{
-	pif->pf_create_region = _create_region;
-	pif->pf_delete_region = _delete_region;
-	pif->pf_pt_in_region = _pt_in_region;
-}
-#endif
-
 #ifdef XDU_SUPPORT_CONTEXT_PRINTER
 void xdu_impl_context_printer(if_context_t* pif)
 {
@@ -152,77 +143,12 @@ void xdu_impl_context_graphic(if_context_t* pif)
 	pif->pf_gdi_text_metric = _gdi_text_metric;
 	pif->pf_gdi_gradient_rect = _gdi_gradient_rect;
 	pif->pf_gdi_alphablend_rect = _gdi_alphablend_rect;
+	pif->pf_gdi_invert_rect = _gdi_invert_rect;
 	pif->pf_gdi_exclude_rect = _gdi_exclude_rect;
+	pif->pf_gdi_inclip_rect = _gdi_inclip_rect;
 #ifdef XDU_SUPPORT_CONTEXT_BITMAP
 	pif->pf_gdi_draw_bitmap = _gdi_draw_bitmap;
 	pif->pf_gdi_draw_image = _gdi_draw_image;
-#endif
-#ifdef XDU_SUPPORT_CONTEXT_REGION
-    pif->pf_gdi_fill_region = _gdi_fill_region;
-#endif
-#endif
-
-#ifdef XDU_SUPPORT_CONTEXT_GDIPLUS
-	pif->pf_gdi_set_point = _gdiplus_set_point;
-	pif->pf_gdi_get_point = _gdiplus_get_point;
-	pif->pf_gdi_draw_points = _gdiplus_draw_points;
-	pif->pf_gdi_draw_ellipse = _gdiplus_draw_ellipse;
-	pif->pf_gdi_draw_line = _gdiplus_draw_line;
-	pif->pf_gdi_draw_pie = _gdiplus_draw_pie;
-	pif->pf_gdi_draw_arc = _gdiplus_draw_arc;
-	pif->pf_gdi_draw_polygon = _gdiplus_draw_polygon;
-	pif->pf_gdi_draw_polyline = _gdiplus_draw_polyline;
-	pif->pf_gdi_draw_bezier = _gdiplus_draw_bezier;
-	pif->pf_gdi_draw_curve = _gdiplus_draw_curve;
-	pif->pf_gdi_draw_rect = _gdiplus_draw_rect;
-	pif->pf_gdi_draw_path = _gdiplus_draw_path;
-	pif->pf_gdi_draw_round = _gdiplus_draw_round;
-	pif->pf_gdi_draw_text = _gdiplus_draw_text;
-	pif->pf_gdi_text_out = _gdiplus_text_out;
-	pif->pf_gdi_text_rect = _gdiplus_text_rect;
-	pif->pf_gdi_text_size = _gdiplus_text_size;
-	pif->pf_gdi_text_metric = _gdiplus_text_metric;
-	pif->pf_gdi_gradient_rect = _gdiplus_gradient_rect;
-	pif->pf_gdi_alphablend_rect = _gdiplus_alphablend_rect;
-	pif->pf_gdi_exclude_rect = _gdiplus_exclude_rect;
-#ifdef XDU_SUPPORT_CONTEXT_BITMAP
-	pif->pf_gdi_draw_bitmap = _gdiplus_draw_bitmap;
-	pif->pf_gdi_draw_image = _gdiplus_draw_image;
-#endif
-#ifdef XDU_SUPPORT_CONTEXT_REGION
-	pif->pf_gdi_fill_region = _gdiplus_fill_region;
-#endif
-#endif
-
-#ifdef XDU_SUPPORT_CONTEXT_CAIRO
-	pif->pf_gdi_set_point = _cairo_set_point;
-	pif->pf_gdi_get_point = _cairo_get_point;
-	pif->pf_gdi_draw_points = _cairo_draw_points;
-	pif->pf_gdi_draw_ellipse = _cairo_draw_ellipse;
-	pif->pf_gdi_draw_line = _cairo_draw_line;
-	pif->pf_gdi_draw_pie = _cairo_draw_pie;
-	pif->pf_gdi_draw_arc = _cairo_draw_arc;
-	pif->pf_gdi_draw_polygon = _cairo_draw_polygon;
-	pif->pf_gdi_draw_polyline = _cairo_draw_polyline;
-	pif->pf_gdi_draw_bezier = _cairo_draw_bezier;
-	pif->pf_gdi_draw_curve = _cairo_draw_curve;
-	pif->pf_gdi_draw_rect = _cairo_draw_rect;
-	pif->pf_gdi_draw_path = _cairo_draw_path;
-	pif->pf_gdi_draw_round = _cairo_draw_round;
-	pif->pf_gdi_draw_text = _cairo_draw_text;
-	pif->pf_gdi_text_out = _cairo_text_out;
-	pif->pf_gdi_text_rect = _cairo_text_rect;
-	pif->pf_gdi_text_size = _cairo_text_size;
-	pif->pf_gdi_text_metric = _cairo_text_metric;
-	pif->pf_gdi_gradient_rect = _cairo_gradient_rect;
-	pif->pf_gdi_alphablend_rect = _cairo_alphablend_rect;
-	pif->pf_gdi_exclude_rect = _cairo_exclude_rect;
-#ifdef XDU_SUPPORT_CONTEXT_BITMAP
-	pif->pf_gdi_draw_bitmap = _cairo_draw_bitmap;
-	pif->pf_gdi_draw_image = _cairo_draw_image;
-#endif
-#ifdef XDU_SUPPORT_CONTEXT_REGION
-	pif->pf_gdi_fill_region = _cairo_fill_region;
 #endif
 #endif
 }
@@ -240,7 +166,6 @@ void xdu_impl_clipboard(if_clipboard_t* pif)
 #ifdef XDU_SUPPORT_WIDGET
 void xdu_impl_widget(if_widget_t* pif)
 {
-
 	pif->pf_widget_startup = _widget_startup;
 	pif->pf_widget_cleanup = _widget_cleanup;
 	pif->pf_widget_create = _widget_create;
@@ -284,7 +209,6 @@ void xdu_impl_widget(if_widget_t* pif)
 	pif->pf_widget_move = _widget_move;
 	pif->pf_widget_take = _widget_take;
 	pif->pf_widget_show = _widget_show;
-	pif->pf_widget_update = _widget_update;
 	pif->pf_widget_layout = _widget_layout;
 	pif->pf_widget_paint = _widget_paint;
 	pif->pf_widget_erase = _widget_erase;
@@ -300,7 +224,7 @@ void xdu_impl_widget(if_widget_t* pif)
 	pif->pf_widget_enable = _widget_enable;
 	pif->pf_widget_active = _widget_active;
 
-	pif->pf_widget_post_char = _widget_post_char;
+	pif->pf_widget_post_wchar = _widget_post_wchar;
 	pif->pf_widget_post_key = _widget_post_key;
 	pif->pf_widget_post_notice = _widget_post_notice;
 	pif->pf_widget_send_notice = _widget_send_notice;
@@ -330,24 +254,10 @@ void xdu_impl_widget(if_widget_t* pif)
 	pif->pf_widget_get_scroll_info = _widget_get_scroll_info;
 
 	pif->pf_widget_has_struct = _widget_has_struct;
-	pif->pf_widget_set_xfont = _widget_set_xfont;
-	pif->pf_widget_get_xfont = _widget_get_xfont;
-	pif->pf_widget_get_xfont_ptr = _widget_get_xfont_ptr;
-	pif->pf_widget_set_xface = _widget_set_xface;
-	pif->pf_widget_get_xface = _widget_get_xface;
-	pif->pf_widget_get_xface_ptr = _widget_get_xface_ptr;
-	pif->pf_widget_set_xbrush = _widget_set_xbrush;
-	pif->pf_widget_get_xbrush = _widget_get_xbrush;
-	pif->pf_widget_get_xbrush_ptr = _widget_get_xbrush_ptr;
-	pif->pf_widget_set_xpen = _widget_set_xpen;
-	pif->pf_widget_get_xpen = _widget_get_xpen;
-	pif->pf_widget_get_xpen_ptr = _widget_get_xpen_ptr;
-	pif->pf_widget_set_mask = _widget_set_mask;
-	pif->pf_widget_get_mask = _widget_get_mask;
-	pif->pf_widget_get_mask_ptr = _widget_get_mask_ptr;
-	pif->pf_widget_set_iconic = _widget_set_iconic;
-	pif->pf_widget_get_iconic = _widget_get_iconic;
-	pif->pf_widget_get_iconic_ptr = _widget_get_iconic_ptr;
+	pif->pf_widget_noti_xfont = _widget_noti_xfont;
+	pif->pf_widget_noti_xface = _widget_noti_xface;
+	pif->pf_widget_noti_xbrush = _widget_noti_xbrush;
+	pif->pf_widget_noti_xpen = _widget_noti_xpen;
 	pif->pf_widget_set_color_mode = _widget_set_color_mode;
 	pif->pf_widget_get_color_mode = _widget_get_color_mode;
 	pif->pf_widget_set_point = _widget_set_point;
@@ -355,17 +265,9 @@ void xdu_impl_widget(if_widget_t* pif)
 	pif->pf_widget_set_size = _widget_set_size;
 	pif->pf_widget_get_size = _widget_get_size;
 
-	pif->pf_widget_do_normal = _widget_do_normal;
+	pif->pf_widget_do_main = _widget_do_main;
 	pif->pf_widget_do_modal = _widget_do_modal;
-	pif->pf_widget_do_trace = _widget_do_trace;
-
-	pif->pf_send_quit_message = _send_quit_message;
-	pif->pf_message_fetch = _message_fetch;
-    pif->pf_message_peek = _message_peek;
-	pif->pf_message_translate = _message_translate;
-	pif->pf_message_dispatch = _message_dispatch;
-	pif->pf_message_is_quit = _message_is_quit;
-	pif->pf_message_position = _message_position;
+	pif->pf_widget_do_track = _widget_do_track;
 
 	pif->pf_get_screen_size = _get_screen_size;
 	pif->pf_get_desktop_size = _get_desktop_size;
@@ -378,10 +280,6 @@ void xdu_impl_widget(if_widget_t* pif)
 	pif->pf_widget_track_mouse = _widget_track_mouse;
 	pif->pf_widget_set_alpha = _widget_set_alpha;
 	pif->pf_widget_get_alpha = _widget_get_alpha;
-
-#ifdef XDU_SUPPORT_WIDGET_REGION
-	pif->pf_widget_set_region = _widget_set_region;
-#endif
 
 #ifdef XDU_SUPPORT_CONTEXT_OPENGL
 	pif->pf_widget_get_glctx = _widget_get_glctx;

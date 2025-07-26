@@ -136,9 +136,6 @@ EXP_API void set_parse(set_t* pset, const tchar_t* token, int len);
 */
 EXP_API int set_format(const set_t* pset, tchar_t* buf, int max);
 
-#if defined(XDK_SUPPORT_TEST)
-	EXP_API void test_set(void);
-#endif
 
 #ifdef	__cplusplus
 }

@@ -84,6 +84,14 @@ typedef struct _file_info_t {
 	tchar_t file_etag[ETAG_LEN + 1];
 	tchar_t file_name[META_LEN + 1];
 }file_info_t;
+
+typedef struct _secu_desc_t {
+	tchar_t scr_uid[KEY_LEN + 1];	/*user id or public key*/
+	tchar_t scr_key[KEY_LEN + 1];	/*user key or private key*/
+}secu_desc_t;
+
+/*list file node callback function*/
+typedef void(*CALLBACK_LISTFILE)(const file_info_t* pfi, void* pv);
 #endif /*XDK_SUPPORT_FILE*/
 
 #ifdef XDK_SUPPORT_PROCESS
@@ -155,11 +163,11 @@ typedef void(*PF_PAGE_FREE)(void*);
 typedef dword_t(*PF_PAGE_SIZE)(void*);
 typedef void* (*PF_PAGE_LOCK)(void*);
 typedef void(*PF_PAGE_UNLOCK)(void*);
-typedef bool_t(*PF_PAGE_PROTECT)(void*, bool_t);
 #endif
 #ifdef XDK_SUPPORT_MEMO_CACHE
 typedef void*(*PF_CACHE_OPEN)(void);
 typedef void(*PF_CACHE_CLOSE)(void*);
+typedef bool_t(*PF_CACHE_PROTECT)(void*, bool_t);
 typedef bool_t(*PF_CACHE_WRITE)(void*, dword_t, dword_t, void*, dword_t, dword_t*);
 typedef bool_t(*PF_CACHE_READ)(void*, dword_t, dword_t, void*, dword_t, dword_t*);
 #endif
@@ -185,11 +193,11 @@ typedef struct _if_memo_t{
 	PF_PAGE_SIZE		pf_page_size;
 	PF_PAGE_LOCK		pf_page_lock;
 	PF_PAGE_UNLOCK		pf_page_unlock;
-	PF_PAGE_PROTECT		pf_page_protect;
 #endif
 #ifdef XDK_SUPPORT_MEMO_CACHE
 	PF_CACHE_OPEN		pf_cache_open;
 	PF_CACHE_CLOSE		pf_cache_close;
+	PF_CACHE_PROTECT	pf_cache_protect;
 	PF_CACHE_WRITE		pf_cache_write;
 	PF_CACHE_READ		pf_cache_read;
 #endif
@@ -355,10 +363,12 @@ typedef struct _if_timer_t{
 #endif /*XDK_SUPPORT_TIMER*/
 
 #ifdef XDK_SUPPORT_RANDOM
-typedef bool_t	(*PF_SYSTEM_RANDOM)(byte_t*, dword_t);
+typedef void	(*PF_SYSTEM_RANDOM32)(dword_t*);
+typedef void	(*PF_SYSTEM_RANDOM64)(lword_t*);
 
 typedef struct _if_random_t{
-	PF_SYSTEM_RANDOM		pf_system_random;
+	PF_SYSTEM_RANDOM32		pf_system_random32;
+	PF_SYSTEM_RANDOM64		pf_system_random64;
 }if_random_t;
 #endif
 

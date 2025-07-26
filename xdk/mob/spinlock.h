@@ -66,9 +66,6 @@ EXP_API bool_t enter_spinlock(spinlock_t pt, int map_ind, int map_pos);
 */
 EXP_API void leave_spinlock(spinlock_t pt, int map_ind, int map_pos);
 
-#if defined(XDK_SUPPORT_TEST)
-EXP_API void test_spinlock(void);
-#endif
 
 #ifdef	__cplusplus
 }

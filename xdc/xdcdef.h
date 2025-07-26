@@ -131,7 +131,7 @@ typedef struct _splitor_t{
 }splitor_t;
 
 
-#define EVENT_BEGIN_DISPATH(pv)			{if_event_t* pev = pv;
+#define EVENT_BEGIN_DISPATH(pv)			{if_dispatch_t* pev = pv;
 #ifdef XDU_SUPPORT_WIDGET_NC
 #define EVENT_ON_NCPAINT(proc)			pev->pf_on_nc_paint = proc;
 #define EVENT_ON_NCCALCSIZE(proc)		pev->pf_on_nc_calcsize = proc;
@@ -151,7 +151,7 @@ typedef struct _splitor_t{
 #define EVENT_ON_WHEEL(proc)			pev->pf_on_wheel = proc;
 #define EVENT_ON_SCROLL(proc)			pev->pf_on_scroll = proc;
 #define EVENT_ON_KEYDOWN(proc)			pev->pf_on_keydown = proc;
-#define EVENT_ON_CHAR(proc)				pev->pf_on_char = proc;
+#define EVENT_ON_WCHAR(proc)			pev->pf_on_wchar = proc;
 #define EVENT_ON_SIZE(proc)				pev->pf_on_size = proc;
 #define EVENT_ON_MOVE(proc)				pev->pf_on_move = proc;
 #define EVENT_ON_SHOW(proc)				pev->pf_on_show = proc;
@@ -168,6 +168,10 @@ typedef struct _splitor_t{
 #define EVENT_ON_SELF_COMMAND(proc)		pev->pf_on_self_command = proc;
 #define EVENT_ON_SYSCMD_CLICK(proc)		pev->pf_on_syscmd_click = proc;
 #define EVENT_ON_TIMER(proc)			pev->pf_on_timer = proc;
+#define EVENT_ON_XFONT(proc)			pev->pf_on_xfont = proc;
+#define EVENT_ON_XFACE(proc)			pev->pf_on_xface = proc;
+#define EVENT_ON_XBRUSH(proc)			pev->pf_on_xbrush = proc;
+#define EVENT_ON_XPEN(proc)				pev->pf_on_xpen = proc;
 #ifdef XDU_SUPPORT_WIDGET_NC
 #define EVENT_ON_NC_IMPLEMENT			{pev->pf_on_nc_paint = widgetnc_on_paint;pev->pf_on_nc_calcsize = widgetnc_on_calcsize;pev->pf_on_nc_hittest = widgetnc_on_hittest;pev->pf_on_nc_calcscroll = widgetnc_on_calcscroll;}
 #else
@@ -194,7 +198,7 @@ typedef struct _splitor_t{
 #define SUBPROC_ON_WHEEL(proc)				pev->sub_on_wheel = proc;
 #define SUBPROC_ON_SCROLL(proc)				pev->sub_on_scroll = proc;
 #define SUBPROC_ON_KEYDOWN(proc)			pev->sub_on_keydown = proc;
-#define SUBPROC_ON_CHAR(proc)				pev->sub_on_char = proc;
+#define SUBPROC_ON_WCHAR(proc)				pev->sub_on_wchar = proc;
 #define SUBPROC_ON_SIZE(proc)				pev->sub_on_size = proc;
 #define SUBPROC_ON_MOVE(proc)				pev->sub_on_move = proc;
 #define SUBPROC_ON_SHOW(proc)				pev->sub_on_show = proc;

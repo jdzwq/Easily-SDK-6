@@ -34,6 +34,8 @@ typedef struct _keybox_delta_t{
 	int ca;
 	int bw, bh;
 	int org_x, org_y;
+
+	xfont_t xf;
 }keybox_delta_t;
 
 
@@ -207,6 +209,8 @@ int hand_keybox_create(res_win_t widget, void* data)
 
 	ptd->index = -1;
 
+	default_widget_xfont(&ptd->xf);
+
 	SETKEYBOXDELTA(widget, ptd);
 
 	return 0;
@@ -277,15 +281,15 @@ void hand_keybox_lbutton_down(res_win_t widget, const xpoint_t* pxp)
 
 	if (ch == KEY_ESC)
 	{
-		widget_post_key(NULL, KEY_ESC);
+		widget_post_key((res_win_t)0, KEY_ESC);
 	}
 	else if (ch == _T('\b'))
 	{
-		widget_post_key(NULL, KEY_BACK);
+		widget_post_key((res_win_t)0, KEY_BACK);
 	}
 	else if (ch == _T('\n'))
 	{
-		widget_post_key(NULL, KEY_ENTER);
+		widget_post_key((res_win_t)0, KEY_ENTER);
 	}
 	else if (ch == _T('\0'))
 	{
@@ -305,43 +309,43 @@ void hand_keybox_lbutton_down(res_win_t widget, const xpoint_t* pxp)
 	}
 	else if (ch == 0x1)
 	{
-		widget_post_key(NULL, KEY_UP);
+		widget_post_key((res_win_t)0, KEY_UP);
 	}
 	else if (ch == 0x3)
 	{
-		widget_post_key(NULL, KEY_LEFT);
+		widget_post_key((res_win_t)0, KEY_LEFT);
 	}
 	else if (ch == KEY_ESC)
 	{
-		widget_post_key(NULL, KEY_LEFT);
+		widget_post_key((res_win_t)0, KEY_LEFT);
 	}
 	else if (ch == _T('\a'))
 	{
-		//widget_copy(NULL);
+		//widget_copy((res_win_t)0);
 	}
 	else if (ch == _T('\r'))
 	{
-		//widget_cut(NULL);
+		//widget_cut((res_win_t)0);
 	}
 	else if (ch == _T('\f'))
 	{
-		//widget_paste(NULL);
+		//widget_paste((res_win_t)0);
 	}
 	else if (ch == _T('\v'))
 	{
-		//widget_undo(NULL);
+		//widget_undo((res_win_t)0);
 	}
 	else if (ch == 0x2)
 	{
-		widget_post_key(NULL, KEY_DOWN);
+		widget_post_key((res_win_t)0, KEY_DOWN);
 	}
 	else if (ch == 0x4)
 	{
-		widget_post_key(NULL, KEY_RIGHT);
+		widget_post_key((res_win_t)0, KEY_RIGHT);
 	}
 	else if (ch && ch != 0x5)
 	{
-		widget_post_char(NULL, ch);
+		widget_post_wchar((res_win_t)0, ch);
 	}
 
 	widget_erase(widget, NULL);
@@ -374,14 +378,18 @@ void hand_keybox_size(res_win_t widget, int code, const xsize_t* prs)
 	widget_erase(widget, NULL);
 }
 
+void hand_keybox_xfont(res_win_t widget, const xfont_t* pxf)
+{
+	keybox_delta_t* ptd = GETKEYBOXDELTA(widget);
+
+	xmem_copy((void*)&ptd->xf, (void*)pxf, sizeof(xfont_t));
+}
+
 void hand_keybox_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 {
 	keybox_delta_t* ptd = GETKEYBOXDELTA(widget);
 
-	xbrush_t xb,xb_bark, xb_focus;
 	xrect_t xr, xr_focus;
-	xfont_t xf;
-	xface_t xa;
 	int i;
 	tchar_t tk[2] = { 0 };
 
@@ -389,15 +397,19 @@ void hand_keybox_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 	visual_t rdc;
 	drawing_interface ifv = {0};
 
-	widget_get_xbrush(widget, &xb);
-	xmem_copy((void*)&xb_focus, (void*)&xb, sizeof(xbrush_t));
-	lighten_xbrush(&xb_focus, DEF_SOFT_LIGHTEN);
+	clr_mod_t clrs;
+	xbrush_t xb_focus, xb_bark;
+	xface_t xa;
 
-	xmem_copy((void*)&xb_bark, (void*)&xb, sizeof(xbrush_t));
+	widget_get_color_mode(widget, &clrs);
+	default_xbrush(&xb_focus);
+	format_xcolor(&clrs.clr_bkg, xb_focus.color);
+	default_xbrush(&xb_bark);
+	format_xcolor(&clrs.clr_bkg, xb_bark.color);
+	lighten_xbrush(&xb_focus, DEF_SOFT_LIGHTEN);
 	lighten_xbrush(&xb_bark, DEF_SOFT_DARKEN);
 
-	widget_get_xfont(widget, &xf);
-	widget_get_xface(widget, &xa);
+	default_xface(&xa);
 	xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_CENTER);
 	xscpy(xa.line_align, GDI_ATTR_TEXT_ALIGN_CENTER);
 
@@ -415,13 +427,13 @@ void hand_keybox_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 	xr.w = ptd->bw;
 	xr.y = 0;
 	xr.h = ptd->bh;
-	(*ifv.pf_draw_text)(ifv.ctx, &xf, &xa, &xr, _T("×"), -1);
+	(*ifv.pf_draw_text)(ifv.ctx, &ptd->xf, &xa, &xr, _T("×"), -1);
 
 	xr.x = 0;
 	xr.w = ptd->bw;
 	xr.y = 0;
 	xr.h = ptd->bh;
-	(*ifv.pf_draw_text)(ifv.ctx, &xf, &xa, &xr, _T("Esc"), -1);
+	(*ifv.pf_draw_text)(ifv.ctx, &ptd->xf, &xa, &xr, _T("Esc"), -1);
 
 	for (i = 0; i < KEYBOX_COUNT; i++)
 	{
@@ -438,7 +450,7 @@ void hand_keybox_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 		if (ptd->index == i)
 			(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb_focus, &xr_focus);
 		else
-			(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr_focus);
+			(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb_bark, &xr_focus);
 
 		if (ptd->ca == _HCA)
 			tk[0] = KEYBOX_HCA[i];
@@ -448,32 +460,30 @@ void hand_keybox_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 			tk[0] = KEYBOX_SCA[i];
 
 		if (tk[0] == _T('\n'))
-			(*ifv.pf_draw_text)(ifv.ctx, &xf, &xa, &xr, _T("Ent"), -1);
+			(*ifv.pf_draw_text)(ifv.ctx, &ptd->xf, &xa, &xr, _T("Ent"), -1);
 		else if (tk[0] == _T('\b'))
-			(*ifv.pf_draw_text)(ifv.ctx, &xf, &xa, &xr, _T("CE"), -1);
+			(*ifv.pf_draw_text)(ifv.ctx, &ptd->xf, &xa, &xr, _T("CE"), -1);
 		else if (tk[0] == _T('\0'))
-			(*ifv.pf_draw_text)(ifv.ctx, &xf, &xa, &xr, _T("FN"), -1);
+			(*ifv.pf_draw_text)(ifv.ctx, &ptd->xf, &xa, &xr, _T("FN"), -1);
 		else if (tk[0] == 0x1)
-			(*ifv.pf_draw_text)(ifv.ctx, &xf, &xa, &xr, _T("↑"), -1);
+			(*ifv.pf_draw_text)(ifv.ctx, &ptd->xf, &xa, &xr, _T("↑"), -1);
 		else if (tk[0] == 0x3)
-			(*ifv.pf_draw_text)(ifv.ctx, &xf, &xa, &xr, _T("←"), -1);
+			(*ifv.pf_draw_text)(ifv.ctx, &ptd->xf, &xa, &xr, _T("←"), -1);
 		else if (tk[0] == _T('\a'))
-			(*ifv.pf_draw_text)(ifv.ctx, &xf, &xa, &xr, _T("复制"), -1);
+			(*ifv.pf_draw_text)(ifv.ctx, &ptd->xf, &xa, &xr, _T("复制"), -1);
 		else if (tk[0] == _T('\r'))
-			(*ifv.pf_draw_text)(ifv.ctx, &xf, &xa, &xr, _T("剪切"), -1);
+			(*ifv.pf_draw_text)(ifv.ctx, &ptd->xf, &xa, &xr, _T("剪切"), -1);
 		else if (tk[0] == _T('\f'))
-			(*ifv.pf_draw_text)(ifv.ctx, &xf, &xa, &xr, _T("粘贴"), -1);
+			(*ifv.pf_draw_text)(ifv.ctx, &ptd->xf, &xa, &xr, _T("粘贴"), -1);
 		else if (tk[0] == _T('\v'))
-			(*ifv.pf_draw_text)(ifv.ctx, &xf, &xa, &xr, _T("撤销"), -1);
+			(*ifv.pf_draw_text)(ifv.ctx, &ptd->xf, &xa, &xr, _T("撤销"), -1);
 		else if (tk[0] == 0x2)
-			(*ifv.pf_draw_text)(ifv.ctx, &xf, &xa, &xr, _T("↓"), -1);
+			(*ifv.pf_draw_text)(ifv.ctx, &ptd->xf, &xa, &xr, _T("↓"), -1);
 		else if (tk[0] == 0x4)
-			(*ifv.pf_draw_text)(ifv.ctx, &xf, &xa, &xr, _T("→"), -1);
+			(*ifv.pf_draw_text)(ifv.ctx, &ptd->xf, &xa, &xr, _T("→"), -1);
 		else
-			(*ifv.pf_draw_text)(ifv.ctx, &xf, &xa, &xr, tk, -1);
+			(*ifv.pf_draw_text)(ifv.ctx, &ptd->xf, &xa, &xr, tk, -1);
 	}
-
-	
 
 	end_canvas_paint(canv, dc, pxr);
 }
@@ -481,7 +491,7 @@ void hand_keybox_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 /**********************************************************************************************/
 res_win_t keybox_create(res_win_t widget, dword_t style, const xrect_t* pxr)
 {
-	if_event_t ev = { 0 };
+	if_dispatch_t ev = { 0 };
 
 	EVENT_BEGIN_DISPATH(&ev)
 
@@ -496,6 +506,8 @@ res_win_t keybox_create(res_win_t widget, dword_t style, const xrect_t* pxr)
 
 		EVENT_ON_LBUTTON_DOWN(hand_keybox_lbutton_down)
 		EVENT_ON_LBUTTON_UP(hand_keybox_lbutton_up)
+
+		EVENT_ON_XFONT(hand_keybox_xfont)
 
 		EVENT_ON_NC_IMPLEMENT
 
@@ -520,9 +532,8 @@ res_win_t show_keybox(const xpoint_t* ppt)
 	xrect_t xr = { 0 };
 	xsize_t xs = { 0 };
 
-	wt = keybox_create(NULL, WD_STYLE_POPUP | WD_STYLE_BORDER | WD_STYLE_NOACTIVE, &xr);
-	if (!wt)
-		return NULL;
+	wt = keybox_create((res_win_t)0, WD_STYLE_POPUP | WD_STYLE_BORDER | WD_STYLE_NOACTIVE, &xr);
+	if (!wt) return (res_win_t)0;
 
 	keybox_popup_size(wt, RECTSIZE(&xr));
 
@@ -541,7 +552,7 @@ res_win_t show_keybox(const xpoint_t* ppt)
 	widget_move(wt, RECTPOINT(&xr));
 	widget_size(wt, RECTSIZE(&xr));
 	widget_take(wt, (int)WS_TAKE_TOPMOST);
-	widget_update(wt);
+	widget_paint(wt);
 	widget_show(wt, WS_SHOW_NORMAL);
 
 	return wt;

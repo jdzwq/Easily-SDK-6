@@ -52,7 +52,7 @@ static bool_t _splitor_item_resize(link_t_ptr ilk, void* pv)
 	{
 		widget_move(win, RECTPOINT(&xr));
 		widget_size(win, RECTSIZE(&xr));
-		widget_update(win);
+		widget_paint(win);
 	}
 
 	return 1;
@@ -121,7 +121,7 @@ void noti_splitor_item_sized(splitor_t* ptd, const xpoint_t* pxp)
 	calc_split_item_rect(ptd->split, ilk, &xr);
 	widget_rect_to_pt(ptd->widget, &xr);
 
-	enum_split_item(ilk, (CALLBACK_ENUMLINK)_splitor_item_resize, ptd->widget);
+	enum_split_item(ilk, (CALLBACK_ENUMLINK)_splitor_item_resize, (void*)ptd->widget);
 
 	widget_erase(ptd->widget, &xr);
 }
@@ -223,7 +223,7 @@ void hand_splitor_size(splitor_t* ptd, const xrect_t* pxr)
 	set_split_item_height(ptd->split, xr.fh);
 
 	resize_split_item(ptd->split);
-	enum_split_item(ptd->split, (CALLBACK_ENUMLINK)_splitor_item_resize, ptd->widget);
+	enum_split_item(ptd->split, (CALLBACK_ENUMLINK)_splitor_item_resize, (void*)ptd->widget);
 
 	widget_erase(ptd->widget, pxr);
 }
@@ -233,17 +233,20 @@ void hand_splitor_paint(splitor_t* ptd, visual_t rdc)
 	link_t_ptr ilk;
 	link_t_ptr st = NULL;
 	xrect_t xr;
-	xbrush_t xb = { 0 };
-	xpen_t xp = { 0 };
-	xcolor_t xc_brim, xc_core;
 	drawing_interface ifv = {0};
+
+	clr_mod_t clrs;
+	xpen_t xp;
+	xcolor_t xc_brim, xc_core;
 
 	XDK_ASSERT(ptd != NULL);
 
-	widget_get_xbrush(ptd->widget, &xb);
+	widget_get_color_mode(ptd->widget, &clrs);
+	default_xpen(&xp);
+	format_xcolor(&clrs.clr_frg, xp.color);
+	xmem_copy((void*)&xc_brim, (void*)&clrs.clr_bkg, sizeof(xcolor_t));
+	xmem_copy((void*)&xc_core, (void*)&clrs.clr_bkg, sizeof(xcolor_t));
 
-	parse_xcolor(&xc_brim, xb.color);
-	parse_xcolor(&xc_core, xb.color);
 	lighten_xcolor(&xc_core, DEF_SOFT_DARKEN);
 
 	default_xpen(&xp);

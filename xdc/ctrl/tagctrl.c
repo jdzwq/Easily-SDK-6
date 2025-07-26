@@ -98,7 +98,7 @@ void noti_tagctrl_reset_scroll(res_win_t widget, bool_t bUpdate)
 	if (widget_is_valid(ptd->vsc))
 	{
 		if (bUpdate)
-			widget_update(ptd->vsc);
+			widget_paint(ptd->vsc);
 		else
 			widget_close(ptd->vsc, 0);
 	}
@@ -106,7 +106,7 @@ void noti_tagctrl_reset_scroll(res_win_t widget, bool_t bUpdate)
 	if (widget_is_valid(ptd->hsc))
 	{
 		if (bUpdate)
-			widget_update(ptd->hsc);
+			widget_paint(ptd->hsc);
 		else
 			widget_close(ptd->hsc, 0);
 	}
@@ -370,28 +370,28 @@ void hand_tagctrl_keydown(res_win_t widget, dword_t ks, int key)
 		break;
 	case _T('c'):
 	case _T('C'):
-		if (widget_key_state(widget, KEY_CONTROL))
+		if (widget_key_state(widget, KS_WITH_CONTROL))
 		{
 			hand_tagctrl_copy(widget);
 		}
 		break;
 	case _T('x'):
 	case _T('X'):
-		if (widget_key_state(widget, KEY_CONTROL))
+		if (widget_key_state(widget, KS_WITH_CONTROL))
 		{
 			hand_tagctrl_cut(widget);
 		}
 		break;
 	case _T('v'):
 	case _T('V'):
-		if (widget_key_state(widget, KEY_CONTROL))
+		if (widget_key_state(widget, KS_WITH_CONTROL))
 		{
 			hand_tagctrl_paste(widget);
 		}
 		break;
 	case _T('z'):
 	case _T('Z'):
-		if (widget_key_state(widget, KEY_CONTROL))
+		if (widget_key_state(widget, KS_WITH_CONTROL))
 		{
 			hand_tagctrl_undo(widget);
 		}
@@ -399,7 +399,7 @@ void hand_tagctrl_keydown(res_win_t widget, dword_t ks, int key)
 	}
 }
 
-void hand_tagctrl_char(res_win_t widget, tchar_t ch)
+void hand_tagctrl_wchar(res_win_t widget, wchar_t ch)
 {
 	tagctrl_delta_t* ptd = GETTAGCTRLDELTA(widget);
 
@@ -592,7 +592,7 @@ void hand_tagctrl_wheel(res_win_t widget, bool_t bHorz, int nDelta)
 			}
 			else
 			{
-				widget_update(ptd->vsc);
+				widget_paint(ptd->vsc);
 			}
 		}
 
@@ -604,7 +604,7 @@ void hand_tagctrl_wheel(res_win_t widget, bool_t bHorz, int nDelta)
 			}
 			else
 			{
-				widget_update(ptd->hsc);
+				widget_paint(ptd->hsc);
 			}
 		}
 
@@ -682,7 +682,7 @@ void hand_tagctrl_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 /************************************************************************************************/
 res_win_t tagctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, res_win_t wparent)
 {
-	if_event_t ev = { 0 };
+	if_dispatch_t ev = { 0 };
 
 	EVENT_BEGIN_DISPATH(&ev)
 
@@ -697,7 +697,7 @@ res_win_t tagctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* px
 		EVENT_ON_WHEEL(hand_tagctrl_wheel)
 
 		EVENT_ON_KEYDOWN(hand_tagctrl_keydown)
-		EVENT_ON_CHAR(hand_tagctrl_char)
+		EVENT_ON_WCHAR(hand_tagctrl_wchar)
 
 		EVENT_ON_MOUSE_MOVE(hand_tagctrl_mousemove)
 		EVENT_ON_LBUTTON_DBCLICK(hand_tagctrl_lbutton_dbclick)

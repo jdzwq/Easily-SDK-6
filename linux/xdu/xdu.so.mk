@@ -1,5 +1,18 @@
+#-----------------------------------------------------------------------------
+# begin GNU MAKE file
+# making order:
+# 1. nmake /f xdu.so.mk test --if need to creating some directory or file-list
+# 2. nmake /f xdu.so.mk clean
+# 3. nmake /f xdu.so.mk
+# 4. nmake /f xdu.so.mk install
+#-----------------------------------------------------------------------------
 CC = gcc
-CFLAGS = -g -Wall -fPIC
+CFLAGS = -g -Wall -fPIC -D _DEBUG
+LFLAGS = -shared -fPIC -pthread
+
+MODULE = xdu
+ARCH = aarch64
+VER = 6.0
 
 SRV_PATH = /usr/local/xService
 LNK_PATH = /usr/local/lib
@@ -8,49 +21,58 @@ SYS_PATH = /usr/include
 INC_PATH = ../../include
 SRC_PATH = ../../xdu
 SUB_PATH = ../../xdu/linux
-OUT_PATH = ~/Easily-app-6/linux/sbin/api
+OUT_PATH = ../../../Easily-app-6/linux/sbin/api
+OBJ_PATH = ../../../Easily-tmp/linux/$(MODULE)/$(ARCH)
 
-VER = 6.0
-LIBS = -lm -ldl -lutil -lrt -lX11 -lcairo -L $(LNK_PATH) -lxdk
+TARGET = lib$(MODULE).so.$(VER)
+LINKIT = lib$(MODULE).so
+
+LIBS = -lm -ldl -lutil -lrt -lX11 -lXrender -L $(LNK_PATH) -lxdk -lxgc
 DIRS = $(wildcard $(SRC_PATH)/*.c $(SUB_PATH)/*.c)
 SRCS = $(notdir $(DIRS))
-OBJS = $(patsubst %.c, %.o, $(SRCS))
-MODULE = libxdu.so
-TARGET = $(OUT_PATH)/$(MODULE).$(VER)
+COBS = $(patsubst %.c, %.o, $(SRCS))
+OBJS = $(addprefix $(OBJ_PATH)/,$(COBS))
 
-%.o : $(SRC_PATH)/%.c
+$(OBJ_PATH)/%.o : $(SRC_PATH)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(SYS_PATH) -I $(INC_PATH) -I $(SRC_PATH)
 
-%.o : $(SUB_PATH)/%.c
+$(OBJ_PATH)/%.o : $(SUB_PATH)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(SYS_PATH) -I $(INC_PATH) -I $(SRC_PATH)
 
 all : $(OBJS)
 	rm -f $@
-	$(CC) -shared -fPIC -o $(TARGET) $(OBJS) $(LIBS)
+	$(CC) $(LFLAGS) -o $(OUT_PATH)/$(TARGET) $(OBJS) $(LIBS)
 	rm -f $(OBJS)
 
 test:
+	if ! test -d $(OBJ_PATH); then \
+	mkdir -p $(OBJ_PATH); \
+	chmod 755 $(OBJ_PATH); \
+	fi
 	@echo $(DIRS)
 	@echo $(SRCS)
 	@echo $(OBJS)
 
 install:
-	if ! test -d $(SRV_PATH); then \
-	sudo mkdir $(SRV_PATH); \
-	fi
 	if ! test -d $(SRV_PATH)/api; then \
-	sudo mkdir $(SRV_PATH)/api; \
+	sudo mkdir -p $(SRV_PATH); \
+	fi
+	if ! test -d $(LNK_PATH); then \
+	sudo mkdir $(LNK_PATH); \
 	fi
 
-	sudo cp -f $(TARGET) $(SRV_PATH)/api;
-	sudo chmod +x $(SRV_PATH)/api/$(MODULE).$(VER);
-	sudo rm -f $(LNK_PATH)/$(MODULE)*;
-	sudo ln -bs $(SRV_PATH)/api/$(MODULE).$(VER) $(LNK_PATH)/$(MODULE);
+	sudo cp -f $(OUT_PATH)/$(TARGET) $(SRV_PATH)/api;
+	sudo chmod 755 $(SRV_PATH)/api/$(TARGET);
+	sudo rm -f $(LNK_PATH)/$(LINKIT);
+	sudo ln -s $(SRV_PATH)/api/$(TARGET) $(LNK_PATH)/$(LINKIT);
 
 uninstall:
-	sudo rm -r $(LNK_PATH)/$(MODULE)*;
-	sudo rm -f $(SRV_PATH)/api/$(MODULE).$(VER)
-
+	sudo rm -r $(LNK_PATH)/$(LINKIT);
+	sudo rm -f $(SRV_PATH)/api/$(TARGET)
+	
 .PHONY : clean
 clean:
-	-rm -f $(OBJS)
+	rm -f $(OBJS)
+#-----------------------------------------------------------------------------
+# end microsoft NMAKE file
+#-----------------------------------------------------------------------------

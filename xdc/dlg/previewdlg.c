@@ -685,7 +685,7 @@ void hand_previewdlg_size(res_win_t widget, int code, const xsize_t* prs)
 	{
 		widget_move(ptd->treectrl, RECTPOINT(&xr));
 		widget_size(ptd->treectrl, RECTSIZE(&xr));
-		widget_update(ptd->treectrl);
+		widget_paint(ptd->treectrl);
 	}
 
 	_previewdlg_calc_statusbar(widget, &xr);
@@ -694,7 +694,7 @@ void hand_previewdlg_size(res_win_t widget, int code, const xsize_t* prs)
 	{
 		widget_move(ptd->statusctrl, RECTPOINT(&xr));
 		widget_size(ptd->statusctrl, RECTSIZE(&xr));
-		widget_update(ptd->statusctrl);
+		widget_paint(ptd->statusctrl);
 
 		status = statusctrl_fetch(ptd->statusctrl);
 		ilk = get_status_item(status, IDN_PREVIEWDLG_STATUS_NAVI);
@@ -702,7 +702,7 @@ void hand_previewdlg_size(res_win_t widget, int code, const xsize_t* prs)
 
 		widget_move(ptd->navibox, RECTPOINT(&xr));
 		widget_size(ptd->navibox, RECTSIZE(&xr));
-		widget_update(ptd->navibox);
+		widget_paint(ptd->navibox);
 	}
 
 	_previewdlg_calc_svgbar(widget, &xr);
@@ -711,7 +711,7 @@ void hand_previewdlg_size(res_win_t widget, int code, const xsize_t* prs)
 	{
 		widget_move(ptd->svgctrl, RECTPOINT(&xr));
 		widget_size(ptd->svgctrl, RECTSIZE(&xr));
-		widget_update(ptd->svgctrl);
+		widget_paint(ptd->svgctrl);
 	}
 
 	_previewdlg_calc_toolbar(widget, &xr);
@@ -737,7 +737,7 @@ void hand_previewdlg_size(res_win_t widget, int code, const xsize_t* prs)
 	{
 		widget_move(pushbox, RECTPOINT(&xr));
 		widget_size(pushbox, RECTSIZE(&xr));
-		widget_update(pushbox);
+		widget_paint(pushbox);
 	}
 
 	xr.x -= (xr.w + nSplit);
@@ -746,7 +746,7 @@ void hand_previewdlg_size(res_win_t widget, int code, const xsize_t* prs)
 	{
 		widget_move(pushbox, RECTPOINT(&xr));
 		widget_size(pushbox, RECTSIZE(&xr));
-		widget_update(pushbox);
+		widget_paint(pushbox);
 	}
 
 	xr.x -= (xr.w + nSplit);
@@ -755,7 +755,7 @@ void hand_previewdlg_size(res_win_t widget, int code, const xsize_t* prs)
 	{
 		widget_move(pushbox, RECTPOINT(&xr));
 		widget_size(pushbox, RECTSIZE(&xr));
-		widget_update(pushbox);
+		widget_paint(pushbox);
 	}
 
 	xr.x -= (xr.w + nSplit);
@@ -764,7 +764,7 @@ void hand_previewdlg_size(res_win_t widget, int code, const xsize_t* prs)
 	{
 		widget_move(pushbox, RECTPOINT(&xr));
 		widget_size(pushbox, RECTSIZE(&xr));
-		widget_update(pushbox);
+		widget_paint(pushbox);
 	}
 
 	xr.x -= (xr.w + nSplit);
@@ -773,7 +773,7 @@ void hand_previewdlg_size(res_win_t widget, int code, const xsize_t* prs)
 	{
 		widget_move(pushbox, RECTPOINT(&xr));
 		widget_size(pushbox, RECTSIZE(&xr));
-		widget_update(pushbox);
+		widget_paint(pushbox);
 	}
 
 	xr.x -= (xr.w + nSplit);
@@ -782,7 +782,7 @@ void hand_previewdlg_size(res_win_t widget, int code, const xsize_t* prs)
 	{
 		widget_move(pushbox, RECTPOINT(&xr));
 		widget_size(pushbox, RECTSIZE(&xr));
-		widget_update(pushbox);
+		widget_paint(pushbox);
 	}
 
 	xr.x -= (xr.w + nSplit);
@@ -791,7 +791,7 @@ void hand_previewdlg_size(res_win_t widget, int code, const xsize_t* prs)
 	{
 		widget_move(pushbox, RECTPOINT(&xr));
 		widget_size(pushbox, RECTSIZE(&xr));
-		widget_update(pushbox);
+		widget_paint(pushbox);
 	}
 
 	xr.x -= (xr.w + nSplit);
@@ -800,7 +800,7 @@ void hand_previewdlg_size(res_win_t widget, int code, const xsize_t* prs)
 	{
 		widget_move(pushbox, RECTPOINT(&xr));
 		widget_size(pushbox, RECTSIZE(&xr));
-		widget_update(pushbox);
+		widget_paint(pushbox);
 	}
 
 	widget_erase(widget, NULL);
@@ -847,7 +847,7 @@ void hand_previewdlg_notice(res_win_t widget, LPNOTICE phdr)
 {
 	previewdlg_delta_t* ptd = GETPREVIEWDLGDELTA(widget);
 
-	if (phdr->id == IDC_PREVIEWDLG_TREECTRL)
+	if (phdr->user == IDC_PREVIEWDLG_TREECTRL)
 	{
 		NOTICE_TREE* pnt = (NOTICE_TREE*)phdr;
 		switch (pnt->code)
@@ -866,7 +866,7 @@ res_win_t previewdlg_create(const tchar_t* title, res_win_t owner)
 {
 	res_win_t dlg;
 	xrect_t xr = { 0 };
-	if_event_t ev = { 0 };
+	if_dispatch_t ev = { 0 };
 
 	EVENT_BEGIN_DISPATH(&ev)
 

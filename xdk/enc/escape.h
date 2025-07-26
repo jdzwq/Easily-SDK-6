@@ -122,17 +122,15 @@ extern "C" {
 
 EXP_API void csv_token_encode(const tchar_t* val, int len, tchar_t* buf, int* pdw);
 
-EXP_API int csv_token_decode(const tchar_t* val, tchar_t* buf, int* pdw);
+EXP_API int csv_token_decode(const tchar_t* val, int len, tchar_t* buf, int* pdw);
 
 EXP_API dword_t url_byte_encode(const byte_t* val, dword_t len, byte_t* buf, dword_t max);
 
 EXP_API dword_t url_byte_decode(const byte_t* val, dword_t len, byte_t* buf, dword_t max);
 
-#if defined(XDK_SUPPORT_ACP) || defined(XDK_SUPPORT_MBCS)
 EXP_API dword_t xml_gb2312_decode(const byte_t* src, tchar_t* dest);
 
 EXP_API dword_t xml_gb2312_encode(tchar_t ch, byte_t* dest, dword_t max);
-#endif
 
 EXP_API dword_t xml_utf8_decode(const byte_t* src, tchar_t* dest);
 

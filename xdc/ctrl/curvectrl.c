@@ -34,6 +34,8 @@ typedef struct _curve_delta_t{
 
 	res_win_t hsc;
 	res_win_t vsc;
+
+	xpen_t xp;
 }curve_delta_t;
 
 #define GETCURVEDELTA(ph) 	(curve_delta_t*)widget_get_user_delta(ph)
@@ -77,6 +79,8 @@ int hand_curve_create(res_win_t widget, void* data)
 	widget_hand_create(widget);
 
 	ptd = (curve_delta_t*)xmem_alloc(sizeof(curve_delta_t));
+
+	default_xpen(&ptd->xp);
 
 	SETCURVEDELTA(widget, ptd);
 
@@ -229,6 +233,13 @@ void hand_curve_wheel(res_win_t widget, bool_t bHorz, int nDelta)
 	}
 }
 
+void hand_curve_xpen(res_win_t widget, const xpen_t* pxp)
+{
+	curve_delta_t* ptd = GETCURVEDELTA(widget);
+
+	xmem_copy((void*)&ptd->xp, (void*)pxp, sizeof(xpen_t));
+}
+
 void hand_curve_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 {
 	curve_delta_t* ptd = GETCURVEDELTA(widget);
@@ -237,8 +248,6 @@ void hand_curve_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 	canvas_t canv;
 	xrect_t xr = { 0 };
 	viewbox_t vb = { 0 };
-	xpen_t xp = { 0 };
-	xbrush_t xb = { 0 };
 
 	xpoint_t pt[5];
 	int i;
@@ -246,10 +255,12 @@ void hand_curve_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 
 	drawing_interface ifv = {0};
 
-	XDK_ASSERT(ptd != NULL);
+	clr_mod_t clrs;
+	xbrush_t xb;
 
-	widget_get_xbrush(widget, &xb);
-	widget_get_xpen(widget, &xp);
+	widget_get_color_mode(widget, &clrs);
+	default_xbrush(&xb);
+	format_xcolor(&clrs.clr_bkg, xb.color);
 
 	widget_get_client_rect(widget, &xr);
 
@@ -278,10 +289,8 @@ void hand_curve_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 		pt[4].x = xr.x + xr.w;
 		pt[4].y = xr.y + xr.h / 2;
 
-		(*ifv.pf_draw_curve)(ifv.ctx, &xp, pt, 5);
+		(*ifv.pf_draw_curve)(ifv.ctx, &ptd->xp, pt, 5);
 	}
-
-	
 
 	end_canvas_paint(canv, dc, pxr);
 }
@@ -289,7 +298,7 @@ void hand_curve_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 /************************************************************************************************/
 res_win_t curvectrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, res_win_t wparent)
 {
-	if_event_t ev = { 0 };
+	if_dispatch_t ev = { 0 };
 
 	EVENT_BEGIN_DISPATH(&ev)
 
@@ -313,6 +322,8 @@ res_win_t curvectrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* 
 		EVENT_ON_RBUTTON_DOWN(hand_curve_rbutton_down)
 		EVENT_ON_RBUTTON_UP(hand_curve_rbutton_up)
 
+		EVENT_ON_XPEN(hand_curve_xpen)
+
 		EVENT_ON_NC_IMPLEMENT
 
 	EVENT_END_DISPATH
@@ -328,7 +339,7 @@ void curvectrl_redraw(res_win_t widget)
 
 	_curvectrl_reset_page(widget);
 
-	widget_update(widget);
+	widget_paint(widget);
 
 	widget_erase(widget, NULL);
 }

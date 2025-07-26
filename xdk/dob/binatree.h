@@ -158,9 +158,6 @@ EXP_API link_t_ptr traver_bina_tree_inorder(link_t_ptr ptr, CALLBACK_ENUMLINK pf
 */
 EXP_API link_t_ptr traver_bina_tree_levelorder(link_t_ptr ptr, CALLBACK_ENUMLINK pf, void* param);
 
-#if defined(XDK_SUPPORT_TEST)
-	EXP_API void test_bina_tree();
-#endif
 
 #ifdef	__cplusplus
 }

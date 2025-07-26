@@ -26,10 +26,9 @@ LICENSE.GPL3 for more details.
 
 #include "variant.h"
 
-#include "../xdkimp.h"
-#include "../xdkoem.h"
+#include "../xdkobj.h"
 #include "../xdkstd.h"
-#include "../xdkutil.h"
+#include "../xdkoem.h"
 
 typedef struct _variant_context{
 	memobj_head head;
@@ -1547,47 +1546,3 @@ void variant_hash128(variant_t var, key128_t* pkey)
 	else
 		xmem_zero((void*)pkey, sizeof(key128_t));
 }
-
-#if defined(XDK_SUPPORT_TEST)
-void test_variant(void)
-{
-	variant_t v1 = variant_alloc(VV_STRING_UTF8);
-	variant_t v2 = variant_alloc(VV_STRING_UTF8);
-
-	XDK_ASSERT(variant_comp(v1, v2) == 0);
-
-	variant_from_string(v1, _T("test1"), -1);
-	variant_from_string(v2, _T("test2"), -1);
-
-	XDK_ASSERT(variant_comp(v1, v2) < 0);
-
-	variant_free(v1);
-	variant_free(v2);
-
-	v1 = variant_alloc(VV_INT);
-	v2 = variant_alloc(VV_INT);
-	variant_from_string(v1, _T("123456789"), -1);
-
-	tchar_t token[NUM_LEN + 1];
-	variant_to_string(v1, token, NUM_LEN);
-
-	variant_from_string(v2, token, -1);
-
-	XDK_ASSERT(variant_comp(v1, v2) == 0);
-
-	byte_t* buf;
-	dword_t len;
-	len = variant_encode(v1, NULL, MAX_LONG);
-	buf = (byte_t*)xmem_alloc(len);
-	variant_encode(v1, buf, len);
-
-	variant_decode(v2, buf);
-
-	XDK_ASSERT(variant_comp(v1, v2) == 0);
-
-	xmem_free(buf);
-
-	variant_free(v1);
-	variant_free(v2);
-}
-#endif

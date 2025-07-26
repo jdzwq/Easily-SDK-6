@@ -26,7 +26,6 @@ LICENSE.GPL3 for more details.
 
 #include "numericarray.h"
 
-#include "../xdkimp.h"
 #include "../xdkstd.h"
 
 double** alloc_numeric_array(void)
@@ -78,7 +77,7 @@ void insert_numeric(double** sa, int index, double val)
 
 	XDK_ASSERT(index >= 0 && index <= size);
 
-	*sa = xmem_realloc(*sa, (size + 1) * sizeof(double));
+	*sa = (double*)xmem_realloc(*sa, (size + 1) * sizeof(double));
 
 	xmem_move((void*)(*sa + index), ((size - index) * sizeof(double)), (int)sizeof(double));
 	xmem_copy((void*)(*sa + index), (void*)&val, sizeof(double));
@@ -96,35 +95,7 @@ void delete_numeric(double** sa, int index)
 
 	xmem_move((void*)(*sa + index + 1), ((size - index - 1) * sizeof(double)), -(int)sizeof(double));
 
-	*sa = xmem_realloc(*sa, (size - 1) * sizeof(double));
+	*sa = (double*)xmem_realloc(*sa, (size - 1) * sizeof(double));
 
 	*(long*)(sa + 1) = (size - 1);
 }
-
-
-#if defined(XDK_SUPPORT_TEST)
-
-void test_numeric_array()
-{
-	double** sa = alloc_numeric_array();
-	int i;
-
-	for (i = 0; i < 10; i++)
-	{
-		insert_numeric(sa, i, i);
-	}
-
-	for (i = 0; i < 10; i++)
-	{
-		_tprintf(_T("%f\n"), get_numeric(sa, i));
-	}
-
-	while (get_numeric_array_size(sa))
-	{
-		delete_numeric(sa, 0);
-	}
-
-	free_numeric_array(sa);
-}
-
-#endif

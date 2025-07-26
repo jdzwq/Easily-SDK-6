@@ -26,7 +26,6 @@ LICENSE.GPL3 for more details.
 
 #include "charset.h"
 
-#include "../xdkimp.h"
 #include "../xdkstd.h"
 
 int parse_charset(const tchar_t* enstr)

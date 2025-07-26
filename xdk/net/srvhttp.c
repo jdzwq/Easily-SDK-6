@@ -27,7 +27,6 @@ LICENSE.GPL3 for more details.
 #include "srvhttp.h"
 
 #include "../xdknet.h"
-#include "../xdkimp.h"
 #include "../xdkoem.h"
 #include "../xdkstd.h"
 

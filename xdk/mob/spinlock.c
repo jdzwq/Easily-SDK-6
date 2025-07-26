@@ -26,10 +26,8 @@ LICENSE.GPL3 for more details.
 
 #include "spinlock.h"
 
-#include "../xdkimp.h"
-#include "../xdkoem.h"
+#include "../xdkobj.h"
 #include "../xdkstd.h"
-
 
 #define GUID_MEM_PREFIX		_T("mem-")
 
@@ -123,7 +121,7 @@ bool_t enter_spinlock(spinlock_t pt, int map_ind, int map_pos)
 	XDK_ASSERT(pt && pt->tag == MEM_SPINLOCK);
 
 	offs = map_ind * ppt->map_size;
-	buff = xshare_lock(ppt->share, offs, ppt->map_size);
+	buff = (byte_t*)xshare_lock(ppt->share, offs, ppt->map_size);
 
 	XDK_ASSERT(buff != NULL);
 
@@ -169,7 +167,7 @@ void leave_spinlock(spinlock_t pt, int map_ind, int map_pos)
 	XDK_ASSERT(pt && pt->tag == MEM_SPINLOCK);
 
 	offs = map_ind * ppt->map_size;
-	buff = xshare_lock(ppt->share, offs, ppt->map_size);
+	buff = (byte_t*)xshare_lock(ppt->share, offs, ppt->map_size);
 
 	XDK_ASSERT(buff != NULL);
 
@@ -190,41 +188,3 @@ void leave_spinlock(spinlock_t pt, int map_ind, int map_pos)
 
 	xshare_unlock(ppt->share, offs, ppt->map_size, buff);
 }
-
-#if defined(XDK_SUPPORT_TEST)
-
-void test_spinlock()
-{
-	lword_t tms;
-	nuid_t nuid = { 0 };
-	tchar_t token[NUID_TOKEN_SIZE + 1] = { 0 };
-
-	tms = get_timestamp();
-	nuid_from_timestamp(&nuid, tms);
-	nuid_format_string(&nuid, token);
-
-	int nums = 4096;
-	spinlock_t lt = alloc_spinlock(token, nums);
-	bool_t rt;
-	int i, k, j;
-
-	for (k = 0; k < 1024; k++)
-	{
-		for (i = 0; i < nums; i++)
-		{
-			for (j = 0; j < 2; j++)
-			{
-				rt = enter_spinlock(lt, k, i);
-				_tprintf(_T("map:%d pos:%d return:%d\n"), k, i, rt);
-				//if (j % 2 && rt)
-					//goto err;
-				leave_spinlock(lt, k, i);
-			}
-		}
-	}
-
-//err:
-
-	free_spinlock(lt);
-}
-#endif

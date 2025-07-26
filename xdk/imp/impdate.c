@@ -26,9 +26,7 @@ LICENSE.GPL3 for more details.
 
 #include "impdate.h"
 
-#include "../xdkimp.h"
 #include "../xdkstd.h"
-#include "../xdkutil.h"
 
 #ifdef XDK_SUPPORT_DATE
 
@@ -266,74 +264,5 @@ dword_t get_ticks()
 
 	return (dword_t)c;
 }
+
 #endif //XDK_SUPPORT_DATE
-
-#ifdef XDK_SUPPORT_DATE
-
-#ifdef _OS_WINDOWS
-static tchar_t calen_week[CALENDAR_COL][UTF_LEN + 1] = { _T("日"), _T("一"), _T("二"), _T("三"), _T("四"), _T("五"), _T("六") };
-#else
-static tchar_t calen_week[CALENDAR_COL][UTF_LEN + 1] = { _T("Sun"), _T("Mon"), _T("Tue"), _T("Wed"), _T("Thu"), _T("Fri"), _T("Sat") };
-#endif
-
-void default_calendar(calendar_t* pca)
-{
-	int i, max_day, wday, weeks;
-
-	max_day = max_mon_days(1970, 1);
-
-	for (i = 0; i < CALENDAR_COL; i++)
-	{
-		xscpy(pca->calen_week[i], calen_week[i]);
-	}
-
-	xmem_zero((void*)pca->calen_days, CALENDAR_ROW * CALENDAR_COL * sizeof(int));
-
-	wday = 4;
-	weeks = 0;
-	for (i = 1; i <= max_day; i++)
-	{
-		pca->calen_days[weeks][wday] = i;
-		wday++;
-
-		if (wday > 6)
-		{
-			wday = 0;
-			weeks++;
-		}
-	}
-}
-
-void fill_calendar(calendar_t* pca, const xdate_t* pdt)
-{
-	int i, max_day, weeks;
-	xdate_t xd = { 0 };
-
-	xd.year = pdt->year;
-	xd.mon = pdt->mon;
-	xd.day = 1;
-
-	mak_loc_week(&xd);
-	max_day = max_mon_days(xd.year, xd.mon);
-
-	for (i = 0; i < CALENDAR_COL; i++)
-	{
-		xscpy(pca->calen_week[i], calen_week[i]);
-	}
-
-	xmem_zero((void*)pca->calen_days, CALENDAR_ROW * CALENDAR_COL * sizeof(int));
-
-	weeks = 0;
-	for (i = 1; i <= max_day; i++)
-	{
-		pca->calen_days[weeks][xd.wday] = i;
-		xd.wday++;
-
-		if (xd.wday > 6)
-		{
-			xd.wday = 0;
-			weeks++;
-		}
-	}
-}
-#endif

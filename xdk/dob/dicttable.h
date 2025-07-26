@@ -227,10 +227,6 @@ EXP_API link_t_ptr write_dict_entity(link_t_ptr ptr, variant_t key, object_t val
 EXP_API bool_t read_dict_entity(link_t_ptr ptr, variant_t key, object_t val);
 
 
-#if defined(XDK_SUPPORT_TEST)
-	EXP_API void test_dict_table();
-#endif
-
 #ifdef	__cplusplus
 }
 #endif

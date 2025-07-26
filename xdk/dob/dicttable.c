@@ -26,9 +26,8 @@ LICENSE.GPL3 for more details.
 
 #include "dicttable.h"
 
-#include "../xdkimp.h"
-#include "../xdkoem.h"
 #include "../xdkstd.h"
+#include "../xdkobj.h"
 
 typedef struct _dict_entity_t{
 	link_t lk;			/* entity self link component*/
@@ -678,70 +677,3 @@ link_t_ptr enum_dict_entity(link_t_ptr ptr, ENUM_DICTTABLE_ENTITY pf, void* pv)
 
 	return plk;
 }
-
-
-#if defined(XDK_SUPPORT_TEST)
-void test_dict_table()
-{
-	dword_t i,count,total = 0;
-	dword_t min, max, zero = 0;
-	link_t_ptr ptr;
-	dict_table_t* pht;
-
-	ptr = create_dict_table();
-
-	variant_t key = variant_alloc(VV_INT);
-
-	object_t val = object_alloc();
-
-	for (i = 0x4E00; i <= 0x9FA5; i++)
-	{
-		variant_set_int(key, i);
-
-		object_set_variant(val, key);
-		write_dict_entity(ptr, key, val);
-	}
-
-	variant_t key2 = variant_alloc(VV_INT);
-
-	for (i = 0x4E00; i <= 0x9FA5; i++)
-	{
-		variant_set_int(key, i);
-
-		read_dict_entity(ptr, key, val);
-		object_get_variant(val, key2);
-
-		int rt = variant_comp(key, key2);
-		XDK_ASSERT(rt == 0);
-	}
-
-	variant_free(key2);
-
-	pht = DictTableFromLink(ptr);
-	min = pht->size;
-	max = 0;
-	for (i = 0; i < pht->size; i++)
-	{
-		count = get_link_count(&((pht->pp)[i]));
-		printf("entity size is:%d\n",  count);
-		total += count;
-		if (!count)
-			zero++;
-		if (min > count)
-			min = count;
-		if (max < count)
-			max = count;
-	}
-
-	printf("table size is:%d\n", pht->size);
-	printf("zero eintities is:%d\n", zero);
-	printf("max eintities is:%d\n", max);
-	printf("min eintities is:%d\n", min);
-	printf("total entities is:%d\n", total);
-
-	destroy_dict_table(ptr);
-
-	variant_free(key);
-	object_free(val);
-}
-#endif

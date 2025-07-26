@@ -26,7 +26,6 @@ LICENSE.GPL3 for more details.
 #include "prim.h"
 #include <math.h>
 
-#include "../xdkimp.h"
 #include "../xdkstd.h"
 
 #define PRIM_TABLE_SIZE		5134

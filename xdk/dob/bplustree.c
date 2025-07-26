@@ -26,9 +26,9 @@ LICENSE.GPL3 for more details.
 
 #include "bplustree.h"
 
-#include "../xdkimp.h"
-#include "../xdkoem.h"
 #include "../xdkstd.h"
+#include "../xdkobj.h"
+#include "../xdkoem.h"
 
 #define BPLUS_ENTITY_INDEX	1
 #define BPLUS_ENTITY_DATA	0
@@ -55,7 +55,11 @@ typedef struct _bplus_index_t{
 	link_t lkSibling;		// the sibling node link component also as self link component
 	link_t lkChild;			// the child node link component 
 
+#ifdef _OS_64
+	key64_t index;
+#else
 	key32_t index;		//file table index
+#endif
 	dword_t count;		//entities count
 	bplus_index_entity* indices; //array for index keyset
 	byte_t* guider;
@@ -152,7 +156,7 @@ static bool_t _lock_bplus_index(bplus_tree_t* pbt, bplus_index_t* pbi)
 
 	XDK_ASSERT(!pbi->guider);
 
-	pbi->guider = xmem_alloc(PAGE_SIZE);
+	pbi->guider = (byte_t*)xmem_alloc(PAGE_SIZE);
 
 	lock_file_table_block(pbt->ind_table, (dword_t)pbi->index, PAGE_SIZE, 0, &mh, (void**)&buff);
 	if (buff)
@@ -195,9 +199,9 @@ static bool_t _lock_bplus_data(bplus_tree_t* pbt, bplus_data_t* pbd)
 
 	XDK_ASSERT(!pbd->guider);
 
-	pbd->guider = xmem_alloc(PAGE_SIZE);
+	pbd->guider = (byte_t*)xmem_alloc(PAGE_SIZE);
 
-	lock_file_table_block(pbt->ind_table, (dword_t)pbd->index, PAGE_SIZE, 0, &mh, &buff);
+	lock_file_table_block(pbt->ind_table, (dword_t)pbd->index, PAGE_SIZE, 0, &mh, (void**)&buff);
 	if (buff)
 	{
 		xmem_copy((void*)pbd->guider, (void*)buff, PAGE_SIZE);
@@ -221,7 +225,7 @@ static void _unlock_bplus_data(bplus_tree_t* pbt, bplus_data_t* pbd, bool_t b_sa
 	{
 		PUT_SWORD_LOC(pbd->guider, 2, pbd->count);
 
-		lock_file_table_block(pbt->ind_table, (dword_t)pbd->index, PAGE_SIZE, 1, &mh, &buff);
+		lock_file_table_block(pbt->ind_table, (dword_t)pbd->index, PAGE_SIZE, 1, &mh, (void**)&buff);
 		xmem_copy((void*)buff, (void*)pbd->guider, (BPLUS_PAGE_HEADER + pbd->count * sizeof(bplus_data_entity)));
 		unlock_file_table_block(pbt->ind_table, (dword_t)pbd->index, PAGE_SIZE, 1, mh, (void*)buff);
 	}
@@ -289,7 +293,11 @@ static bool_t _alloc_bplus_index(bplus_tree_t* pbt, bplus_index_t* pbi)
 	{
 		pbi->tabled = 0;
 		pbi->count = 0;
+	#ifdef _OS_64
+		pbi->index = (key64_t)pbi->indices;
+	#else
 		pbi->index = (key32_t)pbi->indices;
+	#endif
 	}
 
 	return 1;
@@ -331,7 +339,7 @@ static bool_t _attach_bplus_index(bplus_tree_t* pbt, bplus_index_t* pbi)
 
 		if (tag == BPLUS_ENTITY_INDEX)
 		{
-			pbn = _new_bplus_index(pbt);
+			pbn = _new_bplus_index();
 
 			pbn->index = pbi->indices[pbi->count].ind;
 
@@ -340,7 +348,7 @@ static bool_t _attach_bplus_index(bplus_tree_t* pbt, bplus_index_t* pbi)
 		}
 		else if (tag == BPLUS_ENTITY_DATA)
 		{
-			pbd = _new_bplus_data(pbt);
+			pbd = _new_bplus_data();
 
 			pbd->index = (dword_t)(pbi->indices[pbi->count].ind);
 
@@ -400,7 +408,11 @@ static bool_t _alloc_bplus_data(bplus_tree_t* pbt, bplus_data_t* pbn)
 	{
 		pbn->tabled = 0;
 		pbn->count = 0;
+	#ifdef _OS_64
+		pbn->index = (key64_t)pbn->dataset;
+	#else
 		pbn->index = (key32_t)pbn->dataset;
+	#endif
 	}
 
 	return 1;
@@ -1692,7 +1704,7 @@ static bool_t _attach_bplus_index_table(link_t_ptr ptr, link_t_ptr ft)
 	
 	if (tag == BPLUS_ENTITY_INDEX)
 	{
-		pbi = _new_bplus_index(pbt);
+		pbi = _new_bplus_index();
 		pbi->index = index;
 
 		if (!_attach_bplus_index(pbt, pbi))
@@ -1705,7 +1717,7 @@ static bool_t _attach_bplus_index_table(link_t_ptr ptr, link_t_ptr ft)
 	}
 	else if (tag == BPLUS_ENTITY_DATA)
 	{
-		pbd = _new_bplus_data(pbt);
+		pbd = _new_bplus_data();
 		pbd->index = index;
 
 		if (!_attach_bplus_data(pbt, pbd))
@@ -2175,226 +2187,3 @@ link_t_ptr create_bplus_file_table(link_t_ptr index_table, link_t_ptr data_table
 
 	return ptr;
 }
-
-#if defined(XDK_SUPPORT_TEST)
-#include <time.h>
-
-static bool_t print_node(link_t_ptr nlk, void* pa)
-{
-	bplus_tree_t* pbt = (bplus_tree_t*)pa;
-	bplus_data_t* pbd = BplusDataFromLink(nlk);
-	bplus_index_t* pbi;
-	dword_t i,n;
-	key64_t key;
-	key64_t org;
-
-	variant_t var = variant_alloc(VV_NULL);
-	object_t val = object_alloc();
-	_key_zero(&org);
-
-	_tprintf(_T("{"));
-	for (n = 0; n < pbd->count; n++)
-	{
-		_get_bplus_entity_val(pbt, pbd, n, var, val);
-		_key_gen(var, &key);
-
-		printf("%lu ", key);
-
-		XDK_ASSERT(key > 0);
-		XDK_ASSERT(_key_comp(&key, &org) > 0);
-	
-		_key_copy(&org, &key);
-		variant_to_null(var, VV_NULL);
-	}
-	_tprintf(_T("}"));
-
-
-	key64_t* pkey;
-	link_t_ptr plk = _get_bplus_data_parent(nlk);
-	while (plk)
-	{
-		pbi = BplusIndexFromLink(plk);
-
-		if (pbt->ind_table)
-		{
-			_lock_bplus_index(pbt, pbi);
-		}
-
-		_tprintf(_T("("));
-		for (i = 0; i < pbi->count; i++)
-		{
-			pkey = &(pbi->indices[i].key);
-
-			if (pbd->index == pbi->indices[i].ind)
-				_tprintf(_T("["));
-
-			if (pbd->index == pbi->indices[i].ind)
-				printf("%lu] ", *pkey);
-			else
-				printf("%lu ", *pkey);
-		}
-		_tprintf(_T(")"));
-
-		if (pbt->ind_table)
-		{
-			_unlock_bplus_index(pbt, pbi, 0);
-		}
-
-		plk = _get_bplus_index_parent(plk);
-	}
-
-	variant_free(var);
-	object_free(val);
-
-	_tprintf(_T("\n"));
-
-	return 1;
-}
-
-void test_bplus_tree_none_table()
-{
-	//tchar_t numset[] = _T("27 16 48 40 48 32 33 48 48 11 31 29 33 47 11 9 1 46 42 8 35 15 1 15 2 33 2 32 49 36 37 38 0 50 51 80 70 83 91 85 96 82 43 20 24 11 12 46 32 11 46 22 11 45 9 17 39 0 44 30 14 18 21 75 71 65 61 83 77 97 66 78 60 63 91 81 92 84");
-	tchar_t numset[] = _T("136 82 188 91 130 20 27 152 84 182 42 5 29 78 180 32 173 107 10 191 164 83 139 1 99 100 87 172 181 46 69 35 5 8 69 170 24 118 9 79 126 6 5 174 56 171 44 56 175 124 1 73 133 144 115 34 172 160 108 198 54 119 133 74 193 76 172 188 176 29 51 76 64 9 57 132 37 125 91 196 91 111 184 199 64 114 58 150 14 38 7");// 23 167 51 151 138 121 194 9 175 1");
-
-	link_t_ptr ptr = create_bplus_tree();
-
-	variant_t v = variant_alloc(VV_INT);
-
-	object_t val = object_alloc();
-
-	key64_t org = { 0 };
-
-	tchar_t* key;
-	int len;
-	int n, total = 0;
-	while (n = parse_string_token((numset + total), -1, _T(' '), &key, &len))
-	{
-		total += n;
-		n = xsntol(key, len);
-		variant_set_int(v, n);
-		_tprintf(_T("INS %d: "),n);
-
-		object_set_variant(val, v);
-		insert_bplus_entity(ptr, v, val);
-	}
-
-	_key_zero(&org);
-
-	_enum_bplus_entity(ptr, print_node, (void*)BplusTreeFromLink(ptr));
-
-	destroy_bplus_tree(ptr);
-
-	variant_free(v);
-	object_free(val);
-
-	///////////////////////////////////
-	ptr = create_bplus_tree();
-
-	v = variant_alloc(VV_STRING_UTF8);
-	val = object_alloc();
-	variant_t v2 = variant_alloc(VV_STRING_UTF8);
-
-	tchar_t str[NUM_LEN + 1];
-	int i;
-	bool_t rt;
-	n = 100000;
-	for (i = 0; i < n; i++)
-	{
-		xsprintf(str, _T("key%d"), i);
-		variant_from_string(v, str, -1);
-		object_set_variant(val, v);
-
-		insert_bplus_entity(ptr, v, val);
-	}
-
-	for (i = 0; i < n; i++)
-	{
-		xsprintf(str, _T("key%d"), i);
-		variant_from_string(v, str, -1);
-		object_set_variant(val, v);
-
-		rt = find_bplus_entity(ptr, v, val);
-		if (!rt)
-		{
-			_tprintf(_T("missing %s\n"), str);
-		}
-		else
-		{
-			object_get_variant(val, v2);
-			XDK_ASSERT(variant_comp(v, v2) == 0);
-		}
-	}
-
-	_tprintf(_T("end\n"), str);
-
-	variant_free(v2);
-	variant_free(v);
-	object_free(val);
-	destroy_bplus_tree(ptr);
-}
-
-void test_bplus_tree_file_table(const tchar_t* tname, dword_t tmask)
-{
-	tchar_t iname[PATH_LEN + 1] = { 0 };
-	tchar_t dname[PATH_LEN + 1] = { 0 };
-
-	xsprintf(iname, _T("%s.ind"), tname);
-	xsprintf(dname, _T("%s.dat"), tname);
-
-	int i, j = 10;
-	while (j--)
-	{
-		link_t_ptr pt_index = create_file_table(iname, BLOCK_SIZE_4096, tmask);
-		link_t_ptr pt_data = create_file_table(dname, BLOCK_SIZE_512, tmask);
-
-		link_t_ptr ptr = create_bplus_file_table(pt_index, pt_data);
-
-		Srand48((int)time(NULL));
-
-		variant_t v = variant_alloc(VV_INT);
-
-		object_t val = object_alloc();
-
-		int n = 1000;
-		int m;
-
-		for (i = 0; i < n; i++)
-		{
-			while ((m = Lrand48() % n) == 0);
-			//_tprintf(_T("04d "), m);
-			variant_set_int(v, m);
-
-			object_set_variant(val, v);
-			insert_bplus_entity(ptr, v, val);
-		}
-
-		_tprintf(_T("\n"));
-
-		_enum_bplus_entity(ptr, print_node, (void*)BplusTreeFromLink(ptr));
-
-		Srand48((int)time(NULL));
-
-		for (i = 0; i < n; i++)
-		{
-			while ((m = Lrand48() % n) == 0);
-			//_tprintf(_T("04d "), m);
-			variant_set_int(v, m);
-
-			delete_bplus_entity(ptr, v);
-		}
-
-		_tprintf(_T("\n"));
-
-		variant_free(v);
-		object_free(val);
-
-		_enum_bplus_entity(ptr, print_node, (void*)BplusTreeFromLink(ptr));
-
-		destroy_file_table(pt_index);
-
-		destroy_file_table(pt_data);
-
-		destroy_bplus_tree(ptr);
-	}
-}
-#endif

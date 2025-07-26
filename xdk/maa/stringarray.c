@@ -26,7 +26,6 @@ LICENSE.GPL3 for more details.
 
 #include "stringarray.h"
 
-#include "../xdkimp.h"
 #include "../xdkstd.h"
 
 tchar_t** alloc_string_array(void)
@@ -147,7 +146,7 @@ void insert_string(tchar_t** sa, int index, const tchar_t* tk, int len)
 
 	k = (len + 1) * sizeof(tchar_t);
 
-	*sa = xmem_realloc((void*)(*sa), (size + k + sizeof(tchar_t)));
+	*sa = (tchar_t*)xmem_realloc((void*)(*sa), (size + k + sizeof(tchar_t)));
 	xmem_zero((void*)((byte_t*)(*sa) + size), (k + sizeof(tchar_t)));
 
 	xmem_move((void*)(*sa + n), (size - n * sizeof(tchar_t)), k);
@@ -181,39 +180,10 @@ void delete_string(tchar_t** sa, int index)
 	k = (xslen(token) + 1) * sizeof(tchar_t);
 
 	xmem_move((void*)(*sa + n + k / sizeof(tchar_t)), (size - n * sizeof(tchar_t) - k), -k);
-	*sa = xmem_realloc((void*)(*sa), (size - k + sizeof(tchar_t)));
+	*sa = (tchar_t*)xmem_realloc((void*)(*sa), (size - k + sizeof(tchar_t)));
 
 	size -= k;
 	xmem_zero((void*)((byte_t*)(*sa) + size), sizeof(tchar_t));
 
 	*(long*)(sa + 1) = size;
 }
-
-#if defined(_DEBUG) || defined(DEBUG)
-
-void test_string_array()
-{
-	tchar_t token[10];
-
-	tchar_t** sa = alloc_string_array();
-
-	for (int i = 0; i < 10; i++)
-	{
-		xsprintf(token, _T("token%d"), i);
-		insert_string(sa, i, token, -1);
-	}
-
-	for (int i = 0; i < 10; i++)
-	{
-		_tprintf(_T("%s\n"), get_string_ptr(sa, i));
-	}
-
-	while (get_string_array_size(sa))
-	{
-		delete_string(sa, 0);
-	}
-
-	free_string_array(sa);
-}
-
-#endif

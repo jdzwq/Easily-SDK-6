@@ -55,25 +55,13 @@ LICENSE.GPL3 for more details.
 #define TEXT_US				0x1f //unit separator
 
 
-/*define max encode bytes*/
-#ifdef _UNICODE
-#define CHS_LEN		1
-#else
-#if DEF_MBS == _GB2312
-#define CHS_LEN		2
-#else
-#define CHS_LEN		3
-#endif
-#endif
-
-#define UTF_LEN		3
-
 /*define some characters length*/
 #define INT_LEN			16
 #define NUM_LEN			48 
 #define DATE_LEN		48
 #define UTC_LEN			24
 #define CLR_LEN			24
+#define FNT_LEN			32
 #define RES_LEN			64
 #define KEY_LEN			128
 #define BLK_LEN			32

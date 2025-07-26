@@ -43,8 +43,8 @@ numerictoken --> {1 | 2 | ...}
 
 #include "macro.h"
 
-#include "../xdkimp.h"
 #include "../xdkstd.h"
+#include "../xdkobj.h"
 
 /*define some terminated uchar_t*/
 #define NILL			_T('\x02')

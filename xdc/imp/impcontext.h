@@ -177,30 +177,6 @@ EXP_API void  end_doc(visual_t rdc);
 
 #endif //XDU_SUPPORT_CONTEXT_PRINTER
 
-#ifdef XDU_SUPPORT_CONTEXT_REGION
-/*
-@FUNCTION create_region: create region object.
-@INPUT const tchar_t* shape: the shape type, eg: ATTR_SHAPE_*.
-@INPUT const xrect_t* pxr: the region rect.
-@RETURN res_rgn_t: if succeeds return region resource handle, fails return NULL.
-*/
-EXP_API res_rgn_t create_region(const tchar_t* shape, const xrect_t* pxr);
-
-/*
-@FUNCTION delete_region: free region object.
-@INPUT res_rgn_t rgn: the region resource handle.
-@RETURN void: none.
-*/
-EXP_API void	delete_region(res_rgn_t rgn);
-
-/*
-@FUNCTION pt_in_region: test if the point inside the region.
-@INPUT res_rgn_t rgn: the region resource handle.
-@INPUT const xpoint_t* ppt: the point to test.
-@RETURN bool_t: if inside return nonzero, otherwise return zero.
-*/
-EXP_API bool_t	pt_in_region(res_rgn_t rgn, const xpoint_t* ppt);
-#endif
 
 #ifdef	__cplusplus
 }

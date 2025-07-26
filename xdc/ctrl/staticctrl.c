@@ -927,7 +927,6 @@ void noti_statis_begin_edit(res_win_t widget)
 	xrect_t xr = { 0 };
 
 	clr_mod_t ob = { 0 };
-	xfont_t xf = { 0 };
 
 	XDK_ASSERT(ptd->xax);
 	
@@ -940,8 +939,6 @@ void noti_statis_begin_edit(res_win_t widget)
 	if (get_xax_locked(ptd->xax))
 		return;
 
-	widget_get_xfont(widget, &xf);
-	parse_xfont_from_style(&xf, get_statis_style_ptr(ptd->statis));
 	widget_get_color_mode(widget, &ob);
 
 	_statisctrl_coor_rect(widget, ptd->xax, ptd->yax, &xr);
@@ -964,7 +961,6 @@ void noti_statis_begin_edit(res_win_t widget)
 	
 	widget_set_owner(ptd->editor, widget);
 
-	widget_set_xfont(ptd->editor, &xf);
 	widget_set_color_mode(ptd->editor, &ob);
 	widget_show(ptd->editor, WS_SHOW_NORMAL);
 	widget_set_focus(ptd->editor);
@@ -999,7 +995,7 @@ void noti_statis_commit_edit(res_win_t widget)
 	}
 
 	editctrl = ptd->editor;
-	ptd->editor = NULL;
+	ptd->editor = (res_win_t)0;
 
 	widget_destroy(editctrl);
 	widget_set_focus(widget);
@@ -1048,7 +1044,7 @@ void noti_statis_rollback_edit(res_win_t widget)
 	XDK_ASSERT(ptd->xax);
 
 	editctrl = ptd->editor;
-	ptd->editor = NULL;
+	ptd->editor = (res_win_t)0;
 
 	widget_destroy(editctrl);
 	widget_set_focus(widget);
@@ -1074,7 +1070,7 @@ void noti_statis_reset_scroll(res_win_t widget, bool_t bUpdate)
 	if (widget_is_valid(ptd->vsc))
 	{
 		if (bUpdate)
-			widget_update(ptd->vsc);
+			widget_paint(ptd->vsc);
 		else
 			widget_close(ptd->vsc, 0);
 	}
@@ -1082,7 +1078,7 @@ void noti_statis_reset_scroll(res_win_t widget, bool_t bUpdate)
 	if (widget_is_valid(ptd->hsc))
 	{
 		if (bUpdate)
-			widget_update(ptd->hsc);
+			widget_paint(ptd->hsc);
 		else
 			widget_close(ptd->hsc, 0);
 	}
@@ -1232,7 +1228,7 @@ void hand_statis_wheel(res_win_t widget, bool_t bHorz, int nDelta)
 			}
 			else
 			{
-				widget_update(ptd->vsc);
+				widget_paint(ptd->vsc);
 			}
 		}
 
@@ -1244,7 +1240,7 @@ void hand_statis_wheel(res_win_t widget, bool_t bHorz, int nDelta)
 			}
 			else
 			{
-				widget_update(ptd->hsc);
+				widget_paint(ptd->hsc);
 			}
 		}
 
@@ -1404,12 +1400,12 @@ void hand_statis_lbutton_down(res_win_t widget, const xpoint_t* pxp)
 	}
 	else if (nHint == STATIS_HINT_YAXBAR)
 	{
-		if (widget_key_state(widget, KEY_CONTROL))
+		if (widget_key_state(widget, KS_WITH_CONTROL))
 			noti_statis_yax_selected(widget, ylk);
 	}
 	else if (nHint == STATIS_HINT_NONE)
 	{
-		if (!widget_key_state(widget, KEY_CONTROL))
+		if (!widget_key_state(widget, KS_WITH_CONTROL))
 		{
 			if (statis_is_design(ptd->statis))
 				noti_statis_reset_select(widget);
@@ -1537,22 +1533,22 @@ void hand_statis_keydown(res_win_t widget, dword_t ks, int nKey)
 
 	if (statis_is_design(ptd->statis))
 	{
-		if ((nKey == _T('z') || nKey == _T('Z')) && widget_key_state(widget, KEY_CONTROL))
+		if ((nKey == _T('z') || nKey == _T('Z')) && widget_key_state(widget, KS_WITH_CONTROL))
 		{
 			hand_statis_undo(widget);
 			return;
 		}
-		else if ((nKey == _T('c') || nKey == _T('C')) && widget_key_state(widget, KEY_CONTROL))
+		else if ((nKey == _T('c') || nKey == _T('C')) && widget_key_state(widget, KS_WITH_CONTROL))
 		{
 			hand_statis_copy(widget);
 			return;
 		}
-		else if ((nKey == _T('x') || nKey == _T('X')) && widget_key_state(widget, KEY_CONTROL))
+		else if ((nKey == _T('x') || nKey == _T('X')) && widget_key_state(widget, KS_WITH_CONTROL))
 		{
 			hand_statis_cut(widget);
 			return;
 		}
-		else if ((nKey == _T('v') || nKey == _T('V')) && widget_key_state(widget, KEY_CONTROL))
+		else if ((nKey == _T('v') || nKey == _T('V')) && widget_key_state(widget, KS_WITH_CONTROL))
 		{
 			hand_statis_paste(widget);
 			return;
@@ -1594,7 +1590,7 @@ void hand_statis_keydown(res_win_t widget, dword_t ks, int nKey)
 	}
 }
 
-void hand_statis_char(res_win_t widget, tchar_t nChar)
+void hand_statis_wchar(res_win_t widget, wchar_t nChar)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 
@@ -1608,7 +1604,7 @@ void hand_statis_char(res_win_t widget, tchar_t nChar)
 
 	if (IS_VISIBLE_CHAR(nChar) && widget_is_valid(ptd->editor))
 	{
-		widget_post_char(ptd->editor, nChar);
+		widget_post_wchar(ptd->editor, nChar);
 	}
 }
 
@@ -1663,33 +1659,26 @@ void hand_statis_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 	visual_t rdc;
-	xfont_t xf = { 0 };
-	xpen_t xp = { 0 };
-	xbrush_t xb = { 0 };
-	xcolor_t xc = { 0 };
 	xrect_t xr = { 0 };
 
 	canvas_t canv;
 	const drawing_interface* pif = NULL;
 	drawing_interface ifv = {0};
 
-	if (!ptd->statis)
-		return;
+	clr_mod_t clrs;
+	xbrush_t xb = { 0 };
+	xcolor_t xc = { 0 };
 
-	widget_get_xfont(widget, &xf);
-	widget_get_xbrush(widget, &xb);
-	widget_get_xpen(widget, &xp);
+	if (!ptd->statis) return;
+
+	widget_get_color_mode(widget, &clrs);
+	default_xbrush(&xb);
+	format_xcolor(&clrs.clr_bkg, xb.color);
+	xmem_copy((void*)&xc, (void*)&clrs.clr_frg, sizeof(xcolor_t));
 
 	canv = widget_get_canvas(widget);
 	pif = widget_get_canvas_interface(widget);
 	
-
-	
-	
-	
-	
-	
-
 	widget_get_client_rect(widget, &xr);
 
 	rdc = begin_canvas_paint(canv, dc, xr.w, xr.h);
@@ -1730,17 +1719,14 @@ void hand_statis_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 		draw_focus_raw(&ifv, &xc, &xr, ALPHA_SOFT);
 	}
 
-	
-
 	end_canvas_paint(canv, dc, pxr);
-	
 }
 
 /*********************************************************************************/
 
 res_win_t statisctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, res_win_t wparent)
 {
-	if_event_t ev = { 0 };
+	if_dispatch_t ev = { 0 };
 
 	EVENT_BEGIN_DISPATH(&ev)
 
@@ -1755,7 +1741,7 @@ res_win_t statisctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t*
 		EVENT_ON_WHEEL(hand_statis_wheel)
 
 		EVENT_ON_KEYDOWN(hand_statis_keydown)
-		EVENT_ON_CHAR(hand_statis_char)
+		EVENT_ON_WCHAR(hand_statis_wchar)
 
 		EVENT_ON_MOUSE_MOVE(hand_statis_mouse_move)
 		EVENT_ON_MOUSE_HOVER(hand_statis_mouse_hover)
@@ -1950,7 +1936,7 @@ void statisctrl_redraw(res_win_t widget, bool_t bCalc)
 
 	_statisctrl_reset_page(widget);
 
-	widget_update(widget);
+	widget_paint(widget);
 }
 
 void statisctrl_redraw_xax(res_win_t widget, link_t_ptr xlk, bool_t bCalc)

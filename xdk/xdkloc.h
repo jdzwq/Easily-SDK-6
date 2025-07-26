@@ -60,12 +60,12 @@ LOC_API void	_paged_free(void* p);
 LOC_API dword_t	_paged_size(void* p);
 LOC_API void*	_paged_lock(void* p);
 LOC_API void	_paged_unlock(void* p);
-LOC_API bool_t	_paged_protect(void* p, bool_t b);
 #endif
 
 #ifdef XDK_SUPPORT_MEMO_CACHE
 LOC_API void*	_cache_open(void);
 LOC_API void	_cache_close(void* bh);
+LOC_API bool_t	_cache_protect(void* p, bool_t b);
 LOC_API bool_t	_cache_write(void* bh, dword_t hoff, dword_t loff, void* buf, dword_t size, dword_t* pb);
 LOC_API bool_t	_cache_read(void* bh, dword_t hoff, dword_t loff, void* buf, dword_t size, dword_t* pb);
 #endif
@@ -171,7 +171,8 @@ LOC_API bool_t		_alter_timer(res_queue_t rq, res_timer_t rt, dword_t duetime, dw
 #endif
 
 #ifdef XDK_SUPPORT_RANDOM
-LOC_API bool_t		_system_random(byte_t *output, dword_t len);
+LOC_API void		_system_random32(dword_t* pn);
+LOC_API void		_system_random64(lword_t* pn);
 #endif
 
 #ifdef XDK_SUPPORT_SOCK

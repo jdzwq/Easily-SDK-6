@@ -111,35 +111,6 @@ void get_device_caps(visual_t rdc, dev_cap_t* pcap)
 	(pif->pf_get_device_caps)(rdc, pcap);
 }
 
-#ifdef XDU_SUPPORT_CONTEXT_REGION
-res_rgn_t create_region(const tchar_t* shape, const xrect_t* pxr)
-{
-	if_context_t* pif;
-
-	pif = PROCESS_CONTEXT_INTERFACE;
-
-	return (pif->pf_create_region)(shape, pxr);
-}
-
-void delete_region(res_rgn_t rgn)
-{
-	if_context_t* pif;
-
-	pif = PROCESS_CONTEXT_INTERFACE;
-
-	(pif->pf_delete_region)(rgn);
-}
-
-bool_t pt_in_region(res_rgn_t rgn, const xpoint_t* ppt)
-{
-	if_context_t* pif;
-
-	pif = PROCESS_CONTEXT_INTERFACE;
-
-	return (pif->pf_pt_in_region)(rgn, ppt);
-}
-#endif
-
 #ifdef XDU_SUPPORT_CONTEXT_PRINTER
 
 visual_t create_printer_context(const dev_prn_t* pmod)

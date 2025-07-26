@@ -421,24 +421,23 @@ void hand_tool_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 {
 	tool_delta_t* ptd = GETTOOLDELTA(widget);
 	visual_t rdc;
-	xfont_t xf = { 0 };
-	xbrush_t xb = { 0 };
-	xpen_t xp = { 0 };
-	xcolor_t xc = { 0 };
 	xrect_t xr = { 0 };
-	xcolor_t xc_brim = { 0 };
-	xcolor_t xc_core = { 0 };
 
 	canvas_t canv;
 	const drawing_interface* pif = NULL;
 	drawing_interface ifv = {0};
 
-	if (!ptd->tool)
-		return;
+	clr_mod_t clrs;
+	xbrush_t xb;
+	xcolor_t xc_brim, xc_core;
 
-	widget_get_xfont(widget, &xf);
-	widget_get_xbrush(widget, &xb);
-	widget_get_xpen(widget, &xp);
+	if (!ptd->tool) return;
+
+	widget_get_color_mode(widget, &clrs);
+	default_xbrush(&xb);
+	format_xcolor(&clrs.clr_bkg, xb.color);
+	xmem_copy((void*)&xc_brim, (void*)&clrs.clr_bkg, sizeof(xcolor_t));
+	xmem_copy((void*)&xc_core, (void*)&clrs.clr_bkg, sizeof(xcolor_t));
 
 	canv = widget_get_canvas(widget);
 	pif = widget_get_canvas_interface(widget);
@@ -449,9 +448,7 @@ void hand_tool_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 
 	get_visual_interface(rdc, &ifv);
 
-	parse_xcolor(&xc_brim, xb.color);
 	lighten_xbrush(&xb, DEF_SOFT_DARKEN);
-	parse_xcolor(&xc_core, xb.color);
 
 	(*ifv.pf_gradient_rect)(ifv.ctx, &xc_core, &xc_brim, GDI_ATTR_GRADIENT_VERT, &xr);
 
@@ -463,9 +460,9 @@ void hand_tool_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 		_toolctrl_item_rect(widget, ptd->hover, &xr);
 		pt_expand_rect(&xr, DEF_INNER_FEED, DEF_INNER_FEED);
 
-		parse_xcolor(&xc, DEF_ALPHA_COLOR);
+		parse_xcolor(&xc_brim, DEF_ALPHA_COLOR);
 
-		(*ifv.pf_draw_rect)(ifv.ctx, &xp, NULL, &xr);
+		//(*ifv.pf_draw_rect)(ifv.ctx, &xp, NULL, &xr);
 	}
 
 	end_canvas_paint(canv, dc, pxr);
@@ -475,7 +472,7 @@ void hand_tool_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 
 res_win_t toolctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, res_win_t wparent)
 {
-	if_event_t ev = { 0 };
+	if_dispatch_t ev = { 0 };
 
 	EVENT_BEGIN_DISPATH(&ev)
 

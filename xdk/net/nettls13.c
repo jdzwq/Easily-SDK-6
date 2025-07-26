@@ -27,7 +27,6 @@ LICENSE.GPL3 for more details.
 #include "netssl.h"
 
 #include "../xdknet.h"
-#include "../xdkimp.h"
 #include "../xdkoem.h"
 #include "../xdkstd.h"
 
@@ -42,32 +41,32 @@ typedef struct _tls13_signature_set{
 }tls13_signature_set;
 
 static tls13_signature_set signature_set[] = {
-	{ TLS_ALG_RSA_PKCS1_SHA256, PK_RSA, 0, MD_SHA256 },
-	{ TLS_ALG_RSA_PKCS1_SHA384, PK_RSA, 0, MD_SHA384 },
-	{ TLS_ALG_RSA_PKCS1_SHA512, PK_RSA, 0, MD_SHA512 },
+	{ XTLS_ALG_RSA_PKCS1_SHA256, PK_RSA, 0, MD_SHA256 },
+	{ XTLS_ALG_RSA_PKCS1_SHA384, PK_RSA, 0, MD_SHA384 },
+	{ XTLS_ALG_RSA_PKCS1_SHA512, PK_RSA, 0, MD_SHA512 },
 
-	{ TLS_ALG_ECDSA_SECP256R1_SHA256, PK_ECDSA, TLS_EC_GROUP_SECP256R1, MD_SHA256 },
-	{ TLS_ALG_ECDSA_SECP384R1_SHA384, PK_ECDSA, TLS_EC_GROUP_SECP384R1, MD_SHA384 },
-	{ TLS_ALG_ECDSA_SECP512R1_SHA512, PK_ECDSA, TLS_EC_GROUP_SECP512R1, MD_SHA512 },
+	{ XTLS_ALG_ECDSA_SECP256R1_SHA256, PK_ECDSA, XTLS_EC_GROUP_SECP256R1, MD_SHA256 },
+	{ XTLS_ALG_ECDSA_SECP384R1_SHA384, PK_ECDSA, XTLS_EC_GROUP_SECP384R1, MD_SHA384 },
+	{ XTLS_ALG_ECDSA_SECP512R1_SHA512, PK_ECDSA, XTLS_EC_GROUP_SECP512R1, MD_SHA512 },
 
-	{ TLS_ALG_RSA_PSS_RSAE_SHA256, PK_RSASSA_PSS, 0, MD_SHA256 },
-	{ TLS_ALG_RSA_PSS_RSAE_SHA384, PK_RSASSA_PSS, 0, MD_SHA384 },
-	{ TLS_ALG_RSA_PSS_RSAE_SHA512, PK_RSASSA_PSS, 0, MD_SHA512 },
+	{ XTLS_ALG_RSA_PSS_RSAE_SHA256, PK_RSASSA_PSS, 0, MD_SHA256 },
+	{ XTLS_ALG_RSA_PSS_RSAE_SHA384, PK_RSASSA_PSS, 0, MD_SHA384 },
+	{ XTLS_ALG_RSA_PSS_RSAE_SHA512, PK_RSASSA_PSS, 0, MD_SHA512 },
 
-	{ TLS_ALG_RSA_PSS_SHA256, PK_RSASSA_PSS, 0, MD_SHA256 },
-	{ TLS_ALG_RSA_PSS_SHA384, PK_RSASSA_PSS, 0, MD_SHA384 },
-	{ TLS_ALG_RSA_PSS_SHA512, PK_RSASSA_PSS, 0, MD_SHA512 },
+	{ XTLS_ALG_RSA_PSS_SHA256, PK_RSASSA_PSS, 0, MD_SHA256 },
+	{ XTLS_ALG_RSA_PSS_SHA384, PK_RSASSA_PSS, 0, MD_SHA384 },
+	{ XTLS_ALG_RSA_PSS_SHA512, PK_RSASSA_PSS, 0, MD_SHA512 },
 
-	{ TLS_ALG_RSA_PKCS1_SHA1, PK_RSA, 0, MD_SHA1 },
-	{ TLS_ALG_ECDSA_SHA1, PK_ECDSA, 0, MD_SHA1 },
+	{ XTLS_ALG_RSA_PKCS1_SHA1, PK_RSA, 0, MD_SHA1 },
+	{ XTLS_ALG_ECDSA_SHA1, PK_ECDSA, 0, MD_SHA1 },
 };
 
 static sword_t named_group[] = {
-	TLS_EC_GROUP_SECP256R1,
-	TLS_EC_GROUP_SECP384R1,
-	TLS_EC_GROUP_SECP512R1,
-	//TLS_EC_GROUP_X25519,
-	//TLS_EC_GROUP_X448,
+	XTLS_EC_GROUP_SECP256R1,
+	XTLS_EC_GROUP_SECP384R1,
+	XTLS_EC_GROUP_SECP512R1,
+	//XTLS_EC_GROUP_X25519,
+	//XTLS_EC_GROUP_X448,
 };
 
 typedef struct _tls13_ciphers_set{
@@ -78,15 +77,15 @@ typedef struct _tls13_ciphers_set{
 }tls13_ciphers_set;
 
 static tls13_ciphers_set client_ciphers[] = {
-	{ TLS_AES_128_GCM_SHA256, MD_SHA256, 16, 12 },
-	{ TLS_AES_256_GCM_SHA384, MD_SHA384, 32, 12 },
-	{ TLS_CHACHA20_POLY1305_SHA256, MD_SHA256, 32, 12 },
+	{ XTLS_AES_128_GCM_SHA256, MD_SHA256, 16, 12 },
+	{ XTLS_AES_256_GCM_SHA384, MD_SHA384, 32, 12 },
+	{ XTLS_CHACHA20_POLY1305_SHA256, MD_SHA256, 32, 12 },
 };
 
 static tls13_ciphers_set server_ciphers[] = {
-	{ TLS_CHACHA20_POLY1305_SHA256, MD_SHA256, 32, 12 },
-	{ TLS_AES_128_GCM_SHA256, MD_SHA256, 16, 12 },
-	{ TLS_AES_256_GCM_SHA384, MD_SHA384, 32, 12 },
+	{ XTLS_CHACHA20_POLY1305_SHA256, MD_SHA256, 32, 12 },
+	{ XTLS_AES_128_GCM_SHA256, MD_SHA256, 16, 12 },
+	{ XTLS_AES_256_GCM_SHA384, MD_SHA384, 32, 12 },
 };
 
 static const unsigned char label_client_early_traffic[] = "c e traffic";
@@ -182,10 +181,10 @@ typedef struct _tls13_cipher_context{
 }tls13_cipher_context;
 
 
-#define IS_GCM_CIPHER(cipher) ((cipher == TLS_AES_128_GCM_SHA256 || \
-								cipher == TLS_AES_256_GCM_SHA384)? 1 : 0)
+#define IS_GCM_CIPHER(cipher) ((cipher == XTLS_AES_128_GCM_SHA256 || \
+								cipher == XTLS_AES_256_GCM_SHA384)? 1 : 0)
 
-#define IS_CHACHAPOLY_CIPHER(cipher) ((cipher == TLS_CHACHA20_POLY1305_SHA256)? 1 : 0)
+#define IS_CHACHAPOLY_CIPHER(cipher) ((cipher == XTLS_CHACHA20_POLY1305_SHA256)? 1 : 0)
 
 /***********************************************************************************************************************************/
 
@@ -629,12 +628,12 @@ static void _ssl_derive_handshake_key(tls13_cipher_context* pcip)
 	//initialize encrypt and decrypt context
 	switch (pcip->cipher.cip_id)
 	{
-	case TLS_AES_128_GCM_SHA256:
-	case TLS_AES_256_GCM_SHA384:
+	case XTLS_AES_128_GCM_SHA256:
+	case XTLS_AES_256_GCM_SHA384:
 		gcm_setkey((gcm_context *)pcip->ctx_enc, key_enc, (pcip->cipher.key_size * 8));
 		gcm_setkey((gcm_context *)pcip->ctx_dec, key_dec, (pcip->cipher.key_size * 8));
 		break;
-	case TLS_CHACHA20_POLY1305_SHA256:
+	case XTLS_CHACHA20_POLY1305_SHA256:
 		chachapoly_init((chachapoly_context *)pcip->ctx_enc);
 		chachapoly_init((chachapoly_context *)pcip->ctx_dec);
 		chachapoly_setkey((chachapoly_context *)pcip->ctx_enc, key_enc);
@@ -715,12 +714,12 @@ static void _ssl_derive_application_key(tls13_cipher_context* pcip)
 	//initialize encrypt and decrypt context
 	switch (pcip->cipher.cip_id)
 	{
-	case TLS_AES_128_GCM_SHA256:
-	case TLS_AES_256_GCM_SHA384:
+	case XTLS_AES_128_GCM_SHA256:
+	case XTLS_AES_256_GCM_SHA384:
 		gcm_setkey((gcm_context *)pcip->ctx_enc, key_enc, (pcip->cipher.key_size * 8));
 		gcm_setkey((gcm_context *)pcip->ctx_dec, key_dec, (pcip->cipher.key_size * 8));
 		break;
-	case TLS_CHACHA20_POLY1305_SHA256:
+	case XTLS_CHACHA20_POLY1305_SHA256:
 		chachapoly_init((chachapoly_context *)pcip->ctx_enc);
 		chachapoly_init((chachapoly_context *)pcip->ctx_dec);
 		chachapoly_setkey((chachapoly_context *)pcip->ctx_enc, key_enc);
@@ -1584,7 +1583,7 @@ static tls13_handshake_states _ssl_write_client_hello(ssl_context *pssl)
 	} KeyShareEntry;
 	*/
 
-	tls_id = (pcip->tls_ecp_group) ? pcip->tls_ecp_group : TLS_EC_GROUP_X25519;
+	tls_id = (pcip->tls_ecp_group) ? pcip->tls_ecp_group : XTLS_EC_GROUP_X25519;
 
 	//named group tls id
 	PUT_SWORD_NET(prec->snd_msg, msglen, tls_id);
@@ -2719,7 +2718,7 @@ static int _ssl_write_client_certificate_verify(ssl_context *pssl)
 	*/
 	msglen = SSL_HSH_SIZE;
 
-	sig_alg = TLS_ALG_RSA_PKCS1_SHA256;
+	sig_alg = XTLS_ALG_RSA_PKCS1_SHA256;
 
 	//algorithm
 	PUT_SWORD_NET(prec->snd_msg, msglen, sig_alg);
@@ -4199,7 +4198,7 @@ static int _ssl_write_server_certificate_verify(ssl_context *pssl)
 	msglen = SSL_HSH_SIZE;
 
 	//algorithm
-	sig_alg = TLS_ALG_RSA_PKCS1_SHA256;
+	sig_alg = XTLS_ALG_RSA_PKCS1_SHA256;
 	PUT_SWORD_NET(prec->snd_msg, msglen, sig_alg);
 	msglen += 2;
 

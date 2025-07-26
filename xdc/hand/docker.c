@@ -306,18 +306,22 @@ void hand_docker_paint(docker_t* ptd, visual_t dc, const xrect_t* pxr)
 {
 	xrect_t xr, xr_cli, xr_bar;
 	int top, bottom, left, right, span;
-	xbrush_t xb = { 0 };
-	xcolor_t xc_brim, xc_core;
 	int i;
 
 	visual_t rdc;
 	canvas_t canv;
 	drawing_interface ifv = {0};
 
-	widget_get_xbrush(ptd->widget, &xb);
+	clr_mod_t clrs;
+	xbrush_t xb;
+	xcolor_t xc_brim, xc_core;
 
-	parse_xcolor(&xc_brim, xb.color);
-	parse_xcolor(&xc_core, xb.color);
+	widget_get_color_mode(ptd->widget, &clrs);
+	default_xbrush(&xb);
+	format_xcolor(&clrs.clr_bkg, xb.color);
+	xmem_copy((void*)&xc_brim, (void*)&clrs.clr_bkg, sizeof(xcolor_t));
+	xmem_copy((void*)&xc_core, (void*)&clrs.clr_bkg, sizeof(xcolor_t));
+
 	lighten_xcolor(&xc_core, DEF_SOFT_DARKEN);
 
 	widget_get_client_rect(ptd->widget, &xr_cli);

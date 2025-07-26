@@ -26,7 +26,7 @@ LICENSE.GPL3 for more details.
 
 #include "acp.h"
 
-#include "../xdkimp.h"
+#include "../xdkstd.h"
 
 static int utf8_seek_unicode(unsigned char* src, unsigned short* dest)
 {
@@ -34,7 +34,7 @@ static int utf8_seek_unicode(unsigned char* src, unsigned short* dest)
 	int len;
 	int c;
 
-	len = utf8_code_sequence(*src);
+	len = acp_utf8_code_sequence(*src);
 
 	if (len == 3)
 	{
@@ -254,7 +254,7 @@ static int unicode_seek_utf8(unsigned short ch, unsigned char* dest)
 	return index;
 }
 
-int utf8_code_sequence(unsigned char b)
+int acp_utf8_code_sequence(unsigned char b)
 {
 	if ((b & ~0x7F) == 0) {
 		return 1;
@@ -275,30 +275,30 @@ int utf8_code_sequence(unsigned char b)
 	return 1;
 }
 
-int utf8_byte_to_unicode(const byte_t* src, wchar_t* dest)
+int acp_utf8_byte_to_unicode(const byte_t* src, wchar_t* dest)
 {
-	return utf8_seek_unicode(src, (unsigned short*)dest);
+	return utf8_seek_unicode((unsigned char*)src, (unsigned short*)dest);
 }
 
-int utf8_to_unicode(const byte_t* src, dword_t slen, wchar_t* dest, int dlen)
+int acp_utf8_to_unicode(const byte_t* src, dword_t slen, wchar_t* dest, int dlen)
 {
 	int len = 0, total = 0;
 
 	while (total < slen && len < dlen)
 	{
-		len += utf8_seek_unicode((src + total), ((dest) ? (unsigned short*)(dest + len) : NULL));
-		total += utf8_code_sequence((unsigned char)(src[total]));
+		len += utf8_seek_unicode((unsigned char*)(src + total), ((dest) ? (unsigned short*)(dest + len) : NULL));
+		total += acp_utf8_code_sequence((unsigned char)(src[total]));
 	}
 
 	return len;
 }
 
-int unicode_byte_to_utf8(wchar_t ch, byte_t* buf)
+int acp_unicode_byte_to_utf8(wchar_t ch, byte_t* buf)
 {
 	return unicode_seek_utf8((unsigned short)ch, (unsigned char*)buf);
 }
 
-int unicode_to_utf8(const wchar_t* src, int slen, byte_t* dest, dword_t dlen)
+int acp_unicode_to_utf8(const wchar_t* src, int slen, byte_t* dest, dword_t dlen)
 {
 	int len = 0, total = 0;
 

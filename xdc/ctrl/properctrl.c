@@ -301,7 +301,6 @@ void noti_proper_begin_edit(res_win_t widget)
 	EDITDELTA fd = { 0 };
 
 	clr_mod_t ob = { 0 };
-	xfont_t xf = { 0 };
 
 	XDK_ASSERT(ptd->entity);
 
@@ -314,8 +313,6 @@ void noti_proper_begin_edit(res_win_t widget)
 	if (!get_entity_editable(ptd->entity))
 		return;
 
-	widget_get_xfont(widget, &xf);
-	parse_xfont_from_style(&xf, get_proper_style_ptr(ptd->proper));
 	widget_get_color_mode(widget, &ob);
 
 	_properctrl_entity_text_rect(widget, ptd->entity, &xr);
@@ -333,7 +330,6 @@ void noti_proper_begin_edit(res_win_t widget)
 		widget_set_user_id(ptd->editor, IDC_FIREEDIT);
 		widget_set_owner(ptd->editor, widget);
 
-		widget_set_xfont(ptd->editor, &xf);
 		widget_set_color_mode(ptd->editor, &ob);
 		widget_show(ptd->editor, WS_SHOW_NORMAL);
 		widget_set_focus(ptd->editor);
@@ -352,7 +348,6 @@ void noti_proper_begin_edit(res_win_t widget)
 		widget_set_user_id(ptd->editor, IDC_FIRENUM);
 		widget_set_owner(ptd->editor, widget);
 
-		widget_set_xfont(ptd->editor, &xf);
 		widget_set_color_mode(ptd->editor, &ob);
 		widget_show(ptd->editor, WS_SHOW_NORMAL);
 		widget_set_focus(ptd->editor);
@@ -371,7 +366,6 @@ void noti_proper_begin_edit(res_win_t widget)
 		widget_set_user_id(ptd->editor, IDC_FIREDATE);
 		widget_set_owner(ptd->editor, widget);
 
-		widget_set_xfont(ptd->editor, &xf);
 		widget_set_color_mode(ptd->editor, &ob);
 		widget_show(ptd->editor, WS_SHOW_NORMAL);
 		widget_set_focus(ptd->editor);
@@ -390,7 +384,6 @@ void noti_proper_begin_edit(res_win_t widget)
 		widget_set_user_id(ptd->editor, IDC_FIRETIME);
 		widget_set_owner(ptd->editor, widget);
 
-		widget_set_xfont(ptd->editor, &xf);
 		widget_set_color_mode(ptd->editor, &ob);
 		widget_show(ptd->editor, WS_SHOW_NORMAL);
 		widget_set_focus(ptd->editor);
@@ -413,7 +406,6 @@ void noti_proper_begin_edit(res_win_t widget)
 		widget_set_user_id(ptd->editor, IDC_FIRELIST);
 		widget_set_owner(ptd->editor, widget);
 
-		widget_set_xfont(ptd->editor, &xf);
 		widget_set_color_mode(ptd->editor, &ob);
 		widget_show(ptd->editor, WS_SHOW_NORMAL);
 		widget_set_focus(ptd->editor);
@@ -433,7 +425,6 @@ void noti_proper_begin_edit(res_win_t widget)
 		widget_set_user_id(ptd->editor, IDC_FIREWORDS);
 		widget_set_owner(ptd->editor, widget);
 
-		widget_set_xfont(ptd->editor, &xf);
 		widget_set_color_mode(ptd->editor, &ob);
 		widget_show(ptd->editor, WS_SHOW_NORMAL);
 		widget_set_focus(ptd->editor);
@@ -455,8 +446,7 @@ void noti_proper_begin_edit(res_win_t widget)
 		XDK_ASSERT(ptd->editor);
 		widget_set_user_id(ptd->editor, IDC_FIREGRID);
 		widget_set_owner(ptd->editor, widget);
-
-		widget_set_xfont(ptd->editor, &xf);
+		
 		widget_set_color_mode(ptd->editor, &ob);
 		widget_show(ptd->editor, WS_SHOW_NORMAL);
 		widget_set_focus(ptd->editor);
@@ -549,7 +539,7 @@ void noti_proper_commit_edit(res_win_t widget)
 	}
 
 	editctrl = ptd->editor;
-	ptd->editor = NULL;
+	ptd->editor = (res_win_t)0;
 
 	widget_destroy(editctrl);
 	widget_set_focus(widget);
@@ -588,7 +578,7 @@ void noti_proper_rollback_edit(res_win_t widget)
 	}
 
 	editctrl = ptd->editor;
-	ptd->editor = NULL;
+	ptd->editor = (res_win_t)0;
 
 	widget_destroy(editctrl);
 	widget_set_focus(widget);
@@ -614,7 +604,7 @@ void noti_proper_reset_scroll(res_win_t widget, bool_t bUpdate)
 	if (widget_is_valid(ptd->vsc))
 	{
 		if (bUpdate)
-			widget_update(ptd->vsc);
+			widget_paint(ptd->vsc);
 		else
 			widget_close(ptd->vsc, 0);
 	}
@@ -713,7 +703,7 @@ void hand_proper_wheel(res_win_t widget, bool_t bHorz, int nDelta)
 			}
 			else
 			{
-				widget_update(ptd->vsc);
+				widget_paint(ptd->vsc);
 			}
 		}
 
@@ -947,7 +937,7 @@ void hand_proper_keydown(res_win_t widget, dword_t ks, int nKey)
 	}
 }
 
-void hand_proper_char(res_win_t widget, tchar_t nChar)
+void hand_proper_wchar(res_win_t widget, wchar_t nChar)
 {
 	proper_delta_t* ptd = GETPROPERDELTA(widget);
 
@@ -961,7 +951,7 @@ void hand_proper_char(res_win_t widget, tchar_t nChar)
 
 	if (IS_VISIBLE_CHAR(nChar) && widget_is_valid(ptd->editor))
 	{
-		widget_post_char(ptd->editor, nChar);
+		widget_post_wchar(ptd->editor, nChar);
 	}
 
 }
@@ -985,32 +975,26 @@ void hand_proper_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 {
 	proper_delta_t* ptd = GETPROPERDELTA(widget);
 	visual_t rdc;
-	xfont_t xf = { 0 };
-	xbrush_t xb = { 0 };
 	xpen_t xp = { 0 };
 	xrect_t xr = { 0 };
-	xcolor_t xc = { 0 };
 
 	canvas_t canv;
 	const drawing_interface* pif = NULL;
 	drawing_interface ifv = {0};
 
-	if (!ptd->proper)
-		return;
+	clr_mod_t clrs = { 0 };
+	xbrush_t xb = { 0 };
+	xcolor_t xc = { 0 };
 
-	widget_get_xfont(widget, &xf);
-	widget_get_xbrush(widget, &xb);
-	widget_get_xpen(widget, &xp);
+	if (!ptd->proper) return;
+
+	widget_get_color_mode(widget, &clrs);
+	default_xbrush(&xb);
+	format_xcolor(&clrs.clr_bkg, xb.color);
+	xmem_copy((void*)&xc, (void*)&clrs.clr_frg, sizeof(xcolor_t));
 
 	canv = widget_get_canvas(widget);
 	pif = widget_get_canvas_interface(widget);
-	
-
-	
-	
-	
-	
-	
 
 	widget_get_client_rect(widget, &xr);
 
@@ -1032,17 +1016,14 @@ void hand_proper_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 		(*ifv.pf_alphablend_rect)(ifv.ctx, &xc, &xr, ALPHA_TRANS);
 	}
 
-	
-
 	end_canvas_paint(canv, dc, pxr);
-	
 }
 
 /*************************************************************************************************/
 
 res_win_t properctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, res_win_t wparent)
 {
-	if_event_t ev = { 0 };
+	if_dispatch_t ev = { 0 };
 
 	EVENT_BEGIN_DISPATH(&ev)
 
@@ -1057,7 +1038,7 @@ res_win_t properctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t*
 		EVENT_ON_WHEEL(hand_proper_wheel)
 
 		EVENT_ON_KEYDOWN(hand_proper_keydown)
-		EVENT_ON_CHAR(hand_proper_char)
+		EVENT_ON_WCHAR(hand_proper_wchar)
 
 		EVENT_ON_MOUSE_MOVE(hand_proper_mouse_move)
 		EVENT_ON_MOUSE_HOVER(hand_proper_mouse_hover)
@@ -1183,7 +1164,7 @@ void properctrl_redraw(res_win_t widget)
 
 	_properctrl_reset_page(widget);
 
-	widget_update(widget);
+	widget_paint(widget);
 }
 
 void properctrl_redraw_entity(res_win_t widget, link_t_ptr elk)

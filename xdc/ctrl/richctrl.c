@@ -40,6 +40,9 @@ typedef struct _richctrl_delta_t{
 
 	int chs;
 	tchar_t pch[CHS_LEN + 1];
+
+	xfont_t xf;
+	xface_t xa;
 }richctrl_delta_t;
 
 #define GETRICHCTRLDELTA(ph) 	(richctrl_delta_t*)widget_get_user_delta(ph)
@@ -112,7 +115,7 @@ void noti_richctrl_reset_scroll(res_win_t widget, bool_t bUpdate)
 	if (widget_is_valid(ptd->vsc))
 	{
 		if (bUpdate)
-			widget_update(ptd->vsc);
+			widget_paint(ptd->vsc);
 		else
 			widget_close(ptd->vsc, 0);
 	}
@@ -120,7 +123,7 @@ void noti_richctrl_reset_scroll(res_win_t widget, bool_t bUpdate)
 	if (widget_is_valid(ptd->hsc))
 	{
 		if (bUpdate)
-			widget_update(ptd->hsc);
+			widget_paint(ptd->hsc);
 		else
 			widget_close(ptd->hsc, 0);
 	}
@@ -145,6 +148,9 @@ int hand_richctrl_create(res_win_t widget, void* data)
 	ptd->textor.pf_set_text = _richctrl_set_text;
 	ptd->textor.pf_get_paging = _richctrl_get_paging;
 	ptd->textor.max_undo = 1024;
+
+	ptd->textor.pxf = &ptd->xf;
+	ptd->textor.pxa = &ptd->xa;
 
 	ptd->b_lock = 1;
 
@@ -299,15 +305,12 @@ void hand_richctrl_kill_focus(res_win_t widget, res_win_t wt)
 void hand_richctrl_keydown(res_win_t widget, dword_t ks, int key)
 {
 	richctrl_delta_t* ptd = GETRICHCTRLDELTA(widget);
-	xface_t xa;
 
 	if (!ptd)
 		return;
 
 	if (!ptd->textor.data)
 		return;
-
-	widget_get_xface(widget, &xa);
 
 	switch (key)
 	{
@@ -401,28 +404,28 @@ void hand_richctrl_keydown(res_win_t widget, dword_t ks, int key)
 		break;
 	case _T('c'):
 	case _T('C'):
-		if (widget_key_state(widget, KEY_CONTROL))
+		if (widget_key_state(widget, KS_WITH_CONTROL))
 		{
 			hand_richctrl_copy(widget);
 		}
 		break;
 	case _T('x'):
 	case _T('X'):
-		if (widget_key_state(widget, KEY_CONTROL))
+		if (widget_key_state(widget, KS_WITH_CONTROL))
 		{
 			hand_richctrl_cut(widget);
 		}
 		break;
 	case _T('v'):
 	case _T('V'):
-		if (widget_key_state(widget, KEY_CONTROL))
+		if (widget_key_state(widget, KS_WITH_CONTROL))
 		{
 			hand_richctrl_paste(widget);
 		}
 		break;
 	case _T('z'):
 	case _T('Z'):
-		if (widget_key_state(widget, KEY_CONTROL))
+		if (widget_key_state(widget, KS_WITH_CONTROL))
 		{
 			hand_richctrl_undo(widget);
 		}
@@ -430,7 +433,7 @@ void hand_richctrl_keydown(res_win_t widget, dword_t ks, int key)
 	}
 }
 
-void hand_richctrl_char(res_win_t widget, tchar_t ch)
+void hand_richctrl_wchar(res_win_t widget, wchar_t ch)
 {
 	richctrl_delta_t* ptd = GETRICHCTRLDELTA(widget);
 
@@ -626,7 +629,7 @@ void hand_richctrl_wheel(res_win_t widget, bool_t bHorz, int nDelta)
 			}
 			else
 			{
-				widget_update(ptd->vsc);
+				widget_paint(ptd->vsc);
 			}
 		}
 
@@ -638,7 +641,7 @@ void hand_richctrl_wheel(res_win_t widget, bool_t bHorz, int nDelta)
 			}
 			else
 			{
-				widget_update(ptd->hsc);
+				widget_paint(ptd->hsc);
 			}
 		}
 
@@ -699,6 +702,20 @@ void hand_richctrl_menu_command(res_win_t widget, int code, int cid, vword_t dat
 	}
 }
 
+void hand_richctrl_xfont(res_win_t widget, const xfont_t* pxf)
+{
+	richctrl_delta_t* ptd = GETRICHCTRLDELTA(widget);
+
+	xmem_copy((void*)&ptd->xf, (void*)pxf, sizeof(xfont_t));
+}
+
+void hand_richctrl_xface(res_win_t widget, const xface_t* pxa)
+{
+	richctrl_delta_t* ptd = GETRICHCTRLDELTA(widget);
+
+	xmem_copy((void*)&ptd->xa, (void*)pxa, sizeof(xface_t));
+}
+
 void hand_richctrl_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 {
 	richctrl_delta_t* ptd = GETRICHCTRLDELTA(widget);
@@ -715,7 +732,7 @@ void hand_richctrl_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 /************************************************************************************************/
 res_win_t richctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, res_win_t wparent)
 {
-	if_event_t ev = { 0 };
+	if_dispatch_t ev = { 0 };
 	res_win_t wt;
 	xface_t xa;
 
@@ -731,7 +748,7 @@ res_win_t richctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* p
 		EVENT_ON_WHEEL(hand_richctrl_wheel)
 
 		EVENT_ON_KEYDOWN(hand_richctrl_keydown)
-		EVENT_ON_CHAR(hand_richctrl_char)
+		EVENT_ON_WCHAR(hand_richctrl_wchar)
 
 		EVENT_ON_MOUSE_MOVE(hand_richctrl_mousemove)
 		EVENT_ON_LBUTTON_DBCLICK(hand_richctrl_lbutton_dbclick)
@@ -746,17 +763,19 @@ res_win_t richctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* p
 		EVENT_ON_SET_FOCUS(hand_richctrl_set_focus)
 		EVENT_ON_KILL_FOCUS(hand_richctrl_kill_focus)
 
+		EVENT_ON_XFONT(hand_richctrl_xfont)
+		EVENT_ON_XFACE(hand_richctrl_xface)
+
 		EVENT_ON_NC_IMPLEMENT
 
 	EVENT_END_DISPATH
 
 	wt = widget_create(wname, wstyle, pxr, wparent, &ev);
-	if (!wt)
-		return NULL;
+	if (!wt) return (res_win_t)0;
 
-	widget_get_xface(wt, &xa);
+	default_xface(&xa);
 	xscpy(xa.text_wrap, GDI_ATTR_TEXT_WRAP_WORDBREAK);
-	widget_set_xface(wt, &xa);
+	widget_noti_xface(wt, &xa);
 
 	return wt;
 }

@@ -107,11 +107,6 @@ EXP_API bool_t find_bplus_entity(link_t_ptr ptr, variant_t var, object_t val);
 EXP_API void enum_bplus_entity(link_t_ptr ptr, ENUM_BPLUSTREE_ENTITY pf, void* param);
 
 
-#if defined(XDK_SUPPORT_TEST)
-	EXP_API void test_bplus_tree_none_table();
-	EXP_API void test_bplus_tree_file_table(const tchar_t* tname, dword_t tmask);
-#endif
-
 #ifdef	__cplusplus
 }
 #endif

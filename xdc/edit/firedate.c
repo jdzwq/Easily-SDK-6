@@ -84,7 +84,7 @@ static int sub_editbox_self_command(res_win_t widget, int code, vword_t data, ui
 		if (widget_is_valid(datebox))
 		{
 			widget_set_color_mode(datebox, (clr_mod_t*)data);
-			widget_update(datebox);
+			widget_paint(datebox);
 		}
 		return 1;
 	case COMMAND_COMMIT:
@@ -184,7 +184,6 @@ res_win_t firedate_create(res_win_t widget, const xrect_t* pxr)
 	xsize_t xs;
 
 	if_subproc_t ev = { 0 };
-	xface_t xa = { 0 };
 
 	ev.sub_on_keydown = sub_editbox_keydown;
 	ev.sub_on_unsubbing = sub_editbox_unsubbing;
@@ -195,10 +194,6 @@ res_win_t firedate_create(res_win_t widget, const xrect_t* pxr)
 
 	widget_set_user_id(editor, IDC_EDITBOX);
 	widget_set_subproc(editor, IDS_EDITBOX, &ev);
-
-	widget_get_xface(editor, &xa);
-	xscpy(xa.text_wrap, NULL);
-	widget_set_xface(editor, &xa);
 
 	widget_get_window_rect(editor, &xr_ed);
 
@@ -236,7 +231,7 @@ res_win_t firedate_create(res_win_t widget, const xrect_t* pxr)
 
 	widget_move(datebox, RECTPOINT(&xr));
 	widget_size(datebox, RECTSIZE(&xr));
-	widget_update(datebox);
+	widget_paint(datebox);
 
 	return editor;
 }

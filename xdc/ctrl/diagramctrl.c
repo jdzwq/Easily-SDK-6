@@ -694,7 +694,7 @@ void noti_diagram_reset_scroll(res_win_t widget, bool_t bUpdate)
 	if (widget_is_valid(ptd->vsc))
 	{
 		if (bUpdate)
-			widget_update(ptd->vsc);
+			widget_paint(ptd->vsc);
 		else
 			widget_close(ptd->vsc, 0);
 	}
@@ -702,7 +702,7 @@ void noti_diagram_reset_scroll(res_win_t widget, bool_t bUpdate)
 	if (widget_is_valid(ptd->hsc))
 	{
 		if (bUpdate)
-			widget_update(ptd->hsc);
+			widget_paint(ptd->hsc);
 		else
 			widget_close(ptd->hsc, 0);
 	}
@@ -796,7 +796,7 @@ void hand_diagram_wheel(res_win_t widget, bool_t bHorz, int nDelta)
 			}
 			else
 			{
-				widget_update(ptd->vsc);
+				widget_paint(ptd->vsc);
 			}
 		}
 
@@ -808,7 +808,7 @@ void hand_diagram_wheel(res_win_t widget, bool_t bHorz, int nDelta)
 			}
 			else
 			{
-				widget_update(ptd->hsc);
+				widget_paint(ptd->hsc);
 			}
 		}
 
@@ -961,7 +961,7 @@ void hand_diagram_lbutton_down(res_win_t widget, const xpoint_t* pxp)
 	switch (nHint)
 	{
 	case DIAGRAM_HINT_ENTITY:
-		if (widget_key_state(widget, KEY_CONTROL))
+		if (widget_key_state(widget, KS_WITH_CONTROL))
 		{
 			noti_diagram_entity_selected(widget, ilk);
 		}
@@ -1061,7 +1061,7 @@ void hand_diagram_keydown(res_win_t widget, dword_t ks, int nKey)
 
 	if ((nKey == KEY_UP || nKey == KEY_DOWN || nKey == KEY_LEFT || nKey == KEY_RIGHT))
 	{
-		ks = widget_key_state(widget, KEY_SHIFT);
+		ks = widget_key_state(widget, KS_WITH_SHIFT);
 		m = 1;
 
 		if (ks)
@@ -1128,15 +1128,15 @@ void hand_diagram_keydown(res_win_t widget, dword_t ks, int nKey)
 		else
 			noti_diagram_owner(widget, NC_DIAGRAMENTITYDROP, ptd->diagram, ptd->entity, NULL);
 	}
-	else if ((nKey == _T('z') || nKey == _T('Z')) && widget_key_state(widget, KEY_CONTROL))
+	else if ((nKey == _T('z') || nKey == _T('Z')) && widget_key_state(widget, KS_WITH_CONTROL))
 	{
 		_diagramctrl_undo(widget);
 	}
-	else if ((nKey == _T('c') || nKey == _T('C')) && widget_key_state(widget, KEY_CONTROL))
+	else if ((nKey == _T('c') || nKey == _T('C')) && widget_key_state(widget, KS_WITH_CONTROL))
 	{
 		_diagramctrl_copy(widget);
 	}
-	else if ((nKey == _T('x') || nKey == _T('X')) && widget_key_state(widget, KEY_CONTROL))
+	else if ((nKey == _T('x') || nKey == _T('X')) && widget_key_state(widget, KS_WITH_CONTROL))
 	{
 		_diagramctrl_done(widget);
 
@@ -1145,7 +1145,7 @@ void hand_diagram_keydown(res_win_t widget, dword_t ks, int nKey)
 			_diagramctrl_discard(widget);
 		}
 	}
-	else if ((nKey == _T('v') || nKey == _T('V')) && widget_key_state(widget, KEY_CONTROL))
+	else if ((nKey == _T('v') || nKey == _T('V')) && widget_key_state(widget, KS_WITH_CONTROL))
 	{
 		_diagramctrl_done(widget);
 
@@ -1155,15 +1155,6 @@ void hand_diagram_keydown(res_win_t widget, dword_t ks, int nKey)
 		}
 	}
 }
-
-void hand_diagram_char(res_win_t widget, tchar_t nChar)
-{
-	diagram_delta_t* ptd = GETDIAGRAMDELTA(widget);
-
-	if (!ptd->diagram)
-		return;
-}
-
 
 void hand_diagram_notice(res_win_t widget, NOTICE* pnt)
 {
@@ -1177,10 +1168,6 @@ void hand_diagram_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 {
 	diagram_delta_t* ptd = GETDIAGRAMDELTA(widget);
 	xrect_t xr = { 0 };
-	xfont_t xf = { 0 };
-	xbrush_t xb = { 0 };
-	xpen_t xp = { 0 };
-	xcolor_t xc = { 0 };
 	visual_t rdc;
 	link_t_ptr ilk;
 
@@ -1188,22 +1175,21 @@ void hand_diagram_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 	const drawing_interface* pif = NULL;
 	drawing_interface ifv = {0};
 
-	if (!ptd->diagram)
-		return;
+	clr_mod_t clrs;
+	xbrush_t xb;
+	xpen_t xp;
+	xcolor_t xc;
 
-	widget_get_xfont(widget, &xf);
-	widget_get_xbrush(widget, &xb);
-	widget_get_xpen(widget, &xp);
+	if (!ptd->diagram) return;
+
+	widget_get_color_mode(widget, &clrs);
+	default_xbrush(&xb);
+	format_xcolor(&clrs.clr_bkg, xb.color);
+	default_xpen(&xp);
+	format_xcolor(&clrs.clr_frg, &xp.color);
 
 	canv = widget_get_canvas(widget);
 	pif = widget_get_canvas_interface(widget);
-	
-
-	
-	
-	
-	
-	
 
 	widget_get_client_rect(widget, &xr);
 
@@ -1211,13 +1197,10 @@ void hand_diagram_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 	get_visual_interface(rdc, &ifv);
 	widget_get_view_rect(widget, (viewbox_t*)(&ifv.rect));
 
-	widget_get_xbrush(widget, &xb);
-	widget_get_xpen(widget, &xp);
-
 	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
 
 	draw_diagram(pif, ptd->diagram);
-
+	
 	//draw focus
 	if (ptd->entity)
 	{
@@ -1276,17 +1259,14 @@ void hand_diagram_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 		(*ifv.pf_draw_rect)(ifv.ctx, &xp, NULL, &xr);
 	}
 
-	
-
 	end_canvas_paint(canv, dc, pxr);
-	
 }
 
 /***********************************************function********************************************************/
 
 res_win_t diagramctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, res_win_t wparent)
 {
-	if_event_t ev = { 0 };
+	if_dispatch_t ev = { 0 };
 
 	EVENT_BEGIN_DISPATH(&ev)
 
@@ -1301,7 +1281,6 @@ res_win_t diagramctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t
 		EVENT_ON_WHEEL(hand_diagram_wheel)
 
 		EVENT_ON_KEYDOWN(hand_diagram_keydown)
-		EVENT_ON_CHAR(hand_diagram_char)
 
 		EVENT_ON_MOUSE_MOVE(hand_diagram_mouse_move)
 		EVENT_ON_MOUSE_HOVER(hand_diagram_mouse_hover)
@@ -1394,7 +1373,7 @@ void diagramctrl_redraw(res_win_t widget)
 
 	_diagramctrl_reset_page(widget);
 
-	widget_update(widget);
+	widget_paint(widget);
 }
 
 void diagramctrl_redraw_entity(res_win_t widget, link_t_ptr ilk)

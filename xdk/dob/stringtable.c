@@ -31,9 +31,8 @@ LICENSE.GPL3 for more details.
 
 #include "stringtable.h"
 
-#include "../xdkimp.h"
 #include "../xdkstd.h"
-#include "../xdkutil.h"
+#include "../xdkobj.h"
 
 typedef struct _string_table{
 	link_t lk;			/* str table self link component*/
@@ -585,7 +584,7 @@ void string_table_parse_attrset(link_t_ptr ptr, const tchar_t* attrset, int len)
 		}
 		keylen = (int)(token - key);
 
-		if (token == _T('\0'))
+		if (*token == _T('\0'))
 			break;
 
 		//skip ' ','='
@@ -595,7 +594,7 @@ void string_table_parse_attrset(link_t_ptr ptr, const tchar_t* attrset, int len)
 			len--;
 		}
 
-		if (token == _T('\0'))
+		if (*token == _T('\0'))
 			break;
 
 		//skip '\'','\"'

@@ -34,13 +34,14 @@ LICENSE.GPL3 for more details.
 
 #define XDK_SUPPORT_MEMO_HEAP
 #define XDK_SUPPORT_MEMO_PAGE
-#define XDK_SUPPORT_MEMO_GLOB
+//#define XDK_SUPPORT_MEMO_GLOB
 #define XDK_SUPPORT_MEMO_LOCAL
 #define XDK_SUPPORT_MEMO_CACHE
 #define XDK_SUPPORT_MEMO
 #define XDK_SUPPORT_ERROR
 #define XDK_SUPPORT_DATE
-#define XDK_SUPPORT_MBCS
+//#define XDK_SUPPORT_MBCS
+//#define XDK_SUPPORT_ACP_TABLE
 #define XDK_SUPPORT_ASYNC
 #define XDK_SUPPORT_THREAD_EVENT
 #define XDK_SUPPORT_THREAD_CRITI
@@ -58,6 +59,10 @@ LICENSE.GPL3 for more details.
 #define XDK_SUPPORT_SOCK
 #define XDK_SUPPORT_TIMER
 #define XDK_SUPPORT_RANDOM
+
+#if defined(XDK_SUPPORT_FILE) && (defined(_DEBUG) || defined(DEBUG))
+#define XDK_SUPPORT_MEMO_DUMP
+#endif
 
 #include <stdio.h>
 #include <wchar.h>
@@ -100,7 +105,7 @@ LICENSE.GPL3 for more details.
 #include <mach-o/dyld.h>
 #include <math.h>
 
-typedef int         res_queue_t;
+typedef void*         res_queue_t;
 
 #ifdef XDK_SUPPORT_SOCK
 typedef struct sockaddr_in	net_addr_t;
@@ -156,7 +161,7 @@ typedef void*		res_modu_t;
 
 #ifdef XDK_SUPPORT_TIMER
 typedef void*		res_timer_t;
-typedef void(*MAC_TIMER_PROC)(void* param, unsigned char wait);
+typedef void(*MAC_TIMER_PROC)(void* param, res_timer_t tid);
 #endif
 
 

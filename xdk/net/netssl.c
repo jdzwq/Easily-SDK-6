@@ -27,9 +27,9 @@ LICENSE.GPL3 for more details.
 #include "netssl.h"
 
 #include "../xdknet.h"
-#include "../xdkimp.h"
 #include "../xdkoem.h"
 #include "../xdkstd.h"
+#include "../xdkobj.h"
 
 #if defined(XDK_SUPPORT_SOCK)
 

@@ -52,10 +52,6 @@ extern "C" {
 
 	EXP_API dword_t queue_decode(queue_t que, const byte_t* data);
 
-#if defined(XDK_SUPPORT_TEST)
-	EXP_API void test_queue(void);
-#endif
-
 #ifdef	__cplusplus
 }
 #endif

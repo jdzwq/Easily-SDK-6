@@ -34,6 +34,8 @@ typedef struct _words_delta_t{
 	link_t_ptr item;
 	int bw, bh;
 	int page;
+
+	xfont_t xf;
 }words_delta_t;
 
 #define GETWORDSDELTA(ph) 	(words_delta_t*)widget_get_user_delta(ph)
@@ -50,15 +52,12 @@ void _wordsbox_item_rect(res_win_t widget, link_t_ptr plk, xrect_t* pxr)
 
 	canvas_t canv;
 	measure_interface im = { 0 };
-	xfont_t xf = { 0 };
-
-	widget_get_xfont(widget, &xf);
 
 	canv = widget_get_canvas(widget);
 	get_canvas_measure(canv, &im);
 	widget_get_canv_rect(widget, (canvbox_t*)&(im.rect));
 
-	calc_wordsbox_item_rect(&im, &xf, ptd->words, ptd->page, plk, pxr);
+	calc_wordsbox_item_rect(&im, &ptd->xf, ptd->words, ptd->page, plk, pxr);
 	widget_rect_to_pt(widget, pxr);
 }
 
@@ -66,15 +65,13 @@ void _wordsbox_reset_page(res_win_t widget)
 {
 	words_delta_t* ptd = GETWORDSDELTA(widget);
 	measure_interface im = { 0 };
-	xfont_t xf = { 0 };
+
 	xrect_t xr;
 	xsize_t xs;
 
-	widget_get_xfont(widget, &xf);
-
 	get_canvas_measure(widget_get_canvas(widget), &im);
 
-	calc_wordsbox_size(&im, &xf, ptd->words, &xs);
+	calc_wordsbox_size(&im, &ptd->xf, ptd->words, &xs);
 	widget_size_to_pt(widget, &xs);
 
 	widget_get_client_rect(widget, &xr);
@@ -142,15 +139,12 @@ int hand_words_create(res_win_t widget, void* data)
 {
 	words_delta_t* ptd;
 
-	xfont_t xf = { 0 };
 	float pm = 0;
 	xsize_t xs;
 
 	ptd = (words_delta_t*)xmem_alloc(sizeof(words_delta_t));
 
-	widget_get_xfont(widget, &xf);
-
-	font_metric_by_pt(xstof(xf.size), &pm, NULL);
+	font_metric_by_pt(xstof(ptd->xf.size), &pm, NULL);
 	xs.fw = pm;
 	xs.fh = pm;
 
@@ -160,6 +154,8 @@ int hand_words_create(res_win_t widget, void* data)
 	ptd->bh = xs.h;
 
 	ptd->page = 0;
+
+	default_widget_xfont(&ptd->xf);
 
 	SETWORDSDELTA(widget, ptd);
 
@@ -234,7 +230,6 @@ void hand_words_lbutton_up(res_win_t widget, const xpoint_t* pxp)
 {
 	words_delta_t* ptd = GETWORDSDELTA(widget);
 	measure_interface im = { 0 };
-	xfont_t xf = { 0 };
 
 	link_t_ptr ilk = NULL;
 	xpoint_t pt;
@@ -242,15 +237,13 @@ void hand_words_lbutton_up(res_win_t widget, const xpoint_t* pxp)
 	if (!ptd->words)
 		return;
 
-	widget_get_xfont(widget, &xf);
-
 	get_canvas_measure(widget_get_canvas(widget), &im);
 
 	pt.x = pxp->x;
 	pt.y = pxp->y;
 	widget_point_to_tm(widget, &pt);
 
-	calc_wordsbox_hint(&im, &xf, &pt, ptd->words, ptd->page, &ilk);
+	calc_wordsbox_hint(&im, &ptd->xf, &pt, ptd->words, ptd->page, &ilk);
 
 	if (ilk != ptd->item)
 	{
@@ -284,6 +277,13 @@ void hand_words_scroll(res_win_t widget, bool_t bHorz, int nLine)
 	widget_hand_scroll(widget, bHorz, nLine);
 }
 
+void hand_words_xfont(res_win_t widget, const xfont_t* pxf)
+{
+	words_delta_t* ptd = GETWORDSDELTA(widget);
+
+	xmem_copy((void*)&ptd->xf, (void*)pxf, sizeof(xfont_t));
+}
+
 void hand_words_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 {
 	words_delta_t* ptd = GETWORDSDELTA(widget);
@@ -293,14 +293,13 @@ void hand_words_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 	const drawing_interface* pif = NULL;
 	drawing_interface ifv = {0};
 
-	xfont_t xf;
+	clr_mod_t clrs;
 	xbrush_t xb;
-	xpen_t xp;
 	xcolor_t xc;
 
-	widget_get_xfont(widget, &xf);
-	widget_get_xbrush(widget, &xb);
-	widget_get_xpen(widget, &xp);
+	widget_get_color_mode(widget, &clrs);
+	default_xbrush(&xb);
+	format_xcolor(&clrs.clr_bkg, xb.color);
 
 	canv = widget_get_canvas(widget);
 
@@ -314,7 +313,7 @@ void hand_words_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 
 	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
 
-	draw_wordsbox(pif, &xf, ptd->words, ptd->page);
+	draw_wordsbox(pif, &ptd->xf, ptd->words, ptd->page);
 
 	if (ptd->item)
 	{
@@ -335,7 +334,7 @@ void hand_words_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 /************************************************************************************************/
 res_win_t wordsbox_create(res_win_t widget, dword_t style, const xrect_t* pxr)
 {
-	if_event_t ev = { 0 };
+	if_dispatch_t ev = { 0 };
 
 	EVENT_BEGIN_DISPATH(&ev)
 
@@ -348,6 +347,8 @@ res_win_t wordsbox_create(res_win_t widget, dword_t style, const xrect_t* pxr)
 		EVENT_ON_MOUSE_MOVE(hand_words_mouse_move)
 		EVENT_ON_LBUTTON_DOWN(hand_words_lbutton_down)
 		EVENT_ON_LBUTTON_UP(hand_words_lbutton_up)
+
+		EVENT_ON_XFONT(hand_words_xfont)
 
 		EVENT_ON_NC_IMPLEMENT
 
@@ -412,7 +413,7 @@ void wordsbox_redraw(res_win_t widget)
 
 	_wordsbox_reset_page(widget);
 
-	widget_update(widget);
+	widget_paint(widget);
 }
 
 bool_t wordsbox_set_focus_item(res_win_t widget, link_t_ptr ent)
@@ -786,18 +787,14 @@ void wordsbox_popup_size(res_win_t widget, xsize_t* pxs)
 {
 	words_delta_t* ptd = GETWORDSDELTA(widget);
 	measure_interface im = { 0 };
-	xfont_t xf = { 0 };
 
 	XDK_ASSERT(ptd != NULL);
 
-	widget_get_xfont(widget, &xf);
-
 	get_canvas_measure(widget_get_canvas(widget), &im);
 
-	calc_wordsbox_size(&im, &xf, ptd->words, pxs);
+	calc_wordsbox_size(&im, &ptd->xf, ptd->words, pxs);
 
 	widget_size_to_pt(widget, pxs);
 
 	widget_adjust_size(widget_get_style(widget), pxs);
 }
-

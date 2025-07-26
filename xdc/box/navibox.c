@@ -32,6 +32,8 @@ LICENSE.GPL3 for more details.
 typedef struct _navibox_delta_t{
 	res_win_t target;
 	res_win_t keybox;
+
+	xfont_t xf;
 }navibox_delta_t;
 
 #define GETNAVIBOXDELTA(ph) 	(navibox_delta_t*)widget_get_user_delta(ph)
@@ -84,7 +86,7 @@ void navibox_on_keyboard(res_win_t widget)
 	if (widget_is_valid(ptd->keybox))
 	{
 		widget_destroy(ptd->keybox);
-		ptd->keybox = NULL;
+		ptd->keybox = (res_win_t)0;
 
 		widget_erase(widget, NULL);
 		return;
@@ -123,7 +125,7 @@ void navibox_on_keyboard(res_win_t widget)
 	widget_move(ptd->keybox, RECTPOINT(&xr));
 	widget_size(ptd->keybox, RECTSIZE(&xr));
 	widget_take(ptd->keybox, (int)WS_TAKE_TOPMOST);
-	widget_update(ptd->keybox);
+	widget_paint(ptd->keybox);
 	widget_show(ptd->keybox, WS_SHOW_NORMAL);
 
 	widget_erase(widget, NULL);
@@ -139,6 +141,8 @@ int hand_navibox_create(res_win_t widget, void* data)
 
 	ptd = (navibox_delta_t*)xmem_alloc(sizeof(navibox_delta_t));
 	xmem_zero((void*)ptd, sizeof(navibox_delta_t));
+
+	default_widget_xfont(&ptd->xf);
 
 	SETNAVIBOXDELTA(widget, ptd);
 
@@ -168,7 +172,7 @@ void hand_navibox_lbutton_up(res_win_t widget, const xpoint_t* pxp)
 {
 	navibox_delta_t* ptd = GETNAVIBOXDELTA(widget);
 	measure_interface im = { 0 };
-	xfont_t xf = { 0 };
+
 	xpoint_t pt;
 	int hint;
 
@@ -177,11 +181,9 @@ void hand_navibox_lbutton_up(res_win_t widget, const xpoint_t* pxp)
 
 	widget_point_to_tm(widget, &pt);
 
-	widget_get_xfont(widget, &xf);
-
 	get_canvas_measure(widget_get_canvas(widget), &im);
 
-	hint = calc_navibox_hint(&im, &xf, &pt);
+	hint = calc_navibox_hint(&im, &ptd->xf, &pt);
 
 	if (hint == NAVIBOX_HINT_HOME)
 		navibox_on_home(widget);
@@ -202,6 +204,13 @@ void hand_navibox_size(res_win_t widget, int code, const xsize_t* prs)
 	widget_erase(widget, NULL);
 }
 
+void hand_navibox_xfont(res_win_t widget, const xfont_t* pxf)
+{
+	navibox_delta_t* ptd = GETNAVIBOXDELTA(widget);
+
+	xmem_copy((void*)&ptd->xf, (void*)pxf, sizeof(xfont_t));
+}
+
 void hand_navibox_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 {
 	navibox_delta_t* ptd = GETNAVIBOXDELTA(widget);
@@ -212,24 +221,16 @@ void hand_navibox_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 	drawing_interface ifv = {0};
 
 	NAVISTATE ns = { 0 };
-	xfont_t xf;
-	xbrush_t xb;
-	xpen_t xp;
+	
 	xcolor_t xc_brim, xc_core;
+	clr_mod_t clrs;
 
-	widget_get_xfont(widget, &xf);
-	widget_get_xbrush(widget, &xb);
-	widget_get_xpen(widget, &xp);
+	widget_get_color_mode(widget, &clrs);
+	xmem_copy((void*)&xc_brim, (void*)&clrs.clr_bkg, sizeof(xcolor_t));
+	xmem_copy((void*)&xc_core, (void*)&clrs.clr_bkg, sizeof(xcolor_t));
 
 	canv = widget_get_canvas(widget);
 	pif = widget_get_canvas_interface(widget);
-	
-
-	
-	
-	
-	
-	
 
 	widget_get_client_rect(widget, &xr);
 
@@ -237,26 +238,21 @@ void hand_navibox_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 
 	get_visual_interface(rdc, &ifv);
 
-	parse_xcolor(&xc_brim, xb.color);
-	parse_xcolor(&xc_core, xb.color);
 	lighten_xcolor(&xc_brim, DEF_SOFT_DARKEN);
 
 	(*ifv.pf_gradient_rect)(ifv.ctx, &xc_brim, &xc_core, GDI_ATTR_GRADIENT_VERT, &xr);
 
 	ns.keyboxed = widget_is_valid(ptd->keybox);
 
-	draw_navibox(pif, &xf, &ns);
-
-	
+	draw_navibox(pif, &ptd->xf, &ns);
 
 	end_canvas_paint(canv, dc, pxr);
-	
 }
 
 /***************************************************************************************/
 res_win_t navibox_create(res_win_t widget, dword_t style, const xrect_t* pxr)
 {
-	if_event_t ev = { 0 };
+	if_dispatch_t ev = { 0 };
 
 	EVENT_BEGIN_DISPATH(&ev)
 
@@ -269,6 +265,8 @@ res_win_t navibox_create(res_win_t widget, dword_t style, const xrect_t* pxr)
 
 		EVENT_ON_LBUTTON_DOWN(hand_navibox_lbutton_down)
 		EVENT_ON_LBUTTON_UP(hand_navibox_lbutton_up)
+
+		EVENT_ON_XFONT(hand_navibox_xfont)
 
 		EVENT_ON_NC_IMPLEMENT
 
@@ -288,15 +286,12 @@ void navibox_popup_size(res_win_t widget, xsize_t* pxs)
 {
 	navibox_delta_t* ptd = GETNAVIBOXDELTA(widget);
 	measure_interface im = { 0 };
-	xfont_t xf = { 0 };
 
 	XDK_ASSERT(ptd != NULL);
 
-	widget_get_xfont(widget, &xf);
-
 	get_canvas_measure(widget_get_canvas(widget), &im);
 
-	calc_navibox_size(&im, &xf, pxs);
+	calc_navibox_size(&im, &ptd->xf, pxs);
 
 	widget_size_to_pt(widget, pxs);
 

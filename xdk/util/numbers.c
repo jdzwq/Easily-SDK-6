@@ -26,7 +26,6 @@ LICENSE.GPL3 for more details.
 
 #include "numbers.h"
 
-#include "../xdkimp.h"
 #include "../xdkstd.h"
 
 bool_t is_zero_size(const tchar_t* fsize)

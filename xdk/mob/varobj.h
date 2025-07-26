@@ -304,10 +304,6 @@ EXP_API void object_hash64(object_t obj, key64_t* pkey);
 */
 EXP_API void object_hash128(object_t obj, key128_t* pkey);
 
-#if defined(XDK_SUPPORT_TEST)
-	EXP_API void test_object(void);
-#endif
-
 #ifdef	__cplusplus
 }
 #endif

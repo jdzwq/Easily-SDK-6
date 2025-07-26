@@ -26,10 +26,7 @@ LICENSE.GPL3 for more details.
 
 #include "nuid.h"
 
-#include "../xdkimp.h"
-#include "../xdkoem.h"
 #include "../xdkstd.h"
-#include "../xdkutil.h"
 
 void nuid_zero(nuid_t* pu)
 {
@@ -40,10 +37,14 @@ void nuid_from_timestamp(nuid_t* pu, lword_t tms)
 {
 	dword_t r, nh, nl;
 
-	Srand48((dword_t)(GETLDWORD(tms)));
-	r = Lrand48() >> 16;
-	nh = r | 0x0100;
-	nl = Lrand48();
+	//Srand48((dword_t)(GETLDWORD(tms)));
+	//r = Lrand48() >> 16;
+	//nh = r | 0x0100;
+	//nl = Lrand48();
+	system_random32(&r);
+	nh = (r >> 16) | 0x0100;
+	system_random32(&r);
+	nl = r;
 
 	pu->data1 = (dword_t)(tms & 0xffffffff);
 	pu->data2 = (sword_t)((tms >> 32) & 0xffff);

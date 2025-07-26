@@ -43,6 +43,9 @@ typedef struct _tablectrl_delta_t{
 	bool_t b_size;
 	bool_t b_auto;
 	bool_t b_lock;
+
+	xfont_t xf;
+	xface_t xa;
 }tablectrl_delta_t;
 
 #define GETTABLECTRLDELTA(ph) 	(tablectrl_delta_t*)widget_get_user_delta(ph)
@@ -55,19 +58,14 @@ static void _tablectrl_item_rect(res_win_t widget, link_t_ptr plk, xrect_t* pxr)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
 
-	xfont_t xf;
-	xface_t xa;
 	canvas_t canv;
 	measure_interface im = { 0 };
-
-	widget_get_xfont(widget, &xf);
-	widget_get_xface(widget, &xa);
 
 	canv = widget_get_canvas(widget);
 	get_canvas_measure(canv, &im);
 	widget_get_canv_rect(widget, (canvbox_t*)&(im.rect));
 
-	calc_table_item_rect(&im, &xf, &xa, ptd->table, plk, pxr);
+	calc_table_item_rect(&im, &ptd->xf, &ptd->xa, ptd->table, plk, pxr);
 
 	widget_rect_to_pt(widget, pxr);
 }
@@ -76,19 +74,14 @@ static void _tablectrl_item_key_rect(res_win_t widget, link_t_ptr plk, xrect_t* 
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
 
-	xfont_t xf;
-	xface_t xa;
 	canvas_t canv;
 	measure_interface im = { 0 };
-
-	widget_get_xfont(widget, &xf);
-	widget_get_xface(widget, &xa);
 
 	canv = widget_get_canvas(widget);
 	get_canvas_measure(canv, &im);
 	widget_get_canv_rect(widget, (canvbox_t*)&(im.rect));
 
-	calc_table_item_key_rect(&im, &xf, &xa, ptd->table, ptd->ratio, plk, pxr);
+	calc_table_item_key_rect(&im, &ptd->xf, &ptd->xa, ptd->table, ptd->ratio, plk, pxr);
 
 	widget_rect_to_pt(widget, pxr);
 }
@@ -97,19 +90,14 @@ static void _tablectrl_item_val_rect(res_win_t widget, link_t_ptr plk, xrect_t* 
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
 
-	xfont_t xf;
-	xface_t xa;
 	canvas_t canv;
 	measure_interface im = { 0 };
-
-	widget_get_xfont(widget, &xf);
-	widget_get_xface(widget, &xa);
 
 	canv = widget_get_canvas(widget);
 	get_canvas_measure(canv, &im);
 	widget_get_canv_rect(widget, (canvbox_t*)&(im.rect));
 
-	calc_table_item_val_rect(&im, &xf, &xa, ptd->table, ptd->ratio, plk, pxr);
+	calc_table_item_val_rect(&im, &ptd->xf, &ptd->xa, ptd->table, ptd->ratio, plk, pxr);
 
 	widget_rect_to_pt(widget, pxr);
 }
@@ -120,21 +108,16 @@ static void _tablectrl_reset_page(res_win_t widget)
 	xrect_t xr;
 	xsize_t xs;
 	canvas_t canv;
-	xfont_t xf;
-	xface_t xa;
 
 	measure_interface im = { 0 };
-
-	widget_get_xfont(widget, &xf);
-	widget_get_xface(widget, &xa);
 
 	canv = widget_get_canvas(widget);
 	get_canvas_measure(canv, &im);
 	widget_get_canv_rect(widget, (canvbox_t*)&(im.rect));
 
-	(*im.pf_measure_font)(im.ctx, &xf, &xs);
+	(*im.pf_measure_font)(im.ctx, &ptd->xf, &xs);
 	xs.fw = xs.fh;
-	xs.fh = calc_table_height(&im, &xf, &xa, ptd->table);
+	xs.fh = calc_table_height(&im, &ptd->xf, &ptd->xa, ptd->table);
 
 	widget_size_to_pt(widget, &xs);
 
@@ -279,7 +262,6 @@ void noti_tablectrl_begin_edit(res_win_t widget)
 	xrect_t xr = { 0 };
 
 	clr_mod_t ob = { 0 };
-	xfont_t xf = { 0 };
 
 	XDK_ASSERT(ptd->item);
 
@@ -289,7 +271,6 @@ void noti_tablectrl_begin_edit(res_win_t widget)
 	if (ptd->b_lock)
 		return;
 
-	widget_get_xfont(widget, &xf);
 	widget_get_color_mode(widget, &ob);
 
 	if (ptd->onkey)
@@ -307,7 +288,7 @@ void noti_tablectrl_begin_edit(res_win_t widget)
 	widget_set_user_id(ptd->editor, IDC_FIREEDIT);
 	widget_set_owner(ptd->editor, widget);
 
-	widget_set_xfont(ptd->editor, &xf);
+	widget_noti_xfont(ptd->editor, &ptd->xf);
 	widget_set_color_mode(ptd->editor, &ob);
 	widget_show(ptd->editor, WS_SHOW_NORMAL);
 	widget_set_focus(ptd->editor);
@@ -344,7 +325,7 @@ void noti_tablectrl_commit_edit(res_win_t widget)
 	}
 
 	editctrl = ptd->editor;
-	ptd->editor = NULL;
+	ptd->editor = (res_win_t)0;
 
 	widget_destroy(editctrl);
 	widget_set_focus(widget);
@@ -387,7 +368,7 @@ void noti_tablectrl_rollback_edit(res_win_t widget)
 	XDK_ASSERT(ptd->item);
 
 	editctrl = ptd->editor;
-	ptd->editor = NULL;
+	ptd->editor = (res_win_t)0;
 
 	widget_destroy(editctrl);
 	widget_set_focus(widget);
@@ -413,7 +394,7 @@ void noti_tablectrl_reset_scroll(res_win_t widget, bool_t bUpdate)
 	if (widget_is_valid(ptd->vsc))
 	{
 		if (bUpdate)
-			widget_update(ptd->vsc);
+			widget_paint(ptd->vsc);
 		else
 			widget_close(ptd->vsc, 0);
 	}
@@ -432,6 +413,9 @@ int hand_tablectrl_create(res_win_t widget, void* data)
 
 	ptd->ratio = 0.5;
 	ptd->b_lock = 1;
+
+	default_xfont(&ptd->xf);
+	default_xface(&ptd->xa);
 
 	return 0;
 }
@@ -490,7 +474,7 @@ void hand_tablectrl_keydown(res_win_t widget, dword_t ks, int key)
 	}
 }
 
-void hand_tablectrl_char(res_win_t widget, tchar_t nChar)
+void hand_tablectrl_wchar(res_win_t widget, wchar_t nChar)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
 
@@ -504,7 +488,7 @@ void hand_tablectrl_char(res_win_t widget, tchar_t nChar)
 
 	if (IS_VISIBLE_CHAR(nChar) && widget_is_valid(ptd->editor))
 	{
-		widget_post_char(ptd->editor, nChar);
+		widget_post_wchar(ptd->editor, nChar);
 	}
 }
 
@@ -540,8 +524,6 @@ void hand_tablectrl_lbutton_down(res_win_t widget, const xpoint_t* pxp)
 	link_t_ptr ilk = NULL;
 	canvas_t canv;
 	measure_interface im;
-	xfont_t xf;
-	xface_t xa;
 
 	if (!ptd->table)
 		return;
@@ -553,9 +535,6 @@ void hand_tablectrl_lbutton_down(res_win_t widget, const xpoint_t* pxp)
 		widget_set_focus(widget);
 	}
 
-	widget_get_xfont(widget, &xf);
-	widget_get_xface(widget, &xa);
-
 	canv = widget_get_canvas(widget);
 	get_canvas_measure(canv, &im);
 	widget_get_canv_rect(widget, (canvbox_t*)&(im.rect));
@@ -565,7 +544,7 @@ void hand_tablectrl_lbutton_down(res_win_t widget, const xpoint_t* pxp)
 	widget_point_to_tm(widget, &pt);
 
 	ilk = NULL;
-	hint = calc_table_hint(&im, &xf, &xa, &pt, ptd->table, ptd->ratio, &ilk);
+	hint = calc_table_hint(&im, &ptd->xf, &ptd->xa, &pt, ptd->table, ptd->ratio, &ilk);
 
 	if (hint == TABLE_HINT_SPLIT)
 	{
@@ -582,8 +561,6 @@ void hand_tablectrl_lbutton_up(res_win_t widget, const xpoint_t* pxp)
 	link_t_ptr ilk = NULL;
 	measure_interface im;
 	canvas_t canv;
-	xfont_t xf;
-	xface_t xa;
 	bool_t onkey;
 
 	if (!ptd->table)
@@ -595,9 +572,6 @@ void hand_tablectrl_lbutton_up(res_win_t widget, const xpoint_t* pxp)
 		return;
 	}
 
-	widget_get_xfont(widget, &xf);
-	widget_get_xface(widget, &xa);
-
 	canv = widget_get_canvas(widget);
 	get_canvas_measure(canv, &im);
 	widget_get_canv_rect(widget, (canvbox_t*)&(im.rect));
@@ -607,7 +581,7 @@ void hand_tablectrl_lbutton_up(res_win_t widget, const xpoint_t* pxp)
 	widget_point_to_tm(widget, &pt);
 
 	ilk = NULL;
-	hint = calc_table_hint(&im, &xf, &xa, &pt, ptd->table, ptd->ratio, &ilk);
+	hint = calc_table_hint(&im, &ptd->xf, &ptd->xa, &pt, ptd->table, ptd->ratio, &ilk);
 
 	onkey = (hint == TABLE_HINT_KEY) ? 1 : 0;
 
@@ -708,7 +682,7 @@ void hand_tablectrl_wheel(res_win_t widget, bool_t bHorz, int nDelta)
 			}
 			else
 			{
-				widget_update(ptd->vsc);
+				widget_paint(ptd->vsc);
 			}
 		}
 
@@ -738,6 +712,20 @@ void hand_tablectrl_child_command(res_win_t widget, int code, vword_t data)
 	}
 }
 
+void hand_tablectrl_xfont(res_win_t widget, const xfont_t* pxf)
+{
+	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
+
+	xmem_copy((void*)&ptd->xf, (void*)pxf, sizeof(xfont_t));
+}
+
+void hand_tablectrl_xface(res_win_t widget, const xface_t* pxa)
+{
+	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
+
+	xmem_copy((void*)&ptd->xa, (void*)pxa, sizeof(xface_t));
+}
+
 void hand_tablectrl_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
@@ -747,33 +735,31 @@ void hand_tablectrl_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 	drawing_interface ifv = {0};
 	xrect_t xr;
 
-	xfont_t xf = { 0 };
-	xface_t xa = { 0 };
+	clr_mod_t clrs;
 	xbrush_t xb = { 0 };
 	xpen_t xp = { 0 };
 	xcolor_t xc = { 0 };
 
-	if (!ptd->table)
-		return;
+	if (!ptd->table) return;
 
-	widget_get_xfont(widget, &xf);
-	widget_get_xface(widget, &xa);
-	widget_get_xbrush(widget, &xb);
-	widget_get_xpen(widget, &xp);
+	widget_get_color_mode(widget, &clrs);
+	default_xbrush(&xb);
+	format_xcolor(&clrs.clr_bkg, xb.color);
+	default_xpen(&xp);
+	format_xcolor(&clrs.clr_frg, xp.color);
 
 	widget_get_client_rect(widget, &xr);
 
 	canv = widget_get_canvas(widget);
 	pif = widget_get_canvas_interface(widget);
 	
-
 	rdc = begin_canvas_paint(canv, dc, xr.w, xr.h);
 
 	get_visual_interface(rdc, &ifv);
 
 	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
 
-	draw_table(pif, &xf, &xa, &xp, &xb, ptd->table, ptd->ratio);
+	draw_table(pif, &ptd->xf, &ptd->xa, &xp, &xb, ptd->table, ptd->ratio);
 
 	//draw focus
 	if (ptd->item)
@@ -789,16 +775,13 @@ void hand_tablectrl_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 		(*ifv.pf_alphablend_rect)(ifv.ctx, &xc, &xr, ALPHA_TRANS);
 	}
 
-	
-
 	end_canvas_paint(canv, dc, pxr);
-	
 }
 
 /************************************************************************************************/
 res_win_t tablectrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, res_win_t wparent)
 {
-	if_event_t ev = { 0 };
+	if_dispatch_t ev = { 0 };
 
 	EVENT_BEGIN_DISPATH(&ev)
 
@@ -825,6 +808,9 @@ res_win_t tablectrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* 
 		EVENT_ON_RBUTTON_UP(hand_tablectrl_rbutton_up)
 
 		EVENT_ON_CHILD_COMMAND(hand_tablectrl_child_command)
+
+		EVENT_ON_XFONT(hand_tablectrl_xfont)
+		EVENT_ON_XFACE(hand_tablectrl_xface)
 
 		EVENT_ON_NC_IMPLEMENT
 
@@ -908,7 +894,7 @@ void tablectrl_redraw(res_win_t widget)
 
 	_tablectrl_reset_page(widget);
 
-	widget_update(widget);
+	widget_paint(widget);
 }
 
 void tablectrl_redraw_item(res_win_t widget, link_t_ptr ent)

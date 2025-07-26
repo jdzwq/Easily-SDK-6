@@ -26,9 +26,8 @@ LICENSE.GPL3 for more details.
 
 #include "filetable.h"
 
-#include "../xdkimp.h"
-#include "../xdkoem.h"
 #include "../xdkstd.h"
+#include "../xdkobj.h"
 
 #define FILETABLE_MAPBITS		1
 
@@ -178,8 +177,8 @@ static res_file_t _lock_file_map(file_table_context* ppt, int map_ind)
 	else
 	{
 		buff = xmem_alloc(bytes);
-		xuncf_read_file_range(ppt->block, hoff, loff, buff, bytes);
-		mh = (res_file_t)buff;
+		xuncf_read_file_range(ppt->block, hoff, loff, (byte_t*)buff, bytes);
+		mh = (res_file_t)0;
 	}
 
 	if (!buff)
@@ -230,7 +229,7 @@ static void _unlock_file_map(file_table_context* ppt, int map_ind, res_file_t mh
 	}
 	else
 	{
-		xuncf_write_file_range(ppt->block, hoff, loff, buff, bytes);
+		xuncf_write_file_range(ppt->block, hoff, loff, (byte_t*)buff, bytes);
 		xmem_free(buff);
 	}
 
@@ -279,11 +278,11 @@ static bool_t _lock_file_table_block(file_table_context* ppt, int map_ind, int m
 
 		if (write)
 		{
-			rt = xuncf_write_file_range(ppt->block, hoff, loff, buff, size);
+			rt = xuncf_write_file_range(ppt->block, hoff, loff, (byte_t*)buff, size);
 		}
 		else
 		{
-			rt = xuncf_read_file_range(ppt->block, hoff, loff, buff, size);
+			rt = xuncf_read_file_range(ppt->block, hoff, loff, (byte_t*)buff, size);
 		}
 		if (!rt)
 		{
@@ -325,7 +324,7 @@ static bool_t _unlock_file_table_block(file_table_context* ppt, int map_ind, int
 	else
 	{
 		if (write)
-			rt = xuncf_write_file_range(ppt->block, hoff, loff, buf, size);
+			rt = xuncf_write_file_range(ppt->block, hoff, loff, (byte_t*)buf, size);
 		else
 			rt = 1;
 
@@ -762,112 +761,3 @@ bool_t unlock_file_table_block(link_t_ptr pt, dword_t pos, dword_t size, bool_t 
 
 	return _unlock_file_table_block(ppt, i, j, size, write, hh, buf);
 }
-
-#if defined(XDK_SUPPORT_TEST)
-#include <time.h>
-
-void test_file_table_alloc(const tchar_t* fname, dword_t mask)
-{
-	link_t_ptr pt = create_file_table(fname, BLOCK_SIZE_4096, mask);
-
-	file_table_context* ppt = PageTableFromLink(pt);
-
-	Srand48((int)time(NULL));
-
-	#define ARS 100
-	int i, k, b;
-
-	for (k = 0; k < 100; k++)
-	{
-		dword_t ind[ARS] = { 0 };
-		int ext[ARS] = { 0 };
-		for (i = 0; i < ARS; i++)
-		{
-			while (ext[i] == 0) ext[i] = Lrand48() % 1024;
-
-			ind[i] = alloc_file_table_block(pt, ext[i] * PAGE_SIZE);
-
-			b = (int)get_file_table_block_alloced(pt, ind[i]);
-
-			_tprintf(_T("%d-%d-%d\t"), (ind[i] & 0x0000FFFF), ext[i], b);
-		}
-
-		_tprintf(_T("\n"));
-
-		for (i = 0; i < ARS; i++)
-		{
-			free_file_table_block(pt, ind[i], ext[i] * PAGE_SIZE);
-
-			b = (int)get_file_table_block_alloced(pt, ind[i]);
-
-			_tprintf(_T("%d-%d-%d\t"), (ind[i] & 0x0000FFFF), ext[i], b);
-		}
-
-		_tprintf(_T("\n"));
-	}
-
-	destroy_file_table(pt);
-}
-
-void test_file_table_write(const tchar_t* fname, dword_t mask)
-{
-	link_t_ptr pt = create_file_table(fname, BLOCK_SIZE_512, mask);
-
-	file_table_context* ppt = PageTableFromLink(pt);
-
-	Srand48((int)time(NULL));
-
-#define ARS 100
-	int i, k, b;
-
-	res_file_t mh;
-
-	for (k = 0; k < 100; k++)
-	{
-		dword_t ind[ARS] = { 0 };
-		int ext[ARS] = { 0 };
-		vword_t adr[ARS] = { 0 };
-		for (i = 0; i < ARS; i++)
-		{
-			while (ext[i] == 0) ext[i] = Lrand48() % 1024;
-
-			ind[i] = alloc_file_table_block(pt, ext[i] * PAGE_SIZE);
-
-			lock_file_table_block(pt, ind[i], ext[i] * PAGE_SIZE, 1, &mh, (void**)&(adr[i]));
-
-			*((dword_t*)adr[i]) = ind[i];
-			*((byte_t*)adr[i] + ext[i] * PAGE_SIZE - 1) = 'F';
-
-			unlock_file_table_block(pt, ind[i], ext[i] * PAGE_SIZE, 1, mh, (void*)adr[i]);
-
-			_tprintf(_T("%lu-%lu\t"), ind[i], ext[i]);
-		}
-
-		_tprintf(_T("\n"));
-
-		for (i = 0; i < ARS; i++)
-		{
-			lock_file_table_block(pt, ind[i], ext[i] * PAGE_SIZE, 0, &mh, (void**)&(adr[i]));
-
-			if(*((dword_t*)adr[i]) != ind[i])
-				_tprintf(_T("pos %lu mistach\n"), ind[i]);
-
-			if(*((byte_t*)adr[i] + ext[i] * PAGE_SIZE - 1) != 'F')
-				_tprintf(_T("size %lu mistach\n"), ext[i]);
-
-			unlock_file_table_block(pt, ind[i], ext[i] * PAGE_SIZE, 0, mh, (void*)adr[i]);
-
-			free_file_table_block(pt, ind[i], ext[i] * PAGE_SIZE);
-
-			b = (int)get_file_table_block_alloced(pt, ind[i]);
-		}
-
-		_tprintf(_T("\n"));
-	}
-
-	destroy_file_table(pt);
-
-	_tprintf(_T("end\n"));
-}
-
-#endif

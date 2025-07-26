@@ -26,10 +26,8 @@ LICENSE.GPL3 for more details.
 
 #include "trietree.h"
 
-#include "../xdkimp.h"
-#include "../xdkoem.h"
 #include "../xdkstd.h"
-#include "../xdkutil.h"
+#include "../xdkobj.h"
 
 typedef struct _trie_node_t{
 	link_t lkSibling;	/*the self link component, linked to parent*/
@@ -610,71 +608,3 @@ link_t_ptr enum_trie_tree(link_t_ptr ptr, ENUM_TRIETREE_NODE pf, void* param)
 
 	return nlk;
 }
-
-#if defined(XDK_SUPPORT_TEST)
-static bool_t print_leaf(const tchar_t* key, link_t_ptr nlk, void* p)
-{
-	object_t ob = get_trie_node_val_ptr(nlk);
-
-	string_t vs = string_alloc();
-	object_get_string(ob, vs);
-
-	_tprintf(_T("%s %s\n"), key, string_ptr(vs));
-
-	string_free(vs);
-
-	return 1;
-}
-
-void test_trie_tree()
-{
-	object_t v = object_alloc();
-
-	string_t vs = string_alloc();
-	string_cpy(vs, _T("trie"), -1);
-	object_set_string(v, vs);
-	string_free(vs);
-
-	link_t_ptr ptr = create_trie_tree(_T('.'));
-
-	link_t_ptr ilk = write_trie_node(ptr, _T("1.111.1111"), -1, v);
-
-	ilk = write_trie_node(ptr, _T("1.111"), -1, v);
-
-	ilk = write_trie_node(ptr, _T("1.11.111"), -1, v);
-
-	ilk = write_trie_node(ptr, _T("1.11.222"), -1, v);
-
-	ilk = write_trie_node(ptr, _T("1.11.111.11"), -1, v);
-
-	ilk = write_trie_node(ptr, _T("1.1.11.11"), -1, v);
-
-	ilk = write_trie_node(ptr, _T("1.2.3"), -1, v);
-
-	enum_trie_tree(ptr, print_leaf, NULL);
-
-	delete_trie_node(ptr, _T("1.111"), -1);
-
-	delete_trie_node(ptr, _T("1.11.111.11"), -1);
-
-	delete_trie_node(ptr, _T("1.2.3.4"), -1);
-
-	delete_trie_node(ptr, _T("1.2.3"), -1);
-
-	delete_trie_node(ptr, _T("1.11.111"), -1);
-
-	delete_trie_node(ptr, _T("1.11.222"), -1);
-
-	delete_trie_node(ptr, _T("1.1.11.11"), -1);
-
-	delete_trie_node(ptr, _T("1.111.1111"), -1);
-
-	enum_trie_tree(ptr, print_leaf, NULL);
-
-	object_free(v);
-
-	destroy_trie_tree(ptr);
-}
-
-
-#endif

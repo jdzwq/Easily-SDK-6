@@ -32,6 +32,9 @@ LICENSE.GPL3 for more details.
 typedef struct _numbox_delta_t{
 	int index;
 	int bw, bh;
+
+	xfont_t xf;
+	xbrush_t xb;
 }numbox_delta_t;
 
 #define NUMBOX_COUNT	13
@@ -159,11 +162,11 @@ void hand_numbox_lbutton_up(res_win_t widget, const xpoint_t* pxp)
 		return;
 
 	if (ch == _T('-'))
-		widget_post_key(NULL, KEY_BACK);
+		widget_post_key((res_win_t)0, KEY_BACK);
 	else if (ch == _T('\n'))
-		widget_post_key(NULL, KEY_ENTER);
+		widget_post_key((res_win_t)0, KEY_ENTER);
 	else
-		widget_post_char(NULL, ch);
+		widget_post_wchar((res_win_t)0, ch);
 }
 
 void hand_numbox_size(res_win_t widget, int code, const xsize_t* prs)
@@ -176,28 +179,37 @@ void hand_numbox_size(res_win_t widget, int code, const xsize_t* prs)
 	widget_erase(widget, NULL);
 }
 
+void hand_numbox_xfont(res_win_t widget, const xfont_t* pxf)
+{
+	numbox_delta_t* ptd = GETNUMBOXDELTA(widget);
+
+	xmem_copy((void*)&ptd->xf, (void*)pxf, sizeof(xfont_t));
+}
+
 void hand_numbox_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 {
 	numbox_delta_t* ptd = GETNUMBOXDELTA(widget);
 	canvas_t canv;
 	visual_t rdc;
-	xfont_t xf;
-	xface_t xa;
-	xbrush_t xb, xb_bark, xb_focus;
+
 	xrect_t xr, xr_focus;
 	int i;
 	tchar_t tk[2] = { 0 };
 	drawing_interface ifv = {0};
 
-	widget_get_xbrush(widget, &xb);
-	xmem_copy((void*)&xb_focus, (void*)&xb, sizeof(xbrush_t));
-	lighten_xbrush(&xb_focus, DEF_SOFT_LIGHTEN);
+	clr_mod_t clrs;
+	xface_t xa;
+	xbrush_t xb_bark, xb_focus;
 
-	xmem_copy((void*)&xb_bark, (void*)&xb, sizeof(xbrush_t));
+	widget_get_color_mode(widget, &clrs);
+	default_xbrush(&xb_focus);
+	default_xbrush(&xb_bark);
+	format_xcolor(&clrs.clr_bkg, xb_focus.color);
+	format_xcolor(&clrs.clr_bkg, xb_bark.color);
+	lighten_xbrush(&xb_focus, DEF_SOFT_LIGHTEN);
 	lighten_xbrush(&xb_bark, DEF_SOFT_DARKEN);
 
-	widget_get_xfont(widget, &xf);
-	widget_get_xface(widget, &xa);
+	default_xface(&xa);
 	xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_CENTER);
 	xscpy(xa.line_align, GDI_ATTR_TEXT_ALIGN_CENTER);
 
@@ -226,19 +238,17 @@ void hand_numbox_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 		if (ptd->index == i)
 			(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb_focus, &xr_focus);
 		else
-			(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr_focus);
+			(*ifv.pf_draw_rect)(ifv.ctx, NULL, &ptd->xb, &xr_focus);
 
 		tk[0] = NUMBOX_DATA[i];
 
 		if (tk[0] == _T('\n'))
-			(*ifv.pf_draw_text)(ifv.ctx, &xf, &xa, &xr, _T("√"), -1);
+			(*ifv.pf_draw_text)(ifv.ctx, &ptd->xf, &xa, &xr, _T("√"), -1);
 		else if (tk[0] == _T('-'))
-			(*ifv.pf_draw_text)(ifv.ctx, &xf, &xa, &xr, _T("CE"), -1);
+			(*ifv.pf_draw_text)(ifv.ctx, &ptd->xf, &xa, &xr, _T("CE"), -1);
 		else
-			(*ifv.pf_draw_text)(ifv.ctx, &xf, &xa, &xr, tk, -1);
+			(*ifv.pf_draw_text)(ifv.ctx, &ptd->xf, &xa, &xr, tk, -1);
 	}
-
-	
 
 	end_canvas_paint(canv, dc, pxr);
 }
@@ -246,7 +256,7 @@ void hand_numbox_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 /***************************************************************************************/
 res_win_t numbox_create(res_win_t widget, dword_t style, const xrect_t* pxr)
 {
-	if_event_t ev = { 0 };
+	if_dispatch_t ev = { 0 };
 
 	EVENT_BEGIN_DISPATH(&ev)
 
@@ -259,6 +269,8 @@ res_win_t numbox_create(res_win_t widget, dword_t style, const xrect_t* pxr)
 
 		EVENT_ON_LBUTTON_DOWN(hand_numbox_lbutton_down)
 		EVENT_ON_LBUTTON_UP(hand_numbox_lbutton_up)
+
+		EVENT_ON_XFONT(hand_numbox_xfont)
 
 		EVENT_ON_NC_IMPLEMENT
 

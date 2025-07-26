@@ -33,8 +33,13 @@ LICENSE.GPL3 for more details.
 extern "C" {
 #endif
 
+EXP_API void default_widget_xfont(xfont_t* pxf);
 
-EXP_API tchar_t* next_draw_path(const tchar_t* script, int len, tchar_t* pname, xpoint_t* ppt, int* pn);
+EXP_API void default_widget_xface(xface_t* pxa);
+
+EXP_API void default_textor_xfont(xfont_t* pxf);
+
+EXP_API void default_textor_xface(xface_t* pxa);
 
 #ifdef	__cplusplus
 }

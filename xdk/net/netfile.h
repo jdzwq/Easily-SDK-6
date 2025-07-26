@@ -28,7 +28,6 @@ LICENSE.GPL3 for more details.
 #define _NETFILE_H
 
 #include "../xdkdef.h"
-#include "../xdkimp.h"
 #include "netdef.h"
 
 #if defined(XDK_SUPPORT_SOCK)

@@ -26,10 +26,10 @@ LICENSE.GPL3 for more details.
 
 #include "escape.h"
 
-#include "../xdkimp.h"
 #include "../xdkstd.h"
 
-static tchar_t csv_esc[] = { _T('%'), _T('\''), _T('"'), _T('\t'), _T('\r'), _T('\n'), _T('\0') };
+//static tchar_t csv_esc[] = { _T('%'), _T('\''), _T('"'), _T('\t'), _T('\r'), _T('\n'), _T('\0') };
+static tchar_t csv_esc[] = { _T(','), _T('\t'), _T('\r'), _T('\n'), _T('\0') };
 
 bool_t _is_csvesc(tchar_t ch)
 {
@@ -43,33 +43,30 @@ bool_t _is_csvesc(tchar_t ch)
 void csv_token_encode(const tchar_t* val, int len, tchar_t* buf, int* pdw)
 {
 	const tchar_t* token = val;
-	int pos, total = 0;
+	int pos = 0, total = 0;
 	bool_t glt = 0;
-	tchar_t num[3] = { 0 };
 
 	if (len < 0)
 		len = xslen(val);
 
-	pos = 0;
 	while (pos < len)
 	{
 		if (_is_csvesc(*token))
 		{
 			if (buf)
 			{
-				buf[total] = _T('%');
-				xsprintf(buf + total + 1, _T("%02X"), (int)(*token));
+				buf[total] = *token;
 			}
-			total += 3;
-		}
-		else if (*token == CSV_ITEMFEED)
+			total ++;
+			glt = 1;
+		}else if(*token == _T('"'))
 		{
 			if (buf)
 			{
-				buf[total] = *token;
+				buf[total] = _T('"');
+				buf[total+1] = *token;
 			}
-			total++;
-			glt = 1;
+			total += 2;
 		}
 		else
 		{
@@ -97,44 +94,43 @@ void csv_token_encode(const tchar_t* val, int len, tchar_t* buf, int* pdw)
 	if (pdw) *pdw = total;
 }
 
-int csv_token_decode(const tchar_t* val, tchar_t* buf, int* pdw)
+int csv_token_decode(const tchar_t* val, int len, tchar_t* buf, int* pdw)
 {
 	const tchar_t* token = val;
-	int pos, total = 0;
+	int pos = 0, total = 0;
 	bool_t glt = 0;
-	tchar_t num[3] = { 0 };
 
-	pos = 0;
+	if (len < 0)
+		len = xslen(val);
+
+	if (*token == _T('"'))
+	{
+		pos++;
+		token++;
+		glt = 1;
+	}
+	
 	while (glt || (!glt && *token != CSV_ITEMFEED && *token != CSV_LINEFEED))
 	{
-		if (*token == _T('\0'))
-			break;
+		if(pos == len) break;
+		
+		if (*token == _T('\0')) break;
 
-		if (*token == _T('"'))
-		{
-			pos++;
-			token++;
-			glt = (glt) ? 0 : 1;
-		}
-		else if (*token == _T('\''))
-		{
-			pos++;
-			token++;
-		}
-		else if (*token == _T('\r'))
-		{
-			pos++;
-			token++;
-		}
-		else if (*token == _T('%'))
+		if (*token == _T('"') && *(token+1) == _T('"'))
 		{
 			if (buf)
 			{
-				buf[total] = (int)hexntol(token + 1, 2);
+				buf[total] = *token;
 			}
 			total++;
-			pos += 3;
-			token += 3;
+
+			pos += 2;
+			token += 2;
+		}else if (*token == _T('"'))
+		{
+			pos++;
+			token++;
+			glt = 0;
 		}
 		else
 		{
@@ -143,6 +139,7 @@ int csv_token_decode(const tchar_t* val, tchar_t* buf, int* pdw)
 				buf[total] = *token;
 			}
 			total++;
+			
 			pos++;
 			token++;
 		}
@@ -473,7 +470,6 @@ dword_t xml_utf8_decode(const byte_t* src, tchar_t* dest)
 	return pos;
 }
 
-#if defined(XDK_SUPPORT_ACP) || defined(XDK_SUPPORT_MBCS)
 dword_t xml_gb2312_decode(const byte_t* src, tchar_t* dest)
 {
 	wchar_t pch[ESC_LEN + 1] = { 0 };
@@ -545,7 +541,6 @@ dword_t xml_gb2312_decode(const byte_t* src, tchar_t* dest)
 
 	return pos;
 }
-#endif
 
 dword_t xml_unn_decode(const byte_t* src, tchar_t* dest)
 {
@@ -928,7 +923,6 @@ dword_t xml_utf8_encode(tchar_t ch, byte_t* dest, dword_t max)
 	return 0;
 }
 
-#if defined(XDK_SUPPORT_ACP) || defined(XDK_SUPPORT_MBCS)
 dword_t xml_gb2312_encode(tchar_t ch, byte_t* dest, dword_t max)
 {
 	if (ch == _T('<'))
@@ -990,7 +984,6 @@ dword_t xml_gb2312_encode(tchar_t ch, byte_t* dest, dword_t max)
 
 	return 0;
 }
-#endif
 
 dword_t xml_unn_encode(tchar_t ch, byte_t* dest, dword_t max)
 {

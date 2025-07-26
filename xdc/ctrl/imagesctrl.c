@@ -425,8 +425,7 @@ void noti_images_begin_edit(res_win_t widget)
 	if (ptd->b_lock)
 		return;
 
-	widget_get_xfont(widget, &xf);
-
+	default_xfont(&xf);
 	widget_get_color_mode(widget, &ob);
 
 	_imagesctrl_text_rect(widget, ptd->item, &xr);
@@ -439,7 +438,7 @@ void noti_images_begin_edit(res_win_t widget)
 	widget_set_user_id(ptd->editor, IDC_FIREEDIT);
 	widget_set_owner(ptd->editor, widget);
 
-	widget_set_xfont(ptd->editor, &xf);
+	widget_noti_xfont(ptd->editor, &xf);
 	widget_set_color_mode(ptd->editor, &ob);
 
 	widget_show(ptd->editor, WS_SHOW_NORMAL);
@@ -469,7 +468,7 @@ void noti_images_commit_edit(res_win_t widget)
 	}
 
 	editctrl = ptd->editor;
-	ptd->editor = NULL;
+	ptd->editor = (res_win_t)0;
 
 	widget_destroy(editctrl);
 	widget_set_focus(widget);
@@ -488,7 +487,7 @@ void noti_images_rollback_edit(res_win_t widget)
 	noti_images_owner(widget, NC_IMAGEITEMROLLBACK, ptd->images, ptd->item, NULL);
 
 	editctrl = ptd->editor;
-	ptd->editor = NULL;
+	ptd->editor = (res_win_t)0;
 
 	widget_destroy(editctrl);
 	widget_set_focus(widget);
@@ -514,7 +513,7 @@ void noti_images_reset_scroll(res_win_t widget, bool_t bUpdate)
 	if (widget_is_valid(ptd->vsc))
 	{
 		if (bUpdate)
-			widget_update(ptd->vsc);
+			widget_paint(ptd->vsc);
 		else
 			widget_close(ptd->vsc, 0);
 	}
@@ -522,7 +521,7 @@ void noti_images_reset_scroll(res_win_t widget, bool_t bUpdate)
 	if (widget_is_valid(ptd->hsc))
 	{
 		if (bUpdate)
-			widget_update(ptd->hsc);
+			widget_paint(ptd->hsc);
 		else
 			widget_close(ptd->hsc, 0);
 	}
@@ -623,7 +622,7 @@ void hand_images_wheel(res_win_t widget, bool_t bHorz, int nDelta)
 			}
 			else
 			{
-				widget_update(ptd->vsc);
+				widget_paint(ptd->vsc);
 			}
 		}
 
@@ -635,7 +634,7 @@ void hand_images_wheel(res_win_t widget, bool_t bHorz, int nDelta)
 			}
 			else
 			{
-				widget_update(ptd->hsc);
+				widget_paint(ptd->hsc);
 			}
 		}
 
@@ -760,7 +759,7 @@ void hand_images_lbutton_down(res_win_t widget, const xpoint_t* pxp)
 	}
 	else if (nHint == IMAGE_HINT_NONE)
 	{
-		if (!widget_key_state(widget, KEY_CONTROL))
+		if (!widget_key_state(widget, KS_WITH_CONTROL))
 		{
 			noti_images_reset_check(widget);
 		}
@@ -877,34 +876,26 @@ void hand_images_keydown(res_win_t widget, dword_t ks, int nKey)
 		break;
 	case _T('c'):
 	case _T('C'):
-		if (widget_key_state(widget, KEY_CONTROL))
+		if (widget_key_state(widget, KS_WITH_CONTROL))
 		{
 			_imagesctrl_copy(widget);
 		}
 		break;
 	case _T('x'):
 	case _T('X'):
-		if (widget_key_state(widget, KEY_CONTROL))
+		if (widget_key_state(widget, KS_WITH_CONTROL))
 		{
 			_imagesctrl_cut(widget);
 		}
 		break;
 	case _T('v'):
 	case _T('V'):
-		if (widget_key_state(widget, KEY_CONTROL))
+		if (widget_key_state(widget, KS_WITH_CONTROL))
 		{
 			_imagesctrl_paste(widget);
 		}
 		break;
 	}
-}
-
-void hand_images_char(res_win_t widget, tchar_t ch)
-{
-	images_delta_t* ptd = GETIMAGESDELTA(widget);
-
-	if (!ptd->images)
-		return;
 }
 
 void hand_images_set_focus(res_win_t widget, res_win_t wt)
@@ -956,33 +947,26 @@ void hand_images_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 {
 	images_delta_t* ptd = GETIMAGESDELTA(widget);
 	visual_t rdc;
-	xfont_t xf = { 0 };
-	xbrush_t xb = { 0 };
-	xpen_t xp = { 0 };
-	xcolor_t xc = { 0 };
 	xrect_t xr = { 0 };
 
 	canvas_t canv;
 	const drawing_interface* pif = NULL;
 	drawing_interface ifv = {0};
 
-	if (!ptd->images)
-		return;
+	clr_mod_t clrs;
+	xbrush_t xb;
+	xcolor_t xc;
 
-	widget_get_xfont(widget, &xf);
-	widget_get_xbrush(widget, &xb);
-	widget_get_xpen(widget, &xp);
+	if (!ptd->images) return;
+
+	widget_get_color_mode(widget, &clrs);
+	default_xbrush(&xb);
+	format_xcolor(&clrs.clr_bkg, xb.color);
+	xmem_copy((void*)&xc,(void*)&clrs.clr_frg, sizeof(xcolor_t));
 
 	canv = widget_get_canvas(widget);
 	pif = widget_get_canvas_interface(widget);
 	
-
-	
-	
-	
-	
-	
-
 	widget_get_client_rect(widget, &xr);
 
 	rdc = begin_canvas_paint(canv, dc, xr.w, xr.h);
@@ -1004,17 +988,14 @@ void hand_images_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 		draw_focus_raw(&ifv, &xc, &xr, ALPHA_TRANS);
 	}
 
-	
-
 	end_canvas_paint(canv, dc, pxr);
-	
 }
 
 /**************************************************************************************************/
 
 res_win_t imagesctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, res_win_t wparent)
 {
-	if_event_t ev = { 0 };
+	if_dispatch_t ev = { 0 };
 
 	EVENT_BEGIN_DISPATH(&ev)
 
@@ -1029,7 +1010,6 @@ res_win_t imagesctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t*
 		EVENT_ON_WHEEL(hand_images_wheel)
 
 		EVENT_ON_KEYDOWN(hand_images_keydown)
-		EVENT_ON_CHAR(hand_images_char)
 
 		EVENT_ON_MOUSE_MOVE(hand_images_mouse_move)
 		EVENT_ON_MOUSE_HOVER(hand_images_mouse_hover)
@@ -1132,7 +1112,7 @@ void imagesctrl_redraw(res_win_t widget)
 
 	_imagesctrl_reset_page(widget);
 
-	widget_update(widget);
+	widget_paint(widget);
 }
 
 void imagesctrl_tabskip(res_win_t widget, int nSkip)

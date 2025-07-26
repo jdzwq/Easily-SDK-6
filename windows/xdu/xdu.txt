@@ -1,0 +1,12 @@
+SOURCES= \
+../../../Easily-tmp/windows/xdu/x64/Debug/_if_bitmap_win32.cc \
+../../../Easily-tmp/windows/xdu/x64/Debug/_if_bluetooth_win32.cc \
+../../../Easily-tmp/windows/xdu/x64/Debug/_if_clipboard_win32.cc \
+../../../Easily-tmp/windows/xdu/x64/Debug/_if_context_win32.cc \
+../../../Easily-tmp/windows/xdu/x64/Debug/_if_gdiplus_win32.cc \
+../../../Easily-tmp/windows/xdu/x64/Debug/_if_printer_win32.cc \
+../../../Easily-tmp/windows/xdu/x64/Debug/_if_region_win32.cc \
+../../../Easily-tmp/windows/xdu/x64/Debug/_if_shell_win32.cc \
+../../../Easily-tmp/windows/xdu/x64/Debug/_if_widget_win32.cc \
+../../../Easily-tmp/windows/xdu/x64/Debug/xduinf.c \
+../../../Easily-tmp/windows/xdu/x64/Debug/xduutil.c \

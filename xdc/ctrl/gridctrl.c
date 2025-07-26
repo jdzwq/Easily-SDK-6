@@ -923,7 +923,7 @@ void noti_grid_begin_edit(res_win_t widget)
 		return;
 	}
 
-	widget_get_xfont(widget, &xf);
+	default_xfont(&xf);
 	parse_xfont_from_style(&xf, get_col_style_ptr(ptd->col));
 	widget_get_color_mode(widget, &ob);
 
@@ -942,7 +942,7 @@ void noti_grid_begin_edit(res_win_t widget)
 		widget_set_user_id(ptd->editor, IDC_FIREEDIT);
 		widget_set_owner(ptd->editor, widget);
 
-		widget_set_xfont(ptd->editor, &xf);
+		widget_noti_xfont(ptd->editor, &xf);
 		widget_set_color_mode(ptd->editor, &ob);
 		widget_show(ptd->editor, WS_SHOW_NORMAL);
 		widget_set_focus(ptd->editor);
@@ -961,7 +961,7 @@ void noti_grid_begin_edit(res_win_t widget)
 		widget_set_user_id(ptd->editor, IDC_FIRENUM);
 		widget_set_owner(ptd->editor, widget);
 
-		widget_set_xfont(ptd->editor, &xf);
+		widget_noti_xfont(ptd->editor, &xf);
 		widget_set_color_mode(ptd->editor, &ob);
 		widget_show(ptd->editor, WS_SHOW_NORMAL);
 		widget_set_focus(ptd->editor);
@@ -980,7 +980,7 @@ void noti_grid_begin_edit(res_win_t widget)
 		widget_set_user_id(ptd->editor, IDC_FIREDATE);
 		widget_set_owner(ptd->editor, widget);
 
-		widget_set_xfont(ptd->editor, &xf);
+		widget_noti_xfont(ptd->editor, &xf);
 		widget_set_color_mode(ptd->editor, &ob);
 		widget_show(ptd->editor, WS_SHOW_NORMAL);
 		widget_set_focus(ptd->editor);
@@ -999,7 +999,7 @@ void noti_grid_begin_edit(res_win_t widget)
 		widget_set_user_id(ptd->editor, IDC_FIRETIME);
 		widget_set_owner(ptd->editor, widget);
 
-		widget_set_xfont(ptd->editor, &xf);
+		widget_noti_xfont(ptd->editor, &xf);
 		widget_set_color_mode(ptd->editor, &ob);
 		widget_show(ptd->editor, WS_SHOW_NORMAL);
 		widget_set_focus(ptd->editor);
@@ -1022,7 +1022,7 @@ void noti_grid_begin_edit(res_win_t widget)
 		widget_set_user_id(ptd->editor, IDC_FIRELIST);
 		widget_set_owner(ptd->editor, widget);
 
-		widget_set_xfont(ptd->editor, &xf);
+		widget_noti_xfont(ptd->editor, &xf);
 		widget_set_color_mode(ptd->editor, &ob);
 		widget_show(ptd->editor, WS_SHOW_NORMAL);
 		widget_set_focus(ptd->editor);
@@ -1042,7 +1042,7 @@ void noti_grid_begin_edit(res_win_t widget)
 		widget_set_user_id(ptd->editor, IDC_FIREWORDS);
 		widget_set_owner(ptd->editor, widget);
 
-		widget_set_xfont(ptd->editor, &xf);
+		widget_noti_xfont(ptd->editor, &xf);
 		widget_set_color_mode(ptd->editor, &ob);
 		widget_show(ptd->editor, WS_SHOW_NORMAL);
 		widget_set_focus(ptd->editor);
@@ -1065,7 +1065,7 @@ void noti_grid_begin_edit(res_win_t widget)
 		widget_set_user_id(ptd->editor, IDC_FIREGRID);
 		widget_set_owner(ptd->editor, widget);
 
-		widget_set_xfont(ptd->editor, &xf);
+		widget_noti_xfont(ptd->editor, &xf);
 		widget_set_color_mode(ptd->editor, &ob);
 		widget_show(ptd->editor, WS_SHOW_NORMAL);
 		widget_set_focus(ptd->editor);
@@ -1163,7 +1163,7 @@ void noti_grid_commit_edit(res_win_t widget)
 	}
 
 	editctrl = ptd->editor;
-	ptd->editor = NULL;
+	ptd->editor = (res_win_t)0;
 
 	widget_destroy(editctrl);
 	widget_set_focus(widget);
@@ -1245,7 +1245,7 @@ void noti_grid_rollback_edit(res_win_t widget)
 	}
 
 	editctrl = ptd->editor;
-	ptd->editor = NULL;
+	ptd->editor = (res_win_t)0;
 
 	widget_destroy(editctrl);
 	widget_set_focus(widget);
@@ -1271,7 +1271,7 @@ void noti_grid_reset_scroll(res_win_t widget, bool_t bUpdate)
 	if (widget_is_valid(ptd->vsc))
 	{
 		if (bUpdate)
-			widget_update(ptd->vsc);
+			widget_paint(ptd->vsc);
 		else
 			widget_close(ptd->vsc, 0);
 	}
@@ -1279,7 +1279,7 @@ void noti_grid_reset_scroll(res_win_t widget, bool_t bUpdate)
 	if (widget_is_valid(ptd->hsc))
 	{
 		if (bUpdate)
-			widget_update(ptd->hsc);
+			widget_paint(ptd->hsc);
 		else
 			widget_close(ptd->hsc, 0);
 	}
@@ -1427,7 +1427,7 @@ void hand_grid_wheel(res_win_t widget, bool_t bHorz, int nDelta)
 			}
 			else
 			{
-				widget_update(ptd->vsc);
+				widget_paint(ptd->vsc);
 			}
 		}
 
@@ -1439,7 +1439,7 @@ void hand_grid_wheel(res_win_t widget, bool_t bHorz, int nDelta)
 			}
 			else
 			{
-				widget_update(ptd->hsc);
+				widget_paint(ptd->hsc);
 			}
 		}
 
@@ -1630,7 +1630,7 @@ void hand_grid_lbutton_down(res_win_t widget, const xpoint_t* pxp)
 	}
 	else if (nHint == GRID_HINT_COLBAR)
 	{
-		if (widget_key_state(widget, KEY_CONTROL))
+		if (widget_key_state(widget, KS_WITH_CONTROL))
 		{
 			if (grid_is_design(ptd->grid))
 				noti_grid_col_selected(widget, clk);
@@ -1640,7 +1640,7 @@ void hand_grid_lbutton_down(res_win_t widget, const xpoint_t* pxp)
 	}
 	else if (nHint == GRID_HINT_NONE)
 	{
-		if (!widget_key_state(widget, KEY_CONTROL))
+		if (!widget_key_state(widget, KS_WITH_CONTROL))
 		{
 			if(grid_is_design(ptd->grid))
 				noti_grid_reset_select(widget);
@@ -1774,22 +1774,22 @@ void hand_grid_keydown(res_win_t widget, dword_t ks, int nKey)
 
 	if (b_design)
 	{
-		if ((nKey == _T('z') || nKey == _T('Z')) && widget_key_state(widget, KEY_CONTROL))
+		if ((nKey == _T('z') || nKey == _T('Z')) && widget_key_state(widget, KS_WITH_CONTROL))
 		{
 			hand_grid_undo(widget);
 			return;
 		}
-		else if ((nKey == _T('c') || nKey == _T('C')) && widget_key_state(widget, KEY_CONTROL))
+		else if ((nKey == _T('c') || nKey == _T('C')) && widget_key_state(widget, KS_WITH_CONTROL))
 		{
 			hand_grid_copy(widget);
 			return;
 		}
-		else if ((nKey == _T('x') || nKey == _T('X')) && widget_key_state(widget, KEY_CONTROL))
+		else if ((nKey == _T('x') || nKey == _T('X')) && widget_key_state(widget, KS_WITH_CONTROL))
 		{
 			hand_grid_cut(widget);
 			return;
 		}
-		else if ((nKey == _T('v') || nKey == _T('V')) && widget_key_state(widget, KEY_CONTROL))
+		else if ((nKey == _T('v') || nKey == _T('V')) && widget_key_state(widget, KS_WITH_CONTROL))
 		{
 			hand_grid_paste(widget);
 			return;
@@ -1840,7 +1840,7 @@ void hand_grid_keydown(res_win_t widget, dword_t ks, int nKey)
 	}
 }
 
-void hand_grid_char(res_win_t widget, tchar_t nChar)
+void hand_grid_wchar(res_win_t widget, wchar_t nChar)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 
@@ -1854,7 +1854,7 @@ void hand_grid_char(res_win_t widget, tchar_t nChar)
 
 	if (IS_VISIBLE_CHAR(nChar) && widget_is_valid(ptd->editor))
 	{
-		widget_post_char(ptd->editor, nChar);
+		widget_post_wchar(ptd->editor, nChar);
 	}
 }
 
@@ -1918,10 +1918,6 @@ void hand_grid_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 	visual_t rdc;
 	xrect_t xr;
-	xfont_t xf = { 0 };
-	xbrush_t xb = { 0 };
-	xpen_t xp = { 0 };
-	xcolor_t xc = { 0 };
 	link_t_ptr clk;
 	bool_t b_design;
 
@@ -1929,12 +1925,16 @@ void hand_grid_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 	const drawing_interface* pif = NULL;
 	drawing_interface ifv = {0};
 
-	if (!ptd->grid)
-		return;
+	clr_mod_t clrs;
+	xbrush_t xb;
+	xcolor_t xc;
 
-	widget_get_xfont(widget, &xf);
-	widget_get_xbrush(widget, &xb);
-	widget_get_xpen(widget, &xp);
+	if (!ptd->grid) return;
+
+	widget_get_color_mode(widget, &clrs);
+	default_xbrush(&xb);
+	format_xcolor(&clrs.clr_bkg, xb.color);
+	xmem_copy((void*)&xc,(void*)&clrs.clr_frg, sizeof(xcolor_t));
 
 	canv = widget_get_canvas(widget);
 	pif = widget_get_canvas_interface(widget);
@@ -1946,20 +1946,18 @@ void hand_grid_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 	widget_get_view_rect(widget, (viewbox_t*)(&ifv.rect));
 
 	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
-
+	
 	b_design = grid_is_design(ptd->grid);
 
 	if (widget_can_paging(widget))
 	{
 		if (b_design)
 		{
-			parse_xcolor(&xc, xp.color);
 			lighten_xcolor(&xc, DEF_SOFT_DARKEN);
 			draw_ruler(pif, &xc, (const xrect_t*)&(pif->rect));
 		}
 		else
 		{
-			xmem_copy((void*)&xc, (void*)&(pif->mode.clr_frg), sizeof(xcolor_t));
 			draw_corner(pif, &xc, (const xrect_t*)&(pif->rect));
 		}
 	}
@@ -2021,13 +2019,12 @@ void hand_grid_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 	}
 
 	end_canvas_paint(canv, dc, pxr);
-	
 }
 
 /******************************************************************************************/
 res_win_t gridctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, res_win_t wparent)
 {
-	if_event_t ev = { 0 };
+	if_dispatch_t ev = { 0 };
 
 	EVENT_BEGIN_DISPATH(&ev)
 
@@ -2042,7 +2039,7 @@ res_win_t gridctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* p
 		EVENT_ON_WHEEL(hand_grid_wheel)
 
 		EVENT_ON_KEYDOWN(hand_grid_keydown)
-		EVENT_ON_CHAR(hand_grid_char)
+		EVENT_ON_WCHAR(hand_grid_wchar)
 
 		EVENT_ON_MOUSE_MOVE(hand_grid_mouse_move)
 		EVENT_ON_MOUSE_HOVER(hand_grid_mouse_hover)
@@ -2188,7 +2185,7 @@ void gridctrl_redraw(res_win_t widget, bool_t bCalc)
 
 	_gridctrl_reset_page(widget);
 
-	widget_update(widget);
+	widget_paint(widget);
 }
 
 void gridctrl_tabskip(res_win_t widget, int dir)

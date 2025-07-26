@@ -210,12 +210,12 @@ dword_t _socket_wait(res_file_t so, dword_t msk, int ms)
 
 bool_t _socket_bind(res_file_t so, res_addr_t saddr, int slen)
 {
-	return (bind(so, saddr, slen) == 0) ? 1 : 0;
+	return (bind(so, (struct sockaddr*)saddr, slen) == 0) ? 1 : 0;
 }
 
 bool_t _socket_connect(res_file_t so, res_addr_t saddr, int slen)
 {
-	return (connect(so, saddr, slen) == 0) ? 1 : 0;
+	return (connect(so, (struct sockaddr*)saddr, slen) == 0) ? 1 : 0;
 }
 
 bool_t _socket_sendto(res_file_t so, res_addr_t saddr, int alen, void* buf, dword_t size, async_t* pb)
@@ -232,9 +232,9 @@ bool_t _socket_sendto(res_file_t so, res_addr_t saddr, int alen, void* buf, dwor
         ev.events = EPOLLOUT;
         ev.data.fd = so; 
 
-        epoll_ctl(pb->port, EPOLL_CTL_ADD, so, &ev); 
-        rs = epoll_wait(pb->port, &ev, 1, (int)pb->timo);
-        epoll_ctl(pb->port, EPOLL_CTL_DEL, so, &ev); 
+        epoll_ctl(*((int*)pb->port), EPOLL_CTL_ADD, so, &ev); 
+        rs = epoll_wait(*((int*)pb->port), &ev, 1, (int)pb->timo);
+        epoll_ctl(*((int*)pb->port), EPOLL_CTL_DEL, so, &ev); 
         
         if(rs < 0)
         {
@@ -308,9 +308,9 @@ bool_t _socket_recvfrom(res_file_t so, res_addr_t saddr, int* plen, void* buf, d
         ev.events = EPOLLIN;
         ev.data.fd = so; 
 
-        epoll_ctl(pb->port, EPOLL_CTL_ADD, so, &ev); 
-        rs = epoll_wait(pb->port, &ev, 1, (int)pb->timo);
-        epoll_ctl(pb->port, EPOLL_CTL_DEL, so, &ev); 
+        epoll_ctl(*((int*)pb->port), EPOLL_CTL_ADD, so, &ev); 
+        rs = epoll_wait(*((int*)pb->port), &ev, 1, (int)pb->timo);
+        epoll_ctl(*((int*)pb->port), EPOLL_CTL_DEL, so, &ev); 
 
         if(rs < 0)
         {
@@ -393,9 +393,9 @@ bool_t _socket_send(res_file_t so, void* buf, dword_t size, async_t* pb)
         ev.events = EPOLLOUT;
         ev.data.fd = so; 
 
-        epoll_ctl(pb->port, EPOLL_CTL_ADD, so, &ev); 
-        rs = epoll_wait(pb->port, &ev, 1, (int)pb->timo);
-        epoll_ctl(pb->port, EPOLL_CTL_DEL, so, &ev); 
+        epoll_ctl(*((int*)pb->port), EPOLL_CTL_ADD, so, &ev); 
+        rs = epoll_wait(*((int*)pb->port), &ev, 1, (int)pb->timo);
+        epoll_ctl(*((int*)pb->port), EPOLL_CTL_DEL, so, &ev); 
 
         if(rs < 0)
         {
@@ -470,9 +470,9 @@ bool_t _socket_recv(res_file_t so, void* buf, dword_t size, async_t* pb)
         ev.events = EPOLLIN;
         ev.data.fd = so; 
 
-        epoll_ctl(pb->port, EPOLL_CTL_ADD, so, &ev);      
-        rs = epoll_wait(pb->port, &ev, 1, (int)pb->timo);
-        epoll_ctl(pb->port, EPOLL_CTL_DEL, so, &ev); 
+        epoll_ctl(*((int*)pb->port), EPOLL_CTL_ADD, so, &ev);      
+        rs = epoll_wait(*((int*)pb->port), &ev, 1, (int)pb->timo);
+        epoll_ctl(*((int*)pb->port), EPOLL_CTL_DEL, so, &ev); 
 
         if(rs < 0)
         {
@@ -651,9 +651,9 @@ res_file_t _socket_accept(res_file_t so, res_addr_t saddr, int *plen, async_t* p
         ev.events = EPOLLIN;
         ev.data.fd = so; 
 
-        epoll_ctl(pb->port, EPOLL_CTL_ADD, so, &(ev)); 
-        rs = epoll_wait(pb->port, &ev, 1, (int)pb->timo);
-        epoll_ctl(pb->port, EPOLL_CTL_DEL, so, &ev); 
+        epoll_ctl(*((int*)pb->port), EPOLL_CTL_ADD, so, &(ev)); 
+        rs = epoll_wait(*((int*)pb->port), &ev, 1, (int)pb->timo);
+        epoll_ctl(*((int*)pb->port), EPOLL_CTL_DEL, so, &ev); 
 
         if(rs <= 0)
         {
@@ -677,7 +677,7 @@ res_file_t _socket_accept(res_file_t so, res_addr_t saddr, int *plen, async_t* p
         }
     }
     
-    po = accept(so, saddr, (socklen_t*)&nlen);
+    po = accept(so, (struct sockaddr*)saddr, (socklen_t*)&nlen);
     if(po < 0)
     {
         *plen = 0;

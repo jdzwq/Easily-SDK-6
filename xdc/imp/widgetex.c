@@ -146,7 +146,7 @@ void  widget_menu_item_rect(res_win_t wt, int iid, xrect_t* pxr)
 	xrItem.y = xr.y;
 	xrItem.h = xr.h;
 
-	widget_get_xfont(wt, &xf);
+	default_widget_xfont(&xf);
 
 	rdc = widget_window_ctx(wt);
 
@@ -212,7 +212,7 @@ link_t_ptr  widget_detach_splitor(res_win_t wt)
 
 	splitor = pwt->splitor.split;
 	pwt->splitor.split = NULL;
-	pwt->splitor.widget = NULL;
+	pwt->splitor.widget = (res_win_t)0;
 
 	return splitor;
 }

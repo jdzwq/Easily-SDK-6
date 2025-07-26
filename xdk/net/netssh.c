@@ -27,9 +27,9 @@ LICENSE.GPL3 for more details.
 #include "netssh.h"
 
 #include "../xdknet.h"
-#include "../xdkimp.h"
 #include "../xdkoem.h"
 #include "../xdkstd.h"
+#include "../xdkobj.h"
 
 #if defined(XDK_SUPPORT_SOCK)
 
@@ -1329,7 +1329,7 @@ static int _ssh_recv_banner(ssh_context* pssh)
 static dword_t _ssh_format_kexinit(ssh_context* pssh, byte_t* buf, dword_t max)
 {
 	dword_t n, total = 0;
-	schar_t** nametable;
+	const schar_t** nametable;
 	int i;
 
 	if (pssh->type == SSH_TYPE_SERVER)

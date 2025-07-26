@@ -34,6 +34,8 @@ LICENSE.GPL3 for more details.
 typedef struct _pushbox_delta_t{
 	tchar_t* sz_text;
 	bool_t b_check;
+
+	xfont_t xf;
 }pushbox_delta_t;
 
 #define GETPUSHBOXDELTA(ph) 	(pushbox_delta_t*)widget_get_user_delta(ph)
@@ -59,6 +61,8 @@ int hand_pushbox_create(res_win_t widget, void* data)
 
 	ptd = (pushbox_delta_t*)xmem_alloc(sizeof(pushbox_delta_t));
 	xmem_zero((void*)ptd, sizeof(pushbox_delta_t));
+
+	default_widget_xfont(&ptd->xf);
 
 	SETPUSHBOXDELTA(widget, ptd);
 
@@ -138,6 +142,13 @@ void hand_pushbox_size(res_win_t widget, int code, const xsize_t* prs)
 	widget_erase(widget, NULL);
 }
 
+void hand_pushbox_xfont(res_win_t widget, const xfont_t* pxf)
+{
+	pushbox_delta_t* ptd = GETPUSHBOXDELTA(widget);
+	
+	xmem_copy((void*)&ptd->xf, (void*)pxf, sizeof(xfont_t));
+}
+
 void hand_pushbox_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 {
 	pushbox_delta_t* ptd = GETPUSHBOXDELTA(widget);
@@ -146,23 +157,25 @@ void hand_pushbox_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 	dword_t ws;
 	xrect_t xr,xr_box;
 
-	xfont_t xf = { 0 };
-	xface_t xa = { 0 };
-	xbrush_t xb = { 0 };
-	xpen_t xp = { 0 };
-	xcolor_t xc = { 0 };
-	ximage_t xi = { 0 };
+	clr_mod_t clrs;
+	xcolor_t xc;
+	xface_t xa;
+	xbrush_t xb;
+	xpen_t xp;
+	ximage_t xi;
 
 	canvas_t canv;
 	const drawing_interface* pif = NULL;
 	drawing_interface ifv = {0};
 
-	widget_get_xfont(widget, &xf);
-	widget_get_xface(widget, &xa);
-	widget_get_xbrush(widget, &xb);
-	widget_get_xpen(widget, &xp);
-	widget_get_iconic(widget, &xc);
+	widget_get_color_mode(widget, &clrs);
+	default_xpen(&xp);
+	format_xcolor(&clrs.clr_frg, xp.color);
+	default_xbrush(&xb);
+	format_xcolor(&clrs.clr_bkg, xb.color);
 
+	xmem_copy((void*)&xc, (void*)&clrs.clr_ico, sizeof(xcolor_t));
+	default_xface(&xa);
 	xscpy(xa.line_align, GDI_ATTR_TEXT_ALIGN_CENTER);
 
 	widget_get_client_rect(widget, &xr);
@@ -170,7 +183,6 @@ void hand_pushbox_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 	canv = widget_get_canvas(widget);
 	pif = widget_get_canvas_interface(widget);
 	
-
 	rdc = begin_canvas_paint(canv, dc, xr.w, xr.h);
 
 	get_visual_interface(rdc, &ifv);
@@ -198,7 +210,7 @@ void hand_pushbox_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 		xr_box.fh = pif->rect.fh;
 
 		xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_NEAR);
-		(pif->pf_draw_text)(pif->ctx, &xf, &xa, &xr_box, ptd->sz_text, -1);
+		(pif->pf_draw_text)(pif->ctx, &ptd->xf, &xa, &xr_box, ptd->sz_text, -1);
 	}
 	else if (ws & WD_PUSHBOX_ICON)
 	{
@@ -279,19 +291,16 @@ void hand_pushbox_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 		xr_box.fh = pif->rect.fh;
 
 		xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_CENTER);
-		(pif->pf_draw_text)(pif->ctx, &xf, &xa, &xr_box, ptd->sz_text, -1);
+		(pif->pf_draw_text)(pif->ctx, &ptd->xf, &xa, &xr_box, ptd->sz_text, -1);
 	}
 
-	
-
 	end_canvas_paint(canv, dc, pxr);
-	
 }
 
 /***************************************************************************************/
 res_win_t pushbox_create(res_win_t widget, dword_t style, const xrect_t* pxr)
 {
-	if_event_t ev = { 0 };
+	if_dispatch_t ev = { 0 };
 
 	EVENT_BEGIN_DISPATH(&ev)
 
@@ -304,6 +313,8 @@ res_win_t pushbox_create(res_win_t widget, dword_t style, const xrect_t* pxr)
 
 		EVENT_ON_LBUTTON_DOWN(hand_pushbox_lbutton_down)
 		EVENT_ON_LBUTTON_UP(hand_pushbox_lbutton_up)
+
+		EVENT_ON_XFONT(hand_pushbox_xfont)
 
 		EVENT_ON_NC_IMPLEMENT
 
@@ -351,17 +362,14 @@ void pushbox_set_text(res_win_t widget, const tchar_t* text, int len)
 void pushbox_popup_size(res_win_t widget, xsize_t* pxs)
 {
 	pushbox_delta_t* ptd = GETPUSHBOXDELTA(widget);
-	xfont_t xf = { 0 };
 	xsize_t xs;
 	const drawing_interface* pif = NULL;
 
 	XDK_ASSERT(ptd != NULL);
 
-	widget_get_xfont(widget, &xf);
-
 	pif = widget_get_canvas_interface(widget);
 
-	(pif->pf_text_size)(pif->ctx, &xf, ptd->sz_text, -1, &xs);
+	(pif->pf_text_size)(pif->ctx, &ptd->xf, ptd->sz_text, -1, &xs);
 
 	if (xs.fw < xs.fh)
 		xs.fw = xs.fh;

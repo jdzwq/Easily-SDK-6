@@ -53,17 +53,16 @@ LICENSE.GPL3 for more details.
 #include "linux/_xdk_linux.h"
 #endif
 
-#ifndef BYTE_ORDER
-
 #define	LIT_ENDIAN	1234	/* least-significant byte first (vax, pc) */
 #define	BIG_ENDIAN	4321	/* most-significant byte first (IBM, net) */
 #define	PDP_ENDIAN	3412	/* LSB first in word, MSW first in int (pdp)*/
 
-#if defined(_WIN32) || defined(_WIN64) || defined(__i386__) || defined(__arm__) || defined(__x86_64__) || defined(__amd64__) || defined(__aarch64__) ||\
+#if defined(_WIN32) || defined(_WIN64) || defined(__i386__) || defined(__x86_64__) || defined(__amd64__) || \
+   defined(__arm__) || defined(__aarch64__) || \
    defined(vax) || defined(ns32000) || defined(sun386) || \
    defined(MIPSEL) || defined(_MIPSEL) || defined(BIT_ZERO_ON_RIGHT) || \
    defined(__alpha__) || defined(__alpha)
-#define BYTE_ORDER    LIT_ENDIAN
+#define ACP_BYTE_ORDER    LIT_ENDIAN
 #endif
 
 #if defined(sel) || defined(pyr) || defined(mc68000) || defined(sparc) || \
@@ -73,11 +72,8 @@ LICENSE.GPL3 for more details.
     defined(__hppa) || defined(__hp9000) || \
     defined(__hp9000s300) || defined(__hp9000s700) || \
     defined (BIT_ZERO_ON_LEFT) || defined(m68k) || defined(__sparc)
-#define BYTE_ORDER	BIG_ENDIAN
+#define ACP_BYTE_ORDER	BIG_ENDIAN
 #endif
-
-#endif /* BYTE_ORDER */
-
 
 #ifndef LIT_ENDIAN
 #define LIT_ENDIAN	__LITTLE_ENDIAN
@@ -122,14 +118,11 @@ LICENSE.GPL3 for more details.
 #endif
 #endif
 
-#ifndef CHAR_BIT
-#define CHAR_BIT  __CHAR_BIT__
-#endif
-
-
 #ifdef _OS_64
-#define PAGE_INDI		8
+#define PAGE_INDI	    8
+#define PAGE_ALIGN      64
 #else
+#define PAGE_ALIGN      32
 #define PAGE_INDI		4
 #endif
 
@@ -170,8 +163,6 @@ LICENSE.GPL3 for more details.
 #include "enc/encode.h"
 #include "mob/mobdef.h"
 #include "dob/dobdef.h"
-#include "gob/gobdef.h"
-#include "gob/gobattr.h"
 
 typedef struct _handle_head{
 	byte_t tag; // object handle type
@@ -180,60 +171,26 @@ typedef struct _handle_head{
 
 #define _HANDLE_UNKNOWN		0x00
 
-/*driver type*/
-#define _DRIVER_MONOCHROME	0x01
-#define _DRIVER_GRAYSCALE	0x02
-#define _DRIVER_COLOR555	0x03
-#define _DRIVER_COLOR888	0x04
-#define _DRIVER_COLOR8888	0x05
-typedef struct _handle_head	 *driver_t;
-
-/*device type*/
-#define _DEVICE_BITMAP		0x10
-#define _DEVICE_PIXMAP		0x11
-typedef struct _handle_head	 *device_t;
-
-/*visual type*/
-#define _VISUAL_DISPLAY		0x20
-#define _VISUAL_PRINTER		0x21
-#define _VISUAL_SCRIPT		0x22
-#define _VISUAL_MEMORY		0x23
-typedef struct _handle_head	 *visual_t;
-
-/*canvas type*/
-#define _CANVAS_DISPLAY		0x2E
-#define _CANVAS_PRINTER		0x2F
-typedef struct _handle_head *canvas_t;
-
 /*network type*/
-#define _HANDLE_BLOCK		0x30
-#define _HANDLE_INET		0x31
-#define _HANDLE_CONS		0x32
-#define _HANDLE_COMM		0x33
-#define _HANDLE_PIPE		0x34
-#define _HANDLE_SHARE		0x35
-#define _HANDLE_CACHE		0x36
-#define _HANDLE_UNCF		0x37
-#define _HANDLE_UDP			0x38
-#define _HANDLE_TCP			0x39
-#define _HANDLE_SSL			0x3A
-#define _HANDLE_SSH			0x3B
-#define _HANDLE_DTLS		0x3C
-#define _HANDLE_TFTP		0x3D
-#define _HANDLE_MQTT		0x3E
-#define _HANDLE_COAP		0x3F
+#define _HANDLE_BLOCK		0x01
+#define _HANDLE_INET		0x02
+#define _HANDLE_CONS		0x03
+#define _HANDLE_COMM		0x04
+#define _HANDLE_PIPE		0x05
+#define _HANDLE_SHARE		0x06
+#define _HANDLE_CACHE		0x07
+#define _HANDLE_UNCF		0x08
+#define _HANDLE_UDP			0x10
+#define _HANDLE_TCP			0x11
+#define _HANDLE_SSL			0x12
+#define _HANDLE_SSH			0x13
+#define _HANDLE_DTLS		0x14
+#define _HANDLE_TFTP		0x15
+#define _HANDLE_MQTT		0x16
+#define _HANDLE_COAP		0x17
 typedef struct _handle_head *xhand_t;
 
-#define _HANDLE_GLYPH		0xF1
-typedef struct _handle_head	*glyph_t;
-
-#define _HANDLE_FONT		0xF2
-typedef struct _handle_head	 *font_t;
-
-#define _HANDLE_BITMAP		0xF3
-typedef struct _handle_head	 *bitmap_t;
-
-#define _HANDLE_STREAM		0xF4
+#define _HANDLE_STREAM		0x1F
 typedef struct _handle_head *stream_t;
 
 
@@ -264,29 +221,7 @@ typedef struct _handle_head *stream_t;
 #define PF_TIMERFUNC	GNU_TIMER_PROC
 #endif
 
-
 #define NOP		((void*)0)
-
-#define UNIT_PT				_T("pt")
-#define UNIT_MM				_T("mm")
-
-#define PAPER_A4_WIDTH			210.0f
-#define PAPER_A4_HEIGHT			297.0f
-
-#define PAPER_A5_WIDTH			148.0f
-#define PAPER_A5_HEIGHT			210.0f
-
-#define PAPER_LETTER_WIDTH		210.0f
-#define PAPER_LETTER_HEIGHT		280.0f
-
-#define PAPER_MIN_WIDTH			2.6f
-#define PAPER_MIN_HEIGHT		2.6f
-
-#define PAPER_MAX_WIDTH			280.0f
-#define PAPER_MAX_HEIGHT		558.7f
-
-#define DEF_PAPER_WIDTH			PAPER_A4_WIDTH
-#define DEF_PAPER_HEIGHT		PAPER_A4_HEIGHT
 
 #if defined(_UNICODE) || defined(UNICODE)
 #define _tprintf    wprintf

@@ -31,8 +31,6 @@ LICENSE.GPL3 for more details.
 
 #include "integerarray.h"
 
-#include "../xdkimp.h"
-#include "../xdkoem.h"
 #include "../xdkstd.h"
 
 int** alloc_integer_array(void)
@@ -84,7 +82,7 @@ void insert_integer(int** sa, int index, int val)
 
 	XDK_ASSERT(index >= 0 && index <= size);
 
-	*sa = xmem_realloc(*sa, (size + 1) * sizeof(int));
+	*sa = (int*)xmem_realloc((void*)*sa, (size + 1) * sizeof(int));
 
 	xmem_move((void*)(*sa + index), ((size - index) * sizeof(int)), (int)sizeof(int));
 	xmem_copy((void*)(*sa + index), (void*)&val, sizeof(int));
@@ -102,35 +100,7 @@ void delete_integer(int** sa, int index)
 
 	xmem_move((void*)(*sa + index + 1), ((size - index - 1) * sizeof(int)), -(int)sizeof(int));
 
-	*sa = xmem_realloc(*sa, (size - 1) * sizeof(int));
+	*sa = (int*)xmem_realloc((void*)*sa, (size - 1) * sizeof(int));
 
 	*(long*)(sa + 1) = (size - 1);
 }
-
-
-#if defined(XDK_SUPPORT_TEST)
-
-void test_integer_array()
-{
-	int** sa = alloc_integer_array();
-	int i;
-
-	for (i = 0; i < 10; i++)
-	{
-		insert_integer(sa, i, i);
-	}
-
-	for (i = 0; i < 10; i++)
-	{
-		_tprintf(_T("%d\n"), get_integer(sa, i));
-	}
-
-	while (get_integer_array_size(sa))
-	{
-		delete_integer(sa, 0);
-	}
-
-	free_integer_array(sa);
-}
-
-#endif

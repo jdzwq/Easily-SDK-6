@@ -95,7 +95,7 @@ bool_t _file_write(res_file_t fh, void* buf, dword_t size, async_t* pb)
     
         EV_SET(&(ev), fh, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, 0);
         
-        rs = kevent(pb->port, &ev, 1, &kv, 1, &(tp));
+        rs = kevent(*((int*)pb->port), &ev, 1, &kv, 1, &(tp));
         if(rs < 0)
         {
             *pcb = 0;
@@ -179,7 +179,7 @@ bool_t _file_read(res_file_t fh, void* buf, dword_t size, async_t* pb)
         
         EV_SET(&(ev), fh, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, 0);
         
-        rs = kevent(pb->port, &(ev), 1, &kv, 1, &(tp));
+        rs = kevent(*((int*)pb->port), &(ev), 1, &kv, 1, &(tp));
         if(rs < 0)
         {
             *pcb = 0;
@@ -419,7 +419,7 @@ bool_t _file_info(const tchar_t* fname, file_info_t* pxf)
 {
     struct stat st = {0};
     struct tm *p;
-    char* token;
+    const char* token;
     
     if(stat(fname, &st) < 0)
         return 0;

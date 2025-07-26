@@ -27,9 +27,9 @@ LICENSE.GPL3 for more details.
 #include "srvtcp.h"
 
 #include "../xdknet.h"
-#include "../xdkimp.h"
 #include "../xdkoem.h"
 #include "../xdkstd.h"
+#include "../xdkobj.h"
 
 typedef struct _tcp_accept_t{
 	res_file_t so;

@@ -99,7 +99,7 @@ void noti_plot_reset_scroll(res_win_t widget, bool_t bUpdate)
 	if (widget_is_valid(ptd->vsc))
 	{
 		if (bUpdate)
-			widget_update(ptd->vsc);
+			widget_paint(ptd->vsc);
 		else
 			widget_close(ptd->vsc, 0);
 	}
@@ -107,7 +107,7 @@ void noti_plot_reset_scroll(res_win_t widget, bool_t bUpdate)
 	if (widget_is_valid(ptd->hsc))
 	{
 		if (bUpdate)
-			widget_update(ptd->hsc);
+			widget_paint(ptd->hsc);
 		else
 			widget_close(ptd->hsc, 0);
 	}
@@ -250,7 +250,7 @@ void hand_plot_wheel(res_win_t widget, bool_t bHorz, int nDelta)
 			}
 			else
 			{
-				widget_update(ptd->vsc);
+				widget_paint(ptd->vsc);
 			}
 		}
 
@@ -262,7 +262,7 @@ void hand_plot_wheel(res_win_t widget, bool_t bHorz, int nDelta)
 			}
 			else
 			{
-				widget_update(ptd->hsc);
+				widget_paint(ptd->hsc);
 			}
 		}
 
@@ -281,33 +281,26 @@ void hand_plot_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 {
 	plot_delta_t* ptd = GETPLOTDELTA(widget);
 	visual_t rdc;
-	xfont_t xf = { 0 };
-	xbrush_t xb = { 0 };
-	xpen_t xp = { 0 };
-	xcolor_t xc = { 0 };
 	xrect_t xr = { 0 };
 
 	canvas_t canv;
 	const drawing_interface* pif = NULL;
 	drawing_interface ifv = {0};
 
-	if (!ptd->plot)
-		return;
+	clr_mod_t clrs;
+	xbrush_t xb = { 0 };
+	xcolor_t xc = { 0 };
 
-	widget_get_xfont(widget, &xf);
-	widget_get_xbrush(widget, &xb);
-	widget_get_xpen(widget, &xp);
+	if (!ptd->plot) return;
+
+	widget_get_color_mode(widget, &clrs);
+	default_xbrush(&xb);
+	format_xcolor(&clrs.clr_bkg, xb.color);
+	xmem_copy((void*)&xc, (void*)&clrs.clr_frg, sizeof(xcolor_t));
 
 	canv = widget_get_canvas(widget);
 	pif = widget_get_canvas_interface(widget);
 	
-
-	
-	
-	
-	
-	
-
 	widget_get_client_rect(widget, &xr);
 
 	rdc = begin_canvas_paint(canv, dc, xr.w, xr.h);
@@ -318,7 +311,6 @@ void hand_plot_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 
 	if (widget_can_paging(widget))
 	{
-		parse_xcolor(&xc, xp.color);
 		lighten_xcolor(&xc, DEF_HARD_DARKEN);
 
 		draw_corner(pif, &xc, (const xrect_t*)&(pif->rect));
@@ -329,17 +321,14 @@ void hand_plot_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 		draw_plot(pif, ptd->plot);
 	}
 
-	
-
 	end_canvas_paint(canv, dc, pxr);
-	
 }
 
 /*****************************************************************************************************/
 
 res_win_t plotctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, res_win_t wparent)
 {
-	if_event_t ev = { 0 };
+	if_dispatch_t ev = { 0 };
 
 	EVENT_BEGIN_DISPATH(&ev)
 
@@ -413,5 +402,5 @@ void plotctrl_redraw(res_win_t widget)
 
 	_plotctrl_reset_page(widget);
 
-	widget_update(widget);
+	widget_paint(widget);
 }

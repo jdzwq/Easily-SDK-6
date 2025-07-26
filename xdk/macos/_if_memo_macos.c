@@ -96,44 +96,7 @@ void _heapo_clean(res_heap_t heap)
     malloc_zone_pressure_relief(pmz, 0);
 }
 #endif
-/******************************************************************************************/
-#ifdef XDK_SUPPORT_MEMO_GLOB
-res_glob_t _globo_alloc(dword_t size)
-{
 
-	return NULL;
-}
-
-res_glob_t _globo_realloc(res_glob_t glob, dword_t size)
-{
-
-	return NULL;
-}
-
-void _globo_free(res_glob_t glob)
-{
-
-	return;
-}
-
-dword_t _globo_size(res_glob_t glob)
-{
-
-	return 0;
-}
-
-void* _globo_lock(res_glob_t glob)
-{
-
-	return NULL;
-}
-
-bool_t _globo_unlock(res_glob_t glob)
-{
-
-	return 0;
-}
-#endif
 /*****************************************************************************************/
 #ifdef XDK_SUPPORT_MEMO_LOCAL
 void* _local_alloc(dword_t size)
@@ -163,7 +126,7 @@ void* _paged_alloc(dword_t size)
     if (size % PAGE_SIZE)
         dw++;
     
-    return (posix_memalign(&p, PAGE_SIZE, (size_t)(dw * PAGE_SIZE)) < 0)? NULL : p;
+    return (posix_memalign(&p, PAGE_ALIGN, (size_t)(dw * PAGE_SIZE)) < 0)? NULL : p;
 }
 
 void* _paged_realloc(void* p, dword_t size)
@@ -211,9 +174,7 @@ void* _paged_lock(void* p)
     
     n = malloc_size(p);
 
-    mlock(p, n);
-    
-	return p;
+    return (mlock(p, n) == C_ERR)? NULL : p;
 }
 
 void _paged_unlock(void* p)
@@ -225,16 +186,6 @@ void _paged_unlock(void* p)
     munlock(p, n);
 }
 
-bool_t _paged_protect(void* p, bool_t b)
-{
-    size_t n;
-    
-    n = malloc_size(p);
-
-    mprotect(p, n, PROT_READ);
-	
-	return 0;
-}
 #endif
 
 /*****************************************************************************************/
@@ -254,6 +205,15 @@ void _cache_close(void* fh)
 	munmap(fh, PAGE_SPACE);
 }
 
+bool_t _cache_protect(void* p, bool_t b)
+{
+    int msk;
+
+    msk = (b)? (PROT_READ) : (PROT_READ | PROT_WRITE);
+    
+    return (mprotect(p, PAGE_SPACE, PROT_READ) == C_ERR)? bool_false : bool_true;
+}
+
 bool_t _cache_write(void* fh, dword_t hoff, dword_t loff, void* buf, dword_t size, dword_t* pb)
 {
     size_t off;
@@ -261,11 +221,10 @@ bool_t _cache_write(void* fh, dword_t hoff, dword_t loff, void* buf, dword_t siz
     off = MAKESIZE(loff, hoff);
     
     memcpy((void*)((char*)fh + off), buf, (size_t)size);
-    
-    if(pb)
-        *pb = size;
-    
-    return 1;
+
+    if(pb) *pb = size;
+        
+    return bool_true;
 }
 
 bool_t _cache_read(void* fh, dword_t hoff, dword_t loff, void* buf, dword_t size, dword_t* pb)
@@ -276,10 +235,9 @@ bool_t _cache_read(void* fh, dword_t hoff, dword_t loff, void* buf, dword_t size
 
     memcpy(buf, (void*)((char*)fh + off), (size_t)size);
     
-    if(pb)
-        *pb = size;
+    if(pb) *pb = size;
     
-    return 1;
+    return bool_true;
 }
 #endif
 

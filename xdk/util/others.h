@@ -68,8 +68,6 @@ EXP_API byte_t parse_proto(const tchar_t* file);
 
 EXP_API void parse_url(const tchar_t* url, tchar_t** proat, int* prolen, tchar_t** addrat, int* addrlen, tchar_t** portat, int* portlen, tchar_t** objat, int* objlen, tchar_t** qryat, int* qrylen);
 
-EXP_API dword_t load_image_file(const tchar_t* fname, tchar_t* itype, byte_t* buf, dword_t max);
-
 #ifdef	__cplusplus
 }
 #endif

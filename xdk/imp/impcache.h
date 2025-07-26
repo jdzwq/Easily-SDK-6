@@ -73,6 +73,14 @@ EXP_API bool_t xcache_write(xhand_t vmem, const byte_t* data, dword_t* pb);
 */
 EXP_API bool_t xcache_read(xhand_t vmem, byte_t* buf, dword_t* pb);
 
+/*
+@FUNCTION xcache_protect: protect or unprotect the page based memory, let it be READONLY or READWRITE
+@INPUT xhand_t vmem: the cache handle.
+@INPUT bool_t b: if nonezero protect it, zero unprotect it.
+@RETURN bool_t: if succeeds return nonzero, fails return zero.
+*/
+EXP_API bool_t	xcache_protect(xhand_t vmem, bool_t b);
+
 #endif
 
 #ifdef	__cplusplus

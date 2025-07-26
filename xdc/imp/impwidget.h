@@ -43,10 +43,10 @@ extern "C" {
 @INPUT const xrect_t* pxr: rect struct for widget initialize position and size.
 if wstyle is WD_STYLE_CONTROL the rect beint to parent window client, otherwise the rect is screen coordinate based.
 @INPUT res_win_t wparent: the parent window resource handle, child widget must have a parent window.
-@INPUT if_event_t* pev: the window message dispatch struct.
+@INPUT if_dispatch_t* pev: the window message dispatch struct.
 @RETURN res_win_t: if succeeds retur window resource handle, fails return NULL.
 */
-EXP_API res_win_t widget_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, res_win_t wparent, if_event_t* pev);
+EXP_API res_win_t widget_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, res_win_t wparent, if_dispatch_t* pev);
 
 /*
 @FUNCTION widget_destroy: destroy the widget.
@@ -73,9 +73,9 @@ EXP_API int		widget_get_return(res_win_t wt);
 /*
 @FUNCTION widget_get_dispatch: get the widget message dispatch struct.
 @INPUT res_win_t wt: widget resource handle.
-@RETURN if_event_t: return the dispatch struct if exists, else return NULL.
+@RETURN if_dispatch_t: return the dispatch struct if exists, else return NULL.
 */
-EXP_API if_event_t* widget_get_dispatch(res_win_t wt);
+EXP_API if_dispatch_t* widget_get_dispatch(res_win_t wt);
 
 /*
 @FUNCTION widget_set_style: reset the widget style.
@@ -349,13 +349,6 @@ EXP_API void	widget_erase(res_win_t wt, const xrect_t* prt);
 EXP_API void	widget_paint(res_win_t wt);
 
 /*
-@FUNCTION widget_update: redraw whole widndow.
-@INPUT res_win_t wt: the widget resource handle.
-@RETURN void: none.
-*/
-EXP_API void	widget_update(res_win_t wt);
-
-/*
 @FUNCTION widget_enable: enable or disable window, the window disabled can not get focus for inputing.
 @INPUT res_win_t wt: the widget resource handle.
 @INPUT bool_t b: nonezero for enable, zero for disable.
@@ -527,10 +520,10 @@ EXP_API void	widget_set_scroll_info(res_win_t wt, bool_t horz, const scroll_t* p
 /*
 @FUNCTION widget_post_char: post a char input message into windows message queue.
 @INPUT res_win_t wt: the widget resource handle.
-@INPUT tchar_t ch: the character.
+@INPUT wchar_t ch: the wide character.
 @RETURN void: none.
 */
-EXP_API void	widget_post_char(res_win_t wt, tchar_t ch);
+EXP_API void	widget_post_wchar(res_win_t wt, wchar_t ch);
 
 /*
 @FUNCTION widget_post_char: post a key press message into windows message queue, and not wait the message processed.
@@ -703,142 +696,36 @@ EXP_API bool_t	widget_enum_child(res_win_t wt, PF_ENUM_WINDOW_PROC pf, vword_t p
 EXP_API	bool_t	widget_has_struct(res_win_t wt);
 
 /*
-@FUNCTION widget_set_xfont: set the widget font.
+@FUNCTION widget_noti_xfont: notify the widget font changed.
 @INPUT res_win_t wt: windowd resource handle.
 @INPUT const xfont_t* pxf: the font struct.
 @RETURN void: none.
 */
-EXP_API void	widget_set_xfont(res_win_t wt, const xfont_t* pxf);
+EXP_API void	widget_noti_xfont(res_win_t wt, const xfont_t* pxf);
 
 /*
-@FUNCTION widget_get_xfont: copy the widget font.
-@INPUT res_win_t wt: windowd resource handle.
-@OUTPUT xfont_t* pxf: the font struct.
-@RETURN void: none.
-*/
-EXP_API void	widget_get_xfont(res_win_t wt, xfont_t* pxf);
-
-/*
-@FUNCTION widget_get_xfont_ptr: get the widget font.
-@INPUT res_win_t wt: windowd resource handle.
-@RETURN const xfont_t*: return the widget font struct if exists, otherwise return NULL.
-*/
-EXP_API const xfont_t*	widget_get_xfont_ptr(res_win_t wt);
-
-/*
-@FUNCTION widget_set_xface: set the widget face.
+@FUNCTION widget_noti_xface: notify the widget face changed.
 @INPUT res_win_t wt: windowd resource handle.
 @INPUT const xface_t* pxa: the face struct.
 @RETURN void: none.
 */
-EXP_API void	widget_set_xface(res_win_t wt, const xface_t* pxa);
+EXP_API void	widget_noti_xface(res_win_t wt, const xface_t* pxa);
 
 /*
-@FUNCTION widget_get_xface: copy the widget face.
-@INPUT res_win_t wt: windowd resource handle.
-@OUTPUT xface_t* pxa: the face struct.
-@RETURN void: none.
-*/
-EXP_API void	widget_get_xface(res_win_t wt, xface_t* pxa);
-
-/*
-@FUNCTION widget_get_xface_ptr: get the widget face.
-@INPUT res_win_t wt: windowd resource handle.
-@RETURN const xface_t*: return the widget face struct if exists, otherwise return NULL.
-*/
-EXP_API const xface_t*	widget_get_xface_ptr(res_win_t wt);
-
-/*
-@FUNCTION widget_set_xbrush: set the widget brush.
+@FUNCTION widget_noti_xbrush: notify the widget brush changed.
 @INPUT res_win_t wt: windowd resource handle.
 @INPUT const xbrush_t* pxb: the brush struct.
 @RETURN void: none.
 */
-EXP_API void	widget_set_xbrush(res_win_t wt, const xbrush_t* pxb);
+EXP_API void	widget_noti_xbrush(res_win_t wt, const xbrush_t* pxb);
 
 /*
-@FUNCTION widget_get_xbrush: copy the widget brush.
-@INPUT res_win_t wt: windowd resource handle.
-@OUTPUT xbrush_t* pxb: the brush struct.
-@RETURN void: none.
-*/
-EXP_API void	widget_get_xbrush(res_win_t wt, xbrush_t* pxb);
-
-/*
-@FUNCTION widget_get_xbrush_ptr: get the widget brush.
-@INPUT res_win_t wt: windowd resource handle.
-@RETURN const xbrush_t*: return the widget brush struct if exists, otherwise return NULL.
-*/
-EXP_API const xbrush_t*	widget_get_xbrush_ptr(res_win_t wt);
-
-/*
-@FUNCTION widget_set_xpen: set the widget pen.
+@FUNCTION widget_noti_xpen: notify the widget pen changed.
 @INPUT res_win_t wt: windowd resource handle.
 @INPUT const xpen_t* pxp: the pen struct.
 @RETURN void: none.
 */
-EXP_API void	widget_set_xpen(res_win_t wt, const xpen_t* pxp);
-
-/*
-@FUNCTION widget_get_xpen: copy the widget pen.
-@INPUT res_win_t wt: windowd resource handle.
-@OUTPUT xpen_t* pxp: the pen struct.
-@RETURN void: none.
-*/
-EXP_API void	widget_get_xpen(res_win_t wt, xpen_t* pxp);
-
-/*
-@FUNCTION widget_get_xpen_ptr: get the widget pen.
-@INPUT res_win_t wt: windowd resource handle.
-@RETURN const xpen_t*: return the widget pen struct if exists, otherwise return NULL.
-*/
-EXP_API const xpen_t*	widget_get_xpen_ptr(res_win_t wt);
-
-/*
-@FUNCTION widget_set_mask: set the widget mask color.
-@INPUT res_win_t wt: windowd resource handle.
-@INPUT const xcolor_t* pxc: the color struct.
-@RETURN void: none.
-*/
-EXP_API void	widget_set_mask(res_win_t wt, const xcolor_t* pxc);
-
-/*
-@FUNCTION widget_get_mask: copy the widget mask color.
-@INPUT res_win_t wt: windowd resource handle.
-@OUTPUT xcolor_t* pxc: the color struct.
-@RETURN void: none.
-*/
-EXP_API void	widget_get_mask(res_win_t wt, xcolor_t* pxc);
-
-/*
-@FUNCTION widget_get_mask_ptr: get the widget mask color.
-@INPUT res_win_t wt: windowd resource handle.
-@RETURN const xcolor_t*: return the widget color struct if exists, otherwise return NULL.
-*/
-EXP_API const xcolor_t*	widget_get_mask_ptr(res_win_t wt);
-
-/*
-@FUNCTION widget_set_iconic: set the widget icon color.
-@INPUT res_win_t wt: windowd resource handle.
-@INPUT const xcolor_t* pxc: the color struct.
-@RETURN void: none.
-*/
-EXP_API void	widget_set_iconic(res_win_t wt, const xcolor_t* pxc);
-
-/*
-@FUNCTION widget_get_iconic: copy the widget icon color.
-@INPUT res_win_t wt: windowd resource handle.
-@OUTPUT xcolor_t* pxc: the color struct.
-@RETURN void: none.
-*/
-EXP_API void	widget_get_iconic(res_win_t wt, xcolor_t* pxc);
-
-/*
-@FUNCTION widget_get_iconic_ptr: get the widget mask color.
-@INPUT res_win_t wt: windowd resource handle.
-@RETURN const xcolor_t*: return the widget color struct if exists, otherwise return NULL.
-*/
-EXP_API const xcolor_t*	widget_get_iconic_ptr(res_win_t wt);
+EXP_API void	widget_noti_xpen(res_win_t wt, const xpen_t* pxp);
 
 /*
 @FUNCTION widget_set_point: set the child widget position in client coordinate.
@@ -955,19 +842,17 @@ EXP_API void	widget_set_alpha(res_win_t wt, byte_t b);
 */
 EXP_API byte_t	widget_get_alpha(res_win_t wt);
 
-#ifdef XDU_SUPPORT_WIDGET_REGION
-/*
-@FUNCTION widget_set_region: set widget shape region.
-@INPUT res_win_t wt: the widget resource handle.
-@INPUT res_rgn_t rgn: the widget shape region resource handle.
-@RETURN void: none.
-*/
-EXP_API void	widget_set_region(res_win_t wt, res_rgn_t rgn);
-#endif
 
 #ifdef XDU_SUPPORT_CONTEXT_OPENGL
 EXP_API res_glc_t widget_get_glctx(res_win_t wt);
 #endif
+
+/*
+@FUNCTION widget_do_modal: run the widget in normal mode, usually used by overlapped window.
+@INPUT res_win_t wt: the widget resource handle.
+@RETURN int: the widget exit code.
+*/
+EXP_API int		widget_do_main(res_win_t wt);
 
 /*
 @FUNCTION widget_do_modal: run the widget in modal mode, usually used by dialog.
@@ -981,21 +866,7 @@ EXP_API int		widget_do_modal(res_win_t wt);
 @INPUT res_win_t wt: the widget resource handle.
 @RETURN void: none.
 */
-EXP_API void	widget_do_trace(res_win_t wt);
-
-EXP_API void send_quit_message(int code);
-
-EXP_API void message_fetch(msg_t* pmsg, res_win_t wt);
-
-EXP_API bool_t message_peek(msg_t* pmsg);
-
-EXP_API bool_t	message_translate(const msg_t* pmsg);
-
-EXP_API result_t message_dispatch(const msg_t* pmsg);
-
-EXP_API bool_t	message_is_quit(const msg_t* pmsg);
-
-EXP_API void	message_position(xpoint_t* ppt);
+EXP_API void	widget_do_track(res_win_t wt);
 
 #ifdef	__cplusplus
 }

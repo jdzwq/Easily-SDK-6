@@ -28,7 +28,7 @@ LICENSE.GPL3 for more details.
 
 #ifdef XDK_SUPPORT_MBCS
 
-int _gbk_to_ucs(const schar_t* gbk, int len, wchar_t* ucs, int max)
+int c_gbk_to_ucs(const schar_t* gbk, int len, wchar_t* ucs, int max)
 {
     int n, total = 0;
 
@@ -54,7 +54,7 @@ int _gbk_to_ucs(const schar_t* gbk, int len, wchar_t* ucs, int max)
     return total;
 }
 
-int _ucs_to_gbk(const wchar_t* ucs, int len, schar_t* gbk, int max)
+int c_ucs_to_gbk(const wchar_t* ucs, int len, schar_t* gbk, int max)
 {
     int n, total = 0;
     char chs[4];
@@ -81,7 +81,7 @@ int _ucs_to_gbk(const wchar_t* ucs, int len, schar_t* gbk, int max)
     return total;
 }
 
-int _utf_to_ucs(const schar_t* utf, int len, wchar_t* ucs, int max)
+int c_utf_to_ucs(const schar_t* utf, int len, wchar_t* ucs, int max)
 {
     int n, total = 0;
 
@@ -107,7 +107,7 @@ int _utf_to_ucs(const schar_t* utf, int len, wchar_t* ucs, int max)
     return total;
 }
 
-int _ucs_to_utf(const wchar_t* ucs, int len, schar_t* utf, int max)
+int c_ucs_to_utf(const wchar_t* ucs, int len, schar_t* utf, int max)
 {
     int n, total = 0;
     char chs[4];

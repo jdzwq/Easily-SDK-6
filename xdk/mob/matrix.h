@@ -188,10 +188,6 @@ EXP_API matrix_t matrix_mul(matrix_t mt1, matrix_t mt2);
 
 EXP_API double matrix_det(matrix_t mt);
 
-#if defined(XDK_SUPPORT_TEST)
-	EXP_API void test_matrix(void);
-#endif
-
 #ifdef	__cplusplus
 }
 #endif

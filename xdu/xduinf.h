@@ -112,17 +112,13 @@ typedef void(*PF_GDI_DRAW_IMAGE)(visual_t, bitmap_t, const xcolor_t*, const xrec
 typedef void(*PF_GDI_DRAW_BITMAP)(visual_t, bitmap_t, const xpoint_t*);
 typedef void(*PF_GDI_GRADIENT_RECT)(visual_t, const xcolor_t* xc_brim, const xcolor_t* xc_core, const tchar_t* gradient, const xrect_t*);
 typedef void(*PF_GDI_ALPHABLEND_RECT)(visual_t, const xcolor_t*, const xrect_t*, int);
+typedef void(*PF_GDI_INVERT_RECT)(visual_t, const xrect_t*);
 typedef void(*PF_GDI_EXCLUDE_RECT)(visual_t, const xrect_t*);
-typedef void(*PF_GDI_FILL_REGION)(visual_t, const xbrush_t*, res_rgn_t);
+typedef void(*PF_GDI_INCLIP_RECT)(visual_t, const xrect_t*);
+
 typedef void(*PF_GDI_TEXT_RECT)(visual_t, const xfont_t*, const xface_t*, const tchar_t*, int, xrect_t*);
 typedef void(*PF_GDI_TEXT_SIZE)(visual_t, const xfont_t*, const tchar_t*, int, xsize_t*);
 typedef void(*PF_GDI_TEXT_METRIC)(visual_t, const xfont_t*, xsize_t*);
-
-#ifdef XDU_SUPPORT_CONTEXT_REGION
-typedef res_rgn_t(*PF_CREATE_REGION)(const tchar_t*, const xrect_t*);
-typedef void(*PF_DELETE_REGION)(res_rgn_t);
-typedef bool_t(*PF_PT_IN_REGION)(res_rgn_t, const xpoint_t*);
-#endif
 
 #ifdef XDU_SUPPORT_CONTEXT_BITMAP
 /*bitmap interface*/
@@ -192,19 +188,14 @@ typedef struct _if_context_t{
 	PF_GDI_DRAW_ARC			pf_gdi_draw_arc;
 	PF_GDI_DRAW_TEXT		pf_gdi_draw_text;
 	PF_GDI_TEXT_OUT			pf_gdi_text_out;
-	PF_GDI_FILL_REGION		pf_gdi_fill_region;
 	PF_GDI_DRAW_IMAGE		pf_gdi_draw_image;
 	PF_GDI_DRAW_BITMAP		pf_gdi_draw_bitmap;
 	PF_GDI_TEXT_RECT		pf_gdi_text_rect;
 	PF_GDI_TEXT_SIZE		pf_gdi_text_size;
 	PF_GDI_TEXT_METRIC		pf_gdi_text_metric;
+	PF_GDI_INVERT_RECT		pf_gdi_invert_rect;
 	PF_GDI_EXCLUDE_RECT		pf_gdi_exclude_rect;
-
-#ifdef XDU_SUPPORT_CONTEXT_REGION
-	PF_CREATE_REGION			pf_create_region;
-	PF_DELETE_REGION			pf_delete_region;
-	PF_PT_IN_REGION				pf_pt_in_region;
-#endif
+	PF_GDI_INCLIP_RECT		pf_gdi_inclip_rect;
 
 #ifdef XDU_SUPPORT_CONTEXT_BITMAP
 	PF_DESTROY_BITMAP			pf_destroy_bitmap;
@@ -256,10 +247,10 @@ typedef struct _if_clipboard_t{
 
 typedef void(*PF_WIDGET_STARTUP)(int);
 typedef void(*PF_WIDGET_CLEANUP)(void);
-typedef res_win_t(*PF_WIDGET_CREATE)(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, res_win_t wparent, if_event_t* pev);
+typedef res_win_t(*PF_WIDGET_CREATE)(const tchar_t*, dword_t, const xrect_t*, res_win_t, const if_dispatch_t*);
 typedef void(*PF_WIDGET_DESTROY)(res_win_t);
 typedef void(*PF_WIDGET_CLOSE)(res_win_t, int);
-typedef if_event_t* (*PF_WIDGET_GET_DISPATCH)(res_win_t);
+typedef const if_dispatch_t* (*PF_WIDGET_GET_DISPATCH)(res_win_t);
 typedef void(*PF_WIDGET_SET_STYLE)(res_win_t, dword_t);
 typedef dword_t(*PF_WIDGET_GET_STYLE)(res_win_t);
 typedef void(*PF_WIDGET_SET_ACCEL)(res_win_t, res_acl_t);
@@ -300,7 +291,6 @@ typedef void(*PF_WIDGET_SIZE)(res_win_t, const xsize_t*);
 typedef void(*PF_WIDGET_MOVE)(res_win_t, const xpoint_t*);
 typedef void(*PF_WIDGET_TAKE)(res_win_t, int);
 typedef void(*PF_WIDGET_SHOW)(res_win_t, dword_t);
-typedef void(*PF_WIDGET_UPDATE)(res_win_t);
 typedef void(*PF_WIDGET_LAYOUT)(res_win_t);
 typedef void(*PF_WIDGET_PAINT)(res_win_t);
 typedef void(*PF_WIDGET_ERASE)(res_win_t, const xrect_t*);
@@ -327,7 +317,7 @@ typedef bool_t(*PF_WIDGET_SET_SUBPROC_DELTA)(res_win_t, uid_t, vword_t);
 typedef vword_t (*PF_WIDGET_GET_SUBPROC_DELTA)(res_win_t, uid_t);
 typedef bool_t(*PF_WIDGET_HAS_SUBPROC)(res_win_t);
 
-typedef void(*PF_WIDGET_POST_CHAR)(res_win_t, tchar_t);
+typedef void(*PF_WIDGET_POST_WCHAR)(res_win_t, wchar_t);
 typedef void(*PF_WIDGET_POST_KEY)(res_win_t, int);
 typedef void(*PF_WIDGET_POST_NOTICE)(res_win_t, NOTICE*);
 typedef int(*PF_WIDGET_SEND_NOTICE)(res_win_t, NOTICE*);
@@ -341,24 +331,10 @@ typedef void(*PF_WIDGET_SCROLL)(res_win_t, bool_t, int);
 typedef void(*PF_WIDGET_GET_SCROLLINFO)(res_win_t, bool_t, scroll_t*);
 typedef void(*PF_WIDGET_SET_SCROLLINFO)(res_win_t, bool_t, const scroll_t*);
 typedef bool_t(*PF_WIDGET_HAS_STRUCT)(res_win_t);
-typedef void(*PF_WIDGET_SET_XFONT)(res_win_t,const xfont_t*);
-typedef void(*PF_WIDGET_GET_XFONT)(res_win_t, xfont_t*);
-typedef const xfont_t*(*PF_WIDGET_GET_XFONT_PTR)(res_win_t);
-typedef void(*PF_WIDGET_SET_XFACE)(res_win_t, const xface_t*);
-typedef void(*PF_WIDGET_GET_XFACE)(res_win_t, xface_t*);
-typedef const xface_t*(*PF_WIDGET_GET_XFACE_PTR)(res_win_t);
-typedef void(*PF_WIDGET_SET_XBRUSH)(res_win_t, const xbrush_t*);
-typedef void(*PF_WIDGET_GET_XBRUSH)(res_win_t, xbrush_t*);
-typedef const xbrush_t*(*PF_WIDGET_GET_XBRUSH_PTR)(res_win_t);
-typedef void(*PF_WIDGET_SET_XPEN)(res_win_t, const xpen_t*);
-typedef void(*PF_WIDGET_GET_XPEN)(res_win_t, xpen_t*);
-typedef const xpen_t*(*PF_WIDGET_GET_XPEN_PTR)(res_win_t);
-typedef void(*PF_WIDGET_SET_MASK)(res_win_t, const xcolor_t*);
-typedef void(*PF_WIDGET_GET_MASK)(res_win_t, xcolor_t*);
-typedef const xcolor_t*(*PF_WIDGET_GET_MASK_PTR)(res_win_t);
-typedef void(*PF_WIDGET_SET_ICONIC)(res_win_t, const xcolor_t*);
-typedef void(*PF_WIDGET_GET_ICONIC)(res_win_t, xcolor_t*);
-typedef const xcolor_t*(*PF_WIDGET_GET_ICONIC_PTR)(res_win_t);
+typedef void(*PF_WIDGET_NOTI_XFONT)(res_win_t,const xfont_t*);
+typedef void(*PF_WIDGET_NOTI_XFACE)(res_win_t, const xface_t*);
+typedef void(*PF_WIDGET_NOTI_XBRUSH)(res_win_t, const xbrush_t*);
+typedef void(*PF_WIDGET_NOTI_XPEN)(res_win_t, const xpen_t*);
 typedef void(*PF_WIDGET_SET_COLOR_MODE)(res_win_t, const clr_mod_t*);
 typedef void(*PF_WIDGET_GET_COLOR_MODE)(res_win_t, clr_mod_t*);
 typedef void(*PF_WIDGET_SET_POINT)(res_win_t, const xpoint_t*);
@@ -366,17 +342,9 @@ typedef void(*PF_WIDGET_GET_POINT)(res_win_t, xpoint_t*);
 typedef void(*PF_WIDGET_SET_SIZE)(res_win_t, const xsize_t*);
 typedef void(*PF_WIDGET_GET_SIZE)(res_win_t, xsize_t*);
 
-typedef int(*PF_WIDGET_DO_NORMAL)(res_win_t);
+typedef int(*PF_WIDGET_DO_MAIN)(res_win_t);
 typedef int(*PF_WIDGET_DO_MODAL)(res_win_t);
-typedef void(*PF_WIDGET_DO_TRACE)(res_win_t);
-
-typedef void(*PF_SEND_QUIT_MESSAGE)(int);
-typedef void(*PF_MESSAGE_FETCH)(msg_t*, res_win_t);
-typedef bool_t(*PF_MESSAGE_PEEK)(msg_t*);
-typedef bool_t(*PF_MESSAGE_TRANSLATE)(const msg_t*);
-typedef result_t(*PF_MESSAGE_DISPATCH)(const msg_t*);
-typedef bool_t(*PF_MESSAGE_IS_QUIT)(const msg_t*);
-typedef void(*PF_MESSAGE_POSITION)(xpoint_t*);
+typedef void(*PF_WIDGET_DO_TRACK)(res_win_t);
 
 typedef void(*PF_GET_SCREEN_SIZE)(xsize_t*);
 typedef void(*PF_GET_DESKTOP_SIZE)(xsize_t*);
@@ -388,10 +356,6 @@ typedef void(*PF_DESTROY_ACCEL_TABLE)(res_acl_t);
 typedef void(*PF_WIDGET_TRACK_MOUSE)(res_win_t, dword_t);
 typedef void(*PF_WIDGET_SET_ALPHA)(res_win_t, unsigned char);
 typedef unsigned char(*PF_WIDGET_GET_ALPHA)(res_win_t);
-
-#ifdef XDU_SUPPORT_WIDGET_REGION
-typedef void(*PF_WIDGET_SET_REGION)(res_win_t, res_rgn_t);
-#endif
 
 #ifdef XDU_SUPPORT_CONTEXT_OPENGL
 typedef res_glc_t(*PF_WIDGET_GET_GLCTX)(res_win_t);
@@ -446,7 +410,6 @@ typedef struct _if_widget_t{
 	PF_WIDGET_MOVE				pf_widget_move;
 	PF_WIDGET_TAKE				pf_widget_take;
 	PF_WIDGET_SHOW				pf_widget_show;
-	PF_WIDGET_UPDATE			pf_widget_update;
 	PF_WIDGET_LAYOUT			pf_widget_layout;
 	PF_WIDGET_PAINT				pf_widget_paint;
 	PF_WIDGET_ERASE				pf_widget_erase;
@@ -474,7 +437,7 @@ typedef struct _if_widget_t{
 	PF_WIDGET_GET_SUBPROC_DELTA		pf_widget_get_subproc_delta;
 	PF_WIDGET_HAS_SUBPROC		pf_widget_has_subproc;
 
-	PF_WIDGET_POST_CHAR			pf_widget_post_char;
+	PF_WIDGET_POST_WCHAR		pf_widget_post_wchar;
 	PF_WIDGET_POST_KEY			pf_widget_post_key;
 	PF_WIDGET_POST_NOTICE		pf_widget_post_notice;
 	PF_WIDGET_SEND_NOTICE		pf_widget_send_notice;
@@ -486,24 +449,10 @@ typedef struct _if_widget_t{
 	PF_WIDGET_SET_SCROLLINFO	pf_widget_set_scroll_info;
 
 	PF_WIDGET_HAS_STRUCT		pf_widget_has_struct;
-	PF_WIDGET_SET_XFONT			pf_widget_set_xfont;
-	PF_WIDGET_GET_XFONT			pf_widget_get_xfont;
-	PF_WIDGET_GET_XFONT_PTR		pf_widget_get_xfont_ptr;
-	PF_WIDGET_SET_XFACE			pf_widget_set_xface;
-	PF_WIDGET_GET_XFACE			pf_widget_get_xface;
-	PF_WIDGET_GET_XFACE_PTR		pf_widget_get_xface_ptr;
-	PF_WIDGET_SET_XBRUSH		pf_widget_set_xbrush;
-	PF_WIDGET_GET_XBRUSH		pf_widget_get_xbrush;
-	PF_WIDGET_GET_XBRUSH_PTR	pf_widget_get_xbrush_ptr;
-	PF_WIDGET_SET_XPEN			pf_widget_set_xpen;
-	PF_WIDGET_GET_XPEN			pf_widget_get_xpen;
-	PF_WIDGET_GET_XPEN_PTR		pf_widget_get_xpen_ptr;
-	PF_WIDGET_SET_MASK			pf_widget_set_mask;
-	PF_WIDGET_GET_MASK			pf_widget_get_mask;
-	PF_WIDGET_GET_MASK_PTR		pf_widget_get_mask_ptr;
-	PF_WIDGET_SET_ICONIC		pf_widget_set_iconic;
-	PF_WIDGET_GET_ICONIC		pf_widget_get_iconic;
-	PF_WIDGET_GET_ICONIC_PTR	pf_widget_get_iconic_ptr;
+	PF_WIDGET_NOTI_XFONT		pf_widget_noti_xfont;
+	PF_WIDGET_NOTI_XFACE		pf_widget_noti_xface;
+	PF_WIDGET_NOTI_XBRUSH		pf_widget_noti_xbrush;
+	PF_WIDGET_NOTI_XPEN			pf_widget_noti_xpen;
 	PF_WIDGET_SET_COLOR_MODE	pf_widget_set_color_mode;
 	PF_WIDGET_GET_COLOR_MODE	pf_widget_get_color_mode;
 	PF_WIDGET_SET_POINT			pf_widget_set_point;
@@ -511,17 +460,9 @@ typedef struct _if_widget_t{
 	PF_WIDGET_SET_SIZE			pf_widget_set_size;
 	PF_WIDGET_GET_SIZE			pf_widget_get_size;
 
-	PF_WIDGET_DO_NORMAL			pf_widget_do_normal;
+	PF_WIDGET_DO_MAIN			pf_widget_do_main;
 	PF_WIDGET_DO_MODAL			pf_widget_do_modal;
-	PF_WIDGET_DO_TRACE			pf_widget_do_trace;
-
-	PF_SEND_QUIT_MESSAGE		pf_send_quit_message;
-	PF_MESSAGE_FETCH			pf_message_fetch;
-    PF_MESSAGE_PEEK         	pf_message_peek;
-	PF_MESSAGE_TRANSLATE		pf_message_translate;
-	PF_MESSAGE_DISPATCH			pf_message_dispatch;
-	PF_MESSAGE_IS_QUIT			pf_message_is_quit;
-	PF_MESSAGE_POSITION			pf_message_position;
+	PF_WIDGET_DO_TRACK			pf_widget_do_track;
 
 	PF_GET_SCREEN_SIZE			pf_get_screen_size;
 	PF_GET_DESKTOP_SIZE			pf_get_desktop_size;
@@ -533,10 +474,6 @@ typedef struct _if_widget_t{
 	PF_WIDGET_TRACK_MOUSE		pf_widget_track_mouse;
 	PF_WIDGET_SET_ALPHA			pf_widget_set_alpha;
 	PF_WIDGET_GET_ALPHA			pf_widget_get_alpha;
-
-#ifdef XDU_SUPPORT_WIDGET_REGION
-	PF_WIDGET_SET_REGION		pf_widget_set_region;
-#endif
 
 #ifdef XDU_SUPPORT_CONTEXT_OPENGL
 	PF_WIDGET_GET_GLCTX			pf_widget_get_glctx;

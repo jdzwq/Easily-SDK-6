@@ -26,7 +26,6 @@ LICENSE.GPL3 for more details.
 
 #include "compare.h"
 
-#include "../xdkimp.h"
 #include "../xdkstd.h"
 
 int compare_datetime(const xdate_t* pmd1, const xdate_t* pmd2)

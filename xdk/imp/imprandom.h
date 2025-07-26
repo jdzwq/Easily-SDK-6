@@ -37,12 +37,11 @@ extern "C" {
 
 /*
 @FUNCTION system_random: get system random.
-@OUTPUT byte_t* buf: the buffer for return random bytes.
-@INPUT dword_t size: the buffer size in bytes.
-@RETURN bool_t: if succeeds return non zero, fails return zero.
+@OUTPUT word* pn: the 32bit or 64bit random number.
+@RETURN none
 */
-EXP_API bool_t system_random(byte_t* buf, dword_t size);
-
+EXP_API void system_random32(dword_t *pn);
+EXP_API void system_random64(lword_t *pn);
 
 #ifdef	__cplusplus
 }

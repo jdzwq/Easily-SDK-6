@@ -26,9 +26,8 @@ LICENSE.GPL3 for more details.
 
 #include "actable.h"
 
-#include "../xdkimp.h"
-#include "../xdkoem.h"
 #include "../xdkstd.h"
+#include "../xdkobj.h"
 
 #define AC_CHAR_INDEX(ch)		((ch >= _T('A') && ch <= _T('Z'))? (ch - 64) : 0)
 #define AC_BASE_INC			127
@@ -330,8 +329,7 @@ void enum_ac_table(link_t_ptr tt, PF_ENUM_AC_TABLE pf, void* pa)
 	}
 }
 
-#if defined(XDK_SUPPORT_TEST)
-void trace_ac_table(link_t_ptr tt, const tchar_t* key, int len)
+static void trace_ac_table(link_t_ptr tt, const tchar_t* key, int len)
 {
 	ac_table_t* ptt = ACTableFromLink(tt);
 	int i, j;
@@ -396,53 +394,3 @@ void trace_ac_table(link_t_ptr tt, const tchar_t* key, int len)
 
 	_tprintf(_T("\n"));
 }
-
-static bool_t printf_ac_node(const tchar_t* key, int len, vword_t delta, void* p)
-{
-	_tprintf(_T("%s\t%d\n"), key, (int)delta);
-
-	return 1;
-}
-
-void test_ac_table()
-{
-	link_t_ptr tt;
-
-	tt = create_ac_table();
-	
-	//test case 1
-	insert_ac_table(tt, _T("AP"), -1, 1);
-	insert_ac_table(tt, _T("BA"), -1, 2);
-	insert_ac_table(tt, _T("ABC"), -1, 3);
-	insert_ac_table(tt, _T("BCAP"), -1, 4);
-
-	//test case 2
-	/*insert_ac_table(tt, _T("POOL"), -1, 5);
-	insert_ac_table(tt, _T("PRIZE"), -1, 6);
-	insert_ac_table(tt, _T("PREVIEW"), -1, 7);
-	insert_ac_table(tt, _T("PREPARE"), -1, 8);
-	insert_ac_table(tt, _T("PRODUCE"), -1, 9);
-	insert_ac_table(tt, _T("PROGRESS"), -1, 10);*/
-
-	build_ac_table(tt);
-
-	//test case 1
-	//trace_ac_table(tt, _T("AP"), -1);
-	//trace_ac_table(tt, _T("BA"), -1);
-	//trace_ac_table(tt, _T("ABC"), -1);
-	//trace_ac_table(tt, _T("BCAP"), -1);
-	trace_ac_table(tt, _T("ABCAPBABC"), -1);
-
-	//test case 2
-	/*trace_ac_table(tt, _T("POOL"), -1);
-	trace_ac_table(tt, _T("PRIZE"), -1);
-	trace_ac_table(tt, _T("PREVIEW"), -1);
-	trace_ac_table(tt, _T("PREPARE"), -1);
-	trace_ac_table(tt, _T("PRODUCE"), -1);
-	trace_ac_table(tt, _T("PROGRESS"), -1);*/
-
-	enum_ac_table(tt, printf_ac_node, NULL);
-
-	destroy_ac_table(tt);
-}
-#endif

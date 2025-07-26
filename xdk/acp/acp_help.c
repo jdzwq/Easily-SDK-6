@@ -27,11 +27,11 @@ LICENSE.GPL3 for more details.
 
 #include "acp.h"
 
-#include "../xdkimp.h"
+#include "../xdkstd.h"
 
 /*******************************************************************************************/
 
-int w_help_code(const wchar_t* src, int len, wchar_t* buf, int max)
+int w_acp_help_code(const wchar_t* src, int len, wchar_t* buf, int max)
 {
 	int count = 0;
 	int i = 0;
@@ -48,7 +48,7 @@ int w_help_code(const wchar_t* src, int len, wchar_t* buf, int max)
 #ifdef XDK_SUPPORT_ACP_TABLE
 		count += table_unicode_seek_help(*(src + i), ((buf) ? buf + count : NULL));
 #else
-		count += share_unicode_seek_help(*(src + i), ((buf) ? buf + count : NULL));
+		count += share_unicode_seek_help(*(unsigned short*)(src + i), (unsigned short*)((buf) ? buf + count : NULL));
 #endif
 		i++;
 	}
@@ -58,7 +58,7 @@ int w_help_code(const wchar_t* src, int len, wchar_t* buf, int max)
 	return count;
 }
 
-int a_help_code(const schar_t* src, int len, schar_t* buf, int max)
+static int _gb2312_acp_help_code(const schar_t* src, int len, schar_t* buf, int max)
 {
 	int seq, count = 0;
 	int i = 0;
@@ -72,13 +72,13 @@ int a_help_code(const schar_t* src, int len, schar_t* buf, int max)
 
 	while (i < len && count < max)
 	{
-		seq = gb2312_code_sequence(*(byte_t*)(src + i));
+		seq = acp_gb2312_code_sequence(*(byte_t*)(src + i));
 		if (!seq)
 			break;
 #ifdef XDK_SUPPORT_ACP_TABLE
 		count += table_gb2312_seek_help((byte_t*)(src + i), ((buf) ? buf + count : NULL));
 #else
-		count += share_gb2312_seek_help((byte_t*)(src + i), ((buf) ? buf + count : NULL));
+		count += share_gb2312_seek_help((unsigned char*)(src + i), (unsigned char*)((buf) ? buf + count : NULL));
 #endif
 		i += seq;
 	}
@@ -88,3 +88,44 @@ int a_help_code(const schar_t* src, int len, schar_t* buf, int max)
 	return count;
 }
 
+static int _utf8_acp_help_code(const schar_t* src, int len, schar_t* buf, int max)
+{
+	int seq, count = 0;
+	int i = 0;
+	wchar_t wc;
+
+	if (len < 0)
+	{
+		len = 0;
+		while (src && *(src + len))
+			len++;
+	}
+
+	while (i < len && count < max)
+	{
+		seq = acp_utf8_code_sequence(*(byte_t*)(src + i));
+		if (!seq)
+			break;
+
+		utf8_byte_to_ucs((byte_t*)(src + i), &wc);
+#ifdef XDK_SUPPORT_ACP_TABLE
+		count += table_unicode_seek_help(wc, ((buf) ? buf + count : NULL));
+#else
+		count += share_unicode_seek_help(wc, (unsigned short*)((buf) ? buf + count : NULL));
+#endif
+		i += seq;
+	}
+
+	if (buf) buf[count] = '\0';
+
+	return count;
+}
+
+int a_acp_help_code(const schar_t* src, int len, schar_t* buf, int max)
+{
+#if DEF_MBS == _GB2312
+	return _gb2312_acp_help_code(src, len, buf, max);
+#else
+	return _utf8_acp_help_code(src, len, buf, max);
+#endif
+}

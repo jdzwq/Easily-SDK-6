@@ -26,7 +26,7 @@ LICENSE.GPL3 for more details.
 
 #include "matrix.h"
 
-#include "../xdkimp.h"
+#include "../xdkobj.h"
 #include "../xdkstd.h"
 
 typedef struct _matrix_context{
@@ -692,25 +692,3 @@ dword_t matrix_decode(matrix_t mat, const byte_t* buf)
 
 	return (n + 4);
 }
-
-#if defined(XDK_SUPPORT_TEST)
-void test_matrix(void)
-{
-	tchar_t* buf;
-	int len;
-
-	matrix_t pvt = matrix_alloc(2, 10);
-
-	matrix_parse(pvt, _T("{ [0, 1, 2,3, 4, 5, 6, 7, 8,9 ],[9,8,7,6,5,4,3,2,1,0] }"), -1);
-
-	len = matrix_format(pvt, NULL, MAX_LONG);
-	buf = xsalloc(len + 1);
-	matrix_format(pvt, buf, len);
-
-	_tprintf(_T("%s\n"), buf);
-
-	xsfree(buf);
-
-	matrix_free(pvt);
-}
-#endif

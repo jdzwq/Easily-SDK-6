@@ -26,9 +26,9 @@ LICENSE.GPL3 for more details.
 
 #include "acp.h"
 
-#include "../xdkimp.h"
+#include "../xdkstd.h"
 
-int gb2312_code_sequence(unsigned char b)
+int acp_gb2312_code_sequence(unsigned char b)
 {
 	if ((b & ~0x7F) == 0)
 		return 1;
@@ -44,16 +44,16 @@ int gb2312_code_sequence(unsigned char b)
 	return 2;
 }
 
-int gb2312_byte_to_unicode(const byte_t* src, wchar_t* dest)
+int acp_gb2312_byte_to_unicode(const byte_t* src, wchar_t* dest)
 {
 #ifdef XDK_SUPPORT_ACP_TABLE
 	return table_gb2312_seek_unicode(src, (unsigned short*)dest);
 #else
-	return share_gb2312_seek_unicode(src, (unsigned short*)dest);
+	return share_gb2312_seek_unicode((unsigned char*)src, (unsigned short*)dest);
 #endif
 }
 
-int gb2312_to_unicode(const byte_t* src, dword_t slen, wchar_t* dest, int dlen)
+int acp_gb2312_to_unicode(const byte_t* src, dword_t slen, wchar_t* dest, int dlen)
 {
 	int len = 0, total = 0;
 
@@ -62,63 +62,20 @@ int gb2312_to_unicode(const byte_t* src, dword_t slen, wchar_t* dest, int dlen)
 #ifdef XDK_SUPPORT_ACP_TABLE
 		len += table_gb2312_seek_unicode((src + total), ((dest)? (unsigned short*)(dest + len) : NULL));
 #else
-		len += share_gb2312_seek_unicode((src + total), ((dest) ? (unsigned short*)(dest + len) : NULL));
+		len += share_gb2312_seek_unicode(((unsigned char*)src + total), ((dest) ? (unsigned short*)(dest + len) : NULL));
 #endif
-		total += gb2312_code_sequence((unsigned char)(src[total]));
+		total += acp_gb2312_code_sequence((unsigned char)(src[total]));
 	}
 
 	return len;
 }
 
-int unicode_byte_to_gb2312(wchar_t ch, byte_t* buf)
-{
-#ifdef XDK_SUPPORT_ACP_TABLE
-	return table_unicode_seek_gb2312((unsigned short)ch, (unsigned char*)buf);
-#else
-	return share_unicode_seek_gb2312((unsigned short)ch, (unsigned char*)buf);
-#endif
-}
-
-int unicode_to_gb2312(const wchar_t* src, int slen, byte_t* dest, dword_t dlen)
-{
-	int len = 0, total = 0;
-
-	while (total < slen && len < dlen)
-	{
-#ifdef XDK_SUPPORT_ACP_TABLE
-		len += table_unicode_seek_gb2312((unsigned short)(src[total]), ((dest) ? (unsigned char*)(dest + len) : NULL));
-#else
-		len += share_unicode_seek_gb2312((unsigned short)(src[total]), ((dest) ? (unsigned char*)(dest + len) : NULL));
-#endif
-		total++;
-	}
-
-	return len;
-}
-
-int gb2312_code_count(void)
+int acp_gb2312_code_count(void)
 {
 	return (0xFE - 0xA1 + 1) * (0xFE - 0xA1 + 1);
 }
 
-int ascii_code_count(void)
-{
-	return (0xFE - 0x20 + 1);
-}
-
-bool_t next_ascii_char(byte_t* pch)
-{
-	if (*pch == 0)
-		*pch = 0x20;
-	else if (*pch == 0xFE)
-		*pch = 0;
-	else
-		*pch = *pch + 1;
-
-	return (*pch) ? bool_true : bool_false;
-}
-
-bool_t next_gb2312_char(byte_t* pch)
+bool_t acp_next_gb2312_char(byte_t* pch)
 {
 	byte_t h, l;
 
@@ -131,7 +88,8 @@ bool_t next_gb2312_char(byte_t* pch)
 		pch[1] = 0xA1;
 		return bool_true;
 	}
-	else if (h == 0xFE && l == 0xFE)
+	
+	if (h == 0xFE && l == 0xFE)
 	{
 		pch[0] = 0x00;
 		pch[1] = 0x00;
@@ -152,3 +110,4 @@ bool_t next_gb2312_char(byte_t* pch)
 
 	return bool_true;
 }
+

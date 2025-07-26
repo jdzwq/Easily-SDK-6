@@ -357,30 +357,40 @@ void _semap_unlock(res_sema_t sem)
 
 /**********************************************************************************/
 #ifdef XDK_SUPPORT_THREAD_QUEUE
+
 res_queue_t _queue_create(res_queue_t ep, res_file_t fd, int max)
 {
+    int* pkq;
     int kq;
-    
+
     kq = kqueue();
-    
-    return (kq < 0)? 0 : (res_queue_t)kq;
+    if(kq <0 ) return NULL;
+
+    pkq = (int*)calloc(1, sizeof(int));
+    *pkq = kq;
+
+    return (res_queue_t)pkq;
 }
 
 void _queue_destroy(res_queue_t ep)
 {
-    close(ep);
+    int* pkq = (int*)ep;
+
+    close(*pkq);
+    free(pkq);
 }
 
 wait_t _queue_wait(res_queue_t ep, int ms)
 {
+    int* pkq = (int*)ep;
     struct kevent src[2];
     struct kevent dst[2];
     int rt, n = 0;
     
-    EV_SET(&(src[n++]), ep, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, 0);
-    EV_SET(&(src[n++]), ep, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, 0);
+    EV_SET(&(src[n++]), *pkq, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, 0);
+    EV_SET(&(src[n++]), *pkq, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, 0);
     
-    rt = kevent(ep, src, n, dst, n, NULL);
+    rt = kevent(*pkq, src, n, dst, n, NULL);
     if(rt < 0)
         return WAIT_ERR;
     else if(!rt)

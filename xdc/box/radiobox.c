@@ -31,6 +31,8 @@ LICENSE.GPL3 for more details.
 
 typedef struct _radiobox_delta_t{
 	bool_t on;
+
+	xfont_t xf;
 }radiobox_delta_t;
 
 #define GETRADIOBOXDELTA(ph) 	(radiobox_delta_t*)widget_get_user_delta(ph)
@@ -55,6 +57,8 @@ int hand_radiobox_create(res_win_t widget, void* data)
 
 	ptd = (radiobox_delta_t*)xmem_alloc(sizeof(radiobox_delta_t));
 	xmem_zero((void*)ptd, sizeof(radiobox_delta_t));
+
+	default_widget_xfont(&ptd->xf);
 
 	SETRADIOBOXDELTA(widget, ptd);
 
@@ -85,7 +89,6 @@ void hand_radiobox_lbutton_up(res_win_t widget, const xpoint_t* pxp)
 	radiobox_delta_t* ptd = GETRADIOBOXDELTA(widget);
 	
 	measure_interface im = { 0 };
-	xfont_t xf = { 0 };
 	xpoint_t pt;
 	int hint;
 
@@ -94,11 +97,9 @@ void hand_radiobox_lbutton_up(res_win_t widget, const xpoint_t* pxp)
 
 	widget_point_to_tm(widget, &pt);
 
-	widget_get_xfont(widget, &xf);
-
 	get_canvas_measure(widget_get_canvas(widget), &im);
 
-	hint = calc_radiobox_hint(&im, &xf, &pt);
+	hint = calc_radiobox_hint(&im, &ptd->xf, &pt);
 
 	if (hint == RADIOBOX_HINT_ON)
 	{
@@ -123,6 +124,13 @@ void hand_radiobox_size(res_win_t widget, int code, const xsize_t* prs)
 	widget_erase(widget, NULL);
 }
 
+void hand_radiobox_xfont(res_win_t widget, const xfont_t* pxf)
+{
+	radiobox_delta_t* ptd = GETRADIOBOXDELTA(widget);
+	
+	xmem_copy((void*)&ptd->xf, (void*)pxf, sizeof(xfont_t));
+}
+
 void hand_radiobox_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 {
 	radiobox_delta_t* ptd = GETRADIOBOXDELTA(widget);
@@ -132,23 +140,15 @@ void hand_radiobox_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 	const drawing_interface* pif = NULL;
 	drawing_interface ifv = {0};
 
-	xfont_t xf;
+	clr_mod_t clrs;
 	xbrush_t xb;
-	xpen_t xp;
 
-	widget_get_xfont(widget, &xf);
-	widget_get_xbrush(widget, &xb);
-	widget_get_xpen(widget, &xp);
+	widget_get_color_mode(widget, &clrs);
+	default_xbrush(&xb);
+	format_xcolor(&clrs.clr_bkg, xb.color);
 
 	canv = widget_get_canvas(widget);
 	pif = widget_get_canvas_interface(widget);
-	
-
-	
-	
-	
-	
-	
 
 	widget_get_client_rect(widget, &xr);
 
@@ -158,18 +158,15 @@ void hand_radiobox_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 
 	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
 
-	draw_radiobox(pif, &xf, ptd->on);
-
-	
+	draw_radiobox(pif, &ptd->xf, ptd->on);
 
 	end_canvas_paint(canv, dc, pxr);
-	
 }
 
 /***************************************************************************************/
 res_win_t radiobox_create(res_win_t widget, dword_t style, const xrect_t* pxr)
 {
-	if_event_t ev = { 0 };
+	if_dispatch_t ev = { 0 };
 
 	EVENT_BEGIN_DISPATH(&ev)
 
@@ -183,6 +180,8 @@ res_win_t radiobox_create(res_win_t widget, dword_t style, const xrect_t* pxr)
 		EVENT_ON_LBUTTON_DOWN(hand_radiobox_lbutton_down)
 		EVENT_ON_LBUTTON_UP(hand_radiobox_lbutton_up)
 
+		EVENT_ON_XFONT(hand_radiobox_xfont)
+
 		EVENT_ON_NC_IMPLEMENT
 
 	EVENT_END_DISPATH
@@ -194,15 +193,12 @@ void radiobox_popup_size(res_win_t widget, xsize_t* pxs)
 {
 	radiobox_delta_t* ptd = GETRADIOBOXDELTA(widget);
 	measure_interface im = { 0 };
-	xfont_t xf = { 0 };
 
 	XDK_ASSERT(ptd != NULL);
 
-	widget_get_xfont(widget, &xf);
-
 	get_canvas_measure(widget_get_canvas(widget), &im);
 
-	calc_radiobox_size(&im, &xf, pxs);
+	calc_radiobox_size(&im, &ptd->xf, pxs);
 
 	widget_size_to_pt(widget, pxs);
 

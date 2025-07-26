@@ -26,7 +26,7 @@ LICENSE.GPL3 for more details.
 
 #include "set.h"
 
-#include "../xdkimp.h"
+#include "../xdkobj.h"
 #include "../xdkstd.h"
 
 set_t* set_alloc()
@@ -229,7 +229,8 @@ void set_get(set_t* pset, int i, set_t* pv)
 
 static const tchar_t* _set_parse(set_t** ppv, dword_t* psize, const tchar_t* token, int len)
 {
-	int i, size, index, total = 0;
+	int i, index, total = 0;
+	dword_t size;
 	set_t* pv = NULL;
 	set_t* pa = NULL;
 	bool_t b = 0;
@@ -359,7 +360,7 @@ static int _set_format(const set_t* ppv, dword_t size, tchar_t* buf, int max)
 
 void set_parse(set_t* pset, const tchar_t* token, int len)
 {
-	int size = 0;
+	dword_t size = 0;
 
 	set_reset(pset);
 
@@ -374,64 +375,3 @@ int set_format(const set_t* pset, tchar_t* buf, int max)
 	else
 		return _set_format(pset, 1, buf, max);
 }
-
-#if defined(XDK_SUPPORT_TEST)
-void test_set()
-{
-	tchar_t num[NUM_LEN + 1];
-
-	set_t* pset = set_alloc();
-	set_t ve;
-	int i;
-
-	for (i = 0; i < 10; i++)
-	{
-		xsprintf(num, _T("%d"), i);
-
-		ve.type = _SET_ELE;
-		ve.size = 1;
-		ve.data = (double)i;
-
-		set_add(pset, &ve);
-
-		set_reset(&ve);
-	}
-
-	int len = set_format(pset, NULL, MAX_LONG);
-	tchar_t* buf = xsalloc(len + 1);
-	set_format(pset, buf, len);
-
-	_tprintf(_T("%s\n"), buf);
-
-	xsfree(buf);
-
-	set_reset(pset);
-
-	set_parse(pset, _T("{1,2 ,3,{1,2},{1 2 3}, {1, 2, {1 2 3 4}}}"), -1);
-
-	len = set_format(pset, NULL, MAX_LONG);
-	buf = xsalloc(len + 1);
-	set_format(pset, buf, len);
-
-	_tprintf(_T("%s\n"), buf);
-
-	xsfree(buf);
-
-	for (i = 0; i < pset->size; i++)
-	{
-		set_get(pset, i, &ve);
-
-		len = set_format(&ve, NULL, MAX_LONG);
-		buf = xsalloc(len + 1);
-		set_format(&ve, buf, len);
-
-		_tprintf(_T("%s\n"), buf);
-
-		xsfree(buf);
-
-		set_reset(&ve);
-	}
-
-	set_free(pset);
-}
-#endif

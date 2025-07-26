@@ -289,9 +289,6 @@ EXP_API void variant_hash64(variant_t var, key64_t* pkey);
 */
 EXP_API void variant_hash128(variant_t var, key128_t* pkey);
 
-#if defined(XDK_SUPPORT_TEST)
-EXP_API void test_variant(void);
-#endif
 
 #ifdef	__cplusplus
 }

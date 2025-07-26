@@ -38,8 +38,10 @@ typedef struct _panel_delta_t{
 	int item_width;
 
 	res_win_t vsc;
-
 	bool_t b_delete;
+
+	xfont_t xf;
+	xface_t xa;
 }panel_delta_t;
 
 #define GETPANELDELTA(ph) 	(panel_delta_t*)widget_get_user_delta(ph)
@@ -60,15 +62,9 @@ static int _panelctrl_calc_width(res_win_t widget)
 {
 	panel_delta_t* ptd = GETPANELDELTA(widget);
 	link_t_ptr ilk, doc;
-	xfont_t xf;
-	xface_t xa;
 	visual_t rdc;
 	xrect_t xr;
 	int pw;
-
-	widget_get_xfont(widget, &xf);
-	widget_get_xface(widget, &xa);
-	xscpy(xa.text_wrap, GDI_ATTR_TEXT_WRAP_WORDBREAK);
 
 	rdc = widget_client_ctx(widget);
 
@@ -79,7 +75,6 @@ static int _panelctrl_calc_width(res_win_t widget)
 		doc = fetch_arch_document(ilk);
 
 		
-
 		ilk = get_arch_next_sibling_item(ilk);
 	}
 
@@ -126,13 +121,7 @@ static int _panelctrl_calc_hint(res_win_t widget, const xpoint_t* ppt, link_t_pt
 	int total = 0;
 
 	xrect_t xr;
-	xfont_t xf;
-	xface_t xa;
 	viewbox_t vb;
-
-	widget_get_xfont(widget, &xf);
-	widget_get_xface(widget, &xa);
-	xscpy(xa.text_wrap, GDI_ATTR_TEXT_WRAP_WORDBREAK);
 
 	widget_get_view_rect(widget, &vb);
 
@@ -189,16 +178,10 @@ static void _panelctrl_item_rect(res_win_t widget, link_t_ptr plk, xrect_t* pxr)
 
 	link_t_ptr ilk,doc;
 
-	xfont_t xf;
-	xface_t xa;
 	viewbox_t vb;
 	int total = 0;
 
 	xmem_zero((void*)pxr, sizeof(xrect_t));
-
-	widget_get_xfont(widget, &xf);
-	widget_get_xface(widget, &xa);
-	xscpy(xa.text_wrap, GDI_ATTR_TEXT_WRAP_WORDBREAK);
 
 	widget_get_view_rect(widget, &vb);
 
@@ -206,8 +189,6 @@ static void _panelctrl_item_rect(res_win_t widget, link_t_ptr plk, xrect_t* pxr)
 	while (ilk)
 	{
 		doc = fetch_arch_document(ilk);
-
-		
 
 		if (ilk == plk)
 		{
@@ -358,7 +339,7 @@ void noti_panel_reset_scroll(res_win_t widget, bool_t bUpdate)
 	if (widget_is_valid(ptd->vsc))
 	{
 		if (bUpdate)
-			widget_update(ptd->vsc);
+			widget_paint(ptd->vsc);
 		else
 			widget_close(ptd->vsc, 0);
 	}
@@ -376,9 +357,12 @@ int hand_panel_create(res_win_t widget, void* data)
 
 	ptd = (panel_delta_t*)xmem_alloc(sizeof(panel_delta_t));
 
-	widget_get_xfont(widget, &xf);
+	default_xfont(&ptd->xf);
+	default_xface(&ptd->xa);
+	xscpy(ptd->xa.text_wrap, GDI_ATTR_TEXT_WRAP_WORDBREAK);
+	xscpy(ptd->xa.line_align, GDI_ATTR_TEXT_ALIGN_NEAR);
 
-	font_metric_by_pt(xstof(xf.size), &pm, NULL);
+	font_metric_by_pt(xstof(ptd->xf.size), &pm, NULL);
 	xs.fw = pm;
 	xs.fh = pm;
 	widget_size_to_pt(widget, &xs);
@@ -607,7 +591,7 @@ void hand_panel_wheel(res_win_t widget, bool_t bHorz, int nDelta)
 			}
 			else
 			{
-				widget_update(ptd->vsc);
+				widget_paint(ptd->vsc);
 			}
 		}
 
@@ -622,6 +606,22 @@ void hand_panel_wheel(res_win_t widget, bool_t bHorz, int nDelta)
 	}
 }
 
+void hand_panel_xfont(res_win_t widget, const xfont_t* pxf)
+{
+	panel_delta_t* ptd = GETPANELDELTA(widget);
+
+	xmem_copy((void*)&ptd->xf, (void*)pxf, sizeof(xfont_t));
+}
+
+void hand_panel_xface(res_win_t widget, const xface_t* pxa)
+{
+	panel_delta_t* ptd = GETPANELDELTA(widget);
+
+	xmem_copy((void*)&ptd->xa, (void*)pxa, sizeof(xface_t));
+	xscpy(ptd->xa.text_wrap, GDI_ATTR_TEXT_WRAP_WORDBREAK);
+	xscpy(ptd->xa.line_align, GDI_ATTR_TEXT_ALIGN_NEAR);
+}
+
 void hand_panel_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 {
 	panel_delta_t* ptd = GETPANELDELTA(widget);
@@ -629,6 +629,7 @@ void hand_panel_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 	canvas_t canv;
 	const drawing_interface* pif = NULL;
 	drawing_interface ifv = {0};
+	const tchar_t* title = NULL;
 
 	link_t_ptr ilk,doc;
 	xrect_t xr_icon,xr;
@@ -636,31 +637,26 @@ void hand_panel_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 	int total = 0;;
 
 	viewbox_t vb = { 0 };
-	xfont_t xf_top,xf = { 0 };
-	xface_t xa_top,xa = { 0 };
+
+	clr_mod_t clrs;
+	xfont_t xf_top = { 0 };
+	xface_t xa_top = { 0 };
 	xbrush_t xb_bar, xb = { 0 };
 	xpen_t xp = { 0 };
 	xcolor_t xc = { 0 };
 
-	const tchar_t* title = NULL;
+	if (!ptd->arch) return;
 
-	if (!ptd->arch)
-		return;
+	widget_get_color_mode(widget, &clrs);
+	default_xbrush(&xb);
+	format_xcolor(&clrs.clr_bkg, xb.color);
+	default_xpen(&xp);
+	format_xcolor(&clrs.clr_frg, xp.color);
 
-	widget_get_xfont(widget, &xf);
-	widget_get_xface(widget, &xa);
-	widget_get_xbrush(widget, &xb);
-	widget_get_xpen(widget, &xp);
-	widget_get_iconic(widget, &xc);
-
-	memcpy((void*)&xf_top, (void*)&xf, sizeof(xfont_t));
+	memcpy((void*)&xf_top, (void*)&ptd->xf, sizeof(xfont_t));
 	xscpy(xf_top.weight, GDI_ATTR_FONT_WEIGHT_BOLD);
 
-	memcpy((void*)&xa_top, (void*)&xa, sizeof(xface_t));
-
-	xscpy(xa.text_wrap, GDI_ATTR_TEXT_WRAP_WORDBREAK);
-	xscpy(xa.line_align, GDI_ATTR_TEXT_ALIGN_NEAR);
-
+	memcpy((void*)&xa_top, (void*)&ptd->xa, sizeof(xface_t));
 	xscpy(xa_top.text_wrap, _T(""));
 
 	memcpy((void*)&xb_bar, (void*)&xb, sizeof(xbrush_t));
@@ -721,23 +717,20 @@ void hand_panel_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 		xr_icon.y = xr.y;
 		xr_icon.w = ptd->item_width - 12;
 		xr_icon.h = ptd->title_height;
-		(*ifv.pf_draw_text)(ifv.ctx, &xf, &xa, &xr_icon, title, -1);
+		(*ifv.pf_draw_text)(ifv.ctx, &ptd->xf, &ptd->xa, &xr_icon, title, -1);
 
 		xr.x += ptd->item_width;
 
 		ilk = get_arch_next_sibling_item(ilk);
 	}
 
-	
-
 	end_canvas_paint(canv, dc, pxr);
-	
 }
 
 /************************************************************************************************/
 res_win_t panelctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, res_win_t wparent)
 {
-	if_event_t ev = { 0 };
+	if_dispatch_t ev = { 0 };
 
 	EVENT_BEGIN_DISPATH(&ev)
 
@@ -762,6 +755,9 @@ res_win_t panelctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* 
 		EVENT_ON_LBUTTON_DBCLICK(hand_panel_lbutton_dbclick)
 		EVENT_ON_RBUTTON_DOWN(hand_panel_rbutton_down)
 		EVENT_ON_RBUTTON_UP(hand_panel_rbutton_up)
+
+		EVENT_ON_XFONT(hand_panel_xfont)
+		EVENT_ON_XFACE(hand_panel_xface)
 
 		EVENT_ON_NC_IMPLEMENT
 
@@ -850,7 +846,7 @@ void panelctrl_redraw(res_win_t widget)
 
 	_panelctrl_reset_page(widget);
 
-	widget_update(widget);
+	widget_paint(widget);
 }
 
 void panelctrl_redraw_item(res_win_t widget, link_t_ptr ilk)

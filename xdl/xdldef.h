@@ -29,6 +29,7 @@ LICENSE.GPL3 for more details.
 #define	_XDLDEF_H
 
 #include <xdk.h>
+#include <xgc.h>
 
 #if defined(_OS_WINDOWS)
 #include "windows/_cfg_win32.h"

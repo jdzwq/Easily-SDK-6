@@ -89,7 +89,7 @@ wait_t _pipe_listen(res_file_t pip, async_t* pb)
         
         EV_SET(&(ev), pip, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, 0);
         
-        rs = kevent(pb->port, &(ev), 1, &kv, 1, &(tp));
+        rs = kevent(*((int*)pb->port), &(ev), 1, &kv, 1, &(tp));
         if(rs <= 0)
         {
             return WAIT_TMO;

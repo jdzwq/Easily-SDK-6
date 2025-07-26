@@ -26,7 +26,7 @@ LICENSE.GPL3 for more details.
 
 #include "map.h"
 
-#include "../xdkimp.h"
+#include "../xdkobj.h"
 #include "../xdkstd.h"
 
 typedef struct _map_context{
@@ -597,52 +597,3 @@ dword_t map_decode(map_t map, const byte_t* buf)
 
 	return (n + 4);
 }
-
-#if defined(XDK_SUPPORT_TEST)
-void test_map(void)
-{
-	int items = 128;
-	int b = 0x01;
-	int i, k, size, len;
-	map_t pvt;
-	tchar_t* buf;
-
-	for (k = 1; k <= 8; k <<= 1)
-	{
-		pvt = map_alloc(items, k);
-		size = map_size(pvt);
-
-		_tprintf(_T("items:%d bits:%d size:%d mask:%d\n"), items, k, size, b);
-
-		for (i = 0; i < items; i++)
-			map_set_bit(pvt, i, b);
-
-		int rows = items / (32 / k);
-
-		for (i = 0; i < rows; i++)
-			map_set_bit(pvt, i * (32 / k) + i % (32 / k), 0);
-
-		len = map_format(pvt, NULL, MAX_LONG);
-		buf = xsalloc(len + 1);
-		map_format(pvt, buf, len);
-
-		map_zero(pvt);
-		map_parse(pvt, buf, len);
-		xsfree(buf);
-
-		for (i = 0; i < items; i++)
-		{
-			if (map_get_bit(pvt, i) == b)
-				_tprintf(_T("1"));
-			else
-				_tprintf(_T("0"));
-
-			if (!((i + 1) % (32 / k)))
-				_tprintf(_T("\n"));
-		}
-
-		b <<= 1;
-		map_free(pvt);
-	}
-}
-#endif

@@ -1515,7 +1515,7 @@ void MainFrame_OnSize(res_win_t widget, int code, const xsize_t* pxs)
 	{
 		widget_move(pdt->hToolBar, RECTPOINT(&xr));
 		widget_size(pdt->hToolBar, RECTSIZE(&xr));
-		widget_update(pdt->hToolBar);
+		widget_paint(pdt->hToolBar);
 	}
 
 	_MainFrame_CalcStatusBar(widget, &xr);
@@ -1523,7 +1523,7 @@ void MainFrame_OnSize(res_win_t widget, int code, const xsize_t* pxs)
 	{
 		widget_move(pdt->hStatusBar, RECTPOINT(&xr));
 		widget_size(pdt->hStatusBar, RECTSIZE(&xr));
-		widget_update(pdt->hStatusBar);
+		widget_paint(pdt->hStatusBar);
 	}
 
 	_MainFrame_CalcTreeBar(widget, &xr);
@@ -1531,7 +1531,7 @@ void MainFrame_OnSize(res_win_t widget, int code, const xsize_t* pxs)
 	{
 		widget_move(pdt->hTreeBar, RECTPOINT(&xr));
 		widget_size(pdt->hTreeBar, RECTSIZE(&xr));
-		widget_update(pdt->hTreeBar);
+		widget_paint(pdt->hTreeBar);
 	}
 
 	_MainFrame_CalcTitleBar(widget, &xr);
@@ -1539,7 +1539,7 @@ void MainFrame_OnSize(res_win_t widget, int code, const xsize_t* pxs)
 	{
 		widget_move(pdt->hTitleBar, RECTPOINT(&xr));
 		widget_size(pdt->hTitleBar, RECTSIZE(&xr));
-		widget_update(pdt->hTitleBar);
+		widget_paint(pdt->hTitleBar);
 	}
 
 	_MainFrame_CalcPanelBar(widget, &xr);
@@ -1556,7 +1556,7 @@ void MainFrame_OnSize(res_win_t widget, int code, const xsize_t* pxs)
 			{
 				widget_move(hPanel, RECTPOINT(&xr));
 				widget_size(hPanel, RECTSIZE(&xr));
-				widget_update(hPanel);
+				widget_paint(hPanel);
 			}
 
 			plk = get_title_next_item(ptrTitle, plk);
@@ -1611,7 +1611,7 @@ void MainFrame_OnNotice(res_win_t widget, LPNOTICE phdr)
 {
 	MainFrameDelta* pdt = GETMAINFRAMEDELTA(widget);
 
-	if (phdr->id == IDC_MAINFRAME_TOOLBAR)
+	if (phdr->user == IDC_MAINFRAME_TOOLBAR)
 	{
 		NOTICE_TOOL* pnt = (NOTICE_TOOL*)phdr;
 		switch (pnt->code)
@@ -1624,7 +1624,7 @@ void MainFrame_OnNotice(res_win_t widget, LPNOTICE phdr)
 			break;
 		}
 	}
-	else if (phdr->id == IDC_MAINFRAME_TITLEBAR)
+	else if (phdr->user == IDC_MAINFRAME_TITLEBAR)
 	{
 		NOTICE_TITLE* pnt = (NOTICE_TITLE*)phdr;
 		switch (pnt->code)
@@ -1646,7 +1646,7 @@ void MainFrame_OnNotice(res_win_t widget, LPNOTICE phdr)
 			break;
 		}
 	}
-	else if (phdr->id == IDC_MAINFRAME_TREEBAR)
+	else if (phdr->user == IDC_MAINFRAME_TREEBAR)
 	{
 		NOTICE_TREE* pnt = (NOTICE_TREE*)phdr;
 		switch (pnt->code)
@@ -1665,7 +1665,7 @@ void MainFrame_OnNotice(res_win_t widget, LPNOTICE phdr)
 			break;
 		}
 	}
-	else if (phdr->id == IDC_MAINFRAME_STATUSBAR)
+	else if (phdr->user == IDC_MAINFRAME_STATUSBAR)
 	{
 		NOTICE_STATUS* pnt = (NOTICE_STATUS*)phdr;
 		switch (pnt->code)
@@ -1674,7 +1674,7 @@ void MainFrame_OnNotice(res_win_t widget, LPNOTICE phdr)
 			break;
 		}
 	}
-	else if (phdr->id == IDC_MAINFRAME_OWNERPANEL)
+	else if (phdr->user == IDC_MAINFRAME_OWNERPANEL)
 	{
 		NOTICE_OWNER* pnu = (NOTICE_OWNER*)phdr;
 		switch (pnu->code)
@@ -1694,7 +1694,7 @@ res_win_t MainFrame_Create(const tchar_t* mname)
 	res_win_t widget;
 	xrect_t xr = { 0 };
 
-	if_event_t ev = { 0 };
+	if_dispatch_t ev = { 0 };
 
 	EVENT_BEGIN_DISPATH(&ev)
 
@@ -1728,7 +1728,7 @@ res_win_t MainFrame_Create(const tchar_t* mname)
 	}
 	
 	widget_show(widget, WS_SHOW_NORMAL);
-	widget_update(widget);
+	widget_paint(widget);
 
 	return widget;
 }

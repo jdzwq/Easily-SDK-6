@@ -94,12 +94,6 @@ EXP_API void insert_integer(int** sa, int index, int val);
 EXP_API void delete_integer(int** sa, int index);
 
 
-#if defined(XDK_SUPPORT_TEST)
-
-EXP_API void test_integer_array(void);
-
-#endif
-
 #ifdef	__cplusplus
 }
 #endif

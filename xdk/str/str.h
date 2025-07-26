@@ -33,6 +33,23 @@ LICENSE.GPL3 for more details.
 extern "C" {
 #endif
 
+/**********************************************
+xprintf usage:
+pattern: %[flag][width][.][prec][size][type]
+flag: [+|#]
+width: [0-9]
+prec: [0-9]
+size: [h|l]
+type: [c|d|u|x|X|f|s|S]
+**********************************************/
+
+/**********************************************
+xscanf usage:
+pattern: %[size][type]
+size: [h|l]
+type: [c|d|u|x|X|f|s|S]
+**********************************************/
+
 EXP_API schar_t* a_xsalloc(int len);
 EXP_API wchar_t* w_xsalloc(int len);
 
@@ -78,17 +95,35 @@ EXP_API int w_xsntol(const wchar_t* sz, int n);
 EXP_API int a_xstol(const schar_t* sz);
 EXP_API int w_xstol(const wchar_t* sz);
 
+EXP_API long long a_xsntoll(const schar_t* sz, int n);
+EXP_API long long w_xsntoll(const wchar_t* sz, int n);
+
+EXP_API long long a_xstoll(const schar_t* sz);
+EXP_API long long w_xstoll(const wchar_t* sz);
+
 EXP_API float a_xsntof(const schar_t* sz, int n);
 EXP_API float w_xsntof(const wchar_t* sz, int n);
 
 EXP_API float a_xstof(const schar_t* sz);
 EXP_API float w_xstof(const wchar_t* sz);
 
+EXP_API unsigned short a_hexntos(const schar_t* sz, int n);
+EXP_API unsigned short w_hexntos(const wchar_t* sz, int n);
+
 EXP_API unsigned int a_hexntol(const schar_t* sz, int n);
 EXP_API unsigned int w_hexntol(const wchar_t* sz, int n);
 
+EXP_API unsigned long long a_hexntoll(const schar_t* sz, int n);
+EXP_API unsigned long long w_hexntoll(const wchar_t* sz, int n);
+
+EXP_API unsigned short a_hextos(const schar_t* sz);
+EXP_API unsigned short w_hextos(const wchar_t* sz);
+
 EXP_API unsigned int a_hextol(const schar_t* sz);
 EXP_API unsigned int w_hextol(const wchar_t* sz);
+
+EXP_API unsigned long long a_hextoll(const schar_t* sz);
+EXP_API unsigned long long w_hextoll(const wchar_t* sz);
 
 EXP_API double a_xsntonum_dig(const schar_t* sz, int n, int digi);
 EXP_API double w_xsntonum_dig(const wchar_t* sz, int n, int digi);
@@ -98,15 +133,6 @@ EXP_API double w_xsntonum(const wchar_t* sz, int n);
 
 EXP_API double a_xstonum(const schar_t* sz);
 EXP_API double w_xstonum(const wchar_t* sz);
-
-EXP_API long long a_xsntoll(const schar_t* sz, int n);
-EXP_API long long w_xsntoll(const wchar_t* sz, int n);
-
-EXP_API long long a_xstoll(const schar_t* sz);
-EXP_API long long w_xstoll(const wchar_t* sz);
-
-EXP_API int a_lltoxs(long long ll, schar_t* buf, int n);
-EXP_API int w_lltoxs(long long ll, wchar_t* buf, int n);
 
 EXP_API int a_stoxs(short s, schar_t* buf, int n);
 EXP_API int w_stoxs(short s, wchar_t* buf, int n);
@@ -120,8 +146,20 @@ EXP_API int w_ltoxs(int s, wchar_t* buf, int n);
 EXP_API int a_ultoxs(unsigned int s, schar_t* buf, int n);
 EXP_API int w_ultoxs(unsigned int s, wchar_t* buf, int n);
 
+EXP_API int a_lltoxs(long long ll, schar_t* buf, int n);
+EXP_API int w_lltoxs(long long ll, wchar_t* buf, int n);
+
+EXP_API int a_ulltoxs(unsigned long long ll, schar_t* buf, int n);
+EXP_API int w_ulltoxs(unsigned long long ll, wchar_t* buf, int n);
+
+EXP_API int a_stohex(unsigned short s, schar_t type, schar_t* buf, int n);
+EXP_API int w_stohex(unsigned short s, wchar_t type, wchar_t* buf, int n);
+
 EXP_API int a_ltohex(unsigned int s, schar_t type, schar_t* buf, int n);
 EXP_API int w_ltohex(unsigned int s, wchar_t type, wchar_t* buf, int n);
+
+EXP_API int a_lltohex(unsigned long long l, schar_t type, schar_t* buf, int n);
+EXP_API int w_lltohex(unsigned long long l, wchar_t type, wchar_t* buf, int n);
 
 EXP_API int a_ftoxs(float s, schar_t* buf, int n);
 EXP_API int w_ftoxs(float s, wchar_t* buf, int n);
@@ -246,21 +284,6 @@ EXP_API bool_t w_is_prefix(const wchar_t* str, const wchar_t* sub);
 EXP_API bool_t a_is_suffix(const schar_t* str, const schar_t* sub);
 EXP_API bool_t w_is_suffix(const wchar_t* str, const wchar_t* sub);
 
-EXP_API int a_xsprintf_arg(schar_t* buf,const schar_t* fmt,va_list* parg);
-EXP_API int w_xsprintf_arg(wchar_t* buf,const wchar_t* fmt,va_list* parg);
-
-EXP_API int a_xsprintf(schar_t* buf,const schar_t* fmt,...);
-EXP_API int w_xsprintf(wchar_t* buf,const wchar_t* fmt,...);
-
-EXP_API int a_xsappend(schar_t* buf, const schar_t* fmt, ...);
-EXP_API int w_xsappend(wchar_t* buf, const wchar_t* fmt, ...);
-
-EXP_API const schar_t* a_xsscanf(const schar_t* str, const schar_t* fmt, ...);
-EXP_API const wchar_t* w_xsscanf(const wchar_t* str, const wchar_t* fmt, ...);
-
-EXP_API const schar_t* a_xsscanf_arg(const schar_t* str, const schar_t* fmt, va_list* parg);
-EXP_API const wchar_t* w_xsscanf_arg(const wchar_t* str, const wchar_t* fmt, va_list* parg);
-
 #ifdef	__cplusplus
 }
 #endif
@@ -288,8 +311,12 @@ EXP_API const wchar_t* w_xsscanf_arg(const wchar_t* str, const wchar_t* fmt, va_
 #define xstonum				w_xstonum
 #define xsntoll				w_xsntoll
 #define xstoll				w_xstoll
+#define hexntos				w_hexntos
+#define hextos				w_hextos
 #define hexntol				w_hexntol
 #define hextol				w_hextol
+#define hexntoll			w_hexntoll
+#define hextoll				w_hextoll
 #define xsntriml			w_xsntriml
 #define xstriml				w_xstriml
 #define xsntriml			w_xsntriml
@@ -331,11 +358,6 @@ EXP_API const wchar_t* w_xsscanf_arg(const wchar_t* str, const wchar_t* fmt, va_
 #define xsclone				w_xsclone
 #define is_prefix			w_is_prefix
 #define is_suffix			w_is_suffix
-#define xsprintf			w_xsprintf
-#define xsprintf_arg		w_xsprintf_arg
-#define xsappend			w_xsappend
-#define xsscanf				w_xsscanf
-#define xsscanf_arg			w_xsscanf_arg
 
 #define stoxs				w_stoxs
 #define ustoxs				w_ustoxs
@@ -343,11 +365,11 @@ EXP_API const wchar_t* w_xsscanf_arg(const wchar_t* str, const wchar_t* fmt, va_
 #define ultoxs				w_ultoxs
 #define ftoxs				w_ftoxs
 #define lltoxs				w_lltoxs
+#define stohex				w_stohex
 #define ltohex				w_ltohex
+#define lltohex				w_lltohex
 #define numtoxs_dig			w_numtoxs_dig
 #define numtoxs				w_numtoxs
-
-#define xschs(pch)			(((pch) && *(pch))? ucs_sequence(*(pch)) : 0)
 
 #else
 
@@ -372,8 +394,12 @@ EXP_API const wchar_t* w_xsscanf_arg(const wchar_t* str, const wchar_t* fmt, va_
 #define xsntonum			a_xsntonum
 #define xstoll				a_xstoll
 #define xsntoll				a_xsntoll
+#define hexntos				a_hexntos
+#define hextos				a_hextos
 #define hexntol				a_hexntol
 #define hextol				a_hextol
+#define hexntoll			a_hexntoll
+#define hextoll				a_hextoll
 #define xsntriml			a_xsntriml
 #define xstriml				a_xstriml
 #define xsntrimr			a_xsntrimr
@@ -416,23 +442,17 @@ EXP_API const wchar_t* w_xsscanf_arg(const wchar_t* str, const wchar_t* fmt, va_
 #define is_prefix			a_is_prefix
 #define is_suffix			a_is_suffix
 
-#define xsprintf			a_xsprintf
-#define xsprintf_arg		a_xsprintf_arg
-#define xsappend			a_xsappend
-#define xsscanf				a_xsscanf
-#define xsscanf_arg			a_xsscanf_arg
-
 #define stoxs				a_stoxs
 #define ustoxs				a_ustoxs
 #define ltoxs				a_ltoxs
 #define ultoxs				a_ultoxs
 #define ftoxs				a_ftoxs
 #define lltoxs				a_lltoxs
+#define stohex				a_stohex
 #define ltohex				a_ltohex
+#define lltohex				a_lltohex
 #define numtoxs_dig			a_numtoxs_dig
 #define numtoxs				a_numtoxs
-
-#define xschs(pch)			(((pch) && *(pch))? mbs_sequence(*(pch)) : 0)
 
 #endif //UNICODE
 

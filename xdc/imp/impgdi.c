@@ -245,6 +245,88 @@ void draw_polyline(canvas_t canv, const xpen_t* pxp, const xpoint_t* ppt, int n)
 	xmem_free(lpt);
 }
 
+void draw_path_raw(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const tchar_t* aa, const xpoint_t* pa, int n)
+{
+	if_context_t *pif;
+
+	pif = PROCESS_CONTEXT_INTERFACE;
+
+	(*pif->pf_gdi_draw_path)(rdc, pxp, pxb, aa, pa);
+}
+
+void draw_path(canvas_t canv, const xpen_t* pxp, const xbrush_t* pxb, const tchar_t* aa, const xpoint_t* pa, int n)
+{
+	visual_t rdc = get_canvas_visual(canv);
+	xpoint_t* ppt;
+	int i, j;
+
+	if_context_t *pif;
+
+	pif = PROCESS_CONTEXT_INTERFACE;
+
+	if (is_null(aa))
+		return;
+
+	ppt = (xpoint_t*)xmem_alloc(n * sizeof(xpoint_t));
+	xmem_copy((void*)ppt, (void*)pa, n * sizeof(xpoint_t));
+
+	i = j = 0;
+	while (*(aa + j))
+	{
+		if (*(aa + j) == _T('M') || *(aa + j) == _T('m'))
+		{
+			point_tm_to_pt(canv, &ppt[i]);
+			i += 1;
+		}
+		else if (*(aa + j) == _T('L') || *(aa + j) == _T('l'))
+		{
+			point_tm_to_pt(canv, &ppt[i]);
+			i += 1;
+		}
+		else if (*(aa + j) == _T('Q') || *(aa + j) == _T('q'))
+		{
+			point_tm_to_pt(canv, &ppt[i]);
+			point_tm_to_pt(canv, &ppt[i + 1]);
+			i += 2;
+		}
+		else if (*(aa + j) == _T('T') || *(aa + j) == _T('t'))
+		{
+			point_tm_to_pt(canv, &ppt[i]);
+			i += 1;
+		}
+		else if (*(aa + j) == _T('C') || *(aa + j) == _T('c'))
+		{
+			point_tm_to_pt(canv, &ppt[i]);
+			point_tm_to_pt(canv, &ppt[i + 1]);
+			point_tm_to_pt(canv, &ppt[i + 2]);
+			i += 3;
+		}
+		else if (*(aa + j) == _T('S') || *(aa + j) == _T('s'))
+		{
+			point_tm_to_pt(canv, &ppt[i]);
+			point_tm_to_pt(canv, &ppt[i + 1]);
+			i += 2;
+		}
+		else if (*(aa + j) == _T('A') || *(aa + j) == _T('a'))
+		{
+			size_tm_to_pt(canv, (xsize_t*)(&ppt[i]));
+			size_tm_to_pt(canv, (xsize_t*)(&ppt[i + 1]));
+			point_tm_to_pt(canv, &ppt[i + 2]);
+			i += 3;
+		}
+		else if (*(aa + j) == _T('Z') || *(aa + j) == _T('z'))
+		{
+			break;
+		}
+
+		j++;
+	}
+
+	(*pif->pf_gdi_draw_path)(rdc, pxp, pxb, aa, ppt);
+
+	xmem_free(ppt);
+}
+
 void draw_polygon_raw(visual_t rdc,const xpen_t* pxp,const xbrush_t* pxb,const xpoint_t* ppt,int n)
 {
 	if_context_t *pif;
@@ -383,88 +465,6 @@ void draw_pie(canvas_t canv, const xpen_t* pxp, const xbrush_t* pxb, const xrect
 	rect_tm_to_pt(canv, &xr);
 
 	(*pif->pf_gdi_draw_pie)(rdc, pxp, pxb, &xr, fang, tang);
-}
-
-void draw_path_raw(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const tchar_t* aa, const xpoint_t* pa, int n)
-{
-	if_context_t *pif;
-
-	pif = PROCESS_CONTEXT_INTERFACE;
-
-	(*pif->pf_gdi_draw_path)(rdc, pxp, pxb, aa, pa);
-}
-
-void draw_path(canvas_t canv, const xpen_t* pxp, const xbrush_t* pxb, const tchar_t* aa, const xpoint_t* pa, int n)
-{
-	visual_t rdc = get_canvas_visual(canv);
-	xpoint_t* ppt;
-	int i, j;
-
-	if_context_t *pif;
-
-	pif = PROCESS_CONTEXT_INTERFACE;
-
-	if (is_null(aa))
-		return;
-
-	ppt = (xpoint_t*)xmem_alloc(n * sizeof(xpoint_t));
-	xmem_copy((void*)ppt, (void*)pa, n * sizeof(xpoint_t));
-
-	i = j = 0;
-	while (*(aa + j))
-	{
-		if (*(aa + j) == _T('M') || *(aa + j) == _T('m'))
-		{
-			point_tm_to_pt(canv, &ppt[i]);
-			i += 1;
-		}
-		else if (*(aa + j) == _T('L') || *(aa + j) == _T('l'))
-		{
-			point_tm_to_pt(canv, &ppt[i]);
-			i += 1;
-		}
-		else if (*(aa + j) == _T('Q') || *(aa + j) == _T('q'))
-		{
-			point_tm_to_pt(canv, &ppt[i]);
-			point_tm_to_pt(canv, &ppt[i + 1]);
-			i += 2;
-		}
-		else if (*(aa + j) == _T('T') || *(aa + j) == _T('t'))
-		{
-			point_tm_to_pt(canv, &ppt[i]);
-			i += 1;
-		}
-		else if (*(aa + j) == _T('C') || *(aa + j) == _T('c'))
-		{
-			point_tm_to_pt(canv, &ppt[i]);
-			point_tm_to_pt(canv, &ppt[i + 1]);
-			point_tm_to_pt(canv, &ppt[i + 2]);
-			i += 3;
-		}
-		else if (*(aa + j) == _T('S') || *(aa + j) == _T('s'))
-		{
-			point_tm_to_pt(canv, &ppt[i]);
-			point_tm_to_pt(canv, &ppt[i + 1]);
-			i += 2;
-		}
-		else if (*(aa + j) == _T('A') || *(aa + j) == _T('a'))
-		{
-			size_tm_to_pt(canv, (xsize_t*)(&ppt[i]));
-			size_tm_to_pt(canv, (xsize_t*)(&ppt[i + 1]));
-			point_tm_to_pt(canv, &ppt[i + 2]);
-			i += 3;
-		}
-		else if (*(aa + j) == _T('Z') || *(aa + j) == _T('z'))
-		{
-			break;
-		}
-
-		j++;
-	}
-
-	(*pif->pf_gdi_draw_path)(rdc, pxp, pxb, aa, ppt);
-
-	xmem_free(ppt);
 }
 
 void draw_text_raw(visual_t rdc,const xfont_t* pxf,const xface_t* pxa,const xrect_t* pxr,const tchar_t* txt,int len)
@@ -733,7 +733,6 @@ void draw_image(canvas_t canv, const ximage_t* pxi, const xrect_t* pxr)
 	draw_image_raw(rdc, pxi, &xr);
 }
 
-
 void gradient_rect_raw(visual_t rdc, const xcolor_t* xc_brim, const xcolor_t* xc_core, const tchar_t* gradient, const xrect_t* pxr)
 {
 	if_context_t *pif;
@@ -752,6 +751,15 @@ void alphablend_rect_raw(visual_t rdc, const xcolor_t* pxc, const xrect_t* pxr, 
 	(*pif->pf_gdi_alphablend_rect)(rdc, pxc, pxr, opacity);
 }
 
+void invert_rect_raw(visual_t rdc, const xrect_t* pxr)
+{
+	if_context_t *pif;
+
+	pif = PROCESS_CONTEXT_INTERFACE;
+
+	(*pif->pf_gdi_invert_rect)(rdc, pxr);
+}
+
 void exclude_rect_raw(visual_t rdc, const xrect_t* pxr)
 {
 	if_context_t *pif;
@@ -761,37 +769,16 @@ void exclude_rect_raw(visual_t rdc, const xrect_t* pxr)
 	(*pif->pf_gdi_exclude_rect)(rdc, pxr);
 }
 
-void fill_region_raw(visual_t rdc, const xbrush_t* pxb, res_rgn_t rgn)
+void inclip_rect_raw(visual_t rdc, const xrect_t* pxr)
 {
 	if_context_t *pif;
 
 	pif = PROCESS_CONTEXT_INTERFACE;
 
-	(*pif->pf_gdi_fill_region)(rdc, pxb, rgn);
+	(*pif->pf_gdi_inclip_rect)(rdc, pxr);
 }
 
 /******************************************************************************************************************/
-
-void image_size_raw(visual_t rdc, const ximage_t* pxi, xsize_t* pxs)
-{
-	bitmap_t bmp;
-
-	bmp = load_bitmap_from_ximage(rdc, (ximage_t*)pxi, 0, 0);
-	if (bmp)
-	{
-		get_bitmap_size(bmp, &pxs->w, &pxs->h);
-		destroy_bitmap(bmp);
-	}
-}
-
-void image_size(canvas_t canv, const ximage_t* pxi, xsize_t* pxs)
-{
-	visual_t rdc = get_canvas_visual(canv);
-
-	image_size_raw(rdc, pxi, pxs);
-
-	size_pt_to_tm(canv, pxs);
-}
 
 void draw_triangle_raw(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const xrect_t* pxr, const tchar_t* orient)
 {
@@ -1003,6 +990,27 @@ void color_out(canvas_t canv, const xrect_t* pxr, bool_t horz, const tchar_t* rg
 	rect_tm_to_pt(canv, &xr);
 
 	color_out_raw(rdc, &xr, horz, rgbstr, len);
+}
+
+void image_size_raw(visual_t rdc, const ximage_t* pxi, xsize_t* pxs)
+{
+	bitmap_t bmp;
+
+	bmp = load_bitmap_from_ximage(rdc, (ximage_t*)pxi, 0, 0);
+	if (bmp)
+	{
+		get_bitmap_size(bmp, &pxs->w, &pxs->h);
+		destroy_bitmap(bmp);
+	}
+}
+
+void image_size(canvas_t canv, const ximage_t* pxi, xsize_t* pxs)
+{
+	visual_t rdc = get_canvas_visual(canv);
+
+	image_size_raw(rdc, pxi, pxs);
+
+	size_pt_to_tm(canv, pxs);
 }
 
 #endif /*XDU_SUPPORT_CONTEXT*/

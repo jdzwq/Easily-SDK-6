@@ -26,7 +26,6 @@ LICENSE.GPL3 for more details.
 
 #include "sort.h"
 
-#include "../xdkimp.h"
 #include "../xdkstd.h"
 
 void bubble_xsort(xsort_t* pxs, int count)

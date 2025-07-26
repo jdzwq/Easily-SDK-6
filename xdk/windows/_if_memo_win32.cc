@@ -283,7 +283,30 @@ void _paged_unlock(void* p)
 	}
 }
 
-bool_t _paged_protect(void* p, bool_t b)
+#endif
+
+/*****************************************************************************************/
+#ifdef XDK_SUPPORT_MEMO_CACHE
+
+void* _cache_open()
+{
+	SIZE_T psize = 0;
+	DWORD page_gran;
+
+	SYSTEM_INFO si = { 0 };
+
+	GetSystemInfo(&si);
+	page_gran = si.dwAllocationGranularity;
+
+	return VirtualAlloc(NULL, (page_gran * 1024), MEM_RESERVE | MEM_TOP_DOWN, PAGE_NOACCESS);
+}
+
+void _cache_close(void* fh)
+{
+	VirtualFree(fh, 0, MEM_RELEASE);
+}
+
+bool_t _cache_protect(void* p, bool_t b)
 {
 	MEMORY_BASIC_INFORMATION mbi = { 0 };
 	DWORD dw = 0;
@@ -309,28 +332,6 @@ bool_t _paged_protect(void* p, bool_t b)
 	}
 
 	return 0;
-}
-#endif
-
-/*****************************************************************************************/
-#ifdef XDK_SUPPORT_MEMO_CACHE
-
-void* _cache_open()
-{
-	SIZE_T psize = 0;
-	DWORD page_gran;
-
-	SYSTEM_INFO si = { 0 };
-
-	GetSystemInfo(&si);
-	page_gran = si.dwAllocationGranularity;
-
-	return VirtualAlloc(NULL, (page_gran * 1024), MEM_RESERVE | MEM_TOP_DOWN, PAGE_NOACCESS);
-}
-
-void _cache_close(void* fh)
-{
-	VirtualFree(fh, 0, MEM_RELEASE);
 }
 
 bool_t _cache_write(void* fh, dword_t hoff, dword_t loff, void* buf, dword_t size, dword_t* pb)

@@ -202,7 +202,7 @@ void hand_horzbox_timer(res_win_t widget, vword_t tid)
 	xpoint_t pt;
 	xrect_t xr;
 
-	message_position(&pt);
+	//message_position(&pt);
 
 	widget_get_window_rect(widget, &xr);
 
@@ -222,14 +222,17 @@ void hand_horzbox_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 	const drawing_interface* pif = NULL;
 	drawing_interface ifv = {0};
 
-	xbrush_t xb;
-	xpen_t xp;
-	xcolor_t xc_brim, xc_core;
 	xrect_t xr;
 
-	widget_get_xbrush(widget, &xb);
-	default_xpen(&xp);
-	xscpy(xp.color, xb.color);
+	clr_mod_t clrs;
+	xbrush_t xb;
+	xcolor_t xc_brim, xc_core;
+
+	widget_get_color_mode(widget, &clrs);
+	default_xbrush(&xb);
+	format_xcolor(&clrs.clr_bkg, xb.color);
+	xmem_copy((void*)&xc_brim, (void*)&clrs.clr_bkg, sizeof(xcolor_t));
+	xmem_copy((void*)&xc_core, (void*)&clrs.clr_bkg, sizeof(xcolor_t));
 
 	canv = widget_get_canvas(widget);
 	pif = widget_get_canvas_interface(widget);
@@ -240,14 +243,11 @@ void hand_horzbox_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 
 	get_visual_interface(rdc, &ifv);
 
-	lighten_xbrush(&xb, DEF_MIDD_DARKEN);
-	(*ifv.pf_draw_rect)(ifv.ctx, &xp, &xb, &xr);
+	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
 
 	_horzbox_bar_rect(widget, &xr);
 
-	parse_xcolor(&xc_brim, xb.color);
 	lighten_xcolor(&xc_brim, DEF_MIDD_LIGHTEN);
-	parse_xcolor(&xc_core, xb.color);
 
 	(*ifv.pf_gradient_rect)(ifv.ctx, &xc_brim, &xc_core, GDI_ATTR_GRADIENT_VERT, &xr);
 
@@ -257,7 +257,7 @@ void hand_horzbox_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 /***************************************************************************************/
 res_win_t horzbox_create(res_win_t widget, dword_t style, const xrect_t* pxr)
 {
-	if_event_t ev = { 0 };
+	if_dispatch_t ev = { 0 };
 
 	EVENT_BEGIN_DISPATH(&ev)
 
@@ -289,7 +289,7 @@ void horzbox_popup_size(res_win_t widget, xsize_t* pxs)
 
 	XDK_ASSERT(ptd != NULL);
 
-	widget_get_xfont(widget, &xf);
+	default_xfont(&xf);
 
 	get_canvas_measure(widget_get_canvas(widget), &im);
 

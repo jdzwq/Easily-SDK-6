@@ -195,7 +195,7 @@ canvas_t create_display_canvas(visual_t rdc)
 	if (rdc)
 		pcanv->view = create_compatible_context(rdc, 1, 1);
 	else
-		pcanv->view = create_display_context(NULL);
+		pcanv->view = create_display_context((res_win_t)0);
 
 	get_device_caps(pcanv->view, &cap);
 

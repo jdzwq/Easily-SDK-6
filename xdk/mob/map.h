@@ -175,7 +175,7 @@ EXP_API void map_parse(map_t map, const tchar_t* str, int len);
 @INPUT int max: the buffer size in characters, not include terminate character.
 @RETURN int: return the formaped string token length.
 */
-EXP_API int map_formap(map_t map, tchar_t* buf, int max);
+EXP_API int map_format(map_t map, tchar_t* buf, int max);
 
 /*
 @FUNCTION map_encode: encode map object to bytes buffer.
@@ -194,9 +194,6 @@ EXP_API dword_t map_encode(map_t map, byte_t* buf, dword_t max);
 */
 EXP_API dword_t map_decode(map_t map, const byte_t* buf);
 
-#if defined(XDK_SUPPORT_TEST)
-EXP_API void test_map(void);
-#endif
 
 #ifdef	__cplusplus
 }

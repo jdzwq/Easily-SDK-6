@@ -65,6 +65,9 @@ typedef struct _textor_context{
 	visual_t cdc;
 	viewbox_t vb;
 
+	const xfont_t* pxf;
+	const xface_t* pxa;
+
 	void* data;
 	void* object;
 	bool_t atom;

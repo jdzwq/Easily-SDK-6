@@ -48,6 +48,9 @@ LICENSE.GPL3 for more details.
 typedef struct _msgdlg_delta_t{
 	dword_t btn;
 	const tchar_t* text;
+
+	xfont_t xf;
+	xface_t xa;
 }msgdlg_delta_t;
 
 typedef struct _MSGDLGDATA{
@@ -77,6 +80,12 @@ int hand_msgdlg_create(res_win_t widget, void* data)
 
 	ptd->btn = pm->btn;
 	ptd->text = pm->text;
+
+	default_xfont(&ptd->xf);
+	default_xface(&ptd->xa);
+	xscpy(ptd->xa.text_align, GDI_ATTR_TEXT_ALIGN_CENTER);
+	xscpy(ptd->xa.line_align, GDI_ATTR_TEXT_ALIGN_CENTER);
+	xscpy(ptd->xa.text_wrap, GDI_ATTR_TEXT_WRAP_WORDBREAK);
 
 	xs.fw = MSGDLG_TITLE_WIDTH;
 	xs.fh = MSGDLG_TITLE_HEIGHT;
@@ -454,14 +463,24 @@ void hand_msgdlg_keydown(res_win_t widget, dword_t ks, int key)
 	}
 }
 
+void hand_msgdlg_xfont(res_win_t widget, const xfont_t* pxf)
+{
+	msgdlg_delta_t* ptd = GETMSGDLGDELTA(widget);
+
+	xmem_copy((void*)&ptd->xf, (void*)pxf, sizeof(xfont_t));
+}
+
+void hand_msgdlg_xface(res_win_t widget, const xface_t* pxa)
+{
+	msgdlg_delta_t* ptd = GETMSGDLGDELTA(widget);
+
+	xmem_copy((void*)&ptd->xa, (void*)pxa, sizeof(xface_t));
+}
+
 void hand_msgdlg_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 {
 	msgdlg_delta_t* ptd = GETMSGDLGDELTA(widget);
 	
-	xfont_t xf = { 0 };
-	xface_t xa = { 0 };
-	xpen_t xp = { 0 };
-	xbrush_t xb = { 0 };
 	xrect_t xr,xr_txt,xr_bar;
 	xsize_t xs;
 	xpoint_t pt1, pt2;
@@ -470,11 +489,15 @@ void hand_msgdlg_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 	canvas_t canv;
 	drawing_interface ifv = {0};
 
-	widget_get_xfont(widget, &xf);
-	widget_get_xface(widget, &xa);
+	clr_mod_t clrs;
+	xbrush_t xb;
+	xpen_t xp;
 
-	widget_get_xbrush(widget, &xb);
-	widget_get_xpen(widget, &xp);
+	widget_get_color_mode(widget, &clrs);
+	default_xbrush(&xb);
+	format_xcolor(&clrs.clr_bkg, xb.color);
+	default_xpen(&xp);
+	format_xcolor(&clrs.clr_frg, xp.color);
 
 	widget_get_client_rect(widget, &xr);
 
@@ -512,11 +535,7 @@ void hand_msgdlg_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 	xr_txt.w = xr.w - 2 * xs.w;
 	xr_txt.h = xr.h - xs.h;
 
-	xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_CENTER);
-	xscpy(xa.line_align, GDI_ATTR_TEXT_ALIGN_CENTER);
-	xscpy(xa.text_wrap, GDI_ATTR_TEXT_WRAP_WORDBREAK);
-
-	(*ifv.pf_draw_text)(ifv.ctx, &xf, &xa, &xr_txt, ptd->text, -1);
+	(*ifv.pf_draw_text)(ifv.ctx, &ptd->xf, &ptd->xa, &xr_txt, ptd->text, -1);
 
 	end_canvas_paint(canv, dc, pxr);
 }
@@ -525,7 +544,7 @@ void hand_msgdlg_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 res_win_t msgdlg_create(const tchar_t* text, dword_t button, res_win_t owner)
 {
 	MSGDLGDATA md = { 0 };
-	if_event_t ev = { 0 };
+	if_dispatch_t ev = { 0 };
 	xrect_t xr = { 0 };
 	clr_mod_t clr = { 0 };
 	res_win_t dlg;
@@ -548,6 +567,9 @@ res_win_t msgdlg_create(const tchar_t* text, dword_t button, res_win_t owner)
 
 		EVENT_ON_MENU_COMMAND(hand_msgdlg_menu_command)
 
+		EVENT_ON_XFONT(hand_msgdlg_xfont)
+		EVENT_ON_XFACE(hand_msgdlg_xface)
+
 		EVENT_ON_NC_IMPLEMENT
 
 	EVENT_END_DISPATH
@@ -569,7 +591,7 @@ res_win_t msgdlg_create(const tchar_t* text, dword_t button, res_win_t owner)
 
 	msgdlg_popup_size(dlg, RECTSIZE(&xr));
 	widget_size(dlg, RECTSIZE(&xr));
-	widget_update(dlg);
+	widget_paint(dlg);
 	widget_center_window(dlg, owner);
 
 	if (widget_is_valid(owner))

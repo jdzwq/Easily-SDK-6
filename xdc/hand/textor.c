@@ -102,11 +102,8 @@ void _textor_calc_paging(textor_context* ptd, int px, int py, int pw, int ph, bo
 	TEXTOR_CALC tt = { 0 };
 	drawing_interface iv = { 0 };
 	measure_interface it = { 0 };
-	const xfont_t* pxf;
-	const xface_t* pxa;
-
-	pxf = widget_get_xfont_ptr(ptd->widget);
-	pxa = widget_get_xface_ptr(ptd->widget);
+	const xfont_t* pxf = ptd->pxf;
+	const xface_t* pxa = ptd->pxa;
 
 	tt.paged = ptd->paged;
 	tt.page = ptd->page;
@@ -187,11 +184,8 @@ void _textor_calc_maxing(textor_context* ptd, int px, int py, int pw, int ph, bo
 
 	drawing_interface iv = { 0 };
 	measure_interface it = { 0 };
-	const xfont_t* pxf;
-	const xface_t* pxa;
-
-	pxf = widget_get_xfont_ptr(ptd->widget);
-	pxa = widget_get_xface_ptr(ptd->widget);
+	const xfont_t* pxf = ptd->pxf;
+	const xface_t* pxa = ptd->pxa;
 
 	tt.paged = ptd->paged;
 	tt.page = ptd->page;
@@ -273,11 +267,8 @@ void _textor_calc_line(textor_context* ptd, int px, int py, int pw, int ph, bool
 
 	drawing_interface iv = { 0 };
 	measure_interface it = { 0 };
-	const xfont_t* pxf;
-	const xface_t* pxa;
-
-	pxf = widget_get_xfont_ptr(ptd->widget);
-	pxa = widget_get_xface_ptr(ptd->widget);
+	const xfont_t* pxf = ptd->pxf;
+	const xface_t* pxa = ptd->pxa;
 
 	tt.paged = ptd->paged;
 	tt.page = ptd->page;
@@ -355,11 +346,8 @@ void _textor_calc_object(textor_context* ptd, int px, int py, int pw, int ph, bo
 
 	drawing_interface iv = { 0 };
 	measure_interface it = { 0 };
-	const xfont_t* pxf;
-	const xface_t* pxa;
-
-	pxf = widget_get_xfont_ptr(ptd->widget);
-	pxa = widget_get_xface_ptr(ptd->widget);
+	const xfont_t* pxf = ptd->pxf;
+	const xface_t* pxa = ptd->pxa;
 
 	tt.from_obj = tt.to_obj = object;
 	tt.paged = ptd->paged;
@@ -434,11 +422,8 @@ void _textor_calc_texting(textor_context* ptd, int px, int py, int pw, int ph, b
 
 	drawing_interface iv = { 0 };
 	measure_interface it = { 0 };
-	const xfont_t* pxf;
-	const xface_t* pxa;
-
-	pxf = widget_get_xfont_ptr(ptd->widget);
-	pxa = widget_get_xface_ptr(ptd->widget);
+	const xfont_t* pxf = ptd->pxf;
+	const xface_t* pxa = ptd->pxa;
 
 	tt.from_obj = tt.to_obj = object;
 	tt.paged = ptd->paged;
@@ -511,11 +496,8 @@ void _textor_calc_rect(textor_context* ptd, int px, int py, int pw, int ph, bool
 
 	drawing_interface iv = { 0 };
 	measure_interface it = { 0 };
-	const xfont_t* pxf;
-	const xface_t* pxa;
-
-	pxf = widget_get_xfont_ptr(ptd->widget);
-	pxa = widget_get_xface_ptr(ptd->widget);
+	const xfont_t* pxf = ptd->pxf;
+	const xface_t* pxa = ptd->pxa;
 
 	get_visual_interface(ptd->cdc, &iv);
 	tt.piv = &iv;
@@ -622,11 +604,8 @@ void _textor_calc_hint(textor_context* ptd, int px, int py, int pw, int ph, bool
 
 	drawing_interface iv = { 0 };
 	measure_interface it = { 0 };
-	const xfont_t* pxf;
-	const xface_t* pxa;
-
-	pxf = widget_get_xfont_ptr(ptd->widget);
-	pxa = widget_get_xface_ptr(ptd->widget);
+	const xfont_t* pxf = ptd->pxf;
+	const xface_t* pxa = ptd->pxa;
 
 	tt.x = x;
 	tt.y = y;
@@ -699,11 +678,8 @@ void _textor_calc_point(textor_context* ptd, int px, int py, int pw, int ph, boo
 
 	drawing_interface iv = { 0 };
 	measure_interface it = { 0 };
-	const xfont_t* pxf;
-	const xface_t* pxa;
-
-	pxf = widget_get_xfont_ptr(ptd->widget);
-	pxa = widget_get_xface_ptr(ptd->widget);
+	const xfont_t* pxf = ptd->pxf;
+	const xface_t* pxa = ptd->pxa;
 
 	tt.from_row = row;
 	tt.from_col = col;
@@ -810,11 +786,8 @@ void _textor_calc_rowcol(textor_context* ptd, int px, int py, int pw, int ph, bo
 
 	drawing_interface iv = { 0 };
 	measure_interface it = { 0 };
-	const xfont_t* pxf;
-	const xface_t* pxa;
-
-	pxf = widget_get_xfont_ptr(ptd->widget);
-	pxa = widget_get_xface_ptr(ptd->widget);
+	const xfont_t* pxf = ptd->pxf;
+	const xface_t* pxa = ptd->pxa;
 
 	if (col < 0)
 	{
@@ -906,11 +879,8 @@ int _textor_exec_select(textor_context* ptd, int px, int py, int pw, int ph, boo
 
 	drawing_interface iv = { 0 };
 	measure_interface it = { 0 };
-	const xfont_t* pxf;
-	const xface_t* pxa;
-
-	pxf = widget_get_xfont_ptr(ptd->widget);
-	pxa = widget_get_xface_ptr(ptd->widget);
+	const xfont_t* pxf = ptd->pxf;
+	const xface_t* pxa = ptd->pxa;
 
 	tt.buf = buf;
 	tt.max = max;
@@ -978,11 +948,8 @@ int _textor_calc_count(textor_context* ptd, int px, int py, int pw, int ph, bool
 
 	drawing_interface iv = { 0 };
 	measure_interface it = { 0 };
-	const xfont_t* pxf;
-	const xface_t* pxa;
-
-	pxf = widget_get_xfont_ptr(ptd->widget);
-	pxa = widget_get_xface_ptr(ptd->widget);
+	const xfont_t* pxf = ptd->pxf;
+	const xface_t* pxa = ptd->pxa;
 
 	tt.how = how;
 	tt.max = 0;
@@ -1096,11 +1063,8 @@ bool_t _textor_exec_delete(textor_context* ptd, int px, int py, int pw, int ph, 
 
 	drawing_interface iv = { 0 };
 	measure_interface it = { 0 };
-	const xfont_t* pxf;
-	const xface_t* pxa;
-
-	pxf = widget_get_xfont_ptr(ptd->widget);
-	pxa = widget_get_xface_ptr(ptd->widget);
+	const xfont_t* pxf = ptd->pxf;
+	const xface_t* pxa = ptd->pxa;
 
 	tt.paged = ptd->paged;
 	tt.page = ptd->page;
@@ -1220,11 +1184,8 @@ bool_t _textor_exec_insert(textor_context* ptd, int px, int py, int pw, int ph, 
 
 	drawing_interface iv = { 0 };
 	measure_interface it = { 0 };
-	const xfont_t* pxf;
-	const xface_t* pxa;
-
-	pxf = widget_get_xfont_ptr(ptd->widget);
-	pxa = widget_get_xface_ptr(ptd->widget);
+	const xfont_t* pxf = ptd->pxf;
+	const xface_t* pxa = ptd->pxa;
 
 	if (len < 0)
 		len = xslen(str);
@@ -1364,11 +1325,8 @@ void _textor_draw_focus_raw(textor_context* ptd, int px, int py, int pw, int ph,
 
 	drawing_interface iv = { 0 };
 	measure_interface it = { 0 };
-	const xfont_t* pxf;
-	const xface_t* pxa;
-
-	pxf = widget_get_xfont_ptr(ptd->widget);
-	pxa = widget_get_xface_ptr(ptd->widget);
+	const xfont_t* pxf = ptd->pxf;
+	const xface_t* pxa = ptd->pxa;
 
 	tt.from_row = ptd->sel_row;
 	tt.from_col = ptd->sel_col;
@@ -1484,12 +1442,9 @@ void _textor_draw_text(textor_context* ptd, int px, int py, int pw, int ph, bool
 
 	drawing_interface iv = { 0 };
 	measure_interface it = { 0 };
-	const xfont_t* pxf;
-	const xface_t* pxa;
+	const xfont_t* pxf = ptd->pxf;
+	const xface_t* pxa = ptd->pxa;
 	xrect_t xr;
-
-	pxf = widget_get_xfont_ptr(ptd->widget);
-	pxa = widget_get_xface_ptr(ptd->widget);
 
 	widget_get_client_rect(ptd->widget, &xr);
 	tt.client = xr.h;
@@ -1529,13 +1484,10 @@ void _textor_reset_page(textor_context* ptd, bool_t repage)
 	int line_feed;
 	float line_height;
 
-	const xfont_t* pxf;
-	const xface_t* pxa;
+	const xfont_t* pxf = ptd->pxf;
+	const xface_t* pxa = ptd->pxa;
 
 	drawing_interface ifv = { 0 };
-
-	pxf = widget_get_xfont_ptr(ptd->widget);
-	pxa = widget_get_xface_ptr(ptd->widget);
 
 	line_height = xstof(pxa->line_height);
 	if (!line_height)
@@ -1591,9 +1543,8 @@ void _textor_ensure_visible(textor_context* ptd, int row, int col)
 {
 	xpoint_t pt1, pt2;
 	xrect_t xr;
-	const xface_t* pxa;
 
-	pxa = widget_get_xface_ptr(ptd->widget);
+	const xface_t* pxa = ptd->pxa;
 
 	_textor_calc_point(ptd, ptd->vb.px, ptd->vb.py, ptd->vb.pw, ptd->vb.ph, ptd->paged, row, col, &pt1, &pt2);
 
@@ -1692,13 +1643,11 @@ void hand_textor_set_focus(textor_context* ptd, res_win_t wt)
 {
 	xsize_t xs;
 	float pm, lh;
-	const xfont_t* pxf;
-	const xface_t* pxa;
+	const xfont_t* pxf = ptd->pxf;
+	const xface_t* pxa = ptd->pxa;
 
 	XDK_ASSERT(ptd && ptd->widget);
 
-	pxf = widget_get_xfont_ptr(ptd->widget);
-	pxa = widget_get_xface_ptr(ptd->widget);
 	lh = (pxa) ? xstof(pxa->line_height) : 1.0f;
 
 	font_metric_by_pt(xstof(pxf->size), &pm, NULL);
@@ -1722,22 +1671,20 @@ int hand_textor_word(textor_context* ptd, tchar_t* pch)
 	void* object = NULL;
 	bool_t atom = 0;
 	tchar_t token[CHS_LEN + 1] = { 0 };
-	xface_t xa = { 0 };
+	const xface_t* pxa = ptd->pxa;
 
 	XDK_ASSERT(ptd && ptd->widget);
 
-	widget_get_xface(ptd->widget, &xa);
-
 	if (*pch == KEY_ENTER)
 	{
-		if (is_null(xa.text_wrap))
+		if (is_null(pxa->text_wrap))
 			return _TEXTOR_PRESS_IGNORE;
 
 		xsncpy(token, _T("\n"), 1);
 	}
 	else if (*pch == KEY_TAB)
 	{
-		if (is_null(xa.text_wrap))
+		if (is_null(pxa->text_wrap))
 			return _TEXTOR_PRESS_IGNORE;
 
 		xsncpy(token, _T("\t"), 1);
@@ -1928,17 +1875,13 @@ void hand_textor_paint(textor_context* ptd, visual_t dc, const xrect_t* pxr)
 	xrect_t xr;
 	visual_t rdc;
 	canvas_t canv;
-	xbrush_t xb = { 0 };
-	xpen_t xp = { 0 };
-	xcolor_t xc = { 0 };
 	
 	const drawing_interface* pif = NULL;
 	drawing_interface ifv = { 0 };
 
-	XDK_ASSERT(ptd && ptd->widget);
+	xcolor_t xc = { 0 };
 
-	widget_get_xbrush(ptd->widget, &xb);
-	widget_get_xpen(ptd->widget, &xp);
+	XDK_ASSERT(ptd && ptd->widget);
 
 	canv = widget_get_canvas(ptd->widget);
 
@@ -1950,15 +1893,13 @@ void hand_textor_paint(textor_context* ptd, visual_t dc, const xrect_t* pxr)
 
 	get_visual_interface(rdc, &ifv);
 
-	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
-
-	if (widget_can_paging(ptd->widget))
+	/*if (widget_can_paging(ptd->widget))
 	{
-		parse_xcolor(&xc, xp.color);
+		xmem_copy((void*)&xc, (void*)&pclrs->clr_frg, sizeof(xcolor_t));
 		lighten_xcolor(&xc, DEF_HARD_DARKEN);
 
 		draw_corner(pif, &xc, (const xrect_t*)&(pif->rect));
-	}
+	}*/
 
 	_textor_draw_text(ptd, ptd->vb.px, ptd->vb.py, ptd->vb.pw, ptd->vb.ph, ptd->paged, rdc);
 
@@ -2243,7 +2184,7 @@ int hand_textor_left(textor_context* ptd)
 
 	XDK_ASSERT(ptd && ptd->widget);
 
-	if (ptd->b_select && !widget_key_state(ptd->widget, KEY_SHIFT))
+	if (ptd->b_select && !widget_key_state(ptd->widget, KS_WITH_SHIFT))
 	{
 		_textor_calc_rowcol(ptd, ptd->vb.px, ptd->vb.py, ptd->vb.pw, ptd->vb.ph, ptd->paged, ptd->sel_row, ptd->sel_col, &row, &col, &object, &atom);
 
@@ -2262,9 +2203,9 @@ int hand_textor_left(textor_context* ptd)
 		return _TEXTOR_PRESS_HANDLE;
 	}
 
-	if (ptd->b_select != widget_key_state(ptd->widget, KEY_SHIFT))
+	if (ptd->b_select != widget_key_state(ptd->widget, KS_WITH_SHIFT))
 	{
-		ptd->b_select = widget_key_state(ptd->widget, KEY_SHIFT);
+		ptd->b_select = widget_key_state(ptd->widget, KS_WITH_SHIFT);
 		redraw = 1;
 	}
 
@@ -2322,7 +2263,7 @@ int hand_textor_right(textor_context* ptd)
 
 	XDK_ASSERT(ptd && ptd->widget);
 
-	if (ptd->b_select && !widget_key_state(ptd->widget, KEY_SHIFT))
+	if (ptd->b_select && !widget_key_state(ptd->widget, KS_WITH_SHIFT))
 	{
 		_textor_calc_rowcol(ptd, ptd->vb.px, ptd->vb.py, ptd->vb.pw, ptd->vb.ph, ptd->paged, ptd->cur_row, ptd->cur_col + 1, &row, &col, &object, &atom);
 
@@ -2341,7 +2282,7 @@ int hand_textor_right(textor_context* ptd)
 		return _TEXTOR_PRESS_HANDLE;
 	}
 
-	if (!ptd->b_select && widget_key_state(ptd->widget, KEY_SHIFT))
+	if (!ptd->b_select && widget_key_state(ptd->widget, KS_WITH_SHIFT))
 	{
 		ptd->b_select = 1;
 
@@ -2350,9 +2291,9 @@ int hand_textor_right(textor_context* ptd)
 		return _TEXTOR_PRESS_HANDLE;
 	}
 
-	if (ptd->b_select != widget_key_state(ptd->widget, KEY_SHIFT))
+	if (ptd->b_select != widget_key_state(ptd->widget, KS_WITH_SHIFT))
 	{
-		ptd->b_select = widget_key_state(ptd->widget, KEY_SHIFT);
+		ptd->b_select = widget_key_state(ptd->widget, KS_WITH_SHIFT);
 		redraw = 1;
 	}
 
@@ -2410,7 +2351,7 @@ int hand_textor_up(textor_context* ptd)
 
 	XDK_ASSERT(ptd && ptd->widget);
 
-	if (ptd->b_select && !widget_key_state(ptd->widget, KEY_SHIFT))
+	if (ptd->b_select && !widget_key_state(ptd->widget, KS_WITH_SHIFT))
 	{
 		_textor_calc_rowcol(ptd, ptd->vb.px, ptd->vb.py, ptd->vb.pw, ptd->vb.ph, ptd->paged, ptd->sel_row, ptd->sel_col, &row, &col, &object, &atom);
 
@@ -2429,9 +2370,9 @@ int hand_textor_up(textor_context* ptd)
 		return _TEXTOR_PRESS_HANDLE;
 	}
 
-	if (ptd->b_select != widget_key_state(ptd->widget, KEY_SHIFT))
+	if (ptd->b_select != widget_key_state(ptd->widget, KS_WITH_SHIFT))
 	{
-		ptd->b_select = widget_key_state(ptd->widget, KEY_SHIFT);
+		ptd->b_select = widget_key_state(ptd->widget, KS_WITH_SHIFT);
 		redraw = 1;
 	}
 
@@ -2489,7 +2430,7 @@ int hand_textor_down(textor_context* ptd)
 
 	XDK_ASSERT(ptd && ptd->widget);
 
-	if (ptd->b_select && !widget_key_state(ptd->widget, KEY_SHIFT))
+	if (ptd->b_select && !widget_key_state(ptd->widget, KS_WITH_SHIFT))
 	{
 		_textor_calc_rowcol(ptd, ptd->vb.px, ptd->vb.py, ptd->vb.pw, ptd->vb.ph, ptd->paged, ptd->cur_row, ptd->cur_col + 1, &row, &col, &object, &atom);
 
@@ -2508,7 +2449,7 @@ int hand_textor_down(textor_context* ptd)
 		return _TEXTOR_PRESS_HANDLE;
 	}
 
-	if (!ptd->b_select && widget_key_state(ptd->widget, KEY_SHIFT))
+	if (!ptd->b_select && widget_key_state(ptd->widget, KS_WITH_SHIFT))
 	{
 		ptd->b_select = 1;
 
@@ -2517,9 +2458,9 @@ int hand_textor_down(textor_context* ptd)
 		return _TEXTOR_PRESS_HANDLE;
 	}
 
-	if (ptd->b_select != widget_key_state(ptd->widget, KEY_SHIFT))
+	if (ptd->b_select != widget_key_state(ptd->widget, KS_WITH_SHIFT))
 	{
-		ptd->b_select = widget_key_state(ptd->widget, KEY_SHIFT);
+		ptd->b_select = widget_key_state(ptd->widget, KS_WITH_SHIFT);
 		redraw = 1;
 	}
 

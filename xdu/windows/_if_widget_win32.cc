@@ -50,10 +50,10 @@ typedef struct _win32_widget_t{
 	border_t bd;
 	xpoint_t pt;
 	xsize_t st;
-	xfont_t xf;
-	xface_t xa;
-	xbrush_t xb;
-	xpen_t xp;
+
+	xcolor_t bkg;
+	xcolor_t frg;
+	xcolor_t txt;
 	xcolor_t msk;
 	xcolor_t ico;
 
@@ -66,7 +66,7 @@ typedef struct _win32_widget_t{
 #define GETXDUSTRUCT(hWnd)			(win32_widget_t*)GetProp(hWnd, XDUSTRUCT)
 #define SETXDUSTRUCT(hWnd, ev)		SetProp(hWnd, XDUSTRUCT, (HANDLE)ev)
 
-#define GETXDUDISPATCH(hWnd)		(if_event_t*)GetProp(hWnd, XDUDISPATCH)
+#define GETXDUDISPATCH(hWnd)		(if_dispatch_t*)GetProp(hWnd, XDUDISPATCH)
 #define SETXDUDISPATCH(hWnd, ev)	SetProp(hWnd, XDUDISPATCH, (HANDLE)ev)
 
 #define GETXDUSUBPROC(hWnd)			(if_subproc_t*)GetProp(hWnd, XDUSUBPROC)
@@ -162,7 +162,7 @@ LRESULT CALLBACK XdcWidgetProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 	DWORD ds = (pws) ? pws->style : 0;
 
 	LPCREATESTRUCT lpcs;
-	if_event_t* pev;
+	if_dispatch_t* pev;
 	win32_context_t wct = { 0 };
 
 	switch (message)
@@ -393,11 +393,11 @@ LRESULT CALLBACK XdcWidgetProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 		lpcs = (LPCREATESTRUCT)lParam;
 		if (lpcs->lpCreateParams)
 		{
-			if_event_t* pv = (if_event_t*)lpcs->lpCreateParams;
+			if_dispatch_t* pv = (if_dispatch_t*)lpcs->lpCreateParams;
 			if (pv)
 			{
-				pev = (if_event_t*)xmem_alloc(sizeof(if_event_t));
-				CopyMemory((void*)pev, (void*)pv, sizeof(if_event_t));
+				pev = (if_dispatch_t*)xmem_alloc(sizeof(if_dispatch_t));
+				CopyMemory((void*)pev, (void*)pv, sizeof(if_dispatch_t));
 				SETXDUDISPATCH(hWnd, pev);
 			}
 		}
@@ -406,12 +406,11 @@ LRESULT CALLBACK XdcWidgetProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 		pws->parent = (lpcs)? lpcs->hwndParent : NULL;
 		pws->self = hWnd;
 
-		default_xfont(&pws->xf);
-		default_xface(&pws->xa);
-		default_xpen(&pws->xp);
-		default_xbrush(&pws->xb);
+		parse_xcolor(&pws->bkg, GDI_ATTR_RGB_BLACK);
+		parse_xcolor(&pws->frg, GDI_ATTR_RGB_WHITE);
+		parse_xcolor(&pws->txt, GDI_ATTR_RGB_WHITE);
 		parse_xcolor(&pws->msk, GDI_ATTR_RGB_WHITE);
-		parse_xcolor(&pws->ico, GDI_ATTR_RGB_DARKGRAY);
+		parse_xcolor(&pws->ico, GDI_ATTR_RGB_GRAY);
 
 		SETXDUSTRUCT(hWnd, pws);
 
@@ -419,7 +418,7 @@ LRESULT CALLBACK XdcWidgetProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 
 		if (pev && pev->pf_on_create)
 		{
-			if ((*pev->pf_on_create)(hWnd, pev->param))
+			if ((*pev->pf_on_create)(hWnd, (void*)(pev->param)))
 				return -1;
 		}
 		break;
@@ -795,9 +794,9 @@ LRESULT CALLBACK XdcWidgetProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 		break;
 	case WM_CHAR:
 		pev = GETXDUDISPATCH(hWnd);
-		if (pev && pev->pf_on_char)
+		if (pev && pev->pf_on_wchar)
 		{
-			(*pev->pf_on_char)(hWnd, (tchar_t)wParam);
+			(*pev->pf_on_wchar)(hWnd, (wchar_t)wParam);
 			return 0;
 		}
 		break;
@@ -1161,9 +1160,9 @@ LRESULT CALLBACK XdcSubclassProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 		}
 		break;
 	case WM_CHAR:
-		if (pev && pev->sub_on_char)
+		if (pev && pev->sub_on_wchar)
 		{
-			if ((*pev->sub_on_char)(hWnd, (tchar_t)wParam, (uid_t)uIdSubclass, pev->delta))
+			if ((*pev->sub_on_wchar)(hWnd, (wchar_t)wParam, (uid_t)uIdSubclass, pev->delta))
 				return 0;
 		}
 		break;
@@ -1314,7 +1313,7 @@ void _widget_cleanup()
 	UnregisterClass(XDUWIDGET, hInst);
 }
 
-res_win_t _widget_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, res_win_t wparent, if_event_t* pev)
+res_win_t _widget_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, res_win_t wparent, const if_dispatch_t* pev)
 {
 	win32_widget_t* pws;
 
@@ -1605,7 +1604,7 @@ vword_t _widget_del_user_prop(res_win_t wt, const tchar_t* pname)
 	return (vword_t)RemoveProp(wt, pname);
 }
 
-if_event_t* _widget_get_dispatch(res_win_t wt)
+const if_dispatch_t* _widget_get_dispatch(res_win_t wt)
 {
 	return GETXDUDISPATCH(wt);
 }
@@ -1961,7 +1960,7 @@ bool_t _widget_is_child(res_win_t wt)
 #endif
 }
 
-void _widget_post_char(res_win_t wt, tchar_t ch)
+void _widget_post_wchar(res_win_t wt, wchar_t ch)
 {
 	INPUT input[2] = { 0 };
 
@@ -2153,15 +2152,10 @@ void _widget_layout(res_win_t wt)
 	PostMessage(wt, WM_SIZE, WS_SIZE_LAYOUT, 0);
 }
 
-void _widget_update(res_win_t wt)
+void _widget_paint(res_win_t wt)
 {
 	SetWindowPos(wt, NULL, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOCOPYBITS | SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER);
 	PostMessage(wt, WM_NCPAINT, 1, 0);
-}
-
-void _widget_paint(res_win_t wt)
-{
-	UpdateWindow((HWND)wt);
 }
 
 void _widget_enable(res_win_t wt, bool_t b)
@@ -2179,12 +2173,12 @@ void _widget_active(res_win_t wt)
 
 void _widget_post_notice(res_win_t wt, NOTICE* pnt)
 {
-	PostMessage((HWND)wt, WM_NOTICE, (WPARAM)pnt->id, (LPARAM)pnt);
+	PostMessage((HWND)wt, WM_NOTICE, (WPARAM)pnt->user, (LPARAM)pnt);
 }
 
 int _widget_send_notice(res_win_t wt, NOTICE* pnt)
 {
-	return (int)SendMessage((HWND)wt, WM_NOTICE, (WPARAM)pnt->id, (LPARAM)pnt);
+	return (int)SendMessage((HWND)wt, WM_NOTICE, (WPARAM)pnt->user, (LPARAM)pnt);
 }
 
 void _widget_post_command(res_win_t wt, int code, uid_t cid, vword_t data)
@@ -2296,114 +2290,6 @@ bool_t _widget_has_struct(res_win_t wt)
 	win32_widget_t* pws = GETXDUSTRUCT(wt);
 
 	return (pws != NULL) ? 1 : 0;
-}
-
-void  _widget_set_xfont(res_win_t wt, const xfont_t* pxf)
-{
-	win32_widget_t* pws = GETXDUSTRUCT(wt);
-
-	if (pws)
-	{
-		CopyMemory((void*)&pws->xf, (void*)pxf, sizeof(xfont_t));
-	}
-}
-
-void _widget_get_xfont(res_win_t wt, xfont_t* pxf)
-{
-	win32_widget_t* pws = GETXDUSTRUCT(wt);
-
-	if (pws)
-	{
-		CopyMemory((void*)pxf, (void*)&pws->xf, sizeof(xfont_t));
-	}
-}
-
-const xfont_t* _widget_get_xfont_ptr(res_win_t wt)
-{
-	win32_widget_t* pws = GETXDUSTRUCT(wt);
-
-	return (pws)? &pws->xf : NULL;
-}
-
-void _widget_set_xface(res_win_t wt, const xface_t* pxa)
-{
-	win32_widget_t* pws = GETXDUSTRUCT(wt);
-
-	if (pws)
-	{
-		CopyMemory((void*)&pws->xa, (void*)pxa, sizeof(xface_t));
-	}
-}
-
-void _widget_get_xface(res_win_t wt, xface_t* pxa)
-{
-	win32_widget_t* pws = GETXDUSTRUCT(wt);
-
-	if (pws)
-	{
-		CopyMemory((void*)pxa, (void*)&pws->xa, sizeof(xface_t));
-	}
-}
-
-const xface_t* _widget_get_xface_ptr(res_win_t wt)
-{
-	win32_widget_t* pws = GETXDUSTRUCT(wt);
-
-	return (pws)? &pws->xa : NULL;
-}
-
-void _widget_set_xbrush(res_win_t wt, const xbrush_t* pxb)
-{
-	win32_widget_t* pws = GETXDUSTRUCT(wt);
-
-	if (pws)
-	{
-		CopyMemory((void*)&pws->xb, (void*)pxb, sizeof(xbrush_t));
-	}
-}
-
-void _widget_get_xbrush(res_win_t wt, xbrush_t* pxb)
-{
-	win32_widget_t* pws = GETXDUSTRUCT(wt);
-
-	if (pws)
-	{
-		CopyMemory((void*)pxb, (void*)&pws->xb, sizeof(xbrush_t));
-	}
-}
-
-const xbrush_t* _widget_get_xbrush_ptr(res_win_t wt)
-{
-	win32_widget_t* pws = GETXDUSTRUCT(wt);
-
-	return (pws)? &pws->xb : NULL;
-}
-
-void _widget_set_xpen(res_win_t wt, const xpen_t* pxp)
-{
-	win32_widget_t* pws = GETXDUSTRUCT(wt);
-
-	if (pws)
-	{
-		CopyMemory((void*)&pws->xp, (void*)pxp, sizeof(xpen_t));
-	}
-}
-
-void _widget_get_xpen(res_win_t wt, xpen_t* pxp)
-{
-	win32_widget_t* pws = GETXDUSTRUCT(wt);
-
-	if (pws)
-	{
-		CopyMemory((void*)pxp, (void*)&pws->xp, sizeof(xpen_t));
-	}
-}
-
-const xpen_t* _widget_get_xpen_ptr(res_win_t wt)
-{
-	win32_widget_t* pws = GETXDUSTRUCT(wt);
-
-	return (pws)? &pws->xp : NULL;
 }
 
 void _widget_set_mask(res_win_t wt, const xcolor_t* pxc)
@@ -2521,17 +2407,12 @@ void _widget_set_color_mode(res_win_t wt, const clr_mod_t* pclr)
 	win32_widget_t* pws = GETXDUSTRUCT(wt);
 	dword_t dw = (pws)? pws->style : 0;
 
-	if (!pws)
-		return;
+	if (!pws) return;
 
-	format_xcolor(&pclr->clr_bkg, pws->xb.color);
-
-	format_xcolor(&pclr->clr_frg, pws->xp.color);
-
-	format_xcolor(&pclr->clr_txt, pws->xf.color);
-
+	CopyMemory((void*)&pws->bkg, (void*)&pclr->clr_bkg, sizeof(xcolor_t));
+	CopyMemory((void*)&pws->frg, (void*)&pclr->clr_frg, sizeof(xcolor_t));
+	CopyMemory((void*)&pws->txt, (void*)&pclr->clr_txt, sizeof(xcolor_t));
 	CopyMemory((void*)&pws->msk, (void*)&pclr->clr_msk, sizeof(xcolor_t));
-
 	CopyMemory((void*)&pws->ico, (void*)&pclr->clr_ico, sizeof(xcolor_t));
 
 	if (_widget_has_subproc(wt))
@@ -2550,20 +2431,74 @@ void _widget_get_color_mode(res_win_t wt, clr_mod_t* pclr)
 	win32_widget_t* pws = GETXDUSTRUCT(wt);
 	dword_t dw = (pws) ? pws->style : 0;
 
-	if (!pws)
-		return;
+	if (!pws) return;
 
-	parse_xcolor(&pclr->clr_bkg, pws->xb.color);
-
-	parse_xcolor(&pclr->clr_frg, pws->xp.color);
-
-	parse_xcolor(&pclr->clr_txt, pws->xf.color);
-
-	CopyMemory((void*)&pclr->clr_msk, (void*)&pws->msk, sizeof(xcolor_t));
-
-	CopyMemory((void*)&pclr->clr_ico, (void*)&pws->ico, sizeof(xcolor_t));
+	CopyMemory((void*)&pws->bkg, (void*)&pclr->clr_bkg, sizeof(xcolor_t));
+	CopyMemory((void*)&pws->frg, (void*)&pclr->clr_frg, sizeof(xcolor_t));
+	CopyMemory((void*)&pws->txt, (void*)&pclr->clr_txt, sizeof(xcolor_t));
+	CopyMemory((void*)&pws->msk, (void*)&pclr->clr_msk, sizeof(xcolor_t));
+	CopyMemory((void*)&pws->ico, (void*)&pclr->clr_ico, sizeof(xcolor_t));
 }
 
+void _widget_noti_xfont(res_win_t wt, const xfont_t* pxf)
+{
+	win32_widget_t* pws = GETXDUSTRUCT(wt);
+	if_dispatch_t* pif;
+
+	if(!pws) return;
+
+	pif = GETXDUDISPATCH(wt);
+
+	if(pif && pif->pf_on_xfont)
+	{
+		(*pif->pf_on_xfont)(wt, pxf);
+	}
+}
+
+void _widget_noti_xface(res_win_t wt, const xface_t* pxa)
+{
+	win32_widget_t* pws = GETXDUSTRUCT(wt);
+	if_dispatch_t* pif;
+
+	if(!pws) return;
+
+	pif = GETXDUDISPATCH(wt);
+
+	if(pif && pif->pf_on_xface)
+	{
+		(*pif->pf_on_xface)(wt, pxa);
+	}
+}
+
+void _widget_noti_xbrush(res_win_t wt, const xbrush_t* pxb)
+{
+	win32_widget_t* pws = GETXDUSTRUCT(wt);
+	if_dispatch_t* pif;
+
+	if(!pws) return;
+
+	pif = GETXDUDISPATCH(wt);
+
+	if(pif && pif->pf_on_xbrush)
+	{
+		(*pif->pf_on_xbrush)(wt, pxb);
+	}
+}
+
+void _widget_noti_xpen(res_win_t wt, const xpen_t* pxp)
+{
+	win32_widget_t* pws = GETXDUSTRUCT(wt);
+	if_dispatch_t* pif;
+
+	if(!pws) return;
+
+	pif = GETXDUDISPATCH(wt);
+
+	if(pif && pif->pf_on_xpen)
+	{
+		(*pif->pf_on_xpen)(wt, pxp);
+	}
+}
 //////////////////////////////////////////////////////////////////////////////////
 void _send_quit_message(int code)
 {
@@ -2595,7 +2530,7 @@ bool_t	_message_is_quit(const msg_t* pmsg)
 	return (pmsg->message == WM_QUIT) ? 1 : 0;
 }
 
-void _message_position(xpoint_t* ppt)
+void _mouse_position(xpoint_t* ppt)
 {
 	DWORD dw = GetMessagePos();
 
@@ -2603,7 +2538,7 @@ void _message_position(xpoint_t* ppt)
 	ppt->y = HIWORD(dw);
 }
 
-int _widget_do_normal(res_win_t hWnd)
+int _widget_do_main(res_win_t hWnd)
 {
 	MSG msg = { 0 };
 	BOOL bShow = FALSE;
@@ -2730,7 +2665,7 @@ int _widget_do_modal(res_win_t hWnd)
 	return nRet;
 }
 
-void _widget_do_trace(res_win_t hWnd)
+void _widget_do_track(res_win_t hWnd)
 {
 	MSG msg = { 0 };
 	BOOL bShow = FALSE;

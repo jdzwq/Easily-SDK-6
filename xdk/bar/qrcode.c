@@ -25,7 +25,8 @@ LICENSE.GPL3 for more details.
 ***********************************************************************/
 
 #include "qrcode.h"
-#include "qrencode.h"
+
+#include <oem.h>
 
 #define DEF_QRVER		7
 #define DEF_QRLEN		128

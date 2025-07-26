@@ -408,7 +408,7 @@ void hand_calendar_lbutton_down(res_win_t widget, const xpoint_t* pxp)
 	switch (nHint)
 	{
 	case CALENDAR_HINT_DAILY:
-		if (widget_key_state(widget, KEY_CONTROL))
+		if (widget_key_state(widget, KS_WITH_CONTROL))
 		{
 			noti_calendar_daily_selected(widget, ilk);
 		}
@@ -491,14 +491,6 @@ void hand_calendar_keydown(res_win_t widget, dword_t ks, int key)
 
 }
 
-void hand_calendar_char(res_win_t widget, tchar_t nChar)
-{
-	calendar_delta_t* ptd = GETCALENDARDELTA(widget);
-
-	if (!ptd->calendar)
-		return;
-}
-
 void hand_calendar_notice(res_win_t widget, NOTICE* pnt)
 {
 	calendar_delta_t* ptd = GETCALENDARDELTA(widget);
@@ -511,10 +503,6 @@ void hand_calendar_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 {
 	calendar_delta_t* ptd = GETCALENDARDELTA(widget);
 	xrect_t xr = { 0 };
-	xfont_t xf = { 0 };
-	xbrush_t xb = { 0 };
-	xpen_t xp = { 0 };
-	xcolor_t xc = { 0 };
 	visual_t rdc;
 	link_t_ptr ilk;
 
@@ -522,33 +510,19 @@ void hand_calendar_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 	const drawing_interface* pif = NULL;
 	drawing_interface ifv = {0};
 
+	xcolor_t xc;
+
 	if (!ptd->calendar)
 		return;
 
-	widget_get_xfont(widget, &xf);
-	widget_get_xbrush(widget, &xb);
-	widget_get_xpen(widget, &xp);
-
 	canv = widget_get_canvas(widget);
 	pif = widget_get_canvas_interface(widget);
-	
-
-	
-	
-	
-	
-	
 
 	widget_get_client_rect(widget, &xr);
 
 	rdc = begin_canvas_paint(canv, dc, xr.w, xr.h);
 	get_visual_interface(rdc, &ifv);
 	widget_get_view_rect(widget, (viewbox_t*)(&ifv.rect));
-
-	widget_get_xbrush(widget, &xb);
-	widget_get_xpen(widget, &xp);
-
-	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
 
 	draw_calendar(pif, ptd->calendar);
 
@@ -576,17 +550,14 @@ void hand_calendar_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 		ilk = get_calendar_next_daily(ptd->calendar, ilk);
 	}
 
-	
-
 	end_canvas_paint(canv, dc, pxr);
-	
 }
 
 /***********************************************function********************************************************/
 
 res_win_t calendarctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, res_win_t wparent)
 {
-	if_event_t ev = { 0 };
+	if_dispatch_t ev = { 0 };
 
 	EVENT_BEGIN_DISPATH(&ev)
 
@@ -601,7 +572,6 @@ res_win_t calendarctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_
 		EVENT_ON_WHEEL(hand_calendar_wheel)
 
 		EVENT_ON_KEYDOWN(hand_calendar_keydown)
-		EVENT_ON_CHAR(hand_calendar_char)
 
 		EVENT_ON_MOUSE_MOVE(hand_calendar_mouse_move)
 		EVENT_ON_MOUSE_HOVER(hand_calendar_mouse_hover)
@@ -694,7 +664,7 @@ void calendarctrl_redraw(res_win_t widget)
 
 	_calendarctrl_reset_page(widget);
 
-	widget_update(widget);
+	widget_paint(widget);
 }
 
 void calendarctrl_redraw_daily(res_win_t widget, link_t_ptr ilk)

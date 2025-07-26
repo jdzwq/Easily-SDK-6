@@ -33,26 +33,6 @@ LICENSE.GPL3 for more details.
 
 #if defined(XDL_SUPPORT_SVG)
 
-void svg_get_measure_raw(visual_t view, measure_interface* pim)
-{
-	pim->ctx = (void*)view;
-
-	pim->pf_measure_pixel = svg_pixel_metric_raw;
-	pim->pf_measure_font = svg_text_metric_raw;
-	pim->pf_measure_size = svg_text_size_raw;
-	pim->pf_measure_rect = svg_text_rect_raw;
-}
-
-void svg_get_measure(canvas_t canv, measure_interface* pim)
-{
-	pim->ctx = (void*)canv;
-
-	pim->pf_measure_pixel = svg_pixel_metric;
-	pim->pf_measure_font = svg_text_metric;
-	pim->pf_measure_size = svg_text_size;
-	pim->pf_measure_rect = svg_text_rect;
-}
-
 /***************************************************************************************************************/
 
 void svg_draw_line_raw(visual_t view, const xpen_t* pxp, const xpoint_t* ppt1, const xpoint_t* ppt2)

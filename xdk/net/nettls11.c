@@ -27,7 +27,6 @@ LICENSE.GPL3 for more details.
 #include "netssl.h"
 
 #include "../xdknet.h"
-#include "../xdkimp.h"
 #include "../xdkoem.h"
 #include "../xdkstd.h"
 
@@ -78,25 +77,25 @@ typedef struct _tls11_ciphers_set{
 
 
 static tls11_ciphers_set client_ciphers[] = {
-	{ SSL_DHE_RSA_WITH_AES_256_CBC_SHA, CIPHER_BLOCK, BULK_AES, 32, 20, 16 },
-	{ SSL_DHE_RSA_WITH_AES_128_CBC_SHA, CIPHER_BLOCK, BULK_AES, 16, 20, 16 },
-	{ SSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA, CIPHER_BLOCK, BULK_3DES, 24, 20, 8 },
-	{ SSL_RSA_WITH_AES_256_CBC_SHA, CIPHER_BLOCK, BULK_AES, 32, 20, 16 },
-	{ SSL_RSA_WITH_AES_128_CBC_SHA, CIPHER_BLOCK, BULK_AES, 16, 20, 16 },
-	{ SSL_RSA_WITH_3DES_EDE_CBC_SHA, CIPHER_BLOCK, BULK_3DES, 24, 20, 8 },
-	{ SSL_RSA_WITH_RC4_128_SHA, CIPHER_STREAM, BULK_RC4, 16, 20, 0 },
-	{ SSL_RSA_WITH_RC4_128_MD5, CIPHER_STREAM, BULK_RC4, 16, 16, 0 },
+	{ XSSL_DHE_RSA_WITH_AES_256_CBC_SHA, CIPHER_BLOCK, BULK_AES, 32, 20, 16 },
+	{ XSSL_DHE_RSA_WITH_AES_128_CBC_SHA, CIPHER_BLOCK, BULK_AES, 16, 20, 16 },
+	{ XSSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA, CIPHER_BLOCK, BULK_3DES, 24, 20, 8 },
+	{ XSSL_RSA_WITH_AES_256_CBC_SHA, CIPHER_BLOCK, BULK_AES, 32, 20, 16 },
+	{ XSSL_RSA_WITH_AES_128_CBC_SHA, CIPHER_BLOCK, BULK_AES, 16, 20, 16 },
+	{ XSSL_RSA_WITH_3DES_EDE_CBC_SHA, CIPHER_BLOCK, BULK_3DES, 24, 20, 8 },
+	{ XSSL_RSA_WITH_RC4_128_SHA, CIPHER_STREAM, BULK_RC4, 16, 20, 0 },
+	{ XSSL_RSA_WITH_RC4_128_MD5, CIPHER_STREAM, BULK_RC4, 16, 16, 0 },
 };
 
 static tls11_ciphers_set server_ciphers[] = {
-	{ SSL_DHE_RSA_WITH_AES_256_CBC_SHA, CIPHER_BLOCK, BULK_AES, 32, 20, 16 },
-	{ SSL_DHE_RSA_WITH_AES_128_CBC_SHA, CIPHER_BLOCK, BULK_AES, 16, 20, 16 },
-	{ SSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA, CIPHER_BLOCK, BULK_3DES, 24, 20, 8 },
-	{ SSL_RSA_WITH_AES_256_CBC_SHA, CIPHER_BLOCK, BULK_AES, 32, 20, 16 },
-	{ SSL_RSA_WITH_AES_128_CBC_SHA, CIPHER_BLOCK, BULK_AES, 16, 20, 16 },
-	{ SSL_RSA_WITH_3DES_EDE_CBC_SHA, CIPHER_BLOCK, BULK_3DES, 24, 20, 8 },
-	{ SSL_RSA_WITH_RC4_128_SHA, CIPHER_STREAM, BULK_RC4, 16, 20, 0 },
-	{ SSL_RSA_WITH_RC4_128_MD5, CIPHER_STREAM, BULK_RC4, 16, 16, 0 },
+	{ XSSL_DHE_RSA_WITH_AES_256_CBC_SHA, CIPHER_BLOCK, BULK_AES, 32, 20, 16 },
+	{ XSSL_DHE_RSA_WITH_AES_128_CBC_SHA, CIPHER_BLOCK, BULK_AES, 16, 20, 16 },
+	{ XSSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA, CIPHER_BLOCK, BULK_3DES, 24, 20, 8 },
+	{ XSSL_RSA_WITH_AES_256_CBC_SHA, CIPHER_BLOCK, BULK_AES, 32, 20, 16 },
+	{ XSSL_RSA_WITH_AES_128_CBC_SHA, CIPHER_BLOCK, BULK_AES, 16, 20, 16 },
+	{ XSSL_RSA_WITH_3DES_EDE_CBC_SHA, CIPHER_BLOCK, BULK_3DES, 24, 20, 8 },
+	{ XSSL_RSA_WITH_RC4_128_SHA, CIPHER_STREAM, BULK_RC4, 16, 20, 0 },
+	{ XSSL_RSA_WITH_RC4_128_MD5, CIPHER_STREAM, BULK_RC4, 16, 16, 0 },
 };
 
 static char label_client_finished[] = "client finished";
@@ -157,9 +156,9 @@ typedef struct _tls11_cipher_context{
 	sha1_context sha1;
 }tls11_cipher_context;
 
-#define IS_DHE_CIPHER(cipher) ((cipher == SSL_DHE_RSA_WITH_AES_256_CBC_SHA || \
-								cipher == SSL_DHE_RSA_WITH_AES_128_CBC_SHA || \
-								cipher == SSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA) ? 1 : 0)
+#define IS_DHE_CIPHER(cipher) ((cipher == XSSL_DHE_RSA_WITH_AES_256_CBC_SHA || \
+								cipher == XSSL_DHE_RSA_WITH_AES_128_CBC_SHA || \
+								cipher == XSSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA) ? 1 : 0)
 /***********************************************************************************************************************************/
 
 static void _ssl_set_error(int errcode)
@@ -343,20 +342,20 @@ static void _ssl_derive_keys(tls11_cipher_context* pcip, byte_t* premaster, int 
 	//initialize encrypt and decrypt context
 	switch (pcip->cipher)
 	{
-	case SSL_RSA_WITH_RC4_128_MD5:
-	case SSL_RSA_WITH_RC4_128_SHA:
+	case XSSL_RSA_WITH_RC4_128_MD5:
+	case XSSL_RSA_WITH_RC4_128_SHA:
 		arc4_setup((arc4_context *)pcip->ctx_enc, key_enc, pcip->key_size); //the material size is bytes
 		arc4_setup((arc4_context *)pcip->ctx_dec, key_dec, pcip->key_size); //the material size is bytes
 		break;
-	case SSL_RSA_WITH_3DES_EDE_CBC_SHA:
-	case SSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA:
+	case XSSL_RSA_WITH_3DES_EDE_CBC_SHA:
+	case XSSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA:
 		des3_set3key_enc((des3_context *)pcip->ctx_enc, key_enc); //the material size is 24 bytes
 		des3_set3key_dec((des3_context *)pcip->ctx_dec, key_dec); //the material size is 24 bytes
 		break;
-	case SSL_RSA_WITH_AES_128_CBC_SHA:
-	case SSL_RSA_WITH_AES_256_CBC_SHA:
-	case SSL_DHE_RSA_WITH_AES_128_CBC_SHA:
-	case SSL_DHE_RSA_WITH_AES_256_CBC_SHA:
+	case XSSL_RSA_WITH_AES_128_CBC_SHA:
+	case XSSL_RSA_WITH_AES_256_CBC_SHA:
+	case XSSL_DHE_RSA_WITH_AES_128_CBC_SHA:
+	case XSSL_DHE_RSA_WITH_AES_256_CBC_SHA:
 		aes_setkey_enc((aes_context *)pcip->ctx_enc, key_enc, (pcip->key_size * 8)); //the material size is bits
 		aes_setkey_dec((aes_context *)pcip->ctx_dec, key_dec, (pcip->key_size * 8)); //the material size is bits
 		break;

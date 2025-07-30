@@ -39,7 +39,8 @@ int acp_unicode_byte_to_gb2312(wchar_t ch, byte_t* buf)
 
 int acp_unicode_to_gb2312(const wchar_t* src, int slen, byte_t* dest, dword_t dlen)
 {
-	int len = 0, total = 0;
+	int total = 0;
+	dword_t len = 0;
 
 	while (total < slen && len < dlen)
 	{

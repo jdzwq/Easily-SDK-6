@@ -149,12 +149,11 @@ typedef struct _page_cator_t{
 #endif
 
 /*define xdb type and handle*/
-#define _DB_UNKNOWN		0x40
-#define _DB_STUB		0x41
-#define _DB_ODBC		0x42
-#define _DB_OCI			0x43
-#define _DB_MYSQL		0x44
-#define _DB_POSTGRE		0x45
+#define _DB_STUB		0x2A
+#define _DB_ODBC		0x2B
+#define _DB_OCI			0x2C
+#define _DB_MYSQL		0x2D
+#define _DB_POSTGRE		0x2E
 typedef struct _handle_head	*xdb_t;
 
 

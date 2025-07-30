@@ -28,8 +28,9 @@ LICENSE.GPL3 for more details.
 
 #ifdef XDU_SUPPORT_CLIPBOARD
 
-bool_t _clipboard_put(res_win_t win, int fmt, const byte_t* data, dword_t size)
+bool_t _clipboard_put(widget_t wt, int fmt, const byte_t* data, dword_t size)
 {
+	X11_widget_t* pxw = TypePtrFromHead(X11_widget_t, wt);
 	XEvent event;
 	XSelectionRequestEvent ev = {0};
 	XSelectionRequestEvent *xsr;
@@ -53,9 +54,9 @@ bool_t _clipboard_put(res_win_t win, int fmt, const byte_t* data, dword_t size)
 
 	atom_clipb = XInternAtom(g_display, "CLIPBOARD", 0);
 
-	XSetSelectionOwner (g_display, atom_clipb, win, 0);
+	XSetSelectionOwner (g_display, atom_clipb, pxw->self, 0);
 
-	if(XGetSelectionOwner (g_display, atom_clipb) != win)
+	if(XGetSelectionOwner (g_display, atom_clipb) != pxw->self)
 		return bool_false;
 
 	atom_target = XInternAtom(g_display, "TARGETS", 0);
@@ -87,8 +88,9 @@ bool_t _clipboard_put(res_win_t win, int fmt, const byte_t* data, dword_t size)
 	return bool_true;
 }
 
-dword_t _clipboard_get(res_win_t win, int fmt, byte_t* buf, dword_t max)
+dword_t _clipboard_get(widget_t wt, int fmt, byte_t* buf, dword_t max)
 {
+	X11_widget_t* pxw = TypePtrFromHead(X11_widget_t, wt);
 	XEvent ev = {0};
 	int format;
 	unsigned long N, size;
@@ -119,7 +121,7 @@ dword_t _clipboard_get(res_win_t win, int fmt, byte_t* buf, dword_t max)
 		if(buf)
 		{
 			ret = (max < (dword_t)size)? max : (dword_t)size;
-			memcpy((void*)buf, (void*)data, ret);
+			xmem_copy((void*)buf, (void*)data, ret);
 		}else
 		{
 			ret = (dword_t)size;

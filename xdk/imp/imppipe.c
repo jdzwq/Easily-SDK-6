@@ -58,7 +58,7 @@ xhand_t xpipe_srv(const tchar_t* pname, dword_t fmode)
 		return NULL;
 	}
 
-	ppi = (pipe_context*)xmem_alloc(sizeof(pipe_context));
+	ppi = (pipe_context*)xmem_alloc_handle(sizeof(pipe_context));
 	ppi->head.tag = _HANDLE_PIPE;
 	ppi->pipe = pd;
 	ppi->b_srv = 1;
@@ -82,7 +82,10 @@ bool_t xpipe_listen(xhand_t pip)
 
 	XDK_ASSERT(pif != NULL);
 
-    rt = (*pif->pf_pipe_listen)(ppi->pipe, ppi->pov);
+    if((rt = (*pif->pf_pipe_listen)(ppi->pipe, ppi->pov)) == bool_false)
+	{
+		set_system_error(_T("pf_pipe_listen"));
+	}
     
     return rt;
 }
@@ -119,7 +122,7 @@ xhand_t xpipe_cli(const tchar_t* pname, dword_t fmode)
 		return NULL;
 	}
 
-	ppi = (pipe_context*)xmem_alloc(sizeof(pipe_context));
+	ppi = (pipe_context*)xmem_alloc_handle(sizeof(pipe_context));
 	ppi->head.tag = _HANDLE_PIPE;
 	ppi->pipe = pd;
 	ppi->b_srv = 0;
@@ -140,7 +143,7 @@ xhand_t xpipe_attach(res_file_t hp)
 
 	XDK_ASSERT(pif != NULL);
 
-	ppi = (pipe_context*)xmem_alloc(sizeof(pipe_context));
+	ppi = (pipe_context*)xmem_alloc_handle(sizeof(pipe_context));
 	ppi->head.tag = _HANDLE_PIPE;
 	ppi->pipe = hp;
 
@@ -165,7 +168,7 @@ res_file_t xpipe_detach(xhand_t pip)
 		xmem_free(ppi->pov);
 	}
 
-	xmem_free(ppi);
+	xmem_free_handle((xhand_t)ppi);
 
 	return hp;
 }
@@ -194,6 +197,7 @@ bool_t xpipe_flush(xhand_t pip)
 {
 	pipe_context* ppi = TypePtrFromHead(pipe_context, pip);
 	if_pipe_t* pif;
+	bool_t b;
 
 	XDK_ASSERT(pip && pip->tag == _HANDLE_PIPE);
 
@@ -201,10 +205,14 @@ bool_t xpipe_flush(xhand_t pip)
 
 	XDK_ASSERT(pif != NULL);
 
-	if (ppi->pipe)
-		return (*pif->pf_pipe_flush)(ppi->pipe);
-	else
-		return 0;
+	if (!ppi->pipe) return 0;
+
+	if((b = (*pif->pf_pipe_flush)(ppi->pipe)) == bool_false)
+	{
+		set_system_error(_T("pf_pipe_flush"));
+	}
+
+	return b;
 }
 
 void xpipe_free(xhand_t pip)
@@ -238,7 +246,7 @@ void xpipe_free(xhand_t pip)
 	}
 
 	xsfree(ppi->pname);
-	xmem_free(ppi);
+	xmem_free_handle((xhand_t)ppi);
 }
 
 bool_t xpipe_write(xhand_t pip, const byte_t* buf, dword_t* pcb)

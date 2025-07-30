@@ -303,7 +303,7 @@ void _queue_destroy(res_queue_t ep)
 wait_t _queue_wait(res_queue_t ep, int ms)
 {
 	DWORD dw = 0;
-	ULONG_PTR up = NULL;
+	ULONG_PTR up = 0;
 	LPOVERLAPPED ul = NULL;
 	DWORD tmo;
 

@@ -30,12 +30,15 @@ LICENSE.GPL3 for more details.
 
 #pragma comment(lib,"shell32.lib")
 
-bool_t _shell_get_filename(res_win_t owner, const tchar_t* defpath, const tchar_t* filter, const tchar_t* defext, bool_t saveit, tchar_t* pathbuf, int pathlen, tchar_t* filebuf, int filelen)
+bool_t _shell_get_filename(widget_t wt, const tchar_t* defpath, const tchar_t* filter, const tchar_t* defext, bool_t saveit, tchar_t* pathbuf, int pathlen, tchar_t* filebuf, int filelen)
 {
+	win32_widget_t* pws = (win32_widget_t*)wt;
 	OPENFILENAME ofn = { 0 };
 
+	if(!pws) return 0;
+
 	ofn.lStructSize = sizeof(OPENFILENAME);
-	ofn.hwndOwner = owner;
+	ofn.hwndOwner = pws->self;
 	ofn.hInstance = 0;
 	ofn.lpstrFilter = filter;
 	ofn.lpstrCustomFilter = NULL;
@@ -77,15 +80,18 @@ bool_t _shell_get_filename(res_win_t owner, const tchar_t* defpath, const tchar_
 	return 1;
 }
 
-bool_t _shell_get_pathname(res_win_t owner, const tchar_t* defpath, bool_t createit, tchar_t* pathbuf, int pathlen)
+bool_t _shell_get_pathname(widget_t wt, const tchar_t* defpath, bool_t createit, tchar_t* pathbuf, int pathlen)
 {
+	win32_widget_t* pws = (win32_widget_t*)wt;
 	BROWSEINFO brw = { 0 };
 	LPITEMIDLIST pidl = NULL;
 	IShellFolder* pisf = NULL;
 	DWORD len,atr;
 	WCHAR wPath[MAX_PATH] = { 0 };
 
-	brw.hwndOwner = owner;
+	if(!pws) return 0;
+
+	brw.hwndOwner = pws->self;
 	brw.pszDisplayName = NULL;
 	brw.lpszTitle = NULL;
 

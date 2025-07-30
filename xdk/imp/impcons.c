@@ -54,8 +54,8 @@ xhand_t xcons_alloc()
 		set_system_error(_T("pf_cons_alloc"));
 		return NULL;
 	}
-
-	pst = (cons_context*)xmem_alloc(sizeof(cons_context));
+ 
+	pst = (cons_context*)xmem_alloc_handle(sizeof(cons_context));
 	pst->head.tag = _HANDLE_CONS;
 	pst->cons = fd;
 	pst->cname = xsclone(cname);
@@ -76,6 +76,7 @@ res_file_t xcons_stdin(xhand_t con)
 {
 	cons_context* pst = TypePtrFromHead(cons_context, con);
 	if_cons_t* pif;
+	res_file_t fd;
 
 	XDK_ASSERT(con && con->tag == _HANDLE_CONS);
 
@@ -83,13 +84,19 @@ res_file_t xcons_stdin(xhand_t con)
 
 	XDK_ASSERT(pif != NULL);
 
-	return (*pif->pf_cons_stdin)(pst->cons);
+	if((fd = (*pif->pf_cons_stdin)(pst->cons)) == INVALID_FILE)
+	{
+		set_system_error(_T("xcons_stdin"));
+	}
+
+	return fd;
 }
 
 res_file_t xcons_stdout(xhand_t con)
 {
 	cons_context* pst = TypePtrFromHead(cons_context, con);
 	if_cons_t* pif;
+	res_file_t fd;
 
 	XDK_ASSERT(con && con->tag == _HANDLE_CONS);
 
@@ -97,7 +104,12 @@ res_file_t xcons_stdout(xhand_t con)
 
 	XDK_ASSERT(pif != NULL);
 
-	return (*pif->pf_cons_stdout)(pst->cons);
+	if((fd = (*pif->pf_cons_stdout)(pst->cons)) == INVALID_FILE)
+	{
+		set_system_error(_T("xcons_stdout"));
+	}
+
+	return fd;
 }
 
 void xcons_free(xhand_t con)
@@ -121,13 +133,14 @@ void xcons_free(xhand_t con)
 		xsfree(pst->cname);
 	}
 
-	xmem_free(pst);
+	xmem_free_handle((xhand_t)pst);
 }
 
 bool_t xcons_sigaction(xhand_t con, PF_SIGHANDLER pf)
 {
 	cons_context* pst = TypePtrFromHead(cons_context, con);
 	if_cons_t* pif;
+	bool_t b;
 
 	pif = PROCESS_CONS_INTERFACE;
 
@@ -135,7 +148,12 @@ bool_t xcons_sigaction(xhand_t con, PF_SIGHANDLER pf)
 
 	XDK_ASSERT(con && con->tag == _HANDLE_CONS);
 
-	return (*pif->pf_cons_sigaction)(pst->cons, pf);
+	if((b = (*pif->pf_cons_sigaction)(pst->cons, pf)) == bool_false)
+	{
+		set_system_error(_T("xcons_sigaction"));
+	}
+
+	return b;
 }
 
 bool_t xcons_write(xhand_t con, const byte_t* buf, dword_t* pb)
@@ -169,6 +187,7 @@ bool_t xcons_flush(xhand_t con)
 {
 	cons_context* pst = TypePtrFromHead(cons_context, con);
 	if_cons_t* pif;
+	bool_t b;
 
 	pif = PROCESS_CONS_INTERFACE;
 
@@ -176,7 +195,12 @@ bool_t xcons_flush(xhand_t con)
 
 	XDK_ASSERT(con && con->tag == _HANDLE_CONS);
 
-	return (*pif->pf_cons_flush)(pst->cons);
+	if((b = (*pif->pf_cons_flush)(pst->cons)) == bool_false)
+	{
+		set_system_error(_T("xcons_flush"));
+	}
+
+	return b;
 }
 
 bool_t xcons_read(xhand_t con, byte_t* buf, dword_t* pb)

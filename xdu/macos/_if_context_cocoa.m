@@ -43,16 +43,17 @@ void _context_cleanup(void)
 	NOP;
 }
 
-visual_t _create_display_context(res_win_t wt)
+visual_t _create_display_context(widget_t wt)
 {
+	cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
 	cocoa_context_t* ctx = NULL;
 
-	ctx = (cocoa_context_t*)calloc(1, sizeof(cocoa_context_t));
+	ctx = (cocoa_context_t*)xmem_alloc_handle(sizeof(cocoa_context_t));
 	ctx->head.tag = _VISUAL_DISPLAY;
 
 	NSGraphicsContext *graphicsContext = [NSGraphicsContext currentContext];
     ctx->context = [graphicsContext CGContext];
-	ctx->client = [(NSView*)wt frame];
+	ctx->client = [(NSView*)(pwidg->self) frame];
 	ctx->type = CONTEXT_SCREEN;
 	
 	return (visual_t)&(ctx->head);
@@ -60,10 +61,10 @@ visual_t _create_display_context(res_win_t wt)
 
 visual_t _create_compatible_context(visual_t rdc, int cx, int cy)
 {
-	cocoa_context_t* org = (cocoa_context_t*)rdc;
+	cocoa_context_t* org = TypePtrFromHead(cocoa_context_t, rdc);
 	cocoa_context_t* ctx = NULL;
 
-	ctx = (cocoa_context_t*)calloc(1, sizeof(cocoa_context_t));
+	ctx = (cocoa_context_t*)xmem_alloc_handle(sizeof(cocoa_context_t));
 	ctx->head.tag = _VISUAL_DISPLAY;
 
 	ctx->type = CONTEXT_MEMORY;
@@ -90,7 +91,7 @@ visual_t _create_compatible_context(visual_t rdc, int cx, int cy)
 
 void _destroy_context(visual_t rdc)
 {
-	cocoa_context_t* ctx = (cocoa_context_t*)rdc;
+	cocoa_context_t* ctx = TypePtrFromHead(cocoa_context_t, rdc);
 
 	switch (ctx->type)
 	{
@@ -107,12 +108,12 @@ void _destroy_context(visual_t rdc)
 		break;
 	}
 
-	free(ctx);
+	xmem_free_handle(ctx);
 }
 
 void _get_device_caps(visual_t rdc, dev_cap_t* pcap)
 {
-	cocoa_context_t* ctx = (cocoa_context_t*)rdc;
+	cocoa_context_t* ctx = TypePtrFromHead(cocoa_context_t, rdc);
 
 	NSScreen *mainScreen = [NSScreen mainScreen];
     NSRect screenFrame = [mainScreen frame];
@@ -139,8 +140,8 @@ void _get_device_caps(visual_t rdc, dev_cap_t* pcap)
 
 void _render_context(visual_t src, int srcx, int srcy, visual_t dst, int dstx, int dsty, int dstw, int dsth)
 {
-	cocoa_context_t* src_ctx = (cocoa_context_t*)src;
-	cocoa_context_t* dst_ctx = (cocoa_context_t*)dst;
+	cocoa_context_t* src_ctx = TypePtrFromHead(cocoa_context_t, src);
+	cocoa_context_t* dst_ctx = TypePtrFromHead(cocoa_context_t, dst);
 
   	CGImageRef image = CGBitmapContextCreateImage(src_ctx->context);
  

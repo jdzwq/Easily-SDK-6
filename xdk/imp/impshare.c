@@ -60,7 +60,7 @@ xhand_t xshare_srv(const tchar_t* pname, const tchar_t* fpath, dword_t hoff, dwo
 		return NULL;
 	}
 
-	ppi = (share_context*)xmem_alloc(sizeof(share_context));
+	ppi = (share_context*)xmem_alloc_handle(sizeof(share_context));
 	ppi->head.tag = _HANDLE_SHARE;
 	ppi->block = bh;
 	ppi->write_bytes = 0;
@@ -89,7 +89,7 @@ xhand_t xshare_cli(const tchar_t* pname, dword_t size, dword_t fmode)
 		return NULL;
 	}
 
-	ppi = (share_context*)xmem_alloc(sizeof(share_context));
+	ppi = (share_context*)xmem_alloc_handle(sizeof(share_context));
 	ppi->head.tag = _HANDLE_SHARE;
 	ppi->block = bh;
 	ppi->write_bytes = 0;
@@ -127,7 +127,7 @@ void xshare_close(xhand_t block)
 
 	xsfree(ppi->sname);
 
-	xmem_free(ppi);
+	xmem_free_handle((xhand_t)ppi);
 }
 
 bool_t xshare_read(xhand_t block, byte_t* buf, dword_t* pcb)

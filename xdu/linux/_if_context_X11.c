@@ -63,8 +63,9 @@ void _context_cleanup(void)
     g_display = 0;
 }
 
-visual_t _create_display_context(res_win_t wt)
+visual_t _create_display_context(widget_t wt)
 {
+    X11_widget_t* pxw = TypePtrFromHead(X11_widget_t, wt);
     X11_context_t* ctx = NULL;
     XGCValues gv = {0};
     XWindowAttributes attr = {0};
@@ -76,10 +77,10 @@ visual_t _create_display_context(res_win_t wt)
     XGetGCValues(g_display, gc, GCFunction | GCForeground | GCBackground | GCPlaneMask, &gv);
     gv.subwindow_mode = ClipByChildren;
 
-    ctx = (X11_context_t*)calloc(1, sizeof(X11_context_t));
+    ctx = (X11_context_t*)xmem_alloc_handle(sizeof(X11_context_t));
     
     ctx->type = CONTEXT_WIDGET;
-    ctx->device = (wt)? wt : DefaultRootWindow(g_display);
+    ctx->device = (wt)? pxw->self : DefaultRootWindow(g_display);
     ctx->context = XCreateGC(g_display, ctx->device, 0, &gv);
 
     XGetWindowAttributes(g_display, ctx->device, &attr);
@@ -95,7 +96,7 @@ visual_t _create_display_context(res_win_t wt)
 
 visual_t _create_compatible_context(visual_t rdc, int cx, int cy)
 {
-    X11_context_t* org = (X11_context_t*)rdc;
+    X11_context_t* org = TypePtrFromHead(X11_context_t, rdc);
     XGCValues gv = {0};
     Window r;
     int x,y;
@@ -104,7 +105,7 @@ visual_t _create_compatible_context(visual_t rdc, int cx, int cy)
     
     XGetGeometry(g_display, org->device, &r, &x, &y, &w, &h, &b, &d);
     
-    ctx = (X11_context_t*)calloc(1, sizeof(X11_context_t));
+    ctx = (X11_context_t*)xmem_alloc_handle(sizeof(X11_context_t));
 
     ctx->type = CONTEXT_MEMORY;
     ctx->device = XCreatePixmap (g_display, r, cx, cy, org->depth);
@@ -123,7 +124,7 @@ visual_t _create_compatible_context(visual_t rdc, int cx, int cy)
 
 void _destroy_context(visual_t rdc)
 {
-    X11_context_t* ctx = (X11_context_t*)rdc;
+    X11_context_t* ctx = TypePtrFromHead(X11_context_t, rdc);
 
     if(ctx->type == CONTEXT_MEMORY && ctx->device)
         XFreePixmap(g_display, ctx->device);
@@ -134,12 +135,11 @@ void _destroy_context(visual_t rdc)
     if(ctx->context)
 	    XFreeGC(g_display, ctx->context);
     
-    free(ctx);
+    xmem_free_handle(ctx);
 }
 
 void _get_device_caps(visual_t rdc, dev_cap_t* pcap)
 {
-    X11_context_t* ctx = (X11_context_t*)rdc;
     int scrn;
     
     scrn = DefaultScreen(g_display);
@@ -159,117 +159,10 @@ void _get_device_caps(visual_t rdc, dev_cap_t* pcap)
 
 void _render_context(visual_t src, int srcx, int srcy, visual_t dst, int dstx, int dsty, int dstw, int dsth)
 {
-    X11_context_t* src_ctx = (X11_context_t*)src;
-    X11_context_t* dst_ctx = (X11_context_t*)dst;
+    X11_context_t* src_ctx = TypePtrFromHead(X11_context_t, src);
+    X11_context_t* dst_ctx = TypePtrFromHead(X11_context_t, dst);
 
     XCopyArea(g_display, src_ctx->device, dst_ctx->device, src_ctx->context, srcx, srcy, dstw, dsth, dstx, dsty);
-}
-
-/*******************************************************************************************************************/
-
-float _pt_per_mm(visual_t rdc, bool_t horz)
-{
-    X11_context_t* ctx = (X11_context_t*)rdc;
-    int scrn;
-    
-    scrn = DefaultScreen(g_display);
-    
-    if(horz)
-        return (float)((float)DisplayWidth(g_display, scrn) / (float)DisplayWidthMM(g_display, scrn));
-    else
-        return (float)((float)DisplayHeight(g_display, scrn) / (float)DisplayHeightMM(g_display, scrn));
-}
-
-static int _font_size(visual_t rdc, int height)
-{
-    X11_context_t* ctx = (X11_context_t*)rdc;
-
-    float fh;
-    int size;
-    
-    fh = _pt_per_mm(rdc, 0);
-    
-    size = (int)(((float)height / fh) * PDPERMM);
-    
-    return size;
-}
-
-void _text_pt_size(visual_t rdc, const xfont_t* pxf, const tchar_t* txt, int len, xsize_t* pxs)
-{
-    X11_context_t* ctx = (X11_context_t*)rdc;
-
-    XFontStruct* pfs = NULL;
-    tchar_t pattern[256] = {0};
-    
-    if(len < 0) len = xslen(txt);
-    
-    format_font_pattern(pxf, pattern);
-    
-    pfs = XLoadQueryFont(g_display, pattern);
-    if(!pfs)
-        return;
-    
-    pxs->w = XTextWidth(pfs, txt, len);
-    pxs->h = pfs->ascent + pfs->descent;
-
-    XFreeFont(g_display, pfs);
-}
-
-void _text_mm_size(visual_t rdc, const xfont_t* pxf, const tchar_t* txt, int len, xsize_t* pxs)
-{
-    X11_context_t* ctx = (X11_context_t*)rdc;
-
-    _text_pt_size(rdc, pxf, txt, len, pxs);
-    
-    pxs->fw = (float)pxs->w / _pt_per_mm(rdc, 1);
-    pxs->fh = (float)pxs->h / _pt_per_mm(rdc, 0);
-}
-
-void _text_pt_metric(visual_t rdc, const xfont_t* pxf, xsize_t* pxs)
-{
-    X11_context_t* ctx = (X11_context_t*)rdc;
-
-    XFontStruct* pfs = NULL;
-    tchar_t pattern[256] = {0};
-    
-    format_font_pattern(pxf, pattern);
-    
-    pfs = XLoadQueryFont(g_display, pattern);
-    if(!pfs)
-        return;
-    
-    pxs->w = (pfs->min_bounds.width + pfs->max_bounds.width) / 2;
-    pxs->h = pfs->ascent + pfs->descent;
-}
-
-void _text_mm_metric(visual_t rdc, const xfont_t* pxf, xsize_t* pxs)
-{
-    X11_context_t* ctx = (X11_context_t*)rdc;
-
-    _text_pt_metric(rdc, pxf, pxs);
-    
-    pxs->fw = (float)pxs->w / _pt_per_mm(rdc, 1);
-    pxs->fh = (float)pxs->h / _pt_per_mm(rdc, 0);
-}
-
-void _cast_pt_to_mm(visual_t rdc, bool_t horz, xspan_t* pan)
-{
-    X11_context_t* ctx = (X11_context_t*)rdc;
-
-    if(horz)
-        pan->fs = (float)pan->s / _pt_per_mm(rdc, 1);
-    else
-        pan->fs = (float)pan->s / _pt_per_mm(rdc, 0);
-}
-
-void _cast_mm_to_pt(visual_t rdc, bool_t horz, xspan_t* pan)
-{
-    X11_context_t* ctx = (X11_context_t*)rdc;
-
-    if(horz)
-        pan->s = (int)(pan->fs * _pt_per_mm(rdc, 1));
-    else
-        pan->s = (int)(pan->fs * _pt_per_mm(rdc, 0));
 }
 
 #endif //XDU_SUPPORT_CONTEXT

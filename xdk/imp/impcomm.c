@@ -92,7 +92,7 @@ xhand_t xcomm_open(const tchar_t* pname, dword_t fmode)
 		return NULL;
 	}
 
-	pst = (comm_context*)xmem_alloc(sizeof(comm_context));
+	pst = (comm_context*)xmem_alloc_handle(sizeof(comm_context));
 	pst->head.tag = _HANDLE_COMM;
 	pst->comm = fh;
 
@@ -121,7 +121,7 @@ void xcomm_close(xhand_t com)
 		xmem_free(pst->pov);
 	}
 
-	xmem_free(pst);
+	xmem_free_handle((xhand_t)pst);
 }
 
 dword_t xcomm_listen(xhand_t com, dword_t* pcb)
@@ -188,7 +188,13 @@ bool_t xcomm_flush(xhand_t com)
 
 	XDK_ASSERT(com && com->tag == _HANDLE_COMM);
 
-	return (*pif->pf_comm_flush)(pst->comm);
+	if(!(*pif->pf_comm_flush)(pst->comm))
+	{
+		set_system_error(_T("pf_comm_flash"));
+		return 0;
+	}
+
+	return 1;
 }
 
 bool_t xcomm_read(xhand_t com, byte_t* buf, dword_t* pcb)

@@ -104,13 +104,34 @@ typedef struct _cocoa_context_t{
 
 
 #ifdef XDU_SUPPORT_WIDGET
-typedef unsigned int	wparam_t;
-typedef unsigned long   lparam_t;
-typedef int		result_t;
+typedef struct _cocoa_widget_t{
+	handle_head head;
 
-typedef id	res_win_t;
-typedef id	res_cur_t;
-typedef id	res_acl_t;
+	id self;
+	id parent;
+	id owner;
+
+	uid_t uid;
+	dword_t style;
+	bool_t disable;
+	bool_t idling;
+
+	void* acl;
+
+	int state;
+	int result;
+    dword_t keymsk;
+
+	border_t bd;
+	xpoint_t pt;
+	xsize_t st;
+
+	scroll_t hs;
+	scroll_t vs;
+
+	float diaph;
+	clr_mod_t clrs;
+}cocoa_widget_t;
 
 #ifdef XDU_SUPPORT_WIDGET_NC
 /*widget nc hit test*/

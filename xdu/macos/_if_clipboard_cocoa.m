@@ -28,16 +28,17 @@ LICENSE.GPL3 for more details.
 
 #ifdef XDU_SUPPORT_CLIPBOARD
 
-bool_t _clipboard_put(res_win_t win, int fmt, const byte_t* data, dword_t size)
+bool_t _clipboard_put(widget_t wt, int fmt, const byte_t* data, dword_t size)
 {
-	
+	NOP;
 
 	return bool_true;
 }
 
-dword_t _clipboard_get(res_win_t win, int fmt, byte_t* buf, dword_t max)
+dword_t _clipboard_get(widget_t wt, int fmt, byte_t* buf, dword_t max)
 {
-
+	NOP;
+	
 	return bool_false;
 }
 

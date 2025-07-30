@@ -63,7 +63,6 @@ LICENSE.GPL3 for more details.
 #include <cairo/cairo-xlib.h>
 #endif
 
-
 #ifdef XDU_SUPPORT_CONTEXT
 typedef struct _X11_atoms_t{
     Atom net_active_window;
@@ -178,34 +177,48 @@ typedef struct _X11_context_t{
 #endif
 #endif /*XDU_SUPPORT_CLIPBOARD*/
 
-
-#define KEY_BACK		XK_BackSpace
-#define KEY_TAB			XK_Tab
-#define KEY_ENTER		XK_Return
-#define KEY_ESC			XK_Escape
-#define KEY_SPACE		32	//0x20
-#define KEY_PAGEUP		XK_Page_Up
-#define KEY_PAGEDOWN	XK_Page_Down
-#define KEY_END			XK_End
-#define KEY_HOME		XK_Home
-#define KEY_LEFT		XK_Left
-#define KEY_UP			XK_Up
-#define KEY_RIGHT		XK_Right
-#define KEY_DOWN		XK_Down
-#define KEY_INSERT		XK_Insert
-#define KEY_DELETE		XK_Delete
-
 #ifdef XDU_SUPPORT_WIDGET
+typedef struct _X11_widget_t{
+    handle_head head;
 
-typedef XEvent      msg_t;
-typedef unsigned int	wparam_t;
-typedef unsigned long   lparam_t;
-typedef int         result_t;
+	Window self;
+	Window parent;
+	Window owner;
+	
+    dword_t style;
+	uid_t uid;
+    uid_t sid;
 
-typedef Window      res_win_t;
-typedef Cursor      res_cur_t;
-typedef XIC         res_xic_t;
-typedef void*	    res_acl_t;
+	bool_t disable;
+
+	long evmsk;
+	unsigned int keymsk;
+
+    int state;
+	int result;
+
+    void* acl;
+	Cursor cur;
+	XIC xic;
+    res_timer_t ctt;
+
+	border_t bd;
+	xpoint_t pt;
+	xsize_t st;
+
+	scroll_t hs;
+	scroll_t vs;
+
+	bool_t tog;
+	caret_t car;
+
+    float diaph;
+	xcolor_t bkg;
+	xcolor_t frg;
+	xcolor_t txt;
+	xcolor_t msk;
+	xcolor_t ico;
+}X11_widget_t;
 
 #ifdef XDU_SUPPORT_WIDGET_NC
 /*widget nc hit test*/

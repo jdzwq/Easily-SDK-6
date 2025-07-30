@@ -59,7 +59,7 @@ xhand_t xcache_open()
 		return NULL;
 	}
 
-	ppi = (cache_context*)xmem_alloc(sizeof(cache_context));
+	ppi = (cache_context*)xmem_alloc_handle(sizeof(cache_context));
 	ppi->head.tag = _HANDLE_CACHE;
 	ppi->cache = bh;
 	ppi->read_bytes = 0;
@@ -90,7 +90,7 @@ void xcache_close(xhand_t cache)
 
 	(*pif->pf_cache_close)(ppi->cache);
 
-	xmem_free(ppi);
+	xmem_free_handle((xhand_t)ppi);
 }
 
 bool_t xcache_read(xhand_t cache, byte_t* buf, dword_t* pb)

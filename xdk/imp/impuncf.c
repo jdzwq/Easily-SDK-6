@@ -248,7 +248,7 @@ xhand_t xuncf_open_file(const secu_desc_t* psd, const tchar_t* fname, dword_t fm
 		return NULL;
 	}
 
-	pcf = (uncf_context*)xmem_alloc(sizeof(uncf_context));
+	pcf = (uncf_context*)xmem_alloc_handle(sizeof(uncf_context));
 	pcf->head.tag = _HANDLE_UNCF;
 	pcf->file = fh;
 
@@ -291,7 +291,7 @@ void xuncf_close_file(xhand_t unc)
 		xmem_free(pcf->pov);
 	}
 
-	xmem_free(pcf);
+	xmem_free_handle((xhand_t)pcf);
 }
 
 bool_t xuncf_read_file(xhand_t unc, byte_t* buf, dword_t* pcb)

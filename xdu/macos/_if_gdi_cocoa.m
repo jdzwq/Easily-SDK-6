@@ -815,6 +815,10 @@ void _gdi_text_rect(visual_t rdc, const xfont_t* pxf, const xface_t* pxa, const 
 	CFRelease(family);
 
 	if(len < 0) len = xslen(txt);
+	if(!len) {
+		pxr->w = 0;
+		return;
+	}
 	tchar_t* new_txt = xsnclone(txt, len);
 	CFStringRef string = CFStringCreateWithCString(NULL, new_txt, kCFStringEncodingUTF8);
 	xsfree(new_txt);
@@ -834,8 +838,8 @@ void _gdi_text_rect(visual_t rdc, const xfont_t* pxf, const xface_t* pxa, const 
     CFRelease(attrString);
     CFRelease(font);
 
-    pxr->w = (int)width;
-	pxr->h = (int)height;
+    if(pxr->w < (int)width) pxr->w = (int)width;
+	if(pxr->h < (int)height) pxr->h = (int)height;
 }
 
 void _gdi_text_size(visual_t rdc, const xfont_t* pxf, const tchar_t* txt, int len, xsize_t* pxs)
@@ -849,6 +853,10 @@ void _gdi_text_size(visual_t rdc, const xfont_t* pxf, const tchar_t* txt, int le
 	CFRelease(family);
 
 	if(len < 0) len = xslen(txt);
+	if(!len) {
+		pxs->w = 0;
+		return;
+	}
 	tchar_t* new_txt = xsnclone(txt, len);
 	CFStringRef string = CFStringCreateWithCString(NULL, new_txt, kCFStringEncodingUTF8);
 	xsfree(new_txt);
@@ -868,8 +876,8 @@ void _gdi_text_size(visual_t rdc, const xfont_t* pxf, const tchar_t* txt, int le
     CFRelease(attrString);
     CFRelease(font);
 
-    pxs->w = (int)width;
-	pxs->h = (int)height;
+    if(pxs->w < (int)width) pxs->w = (int)width;
+	if(pxs->h < (int)height) pxs->h = (int)height;
 }
 
 void _gdi_text_metric(visual_t rdc, const xfont_t* pxf, xsize_t* pxs)

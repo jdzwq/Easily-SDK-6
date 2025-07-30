@@ -54,7 +54,7 @@ LICENSE.GPL3 for more details.
 #define XDK_SUPPORT_TIMER
 #define XDK_SUPPORT_RANDOM
 
-#if defined(XDK_SUPPORT_FILE) && (defined(_DEBUG) || defined(DEBUG))
+#if (defined(_DEBUG) || defined(DEBUG))
 #define XDK_SUPPORT_MEMO_DUMP
 #endif
 

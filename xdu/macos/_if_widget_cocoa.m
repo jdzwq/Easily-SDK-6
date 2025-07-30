@@ -41,33 +41,6 @@ LICENSE.GPL3 for more details.
 
 static const NSRange NullRange = { NSNotFound, 0 };
 
-typedef struct _cocoa_widget_t{
-	res_win_t parent;
-	res_win_t owner;
-	res_win_t oneself;
-
-	uid_t uid;
-	dword_t style;
-	bool_t disable;
-	bool_t idling;
-
-	res_acl_t acl;
-	res_cur_t cur;
-
-	int state;
-	int result;
-    dword_t keymsk;
-
-	border_t bd;
-	xpoint_t pt;
-	xsize_t st;
-
-	scroll_t hs;
-	scroll_t vs;
-
-	clr_mod_t clrs;
-}cocoa_widget_t;
-
 #ifndef NSEscapeCharacter
 #define NSEscapeCharacter 0x001B
 #endif
@@ -76,7 +49,7 @@ typedef struct _cocoa_widget_t{
 #define NSSpaceCharacter 0x0020
 #endif
 
-static int unichar_to_keycode(unichar uch)
+static int _cocoa_to_keycode(unichar uch)
 {
     switch (uch)
     {
@@ -111,7 +84,7 @@ static int unichar_to_keycode(unichar uch)
     }
 }
 
-static unichar keycode_to_unichar(int key)
+static unichar _keycode_to_cocoa(int key)
 {
     switch (key)
     {
@@ -146,7 +119,7 @@ static unichar keycode_to_unichar(int key)
     }
 }
 
-static dword_t _keynsState(NSUInteger nsFlags)
+static dword_t _key_state(NSUInteger nsFlags)
 {
     dword_t mask = 0;
 
@@ -162,7 +135,7 @@ static dword_t _keynsState(NSUInteger nsFlags)
     return mask;
 }
 
-static dword_t _mousensState(NSUInteger nsState)
+static dword_t _mouse_state(NSUInteger nsState)
 {
     dword_t mask = 0;
 
@@ -376,7 +349,7 @@ NSString *const CommandMessage = @"CommandMessage";
     int result = 0;
     if (pdisp && pdisp->pf_on_notice)
     {
-        (*pdisp->pf_on_notice)((res_win_t)ref_view, pnt);
+        (*pdisp->pf_on_notice)((widget_t)&(pwidg->head), pnt);
         result = 1;
     }
 
@@ -401,28 +374,28 @@ NSString *const CommandMessage = @"CommandMessage";
     case IDC_PARENT:
         if (pdisp && pdisp->pf_on_parent_command)
         {
-            (*pdisp->pf_on_parent_command)((res_win_t)ref_view, code, data);
+            (*pdisp->pf_on_parent_command)((widget_t)&(pwidg->head), code, data);
             result = 1;
         }
     break;
     case IDC_CHILD:
         if (pdisp && pdisp->pf_on_child_command)
         {
-            (*pdisp->pf_on_child_command)((res_win_t)ref_view, code, data);
+            (*pdisp->pf_on_child_command)((widget_t)&(pwidg->head), code, data);
             result = 1;
         }
     break;
     case IDC_SELF:
         if (pdisp && pdisp->pf_on_self_command)
         {
-            (*pdisp->pf_on_self_command)((res_win_t)ref_view, code, data);
+            (*pdisp->pf_on_self_command)((widget_t)&(pwidg->head), code, data);
             result = 1;
         }
     break;
     default:
         if (pdisp && pdisp->pf_on_menu_command)
         {
-            (*pdisp->pf_on_menu_command)((res_win_t)ref_view, code, cid, data);
+            (*pdisp->pf_on_menu_command)((widget_t)&(pwidg->head), code, cid, data);
             result = 1;
         }
     break;
@@ -486,7 +459,7 @@ NSString *const CommandMessage = @"CommandMessage";
     int result = 0;
     if (pdisp && pdisp->pf_on_notice)
     {
-        (*pdisp->pf_on_notice)((res_win_t)ref_view, pnt);
+        (*pdisp->pf_on_notice)((widget_t)&(pwidg->head), pnt);
         result = 1;
     }
 
@@ -513,28 +486,28 @@ NSString *const CommandMessage = @"CommandMessage";
     case IDC_PARENT:
         if (pdisp && pdisp->pf_on_parent_command)
         {
-            (*pdisp->pf_on_parent_command)((res_win_t)ref_view, code, data);
+            (*pdisp->pf_on_parent_command)((widget_t)&(pwidg->head), code, data);
             result = 1;
         }
     break;
     case IDC_CHILD:
         if (pdisp && pdisp->pf_on_child_command)
         {
-            (*pdisp->pf_on_child_command)((res_win_t)ref_view, code, data);
+            (*pdisp->pf_on_child_command)((widget_t)&(pwidg->head), code, data);
             result = 1;
         }
     break;
     case IDC_SELF:
         if (pdisp && pdisp->pf_on_self_command)
         {
-            (*pdisp->pf_on_self_command)((res_win_t)ref_view, code, data);
+            (*pdisp->pf_on_self_command)((widget_t)&(pwidg->head), code, data);
             result = 1;
         }
     break;
     default:
         if (pdisp && pdisp->pf_on_menu_command)
         {
-            (*pdisp->pf_on_menu_command)((res_win_t)ref_view, code, cid, data);
+            (*pdisp->pf_on_menu_command)((widget_t)&(pwidg->head), code, cid, data);
             result = 1;
         }
     break;
@@ -548,11 +521,12 @@ NSString *const CommandMessage = @"CommandMessage";
     _CocoaWindow* ref_window = sender;
     _CocoaView* ref_view = [ref_window contentView];
 
+    cocoa_widget_t* pwidg = (cocoa_widget_t*)ref_view.widget;
     if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
 
     if (pdisp && pdisp->pf_on_close)
      {
-        if((*pdisp->pf_on_close)((res_win_t)ref_view))
+        if((*pdisp->pf_on_close)((widget_t)&(pwidg->head)))
             return NO;
     }
 
@@ -563,6 +537,8 @@ NSString *const CommandMessage = @"CommandMessage";
 {@autoreleasepool {
     _CocoaWindow* ref_window = notification.object;
     _CocoaView* ref_view = [ref_window contentView];
+
+    cocoa_widget_t* pwidg = (cocoa_widget_t*)ref_view.widget;
 
     _CocoaWindowRunType run_type = [ref_window running];
     ref_window.running = _CocoaWindowRunInvalid;
@@ -579,7 +555,7 @@ NSString *const CommandMessage = @"CommandMessage";
 
     if(run_type != _CocoaWindowRunInvalid)
     {
-        _widget_destroy((res_win_t)ref_view);
+        _widget_destroy((widget_t)&(pwidg->head));
     }
 }}
 
@@ -603,11 +579,11 @@ NSString *const CommandMessage = @"CommandMessage";
     if(pdisp && pdisp->pf_on_size)
     {
          if (NSEqualRects(newFrame, scrFrame))
-            (*pdisp->pf_on_size)((res_win_t)ref_view, WS_SIZE_MAXIMIZED, &xs);
+            (*pdisp->pf_on_size)((widget_t)&(pwidg->head), WS_SIZE_MAXIMIZED, &xs);
         else if(pwidg->st.w == xs.w && pwidg->st.h == xs.h)
-            (*pdisp->pf_on_size)((res_win_t)ref_view, WS_SIZE_LAYOUT, &xs);
+            (*pdisp->pf_on_size)((widget_t)&(pwidg->head), WS_SIZE_LAYOUT, &xs);
         else
-            (*pdisp->pf_on_size)((res_win_t)ref_view, WS_SIZE_RESTORE, &xs);
+            (*pdisp->pf_on_size)((widget_t)&(pwidg->head), WS_SIZE_RESTORE, &xs);
 
         pwidg->st.w = xs.w;
         pwidg->st.h = xs.h;
@@ -633,7 +609,7 @@ NSString *const CommandMessage = @"CommandMessage";
 
     if(pdisp && pdisp->pf_on_size)
     {
-        (*pdisp->pf_on_size)((res_win_t)ref_view, WS_SIZE_FULLSCREEN, &xs);
+        (*pdisp->pf_on_size)((widget_t)&(pwidg->head), WS_SIZE_FULLSCREEN, &xs);
     }
 
     pwidg->state = WS_SHOW_FULLSCREEN;
@@ -658,7 +634,7 @@ NSString *const CommandMessage = @"CommandMessage";
 
     if(pdisp && pdisp->pf_on_size)
     {
-        (*pdisp->pf_on_size)((res_win_t)ref_view, WS_SIZE_RESTORE, &xs);
+        (*pdisp->pf_on_size)((widget_t)&(pwidg->head), WS_SIZE_RESTORE, &xs);
     }
 
     pwidg->state = WS_SHOW_NORMAL;
@@ -689,7 +665,7 @@ NSString *const CommandMessage = @"CommandMessage";
 
     if(pdisp && pdisp->pf_on_move)
     {
-        (*pdisp->pf_on_move)((res_win_t)ref_view, &pt);
+        (*pdisp->pf_on_move)((widget_t)&(pwidg->head), &pt);
 
         pwidg->pt.x = pt.x;
         pwidg->pt.y = pt.y;
@@ -712,7 +688,7 @@ NSString *const CommandMessage = @"CommandMessage";
         xsize_t xs;
         xs.w = 0;
         xs.h = 0;
-        (*pdisp->pf_on_size)((res_win_t)ref_view, WS_SIZE_MINIMIZED, &xs);
+        (*pdisp->pf_on_size)((widget_t)&(pwidg->head), WS_SIZE_MINIMIZED, &xs);
 
         pwidg->st.w = xs.w;
         pwidg->st.h = xs.h;
@@ -740,7 +716,7 @@ NSString *const CommandMessage = @"CommandMessage";
 
     if(pdisp && pdisp->pf_on_size)
     {
-        (*pdisp->pf_on_size)((res_win_t)ref_view, WS_SIZE_RESTORE, &xs);
+        (*pdisp->pf_on_size)((widget_t)&(pwidg->head), WS_SIZE_RESTORE, &xs);
 
         pwidg->st.w = xs.w;
         pwidg->st.h = xs.h;
@@ -754,11 +730,12 @@ NSString *const CommandMessage = @"CommandMessage";
     _CocoaWindow* ref_window = notification.object;
     _CocoaView* ref_view = [ref_window contentView];
 
+    cocoa_widget_t* pwidg = (cocoa_widget_t*)ref_view.widget;
     if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
 
     if(pdisp && pdisp->pf_on_activate)
     {
-        (*pdisp->pf_on_activate)((res_win_t)ref_view, 1);
+        (*pdisp->pf_on_activate)((widget_t)&(pwidg->head), 1);
     }
 }}
 
@@ -781,13 +758,14 @@ NSString *const CommandMessage = @"CommandMessage";
     _CocoaWindow* ref_window = notification.object;
     _CocoaView* ref_view = [ref_window contentView];
 
+    cocoa_widget_t* pwidg = (cocoa_widget_t*)ref_view.widget;
     if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
 
     bool_t visible = (ref_window.occlusionState & NSWindowOcclusionStateVisible)? 1 : 0;
 
     if(pdisp && pdisp->pf_on_show)
     {
-        (*pdisp->pf_on_show)((res_win_t)ref_view, visible);
+        (*pdisp->pf_on_show)((widget_t)&(pwidg->head), visible);
     }
 }}
 
@@ -827,11 +805,12 @@ NSString *const CommandMessage = @"CommandMessage";
         return;
     
     _CocoaView* ref_view = [self contentView];
+    cocoa_widget_t* pwidg = (cocoa_widget_t*)ref_view.widget;
     if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
 
     if (pdisp && pdisp->pf_on_timer)
     {
-        (*pdisp->pf_on_timer)((res_win_t)ref_view, 0);
+        (*pdisp->pf_on_timer)((widget_t)&(pwidg->head), 0);
     }
 }}
 
@@ -908,11 +887,12 @@ NSString *const CommandMessage = @"CommandMessage";
         return [super becomeFirstResponder];
 
     _CocoaView* ref_view = self;
+    cocoa_widget_t* pwidg = (cocoa_widget_t*)ref_view.widget;
     if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
 
     if (pdisp && pdisp->pf_on_set_focus)
     {
-        (*pdisp->pf_on_set_focus)((res_win_t)ref_view, ref_view);
+        (*pdisp->pf_on_set_focus)((widget_t)&(pwidg->head), ref_view);
     }
 
     return YES;
@@ -924,11 +904,12 @@ NSString *const CommandMessage = @"CommandMessage";
         return [super resignFirstResponder];
 
     _CocoaView* ref_view = self;
+    cocoa_widget_t* pwidg = (cocoa_widget_t*)ref_view.widget;
     if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
 
     if (pdisp && pdisp->pf_on_kill_focus)
     {
-        (*pdisp->pf_on_kill_focus)((res_win_t)ref_view, 0);
+        (*pdisp->pf_on_kill_focus)((widget_t)&(pwidg->head), 0);
     }
 
     return YES;
@@ -960,6 +941,7 @@ NSString *const CommandMessage = @"CommandMessage";
     if([self isKindOfClass:[_CocoaView class]] == NO) return;
     
     _CocoaView* ref_view = self;
+    cocoa_widget_t* pwidg = (cocoa_widget_t*)ref_view.widget;
     if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
 
     NSPoint cliPoint = [ref_view convertPoint:[nsEvent locationInWindow] fromView:nil];
@@ -972,7 +954,7 @@ NSString *const CommandMessage = @"CommandMessage";
     {
         if(pdisp && pdisp->pf_on_lbutton_down)
         {
-            (*pdisp->pf_on_lbutton_down)((res_win_t)ref_view, &pt);
+            (*pdisp->pf_on_lbutton_down)((widget_t)&(pwidg->head), &pt);
         }
     }
 }}
@@ -983,6 +965,7 @@ NSString *const CommandMessage = @"CommandMessage";
     if([self isKindOfClass:[_CocoaView class]] == NO) return;
 
     _CocoaView* ref_view = self;
+    cocoa_widget_t* pwidg = (cocoa_widget_t*)ref_view.widget;
     if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
 
     NSPoint cliPoint = [ref_view convertPoint:[nsEvent locationInWindow] fromView:nil];
@@ -996,13 +979,13 @@ NSString *const CommandMessage = @"CommandMessage";
     {
         if(pdisp && pdisp->pf_on_lbutton_up)
         {
-            (*pdisp->pf_on_lbutton_up)((res_win_t)ref_view, &pt);
+            (*pdisp->pf_on_lbutton_up)((widget_t)&(pwidg->head), &pt);
         }
     }else
     {
         if(pdisp && pdisp->pf_on_lbutton_dbclick)
         {
-            (*pdisp->pf_on_lbutton_dbclick)((res_win_t)ref_view, &pt);
+            (*pdisp->pf_on_lbutton_dbclick)((widget_t)&(pwidg->head), &pt);
         } 
     }
 }}
@@ -1013,6 +996,7 @@ NSString *const CommandMessage = @"CommandMessage";
     if([self isKindOfClass:[_CocoaView class]] == NO) return;
 
     _CocoaView* ref_view = self;
+    cocoa_widget_t* pwidg = (cocoa_widget_t*)ref_view.widget;
     if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
 
     NSPoint cliPoint = [ref_view convertPoint:[nsEvent locationInWindow] fromView:nil];
@@ -1023,14 +1007,14 @@ NSString *const CommandMessage = @"CommandMessage";
     pt.x = (int)cliPoint.x, pt.y = (int)cliPoint.y;
 
     NSUInteger nsFlags = [nsEvent modifierFlags];
-    dword_t mask = _keynsState(nsFlags);
+    dword_t mask = _key_state(nsFlags);
 
     NSUInteger nsState = [NSEvent pressedMouseButtons];
-    mask |= _mousensState(nsState);
+    mask |= _mouse_state(nsState);
 
     if(pdisp && pdisp->pf_on_mouse_move)
     {
-        (*pdisp->pf_on_mouse_move)((res_win_t)ref_view, mask, &pt);
+        (*pdisp->pf_on_mouse_move)((widget_t)&(pwidg->head), mask, &pt);
     }
 }}
 
@@ -1040,6 +1024,7 @@ NSString *const CommandMessage = @"CommandMessage";
     if([self isKindOfClass:[_CocoaView class]] == NO) return;
 
     _CocoaView* ref_view = self;
+    cocoa_widget_t* pwidg = (cocoa_widget_t*)ref_view.widget;
     if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
 
     NSPoint cliPoint = [ref_view convertPoint:[nsEvent locationInWindow] fromView:nil];
@@ -1051,7 +1036,7 @@ NSString *const CommandMessage = @"CommandMessage";
 
     if(pdisp && pdisp->pf_on_rbutton_down)
     {
-        (*pdisp->pf_on_rbutton_down)((res_win_t)ref_view, &pt);
+        (*pdisp->pf_on_rbutton_down)((widget_t)&(pwidg->head), &pt);
     }
 }}
 
@@ -1061,6 +1046,7 @@ NSString *const CommandMessage = @"CommandMessage";
     if([self isKindOfClass:[_CocoaView class]] == NO) return ;
 
     _CocoaView* ref_view = self;
+    cocoa_widget_t* pwidg = (cocoa_widget_t*)ref_view.widget;
     if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
 
     NSPoint cliPoint = [ref_view convertPoint:[nsEvent locationInWindow] fromView:nil];
@@ -1072,7 +1058,7 @@ NSString *const CommandMessage = @"CommandMessage";
 
     if(pdisp && pdisp->pf_on_rbutton_up)
     {
-        (*pdisp->pf_on_rbutton_up)((res_win_t)ref_view, &pt);
+        (*pdisp->pf_on_rbutton_up)((widget_t)&(pwidg->head), &pt);
     }
 }}
 
@@ -1082,6 +1068,7 @@ NSString *const CommandMessage = @"CommandMessage";
     if([self isKindOfClass:[_CocoaView class]] == NO) return ;
 
     _CocoaView* ref_view = self;
+    cocoa_widget_t* pwidg = (cocoa_widget_t*)ref_view.widget;
     if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
 
     NSPoint cliPoint = [ref_view convertPoint:[nsEvent locationInWindow] fromView:nil];
@@ -1092,14 +1079,14 @@ NSString *const CommandMessage = @"CommandMessage";
     pt.x = (int)cliPoint.x, pt.y = (int)cliPoint.y;
 
     NSUInteger nsFlags = [nsEvent modifierFlags];
-    dword_t mask = _keynsState(nsFlags);
+    dword_t mask = _key_state(nsFlags);
 
     NSUInteger nsState = [NSEvent pressedMouseButtons];
-    mask |= _mousensState(nsState);
+    mask |= _mouse_state(nsState);
 
     if(pdisp && pdisp->pf_on_mouse_hover)
     {
-        (*pdisp->pf_on_mouse_hover)((res_win_t)ref_view, mask, &pt);
+        (*pdisp->pf_on_mouse_hover)((widget_t)&(pwidg->head), mask, &pt);
     }
 }}
 
@@ -1109,6 +1096,7 @@ NSString *const CommandMessage = @"CommandMessage";
     if([self isKindOfClass:[_CocoaView class]] == NO) return ;
 
     _CocoaView* ref_view = self;
+    cocoa_widget_t* pwidg = (cocoa_widget_t*)ref_view.widget;
     if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
 
     NSPoint cliPoint = [ref_view convertPoint:[nsEvent locationInWindow] fromView:nil];
@@ -1119,14 +1107,14 @@ NSString *const CommandMessage = @"CommandMessage";
     pt.x = (int)cliPoint.x, pt.y = (int)cliPoint.y;
 
     NSUInteger nsFlags = [nsEvent modifierFlags];
-    dword_t mask = _keynsState(nsFlags);
+    dword_t mask = _key_state(nsFlags);
 
     NSUInteger nsState = [NSEvent pressedMouseButtons];
-    mask |= _mousensState(nsState);
+    mask |= _mouse_state(nsState);
 
     if(pdisp && pdisp->pf_on_mouse_leave)
     {
-        (*pdisp->pf_on_mouse_leave)((res_win_t)ref_view, mask, &pt);
+        (*pdisp->pf_on_mouse_leave)((widget_t)&(pwidg->head), mask, &pt);
     }
 }}
 
@@ -1139,7 +1127,7 @@ NSString *const CommandMessage = @"CommandMessage";
     if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
     cocoa_widget_t* pwidg = (cocoa_widget_t*)ref_view.widget;
 
-    visual_t rdc = _create_display_context((res_win_t)ref_view);
+    visual_t rdc = _create_display_context((widget_t)&(pwidg->head));
     if(!rdc) return;
 
     NSPoint nsOrigin = NSMakePoint(rect.origin.x, rect.origin.y);
@@ -1153,7 +1141,7 @@ NSString *const CommandMessage = @"CommandMessage";
 
     if(pdisp && pdisp->pf_on_paint)
     {
-        (*pdisp->pf_on_paint)((res_win_t)ref_view, rdc, &xr);
+        (*pdisp->pf_on_paint)((widget_t)&(pwidg->head), rdc, &xr);
     }
 
     _destroy_context(rdc);
@@ -1220,15 +1208,29 @@ NSString *const CommandMessage = @"CommandMessage";
     if([self isKindOfClass:[_CocoaView class]] == NO) return ;
 
     _CocoaView* ref_view = self;
+    cocoa_widget_t* pwidg = (cocoa_widget_t*)ref_view.widget;
     if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
 
     unsigned short key = [nsEvent keyCode];
     NSUInteger nsFlags = [nsEvent modifierFlags];
-    dword_t mask = _keynsState(nsFlags);
+    dword_t mask = _key_state(nsFlags);
+
+    acl_table_t* pac = (acl_table_t*)pwidg->acl;
+    if(pac)
+    {
+        for (int i = 0; pac[i].vir != 0; ++i) 
+        {
+            if (pac[i].key == key && (mask & pac[i].vir)) 
+            {
+                _widget_post_command((widget_t)&(pwidg->head), pac[i].cmd, pwidg->uid, 0);
+                return;
+            }
+        }
+    }
 
     if(pdisp && pdisp->pf_on_keydown)
     {
-        (*pdisp->pf_on_keydown)((res_win_t)ref_view, mask, (int)key);
+        (*pdisp->pf_on_keydown)((widget_t)&(pwidg->head), mask, (int)key);
     }
 }}
 
@@ -1243,7 +1245,7 @@ NSString *const CommandMessage = @"CommandMessage";
 
     const unsigned int modifierFlags = [nsEvent modifierFlags] & NSEventModifierFlagDeviceIndependentFlagsMask;
 
-    pwidg->keymsk = _keynsState(modifierFlags);
+    pwidg->keymsk = _key_state(modifierFlags);
 }}
 
 - (void)keyUp:(NSEvent *)nsEvent
@@ -1252,15 +1254,16 @@ NSString *const CommandMessage = @"CommandMessage";
     if([self isKindOfClass:[_CocoaView class]] == NO) return ;
 
     _CocoaView* ref_view = self;
+    cocoa_widget_t* pwidg = (cocoa_widget_t*)ref_view.widget;
     if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
 
     unsigned short key = [nsEvent keyCode];
     NSUInteger nsFlags = [nsEvent modifierFlags];
-    dword_t mask = _keynsState(nsFlags);
+    dword_t mask = _key_state(nsFlags);
 
     if(pdisp && pdisp->pf_on_keyup)
     {
-        (*pdisp->pf_on_keyup)((res_win_t)ref_view, mask, key);
+        (*pdisp->pf_on_keyup)((widget_t)&(pwidg->head), mask, key);
     }
 }}
 
@@ -1270,6 +1273,7 @@ NSString *const CommandMessage = @"CommandMessage";
     if([self isKindOfClass:[_CocoaView class]] == NO) return ;
 
     _CocoaView* ref_view = self;
+    cocoa_widget_t* pwidg = (cocoa_widget_t*)ref_view.widget;
     if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
 
     double deltaX = [nsEvent scrollingDeltaX];
@@ -1290,10 +1294,10 @@ NSString *const CommandMessage = @"CommandMessage";
     if(pdisp && pdisp->pf_on_scroll)
     {
         if(sx)
-            (*pdisp->pf_on_scroll)((res_win_t)ref_view, 1, sx);
+            (*pdisp->pf_on_scroll)((widget_t)&(pwidg->head), 1, sx);
         
         if(sy)
-            (*pdisp->pf_on_scroll)((res_win_t)ref_view, 0, sy);
+            (*pdisp->pf_on_scroll)((widget_t)&(pwidg->head), 0, sy);
     }
 }}
 
@@ -1303,6 +1307,7 @@ NSString *const CommandMessage = @"CommandMessage";
     if([self isKindOfClass:[_CocoaView class]] == NO) return ;
 
     _CocoaView* ref_view = self;
+    cocoa_widget_t* pwidg = (cocoa_widget_t*)ref_view.widget;
     if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
 
     NSString* token;
@@ -1331,7 +1336,7 @@ NSString *const CommandMessage = @"CommandMessage";
 
             if(pdisp && pdisp->pf_on_wchar)
             {
-                (*pdisp->pf_on_wchar)((res_win_t)ref_view, (wchar_t)widechar);
+                (*pdisp->pf_on_wchar)((widget_t)&(pwidg->head), (wchar_t)widechar);
             }
         }
     }
@@ -1366,8 +1371,9 @@ void _widget_cleanup()
     NOP;
 }
 
-res_win_t _widget_create(const tchar_t* wname, dword_t wstyle, const xrect_t* wrect, res_win_t wparent, const if_dispatch_t* wnsEvent)
+widget_t _widget_create(const tchar_t* wname, dword_t wstyle, const xrect_t* wrect, widget_t wparent, const if_dispatch_t* wnsEvent)
 {@autoreleasepool {
+    cocoa_widget_t* pwidg_parent = (wparent)? TypePtrFromHead(cocoa_widget_t, wparent) : NULL;
     _CocoaView* new_view = nil;
 
     NSUInteger nsStyle = 0;
@@ -1376,17 +1382,17 @@ res_win_t _widget_create(const tchar_t* wname, dword_t wstyle, const xrect_t* wr
     NSColor* nsColor;
 
     NSScreen* nsScreen = [NSScreen mainScreen];
-    NSWindow* nsWindow = (wparent)? [(NSView*)wparent window] : nil;
+    NSWindow* nsWindow = (pwidg_parent)? [(NSView*)(pwidg_parent->self) window] : nil;
     NSView* nsView = (nsWindow)? [nsWindow contentView] : nil;
 
-    cocoa_widget_t* pwidg = (cocoa_widget_t*)calloc(1, sizeof(cocoa_widget_t));
-	if_dispatch_t* pdisp = (if_dispatch_t*)calloc(1, sizeof(if_dispatch_t));
+    cocoa_widget_t* pwidg = (cocoa_widget_t*)xmem_alloc_handle(sizeof(cocoa_widget_t));
+	if_dispatch_t* pdisp = (if_dispatch_t*)xmem_alloc(sizeof(if_dispatch_t));
     if(wnsEvent)
 	{
-		memcpy((void*)(pdisp), (void*)wnsEvent, sizeof(if_dispatch_t));
+		xmem_copy((void*)(pdisp), (void*)wnsEvent, sizeof(if_dispatch_t));
 	}
 
-    pwidg->parent = wparent;
+    pwidg->parent = (pwidg_parent)? pwidg_parent->self : nil;
 	pwidg->style = wstyle;
 	pwidg->state = WS_SHOW_HIDE;
 
@@ -1401,7 +1407,7 @@ res_win_t _widget_create(const tchar_t* wname, dword_t wstyle, const xrect_t* wr
 
         new_view = [[_CocoaView alloc] initWithFrame:nsRect];
 
-        if(new_view == nil) {free(pwidg); free(pdisp); return (res_win_t)nil;}
+        if(new_view == nil) {xmem_free_handle(pwidg); xmem_free(pdisp); return (widget_t)nil;}
 
         new_view.properties = [[NSMutableDictionary alloc] init];
         new_view.widget = pwidg;
@@ -1414,7 +1420,7 @@ res_win_t _widget_create(const tchar_t* wname, dword_t wstyle, const xrect_t* wr
 
         _CocoaViewDelegate* view_delegate = [[_CocoaViewDelegate alloc] initWithCocoaView:new_view];
         
-        if(view_delegate == nil) {free(pwidg); free(pdisp); return (res_win_t)nil;}
+        if(view_delegate == nil) {xmem_free_handle(pwidg); xmem_free(pdisp); return (widget_t)nil;}
 
         new_view.delegate = view_delegate;
     }else
@@ -1441,7 +1447,7 @@ res_win_t _widget_create(const tchar_t* wname, dword_t wstyle, const xrect_t* wr
                                     backing:NSBackingStoreBuffered
                                     defer:NO];
 
-	    if(coc_window == nil) {free(pwidg); free(pdisp); return (res_win_t)nil;}
+	    if(coc_window == nil) {xmem_free_handle(pwidg); xmem_free(pdisp); return (widget_t)nil;}
         
         if(!(wstyle & WD_STYLE_TITLE))
         {
@@ -1451,7 +1457,7 @@ res_win_t _widget_create(const tchar_t* wname, dword_t wstyle, const xrect_t* wr
 
         new_view = [[_CocoaView alloc] initWithFrame:[[coc_window contentView] bounds]];
 
-        if(new_view == nil) {free(pwidg); free(pdisp); return (res_win_t)nil;}
+        if(new_view == nil) {xmem_free_handle(pwidg); xmem_free(pdisp); return (widget_t)nil;}
 
         new_view.properties = [[NSMutableDictionary alloc] init];
         new_view.widget = pwidg;
@@ -1469,28 +1475,26 @@ res_win_t _widget_create(const tchar_t* wname, dword_t wstyle, const xrect_t* wr
 
         _CocoaWindowDelegate* win_delegate = [[_CocoaWindowDelegate alloc] initWithCocoaWindow:coc_window];
         
-        if(win_delegate == nil) {free(pwidg); free(pdisp); return (res_win_t)nil;}
+        if(win_delegate == nil) {xmem_free_handle(pwidg); xmem_free(pdisp); return (widget_t)nil;}
 
         [coc_window setDelegate:win_delegate];
         coc_window.running = _CocoaWindowRunNormal;
     }
 
+    pwidg->self = new_view;
+
     if (pdisp && pdisp->pf_on_create)
     {
-        (*pdisp->pf_on_create)((res_win_t)new_view, pdisp->param);
+        (*pdisp->pf_on_create)((widget_t)&(pwidg->head), pdisp->param);
     }
 
-    return (res_win_t)new_view;
+    return (widget_t)&(pwidg->head);
 }}
 
-void _widget_destroy(res_win_t wt)
+void _widget_destroy(widget_t wt)
 {@autoreleasepool {
-    if([(NSView*)wt isKindOfClass:[_CocoaView class]] == NO)
-        return [(NSView*)wt release];
-
-    _CocoaView* coc_view = wt;
-
-	cocoa_widget_t* pwidg = (cocoa_widget_t*)coc_view.widget;
+	cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 	if_dispatch_t* pdisp = (if_dispatch_t*)coc_view.dispatch;
 
     BOOL b_windowless = (pwidg->style & WD_STYLE_CHILD) ? YES : NO;
@@ -1500,8 +1504,10 @@ void _widget_destroy(res_win_t wt)
 		(*pdisp->pf_on_destroy)(wt);
 	}
 
-    if(pwidg) free(pwidg);
-    if(pdisp) free(pdisp);
+    if(pwidg && pwidg->acl) xmem_free(pwidg->acl);
+
+    if(pwidg) xmem_free_handle(pwidg);
+    if(pdisp) xmem_free(pdisp);
 
     if(coc_view.caret_timer)
     {
@@ -1547,13 +1553,10 @@ void _widget_destroy(res_win_t wt)
     }*/
 }}
 
-void _widget_close(res_win_t wt, int ret)
+void _widget_close(widget_t wt, int ret)
 {@autoreleasepool {
-    if([(NSView*)wt isKindOfClass:[_CocoaView class]] == NO)
-        return;
-    
-    _CocoaView* coc_view = wt;
-	cocoa_widget_t* pwidg = (cocoa_widget_t*)coc_view.widget;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
     if(pwidg->style & WD_STYLE_CHILD) return;
 
@@ -1573,59 +1576,49 @@ void _widget_close(res_win_t wt, int ret)
     });
 }}
 
-const if_dispatch_t* _widget_get_dispatch(res_win_t wt)
+const if_dispatch_t* _widget_get_dispatch(widget_t wt)
 {@autoreleasepool {
-     if([(NSView*)wt isKindOfClass:[_CocoaView class]] == NO)
-        return NULL;
-
-    _CocoaView* coc_view = wt;
+     cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
 	if_dispatch_t* pdisp = (if_dispatch_t*)coc_view.dispatch;
 
 	return (pdisp);
 }}
 
-if_subproc_t* _widget_get_subproc(res_win_t wt, uid_t sid)
+if_subproc_t* _widget_get_subproc(widget_t wt, uid_t sid)
 {@autoreleasepool {
-    if([(NSView*)wt isKindOfClass:[_CocoaView class]] == NO)
-        return NULL;
-
-    _CocoaView* coc_view = wt;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
     if_subproc_t* psub = (if_subproc_t*)coc_view.subproc;
 
 	return (psub);
 }}
 
-bool_t _widget_set_subproc(res_win_t wt, uid_t sid, if_subproc_t* sub)
+bool_t _widget_set_subproc(widget_t wt, uid_t sid, if_subproc_t* sub)
 {@autoreleasepool {
-     if([(NSView*)wt isKindOfClass:[_CocoaView class]] == NO)
-        return 0;
-
-    _CocoaView* coc_view = wt;
+     cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
 	coc_view.subproc = (id)sub;
 
 	return 1;
 }}
 
-void _widget_del_subproc(res_win_t wt, uid_t sid)
+void _widget_del_subproc(widget_t wt, uid_t sid)
 {@autoreleasepool {
-    if([(NSView*)wt isKindOfClass:[_CocoaView class]] == NO)
-        return;
-
-   _CocoaView* coc_view = wt;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
 	coc_view.subproc = 0;
 
 }}
 
-bool_t _widget_set_subproc_delta(res_win_t wt, uid_t sid, vword_t delta)
+bool_t _widget_set_subproc_delta(widget_t wt, uid_t sid, vword_t delta)
 {@autoreleasepool {
-    if([(NSView*)wt isKindOfClass:[_CocoaView class]] == NO)
-        return 0;
-
-    _CocoaView* coc_view = wt;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
 	if_subproc_t* psub = (if_subproc_t*)coc_view.subproc;
 
@@ -1636,12 +1629,10 @@ bool_t _widget_set_subproc_delta(res_win_t wt, uid_t sid, vword_t delta)
 	return 1;
 }}
 
-vword_t _widget_get_subproc_delta(res_win_t wt, uid_t sid)
+vword_t _widget_get_subproc_delta(widget_t wt, uid_t sid)
 {@autoreleasepool {
-    if([(NSView*)wt isKindOfClass:[_CocoaView class]] == NO)
-        return (vword_t)0;
-
-    _CocoaView* coc_view = wt;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
 	if_subproc_t* psub = (if_subproc_t*)coc_view.subproc;
 
@@ -1650,183 +1641,135 @@ vword_t _widget_get_subproc_delta(res_win_t wt, uid_t sid)
 	return psub->delta;
 }}
 
-bool_t _widget_has_subproc(res_win_t wt)
+bool_t _widget_has_subproc(widget_t wt)
 {@autoreleasepool {
-    if([(NSView*)wt isKindOfClass:[_CocoaView class]] == NO)
-        return 0;
-
-    _CocoaView* coc_view = wt;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
     if_subproc_t* psub = (if_subproc_t*)coc_view.subproc;
 
 	return (psub == NULL) ? 0 : 1;
 }}
 
-void _widget_set_core_delta(res_win_t wt, vword_t pd)
+void _widget_set_core_delta(widget_t wt, vword_t pd)
 {@autoreleasepool {
-    if([(NSView*)wt isKindOfClass:[_CocoaView class]] == NO)
-        return ;
-
-    _CocoaView* coc_view = wt;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
     coc_view.coredelta = (id)pd;
 }}
 
-vword_t _widget_get_core_delta(res_win_t wt)
+vword_t _widget_get_core_delta(widget_t wt)
 {@autoreleasepool {
-    if([(NSView*)wt isKindOfClass:[_CocoaView class]] == NO)
-        return (vword_t)0;
-
-    _CocoaView* coc_view = wt;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
 	return (vword_t)coc_view.coredelta;
 }}
 
-void _widget_set_user_delta(res_win_t wt, vword_t pd)
+void _widget_set_user_delta(widget_t wt, vword_t pd)
 {@autoreleasepool {
-    if([(NSView*)wt isKindOfClass:[_CocoaView class]] == NO)
-        return;
-
-    _CocoaView* coc_view = wt;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
 	coc_view.userdelta = (id)pd;
 }}
 
-vword_t _widget_get_user_delta(res_win_t wt)
+vword_t _widget_get_user_delta(widget_t wt)
 {@autoreleasepool {
-    if([(NSView*)wt isKindOfClass:[_CocoaView class]] == NO)
-        return (vword_t)0;
-
-     _CocoaView* coc_view = wt;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
 	return (vword_t)coc_view.userdelta;
 }}
 
-void _widget_set_style(res_win_t wt, dword_t ws)
+void _widget_set_style(widget_t wt, dword_t ws)
 {@autoreleasepool {
-    if([(NSView*)wt isKindOfClass:[_CocoaView class]] == NO)
-        return;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
-    _CocoaView* coc_view = wt;
-
-	cocoa_widget_t* pwidg = (cocoa_widget_t*)coc_view.widget;
-
-	if(pwidg) pwidg->style = ws;
+	pwidg->style = ws;
 }}
 
-dword_t _widget_get_style(res_win_t wt)
+dword_t _widget_get_style(widget_t wt)
 {@autoreleasepool {
-    if([(NSView*)wt isKindOfClass:[_CocoaView class]] == NO)
-        return (dword_t)0;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
-     _CocoaView* coc_view = wt;
-
-	cocoa_widget_t* pwidg = (cocoa_widget_t*)coc_view.widget;
-
-	return (pwidg)? pwidg->style : 0;
+	return pwidg->style;
 }}
 
-void _widget_set_accel(res_win_t wt, res_acl_t acl)
+void _widget_set_accel(widget_t wt, const acl_table_t* pacl, int n)
 {@autoreleasepool {
-    if([(NSView*)wt isKindOfClass:[_CocoaView class]] == NO)
-        return;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
-     _CocoaView* coc_view = wt;
+    if(pwidg->acl) xmem_free(pwidg->acl);
 
-	cocoa_widget_t* pwidg = (cocoa_widget_t*)coc_view.widget;
+	acl_table_t* pa = (acl_table_t*)xmem_alloc((n + 1) * sizeof(acl_table_t));
+	xmem_copy((void*)pa, (void*)pacl, n * sizeof(acl_table_t));
 
-	if(pwidg) pwidg->acl = acl;
+	pa[n].vir = 0, pa[n].key = 0, pa[n].cmd = 0;
+	pwidg->acl = pa;
 }}
 
-res_acl_t _widget_get_accel(res_win_t wt)
+void _widget_set_owner(widget_t wt, widget_t owner)
 {@autoreleasepool {
-    if([(NSView*)wt isKindOfClass:[_CocoaView class]] == NO)
-        return (res_acl_t)0;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
-    _CocoaView* coc_view = wt;
+    cocoa_widget_t* pwidg_owner = (owner)? TypePtrFromHead(cocoa_widget_t, owner) : NULL;
 
-	cocoa_widget_t* pwidg = (cocoa_widget_t*)coc_view.widget;
-
-	return (pwidg)? pwidg->acl : (res_acl_t)0;
+	pwidg->owner = (pwidg_owner)? pwidg_owner->self : nil;
 }}
 
-void _widget_set_owner(res_win_t wt, res_win_t owner)
+widget_t _widget_get_owner(widget_t wt)
 {@autoreleasepool {
-    if([(NSView*)wt isKindOfClass:[_CocoaView class]] == NO)
-        return;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
-     _CocoaView* coc_view = wt;
-	cocoa_widget_t* pwidg = (cocoa_widget_t*)coc_view.widget;
+    _CocoaView* coc_owner = pwidg->owner;
+	cocoa_widget_t* pwidg_owner = (coc_owner)? (cocoa_widget_t*)coc_owner.widget : NULL;
 
-	if(pwidg) pwidg->owner = owner;
+	return (pwidg_owner)? &(pwidg_owner->head) : NULL;
 }}
 
-res_win_t _widget_get_owner(res_win_t wt)
+void _widget_set_user_id(widget_t wt, uid_t uid)
 {@autoreleasepool {
-    if([(NSView*)wt isKindOfClass:[_CocoaView class]] == NO)
-        return (res_win_t)0;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
-     _CocoaView* coc_view = wt;
-
-	cocoa_widget_t* pwidg = (cocoa_widget_t*)coc_view.widget;
-
-	return (pwidg)? pwidg->owner : (res_win_t)nil;
+	pwidg->uid = uid;
 }}
 
-void _widget_set_user_id(res_win_t wt, uid_t uid)
+uid_t _widget_get_user_id(widget_t wt)
 {@autoreleasepool {
-    if([(NSView*)wt isKindOfClass:[_CocoaView class]] == NO)
-        return;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
-    _CocoaView* coc_view = wt;
-
-    cocoa_widget_t* pwidg = (cocoa_widget_t*)coc_view.widget;
-
-	if(pwidg) pwidg->uid = uid;
+    return pwidg->uid;
 }}
 
-uid_t _widget_get_user_id(res_win_t wt)
+void _widget_set_user_result(widget_t wt, int rt)
 {@autoreleasepool {
-    if([(NSView*)wt isKindOfClass:[_CocoaView class]] == NO)
-        return (uid_t)0;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
-    _CocoaView* coc_view = wt;
-
-	cocoa_widget_t* pwidg = (cocoa_widget_t*)coc_view.widget;
-
-    return (pwidg)? pwidg->uid : 0;
+	pwidg->result = rt;
 }}
 
-void _widget_set_user_result(res_win_t wt, int rt)
+int _widget_get_user_result(widget_t wt)
 {@autoreleasepool {
-    if([(NSView*)wt isKindOfClass:[_CocoaView class]] == NO)
-        return;
+cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
-     _CocoaView* coc_view = wt;
-
-	cocoa_widget_t* pwidg = (cocoa_widget_t*)coc_view.widget;
-
-	if(pwidg) pwidg->result = rt;
+    return pwidg->result;
 }}
 
-int _widget_get_user_result(res_win_t wt)
+bool_t _widget_enum_child(widget_t wt, PF_ENUM_WINDOW_PROC pf, vword_t pv)
 {@autoreleasepool {
-    if([(NSView*)wt isKindOfClass:[_CocoaView class]] == NO)
-        return 0;
-
-    _CocoaView* coc_view = wt;
-
-	cocoa_widget_t* pwidg = (cocoa_widget_t*)coc_view.widget;
-
-    return (pwidg)? pwidg->result : 0;
-}}
-
-bool_t _widget_enum_child(res_win_t wt, PF_ENUM_WINDOW_PROC pf, vword_t pv)
-{@autoreleasepool {
-    if(![(NSView*)wt isKindOfClass:[_CocoaView class]])
-        return 0;
-
-    _CocoaView* coc_view = wt;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
     NSArray *subviews = [coc_view subviews];
     
@@ -1834,19 +1777,20 @@ bool_t _widget_enum_child(res_win_t wt, PF_ENUM_WINDOW_PROC pf, vword_t pv)
     {
         if([nsChild isKindOfClass:[_CocoaView class]])
         {
-            (*pf)((res_win_t)nsChild, pv);
+             _CocoaView* cocChild = (_CocoaView*)nsChild;
+            pwidg = (cocoa_widget_t*)cocChild.widget;
+
+            (*pf)((widget_t)&(pwidg->head), pv);
         }
     }
 
     return 1;
 }}
 
-res_win_t _widget_get_child(res_win_t wt, uid_t uid)
+widget_t _widget_get_child(widget_t wt, uid_t uid)
 {@autoreleasepool {
-    if(![(NSView*)wt isKindOfClass:[_CocoaView class]])
-        return (res_win_t)nil;
-
-    _CocoaView* coc_view = wt;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
     NSArray *subviews = [coc_view subviews];
     
@@ -1855,53 +1799,49 @@ res_win_t _widget_get_child(res_win_t wt, uid_t uid)
         if([nsChild isKindOfClass:[_CocoaView class]])
         {
             _CocoaView* cocChild = (_CocoaView*)nsChild;
-            cocoa_widget_t* pwidg = (cocoa_widget_t*)cocChild.widget;
+            pwidg = (cocoa_widget_t*)cocChild.widget;
 
-            if(pwidg->uid == uid) return (res_win_t)nsChild;
+            if(pwidg->uid == uid) return (widget_t)&(pwidg->head);
         }
     }
 
-    return (res_win_t)nil;
+    return (widget_t)nil;
 }}
 
-res_win_t _widget_get_parent(res_win_t wt)
+widget_t _widget_get_parent(widget_t wt)
 {@autoreleasepool {
-    if(![(NSView*)wt isKindOfClass:[_CocoaView class]])
-        return (res_win_t)nil;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
 
-     _CocoaView* coc_view = wt;
-     cocoa_widget_t* pwidg = (cocoa_widget_t*)coc_view.widget;
+    _CocoaView* coc_view = pwidg->parent;
+    pwidg = (coc_view)? (cocoa_widget_t*)coc_view.widget : NULL;
 
-    return (res_win_t)pwidg->parent;
+    return (pwidg)? (widget_t)&(pwidg->head) : NULL;
 }}
 
-void _widget_set_user_prop(res_win_t wt, const tchar_t* pname,vword_t val)
+void _widget_set_user_prop(widget_t wt, const tchar_t* pname,vword_t val)
 {@autoreleasepool {
-    if(![(NSView*)wt isKindOfClass:[_CocoaView class]])
-        return;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
-     _CocoaView* coc_view = wt;
      NSString* nsKey = [NSString stringWithUTF8String:pname];
 
     [[coc_view properties] setObject:@(val) forKey:nsKey];
 }}
 
-vword_t _widget_get_user_prop(res_win_t wt, const tchar_t* pname)
+vword_t _widget_get_user_prop(widget_t wt, const tchar_t* pname)
 {@autoreleasepool {
-    if(![(NSView*)wt isKindOfClass:[_CocoaView class]])
-        return (vword_t)0;
-    
-    _CocoaView* coc_view = wt;
+   cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
+
     NSString* nsKey = [NSString stringWithUTF8String:pname];
     return [coc_view.properties[nsKey] unsignedLongLongValue];
 }}
 
-vword_t _widget_del_user_prop(res_win_t wt, const tchar_t* pname)
+vword_t _widget_del_user_prop(widget_t wt, const tchar_t* pname)
 {@autoreleasepool {
-   if(![(NSView*)wt isKindOfClass:[_CocoaView class]])
-        return (vword_t)0;
-    
-    _CocoaView* coc_view = wt;
+   cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
+
     NSString* nsKey = [NSString stringWithUTF8String:pname];
 
     vword_t val = [coc_view.properties[nsKey] unsignedLongLongValue];
@@ -1910,12 +1850,10 @@ vword_t _widget_del_user_prop(res_win_t wt, const tchar_t* pname)
    return val;
 }}
 
-void _widget_get_menu_rect(res_win_t wt, xrect_t* pxr)
+void _widget_get_menu_rect(widget_t wt, xrect_t* pxr)
 {@autoreleasepool {
-    if(![(NSView*)wt isKindOfClass:[_CocoaView class]])
-        return;
-
-    _CocoaView* coc_view = wt;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
 	pxr->x = 0;
     pxr->y = 0;
@@ -1923,66 +1861,38 @@ void _widget_get_menu_rect(res_win_t wt, xrect_t* pxr)
     pxr->h = 0;
 }}
 
-void _widget_get_border(res_win_t wt, border_t* pbd)
+void _widget_get_border(widget_t wt, border_t* pbd)
 {@autoreleasepool {
-    if(![(NSView*)wt isKindOfClass:[_CocoaView class]])
-        return;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
-    _CocoaView* coc_view = wt;
-	cocoa_widget_t* pwidg = (cocoa_widget_t*)coc_view.widget;
-
-	memcpy((void*)pbd, (void*)(&pwidg->bd), sizeof(border_t));
+	xmem_copy((void*)pbd, (void*)(&pwidg->bd), sizeof(border_t));
 }}
 
-void _widget_adjust_size(dword_t wstyle, xsize_t* pxs)
+bool_t _widget_is_maximized(widget_t wt)
 {@autoreleasepool {
-
-    if(!(wstyle & WD_STYLE_TITLE)) return;
-
-    NSApplication *nsApp = [NSApplication sharedApplication];
-    NSWindow* nsWindow = [nsApp mainWindow];
-
-    NSRect frameRect = [nsWindow frame];
-    NSRect contentRect = [nsWindow contentRectForFrameRect:frameRect];
-    CGFloat titleBarHeight = NSMaxY(frameRect) - NSMaxY(contentRect);
-    CGFloat borderLeft = contentRect.origin.x - frameRect.origin.x;
-    CGFloat borderRight = NSMaxX(frameRect) - NSMaxX(contentRect);
-    CGFloat borderBottom = contentRect.origin.y - frameRect.origin.y;
-
-    pxs->w += (int)(borderLeft + borderRight);
-    pxs->h += (int)(titleBarHeight + borderBottom);
-}}
-
-bool_t _widget_is_maximized(res_win_t wt)
-{@autoreleasepool {
-    if(![(NSView*)wt isKindOfClass:[_CocoaView class]])
-        return 0;
-
-    _CocoaView* coc_view = wt;
-	cocoa_widget_t* pwidg = (cocoa_widget_t*)coc_view.widget;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
 	return (pwidg->state == WS_SHOW_MAXIMIZE)? 1 : 0;
 }}
 
-bool_t _widget_is_minimized(res_win_t wt)
+bool_t _widget_is_minimized(widget_t wt)
 {@autoreleasepool {
-    if(![(NSView*)wt isKindOfClass:[_CocoaView class]])
-        return 0;
-
-    _CocoaView* coc_view = wt;
-	cocoa_widget_t* pwidg = (cocoa_widget_t*)coc_view.widget;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
 	return (pwidg->state == WS_SHOW_MINIMIZE)? 1 : 0;
 }}
 
-visual_t _widget_client_ctx(res_win_t wt)
+visual_t _widget_client_ctx(widget_t wt)
 {@autoreleasepool {
-    if(![(NSView*)wt isKindOfClass:[_CocoaView class]])
-        return NULL;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
 	NSGraphicsContext *nsContext = [NSGraphicsContext currentContext];
 
-	cocoa_context_t* ctx = (cocoa_context_t*)calloc(1, sizeof(cocoa_context_t));
+	cocoa_context_t* ctx = (cocoa_context_t*)xmem_alloc_handle(sizeof(cocoa_context_t));
 	ctx->head.tag = _VISUAL_DISPLAY;
     ctx->context = [nsContext CGContext];
 	ctx->type = CONTEXT_SCREEN;
@@ -1990,17 +1900,16 @@ visual_t _widget_client_ctx(res_win_t wt)
 	return (visual_t)&(ctx->head);
 }}
 
-visual_t _widget_window_ctx(res_win_t wt)
+visual_t _widget_window_ctx(widget_t wt)
 {@autoreleasepool {
-    if(![(NSView*)wt isKindOfClass:[_CocoaView class]])
-        return NULL;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
-    _CocoaView* coc_view = wt;
     NSWindow* nsWindow = [coc_view window];
 
 	NSGraphicsContext *nsContext = [nsWindow graphicsContext];
 
-    cocoa_context_t* ctx = (cocoa_context_t*)calloc(1, sizeof(cocoa_context_t));
+    cocoa_context_t* ctx = (cocoa_context_t*)xmem_alloc_handle(sizeof(cocoa_context_t));
 	ctx->head.tag = _VISUAL_DISPLAY;
     ctx->context = [nsContext CGContext];
 	ctx->type = CONTEXT_SCREEN;
@@ -2008,22 +1917,21 @@ visual_t _widget_window_ctx(res_win_t wt)
 	return (visual_t)&(ctx->head);
 }}
 
-void _widget_release_ctx(res_win_t wt, visual_t dc)
+void _widget_release_ctx(widget_t wt, visual_t dc)
 {@autoreleasepool {
-    if(![(NSView*)wt isKindOfClass:[_CocoaView class]])
-        return;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
     cocoa_context_t* ctx = (cocoa_context_t*)dc;
 	
-    free(ctx);
+    xmem_free_handle(ctx);
 }}
 
-void _widget_get_client_rect(res_win_t wt, xrect_t* prt)
+void _widget_get_client_rect(widget_t wt, xrect_t* prt)
 {@autoreleasepool {
-    if(![(NSView*)wt isKindOfClass:[_CocoaView class]])
-        return;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
-    _CocoaView* coc_view = wt;
 	NSRect nsRect = [coc_view frame];
 
 	prt->x = 0;
@@ -2032,13 +1940,10 @@ void _widget_get_client_rect(res_win_t wt, xrect_t* prt)
 	prt->h = nsRect.size.height;
 }}
 
-void _widget_get_window_rect(res_win_t wt, xrect_t* prt)
+void _widget_get_window_rect(widget_t wt, xrect_t* prt)
 {@autoreleasepool {
-    if(![(NSView*)wt isKindOfClass:[_CocoaView class]])
-        return;
-
-    _CocoaView* coc_view = wt;
-	cocoa_widget_t* pwidg = (cocoa_widget_t*)coc_view.widget;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
     if(pwidg->style & WD_STYLE_CHILD)
     {
@@ -2063,13 +1968,10 @@ void _widget_get_window_rect(res_win_t wt, xrect_t* prt)
     }
 }}
 
-void _widget_client_to_window(res_win_t wt, xpoint_t* ppt)
+void _widget_client_to_window(widget_t wt, xpoint_t* ppt)
 {@autoreleasepool {
-    if(![(NSView*)wt isKindOfClass:[_CocoaView class]])
-        return;
-
-    _CocoaView* coc_view = wt;
-    cocoa_widget_t* pwidg = (cocoa_widget_t*)coc_view.widget;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
     if(pwidg->style & WD_STYLE_CHILD)
         return;
@@ -2085,13 +1987,10 @@ void _widget_client_to_window(res_win_t wt, xpoint_t* ppt)
     ppt->y = winPoint.y;
 }}
 
-void _widget_window_to_client(res_win_t wt, xpoint_t* ppt)
+void _widget_window_to_client(widget_t wt, xpoint_t* ppt)
 {@autoreleasepool {
-    if(![(NSView*)wt isKindOfClass:[_CocoaView class]])
-        return;
-
-    _CocoaView* coc_view = wt;
-    cocoa_widget_t* pwidg = (cocoa_widget_t*)coc_view.widget;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
     if(pwidg->style & WD_STYLE_CHILD) return;
 
@@ -2106,13 +2005,11 @@ void _widget_window_to_client(res_win_t wt, xpoint_t* ppt)
     ppt->y = cliPoint.y;
 }}
 
-void _widget_client_to_screen(res_win_t wt, xpoint_t* ppt)
+void _widget_client_to_screen(widget_t wt, xpoint_t* ppt)
 {@autoreleasepool {
-    if(![(NSView*)wt isKindOfClass:[_CocoaView class]])
-        return;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
-    _CocoaView* coc_view = wt;
-    cocoa_widget_t* pwidg = (cocoa_widget_t*)coc_view.widget;
     NSWindow* nsWindow;
 
     NSPoint cliPoint = NSMakePoint(ppt->x, ppt->y);
@@ -2137,13 +2034,10 @@ void _widget_client_to_screen(res_win_t wt, xpoint_t* ppt)
     ppt->y = scrPoint.y;
 }}
 
-void _widget_screen_to_client(res_win_t wt, xpoint_t* ppt)
+void _widget_screen_to_client(widget_t wt, xpoint_t* ppt)
 {@autoreleasepool {
-    if(![(NSView*)wt isKindOfClass:[_CocoaView class]])
-        return;
-
-    _CocoaView* coc_view = wt;
-    cocoa_widget_t* pwidg = (cocoa_widget_t*)coc_view.widget;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
     NSWindow* nsWindow = [coc_view window];
     NSScreen* screen = [nsWindow screen] ?: [NSScreen mainScreen];
@@ -2160,13 +2054,16 @@ void _widget_screen_to_client(res_win_t wt, xpoint_t* ppt)
     ppt->y = cliPoint.y;
 }}
 
-void _widget_center_window(res_win_t wt, res_win_t owner)
+void _widget_center_window(widget_t wt, widget_t owner)
 {@autoreleasepool {
-    if(![(NSView*)wt isKindOfClass:[_CocoaView class]])
-        return;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
-    NSWindow* src_window = [(NSView*)wt window];
-    NSWindow* dst_window = (owner)? [(NSView*)owner window] : nil ;
+    cocoa_widget_t* powner = (owner)? TypePtrFromHead(cocoa_widget_t, owner) : NULL;
+    _CocoaView* coc_owner = (powner)? powner->self : nil;
+
+    NSWindow* src_window = [coc_view window];
+    NSWindow* dst_window = (coc_owner)? [coc_owner window] : nil ;
 
     if(src_window == nil) return;
 
@@ -2179,7 +2076,7 @@ void _widget_center_window(res_win_t wt, res_win_t owner)
     //[src_window setFrameOrigin:NSMakePoint(newX, newY)];
 }}
 
-void _widget_set_cursor(res_win_t wt, int ci)
+void _widget_set_cursor(widget_t wt, int ci)
 {@autoreleasepool {
 	switch (ci)
 	{
@@ -2213,18 +2110,15 @@ void _widget_set_cursor(res_win_t wt, int ci)
 	}
 }}
 
-void _widget_set_capture(res_win_t wt, bool_t b)
+void _widget_set_capture(widget_t wt, bool_t b)
 {@autoreleasepool {
 	NOP;
 }}
 
-vword_t _widget_set_timer(res_win_t wt, int ms)
+vword_t _widget_set_timer(widget_t wt, int ms)
 {@autoreleasepool {
-    if(![(NSView*)wt isKindOfClass:[_CocoaView class]])
-        return 0;
-
-    _CocoaView* coc_view = wt;
-    cocoa_widget_t* pwidg = (cocoa_widget_t*)coc_view.widget;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
     if(pwidg->style & WD_STYLE_CHILD) return 0;
 
@@ -2236,13 +2130,10 @@ vword_t _widget_set_timer(res_win_t wt, int ms)
                                                     repeats:YES];
 }}
 
-void _widget_kill_timer(res_win_t wt, vword_t tid)
+void _widget_kill_timer(widget_t wt, vword_t tid)
 {@autoreleasepool {
-	if(![(NSView*)wt isKindOfClass:[_CocoaView class]])
-        return;
-
-    _CocoaView* coc_view = wt;
-    cocoa_widget_t* pwidg = (cocoa_widget_t*)coc_view.widget;
+	cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
     if(pwidg->style & WD_STYLE_CHILD) return;
 
@@ -2254,12 +2145,10 @@ void _widget_kill_timer(res_win_t wt, vword_t tid)
     }
 }}
 
-void _widget_create_caret(res_win_t wt, int w, int h)
+void _widget_create_caret(widget_t wt, int w, int h)
 {@autoreleasepool {
-    if(![(NSView*)wt isKindOfClass:[_CocoaView class]])
-        return;
-
-    _CocoaView* coc_view = wt;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
     coc_view.caret_visible = YES;
     coc_view.caret_timer = [NSTimer scheduledTimerWithTimeInterval:0.5
@@ -2271,12 +2160,10 @@ void _widget_create_caret(res_win_t wt, int w, int h)
     [coc_view setNeedsDisplayInRect:[coc_view caret_rect]];
 }}
 
-void _widget_destroy_caret(res_win_t wt)
+void _widget_destroy_caret(widget_t wt)
 {@autoreleasepool {
-    if(![(NSView*)wt isKindOfClass:[_CocoaView class]])
-        return;
-
-	 _CocoaView* coc_view = wt;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
      coc_view.caret_visible = NO;
 
@@ -2289,12 +2176,10 @@ void _widget_destroy_caret(res_win_t wt)
      [coc_view setNeedsDisplayInRect:[coc_view caret_rect]];
 }}
 
-void _widget_show_caret(res_win_t wt, int x, int y, bool_t b)
+void _widget_show_caret(widget_t wt, int x, int y, bool_t b)
 {@autoreleasepool {
-    if(![(NSView*)wt isKindOfClass:[_CocoaView class]])
-        return;
-
-	_CocoaView* coc_view = wt;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
     coc_view.caret_visible = b;
     if(b)
@@ -2306,86 +2191,72 @@ void _widget_show_caret(res_win_t wt, int x, int y, bool_t b)
     [coc_view setNeedsDisplayInRect:coc_view.caret_rect];
 }}
 
-void _widget_set_focus(res_win_t wt)
+void _widget_set_focus(widget_t wt)
 {@autoreleasepool {
-    if(![(NSView*)wt isKindOfClass:[_CocoaView class]])
-        return;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
-	 NSWindow* nsWindow = [(NSView*)wt window];
+	 NSWindow* nsWindow = [coc_view window];
     if(nsWindow)
     {
-        [nsWindow makeFirstResponder:(NSView*)wt];
+        [nsWindow makeFirstResponder:coc_view];
         return;
     }
 
-    _CocoaView* coc_view = wt;
-    cocoa_widget_t* pwidg = (cocoa_widget_t*)coc_view.widget;
     nsWindow = (pwidg->parent)? [(NSView*)pwidg->parent window] : nil;
     if(nsWindow == nil) return;
 
-	[nsWindow makeFirstResponder:(NSView*)wt];
+	[nsWindow makeFirstResponder:coc_view];
 }}
 
-bool_t _widget_key_state(res_win_t wt, int ks)
+bool_t _widget_key_state(widget_t wt, int ks)
 {@autoreleasepool {
-    if(![(NSView*)wt isKindOfClass:[_CocoaView class]])
-        return 0;
-
-    _CocoaView* coc_view = wt;
-    cocoa_widget_t* pwidg = (cocoa_widget_t*)coc_view.widget;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
     return (ks & pwidg->keymsk)? 1 : 0;
 }}
 
-bool_t _widget_is_valid(res_win_t wt)
+bool_t _widget_is_valid(widget_t wt)
 {@autoreleasepool {
-    if(![(NSView*)wt isKindOfClass:[_CocoaView class]])
-        return 0;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
-    _CocoaView* coc_view = wt;
-    cocoa_widget_t* pwidg = (cocoa_widget_t*)coc_view.widget;
-
-	return (pwidg == NULL)? 0 : 1;
+	return (coc_view == nil)? 0 : 1;
 }}
 
-bool_t _widget_is_focus(res_win_t wt)
+bool_t _widget_is_focus(widget_t wt)
 {@autoreleasepool {
-	NSWindow* window = [(NSView*)wt window];
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
+
+	NSWindow* window = [coc_view window];
 
     if(window == nil) return 0;
 
-    return ([window firstResponder] == wt)? 1 : 0;
+    return ([window firstResponder] == coc_view)? 1 : 0;
 }}
 
-bool_t _widget_is_child(res_win_t wt)
+bool_t _widget_is_child(widget_t wt)
 {@autoreleasepool {
-    if(![(NSView*)wt isKindOfClass:[_CocoaView class]])
-        return 0;
-
-    _CocoaView* coc_view = wt;
-    cocoa_widget_t* pwidg = (cocoa_widget_t*)coc_view.widget;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
 	return (pwidg->style & WD_STYLE_CHILD)? 1 : 0;
 }}
 
-bool_t _widget_is_ownc(res_win_t wt)
+bool_t _widget_is_ownc(widget_t wt)
 {@autoreleasepool {
-	if(![(NSView*)wt isKindOfClass:[_CocoaView class]])
-        return 0;
-
-    _CocoaView* coc_view = wt;
-    cocoa_widget_t* pwidg = (cocoa_widget_t*)coc_view.widget;
+	cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
 	return (pwidg->style & WD_STYLE_OWNERNC)? 1 : 0;
 }}
 
-void _widget_move(res_win_t wt, const xpoint_t* ppt)
+void _widget_move(widget_t wt, const xpoint_t* ppt)
 {@autoreleasepool {
-    if(![(NSView*)wt isKindOfClass:[_CocoaView class]])
-        return;
-
-	_CocoaView* coc_view = wt;
-    cocoa_widget_t* pwidg = (cocoa_widget_t*)coc_view.widget;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
     NSPoint newPosition = NSMakePoint(ppt->x, ppt->y);
 
@@ -2396,7 +2267,7 @@ void _widget_move(res_win_t wt, const xpoint_t* ppt)
     }
     else
     {
-        NSWindow* nsWindow = [(NSView*)wt window];
+        NSWindow* nsWindow = [coc_view window];
         NSScreen* nsScreen = [nsWindow screen] ?: [NSScreen mainScreen];
 
         _screen_to_cocoa(nsScreen, &newPosition);
@@ -2404,13 +2275,10 @@ void _widget_move(res_win_t wt, const xpoint_t* ppt)
     }
 }}
 
-void _widget_size(res_win_t wt, const xsize_t* pxs)
+void _widget_size(widget_t wt, const xsize_t* pxs)
 {@autoreleasepool {
-    if(![(NSView*)wt isKindOfClass:[_CocoaView class]])
-        return;
-
-    _CocoaView* coc_view = wt;
-    cocoa_widget_t* pwidg = (cocoa_widget_t*)coc_view.widget;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
     if(pwidg->style & WD_STYLE_CHILD)
     {
@@ -2427,13 +2295,10 @@ void _widget_size(res_win_t wt, const xsize_t* pxs)
     }
 }}
 
-void _widget_take(res_win_t wt, int zor)
+void _widget_take(widget_t wt, int zor)
 {@autoreleasepool {
-    if(![(NSView*)wt isKindOfClass:[_CocoaView class]])
-        return;
-
-    _CocoaView* coc_view = wt;
-    cocoa_widget_t* pwidg = (cocoa_widget_t*)coc_view.widget;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
     if(pwidg->style & WD_STYLE_CHILD) return;
 
@@ -2458,15 +2323,12 @@ void _widget_take(res_win_t wt, int zor)
 	}
 }}
 
-void _widget_show(res_win_t wt, dword_t sw)
+void _widget_show(widget_t wt, dword_t sw)
 {@autoreleasepool {
-    if(![(NSView*)wt isKindOfClass:[_CocoaView class]])
-        return;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
-    _CocoaView* coc_view = wt;
-    cocoa_widget_t* pwidg = (cocoa_widget_t*)coc_view.widget;
-
-    NSWindow* coc_window = (pwidg->style & WD_STYLE_CHILD)? nil : [(NSView*)coc_view window];
+    NSWindow* coc_window = (pwidg->style & WD_STYLE_CHILD)? nil : [coc_view window];
 
 	switch(sw)
 	{
@@ -2512,61 +2374,59 @@ void _widget_show(res_win_t wt, dword_t sw)
 	}
 }}
 
-void _widget_paint(res_win_t wt)
+void _widget_paint(widget_t wt)
 {@autoreleasepool {
-    [(NSView*)wt setNeedsDisplay:YES];
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
+
+    [coc_view setNeedsDisplay:YES];
 }}
 
-void _widget_layout(res_win_t wt)
+void _widget_layout(widget_t wt)
 {@autoreleasepool {
-    if(![(NSView*)wt isKindOfClass:[_CocoaView class]])
-        return;
-
-    _CocoaView* coc_view = wt;
-    cocoa_widget_t* pwidg = (cocoa_widget_t*)coc_view.widget;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
     if(pwidg->style & WD_STYLE_CHILD) return;
 
-    NSWindow* coc_window = [(NSView*)coc_view window];
+    NSWindow* coc_window = [coc_view window];
 
     [[NSNotificationCenter defaultCenter] postNotificationName:NSWindowDidResizeNotification
                         object:coc_window];
 }}
 
-void _widget_erase(res_win_t wt, const xrect_t* prt)
+void _widget_erase(widget_t wt, const xrect_t* prt)
 {@autoreleasepool {  
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
+
     if(prt)
     {
         NSPoint nsPoint = NSMakePoint(prt->x, prt->y);
-         _view_to_cocoa((NSView*)wt, &nsPoint);
+         _view_to_cocoa(coc_view, &nsPoint);
     
         NSRect nsRect = NSMakeRect(nsPoint.x, nsPoint.y, prt->w, prt->h);
-        [(NSView*)wt setNeedsDisplayInRect:nsRect];
+        [coc_view setNeedsDisplayInRect:nsRect];
     }
     else
     {
-        [(NSView*)wt setNeedsDisplay:YES];
+        [coc_view setNeedsDisplay:YES];
     }
 }}
 
-void _widget_enable(res_win_t wt, bool_t b)
+void _widget_enable(widget_t wt, bool_t b)
 {@autoreleasepool {
-    if(![(NSView*)wt isKindOfClass:[_CocoaView class]])
-        return;
-
-	_CocoaView* coc_view = wt;
-    cocoa_widget_t* pwidg = (cocoa_widget_t*)coc_view.widget;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
     pwidg->disable = b;
 }}
 
-void _widget_post_notice(res_win_t wt, NOTICE* pnt)
+void _widget_post_notice(widget_t wt, NOTICE* pnt)
 {@autoreleasepool {
-    if(![(NSView*)wt isKindOfClass:[_CocoaView class]])
-        return;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
-	_CocoaView* coc_view = wt;
-    cocoa_widget_t* pwidg = (cocoa_widget_t*)coc_view.widget;
     vword_t delta = (vword_t)pnt;
 
     if(pwidg->style & WD_STYLE_CHILD)
@@ -2592,13 +2452,11 @@ void _widget_post_notice(res_win_t wt, NOTICE* pnt)
     }
 }}
 
-int _widget_send_notice(res_win_t wt, NOTICE* pnt)
+int _widget_send_notice(widget_t wt, NOTICE* pnt)
 {@autoreleasepool {
-    if(![(NSView*)wt isKindOfClass:[_CocoaView class]])
-        return 0;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
-	_CocoaView* coc_view = wt;
-    cocoa_widget_t* pwidg = (cocoa_widget_t*)coc_view.widget;
     vword_t delta = (vword_t)pnt;
     int result = 0;
 
@@ -2625,13 +2483,10 @@ int _widget_send_notice(res_win_t wt, NOTICE* pnt)
     return pwidg->result;
 }}
 
-void _widget_post_command(res_win_t wt, int code, uid_t cid, vword_t data)
+void _widget_post_command(widget_t wt, int code, uid_t cid, vword_t data)
 {@autoreleasepool {
-    if(![(NSView*)wt isKindOfClass:[_CocoaView class]])
-        return;
-
-	_CocoaView* coc_view = wt;
-    cocoa_widget_t* pwidg = (cocoa_widget_t*)coc_view.widget;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
     if(pwidg->style & WD_STYLE_CHILD)
     {
@@ -2662,13 +2517,10 @@ void _widget_post_command(res_win_t wt, int code, uid_t cid, vword_t data)
     }
 }}
 
-int _widget_send_command(res_win_t wt, int code, uid_t cid, vword_t data)
+int _widget_send_command(widget_t wt, int code, uid_t cid, vword_t data)
 {@autoreleasepool {
-    if(![(NSView*)wt isKindOfClass:[_CocoaView class]])
-        return 0;
-
-	_CocoaView* coc_view = wt;
-    cocoa_widget_t* pwidg = (cocoa_widget_t*)coc_view.widget;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
     if(pwidg->style & WD_STYLE_CHILD)
     {
@@ -2697,13 +2549,11 @@ int _widget_send_command(res_win_t wt, int code, uid_t cid, vword_t data)
     return pwidg->result;
 }}
 
-void _widget_post_wchar(res_win_t wt, wchar_t ch)
+void _widget_post_wchar(widget_t wt, wchar_t ch)
 {@autoreleasepool {
-    if(![(NSView*)wt isKindOfClass:[_CocoaView class]])
-        return;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
-    _CocoaView* coc_view = wt;
-    cocoa_widget_t* pwidg = (cocoa_widget_t*)coc_view.widget;
     NSWindow* nsWindow = [(NSView*)coc_view window];
 
     NSString* nsString = [NSString stringWithCharacters:&ch length:1];
@@ -2735,13 +2585,10 @@ void _widget_post_wchar(res_win_t wt, wchar_t ch)
     [NSApp postEvent:nsKeyup atStart:NO];
 }}
 
-void _widget_post_key(res_win_t wt, int key)
+void _widget_post_key(widget_t wt, int key)
 {@autoreleasepool {
-    if(![(NSView*)wt isKindOfClass:[_CocoaView class]])
-        return;
-
-    _CocoaView* coc_view = wt;
-    cocoa_widget_t* pwidg = (cocoa_widget_t*)coc_view.widget;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
     NSWindow* nsWindow = [(NSView*)coc_view window];
     NSString *nsString = [NSString stringWithFormat:@"%c", key];
@@ -2775,13 +2622,10 @@ void _widget_post_key(res_win_t wt, int key)
    [NSApp postEvent:nsKeyup atStart:NO];
 }}
 
-void _widget_set_title(res_win_t wt, const tchar_t* token)
+void _widget_set_title(widget_t wt, const tchar_t* token)
 {@autoreleasepool {
-    if(![(NSView*)wt isKindOfClass:[_CocoaView class]])
-        return;
-
-    _CocoaView* coc_view = wt;
-    cocoa_widget_t* pwidg = (cocoa_widget_t*)coc_view.widget;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
     if(!(pwidg->style & WD_STYLE_TITLE)) return;
 
@@ -2791,13 +2635,10 @@ void _widget_set_title(res_win_t wt, const tchar_t* token)
     [coc_window setTitle:title];
 }}
 
-int _widget_get_title(res_win_t wt, tchar_t* buf, int max)
+int _widget_get_title(widget_t wt, tchar_t* buf, int max)
 {@autoreleasepool {
-    if(![(NSView*)wt isKindOfClass:[_CocoaView class]])
-        return 0;
-
-	_CocoaView* coc_view = wt;
-    cocoa_widget_t* pwidg = (cocoa_widget_t*)coc_view.widget;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
     if(!(pwidg->style & WD_STYLE_TITLE)) return 0;
 
@@ -2813,13 +2654,10 @@ int _widget_get_title(res_win_t wt, tchar_t* buf, int max)
     return len;
 }}
 
-void _widget_active(res_win_t wt)
+void _widget_active(widget_t wt)
 {@autoreleasepool {
-    if(![(NSView*)wt isKindOfClass:[_CocoaView class]])
-        return;
-
-    _CocoaView* coc_view = wt;
-    cocoa_widget_t* pwidg = (cocoa_widget_t*)coc_view.widget;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
     if(pwidg->style & WD_STYLE_CHILD) return;
 
@@ -2829,12 +2667,12 @@ void _widget_active(res_win_t wt)
     [coc_window makeKeyAndOrderFront:nil];
 }}
 
-void _widget_scroll(res_win_t wt, bool_t horz, int line)
+void _widget_scroll(widget_t wt, bool_t horz, int line)
 {@autoreleasepool {
-    if (![(NSView*)wt isKindOfClass:[NSScrollView class]]) 
-        return; 
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
     
-    NSScrollView *scrollView = (NSScrollView *)wt;
+    NSScrollView *scrollView = (NSScrollView *)coc_view;
     NSPoint newOrigin = [[scrollView contentView] bounds].origin;
 
     if (horz) {
@@ -2847,24 +2685,21 @@ void _widget_scroll(res_win_t wt, bool_t horz, int line)
     [scrollView reflectScrolledClipView:[scrollView contentView]];
 }}
 
-void _widget_get_scroll_info(res_win_t wt, bool_t horz, scroll_t* psl)
+void _widget_get_scroll_info(widget_t wt, bool_t horz, scroll_t* psl)
 {@autoreleasepool {
-    if(![(NSView*)wt isKindOfClass:[_CocoaView class]])
-        return;
-
-    _CocoaView* coc_view = wt;
-    cocoa_widget_t* pwidg = (cocoa_widget_t*)coc_view.widget;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
 	if(horz)
-		memcpy((void*)psl, (void*)&(pwidg->hs), sizeof(scroll_t));
+		xmem_copy((void*)psl, (void*)&(pwidg->hs), sizeof(scroll_t));
 	else
-		memcpy((void*)psl, (void*)&(pwidg->vs), sizeof(scroll_t));
+		xmem_copy((void*)psl, (void*)&(pwidg->vs), sizeof(scroll_t));
 }}
 
-static int CALLBACK _update_horz_position(res_win_t child, vword_t b)
+static int CALLBACK _update_horz_position(widget_t child, vword_t b)
 {@autoreleasepool {
-    _CocoaView* coc_view = child;
-    cocoa_widget_t* pwidg = (cocoa_widget_t*)coc_view.widget;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, child);
+    _CocoaView* coc_view = pwidg->self;
 
     if(pwidg->style & WD_STYLE_CHILD)
     {
@@ -2884,10 +2719,10 @@ static int CALLBACK _update_horz_position(res_win_t child, vword_t b)
 	return (0);
 }}
 
-static int CALLBACK _update_vert_position(res_win_t child, vword_t b)
+static int CALLBACK _update_vert_position(widget_t child, vword_t b)
 {@autoreleasepool {
-    _CocoaView* coc_view = child;
-    cocoa_widget_t* pwidg = (cocoa_widget_t*)coc_view.widget;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, child);
+    _CocoaView* coc_view = pwidg->self;
 
     if(pwidg->style & WD_STYLE_CHILD)
     {
@@ -2907,19 +2742,17 @@ static int CALLBACK _update_vert_position(res_win_t child, vword_t b)
 	return (0);
 }}
 
-void _widget_set_scroll_info(res_win_t wt, bool_t horz, const scroll_t* psl)
+void _widget_set_scroll_info(widget_t wt, bool_t horz, const scroll_t* psl)
 {@autoreleasepool {
-    if(![(NSView*)wt isKindOfClass:[_CocoaView class]])
-        return;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
-    _CocoaView* coc_view = wt;
-    cocoa_widget_t* pwidg = (cocoa_widget_t*)coc_view.widget;
 	int b;
 
 	if(horz)
 	{
 		b = (psl->pos - pwidg->hs.pos);
-		memcpy((void*)&(pwidg->hs), (void*)psl, sizeof(scroll_t));
+		xmem_copy((void*)&(pwidg->hs), (void*)psl, sizeof(scroll_t));
 
 		if(!b) return;
 
@@ -2928,7 +2761,7 @@ void _widget_set_scroll_info(res_win_t wt, bool_t horz, const scroll_t* psl)
 	else
 	{
 		b = (psl->pos - pwidg->vs.pos);
-		memcpy((void*)&(pwidg->vs), (void*)psl, sizeof(scroll_t));
+		xmem_copy((void*)&(pwidg->vs), (void*)psl, sizeof(scroll_t));
 
 		if(!b) return;
 
@@ -2936,86 +2769,57 @@ void _widget_set_scroll_info(res_win_t wt, bool_t horz, const scroll_t* psl)
 	}
 }}
 
-bool_t _widget_has_struct(res_win_t wt)
+void _widget_set_point(widget_t wt, const xpoint_t* ppt)
 {@autoreleasepool {
-    if(![(NSView*)wt isKindOfClass:[_CocoaView class]])
-        return 0;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
-    _CocoaView* coc_view = wt;
-    cocoa_widget_t* pwidg = (cocoa_widget_t*)coc_view.widget;
-
-    return (pwidg)? 1 : 0;
+	xmem_copy((void*)&pwidg->pt, (void*)ppt, sizeof(xpoint_t));
 }}
 
-void _widget_set_point(res_win_t wt, const xpoint_t* ppt)
+void _widget_get_point(widget_t wt, xpoint_t* ppt)
 {@autoreleasepool {
-    if(![(NSView*)wt isKindOfClass:[_CocoaView class]])
-        return;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
-    _CocoaView* coc_view = wt;
-    cocoa_widget_t* pwidg = (cocoa_widget_t*)coc_view.widget;
-
-	memcpy((void*)&pwidg->pt, (void*)ppt, sizeof(xpoint_t));
+	xmem_copy((void*)ppt, (void*)&pwidg->pt, sizeof(xpoint_t));
 }}
 
-void _widget_get_point(res_win_t wt, xpoint_t* ppt)
+void _widget_set_size(widget_t wt, const xsize_t* pst)
 {@autoreleasepool {
-    if(![(NSView*)wt isKindOfClass:[_CocoaView class]])
-        return;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
-    _CocoaView* coc_view = wt;
-    cocoa_widget_t* pwidg = (cocoa_widget_t*)coc_view.widget;
-
-	memcpy((void*)ppt, (void*)&pwidg->pt, sizeof(xpoint_t));
+	xmem_copy((void*)&pwidg->st, (void*)pst, sizeof(xsize_t));
 }}
 
-void _widget_set_size(res_win_t wt, const xsize_t* pst)
+void _widget_get_size(widget_t wt, xsize_t* pst)
 {@autoreleasepool {
-    if(![(NSView*)wt isKindOfClass:[_CocoaView class]])
-        return;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
-    _CocoaView* coc_view = wt;
-    cocoa_widget_t* pwidg = (cocoa_widget_t*)coc_view.widget;
-
-	memcpy((void*)&pwidg->st, (void*)pst, sizeof(xsize_t));
+	xmem_copy((void*)pst, (void*)&pwidg->st, sizeof(xsize_t));
 }}
 
-void _widget_get_size(res_win_t wt, xsize_t* pst)
-{@autoreleasepool {
-    if(![(NSView*)wt isKindOfClass:[_CocoaView class]])
-        return;
+static int CALLBACK _widget_set_child_color_mode(widget_t wt, vword_t pv)
+{
+	dword_t dw = _widget_get_style(wt);
+	if (dw & WD_STYLE_NOCHANGE)
+		return 1;
 
-    _CocoaView* coc_view = wt;
-    cocoa_widget_t* pwidg = (cocoa_widget_t*)coc_view.widget;
-
-	memcpy((void*)pst, (void*)&pwidg->st, sizeof(xsize_t));
-}}
-
-static int CALLBACK _widget_set_child_color_mode(res_win_t wt, vword_t pv)
-{@autoreleasepool {
-	if (_widget_has_struct(wt))
-	{
-		dword_t dw = _widget_get_style(wt);
-		if (dw & WD_STYLE_NOCHANGE)
-			return 1;
-
-		_widget_set_color_mode(wt, (const clr_mod_t*)pv);
-	}
+	_widget_set_color_mode(wt, (const clr_mod_t*)pv);
 
 	return 1;
-}}
+}
 
-void _widget_set_color_mode(res_win_t wt, const clr_mod_t* pclr)
+void _widget_set_color_mode(widget_t wt, const clr_mod_t* pclr)
 {@autoreleasepool {
-    if(![(NSView*)wt isKindOfClass:[_CocoaView class]])
-        return;
-
-    _CocoaView* coc_view = wt;
-    cocoa_widget_t* pwidg = (cocoa_widget_t*)coc_view.widget;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
 	dword_t dw = pwidg->style;
 
-    memcpy((void*)&pwidg->clrs, (void*)pclr, sizeof(clr_mod_t));
+    xmem_copy((void*)&pwidg->clrs, (void*)pclr, sizeof(clr_mod_t));
 
 	NSColor *nsColor = [NSColor colorWithCalibratedRed:(float)(pwidg->clrs.clr_bkg.r) / 255.0f
                                     green:(float)(pwidg->clrs.clr_bkg.g) / 255.0f
@@ -3032,79 +2836,84 @@ void _widget_set_color_mode(res_win_t wt, const clr_mod_t* pclr)
 	_widget_enum_child(wt, _widget_set_child_color_mode, (vword_t)pclr);
 }}
 
-void _widget_get_color_mode(res_win_t wt, clr_mod_t* pclr)
+void _widget_get_color_mode(widget_t wt, clr_mod_t* pclr)
 {@autoreleasepool {
-    if(![(NSView*)wt isKindOfClass:[_CocoaView class]])
-        return;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
-    _CocoaView* coc_view = wt;
-    cocoa_widget_t* pwidg = (cocoa_widget_t*)coc_view.widget;
-
-    memcpy((void*)pclr, (void*)&pwidg->clrs, sizeof(clr_mod_t));
+    xmem_copy((void*)pclr, (void*)&pwidg->clrs, sizeof(clr_mod_t));
 }}
 
-void _widget_noti_xfont(res_win_t wt, const xfont_t* pxf)
+void _widget_set_diaph(widget_t wt, float b)
 {@autoreleasepool {
-    if(![(NSView*)wt isKindOfClass:[_CocoaView class]])
-        return;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
-    _CocoaView* coc_view = wt;
+    pwidg->diaph = b;
+    [coc_view setWantsLayer:YES];
+    coc_view.layer.opacity = (1.0 - b); 
+}}
+
+float _widget_get_diaph(widget_t wt)
+{@autoreleasepool {
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
+
+	return pwidg->diaph;
+}}
+
+void _widget_noti_xfont(widget_t wt, const xfont_t* pxf)
+{@autoreleasepool {
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
+
     if_dispatch_t* pdisp = (if_dispatch_t*)coc_view.dispatch;
-
 	if(pdisp && pdisp->pf_on_xfont)
 	{
 		(*pdisp->pf_on_xfont)(wt, pxf);
 	}
 }}
 
-void _widget_noti_xface(res_win_t wt, const xface_t* pxa)
+void _widget_noti_xface(widget_t wt, const xface_t* pxa)
 {@autoreleasepool {
-    if(![(NSView*)wt isKindOfClass:[_CocoaView class]])
-        return;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
-    _CocoaView* coc_view = wt;
     if_dispatch_t* pdisp = (if_dispatch_t*)coc_view.dispatch;
-
 	if(pdisp && pdisp->pf_on_xface)
 	{
 		(*pdisp->pf_on_xface)(wt, pxa);
 	}
 }}
 
-void _widget_noti_xbrush(res_win_t wt, const xbrush_t* pxb)
+void _widget_noti_xbrush(widget_t wt, const xbrush_t* pxb)
 {@autoreleasepool {
-    if(![(NSView*)wt isKindOfClass:[_CocoaView class]])
-        return;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
-    _CocoaView* coc_view = wt;
     if_dispatch_t* pdisp = (if_dispatch_t*)coc_view.dispatch;
-
 	if(pdisp && pdisp->pf_on_xbrush)
 	{
 		(*pdisp->pf_on_xbrush)(wt, pxb);
 	}
 }}
 
-void _widget_noti_xpen(res_win_t wt, const xpen_t* pxp)
+void _widget_noti_xpen(widget_t wt, const xpen_t* pxp)
 {@autoreleasepool {
-    if(![(NSView*)wt isKindOfClass:[_CocoaView class]])
-        return;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
-    _CocoaView* coc_view = wt;
     if_dispatch_t* pdisp = (if_dispatch_t*)coc_view.dispatch;
-
 	if(pdisp && pdisp->pf_on_xpen)
 	{
 		(*pdisp->pf_on_xpen)(wt, pxp);
 	}
 }}
 
-int	_widget_do_main(res_win_t wt)
+int	_widget_do_main(widget_t wt)
 {@autoreleasepool {
-    if(![(NSView*)wt isKindOfClass:[_CocoaView class]]) return 0;
-
-    _CocoaView* coc_view = wt;
-    cocoa_widget_t* pwidg = (cocoa_widget_t*)coc_view.widget;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
     if(pwidg->style & WD_STYLE_CHILD) return 0;
 
@@ -3120,14 +2929,12 @@ int	_widget_do_main(res_win_t wt)
 	return 0;
 }
 
-int	_widget_do_modal(res_win_t wt)
+int	_widget_do_modal(widget_t wt)
 {
     int ret = 0;
     @autoreleasepool {
-    if(![(NSView*)wt isKindOfClass:[_CocoaView class]]) return 0;
-
-	_CocoaView* coc_view = wt;
-    cocoa_widget_t* pwidg = (cocoa_widget_t*)coc_view.widget;
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
 
     if(pwidg->style & WD_STYLE_CHILD) return 0;
 
@@ -3145,30 +2952,63 @@ int	_widget_do_modal(res_win_t wt)
     return ret;
 }
 
-void _widget_do_track(res_win_t wt)
+void _widget_do_track(widget_t wt)
 {@autoreleasepool {
-	if(![(NSView*)wt isKindOfClass:[_CocoaView class]]) return;
+	NOP;
+}}
+
+void _message_quit(int code)
+{
+    [NSApp stop];
+}
+
+void _message_position(xpoint_t* pxp)
+{@autoreleasepool {
+    NSPoint nsPos = [NSEvent mouseLocation];
+    NSScreen* nsScreen = [NSScreen mainScreen];
+    _cocoa_to_screen(nsScreen, &nsPos);
+
+    pxp->x = nsPos.x;
+    pxp->y = nsPos.y;
 }}
 
 /*---------------------------------------------------------------*/
+void _adjust_widget_size(dword_t wstyle, xsize_t* pxs)
+{@autoreleasepool {
+
+    if(!(wstyle & WD_STYLE_TITLE)) return;
+
+    NSApplication *nsApp = [NSApplication sharedApplication];
+    NSWindow* nsWindow = [nsApp mainWindow];
+
+    NSRect frameRect = [nsWindow frame];
+    NSRect contentRect = [nsWindow contentRectForFrameRect:frameRect];
+    CGFloat titleBarHeight = NSMaxY(frameRect) - NSMaxY(contentRect);
+    CGFloat borderLeft = contentRect.origin.x - frameRect.origin.x;
+    CGFloat borderRight = NSMaxX(frameRect) - NSMaxX(contentRect);
+    CGFloat borderBottom = contentRect.origin.y - frameRect.origin.y;
+
+    pxs->w += (int)(borderLeft + borderRight);
+    pxs->h += (int)(titleBarHeight + borderBottom);
+}}
 
 void _get_screen_size(xsize_t* pxs)
-{
+{@autoreleasepool {
     NSScreen *mainScreen = [NSScreen mainScreen];
     NSRect screenFrame = [mainScreen frame];
 
     pxs->w = (int)screenFrame.size.width;
     pxs->h = (int)screenFrame.size.height;
-}
+}}
 
 void _get_desktop_size(xsize_t* pxs)
-{
+{@autoreleasepool {
     NSScreen *mainScreen = [NSScreen mainScreen];
     NSRect visibleFrame = [mainScreen visibleFrame];
 
     pxs->w = (int)visibleFrame.size.width;
     pxs->h = (int)visibleFrame.size.height;
-}
+}}
 
 void _screen_size_to_tm(xsize_t* pxs)
 {
@@ -3182,41 +3022,6 @@ void _screen_size_to_pt(xsize_t* pxs)
 	pxs->h = (int)((double)pxs->fh * PTPERMM);
 }
 
-res_acl_t _create_accel_table(const accel_t* pac, int n)
-{
-	accel_t* pnew;
 
-	pnew = (accel_t*)calloc(n + 1, sizeof(accel_t));
-	memcpy((void*)pnew, (void*)pac, n * sizeof(accel_t));
-
-	pnew[n].vir = 0;
-	pnew[n].key = 0;
-
-	pnew[n].cmd = 0;
-
-	return (res_acl_t)pnew;
-}
-
-void _destroy_accel_table(res_acl_t hac)
-{
-	accel_t* pac = (accel_t*)hac;
-
-	free(pac);
-}
-
-void _widget_track_mouse(res_win_t wt, dword_t mask)
-{
-
-}
-
-void _widget_set_alpha(res_win_t wt, unsigned char b)
-{
-
-}
-
-unsigned char _widget_get_alpha(res_win_t wt)
-{
-	return (unsigned char)0;
-}
 
 #endif //XDU_SUPPORT_WIDGET

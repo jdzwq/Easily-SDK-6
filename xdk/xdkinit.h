@@ -62,6 +62,7 @@ extern "C" {
 		res_heap_t	if_heap;
 #endif
 #ifdef XDK_SUPPORT_MEMO_DUMP
+		link_t		if_hand;
 		link_t		if_dump;
 		link_t		if_trak;
 #endif

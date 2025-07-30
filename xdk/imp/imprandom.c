@@ -38,7 +38,7 @@ void system_random32(dword_t* pn)
 
 	XDK_ASSERT(pif != NULL);
 
-	return (*pif->pf_system_random32)(pn);
+	(*pif->pf_system_random32)(pn);
 }
 
 void system_random64(lword_t* pn)
@@ -49,9 +49,7 @@ void system_random64(lword_t* pn)
 
 	XDK_ASSERT(pif != NULL);
 
-	return (*pif->pf_system_random64)(pn);
+	(*pif->pf_system_random64)(pn);
 }
-
-
 
 #endif /*XDK_SUPPORT_RANDOM*/

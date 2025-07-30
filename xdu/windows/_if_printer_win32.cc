@@ -75,8 +75,9 @@ bool_t _default_printer_mode(dev_prn_t* pmod)
 	return 1;
 }
 
-bool_t _setup_printer_mode(res_win_t wnd, dev_prn_t* pmod)
+bool_t _setup_printer_mode(widget_t wt, dev_prn_t* pmod)
 {
+	win32_widget_t* pws = (win32_widget_t*)wt;
 	TCHAR szPrinter[MAX_PATH];
 	PRINTER_DEFAULTS pdf;
 	HANDLE hPrinter;
@@ -84,6 +85,8 @@ bool_t _setup_printer_mode(res_win_t wnd, dev_prn_t* pmod)
 
 	TCHAR* tmp;
 	int size;
+
+	if(!pws) return 0;
 
 	if (pmod->devname[0] != _T('\0'))
 	{
@@ -105,7 +108,7 @@ bool_t _setup_printer_mode(res_win_t wnd, dev_prn_t* pmod)
 	if (!OpenPrinter(szPrinter, &hPrinter, NULL))
 		return 0;
 
-	size = DocumentProperties(wnd, hPrinter, szPrinter, NULL, NULL, 0);
+	size = DocumentProperties(pws->self, hPrinter, szPrinter, NULL, NULL, 0);
 	if (size < 0)
 	{
 		ClosePrinter(hPrinter);
@@ -115,7 +118,7 @@ bool_t _setup_printer_mode(res_win_t wnd, dev_prn_t* pmod)
 	pdev = (DEVMODE*)GlobalLock(GlobalAlloc(GMEM_MOVEABLE | GMEM_ZEROINIT, size));
 	pdev->dmSize = sizeof(DEVMODE);//(WORD)size;
 
-	size = DocumentProperties(wnd, hPrinter, szPrinter, pdev, pdev, DM_IN_PROMPT | DM_IN_BUFFER | DM_OUT_BUFFER);
+	size = DocumentProperties(pws->self, hPrinter, szPrinter, pdev, pdev, DM_IN_PROMPT | DM_IN_BUFFER | DM_OUT_BUFFER);
 	
 	pmod->landscape = (pdev->dmOrientation == DMORIENT_LANDSCAPE) ? 1 : 0;
 	pmod->paper_width = pdev->dmPaperWidth;

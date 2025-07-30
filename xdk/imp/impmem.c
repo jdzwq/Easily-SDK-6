@@ -39,7 +39,7 @@ void* xmem_alloc_dump(dword_t size, const char* src, const char* func, unsigned 
 	
 	pif = THREAD_ZONE_INTERFACE;
 
-	p = xmem_alloc_nodump((size + sizeof(link_t) + sizeof(vword_t)));
+	p = xmem_alloc_nodump(sizeof(link_t) + sizeof(vword_t) + size);
 
 	((link_t_ptr)p)->tag = lkDebug;
 	insert_link_after(&pif->if_dump, LINK_LAST, (link_t_ptr)p);
@@ -78,7 +78,7 @@ void* xmem_realloc_dump(void* p, dword_t size, const char* src, const char* func
 	dump =(char*)(*((vword_t*)((byte_t*)p + sizeof(link_t))));
 	xmem_free_nodump((void*)dump);
 
-	p = xmem_realloc_nodump(p, (size + sizeof(link_t) + sizeof(vword_t)));
+	p = xmem_realloc_nodump(p, (sizeof(link_t) + sizeof(vword_t) + size));
 
 	((link_t_ptr)p)->tag = lkDebug;
 	insert_link_after(&pif->if_dump, LINK_LAST, (link_t_ptr)p);
@@ -231,6 +231,52 @@ void xmem_free_nodump(void* p)
 	(*piv->pf_local_free)(p);
 
 #endif //XDK_SUPPORT_MEMO_HEAP
+}
+
+xhand_t xmem_alloc_handle_dump(dword_t size, const char* src, const char* func, unsigned int line)
+{
+	if_zone_t* pif;
+	void* p;
+	dword_t dlen;
+	char* dump;
+	
+	pif = THREAD_ZONE_INTERFACE;
+
+	p = xmem_alloc_nodump(sizeof(link_t) + sizeof(vword_t) + size);
+
+	((link_t_ptr)p)->tag = lkDebug;
+	insert_link_after(&pif->if_hand, LINK_LAST, (link_t_ptr)p);
+
+	dlen = a_xslen(src) + a_xslen(func) +  2 * NUM_LEN;
+	dump = (char*)xmem_alloc_nodump(dlen);
+	a_xsprintf(dump, "%s %s:%d\n", src, func, line);
+	*((vword_t*)((byte_t*)p + sizeof(link_t))) = (vword_t)dump;
+
+	p = (void*)((byte_t*)p + sizeof(link_t) + sizeof(vword_t));
+
+	return (xhand_t)p;
+}
+
+void xmem_free_handle_dump(xhand_t ph)
+{
+	if_zone_t* pif;
+	vword_t dump;
+
+	pif = THREAD_ZONE_INTERFACE;
+
+	XDK_ASSERT(pif != NULL);
+
+	if (!ph) return;
+
+	ph = (void*)((byte_t*)ph - sizeof(vword_t) - sizeof(link_t));
+	XDK_ASSERT(((link_t_ptr)ph)->tag == lkDebug);
+
+	delete_link(&pif->if_hand, (link_t_ptr)ph);
+
+	dump = *((vword_t*)((byte_t*)ph + sizeof(link_t)));
+	xmem_free_nodump((void*)dump);
+
+	xmem_free_nodump((void*)ph);
 }
 
 void xmem_zero(void* p, dword_t size)

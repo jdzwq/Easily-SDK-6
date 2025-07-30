@@ -168,7 +168,7 @@ dword_t _comm_listen(res_file_t fh, async_t* pb)
 	COMSTAT sta = { 0 };
 
 	DWORD dw = 0;
-	ULONG_PTR up = NULL;
+	ULONG_PTR up = 0;
 	LPOVERLAPPED ul = NULL;
 
 	GetCommTimeouts(fh, &tms);

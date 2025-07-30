@@ -1320,8 +1320,6 @@ const schar_t* a_tk_scanf(const schar_t* token, schar_t size, schar_t type, va_l
 	long long *pl;
 	unsigned long long *pul;
 	double *pdb;
-	schar_t* psstr;
-	wchar_t* pwstr;
 
 	switch (type)
 	{
@@ -1438,8 +1436,6 @@ const wchar_t* w_tk_scanf(const wchar_t* token, wchar_t size, wchar_t type, va_l
 	long long *pl;
 	unsigned long long* pul;
 	double *pdb;
-	schar_t* psstr;
-	wchar_t* pwstr;
 
 	switch (type)
 	{

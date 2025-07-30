@@ -106,17 +106,18 @@ void _context_cleanup(void)
 #endif
 }
 
-visual_t _create_display_context(res_win_t wt)
+visual_t _create_display_context(widget_t wt)
 {
+	win32_widget_t* pws = (win32_widget_t*)wt;
 	win32_context_t* ctx = NULL;
 
-	ctx = (win32_context_t*)xmem_alloc(sizeof(win32_context_t));
+	ctx = (win32_context_t*)xmem_alloc_handle(sizeof(win32_context_t));
 	ctx->head.tag = _VISUAL_DISPLAY;
 
-	if (wt)
+	if (pws && IsWindow(pws->self))
 	{
-		ctx->device.widget = wt;
-		ctx->context = GetWindowDC(wt);
+		ctx->device.window = pws->self;
+		ctx->context = GetWindowDC(pws->self);
 		ctx->type = CONTEXT_WIDGET;
 	}
 	else
@@ -138,7 +139,8 @@ visual_t _create_compatible_context(visual_t rdc, int cx, int cy)
 	win32_context_t* ctx = NULL;
 	HBITMAP bmp;
 
-	ctx = (win32_context_t*)xmem_alloc(sizeof(win32_context_t));
+	ctx = (win32_context_t*)xmem_alloc_handle(sizeof(win32_context_t));
+	ctx->head.tag = _VISUAL_DISPLAY;
 
 	ctx->context = CreateCompatibleDC(org->context);
 	if (ctx->context)
@@ -160,7 +162,7 @@ void _destroy_context(visual_t rdc)
 	switch (ctx->type)
 	{
 	case CONTEXT_WIDGET:
-		ReleaseDC(ctx->device.widget, ctx->context);
+		ReleaseDC(ctx->device.window, ctx->context);
 		break;
 	case CONTEXT_MEMORY:
 		bmp = (HBITMAP)SelectObject(ctx->context, (HGDIOBJ)ctx->device.bitmap);
@@ -176,7 +178,7 @@ void _destroy_context(visual_t rdc)
 		break;
 	}
 
-	xmem_free(rdc);
+	//xmem_free_handle((xhand_t)rdc);
 }
 
 void _get_device_caps(visual_t rdc, dev_cap_t* pcap)

@@ -105,6 +105,35 @@ LICENSE.GPL3 for more details.
 typedef unsigned int	uid_t;
 #endif
 
+#ifdef XDU_SUPPORT_WIDGET
+typedef struct _win32_widget_t{
+	handle_head head;
+
+	HWND self;
+	HACCEL acl;
+
+	HWND parent;
+	HWND owner;
+
+	dword_t style;
+	uid_t uid;
+
+	int result;
+
+	border_t bd;
+	xpoint_t pt;
+	xsize_t st;
+
+	xcolor_t bkg;
+	xcolor_t frg;
+	xcolor_t txt;
+	xcolor_t msk;
+	xcolor_t ico;
+}win32_widget_t;
+
+typedef COLORREF	pixel_t;
+#endif
+
 #ifdef XDU_SUPPORT_CONTEXT
 
 typedef struct _win32_context_t{
@@ -114,7 +143,7 @@ typedef struct _win32_context_t{
 	union
 	{
 		HBITMAP bitmap;
-		HWND widget;
+		HWND window;
 	}device;
 	int type;
 }win32_context_t;
@@ -127,22 +156,20 @@ typedef struct _win32_bitmap_t{
 }win32_bitmap_t;
 #endif
 
-typedef HFONT		res_font_t;
+typedef struct _win32_font_t{
+	handle_head head;
+
+	HFONT font;
+}win32_font_t;
 
 #ifdef XDU_SUPPORT_CONTEXT_OPENGL
-typedef HGLRC		res_glc_t;
-#endif
-#endif
+typedef struct _win32_glrc_t{
+	handle_head head;
 
-#ifdef XDU_SUPPORT_WIDGET
-typedef HACCEL		res_acl_t;
-typedef HWND		res_win_t;
+	HGLRC glrc;
+}win32_glrc_t;
 
-typedef COLORREF	pixel_t;
-typedef MSG			msg_t;
-typedef WPARAM		uparam_t;
-typedef LPARAM		lparam_t;
-typedef LRESULT		result_t;
+#endif
 #endif
 
 #ifdef XDU_SUPPORT_CLIPBOARD

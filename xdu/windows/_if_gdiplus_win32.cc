@@ -1804,23 +1804,5 @@ void _gdi_inclip_rect(visual_t rdc, const xrect_t* pxr)
 	gh.SetClip(Gdiplus::Rect(pxr->x, pxr->y, pxr->w, pxr->h));
 }
 
-void _gdi_fill_region(visual_t rdc, const xbrush_t* pxb, res_rgn_t rgn)
-{
-	win32_context_t* ctx = (win32_context_t*)rdc;
-	HDC hDC = (HDC)(ctx->context);
-
-	Region gn(rgn);
-
-	Brush* pb = create_brush(pxb, NULL, NULL);
-
-	Gdiplus::Graphics gh(hDC);
-
-	gh.SetPageUnit(UnitPixel);
-
-	gh.FillRegion(pb, &gn);
-
-	delete pb;
-}
-
 
 #endif //XDU_SUPPORT_CONTEXT_GRAPHICPLUS

@@ -282,7 +282,8 @@ int acp_utf8_byte_to_unicode(const byte_t* src, wchar_t* dest)
 
 int acp_utf8_to_unicode(const byte_t* src, dword_t slen, wchar_t* dest, int dlen)
 {
-	int len = 0, total = 0;
+	int len = 0;
+	dword_t total = 0;
 
 	while (total < slen && len < dlen)
 	{
@@ -300,7 +301,8 @@ int acp_unicode_byte_to_utf8(wchar_t ch, byte_t* buf)
 
 int acp_unicode_to_utf8(const wchar_t* src, int slen, byte_t* dest, dword_t dlen)
 {
-	int len = 0, total = 0;
+	dword_t len = 0;
+	int total = 0;
 
 	while (total < slen && len < dlen)
 	{

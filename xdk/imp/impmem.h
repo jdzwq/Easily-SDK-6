@@ -60,6 +60,9 @@ EXP_API void*	xmem_realloc_dump(void* p, dword_t size, const char* src, const ch
 EXP_API void	xmem_free_nodump(void* p);
 EXP_API void	xmem_free_dump(void* p);
 
+EXP_API xhand_t	xmem_alloc_handle_dump(dword_t size, const char* src, const char* func, unsigned int line);
+EXP_API void	xmem_free_handle_dump(xhand_t ph);
+
 /*
 @FUNCTION xmem_zero: set the memory content to zero.
 @INPUT void* p: the memoy pointer, can not be NULL.
@@ -119,10 +122,16 @@ EXP_API	void	xmem_assert(void* p);
 #define xmem_alloc(size)		xmem_alloc_dump(size, __FILE__, __FUNCTION__, __LINE__)
 #define xmem_realloc(p, size)	xmem_realloc_dump(p, size, __FILE__, __FUNCTION__, __LINE__)
 #define xmem_free(p)			xmem_free_dump(p)
+
+#define xmem_alloc_handle(size)	xmem_alloc_handle_dump(size, __FILE__, __FUNCTION__, __LINE__)
+#define xmem_free_handle(ph)	xmem_free_handle_dump(ph)
 #else
 #define xmem_alloc(size)		xmem_alloc_nodump(size)
 #define xmem_realloc(p, size)	xmem_realloc_nodump(p, size)
 #define xmem_free(p)			xmem_free_nodump(p)
+
+#define xmem_alloc_handle(size)	(xhand_t)xmem_alloc_nodump(size)
+#define xmem_free_handle(ph)	xmem_free_nodump((void*)ph)
 #endif //XDK_SUPPORT_MEMO_DUMP
 
 

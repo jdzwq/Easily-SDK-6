@@ -102,6 +102,7 @@ void xdk_thread_init(int master)
 	XDK_ASSERT(g_xdk_mou.tls_thr_zone != 0);
 	(*pit->pf_thread_set_tls)(g_xdk_mou.tls_thr_zone, (void*)pzn);
 #ifdef XDK_SUPPORT_MEMO_DUMP
+	init_root_link(&pzn->if_hand);
 	init_root_link(&pzn->if_dump);
 
 	(*pit->pf_criti_enter)(g_xdk_mou.dump_crit);
@@ -584,6 +585,7 @@ void xmem_dump()
 	link_t_ptr plk, nlk;
 	dword_t tid,len;
 	vword_t dump;
+	xhand_t hand;
 	tchar_t token[4096];
 
 	if_thread_t* pit;
@@ -611,14 +613,36 @@ void xmem_dump()
 
 #ifdef XDK_SUPPORT_ERROR
 #if defined(UNICODE) || defined(_UNICODE)
-		len = xsprintf(token, _T("memory leak:[thread id: %d, %S]\n"), tid, (char*)dump);
+		len = xsprintf(token, _T("memory leak:[thread id: %d, location: %S]\n"), tid, (char*)dump);
 #else
-		len = xsprintf(token, _T("memory leak:[thread id: %d, %s]\n"), tid, (char*)dump);
+		len = xsprintf(token, _T("memory leak:[thread id: %d, location: %s]\n"), tid, (char*)dump);
 #endif
 		(*pie->pf_error_print)(token);
 #endif
 
 		delete_link(&pih->if_dump, plk);
+		plk = nlk;
+	}
+
+	plk = get_first_link(&pih->if_hand);
+	while (plk)
+	{
+		nlk = get_next_link(plk);
+
+		dump = *((vword_t*)((byte_t*)plk + sizeof(link_t)));
+		hand = (xhand_t)((byte_t*)plk + sizeof(link_t) + sizeof(vword_t));
+		tid = (*pit->pf_thread_get_id)();
+
+#ifdef XDK_SUPPORT_ERROR
+#if defined(UNICODE) || defined(_UNICODE)
+		len = xsprintf(token, _T("resource leak:[thread: %d, handle: %02X, location: %S]\n"), tid, (int)(hand->tag), (char*)dump);
+#else
+		len = xsprintf(token, _T("resource leak:[thread: %d, handle: %02X, location: %s]\n"), tid, (int)(hand->tag), (char*)dump);
+#endif
+		(*pie->pf_error_print)(token);
+#endif
+
+		delete_link(&pih->if_hand, plk);
 		plk = nlk;
 	}
 }
@@ -627,12 +651,12 @@ void xmem_dump()
 
 void thread_dump()
 {
-	return;
+	NOP;
 }
 
 void xmem_dump()
 {
-	return;
+	NOP;
 }
 
 #endif //XDK_SUPPORT_THREAD

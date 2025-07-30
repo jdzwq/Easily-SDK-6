@@ -28,12 +28,16 @@ LICENSE.GPL3 for more details.
 
 #ifdef XDU_SUPPORT_CLIPBOARD
 
-bool_t _clipboard_put(res_win_t win, int fmt, const byte_t* data, dword_t size)
+bool_t _clipboard_put(widget_t wt, int fmt, const byte_t* data, dword_t size)
 {
+	win32_widget_t* pws = (win32_widget_t*)wt;
 	HGLOBAL glb;
 	void* buf;
 
-	if (!OpenClipboard(win))
+	if(!pws) return 0;
+	if (!IsWindow(pws->self)) return 0;
+
+	if (!OpenClipboard(pws->self))
 		return bool_false;
 
 	EmptyClipboard();
@@ -48,13 +52,17 @@ bool_t _clipboard_put(res_win_t win, int fmt, const byte_t* data, dword_t size)
 	return (SetClipboardData(fmt, (HANDLE)glb)) ? bool_true : bool_false;
 }
 
-dword_t _clipboard_get(res_win_t win, int fmt, byte_t* buf, dword_t max)
+dword_t _clipboard_get(widget_t wt, int fmt, byte_t* buf, dword_t max)
 {
+	win32_widget_t* pws = (win32_widget_t*)wt;
 	HGLOBAL glb;
 	void* data;
 	dword_t len;
 
-	if (!OpenClipboard(win))
+	if(!pws) return 0;
+	if (!IsWindow(pws->self)) return 0;
+
+	if (!OpenClipboard(pws->self))
 		return 0;
 
 	if (!IsClipboardFormatAvailable(fmt))

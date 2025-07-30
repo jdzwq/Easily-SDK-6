@@ -307,7 +307,7 @@ bool_t _socket_sendto(res_file_t so, res_addr_t saddr, int alen, void* buf, dwor
 	LPOVERLAPPED pov = (pb && pb->type != ASYNC_BLOCK) ? (LPOVERLAPPED)pb->lapp : NULL;
 	dword_t* pcb = (pb) ? &(pb->size) : NULL;
 
-	ULONG_PTR up = NULL;
+	ULONG_PTR up = 0;
 	LPOVERLAPPED ul = NULL;
 
 	WSABUF wb;
@@ -382,7 +382,7 @@ bool_t _socket_recvfrom(res_file_t so, res_addr_t saddr, int* plen, void* buf, d
 	LPOVERLAPPED pov = (pb && pb->type != ASYNC_BLOCK) ? (LPOVERLAPPED)pb->lapp : NULL;
 	dword_t* pcb = (pb) ? &(pb->size) : NULL;
 
-	ULONG_PTR up = NULL;
+	ULONG_PTR up = 0;
 	LPOVERLAPPED ul = NULL;
 
 	int err, alen = 0;
@@ -459,7 +459,7 @@ bool_t _socket_send(res_file_t so, void* buf, dword_t len, async_t* pb)
 	LPOVERLAPPED pov = (pb && pb->type != ASYNC_BLOCK) ? (LPOVERLAPPED)pb->lapp : NULL;
 	dword_t* pcb = (pb) ? &(pb->size) : NULL;
 
-	ULONG_PTR up = NULL;
+	ULONG_PTR up = 0;
 	LPOVERLAPPED ul = NULL;
 
 	int err;
@@ -528,7 +528,7 @@ bool_t _socket_recv(res_file_t so, void* buf, dword_t len, async_t* pb)
 	LPOVERLAPPED pov = (pb && pb->type != ASYNC_BLOCK) ? (LPOVERLAPPED)pb->lapp : NULL;
 	dword_t* pcb = (pb) ? &(pb->size) : NULL;
 
-	ULONG_PTR up = NULL;
+	ULONG_PTR up = 0;
 	LPOVERLAPPED ul = NULL;
 
 	int err;
@@ -614,7 +614,7 @@ res_file_t _socket_accept(res_file_t ls, res_addr_t saddr, int *plen, async_t* p
 	GUID id_acceptex_addr = WSAID_GETACCEPTEXSOCKADDRS;
 
 	DWORD fd, dw;
-	ULONG_PTR up = NULL;
+	ULONG_PTR up = 0;
 	LPOVERLAPPED ul = NULL;
 
 	unsigned char buf[64] = { 0 };

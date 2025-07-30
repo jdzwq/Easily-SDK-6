@@ -71,14 +71,6 @@ void xdu_impl_context(if_context_t* pif)
 	pif->pf_destroy_context = _destroy_context;
 	pif->pf_get_device_caps = _get_device_caps;
 	pif->pf_render_context = _render_context;
-
-	pif->pf_pt_per_mm = _pt_per_mm;;
-	pif->pf_text_mm_metric = _text_mm_metric;
-	pif->pf_text_pt_metric = _text_pt_metric;
-	pif->pf_text_mm_size = _text_mm_size;
-	pif->pf_text_pt_size = _text_pt_size;
-	pif->pf_cast_mm_to_pt = _cast_mm_to_pt;
-	pif->pf_cast_pt_to_mm = _cast_pt_to_mm;
 }
 
 #ifdef XDU_SUPPORT_CONTEXT_BITMAP
@@ -174,7 +166,6 @@ void xdu_impl_widget(if_widget_t* pif)
 	pif->pf_widget_get_dispatch = _widget_get_dispatch;
 	pif->pf_widget_get_style = _widget_get_style;
 	pif->pf_widget_set_style = _widget_set_style;
-	pif->pf_widget_get_accel = _widget_get_accel;
 	pif->pf_widget_set_accel = _widget_set_accel;
 	pif->pf_widget_get_owner = _widget_get_owner;
 	pif->pf_widget_set_owner = _widget_set_owner;
@@ -233,7 +224,6 @@ void xdu_impl_widget(if_widget_t* pif)
 
 	pif->pf_widget_set_timer = _widget_set_timer;
 	pif->pf_widget_kill_timer = _widget_kill_timer;
-	pif->pf_widget_adjust_size = _widget_adjust_size;
 	pif->pf_widget_get_menu_rect = _widget_get_menu_rect;
 	pif->pf_widget_get_border = _widget_get_border;
 
@@ -253,13 +243,14 @@ void xdu_impl_widget(if_widget_t* pif)
 	pif->pf_widget_set_scroll_info = _widget_set_scroll_info;
 	pif->pf_widget_get_scroll_info = _widget_get_scroll_info;
 
-	pif->pf_widget_has_struct = _widget_has_struct;
 	pif->pf_widget_noti_xfont = _widget_noti_xfont;
 	pif->pf_widget_noti_xface = _widget_noti_xface;
 	pif->pf_widget_noti_xbrush = _widget_noti_xbrush;
 	pif->pf_widget_noti_xpen = _widget_noti_xpen;
 	pif->pf_widget_set_color_mode = _widget_set_color_mode;
 	pif->pf_widget_get_color_mode = _widget_get_color_mode;
+	pif->pf_widget_set_diaph = _widget_set_diaph;
+	pif->pf_widget_get_diaph = _widget_get_diaph;
 	pif->pf_widget_set_point = _widget_set_point;
 	pif->pf_widget_get_point = _widget_get_point;
 	pif->pf_widget_set_size = _widget_set_size;
@@ -269,17 +260,14 @@ void xdu_impl_widget(if_widget_t* pif)
 	pif->pf_widget_do_modal = _widget_do_modal;
 	pif->pf_widget_do_track = _widget_do_track;
 
+	pif->pf_message_position = _message_position;
+	pif->pf_message_quit = _message_quit;
+
+	pif->pf_adjust_widget_size = _adjust_widget_size;
 	pif->pf_get_screen_size = _get_screen_size;
 	pif->pf_get_desktop_size = _get_desktop_size;
 	pif->pf_screen_size_to_pt = _screen_size_to_pt;
 	pif->pf_screen_size_to_tm = _screen_size_to_tm;
-
-	pif->pf_create_accel_table = _create_accel_table;
-	pif->pf_destroy_accel_table = _destroy_accel_table;
-
-	pif->pf_widget_track_mouse = _widget_track_mouse;
-	pif->pf_widget_set_alpha = _widget_set_alpha;
-	pif->pf_widget_get_alpha = _widget_get_alpha;
 
 #ifdef XDU_SUPPORT_CONTEXT_OPENGL
 	pif->pf_widget_get_glctx = _widget_get_glctx;

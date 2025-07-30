@@ -95,7 +95,7 @@ bool_t _file_write(res_file_t fh, void* buf, dword_t size, async_t* pb)
 	dword_t* pcb = (pb) ? &(pb->size) : NULL;
 
 	DWORD err, dw = 0;
-	ULONG_PTR up = NULL;
+	ULONG_PTR up = 0;
 	LPOVERLAPPED ul = NULL;
 	bool_t rt = 1;
 
@@ -169,7 +169,7 @@ bool_t _file_read(res_file_t fh, void* buf, dword_t size, async_t* pb)
 	dword_t* pcb = (pb) ? &(pb->size) : NULL;
 
 	DWORD err, dw = 0;
-	ULONG_PTR up = NULL;
+	ULONG_PTR up = 0;
 	LPOVERLAPPED ul = NULL;
 	bool_t rt = 1;
 

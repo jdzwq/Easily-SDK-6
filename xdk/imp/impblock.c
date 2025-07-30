@@ -44,7 +44,7 @@ xhand_t xblock_open(byte_t** pp)
 
 	XDK_ASSERT(pp != NULL);
 
-	ppi = (block_context*)xmem_alloc(sizeof(block_context));
+	ppi = (block_context*)xmem_alloc_handle(sizeof(block_context));
 	ppi->head.tag = _HANDLE_BLOCK;
 	ppi->block = pp;
 	ppi->read_bytes = 0;
@@ -71,7 +71,7 @@ byte_t** xblock_close(xhand_t block)
 
 	pp = ppi->block;
 
-	xmem_free(ppi);
+	xmem_free_handle((xhand_t)ppi);
 
 	return pp;
 }

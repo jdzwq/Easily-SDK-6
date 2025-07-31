@@ -9178,7 +9178,7 @@ void draw_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t
 	xrect_t xr;
 
 	xmem_copy((void*)&xr, (void*)pxr, sizeof(xrect_t));
-	(*pif->pf_rect_tm_to_pt)(pif->ctx, &xr);
+	(*pif->pf_rect_mm_to_pt)(pif->ctx, &xr);
 
 	visu = (*pif->pf_get_visual_handle)(pif->ctx);
 	(*pif->pf_get_visual_interface)(visu, &it);

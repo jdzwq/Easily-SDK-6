@@ -26,8 +26,8 @@ LICENSE.GPL3 for more details.
 
 #include "dlg.h"
 
-#include "../xdcimp.h"
-#include "../xdcinit.h"
+#include "../xdcobj.h"
+
 
 #define IDC_PROPERDLG_PROPER			10
 #define IDC_PROPERDLG_PUSHBOX_OK		11
@@ -43,9 +43,9 @@ typedef struct _properdlg_delta_t{
 #define SETPROPERDLGDELTA(ph,ptd) widget_set_user_delta(ph,(vword_t)ptd)
 
 /**********************************************************************************/
-void properdlg_on_ok(res_win_t widget)
+void properdlg_on_ok(widget_t widget)
 {
-	res_win_t ctrl;
+	widget_t ctrl;
 
 	ctrl = widget_get_child(widget, IDC_PROPERDLG_PROPER);
 	properctrl_accept(ctrl, 1);
@@ -53,13 +53,13 @@ void properdlg_on_ok(res_win_t widget)
 	widget_close(widget, 1);
 }
 /**********************************************************************************/
-int hand_properdlg_create(res_win_t widget, void* data)
+int hand_properdlg_create(widget_t widget, void* data)
 {
 	properdlg_delta_t* ptd;
 
 	xrect_t xr;
 	xsize_t xs;
-	res_win_t properctrl, pushbox;
+	widget_t properctrl, pushbox;
 
 	widget_hand_create(widget);
 
@@ -106,10 +106,10 @@ int hand_properdlg_create(res_win_t widget, void* data)
 	return 0;
 }
 
-void hand_properdlg_destroy(res_win_t widget)
+void hand_properdlg_destroy(widget_t widget)
 {
 	properdlg_delta_t* ptd = GETPROPERDLGDELTA(widget);
-	res_win_t ctrl;
+	widget_t ctrl;
 
 	XDK_ASSERT(ptd != NULL);
 
@@ -128,7 +128,7 @@ void hand_properdlg_destroy(res_win_t widget)
 	widget_hand_destroy(widget);
 }
 
-void hand_properdlg_menu_command(res_win_t widget, int code, int cid, vword_t data)
+void hand_properdlg_menu_command(widget_t widget, int code, int cid, vword_t data)
 {
 	properdlg_delta_t* ptd = GETPROPERDLGDELTA(widget);
 
@@ -138,12 +138,12 @@ void hand_properdlg_menu_command(res_win_t widget, int code, int cid, vword_t da
 	}
 }
 
-void hand_properdlg_size(res_win_t widget, int code, const xsize_t* prs)
+void hand_properdlg_size(widget_t widget, int code, const xsize_t* prs)
 {
 	properdlg_delta_t* ptd = GETPROPERDLGDELTA(widget);
 	xsize_t xs;
 	xrect_t xr;
-	res_win_t ctrl;
+	widget_t ctrl;
 
 	xs.fw = PROPERDLG_BUTTON_WIDTH;
 	xs.fh = PROPERDLG_BUTTON_HEIGHT;
@@ -183,7 +183,7 @@ void hand_properdlg_size(res_win_t widget, int code, const xsize_t* prs)
 	widget_erase(widget, NULL);
 }
 
-void hand_properdlg_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
+void hand_properdlg_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 {
 	properdlg_delta_t* ptd = GETPROPERDLGDELTA(widget);
 	visual_t rdc;
@@ -229,10 +229,10 @@ void hand_properdlg_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 }
 
 /***************************************************************************************/
-res_win_t properdlg_create(const tchar_t* title, link_t_ptr ptr, res_win_t owner)
+widget_t properdlg_create(const tchar_t* title, link_t_ptr ptr, widget_t owner)
 {
 	if_dispatch_t ev = { 0 };
-	res_win_t dlg;
+	widget_t dlg;
 	xrect_t xr = { 0 };
 	clr_mod_t clr;
 
@@ -272,7 +272,7 @@ res_win_t properdlg_create(const tchar_t* title, link_t_ptr ptr, res_win_t owner
 	return dlg;
 }
 
-void properdlg_popup_size(res_win_t widget, xsize_t* pxs)
+void properdlg_popup_size(widget_t widget, xsize_t* pxs)
 {
 	properdlg_delta_t* ptd = GETPROPERDLGDELTA(widget);
 
@@ -288,6 +288,6 @@ void properdlg_popup_size(res_win_t widget, xsize_t* pxs)
 
 	widget_size_to_pt(widget, pxs);
 
-	widget_adjust_size(widget_get_style(widget), pxs);
+	adjust_widget_size(widget_get_style(widget), pxs);
 }
 

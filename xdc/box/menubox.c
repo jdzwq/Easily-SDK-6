@@ -26,8 +26,8 @@ LICENSE.GPL3 for more details.
 
 #include "box.h"
 
-#include "../xdcimp.h"
-#include "../xdcinit.h"
+#include "../xdcobj.h"
+
 
 typedef struct _menu_delta_t{
 	link_t_ptr menu;
@@ -40,7 +40,7 @@ typedef struct _menu_delta_t{
 #define SETMENUDELTA(widget,ptd) widget_set_user_delta(widget,(vword_t)ptd)
 
 /**********************************************************************************************/
-static void _menubox_item_rect(res_win_t widget, link_t_ptr ilk, xrect_t* pxr)
+static void _menubox_item_rect(widget_t widget, link_t_ptr ilk, xrect_t* pxr)
 {
 	menu_delta_t* ptd = GETMENUDELTA(widget);
 	canvas_t canv;
@@ -56,7 +56,7 @@ static void _menubox_item_rect(res_win_t widget, link_t_ptr ilk, xrect_t* pxr)
 	widget_rect_to_pt(widget, pxr);
 }
 
-static void _menubox_reset_page(res_win_t widget)
+static void _menubox_reset_page(widget_t widget)
 {
 	menu_delta_t* ptd = GETMENUDELTA(widget);
 	int pw, ph, fw, fh, lw, lh;
@@ -100,7 +100,7 @@ static void _menubox_reset_page(res_win_t widget)
 
 /************************************************************************************************/
 
-void noti_menu_item_changing(res_win_t widget)
+void noti_menu_item_changing(widget_t widget)
 {
 	menu_delta_t* ptd = GETMENUDELTA(widget);
 	xrect_t xr;
@@ -114,7 +114,7 @@ void noti_menu_item_changing(res_win_t widget)
 	widget_erase(widget, &xr);
 }
 
-void noti_menu_item_changed(res_win_t widget, link_t_ptr plk)
+void noti_menu_item_changed(widget_t widget, link_t_ptr plk)
 {
 	menu_delta_t* ptd = GETMENUDELTA(widget);
 	xrect_t xr;
@@ -130,7 +130,7 @@ void noti_menu_item_changed(res_win_t widget, link_t_ptr plk)
 }
 
 /**************************************************************************************/
-int hand_menu_create(res_win_t widget, void* data)
+int hand_menu_create(widget_t widget, void* data)
 {
 	menu_delta_t* ptd;
 
@@ -146,7 +146,7 @@ int hand_menu_create(res_win_t widget, void* data)
 	return 0;
 }
 
-void hand_menu_destroy(res_win_t widget)
+void hand_menu_destroy(widget_t widget)
 {
 	menu_delta_t* ptd = GETMENUDELTA(widget);
 
@@ -159,7 +159,7 @@ void hand_menu_destroy(res_win_t widget)
 	widget_hand_destroy(widget);
 }
 
-void hand_menu_size(res_win_t widget, int code, const xsize_t* prs)
+void hand_menu_size(widget_t widget, int code, const xsize_t* prs)
 {
 	menu_delta_t* ptd = GETMENUDELTA(widget);
 
@@ -169,7 +169,7 @@ void hand_menu_size(res_win_t widget, int code, const xsize_t* prs)
 	menubox_redraw(widget);
 }
 
-void hand_menu_mouse_move(res_win_t widget, dword_t dw, const xpoint_t* pxp)
+void hand_menu_mouse_move(widget_t widget, dword_t dw, const xpoint_t* pxp)
 {
 	menu_delta_t* ptd = GETMENUDELTA(widget);
 
@@ -178,7 +178,7 @@ void hand_menu_mouse_move(res_win_t widget, dword_t dw, const xpoint_t* pxp)
 
 }
 
-void hand_menu_lbutton_down(res_win_t widget, const xpoint_t* pxp)
+void hand_menu_lbutton_down(widget_t widget, const xpoint_t* pxp)
 {
 	menu_delta_t* ptd = GETMENUDELTA(widget);
 	int nHint;
@@ -218,7 +218,7 @@ void hand_menu_lbutton_down(res_win_t widget, const xpoint_t* pxp)
 	}
 }
 
-void hand_menu_lbutton_up(res_win_t widget, const xpoint_t* pxp)
+void hand_menu_lbutton_up(widget_t widget, const xpoint_t* pxp)
 {
 	menu_delta_t* ptd = GETMENUDELTA(widget);
 	
@@ -237,7 +237,7 @@ void hand_menu_lbutton_up(res_win_t widget, const xpoint_t* pxp)
 	widget_post_command(widget_get_owner(widget), code, widget_get_user_id(widget), (vword_t)widget);
 }
 
-void hand_menu_rbutton_down(res_win_t widget, const xpoint_t* pxp)
+void hand_menu_rbutton_down(widget_t widget, const xpoint_t* pxp)
 {
 	menu_delta_t* ptd = GETMENUDELTA(widget);
 
@@ -247,7 +247,7 @@ void hand_menu_rbutton_down(res_win_t widget, const xpoint_t* pxp)
 	widget_set_capture(widget, 1);
 }
 
-void hand_menu_rbutton_up(res_win_t widget, const xpoint_t* pxp)
+void hand_menu_rbutton_up(widget_t widget, const xpoint_t* pxp)
 {
 	menu_delta_t* ptd = GETMENUDELTA(widget);
 	
@@ -266,7 +266,7 @@ void hand_menu_rbutton_up(res_win_t widget, const xpoint_t* pxp)
 	widget_post_command(widget_get_owner(widget), code, widget_get_user_id(widget), (vword_t)widget);
 }
 
-void hand_menu_scroll(res_win_t widget, bool_t bHorz, int nLine)
+void hand_menu_scroll(widget_t widget, bool_t bHorz, int nLine)
 {
 	menu_delta_t* ptd = GETMENUDELTA(widget);
 
@@ -276,14 +276,14 @@ void hand_menu_scroll(res_win_t widget, bool_t bHorz, int nLine)
 	widget_hand_scroll(widget, bHorz, nLine);
 }
 
-void hand_menu_xfont(res_win_t widget, const xfont_t* pxf)
+void hand_menu_xfont(widget_t widget, const xfont_t* pxf)
 {
 	menu_delta_t* ptd = GETMENUDELTA(widget);
 
 	xmem_copy((void*)&ptd->xf, (void*)pxf, sizeof(xfont_t));
 }
 
-void hand_menu_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
+void hand_menu_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 {
 	menu_delta_t* ptd = GETMENUDELTA(widget);
 
@@ -333,7 +333,7 @@ void hand_menu_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 
 /*******************************************************************************************************/
 
-res_win_t menubox_create(res_win_t wparent, dword_t wstyle, const xrect_t* pxr)
+widget_t menubox_create(widget_t wparent, dword_t wstyle, const xrect_t* pxr)
 {
 	if_dispatch_t ev = { 0 };
 
@@ -364,7 +364,7 @@ res_win_t menubox_create(res_win_t wparent, dword_t wstyle, const xrect_t* pxr)
 	return widget_create(NULL, wstyle, pxr, wparent, &ev);
 }
 
-void menubox_set_data(res_win_t widget, link_t_ptr ptr)
+void menubox_set_data(widget_t widget, link_t_ptr ptr)
 {
 	menu_delta_t* ptd = GETMENUDELTA(widget);
 
@@ -378,7 +378,7 @@ void menubox_set_data(res_win_t widget, link_t_ptr ptr)
 	menubox_redraw(widget);
 }
 
-link_t_ptr menubox_get_data(res_win_t widget)
+link_t_ptr menubox_get_data(widget_t widget)
 {
 	menu_delta_t* ptd = GETMENUDELTA(widget);
 
@@ -387,7 +387,7 @@ link_t_ptr menubox_get_data(res_win_t widget)
 	return ptd->menu;
 }
 
-void menubox_redraw(res_win_t widget)
+void menubox_redraw(widget_t widget)
 {
 	menu_delta_t* ptd = GETMENUDELTA(widget);
 	link_t_ptr ilk;
@@ -418,7 +418,7 @@ void menubox_redraw(res_win_t widget)
 	widget_paint(widget);
 }
 
-void menubox_tabskip(res_win_t widget, int nSkip)
+void menubox_tabskip(widget_t widget, int nSkip)
 {
 	menu_delta_t* ptd = GETMENUDELTA(widget);
 	link_t_ptr plk = ptd->item;
@@ -465,7 +465,7 @@ void menubox_tabskip(res_win_t widget, int nSkip)
 	}
 }
 
-void menubox_set_focus_item(res_win_t widget, link_t_ptr ilk)
+void menubox_set_focus_item(widget_t widget, link_t_ptr ilk)
 {
 	menu_delta_t* ptd = GETMENUDELTA(widget);
 	bool_t bRe;
@@ -497,7 +497,7 @@ void menubox_set_focus_item(res_win_t widget, link_t_ptr ilk)
 	}
 }
 
-link_t_ptr menubox_get_focus_item(res_win_t widget)
+link_t_ptr menubox_get_focus_item(widget_t widget)
 {
 	menu_delta_t* ptd = GETMENUDELTA(widget);
 
@@ -509,7 +509,7 @@ link_t_ptr menubox_get_focus_item(res_win_t widget)
 	return ptd->item;
 }
 
-void menubox_get_item_rect(res_win_t widget, link_t_ptr ilk, xrect_t* pxr)
+void menubox_get_item_rect(widget_t widget, link_t_ptr ilk, xrect_t* pxr)
 {
 	menu_delta_t* ptd = GETMENUDELTA(widget);
 	
@@ -525,7 +525,7 @@ void menubox_get_item_rect(res_win_t widget, link_t_ptr ilk, xrect_t* pxr)
 	_menubox_item_rect(widget, ilk, pxr);
 }
 
-void menubox_popup_size(res_win_t widget, xsize_t* pxs)
+void menubox_popup_size(widget_t widget, xsize_t* pxs)
 {
 	menu_delta_t* ptd = GETMENUDELTA(widget);
 
@@ -546,10 +546,10 @@ void menubox_popup_size(res_win_t widget, xsize_t* pxs)
 
 	widget_size_to_pt(widget, pxs);
 
-	widget_adjust_size(widget_get_style(widget), pxs);
+	adjust_widget_size(widget_get_style(widget), pxs);
 }
 
-void menubox_layout(res_win_t widget, const xpoint_t* ppt, int lay)
+void menubox_layout(widget_t widget, const xpoint_t* ppt, int lay)
 {
 	menu_delta_t* ptd = GETMENUDELTA(widget);
 	xrect_t xr = { 0 };

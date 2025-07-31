@@ -27,6 +27,7 @@ LICENSE.GPL3 for more details.
 #include "srvudp.h"
 
 #include "../xdknet.h"
+#include "../xdkbio.h"
 #include "../xdkoem.h"
 #include "../xdkstd.h"
 #include "../xdkobj.h"

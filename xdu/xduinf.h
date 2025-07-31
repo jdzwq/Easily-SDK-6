@@ -83,6 +83,8 @@ typedef visual_t(*PF_CREATE_COMPATIBLE_CONTEXT)(visual_t, int, int);
 typedef void(*PF_DESTROY_CONTEXT)(visual_t);
 typedef void(*PF_RENDER_CONTEXT)(visual_t, int, int, visual_t, int, int, int, int);
 typedef void(*PF_GET_DEVICE_CAPS)(visual_t, dev_cap_t*);
+typedef float(*PF_PIXEL_METRIC)(visual_t);
+typedef float(*PF_FONT_METRIC)(visual_t, const xfont_t*);
 
 /*graphic interface*/
 typedef void(*PF_GDI_SET_POINT)(visual_t, const xcolor_t*, const xpoint_t*);
@@ -101,6 +103,9 @@ typedef void(*PF_GDI_DRAW_ELLIPSE)(visual_t, const xpen_t*, const xbrush_t*, con
 typedef void(*PF_GDI_DRAW_PIE)(visual_t, const xpen_t*, const xbrush_t*, const xrect_t*, double, double);
 typedef void(*PF_GDI_DRAW_TEXT)(visual_t, const xfont_t*, const xface_t*, const xrect_t*, const tchar_t*, int);
 typedef void(*PF_GDI_TEXT_OUT)(visual_t, const xfont_t*, const xpoint_t*, const tchar_t*, int);
+typedef void(*PF_GDI_TEXT_RECT)(visual_t, const xfont_t*, const xface_t*, const tchar_t*, int, xrect_t*);
+typedef void(*PF_GDI_TEXT_SIZE)(visual_t, const xfont_t*, const tchar_t*, int, xsize_t*);
+typedef void(*PF_GDI_FONT_SIZE)(visual_t, const xfont_t*, xsize_t*);
 typedef void(*PF_GDI_DRAW_IMAGE)(visual_t, bitmap_t, const xcolor_t*, const xrect_t*);
 typedef void(*PF_GDI_DRAW_BITMAP)(visual_t, bitmap_t, const xpoint_t*);
 typedef void(*PF_GDI_GRADIENT_RECT)(visual_t, const xcolor_t* xc_brim, const xcolor_t* xc_core, const tchar_t* gradient, const xrect_t*);
@@ -108,10 +113,6 @@ typedef void(*PF_GDI_ALPHABLEND_RECT)(visual_t, const xcolor_t*, const xrect_t*,
 typedef void(*PF_GDI_INVERT_RECT)(visual_t, const xrect_t*);
 typedef void(*PF_GDI_EXCLUDE_RECT)(visual_t, const xrect_t*);
 typedef void(*PF_GDI_INCLIP_RECT)(visual_t, const xrect_t*);
-
-typedef void(*PF_GDI_TEXT_RECT)(visual_t, const xfont_t*, const xface_t*, const tchar_t*, int, xrect_t*);
-typedef void(*PF_GDI_TEXT_SIZE)(visual_t, const xfont_t*, const tchar_t*, int, xsize_t*);
-typedef void(*PF_GDI_TEXT_METRIC)(visual_t, const xfont_t*, xsize_t*);
 
 #ifdef XDU_SUPPORT_CONTEXT_BITMAP
 /*bitmap interface*/
@@ -154,6 +155,8 @@ typedef struct _if_context_t{
 	PF_DESTROY_CONTEXT			pf_destroy_context;
 	PF_RENDER_CONTEXT			pf_render_context;
 	PF_GET_DEVICE_CAPS			pf_get_device_caps;
+	PF_PIXEL_METRIC				pf_pixel_metric;
+	PF_FONT_METRIC				pf_font_metric;
 
 	PF_GDI_SET_POINT		pf_gdi_set_point;
 	PF_GDI_GET_POINT		pf_gdi_get_point;
@@ -177,7 +180,7 @@ typedef struct _if_context_t{
 	PF_GDI_DRAW_BITMAP		pf_gdi_draw_bitmap;
 	PF_GDI_TEXT_RECT		pf_gdi_text_rect;
 	PF_GDI_TEXT_SIZE		pf_gdi_text_size;
-	PF_GDI_TEXT_METRIC		pf_gdi_text_metric;
+	PF_GDI_FONT_SIZE		pf_gdi_font_size;
 	PF_GDI_INVERT_RECT		pf_gdi_invert_rect;
 	PF_GDI_EXCLUDE_RECT		pf_gdi_exclude_rect;
 	PF_GDI_INCLIP_RECT		pf_gdi_inclip_rect;
@@ -334,10 +337,11 @@ typedef void(*PF_MESSAGE_POSITION)(xpoint_t*);
 typedef void(*PF_MESSAGE_QUIT)(int);
 
 typedef void(*PF_ADJUST_WIDGET_SIZE)(dword_t, xsize_t*);
+typedef void(*PF_CALC_WIDGET_BORDER)(dword_t, border_t*);
 typedef void(*PF_GET_SCREEN_SIZE)(xsize_t*);
 typedef void(*PF_GET_DESKTOP_SIZE)(xsize_t*);
 typedef void(*PF_SCREEN_SIZE_TO_PT)(xsize_t*);
-typedef void(*PF_SCREEN_SIZE_TO_TM)(xsize_t*);
+typedef void(*PF_SCREEN_SIZE_TO_MM)(xsize_t*);
 
 #ifdef XDU_SUPPORT_CONTEXT_OPENGL
 typedef res_glc_t(*PF_WIDGET_GET_GLCTX)(widget_t);
@@ -449,10 +453,11 @@ typedef struct _if_widget_t{
 	PF_MESSAGE_QUIT				pf_message_quit;
 
 	PF_ADJUST_WIDGET_SIZE		pf_adjust_widget_size;
+	PF_CALC_WIDGET_BORDER		pf_calc_widget_border;
 	PF_GET_SCREEN_SIZE			pf_get_screen_size;
 	PF_GET_DESKTOP_SIZE			pf_get_desktop_size;
 	PF_SCREEN_SIZE_TO_PT		pf_screen_size_to_pt;
-	PF_SCREEN_SIZE_TO_TM		pf_screen_size_to_tm;
+	PF_SCREEN_SIZE_TO_MM		pf_screen_size_to_mm;
 
 #ifdef XDU_SUPPORT_CONTEXT_OPENGL
 	PF_WIDGET_GET_GLCTX			pf_widget_get_glctx;

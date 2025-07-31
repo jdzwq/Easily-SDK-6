@@ -94,13 +94,6 @@ LICENSE.GPL3 for more details.
 
 #define DEF_TIPTIME		3000
 
-#define WIDGET_TITLE_SPAN		(float)10	//mm
-#define WIDGET_MENU_SPAN		(float)7.5	//mm
-#define WIDGET_SCROLL_SPAN		(float)5	//mm
-#define WIDGET_ICON_SPAN		(float)3	//mm
-#define WIDGET_FRAME_EDGE		(float)1.5	//mm
-#define WIDGET_CHILD_EDGE		(float)0.5	//mm
-
 typedef struct _PAGEINFO{
 	int total_width;
 	int total_height;
@@ -116,7 +109,7 @@ typedef struct _DOCKINFO{
 }DOCKINFO;
 
 typedef struct _docker_t{
-	res_win_t widget;
+	widget_t widget;
 	DOCKINFO dock[4];
 	int x, y;
 	int ind;
@@ -124,7 +117,7 @@ typedef struct _docker_t{
 }docker_t;
 
 typedef struct _splitor_t{
-	res_win_t widget;
+	widget_t widget;
 	link_t_ptr split;
 	link_t_ptr item;
 	int x, y;

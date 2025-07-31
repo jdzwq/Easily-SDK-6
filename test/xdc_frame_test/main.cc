@@ -1,9 +1,9 @@
 #include <xdl.h>
 #include <xdc.h>
 
-res_win_t g_main = NULL;
+widget_t g_main = NULL;
 
-res_win_t MainFrame_Create(const tchar_t* mname);
+widget_t MainFrame_Create(const tchar_t* mname);
 
 #ifdef _OS_WINDOWS
 int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
@@ -83,14 +83,14 @@ accel_t	MAINFRAME_ACCEL[MAINFRAME_ACCEL_COUNT] = {
 };
 
 typedef struct tagMainFrameDelta{
-	res_win_t hToolBar;
-	res_win_t hTitleBar;
-	res_win_t hTreeBar;
-	res_win_t hStatusBar;
+	widget_t hToolBar;
+	widget_t hTitleBar;
+	widget_t hTreeBar;
+	widget_t hStatusBar;
 
-	res_win_t hToolTip;
-	res_win_t hKeyBox;
-	res_win_t hNaviBox;
+	widget_t hToolTip;
+	widget_t hKeyBox;
+	widget_t hNaviBox;
 
 	bool_t bDirty;
 	bool_t bMode;
@@ -99,28 +99,28 @@ typedef struct tagMainFrameDelta{
 #define GETMAINFRAMEDELTA(widget) 			(MainFrameDelta*)widget_get_user_delta(widget)
 #define SETMAINFRAMEDELTA(widget,ptd)		widget_set_user_delta(widget,(vword_t)ptd)
 
-void _MainFrame_CalcToolBar(res_win_t widget, xrect_t* pxr)
+void _MainFrame_CalcToolBar(widget_t widget, xrect_t* pxr)
 {
 	MainFrameDelta* pdt = GETMAINFRAMEDELTA(widget);
 
 	widget_get_dock_rect(widget, WS_DOCK_TOP, pxr);
 }
 
-void _MainFrame_CalcStatusBar(res_win_t widget, xrect_t* pxr)
+void _MainFrame_CalcStatusBar(widget_t widget, xrect_t* pxr)
 {
 	MainFrameDelta* pdt = GETMAINFRAMEDELTA(widget);
 
 	widget_get_dock_rect(widget, WS_DOCK_BOTTOM, pxr);
 }
 
-void _MainFrame_CalcTreeBar(res_win_t widget, xrect_t* pxr)
+void _MainFrame_CalcTreeBar(widget_t widget, xrect_t* pxr)
 {
 	MainFrameDelta* pdt = GETMAINFRAMEDELTA(widget);
 
 	widget_get_dock_rect(widget, WS_DOCK_LEFT, pxr);
 }
 
-void _MainFrame_CalcTitleBar(res_win_t widget, xrect_t* pxr)
+void _MainFrame_CalcTitleBar(widget_t widget, xrect_t* pxr)
 {
 	MainFrameDelta* pdt = GETMAINFRAMEDELTA(widget);
 	xsize_t xs;
@@ -133,7 +133,7 @@ void _MainFrame_CalcTitleBar(res_win_t widget, xrect_t* pxr)
 	pxr->h = xs.h;
 }
 
-void _MainFrame_CalcPanelBar(res_win_t widget, xrect_t* pxr)
+void _MainFrame_CalcPanelBar(widget_t widget, xrect_t* pxr)
 {
 	MainFrameDelta* pdt = GETMAINFRAMEDELTA(widget);
 	xsize_t xs;
@@ -147,7 +147,7 @@ void _MainFrame_CalcPanelBar(res_win_t widget, xrect_t* pxr)
 	pxr->h -= xs.h;
 }
 
-void _MainFrame_CreateToolBar(res_win_t widget)
+void _MainFrame_CreateToolBar(widget_t widget)
 {
 	MainFrameDelta* pdt = GETMAINFRAMEDELTA(widget);
 
@@ -240,7 +240,7 @@ void _MainFrame_CreateToolBar(res_win_t widget)
 	widget_show(pdt->hToolBar, WS_SHOW_NORMAL);
 }
 
-void _MainFrame_CreateTitleBar(res_win_t widget)
+void _MainFrame_CreateTitleBar(widget_t widget)
 {
 	MainFrameDelta* pdt = GETMAINFRAMEDELTA(widget);
 
@@ -261,7 +261,7 @@ void _MainFrame_CreateTitleBar(res_win_t widget)
 	widget_show(pdt->hTitleBar, WS_SHOW_NORMAL);
 }
 
-void _MainFrame_CreateTreeBar(res_win_t widget)
+void _MainFrame_CreateTreeBar(widget_t widget)
 {
 	MainFrameDelta* pdt = GETMAINFRAMEDELTA(widget);
 
@@ -283,7 +283,7 @@ void _MainFrame_CreateTreeBar(res_win_t widget)
 	widget_show(pdt->hTreeBar, WS_SHOW_NORMAL);
 }
 
-void _MainFrame_CreateStatusBar(res_win_t widget)
+void _MainFrame_CreateStatusBar(widget_t widget)
 {
 	MainFrameDelta* pdt = GETMAINFRAMEDELTA(widget);
 
@@ -318,7 +318,7 @@ void _MainFrame_CreateStatusBar(res_win_t widget)
 	widget_show(pdt->hNaviBox, WS_SHOW_NORMAL);
 }
 
-void _MainFrame_DestroyToolBar(res_win_t widget)
+void _MainFrame_DestroyToolBar(widget_t widget)
 {
 	MainFrameDelta* pdt = GETMAINFRAMEDELTA(widget);
 
@@ -328,7 +328,7 @@ void _MainFrame_DestroyToolBar(res_win_t widget)
 	widget_destroy(pdt->hToolBar);
 }
 
-void _MainFrame_DestroyTitleBar(res_win_t widget)
+void _MainFrame_DestroyTitleBar(widget_t widget)
 {
 	MainFrameDelta* pdt = GETMAINFRAMEDELTA(widget);
 
@@ -338,7 +338,7 @@ void _MainFrame_DestroyTitleBar(res_win_t widget)
 	widget_destroy(pdt->hTitleBar);
 }
 
-void _MainFrame_DestroyTreeBar(res_win_t widget)
+void _MainFrame_DestroyTreeBar(widget_t widget)
 {
 	MainFrameDelta* pdt = GETMAINFRAMEDELTA(widget);
 
@@ -348,7 +348,7 @@ void _MainFrame_DestroyTreeBar(res_win_t widget)
 	widget_destroy(pdt->hTreeBar);
 }
 
-void _MainFrame_DestroyStatusBar(res_win_t widget)
+void _MainFrame_DestroyStatusBar(widget_t widget)
 {
 	MainFrameDelta* pdt = GETMAINFRAMEDELTA(widget);
 
@@ -358,11 +358,11 @@ void _MainFrame_DestroyStatusBar(res_win_t widget)
 	widget_destroy(pdt->hStatusBar);
 }
 
-res_win_t _MainFrame_CreatePanel(res_win_t widget, const tchar_t* wclass)
+widget_t _MainFrame_CreatePanel(widget_t widget, const tchar_t* wclass)
 {
 	MainFrameDelta* pdt = GETMAINFRAMEDELTA(widget);
 
-	res_win_t hPanel = NULL;
+	widget_t hPanel = NULL;
 	xrect_t xr = { 0 };
 
 	link_t_ptr ptr_title, ilk;
@@ -736,7 +736,7 @@ res_win_t _MainFrame_CreatePanel(res_win_t widget, const tchar_t* wclass)
 	return hPanel;
 }
 
-res_win_t _MainFrame_GetActivePanel(res_win_t widget)
+widget_t _MainFrame_GetActivePanel(widget_t widget)
 {
 	MainFrameDelta* pdt = GETMAINFRAMEDELTA(widget);
 
@@ -746,11 +746,11 @@ res_win_t _MainFrame_GetActivePanel(res_win_t widget)
 	if (!nlk)
 		return NULL;
 
-	return (res_win_t)get_title_item_delta(nlk);
+	return (widget_t)get_title_item_delta(nlk);
 }
 
 /*******************************************************************************************************/
-void MainFrame_ToolBar_OnLBClick(res_win_t widget, NOTICE_TOOL* pnt)
+void MainFrame_ToolBar_OnLBClick(widget_t widget, NOTICE_TOOL* pnt)
 {
 	MainFrameDelta* pdt = GETMAINFRAMEDELTA(widget);
 	xrect_t xr = { 0 };
@@ -769,7 +769,7 @@ void MainFrame_ToolBar_OnLBClick(res_win_t widget, NOTICE_TOOL* pnt)
 	widget_send_command(widget, 0, nID, (vword_t)&pt);
 }
 
-void MainFrame_ToolBar_OnItemHover(res_win_t widget, NOTICE_TOOL* pnt)
+void MainFrame_ToolBar_OnItemHover(widget_t widget, NOTICE_TOOL* pnt)
 {
 	MainFrameDelta* pdt = GETMAINFRAMEDELTA(widget);
 
@@ -787,16 +787,16 @@ void MainFrame_ToolBar_OnItemHover(res_win_t widget, NOTICE_TOOL* pnt)
 		pdt->hToolTip = show_toolbox(&xp, get_tool_item_title_ptr(pnt->item));
 }
 
-void MainFrame_TitleBar_OnItemInsert(res_win_t widget, NOTICE_TITLE* pnt)
+void MainFrame_TitleBar_OnItemInsert(widget_t widget, NOTICE_TITLE* pnt)
 {
 	MainFrameDelta* pdt = GETMAINFRAMEDELTA(widget);
 }
 
-void MainFrame_TitleBar_OnItemDelete(res_win_t widget, NOTICE_TITLE* pnt)
+void MainFrame_TitleBar_OnItemDelete(widget_t widget, NOTICE_TITLE* pnt)
 {
 	MainFrameDelta* pdt = GETMAINFRAMEDELTA(widget);
 
-	res_win_t hPanel = (res_win_t)get_title_item_delta(pnt->item);
+	widget_t hPanel = (widget_t)get_title_item_delta(pnt->item);
 
 	if (!widget_is_valid(hPanel))
 		return;
@@ -855,11 +855,11 @@ void MainFrame_TitleBar_OnItemDelete(res_win_t widget, NOTICE_TITLE* pnt)
 	}
 }
 
-void MainFrame_TitleBar_OnItemChanging(res_win_t widget, NOTICE_TITLE* pnt)
+void MainFrame_TitleBar_OnItemChanging(widget_t widget, NOTICE_TITLE* pnt)
 {
 	MainFrameDelta* pdt = GETMAINFRAMEDELTA(widget);
 
-	res_win_t hPanel = (res_win_t)get_title_item_delta(pnt->item);
+	widget_t hPanel = (widget_t)get_title_item_delta(pnt->item);
 
 	if (widget_is_valid(hPanel))
 	{
@@ -867,11 +867,11 @@ void MainFrame_TitleBar_OnItemChanging(res_win_t widget, NOTICE_TITLE* pnt)
 	}
 }
 
-void MainFrame_TitleBar_OnItemChanged(res_win_t widget, NOTICE_TITLE* pnt)
+void MainFrame_TitleBar_OnItemChanged(widget_t widget, NOTICE_TITLE* pnt)
 {
 	MainFrameDelta* pdt = GETMAINFRAMEDELTA(widget);
 
-	res_win_t hPanel = (res_win_t)get_title_item_delta(pnt->item);
+	widget_t hPanel = (widget_t)get_title_item_delta(pnt->item);
 
 	if (widget_is_valid(hPanel))
 	{
@@ -884,7 +884,7 @@ void MainFrame_TitleBar_OnItemChanged(res_win_t widget, NOTICE_TITLE* pnt)
 	}
 }
 
-void MainFrame_TitleBar_OnItemHover(res_win_t widget, NOTICE_TITLE* pnt)
+void MainFrame_TitleBar_OnItemHover(widget_t widget, NOTICE_TITLE* pnt)
 {
 	MainFrameDelta* pdt = GETMAINFRAMEDELTA(widget);
 
@@ -902,7 +902,7 @@ void MainFrame_TitleBar_OnItemHover(res_win_t widget, NOTICE_TITLE* pnt)
 		pdt->hToolTip = show_toolbox(&xp, get_title_item_title_ptr(pnt->item));
 }
 
-/*void MainFrame_UserPanel_OnCalc(res_win_t win, PAGE_CALC* ppc)
+/*void MainFrame_UserPanel_OnCalc(widget_t win, PAGE_CALC* ppc)
 {
 	ppc->total_height = 8096;
 	ppc->total_width = 4096;
@@ -910,7 +910,7 @@ void MainFrame_TitleBar_OnItemHover(res_win_t widget, NOTICE_TITLE* pnt)
 	ppc->line_width = 10;
 }*/
 
-void MainFrame_UserPanel_OnDraw(res_win_t win, visual_t rdc)
+void MainFrame_UserPanel_OnDraw(widget_t win, visual_t rdc)
 {
 	canvbox_t cb;
 	xcolor_t xc;
@@ -1412,7 +1412,7 @@ void MainFrame_UserPanel_OnDraw(res_win_t win, visual_t rdc)
 
 /******************************************************************************************************/
 
-int MainFrame_OnCreate(res_win_t widget, void* data)
+int MainFrame_OnCreate(widget_t widget, void* data)
 {
 	MainFrameDelta* pdt;
 
@@ -1453,7 +1453,7 @@ int MainFrame_OnCreate(res_win_t widget, void* data)
 	return 0;
 }
 
-void MainFrame_OnDestroy(res_win_t widget)
+void MainFrame_OnDestroy(widget_t widget)
 {
 	MainFrameDelta* pdt = GETMAINFRAMEDELTA(widget);
 
@@ -1480,7 +1480,7 @@ void MainFrame_OnDestroy(res_win_t widget)
 	widget_hand_destroy(widget);
 }
 
-int MainFrame_OnClose(res_win_t widget)
+int MainFrame_OnClose(widget_t widget)
 {
 	MainFrameDelta* pdt = GETMAINFRAMEDELTA(widget);
 
@@ -1504,7 +1504,7 @@ int MainFrame_OnClose(res_win_t widget)
 	return 0;
 }
 
-void MainFrame_OnSize(res_win_t widget, int code, const xsize_t* pxs)
+void MainFrame_OnSize(widget_t widget, int code, const xsize_t* pxs)
 {
 	MainFrameDelta* pdt = GETMAINFRAMEDELTA(widget);
 
@@ -1550,7 +1550,7 @@ void MainFrame_OnSize(res_win_t widget, int code, const xsize_t* pxs)
 		LINKPTR plk = get_title_next_item(ptrTitle, LINK_FIRST);
 		while (plk)
 		{
-			res_win_t hPanel = (res_win_t)get_title_item_delta(plk);
+			widget_t hPanel = (widget_t)get_title_item_delta(plk);
 
 			if (widget_is_valid(hPanel))
 			{
@@ -1566,18 +1566,18 @@ void MainFrame_OnSize(res_win_t widget, int code, const xsize_t* pxs)
 	widget_erase(widget, NULL);
 }
 
-void MainFrame_OnScroll(res_win_t widget, bool_t bHorz, int nLine)
+void MainFrame_OnScroll(widget_t widget, bool_t bHorz, int nLine)
 {
 	MainFrameDelta* pdt = GETMAINFRAMEDELTA(widget);
 
 	widget_hand_scroll(widget, bHorz, nLine);
 }
 
-void MainFrame_OnMenuCommand(res_win_t widget, int code, int cid, vword_t data)
+void MainFrame_OnMenuCommand(widget_t widget, int code, int cid, vword_t data)
 {
 	MainFrameDelta* pdt = GETMAINFRAMEDELTA(widget);
 
-	res_win_t hPanel = _MainFrame_GetActivePanel(widget);
+	widget_t hPanel = _MainFrame_GetActivePanel(widget);
 	if (hPanel && !code)
 	{
 		if (widget_send_command(hPanel, code, cid, data))
@@ -1607,7 +1607,7 @@ void MainFrame_OnMenuCommand(res_win_t widget, int code, int cid, vword_t data)
 	}
 }
 
-void MainFrame_OnNotice(res_win_t widget, LPNOTICE phdr)
+void MainFrame_OnNotice(widget_t widget, LPNOTICE phdr)
 {
 	MainFrameDelta* pdt = GETMAINFRAMEDELTA(widget);
 
@@ -1689,9 +1689,9 @@ void MainFrame_OnNotice(res_win_t widget, LPNOTICE phdr)
 	}
 }
 
-res_win_t MainFrame_Create(const tchar_t* mname)
+widget_t MainFrame_Create(const tchar_t* mname)
 {
-	res_win_t widget;
+	widget_t widget;
 	xrect_t xr = { 0 };
 
 	if_dispatch_t ev = { 0 };

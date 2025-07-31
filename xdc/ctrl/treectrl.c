@@ -26,16 +26,16 @@ LICENSE.GPL3 for more details.
 
 #include "ctrl.h"
 
-#include "../xdcimp.h"
-#include "../xdcinit.h"
+#include "../xdcobj.h"
+
 
 typedef struct _tree_delta_t{
 	link_t_ptr tree;
 	link_t_ptr item;
 	link_t_ptr hover;
 
-	res_win_t editor;
-	res_win_t vsc;
+	widget_t editor;
+	widget_t vsc;
 
 	int org_x, org_y, cur_x, cur_y;
 
@@ -44,7 +44,7 @@ typedef struct _tree_delta_t{
 }tree_delta_t;
 
 typedef struct _tree_redraw_param{
-	res_win_t wt;
+	widget_t wt;
 	bool_t calc;
 	bool_t valid;
 }tree_redraw_param;
@@ -56,7 +56,7 @@ typedef struct _tree_redraw_param{
 /*********************************************control event**************************************/
 
 
-static void _treectrl_item_rect(res_win_t widget, link_t_ptr ilk, xrect_t* pxr)
+static void _treectrl_item_rect(widget_t widget, link_t_ptr ilk, xrect_t* pxr)
 {
 	tree_delta_t* ptd = GETTREEDELTA(widget);
 	
@@ -65,7 +65,7 @@ static void _treectrl_item_rect(res_win_t widget, link_t_ptr ilk, xrect_t* pxr)
 	widget_rect_to_pt(widget, pxr);
 }
 
-static void _treectrl_item_text_rect(res_win_t widget, link_t_ptr ilk, xrect_t* pxr)
+static void _treectrl_item_text_rect(widget_t widget, link_t_ptr ilk, xrect_t* pxr)
 {
 	tree_delta_t* ptd = GETTREEDELTA(widget);
 
@@ -74,7 +74,7 @@ static void _treectrl_item_text_rect(res_win_t widget, link_t_ptr ilk, xrect_t* 
 	widget_rect_to_pt(widget, pxr);
 }
 
-static void _treectrl_item_expand_rect(res_win_t widget, link_t_ptr ilk, xrect_t* pxr)
+static void _treectrl_item_expand_rect(widget_t widget, link_t_ptr ilk, xrect_t* pxr)
 {
 	tree_delta_t* ptd = GETTREEDELTA(widget);
 
@@ -83,7 +83,7 @@ static void _treectrl_item_expand_rect(res_win_t widget, link_t_ptr ilk, xrect_t
 	widget_rect_to_pt(widget, pxr);
 }
 
-static void _treectrl_reset_page(res_win_t widget)
+static void _treectrl_reset_page(widget_t widget)
 {
 	tree_delta_t* ptd = GETTREEDELTA(widget);
 	int pw, ph, fw, fh, lh;
@@ -122,7 +122,7 @@ static void _treectrl_reset_page(res_win_t widget)
 	widget_reset_scroll(widget, 0);
 }
 
-static void _treectrl_ensure_visible(res_win_t widget)
+static void _treectrl_ensure_visible(widget_t widget)
 {
 	tree_delta_t* ptd = GETTREEDELTA(widget);
 	bool_t b_tag = 0;
@@ -155,7 +155,7 @@ static void _treectrl_ensure_visible(res_win_t widget)
 }
 
 /******************************************************************************************/
-int noti_tree_owner(res_win_t widget, unsigned int code, link_t_ptr tree, link_t_ptr ilk, void* data)
+int noti_tree_owner(widget_t widget, unsigned int code, link_t_ptr tree, link_t_ptr ilk, void* data)
 {
 	tree_delta_t* ptd = GETTREEDELTA(widget);
 	NOTICE_TREE nf = { 0 };
@@ -173,7 +173,7 @@ int noti_tree_owner(res_win_t widget, unsigned int code, link_t_ptr tree, link_t
 	return nf.ret;
 }
 
-void noti_tree_item_enter(res_win_t widget, link_t_ptr plk)
+void noti_tree_item_enter(widget_t widget, link_t_ptr plk)
 {
 	tree_delta_t* ptd = GETTREEDELTA(widget);
 
@@ -184,11 +184,11 @@ void noti_tree_item_enter(res_win_t widget, link_t_ptr plk)
 
 	if (widget_is_hotvoer(widget))
 	{
-		widget_track_mouse(widget, MS_TRACK_HOVER | MS_TRACK_LEAVE);
+		//widget_track_mouse(widget, MS_TRACK_HOVER | MS_TRACK_LEAVE);
 	}
 }
 
-void noti_tree_item_leave(res_win_t widget)
+void noti_tree_item_leave(widget_t widget)
 {
 	tree_delta_t* ptd = GETTREEDELTA(widget);
 
@@ -198,11 +198,11 @@ void noti_tree_item_leave(res_win_t widget)
 
 	if (widget_is_hotvoer(widget))
 	{
-		widget_track_mouse(widget, MS_TRACK_HOVER | MS_TRACK_LEAVE);
+		//widget_track_mouse(widget, MS_TRACK_HOVER | MS_TRACK_LEAVE);
 	}
 }
 
-void noti_tree_item_hover(res_win_t widget, int x, int y)
+void noti_tree_item_hover(widget_t widget, int x, int y)
 {
 	tree_delta_t* ptd = GETTREEDELTA(widget);
 	xpoint_t xp;
@@ -214,7 +214,7 @@ void noti_tree_item_hover(res_win_t widget, int x, int y)
 	noti_tree_owner(widget, NC_TREEITEMHOVER, ptd->tree, ptd->hover, (void*)&xp);
 }
 
-bool_t noti_tree_item_changing(res_win_t widget)
+bool_t noti_tree_item_changing(widget_t widget)
 {
 	tree_delta_t* ptd = GETTREEDELTA(widget);
 	link_t_ptr tlk;
@@ -237,7 +237,7 @@ bool_t noti_tree_item_changing(res_win_t widget)
 	return 1;
 }
 
-void noti_tree_item_changed(res_win_t widget, link_t_ptr ilk)
+void noti_tree_item_changed(widget_t widget, link_t_ptr ilk)
 {
 	tree_delta_t* ptd = GETTREEDELTA(widget);
 	xrect_t xr;
@@ -254,7 +254,7 @@ void noti_tree_item_changed(res_win_t widget, link_t_ptr ilk)
 	noti_tree_owner(widget, NC_TREEITEMCHANGED, ptd->tree, ptd->item, NULL);
 }
 
-void noti_tree_item_checked(res_win_t widget, link_t_ptr ilk)
+void noti_tree_item_checked(widget_t widget, link_t_ptr ilk)
 {
 	tree_delta_t* ptd = GETTREEDELTA(widget);
 	bool_t bCheck;
@@ -289,7 +289,7 @@ void noti_tree_item_checked(res_win_t widget, link_t_ptr ilk)
 	widget_erase(widget, &xr);
 }
 
-void noti_tree_item_expand(res_win_t widget, link_t_ptr ilk)
+void noti_tree_item_expand(widget_t widget, link_t_ptr ilk)
 {
 	tree_delta_t* ptd = GETTREEDELTA(widget);
 
@@ -302,7 +302,7 @@ void noti_tree_item_expand(res_win_t widget, link_t_ptr ilk)
 	treectrl_redraw(widget);
 }
 
-void noti_tree_item_collapse(res_win_t widget, link_t_ptr ilk)
+void noti_tree_item_collapse(widget_t widget, link_t_ptr ilk)
 {
 	tree_delta_t* ptd = GETTREEDELTA(widget);
 
@@ -315,7 +315,7 @@ void noti_tree_item_collapse(res_win_t widget, link_t_ptr ilk)
 	treectrl_redraw(widget);
 }
 
-void noti_tree_item_drag(res_win_t widget, int x, int y)
+void noti_tree_item_drag(widget_t widget, int x, int y)
 {
 	tree_delta_t* ptd = GETTREEDELTA(widget);
 	xpoint_t pt;
@@ -335,7 +335,7 @@ void noti_tree_item_drag(res_win_t widget, int x, int y)
 	noti_tree_owner(widget, NC_TREEITEMDRAG, ptd->tree, ptd->item, (void*)&pt);
 }
 
-void noti_tree_item_drop(res_win_t widget, int x, int y)
+void noti_tree_item_drop(widget_t widget, int x, int y)
 {
 	tree_delta_t* ptd = GETTREEDELTA(widget);
 	xpoint_t pt;
@@ -355,7 +355,7 @@ void noti_tree_item_drop(res_win_t widget, int x, int y)
 	noti_tree_owner(widget, NC_TREEITEMDROP, ptd->tree, ptd->item, (void*)&pt);
 }
 
-void noti_tree_begin_edit(res_win_t widget)
+void noti_tree_begin_edit(widget_t widget)
 {
 	tree_delta_t* ptd = GETTREEDELTA(widget);
 	const tchar_t* text;
@@ -399,11 +399,11 @@ void noti_tree_begin_edit(res_win_t widget)
 	editbox_selectall(ptd->editor);
 }
 
-void noti_tree_commit_edit(res_win_t widget)
+void noti_tree_commit_edit(widget_t widget)
 {
 	tree_delta_t* ptd = GETTREEDELTA(widget);
 	const tchar_t* text;
-	res_win_t editctrl;
+	widget_t editctrl;
 
 	if (!widget_is_valid(ptd->editor))
 		return;
@@ -418,16 +418,16 @@ void noti_tree_commit_edit(res_win_t widget)
 	}
 
 	editctrl = ptd->editor;
-	ptd->editor = (res_win_t)0;
+	ptd->editor = (widget_t)0;
 
 	widget_destroy(editctrl);
 	widget_set_focus(widget);
 }
 
-void noti_tree_rollback_edit(res_win_t widget)
+void noti_tree_rollback_edit(widget_t widget)
 {
 	tree_delta_t* ptd = GETTREEDELTA(widget);
-	res_win_t editctrl;
+	widget_t editctrl;
 
 	if (!widget_is_valid(ptd->editor))
 		return;
@@ -437,13 +437,13 @@ void noti_tree_rollback_edit(res_win_t widget)
 	noti_tree_owner(widget, NC_TREEITEMROLLBACK, ptd->tree, ptd->item, NULL);
 
 	editctrl = ptd->editor;
-	ptd->editor = (res_win_t)0;
+	ptd->editor = (widget_t)0;
 
 	widget_destroy(editctrl);
 	widget_set_focus(widget);
 }
 
-void noti_tree_reset_editor(res_win_t widget, bool_t bCommit)
+void noti_tree_reset_editor(widget_t widget, bool_t bCommit)
 {
 	tree_delta_t* ptd = GETTREEDELTA(widget);
 
@@ -456,7 +456,7 @@ void noti_tree_reset_editor(res_win_t widget, bool_t bCommit)
 	}
 }
 
-void noti_tree_reset_scroll(res_win_t widget, bool_t bUpdate)
+void noti_tree_reset_scroll(widget_t widget, bool_t bUpdate)
 {
 	tree_delta_t* ptd = GETTREEDELTA(widget);
 
@@ -470,7 +470,7 @@ void noti_tree_reset_scroll(res_win_t widget, bool_t bUpdate)
 }
 /********************************************************************************************/
 
-int hand_tree_create(res_win_t widget, void* data)
+int hand_tree_create(widget_t widget, void* data)
 {
 	tree_delta_t* ptd;
 
@@ -486,7 +486,7 @@ int hand_tree_create(res_win_t widget, void* data)
 	return 0;
 }
 
-void hand_tree_destroy(res_win_t widget)
+void hand_tree_destroy(widget_t widget)
 {
 	tree_delta_t* ptd = GETTREEDELTA(widget);
 
@@ -504,7 +504,7 @@ void hand_tree_destroy(res_win_t widget)
 	widget_hand_destroy(widget);
 }
 
-void hand_tree_size(res_win_t widget, int code, const xsize_t* pxs)
+void hand_tree_size(widget_t widget, int code, const xsize_t* pxs)
 {
 	tree_delta_t* ptd = GETTREEDELTA(widget);
 	xrect_t xr;
@@ -523,7 +523,7 @@ void hand_tree_size(res_win_t widget, int code, const xsize_t* pxs)
 	treectrl_redraw(widget);
 }
 
-void hand_tree_lbutton_down(res_win_t widget, const xpoint_t* pxp)
+void hand_tree_lbutton_down(widget_t widget, const xpoint_t* pxp)
 {
 	tree_delta_t* ptd = GETTREEDELTA(widget);
 	link_t_ptr tlk;
@@ -566,7 +566,7 @@ void hand_tree_lbutton_down(res_win_t widget, const xpoint_t* pxp)
 	}
 }
 
-void hand_tree_lbutton_up(res_win_t widget, const xpoint_t* pxp)
+void hand_tree_lbutton_up(widget_t widget, const xpoint_t* pxp)
 {
 	tree_delta_t* ptd = GETTREEDELTA(widget);
 	link_t_ptr tlk;
@@ -622,7 +622,7 @@ void hand_tree_lbutton_up(res_win_t widget, const xpoint_t* pxp)
 	noti_tree_owner(widget, NC_TREELBCLK, ptd->tree, ptd->item, (void*)pxp);
 }
 
-void hand_tree_lbutton_dbclick(res_win_t widget, const xpoint_t* pxp)
+void hand_tree_lbutton_dbclick(widget_t widget, const xpoint_t* pxp)
 {
 	tree_delta_t* ptd = GETTREEDELTA(widget);
 
@@ -635,7 +635,7 @@ void hand_tree_lbutton_dbclick(res_win_t widget, const xpoint_t* pxp)
 	noti_tree_owner(widget, NC_TREEDBCLK, ptd->tree, ptd->item, (void*)pxp);
 }
 
-void hand_tree_rbutton_down(res_win_t widget, const xpoint_t* pxp)
+void hand_tree_rbutton_down(widget_t widget, const xpoint_t* pxp)
 {
 	tree_delta_t* ptd = GETTREEDELTA(widget);
 
@@ -645,7 +645,7 @@ void hand_tree_rbutton_down(res_win_t widget, const xpoint_t* pxp)
 	noti_tree_reset_editor(widget, 1);
 }
 
-void hand_tree_rbutton_up(res_win_t widget, const xpoint_t* pxp)
+void hand_tree_rbutton_up(widget_t widget, const xpoint_t* pxp)
 {
 	tree_delta_t* ptd = GETTREEDELTA(widget);
 
@@ -655,7 +655,7 @@ void hand_tree_rbutton_up(res_win_t widget, const xpoint_t* pxp)
 	noti_tree_owner(widget, NC_TREERBCLK, ptd->tree, ptd->item, (void*)pxp);
 }
 
-void hand_tree_mouse_move(res_win_t widget, dword_t dw, const xpoint_t* pxp)
+void hand_tree_mouse_move(widget_t widget, dword_t dw, const xpoint_t* pxp)
 {
 	tree_delta_t* ptd = GETTREEDELTA(widget);
 	link_t_ptr tlk;
@@ -698,7 +698,7 @@ void hand_tree_mouse_move(res_win_t widget, dword_t dw, const xpoint_t* pxp)
 	}
 }
 
-void hand_tree_mouse_hover(res_win_t widget, dword_t dw, const xpoint_t* pxp)
+void hand_tree_mouse_hover(widget_t widget, dword_t dw, const xpoint_t* pxp)
 {
 	tree_delta_t* ptd = GETTREEDELTA(widget);
 
@@ -709,7 +709,7 @@ void hand_tree_mouse_hover(res_win_t widget, dword_t dw, const xpoint_t* pxp)
 		noti_tree_item_hover(widget, pxp->x, pxp->y);
 }
 
-void hand_tree_mouse_leave(res_win_t widget, dword_t dw, const xpoint_t* pxp)
+void hand_tree_mouse_leave(widget_t widget, dword_t dw, const xpoint_t* pxp)
 {
 	tree_delta_t* ptd = GETTREEDELTA(widget);
 
@@ -720,7 +720,7 @@ void hand_tree_mouse_leave(res_win_t widget, dword_t dw, const xpoint_t* pxp)
 		noti_tree_item_leave(widget);
 }
 
-void hand_tree_keydown(res_win_t widget, dword_t ks, int nKey)
+void hand_tree_keydown(widget_t widget, dword_t ks, int nKey)
 {
 	tree_delta_t* ptd = GETTREEDELTA(widget);
 
@@ -757,7 +757,7 @@ void hand_tree_keydown(res_win_t widget, dword_t ks, int nKey)
 	}
 }
 
-void hand_tree_scroll(res_win_t widget, bool_t bHorz, int nLine)
+void hand_tree_scroll(widget_t widget, bool_t bHorz, int nLine)
 {
 	tree_delta_t* ptd = GETTREEDELTA(widget);
 
@@ -769,12 +769,12 @@ void hand_tree_scroll(res_win_t widget, bool_t bHorz, int nLine)
 	widget_hand_scroll(widget, bHorz, nLine);
 }
 
-void hand_tree_wheel(res_win_t widget, bool_t bHorz, int nDelta)
+void hand_tree_wheel(widget_t widget, bool_t bHorz, int nDelta)
 {
 	tree_delta_t* ptd = GETTREEDELTA(widget);
 	scroll_t scr = { 0 };
 	int nLine;
-	res_win_t win;
+	widget_t win;
 
 	if (!ptd->tree)
 		return;
@@ -813,7 +813,7 @@ void hand_tree_wheel(res_win_t widget, bool_t bHorz, int nDelta)
 	}
 }
 
-void hand_tree_child_command(res_win_t widget, int code, vword_t data)
+void hand_tree_child_command(widget_t widget, int code, vword_t data)
 {
 	tree_delta_t* ptd = GETTREEDELTA(widget);
 
@@ -828,7 +828,7 @@ void hand_tree_child_command(res_win_t widget, int code, vword_t data)
 	}
 }
 
-void hand_tree_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
+void hand_tree_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 {
 	tree_delta_t* ptd = GETTREEDELTA(widget);
 	visual_t rdc;
@@ -882,7 +882,7 @@ void hand_tree_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 
 /*****************************************************************************************************/
 
-res_win_t treectrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, res_win_t wparent)
+widget_t treectrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, widget_t wparent)
 {
 	if_dispatch_t ev = { 0 };
 
@@ -919,7 +919,7 @@ res_win_t treectrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* p
 	return widget_create(wname, wstyle, pxr, wparent, &ev);
 }
 
-void treectrl_attach(res_win_t widget, link_t_ptr ptr)
+void treectrl_attach(widget_t widget, link_t_ptr ptr)
 {
 	tree_delta_t* ptd = GETTREEDELTA(widget);
 	xrect_t xr;
@@ -942,7 +942,7 @@ void treectrl_attach(res_win_t widget, link_t_ptr ptr)
 	treectrl_redraw(widget);
 }
 
-link_t_ptr treectrl_detach(res_win_t widget)
+link_t_ptr treectrl_detach(widget_t widget)
 {
 	tree_delta_t* ptd = GETTREEDELTA(widget);
 	link_t_ptr ptr;
@@ -958,7 +958,7 @@ link_t_ptr treectrl_detach(res_win_t widget)
 	return ptr;
 }
 
-link_t_ptr treectrl_fetch(res_win_t widget)
+link_t_ptr treectrl_fetch(widget_t widget)
 {
 	tree_delta_t* ptd = GETTREEDELTA(widget);
 
@@ -967,7 +967,7 @@ link_t_ptr treectrl_fetch(res_win_t widget)
 	return ptd->tree;
 }
 
-void treectrl_accept(res_win_t widget, bool_t bAccept)
+void treectrl_accept(widget_t widget, bool_t bAccept)
 {
 	tree_delta_t* ptd = GETTREEDELTA(widget);
 
@@ -994,7 +994,7 @@ bool_t _redraw_tree_node(link_t_ptr plk, void* pv)
 	return 1;
 }
 
-void treectrl_redraw(res_win_t widget)
+void treectrl_redraw(widget_t widget)
 {
 	tree_delta_t* ptd = GETTREEDELTA(widget);
 	tree_redraw_param tp = { 0 };
@@ -1025,7 +1025,7 @@ void treectrl_redraw(res_win_t widget)
 	widget_paint(widget);
 }
 
-void treectrl_redraw_item(res_win_t widget, link_t_ptr ilk)
+void treectrl_redraw_item(widget_t widget, link_t_ptr ilk)
 {
 	tree_delta_t* ptd = GETTREEDELTA(widget);
 	xrect_t xr;
@@ -1049,7 +1049,7 @@ void treectrl_redraw_item(res_win_t widget, link_t_ptr ilk)
 	widget_erase(widget, &xr);
 }
 
-bool_t treectrl_set_focus_item(res_win_t widget, link_t_ptr ilk)
+bool_t treectrl_set_focus_item(widget_t widget, link_t_ptr ilk)
 {
 	tree_delta_t* ptd = GETTREEDELTA(widget);
 	bool_t bRe;
@@ -1088,7 +1088,7 @@ bool_t treectrl_set_focus_item(res_win_t widget, link_t_ptr ilk)
 	return 1;
 }
 
-link_t_ptr treectrl_get_focus_item(res_win_t widget)
+link_t_ptr treectrl_get_focus_item(widget_t widget)
 {
 	tree_delta_t* ptd = GETTREEDELTA(widget);
 
@@ -1100,7 +1100,7 @@ link_t_ptr treectrl_get_focus_item(res_win_t widget)
 	return ptd->item;
 }
 
-bool_t treectrl_set_item_title(res_win_t widget, link_t_ptr ilk, const tchar_t* szText)
+bool_t treectrl_set_item_title(widget_t widget, link_t_ptr ilk, const tchar_t* szText)
 {
 	tree_delta_t* ptd = GETTREEDELTA(widget);
 	const tchar_t* text;
@@ -1127,7 +1127,7 @@ bool_t treectrl_set_item_title(res_win_t widget, link_t_ptr ilk, const tchar_t* 
 	return 1;
 }
 
-void treectrl_tabskip(res_win_t widget, int nSkip)
+void treectrl_tabskip(widget_t widget, int nSkip)
 {
 	tree_delta_t* ptd = GETTREEDELTA(widget);
 	link_t_ptr plk = NULL;
@@ -1204,7 +1204,7 @@ void treectrl_tabskip(res_win_t widget, int nSkip)
 		treectrl_set_focus_item(widget, plk);
 }
 
-void treectrl_get_item_rect(res_win_t widget, link_t_ptr ilk, xrect_t* prt)
+void treectrl_get_item_rect(widget_t widget, link_t_ptr ilk, xrect_t* prt)
 {
 	tree_delta_t* ptd = GETTREEDELTA(widget);
 	
@@ -1220,7 +1220,7 @@ void treectrl_get_item_rect(res_win_t widget, link_t_ptr ilk, xrect_t* prt)
 	_treectrl_item_rect(widget, ilk, prt);
 }
 
-void treectrl_find(res_win_t widget, const tchar_t* token)
+void treectrl_find(widget_t widget, const tchar_t* token)
 {
 	tree_delta_t* ptd = GETTREEDELTA(widget);
 	link_t_ptr elk;
@@ -1258,7 +1258,7 @@ void treectrl_find(res_win_t widget, const tchar_t* token)
 		treectrl_set_focus_item(widget, NULL);
 }
 
-void treectrl_popup_size(res_win_t widget, xsize_t* pse)
+void treectrl_popup_size(widget_t widget, xsize_t* pse)
 {
 	tree_delta_t* ptd = GETTREEDELTA(widget);
 	int count;
@@ -1285,10 +1285,10 @@ void treectrl_popup_size(res_win_t widget, xsize_t* pse)
 
 	widget_size_to_pt(widget, pse);
 
-	widget_adjust_size(widget_get_style(widget), pse);
+	adjust_widget_size(widget_get_style(widget), pse);
 }
 
-void treectrl_set_lock(res_win_t widget, bool_t bLock)
+void treectrl_set_lock(widget_t widget, bool_t bLock)
 {
 	tree_delta_t* ptd = GETTREEDELTA(widget);
 
@@ -1297,7 +1297,7 @@ void treectrl_set_lock(res_win_t widget, bool_t bLock)
 	ptd->b_lock = bLock;
 }
 
-bool_t treectrl_get_lock(res_win_t widget)
+bool_t treectrl_get_lock(widget_t widget)
 {
 	tree_delta_t* ptd = GETTREEDELTA(widget);
 

@@ -165,4 +165,20 @@ void _render_context(visual_t src, int srcx, int srcy, visual_t dst, int dstx, i
     XCopyArea(g_display, src_ctx->device, dst_ctx->device, src_ctx->context, srcx, srcy, dstw, dsth, dstx, dsty);
 }
 
+
+float _pixel_metric(visual_t rdc)
+{
+	return LOGMMPERPT;
+}
+
+float _font_metric(visual_t rdc, const xfont_t* pxf)
+{
+	float pt = xstof(pxf->size);
+	float pm = 0.0f;
+
+	font_metric_by_pt(pt, &pm, NULL);
+
+	return pm;
+}
+
 #endif //XDU_SUPPORT_CONTEXT

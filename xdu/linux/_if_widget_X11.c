@@ -529,7 +529,6 @@ widget_t _widget_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr
 
 	pxw = (X11_widget_t*)xmem_alloc_handle(sizeof(X11_widget_t));
 
-	pxw->root = rot;
 	pxw->parent = (par == rot)? NULL : par;
 	pxw->self = win;
 	pxw->style = wstyle;
@@ -976,7 +975,7 @@ void _widget_get_window_rect(widget_t wt, xrect_t* prt)
 
 	XGetWindowAttributes(g_display, pxw->self, &attr);
 
-	rot = (pxw)? pxw->root : RootWindow(g_display, DefaultScreen(g_display));
+	rot = RootWindow(g_display, DefaultScreen(g_display));
 
 	XTranslateCoordinates(g_display, pxw->self, rot, attr.x, attr.y, &dst_x, &dst_y, &cld);
 
@@ -1006,7 +1005,7 @@ void _widget_screen_to_client(widget_t wt, xpoint_t* ppt)
 	Window rot = 0, cld = 0;
 	int dst_x = 0, dst_y = 0;
 
-	rot = (pxw)? pxw->root : RootWindow(g_display, DefaultScreen(g_display));
+	rot = RootWindow(g_display, DefaultScreen(g_display));
 
 	XTranslateCoordinates(g_display, rot, pxw->self, ppt->x, ppt->y, &dst_x, &dst_y, &cld);
 
@@ -2687,6 +2686,11 @@ void _adjust_widget_size(dword_t ws, xsize_t* pxs)
 	}
 }
 
+void _calc_widget_border(dword_t ws, border_t* pbd)
+{
+	NOP;
+}
+
 void _get_screen_size(xsize_t* pxs)
 {
 	pxs->w = DisplayWidth(g_display, DefaultScreen(g_display));
@@ -2699,7 +2703,7 @@ void _get_desktop_size(xsize_t* pxs)
     pxs->h = DisplayHeight(g_display, DefaultScreen(g_display));
 }
 
-void _screen_size_to_tm(xsize_t* pxs)
+void _screen_size_to_mm(xsize_t* pxs)
 {
 	double dx, dy;
 

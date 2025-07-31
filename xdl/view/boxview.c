@@ -164,7 +164,7 @@ void draw_datebox(const drawing_interface* pif, const xfont_t* pxf, const xdate_
 
 	const canvbox_t* pbox = (canvbox_t*)(&pif->rect);
 
-	(*pif->pf_text_metric)(pif->ctx, pxf, &xs);
+	(*pif->pf_font_size)(pif->ctx, pxf, &xs);
 
 	mx = (xs.fw > DEF_TOUCH_SPAN) ? xs.fw : DEF_TOUCH_SPAN;
 	my = (xs.fh > DEF_TOUCH_SPAN) ? xs.fh : DEF_TOUCH_SPAN;
@@ -442,7 +442,7 @@ void draw_timebox(const drawing_interface* pif, const xfont_t* pxf, const xdate_
 	parse_xcolor(&xc, xp.color);
 	lighten_xpen(&xp, DEF_HARD_DARKEN);
 
-	(*pif->pf_text_metric)(pif->ctx, &xf, &xs);
+	(*pif->pf_font_size)(pif->ctx, &xf, &xs);
 
 	mx = (xs.fw > DEF_TOUCH_SPAN) ? xs.fw : DEF_TOUCH_SPAN;
 	my = (xs.fh > DEF_TOUCH_SPAN) ? xs.fh : DEF_TOUCH_SPAN;
@@ -750,7 +750,7 @@ void draw_listbox(const drawing_interface* pif, const xfont_t* pxf, link_t_ptr p
 
 	const canvbox_t* pbox = (canvbox_t*)(&pif->rect);
 
-	(*pif->pf_text_metric)(pif->ctx, pxf, &xs);
+	(*pif->pf_font_size)(pif->ctx, pxf, &xs);
 
 	mx = (xs.fw > DEF_TOUCH_SPAN) ? xs.fw : DEF_TOUCH_SPAN;
 	my = (xs.fh > DEF_TOUCH_SPAN) ? xs.fh : DEF_TOUCH_SPAN;
@@ -928,7 +928,7 @@ void draw_dropbox(const drawing_interface* pif, const xfont_t* pxf, link_t_ptr p
 
 	const canvbox_t* pbox = (canvbox_t*)(&pif->rect);
 
-	(*pif->pf_text_metric)(pif->ctx, pxf, &xs);
+	(*pif->pf_font_size)(pif->ctx, pxf, &xs);
 
 	mx = (xs.fw > DEF_TOUCH_SPAN) ? xs.fw : DEF_TOUCH_SPAN;
 	my = (xs.fh > DEF_TOUCH_SPAN) ? xs.fh : DEF_TOUCH_SPAN;
@@ -1096,7 +1096,7 @@ void draw_radiobox(const drawing_interface* pif, const xfont_t* pxf, bool_t b_on
 	lighten_xbrush(&xb, DEF_SOFT_DARKEN);
 	lighten_xbrush(&xb_on, DEF_HARD_DARKEN);
 
-	(*pif->pf_text_metric)(pif->ctx, &xf, &xs);
+	(*pif->pf_font_size)(pif->ctx, &xf, &xs);
 
 	mx = (xs.fw > DEF_TOUCH_SPAN) ? xs.fw : DEF_TOUCH_SPAN;
 	my = (xs.fh > DEF_TOUCH_SPAN) ? xs.fh : DEF_TOUCH_SPAN;
@@ -1201,7 +1201,7 @@ void draw_checkbox(const drawing_interface* pif, const xfont_t* pxf, bool_t b_on
 	parse_xcolor(&xc, xp.color);
 	lighten_xpen(&xp, DEF_HARD_DARKEN);
 
-	(*pif->pf_text_metric)(pif->ctx, &xf, &xs);
+	(*pif->pf_font_size)(pif->ctx, &xf, &xs);
 
 	mx = (xs.fw > DEF_TOUCH_SPAN) ? xs.fw : DEF_TOUCH_SPAN;
 	my = (xs.fh > DEF_TOUCH_SPAN) ? xs.fh : DEF_TOUCH_SPAN;
@@ -1308,7 +1308,7 @@ void draw_slidebox(const drawing_interface* pif, const xfont_t* pxf, int pos)
 	default_xbrush(&xb);
 	xscpy(xb.color, xp.color);
 
-	(*pif->pf_text_metric)(pif->ctx, &xf, &xs);
+	(*pif->pf_font_size)(pif->ctx, &xf, &xs);
 
 	mx = (xs.fw > DEF_TOUCH_SPAN) ? xs.fw : DEF_TOUCH_SPAN;
 	my = (xs.fh > DEF_TOUCH_SPAN) ? xs.fh : DEF_TOUCH_SPAN;
@@ -1441,7 +1441,7 @@ void draw_spinbox(const drawing_interface* pif, const xfont_t* pxf, int cur)
 	parse_xcolor(&xc, xp.color);
 	lighten_xpen(&xp, DEF_HARD_DARKEN);
 
-	(*pif->pf_text_metric)(pif->ctx, &xf, &xs);
+	(*pif->pf_font_size)(pif->ctx, &xf, &xs);
 
 	mx = (xs.fw > DEF_TOUCH_SPAN) ? xs.fw : DEF_TOUCH_SPAN;
 	my = (xs.fh > DEF_TOUCH_SPAN) ? xs.fh : DEF_TOUCH_SPAN;
@@ -1565,7 +1565,7 @@ void draw_navibox(const drawing_interface* pif, const xfont_t* pxf, const NAVIST
 	parse_xcolor(&xc, xp.color);
 	lighten_xpen(&xp, DEF_HARD_DARKEN);
 
-	(*pif->pf_text_metric)(pif->ctx, &xf, &xs);
+	(*pif->pf_font_size)(pif->ctx, &xf, &xs);
 
 	mx = (xs.fw > DEF_TOUCH_SPAN) ? xs.fw : DEF_TOUCH_SPAN;
 	my = (xs.fh > DEF_TOUCH_SPAN) ? xs.fh : DEF_TOUCH_SPAN;
@@ -1698,7 +1698,7 @@ void draw_vertbox(const drawing_interface* pif, const xfont_t* pxf)
 	parse_xcolor(&xc, xp.color);
 	lighten_xpen(&xp, DEF_HARD_DARKEN);
 
-	(*pif->pf_text_metric)(pif->ctx, &xf, &xs);
+	(*pif->pf_font_size)(pif->ctx, &xf, &xs);
 
 	mx = (xs.fw > DEF_TOUCH_SPAN) ? xs.fw : DEF_TOUCH_SPAN;
 	my = (xs.fh > DEF_TOUCH_SPAN) ? xs.fh : DEF_TOUCH_SPAN;
@@ -1821,7 +1821,7 @@ void draw_horzbox(const drawing_interface* pif, const xfont_t* pxf)
 	parse_xcolor(&xc, xp.color);
 	lighten_xpen(&xp, DEF_HARD_DARKEN);
 
-	(*pif->pf_text_metric)(pif->ctx, &xf, &xs);
+	(*pif->pf_font_size)(pif->ctx, &xf, &xs);
 
 	mx = (xs.fw > DEF_TOUCH_SPAN) ? xs.fw : DEF_TOUCH_SPAN;
 	my = (xs.fh > DEF_TOUCH_SPAN) ? xs.fh : DEF_TOUCH_SPAN;
@@ -2088,7 +2088,7 @@ void draw_iconbox(const drawing_interface* pif, const xfont_t* pxf, const tchar_
 	}
 	parse_xcolor(&xc, xp.color);
 
-	(*pif->pf_text_metric)(pif->ctx, &xf, &xs);
+	(*pif->pf_font_size)(pif->ctx, &xf, &xs);
 
 	mx = (xs.fw > DEF_TOUCH_SPAN) ? xs.fw : DEF_TOUCH_SPAN;
 	my = (xs.fh > DEF_TOUCH_SPAN) ? xs.fh : DEF_TOUCH_SPAN;
@@ -2399,7 +2399,7 @@ void draw_wordsbox(const drawing_interface* pif, const xfont_t* pxf, link_t_ptr 
 
 	const canvbox_t* pbox = (canvbox_t*)(&pif->rect);
 
-	(*pif->pf_text_metric)(pif->ctx, pxf, &xs);
+	(*pif->pf_font_size)(pif->ctx, pxf, &xs);
 
 	mx = (xs.fw > DEF_TOUCH_SPAN) ? xs.fw : DEF_TOUCH_SPAN;
 	my = (xs.fh > DEF_TOUCH_SPAN) ? xs.fh : DEF_TOUCH_SPAN;

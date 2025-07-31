@@ -3,8 +3,7 @@
 #define _XDC_H
 
 #include "../xdc/xdcdef.h"
-#include "../xdc/xdcinit.h"
-#include "../xdc/xdcimp.h"
+#include "../xdc/xdcobj.h"
 #include "../xdc/xdcutil.h"
 
 #ifdef _OS_WINDOWS

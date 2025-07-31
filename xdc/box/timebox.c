@@ -26,8 +26,8 @@ LICENSE.GPL3 for more details.
 
 #include "box.h"
 
-#include "../xdcimp.h"
-#include "../xdcinit.h"
+#include "../xdcobj.h"
+
 
 typedef struct _timebox_delta_t{
 	xdate_t tt;
@@ -39,7 +39,7 @@ typedef struct _timebox_delta_t{
 #define SETTIMEBOXDELTA(ph,ptd) widget_set_user_delta(ph,(vword_t)ptd)
 
 /*********************************************************************************/
-void noti_timebox_command(res_win_t widget, int code, vword_t data)
+void noti_timebox_command(widget_t widget, int code, vword_t data)
 {
 	timebox_delta_t* ptd = GETTIMEBOXDELTA(widget);
 
@@ -49,7 +49,7 @@ void noti_timebox_command(res_win_t widget, int code, vword_t data)
 		widget_post_command(widget_get_owner(widget), code, widget_get_user_id(widget), data);
 }
 
-void timebox_on_year_up(res_win_t widget)
+void timebox_on_year_up(widget_t widget)
 {
 	timebox_delta_t* ptd = GETTIMEBOXDELTA(widget);
 
@@ -62,7 +62,7 @@ void timebox_on_year_up(res_win_t widget)
 	noti_timebox_command(widget, COMMAND_UPDATE, (vword_t)NULL);
 }
 
-void timebox_on_year_down(res_win_t widget)
+void timebox_on_year_down(widget_t widget)
 {
 	timebox_delta_t* ptd = GETTIMEBOXDELTA(widget);
 
@@ -75,7 +75,7 @@ void timebox_on_year_down(res_win_t widget)
 	noti_timebox_command(widget, COMMAND_UPDATE, (vword_t)NULL);
 }
 
-void timebox_on_mon_up(res_win_t widget)
+void timebox_on_mon_up(widget_t widget)
 {
 	timebox_delta_t* ptd = GETTIMEBOXDELTA(widget);
 
@@ -88,7 +88,7 @@ void timebox_on_mon_up(res_win_t widget)
 	noti_timebox_command(widget, COMMAND_UPDATE, (vword_t)NULL);
 }
 
-void timebox_on_mon_down(res_win_t widget)
+void timebox_on_mon_down(widget_t widget)
 {
 	timebox_delta_t* ptd = GETTIMEBOXDELTA(widget);
 
@@ -101,7 +101,7 @@ void timebox_on_mon_down(res_win_t widget)
 	noti_timebox_command(widget, COMMAND_UPDATE, (vword_t)NULL);
 }
 
-void timebox_on_day_up(res_win_t widget)
+void timebox_on_day_up(widget_t widget)
 {
 	timebox_delta_t* ptd = GETTIMEBOXDELTA(widget);
 
@@ -114,7 +114,7 @@ void timebox_on_day_up(res_win_t widget)
 	noti_timebox_command(widget, COMMAND_UPDATE, (vword_t)NULL);
 }
 
-void timebox_on_day_down(res_win_t widget)
+void timebox_on_day_down(widget_t widget)
 {
 	timebox_delta_t* ptd = GETTIMEBOXDELTA(widget);
 
@@ -127,7 +127,7 @@ void timebox_on_day_down(res_win_t widget)
 	noti_timebox_command(widget, COMMAND_UPDATE, (vword_t)NULL);
 }
 
-void timebox_on_hour_up(res_win_t widget)
+void timebox_on_hour_up(widget_t widget)
 {
 	timebox_delta_t* ptd = GETTIMEBOXDELTA(widget);
 
@@ -140,7 +140,7 @@ void timebox_on_hour_up(res_win_t widget)
 	noti_timebox_command(widget, COMMAND_UPDATE, (vword_t)NULL);
 }
 
-void timebox_on_hour_down(res_win_t widget)
+void timebox_on_hour_down(widget_t widget)
 {
 	timebox_delta_t* ptd = GETTIMEBOXDELTA(widget);
 
@@ -153,7 +153,7 @@ void timebox_on_hour_down(res_win_t widget)
 	noti_timebox_command(widget, COMMAND_UPDATE, (vword_t)NULL);
 }
 
-void timebox_on_hour_zero(res_win_t widget)
+void timebox_on_hour_zero(widget_t widget)
 {
 	timebox_delta_t* ptd = GETTIMEBOXDELTA(widget);
 
@@ -164,7 +164,7 @@ void timebox_on_hour_zero(res_win_t widget)
 	noti_timebox_command(widget, COMMAND_UPDATE, (vword_t)NULL);
 }
 
-void timebox_on_minute_up(res_win_t widget)
+void timebox_on_minute_up(widget_t widget)
 {
 	timebox_delta_t* ptd = GETTIMEBOXDELTA(widget);
 
@@ -177,7 +177,7 @@ void timebox_on_minute_up(res_win_t widget)
 	noti_timebox_command(widget, COMMAND_UPDATE, (vword_t)NULL);
 }
 
-void timebox_on_minute_down(res_win_t widget)
+void timebox_on_minute_down(widget_t widget)
 {
 	timebox_delta_t* ptd = GETTIMEBOXDELTA(widget);
 
@@ -190,7 +190,7 @@ void timebox_on_minute_down(res_win_t widget)
 	noti_timebox_command(widget, COMMAND_UPDATE, (vword_t)NULL);
 }
 
-void timebox_on_minute_zero(res_win_t widget)
+void timebox_on_minute_zero(widget_t widget)
 {
 	timebox_delta_t* ptd = GETTIMEBOXDELTA(widget);
 
@@ -201,7 +201,7 @@ void timebox_on_minute_zero(res_win_t widget)
 	noti_timebox_command(widget, COMMAND_UPDATE, (vword_t)NULL);
 }
 
-void timebox_on_second_up(res_win_t widget)
+void timebox_on_second_up(widget_t widget)
 {
 	timebox_delta_t* ptd = GETTIMEBOXDELTA(widget);
 
@@ -214,7 +214,7 @@ void timebox_on_second_up(res_win_t widget)
 	noti_timebox_command(widget, COMMAND_UPDATE, (vword_t)NULL);
 }
 
-void timebox_on_second_down(res_win_t widget)
+void timebox_on_second_down(widget_t widget)
 {
 	timebox_delta_t* ptd = GETTIMEBOXDELTA(widget);
 
@@ -227,7 +227,7 @@ void timebox_on_second_down(res_win_t widget)
 	noti_timebox_command(widget, COMMAND_UPDATE, (vword_t)NULL);
 }
 
-void timebox_on_second_zero(res_win_t widget)
+void timebox_on_second_zero(widget_t widget)
 {
 	timebox_delta_t* ptd = GETTIMEBOXDELTA(widget);
 
@@ -238,7 +238,7 @@ void timebox_on_second_zero(res_win_t widget)
 	noti_timebox_command(widget, COMMAND_UPDATE, (vword_t)NULL);
 }
 /*********************************************************************************/
-int hand_timebox_create(res_win_t widget, void* data)
+int hand_timebox_create(widget_t widget, void* data)
 {
 	timebox_delta_t* ptd = GETTIMEBOXDELTA(widget);
 
@@ -256,7 +256,7 @@ int hand_timebox_create(res_win_t widget, void* data)
 	return 0;
 }
 
-void hand_timebox_destroy(res_win_t widget)
+void hand_timebox_destroy(widget_t widget)
 {
 	timebox_delta_t* ptd = GETTIMEBOXDELTA(widget);
 
@@ -269,13 +269,13 @@ void hand_timebox_destroy(res_win_t widget)
 	widget_hand_destroy(widget);
 }
 
-void hand_timebox_lbutton_down(res_win_t widget, const xpoint_t* pxp)
+void hand_timebox_lbutton_down(widget_t widget, const xpoint_t* pxp)
 {
 	timebox_delta_t* ptd = GETTIMEBOXDELTA(widget);
 	
 }
 
-void hand_timebox_lbutton_up(res_win_t widget, const xpoint_t* pxp)
+void hand_timebox_lbutton_up(widget_t widget, const xpoint_t* pxp)
 {
 	timebox_delta_t* ptd = GETTIMEBOXDELTA(widget);
 	
@@ -329,14 +329,14 @@ void hand_timebox_lbutton_up(res_win_t widget, const xpoint_t* pxp)
 	}
 }
 
-void hand_timebox_size(res_win_t widget, int code, const xsize_t* prs)
+void hand_timebox_size(widget_t widget, int code, const xsize_t* prs)
 {
 	timebox_delta_t* ptd = GETTIMEBOXDELTA(widget);
 	
 	widget_erase(widget, NULL);
 }
 
-void hand_timebox_xfont(res_win_t widget, const xfont_t* pxf)
+void hand_timebox_xfont(widget_t widget, const xfont_t* pxf)
 {
 	timebox_delta_t* ptd = GETTIMEBOXDELTA(widget);
 
@@ -345,7 +345,7 @@ void hand_timebox_xfont(res_win_t widget, const xfont_t* pxf)
 	xmem_copy((void*)&ptd->xf, (void*)pxf, sizeof(xfont_t));
 }
 
-void hand_timebox_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
+void hand_timebox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 {
 	timebox_delta_t* ptd = GETTIMEBOXDELTA(widget);
 	visual_t rdc;
@@ -378,7 +378,7 @@ void hand_timebox_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 }
 
 /***************************************************************************************/
-res_win_t timebox_create(res_win_t widget, dword_t style, const xrect_t* pxr)
+widget_t timebox_create(widget_t widget, dword_t style, const xrect_t* pxr)
 {
 	if_dispatch_t ev = { 0 };
 
@@ -403,7 +403,7 @@ res_win_t timebox_create(res_win_t widget, dword_t style, const xrect_t* pxr)
 	return widget_create(NULL, style, pxr, widget, &ev);
 }
 
-void timebox_popup_size(res_win_t widget, xsize_t* pxs)
+void timebox_popup_size(widget_t widget, xsize_t* pxs)
 {
 	timebox_delta_t* ptd = GETTIMEBOXDELTA(widget);
 	measure_interface im = { 0 };
@@ -416,10 +416,10 @@ void timebox_popup_size(res_win_t widget, xsize_t* pxs)
 
 	widget_size_to_pt(widget, pxs);
 
-	widget_adjust_size(widget_get_style(widget), pxs);
+	adjust_widget_size(widget_get_style(widget), pxs);
 }
 
-void timebox_set_datetime(res_win_t widget, const xdate_t* pxt)
+void timebox_set_datetime(widget_t widget, const xdate_t* pxt)
 {
 	timebox_delta_t* ptd = GETTIMEBOXDELTA(widget);
 
@@ -433,7 +433,7 @@ void timebox_set_datetime(res_win_t widget, const xdate_t* pxt)
 	widget_erase(widget, NULL);
 }
 
-void timebox_get_datetime(res_win_t widget, xdate_t* pxt)
+void timebox_get_datetime(widget_t widget, xdate_t* pxt)
 {
 	timebox_delta_t* ptd = GETTIMEBOXDELTA(widget);
 

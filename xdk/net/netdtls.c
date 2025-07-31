@@ -27,6 +27,7 @@ LICENSE.GPL3 for more details.
 #include "netdtls.h"
 
 #include "../xdknet.h"
+#include "../xdkbio.h"
 #include "../xdkoem.h"
 #include "../xdkobj.h"
 #include "../xdkstd.h"

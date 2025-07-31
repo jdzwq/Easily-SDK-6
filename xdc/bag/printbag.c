@@ -26,7 +26,7 @@ LICENSE.GPL3 for more details.
 
 #include "printbag.h"
 
-#include "../xdcimp.h"
+#include "../xdcobj.h"
 
 
 #ifdef XDU_SUPPORT_CONTEXT_PRINTER

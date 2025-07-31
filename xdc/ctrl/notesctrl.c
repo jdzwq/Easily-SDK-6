@@ -26,8 +26,8 @@ LICENSE.GPL3 for more details.
 
 #include "ctrl.h"
 
-#include "../xdcimp.h"
-#include "../xdcinit.h"
+#include "../xdcobj.h"
+
 
 typedef struct _notes_delta_t{
 	link_t_ptr arch;
@@ -35,7 +35,7 @@ typedef struct _notes_delta_t{
 	link_t_ptr hover;
 	int tw, th;
 
-	res_win_t vsc;
+	widget_t vsc;
 	bool_t b_delete;
 
 	xfont_t xf;
@@ -57,7 +57,7 @@ typedef enum{
 }NOTES_HINT;
 /***************************************************************************************/
 
-static int _notesctrl_calc_width(res_win_t widget)
+static int _notesctrl_calc_width(widget_t widget)
 {
 	notes_delta_t* ptd = GETNOTESDELTA(widget);
 	link_t_ptr ilk, doc;
@@ -99,7 +99,7 @@ static int _notesctrl_calc_width(res_win_t widget)
 	return pw + ptd->tw + ptd->th;
 }
 
-static int _notesctrl_calc_height(res_win_t widget)
+static int _notesctrl_calc_height(widget_t widget)
 {
 	notes_delta_t* ptd = GETNOTESDELTA(widget);
 	link_t_ptr ilk,doc;
@@ -152,7 +152,7 @@ static int _notesctrl_calc_height(res_win_t widget)
 	return ph;
 }
 
-static int _notesctrl_calc_hint(res_win_t widget, const xpoint_t* ppt, link_t_ptr* pplk)
+static int _notesctrl_calc_hint(widget_t widget, const xpoint_t* ppt, link_t_ptr* pplk)
 {
 	notes_delta_t* ptd = GETNOTESDELTA(widget);
 	visual_t rdc;
@@ -251,7 +251,7 @@ static int _notesctrl_calc_hint(res_win_t widget, const xpoint_t* ppt, link_t_pt
 	return hint;
 }
 
-static void _notesctrl_item_rect(res_win_t widget, link_t_ptr plk, xrect_t* pxr)
+static void _notesctrl_item_rect(widget_t widget, link_t_ptr plk, xrect_t* pxr)
 {
 	notes_delta_t* ptd = GETNOTESDELTA(widget);
 	visual_t rdc;
@@ -312,7 +312,7 @@ static void _notesctrl_item_rect(res_win_t widget, link_t_ptr plk, xrect_t* pxr)
 	widget_release_ctx(widget, rdc);
 }
 
-static void _notesctrl_reset_page(res_win_t widget)
+static void _notesctrl_reset_page(widget_t widget)
 {
 	notes_delta_t* ptd = GETNOTESDELTA(widget);
 	xrect_t xr;
@@ -325,7 +325,7 @@ static void _notesctrl_reset_page(res_win_t widget)
 	widget_reset_paging(widget, xr.w, xr.h, xr.w, mh, ptd->tw, ptd->th);
 }
 
-static void _notesctrl_ensure_visible(res_win_t widget)
+static void _notesctrl_ensure_visible(widget_t widget)
 {
 	notes_delta_t* ptd = GETNOTESDELTA(widget);
 	xrect_t xr;
@@ -340,7 +340,7 @@ static void _notesctrl_ensure_visible(res_win_t widget)
 
 
 /*************************************************************************/
-int noti_notes_owner(res_win_t widget, unsigned int code, link_t_ptr arch, link_t_ptr item, void* data)
+int noti_notes_owner(widget_t widget, unsigned int code, link_t_ptr arch, link_t_ptr item, void* data)
 {
 	notes_delta_t* ptd = GETNOTESDELTA(widget);
 	NOTICE_NOTES nf = { 0 };
@@ -358,7 +358,7 @@ int noti_notes_owner(res_win_t widget, unsigned int code, link_t_ptr arch, link_
 	return nf.ret;
 }
 
-bool_t noti_notes_item_changing(res_win_t widget)
+bool_t noti_notes_item_changing(widget_t widget)
 {
 	notes_delta_t* ptd = GETNOTESDELTA(widget);
 	xrect_t xr;
@@ -377,7 +377,7 @@ bool_t noti_notes_item_changing(res_win_t widget)
 	return 1;
 }
 
-void noti_notes_item_changed(res_win_t widget, link_t_ptr elk)
+void noti_notes_item_changed(widget_t widget, link_t_ptr elk)
 {
 	notes_delta_t* ptd = GETNOTESDELTA(widget);
 	xrect_t xr;
@@ -391,7 +391,7 @@ void noti_notes_item_changed(res_win_t widget, link_t_ptr elk)
 	widget_erase(widget, &xr);
 }
 
-bool_t noti_notes_item_delete(res_win_t widget, link_t_ptr ilk)
+bool_t noti_notes_item_delete(widget_t widget, link_t_ptr ilk)
 {
 	notes_delta_t* ptd = GETNOTESDELTA(widget);
 
@@ -401,7 +401,7 @@ bool_t noti_notes_item_delete(res_win_t widget, link_t_ptr ilk)
 	return 1;
 }
 
-void noti_notes_item_enter(res_win_t widget, link_t_ptr plk)
+void noti_notes_item_enter(widget_t widget, link_t_ptr plk)
 {
 	notes_delta_t* ptd = GETNOTESDELTA(widget);
 
@@ -412,11 +412,11 @@ void noti_notes_item_enter(res_win_t widget, link_t_ptr plk)
 
 	if (widget_is_hotvoer(widget))
 	{
-		widget_track_mouse(widget, MS_TRACK_HOVER | MS_TRACK_LEAVE);
+		//widget_track_mouse(widget, MS_TRACK_HOVER | MS_TRACK_LEAVE);
 	}
 }
 
-void noti_notes_item_leave(res_win_t widget)
+void noti_notes_item_leave(widget_t widget)
 {
 	notes_delta_t* ptd = GETNOTESDELTA(widget);
 
@@ -426,11 +426,11 @@ void noti_notes_item_leave(res_win_t widget)
 
 	if (widget_is_hotvoer(widget))
 	{
-		widget_track_mouse(widget, MS_TRACK_HOVER | MS_TRACK_LEAVE);
+		//widget_track_mouse(widget, MS_TRACK_HOVER | MS_TRACK_LEAVE);
 	}
 }
 
-void noti_notes_item_hover(res_win_t widget, int x, int y)
+void noti_notes_item_hover(widget_t widget, int x, int y)
 {
 	notes_delta_t* ptd = GETNOTESDELTA(widget);
 	xpoint_t xp;
@@ -442,7 +442,7 @@ void noti_notes_item_hover(res_win_t widget, int x, int y)
 	noti_notes_owner(widget, NC_NOTESITEMHOVER, ptd->arch, ptd->hover, (void*)&xp);
 }
 
-void noti_notes_reset_scroll(res_win_t widget, bool_t bUpdate)
+void noti_notes_reset_scroll(widget_t widget, bool_t bUpdate)
 {
 	notes_delta_t* ptd = GETNOTESDELTA(widget);
 
@@ -455,7 +455,7 @@ void noti_notes_reset_scroll(res_win_t widget, bool_t bUpdate)
 	}
 }
 /********************************************************************************************/
-int hand_notes_create(res_win_t widget, void* data)
+int hand_notes_create(widget_t widget, void* data)
 {
 	notes_delta_t* ptd;
 	visual_t rdc;
@@ -470,7 +470,7 @@ int hand_notes_create(res_win_t widget, void* data)
 
 	get_visual_interface(rdc, &ifv);
 
-	(*ifv.pf_text_metric)(ifv.ctx, &ptd->xf, &xs);
+	(*ifv.pf_font_size)(ifv.ctx, &ptd->xf, &xs);
 
 	widget_release_ctx(widget, rdc);
 
@@ -485,7 +485,7 @@ int hand_notes_create(res_win_t widget, void* data)
 	return 0;
 }
 
-void hand_notes_destroy(res_win_t widget)
+void hand_notes_destroy(widget_t widget)
 {
 	notes_delta_t* ptd = GETNOTESDELTA(widget);
 
@@ -501,7 +501,7 @@ void hand_notes_destroy(res_win_t widget)
 	widget_hand_destroy(widget);
 }
 
-void hand_notes_keydown(res_win_t widget, dword_t ks, int key)
+void hand_notes_keydown(widget_t widget, dword_t ks, int key)
 {
 	notes_delta_t* ptd = GETNOTESDELTA(widget);
 
@@ -529,7 +529,7 @@ void hand_notes_keydown(res_win_t widget, dword_t ks, int key)
 	}
 }
 
-void hand_notes_mouse_move(res_win_t widget, dword_t dw, const xpoint_t* pxp)
+void hand_notes_mouse_move(widget_t widget, dword_t dw, const xpoint_t* pxp)
 {
 	notes_delta_t* ptd = GETNOTESDELTA(widget);
 	link_t_ptr plk = NULL;
@@ -550,7 +550,7 @@ void hand_notes_mouse_move(res_win_t widget, dword_t dw, const xpoint_t* pxp)
 	}
 }
 
-void hand_notes_mouse_hover(res_win_t widget, dword_t dw, const xpoint_t* pxp)
+void hand_notes_mouse_hover(widget_t widget, dword_t dw, const xpoint_t* pxp)
 {
 	notes_delta_t* ptd = GETNOTESDELTA(widget);
 
@@ -561,7 +561,7 @@ void hand_notes_mouse_hover(res_win_t widget, dword_t dw, const xpoint_t* pxp)
 		noti_notes_item_hover(widget, pxp->x, pxp->y);
 }
 
-void hand_notes_mouse_leave(res_win_t widget, dword_t dw, const xpoint_t* pxp)
+void hand_notes_mouse_leave(widget_t widget, dword_t dw, const xpoint_t* pxp)
 {
 	notes_delta_t* ptd = GETNOTESDELTA(widget);
 
@@ -572,7 +572,7 @@ void hand_notes_mouse_leave(res_win_t widget, dword_t dw, const xpoint_t* pxp)
 		noti_notes_item_leave(widget);
 }
 
-void hand_notes_lbutton_down(res_win_t widget, const xpoint_t* pxp)
+void hand_notes_lbutton_down(widget_t widget, const xpoint_t* pxp)
 {
 	notes_delta_t* ptd = GETNOTESDELTA(widget);
 
@@ -585,7 +585,7 @@ void hand_notes_lbutton_down(res_win_t widget, const xpoint_t* pxp)
 	}
 }
 
-void hand_notes_lbutton_up(res_win_t widget, const xpoint_t* pxp)
+void hand_notes_lbutton_up(widget_t widget, const xpoint_t* pxp)
 {
 	notes_delta_t* ptd = GETNOTESDELTA(widget);
 	link_t_ptr ilk = NULL;
@@ -624,7 +624,7 @@ void hand_notes_lbutton_up(res_win_t widget, const xpoint_t* pxp)
 	noti_notes_owner(widget, NC_NOTESLBCLK, ptd->arch, ptd->item, (void*)pxp);
 }
 
-void hand_notes_lbutton_dbclick(res_win_t widget, const xpoint_t* pxp)
+void hand_notes_lbutton_dbclick(widget_t widget, const xpoint_t* pxp)
 {
 	notes_delta_t* ptd = GETNOTESDELTA(widget);
 
@@ -634,7 +634,7 @@ void hand_notes_lbutton_dbclick(res_win_t widget, const xpoint_t* pxp)
 	noti_notes_owner(widget, NC_NOTESDBCLK, ptd->arch, ptd->item, (void*)pxp);
 }
 
-void hand_notes_rbutton_down(res_win_t widget, const xpoint_t* pxp)
+void hand_notes_rbutton_down(widget_t widget, const xpoint_t* pxp)
 {
 	notes_delta_t* ptd = GETNOTESDELTA(widget);
 
@@ -642,7 +642,7 @@ void hand_notes_rbutton_down(res_win_t widget, const xpoint_t* pxp)
 		return;
 }
 
-void hand_notes_rbutton_up(res_win_t widget, const xpoint_t* pxp)
+void hand_notes_rbutton_up(widget_t widget, const xpoint_t* pxp)
 {
 	notes_delta_t* ptd = GETNOTESDELTA(widget);
 
@@ -652,7 +652,7 @@ void hand_notes_rbutton_up(res_win_t widget, const xpoint_t* pxp)
 	noti_notes_owner(widget, NC_NOTESRBCLK, ptd->arch, ptd->item, (void*)pxp);
 }
 
-void hand_notes_size(res_win_t widget, int code, const xsize_t* prs)
+void hand_notes_size(widget_t widget, int code, const xsize_t* prs)
 {
 	notes_delta_t* ptd = GETNOTESDELTA(widget);
 
@@ -664,7 +664,7 @@ void hand_notes_size(res_win_t widget, int code, const xsize_t* prs)
 	notesctrl_redraw(widget);
 }
 
-void hand_notes_scroll(res_win_t widget, bool_t bHorz, int nLine)
+void hand_notes_scroll(widget_t widget, bool_t bHorz, int nLine)
 {
 	notes_delta_t* ptd = GETNOTESDELTA(widget);
 
@@ -674,12 +674,12 @@ void hand_notes_scroll(res_win_t widget, bool_t bHorz, int nLine)
 	widget_hand_scroll(widget, bHorz, nLine);
 }
 
-void hand_notes_wheel(res_win_t widget, bool_t bHorz, int nDelta)
+void hand_notes_wheel(widget_t widget, bool_t bHorz, int nDelta)
 {
 	notes_delta_t* ptd = GETNOTESDELTA(widget);
 	scroll_t scr = { 0 };
 	int nLine;
-	res_win_t win;
+	widget_t win;
 
 	if (!ptd->arch)
 		return;
@@ -716,21 +716,21 @@ void hand_notes_wheel(res_win_t widget, bool_t bHorz, int nDelta)
 	}
 }
 
-void hand_notes_xfont(res_win_t widget, const xfont_t* pxf)
+void hand_notes_xfont(widget_t widget, const xfont_t* pxf)
 {
 	notes_delta_t* ptd = GETNOTESDELTA(widget);
 
 	xmem_copy((void*)&ptd->xf, (void*)pxf, sizeof(xfont_t));
 }
 
-void hand_notes_xface(res_win_t widget, const xface_t* pxa)
+void hand_notes_xface(widget_t widget, const xface_t* pxa)
 {
 	notes_delta_t* ptd = GETNOTESDELTA(widget);
 
 	xmem_copy((void*)&ptd->xa, (void*)pxa, sizeof(xface_t));
 }
 
-void hand_notes_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
+void hand_notes_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 {
 	notes_delta_t* ptd = GETNOTESDELTA(widget);
 	visual_t rdc;
@@ -817,13 +817,13 @@ void hand_notes_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 		if (ilk == ptd->item)
 		{
 			pt_center_rect(&xr_btn, 16, 16);
-			rect_pt_to_tm(canv, &xr_btn);
+			rect_pt_to_mm(canv, &xr_btn);
 			draw_gizmo(pif, &xc, &xr_btn, GDI_ATTR_GIZMO_GUIDER);
 		}
 		else
 		{
 			pt_center_rect(&xr_btn, 16, 16);
-			rect_pt_to_tm(canv, &xr_btn);
+			rect_pt_to_mm(canv, &xr_btn);
 			draw_gizmo(pif, &xc, &xr_btn, GDI_ATTR_GIZMO_RADIOED);
 		}
 
@@ -871,7 +871,7 @@ void hand_notes_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 			xr_btn.h = NOTESCTRL_SPAN_PLUS * ptd->tw;
 
 			pt_center_rect(&xr_btn, 8, 8);
-			rect_pt_to_tm(canv, &xr_btn);
+			rect_pt_to_mm(canv, &xr_btn);
 			draw_gizmo(pif, &xc, &xr_btn, GDI_ATTR_GIZMO_FIXED);
 		}
 
@@ -891,7 +891,7 @@ void hand_notes_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 			xr_btn.h = ptd->th;
 
 			pt_center_rect(&xr_btn, 8, 8);
-			rect_pt_to_tm(canv, &xr_btn);
+			rect_pt_to_mm(canv, &xr_btn);
 			draw_gizmo(pif, &xc, &xr_btn, GDI_ATTR_GIZMO_CLOSE);
 		}
 
@@ -931,7 +931,7 @@ void hand_notes_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 }
 
 /************************************************************************************************/
-res_win_t notesctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, res_win_t wparent)
+widget_t notesctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, widget_t wparent)
 {
 	if_dispatch_t ev = { 0 };
 
@@ -969,7 +969,7 @@ res_win_t notesctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* 
 	return widget_create(wname, wstyle, pxr, wparent, &ev);
 }
 
-void notesctrl_attach(res_win_t widget, link_t_ptr ptr)
+void notesctrl_attach(widget_t widget, link_t_ptr ptr)
 {
 	notes_delta_t* ptd = GETNOTESDELTA(widget);
 
@@ -982,7 +982,7 @@ void notesctrl_attach(res_win_t widget, link_t_ptr ptr)
 	notesctrl_redraw(widget);
 }
 
-link_t_ptr notesctrl_detach(res_win_t widget)
+link_t_ptr notesctrl_detach(widget_t widget)
 {
 	notes_delta_t* ptd = GETNOTESDELTA(widget);
 	link_t_ptr data;
@@ -997,7 +997,7 @@ link_t_ptr notesctrl_detach(res_win_t widget)
 	return data;
 }
 
-link_t_ptr notesctrl_fetch(res_win_t widget)
+link_t_ptr notesctrl_fetch(widget_t widget)
 {
 	notes_delta_t* ptd = GETNOTESDELTA(widget);
 
@@ -1006,7 +1006,7 @@ link_t_ptr notesctrl_fetch(res_win_t widget)
 	return ptd->arch;
 }
 
-void notesctrl_enable_delete(res_win_t widget, bool_t bDelete)
+void notesctrl_enable_delete(widget_t widget, bool_t bDelete)
 {
 	notes_delta_t* ptd = GETNOTESDELTA(widget);
 
@@ -1015,7 +1015,7 @@ void notesctrl_enable_delete(res_win_t widget, bool_t bDelete)
 	ptd->b_delete = bDelete;
 }
 
-void notesctrl_redraw(res_win_t widget)
+void notesctrl_redraw(widget_t widget)
 {
 	notes_delta_t* ptd = GETNOTESDELTA(widget);
 	link_t_ptr ilk, doc;
@@ -1052,7 +1052,7 @@ void notesctrl_redraw(res_win_t widget)
 	widget_paint(widget);
 }
 
-void notesctrl_redraw_item(res_win_t widget, link_t_ptr ilk)
+void notesctrl_redraw_item(widget_t widget, link_t_ptr ilk)
 {
 	notes_delta_t* ptd = GETNOTESDELTA(widget);
 	xrect_t xr;
@@ -1071,7 +1071,7 @@ void notesctrl_redraw_item(res_win_t widget, link_t_ptr ilk)
 	widget_erase(widget, &xr);
 }
 
-bool_t notesctrl_set_focus_item(res_win_t widget, link_t_ptr ilk)
+bool_t notesctrl_set_focus_item(widget_t widget, link_t_ptr ilk)
 {
 	notes_delta_t* ptd = GETNOTESDELTA(widget);
 	bool_t bRe;
@@ -1106,7 +1106,7 @@ bool_t notesctrl_set_focus_item(res_win_t widget, link_t_ptr ilk)
 	return 1;
 }
 
-link_t_ptr notesctrl_get_focus_item(res_win_t widget)
+link_t_ptr notesctrl_get_focus_item(widget_t widget)
 {
 	notes_delta_t* ptd = GETNOTESDELTA(widget);
 
@@ -1118,7 +1118,7 @@ link_t_ptr notesctrl_get_focus_item(res_win_t widget)
 	return ptd->item;
 }
 
-void notesctrl_get_item_rect(res_win_t widget, link_t_ptr elk, xrect_t* prt)
+void notesctrl_get_item_rect(widget_t widget, link_t_ptr elk, xrect_t* prt)
 {
 	notes_delta_t* ptd = GETNOTESDELTA(widget);
 
@@ -1130,7 +1130,7 @@ void notesctrl_get_item_rect(res_win_t widget, link_t_ptr elk, xrect_t* prt)
 	_notesctrl_item_rect(widget, elk, prt);
 }
 
-void notesctrl_tabskip(res_win_t widget, int nSkip)
+void notesctrl_tabskip(widget_t widget, int nSkip)
 {
 	notes_delta_t* ptd = GETNOTESDELTA(widget);
 	link_t_ptr plk = NULL;

@@ -26,8 +26,8 @@ LICENSE.GPL3 for more details.
 
 #include "box.h"
 
-#include "../xdcimp.h"
-#include "../xdcinit.h"
+#include "../xdcobj.h"
+
 
 typedef struct _spinbox_delta_t{
 	int cur;
@@ -39,7 +39,7 @@ typedef struct _spinbox_delta_t{
 #define SETSPINBOXDELTA(ph,ptd) widget_set_user_delta(ph,(vword_t)ptd)
 
 /*********************************************************************************/
-void noti_spinbox_command(res_win_t widget, int code, vword_t data)
+void noti_spinbox_command(widget_t widget, int code, vword_t data)
 {
 	spinbox_delta_t* ptd = GETSPINBOXDELTA(widget);
 
@@ -49,7 +49,7 @@ void noti_spinbox_command(res_win_t widget, int code, vword_t data)
 		widget_post_command(widget_get_owner(widget), code, widget_get_user_id(widget), data);
 }
 
-void spinbox_on_plus(res_win_t widget)
+void spinbox_on_plus(widget_t widget)
 {
 	spinbox_delta_t* ptd = GETSPINBOXDELTA(widget);
 
@@ -60,7 +60,7 @@ void spinbox_on_plus(res_win_t widget)
 	noti_spinbox_command(widget, COMMAND_UPDATE, (vword_t)NULL);
 }
 
-void spinbox_on_minus(res_win_t widget)
+void spinbox_on_minus(widget_t widget)
 {
 	spinbox_delta_t* ptd = GETSPINBOXDELTA(widget);
 
@@ -72,7 +72,7 @@ void spinbox_on_minus(res_win_t widget)
 }
 
 /*********************************************************************************/
-int hand_spinbox_create(res_win_t widget, void* data)
+int hand_spinbox_create(widget_t widget, void* data)
 {
 	spinbox_delta_t* ptd;
 
@@ -88,7 +88,7 @@ int hand_spinbox_create(res_win_t widget, void* data)
 	return 0;
 }
 
-void hand_spinbox_destroy(res_win_t widget)
+void hand_spinbox_destroy(widget_t widget)
 {
 	spinbox_delta_t* ptd = GETSPINBOXDELTA(widget);
 
@@ -101,13 +101,13 @@ void hand_spinbox_destroy(res_win_t widget)
 	widget_hand_destroy(widget);
 }
 
-void hand_spinbox_lbutton_down(res_win_t widget, const xpoint_t* pxp)
+void hand_spinbox_lbutton_down(widget_t widget, const xpoint_t* pxp)
 {
 	spinbox_delta_t* ptd = GETSPINBOXDELTA(widget);
 	
 }
 
-void hand_spinbox_lbutton_up(res_win_t widget, const xpoint_t* pxp)
+void hand_spinbox_lbutton_up(widget_t widget, const xpoint_t* pxp)
 {
 	spinbox_delta_t* ptd = GETSPINBOXDELTA(widget);
 	measure_interface im = { 0 };
@@ -130,14 +130,14 @@ void hand_spinbox_lbutton_up(res_win_t widget, const xpoint_t* pxp)
 		spinbox_on_minus(widget);
 }
 
-void hand_spinbox_size(res_win_t widget, int code, const xsize_t* prs)
+void hand_spinbox_size(widget_t widget, int code, const xsize_t* prs)
 {
 	spinbox_delta_t* ptd = GETSPINBOXDELTA(widget);
 	
 	widget_erase(widget, NULL);
 }
 
-void hand_spinbox_xfont(res_win_t widget, const xfont_t* pxf)
+void hand_spinbox_xfont(widget_t widget, const xfont_t* pxf)
 {
 	spinbox_delta_t* ptd = GETSPINBOXDELTA(widget);
 
@@ -146,7 +146,7 @@ void hand_spinbox_xfont(res_win_t widget, const xfont_t* pxf)
 	xmem_copy((void*)&ptd->xf, (void*)pxf, sizeof(xfont_t));
 }
 
-void hand_spinbox_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
+void hand_spinbox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 {
 	spinbox_delta_t* ptd = GETSPINBOXDELTA(widget);
 	visual_t rdc;
@@ -179,7 +179,7 @@ void hand_spinbox_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 }
 
 /***************************************************************************************/
-res_win_t spinbox_create(res_win_t widget, dword_t style, const xrect_t* pxr)
+widget_t spinbox_create(widget_t widget, dword_t style, const xrect_t* pxr)
 {
 	if_dispatch_t ev = { 0 };
 
@@ -204,7 +204,7 @@ res_win_t spinbox_create(res_win_t widget, dword_t style, const xrect_t* pxr)
 	return widget_create(NULL, style, pxr, widget, &ev);
 }
 
-void spinbox_popup_size(res_win_t widget, xsize_t* pxs)
+void spinbox_popup_size(widget_t widget, xsize_t* pxs)
 {
 	spinbox_delta_t* ptd = GETSPINBOXDELTA(widget);
 	measure_interface im = { 0 };
@@ -217,10 +217,10 @@ void spinbox_popup_size(res_win_t widget, xsize_t* pxs)
 
 	widget_size_to_pt(widget, pxs);
 
-	widget_adjust_size(widget_get_style(widget), pxs);
+	adjust_widget_size(widget_get_style(widget), pxs);
 }
 
-void spinbox_set_spin(res_win_t widget, int cur)
+void spinbox_set_spin(widget_t widget, int cur)
 {
 	spinbox_delta_t* ptd = GETSPINBOXDELTA(widget);
 
@@ -231,7 +231,7 @@ void spinbox_set_spin(res_win_t widget, int cur)
 	widget_erase(widget, NULL);
 }
 
-int spinbox_get_spin(res_win_t widget)
+int spinbox_get_spin(widget_t widget)
 {
 	spinbox_delta_t* ptd = GETSPINBOXDELTA(widget);
 

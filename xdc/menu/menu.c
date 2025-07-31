@@ -26,12 +26,12 @@ LICENSE.GPL3 for more details.
 
 #include "menu.h"
 
-#include "../xdcimp.h"
-#include "../xdcinit.h"
+#include "../xdcobj.h"
 
-void textor_menu(res_win_t widget, const xpoint_t* ppt, int lay)
+
+void textor_menu(widget_t widget, const xpoint_t* ppt, int lay)
 {
-	res_win_t editmenu;
+	widget_t editmenu;
 	link_t_ptr ptr_menu;
 	link_t_ptr ilk;
 
@@ -79,9 +79,9 @@ void textor_menu(res_win_t widget, const xpoint_t* ppt, int lay)
 	destroy_menu_doc(ptr_menu);
 }
 
-void fontname_menu(res_win_t widget, dword_t idc, const xpoint_t* ppt, int lay)
+void fontname_menu(widget_t widget, dword_t idc, const xpoint_t* ppt, int lay)
 {
-	res_win_t menu;
+	widget_t menu;
 	xrect_t xr;
 
 	link_t_ptr ent, ptr_string;
@@ -151,9 +151,9 @@ void fontname_menu_item(int iid, tchar_t* buf, int max)
 	destroy_string_table(ptr_string);
 }
 
-void fontsize_menu(res_win_t widget, dword_t idc, const xpoint_t* ppt, int lay)
+void fontsize_menu(widget_t widget, dword_t idc, const xpoint_t* ppt, int lay)
 {
-	res_win_t menu;
+	widget_t menu;
 	xrect_t xr;
 
 	link_t_ptr ent, ptr_string;
@@ -222,9 +222,9 @@ void fontsize_menu_item(int iid, tchar_t* buf, int max)
 	destroy_string_table(ptr_string);
 }
 
-void fontstyle_menu(res_win_t widget, dword_t idc, const xpoint_t* ppt, int lay)
+void fontstyle_menu(widget_t widget, dword_t idc, const xpoint_t* ppt, int lay)
 {
-	res_win_t menu;
+	widget_t menu;
 	xrect_t xr;
 
 	link_t_ptr ent, ptr_string;
@@ -293,9 +293,9 @@ void fontstyle_menu_item(int iid, tchar_t* buf, int max)
 	destroy_string_table(ptr_string);
 }
 
-void fontweight_menu(res_win_t widget, dword_t idc, const xpoint_t* ppt, int lay)
+void fontweight_menu(widget_t widget, dword_t idc, const xpoint_t* ppt, int lay)
 {
-	res_win_t menu;
+	widget_t menu;
 	xrect_t xr;
 
 	link_t_ptr ent, ptr_string;
@@ -364,9 +364,9 @@ void fontweight_menu_item(int iid, tchar_t* buf, int max)
 	destroy_string_table(ptr_string);
 }
 
-void color_menu(res_win_t widget, dword_t idc, const xpoint_t* ppt, int lay)
+void color_menu(widget_t widget, dword_t idc, const xpoint_t* ppt, int lay)
 {
-	res_win_t menu;
+	widget_t menu;
 	xrect_t xr;
 
 	link_t_ptr ent, ptr_string;
@@ -435,9 +435,9 @@ void color_menu_item(int iid, tchar_t* buf, int max)
 	destroy_string_table(ptr_string);
 }
 
-void shape_menu(res_win_t widget, dword_t idc, const xpoint_t* ppt, int lay)
+void shape_menu(widget_t widget, dword_t idc, const xpoint_t* ppt, int lay)
 {
-	res_win_t menu;
+	widget_t menu;
 	xrect_t xr;
 
 	link_t_ptr ent, ptr_string;
@@ -520,10 +520,10 @@ void shape_menu_item(int iid, tchar_t* buf, int max)
 	destroy_string_table(ptr_string);
 }
 
-void track_popup_menu(res_win_t widget, dword_t idc, link_t_ptr menu, const xpoint_t* ppt, int lay)
+void track_popup_menu(widget_t widget, dword_t idc, link_t_ptr menu, const xpoint_t* ppt, int lay)
 {
 	xrect_t xr = { 0 };
-	res_win_t hMenu = menubox_create(widget, WD_STYLE_POPUP | WD_STYLE_BORDER | WD_STYLE_NOACTIVE, &xr);
+	widget_t hMenu = menubox_create(widget, WD_STYLE_POPUP | WD_STYLE_BORDER | WD_STYLE_NOACTIVE, &xr);
 	widget_set_user_id(hMenu, idc);
 	widget_set_owner(hMenu, widget);
 

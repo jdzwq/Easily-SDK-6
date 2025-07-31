@@ -26,8 +26,8 @@ LICENSE.GPL3 for more details.
 
 #include "ctrl.h"
 
-#include "../xdcimp.h"
-#include "../xdcinit.h"
+#include "../xdcobj.h"
+
 
 #define DIAGRAM_LINE_FEED		(float)50
 #define DIAGRAM_ENTITY_MIN_WIDTH	(float)10
@@ -48,8 +48,8 @@ typedef struct _diagram_delta_t{
 	bool_t b_drag;
 	bool_t b_size;
 
-	res_win_t hsc;
-	res_win_t vsc;
+	widget_t hsc;
+	widget_t vsc;
 
 	link_t_ptr stack;
 }diagram_delta_t;
@@ -58,7 +58,7 @@ typedef struct _diagram_delta_t{
 #define SETDIAGRAMDELTA(ph,ptd) widget_set_user_delta(ph,(vword_t)ptd)
 
 /******************************************diagram event********************************************************/
-static void _diagramctrl_done(res_win_t widget)
+static void _diagramctrl_done(widget_t widget)
 {
 	diagram_delta_t* ptd = GETDIAGRAMDELTA(widget);
 	byte_t* buf;
@@ -83,7 +83,7 @@ static void _diagramctrl_done(res_win_t widget)
 	push_stack_node(ptd->stack, (void*)buf);
 }
 
-static void _diagramctrl_undo(res_win_t widget)
+static void _diagramctrl_undo(widget_t widget)
 {
 	diagram_delta_t* ptd = GETDIAGRAMDELTA(widget);
 	void* p;
@@ -110,7 +110,7 @@ static void _diagramctrl_undo(res_win_t widget)
 	}
 }
 
-static void _diagramctrl_discard(res_win_t widget)
+static void _diagramctrl_discard(widget_t widget)
 {
 	diagram_delta_t* ptd = GETDIAGRAMDELTA(widget);
 	void* p;
@@ -124,7 +124,7 @@ static void _diagramctrl_discard(res_win_t widget)
 	}
 }
 
-static void _diagramctrl_clean(res_win_t widget)
+static void _diagramctrl_clean(widget_t widget)
 {
 	diagram_delta_t* ptd = GETDIAGRAMDELTA(widget);
 	void* p;
@@ -137,7 +137,7 @@ static void _diagramctrl_clean(res_win_t widget)
 	}
 }
 
-static bool_t _diagramctrl_copy(res_win_t widget)
+static bool_t _diagramctrl_copy(widget_t widget)
 {
 	diagram_delta_t* ptd = GETDIAGRAMDELTA(widget);
 
@@ -192,7 +192,7 @@ static bool_t _diagramctrl_copy(res_win_t widget)
 	return 1;
 }
 
-static bool_t _diagramctrl_cut(res_win_t widget)
+static bool_t _diagramctrl_cut(widget_t widget)
 {
 	diagram_delta_t* ptd = GETDIAGRAMDELTA(widget);
 	link_t_ptr nxt, ilk;
@@ -219,7 +219,7 @@ static bool_t _diagramctrl_cut(res_win_t widget)
 	return 1;
 }
 
-static bool_t _diagramctrl_paste(res_win_t widget)
+static bool_t _diagramctrl_paste(widget_t widget)
 {
 	diagram_delta_t* ptd = GETDIAGRAMDELTA(widget);
 
@@ -284,7 +284,7 @@ static bool_t _diagramctrl_paste(res_win_t widget)
 	return 1;
 }
 
-static void _diagramctrl_entity_rect(res_win_t widget, link_t_ptr ilk, xrect_t* pxr)
+static void _diagramctrl_entity_rect(widget_t widget, link_t_ptr ilk, xrect_t* pxr)
 {
 	diagram_delta_t* ptd = GETDIAGRAMDELTA(widget);
 
@@ -293,7 +293,7 @@ static void _diagramctrl_entity_rect(res_win_t widget, link_t_ptr ilk, xrect_t* 
 	widget_rect_to_pt(widget, pxr);
 }
 
-static void _diagramctrl_reset_page(res_win_t widget)
+static void _diagramctrl_reset_page(widget_t widget)
 {
 	diagram_delta_t* ptd = GETDIAGRAMDELTA(widget);
 
@@ -333,7 +333,7 @@ static void _diagramctrl_reset_page(res_win_t widget)
 	widget_reset_scroll(widget, 0);
 }
 
-static void _diagramctrl_ensure_visible(res_win_t widget)
+static void _diagramctrl_ensure_visible(widget_t widget)
 {
 	diagram_delta_t* ptd = GETDIAGRAMDELTA(widget);
 
@@ -347,7 +347,7 @@ static void _diagramctrl_ensure_visible(res_win_t widget)
 	widget_ensure_visible(widget, &xr, 1);
 }
 /*********************************************************************************************************/
-int noti_diagram_owner(res_win_t widget, unsigned int code, link_t_ptr ptr, link_t_ptr ilk, void* data)
+int noti_diagram_owner(widget_t widget, unsigned int code, link_t_ptr ptr, link_t_ptr ilk, void* data)
 {
 	diagram_delta_t* ptd = GETDIAGRAMDELTA(widget);
 	NOTICE_DIAGRAM nf = { 0 };
@@ -365,7 +365,7 @@ int noti_diagram_owner(res_win_t widget, unsigned int code, link_t_ptr ptr, link
 	return nf.ret;
 }
 
-void noti_diagram_reset_select(res_win_t widget)
+void noti_diagram_reset_select(widget_t widget)
 {
 	diagram_delta_t* ptd = GETDIAGRAMDELTA(widget);
 	link_t_ptr ilk;
@@ -391,7 +391,7 @@ void noti_diagram_reset_select(res_win_t widget)
 	}
 }
 
-void noti_diagram_entity_selected(res_win_t widget, link_t_ptr ilk)
+void noti_diagram_entity_selected(widget_t widget, link_t_ptr ilk)
 {
 	diagram_delta_t* ptd = GETDIAGRAMDELTA(widget);
 	xrect_t xr;
@@ -413,7 +413,7 @@ void noti_diagram_entity_selected(res_win_t widget, link_t_ptr ilk)
 	widget_erase(widget, &xr);
 }
 
-bool_t noti_diagram_entity_changing(res_win_t widget)
+bool_t noti_diagram_entity_changing(widget_t widget)
 {
 	diagram_delta_t* ptd = GETDIAGRAMDELTA(widget);
 	xrect_t xr;
@@ -434,7 +434,7 @@ bool_t noti_diagram_entity_changing(res_win_t widget)
 	return (bool_t)1;
 }
 
-void noti_diagram_entity_changed(res_win_t widget, link_t_ptr ilk)
+void noti_diagram_entity_changed(widget_t widget, link_t_ptr ilk)
 {
 	diagram_delta_t* ptd = GETDIAGRAMDELTA(widget);
 	xrect_t xr;
@@ -453,7 +453,7 @@ void noti_diagram_entity_changed(res_win_t widget, link_t_ptr ilk)
 	noti_diagram_owner(widget, NC_DIAGRAMENTITYCHANGED, ptd->diagram, ilk, NULL);
 }
 
-void noti_diagram_entity_enter(res_win_t widget, link_t_ptr ilk)
+void noti_diagram_entity_enter(widget_t widget, link_t_ptr ilk)
 {
 	diagram_delta_t* ptd = GETDIAGRAMDELTA(widget);
 
@@ -462,10 +462,10 @@ void noti_diagram_entity_enter(res_win_t widget, link_t_ptr ilk)
 
 	ptd->hover = ilk;
 
-	widget_track_mouse(widget, MS_TRACK_HOVER | MS_TRACK_LEAVE);
+	//widget_track_mouse(widget, MS_TRACK_HOVER | MS_TRACK_LEAVE);
 }
 
-void noti_diagram_entity_leave(res_win_t widget)
+void noti_diagram_entity_leave(widget_t widget)
 {
 	diagram_delta_t* ptd = GETDIAGRAMDELTA(widget);
 
@@ -473,10 +473,10 @@ void noti_diagram_entity_leave(res_win_t widget)
 
 	ptd->hover = NULL;
 
-	widget_track_mouse(widget, MS_TRACK_HOVER | MS_TRACK_LEAVE);
+	//widget_track_mouse(widget, MS_TRACK_HOVER | MS_TRACK_LEAVE);
 }
 
-void noti_diagram_entity_hover(res_win_t widget, int x, int y)
+void noti_diagram_entity_hover(widget_t widget, int x, int y)
 {
 	diagram_delta_t* ptd = GETDIAGRAMDELTA(widget);
 	xpoint_t pt;
@@ -488,7 +488,7 @@ void noti_diagram_entity_hover(res_win_t widget, int x, int y)
 	noti_diagram_owner(widget, NC_DIAGRAMENTITYHOVER, ptd->diagram, ptd->hover, (void*)&pt);
 }
 
-void noti_diagram_entity_drag(res_win_t widget, int x, int y)
+void noti_diagram_entity_drag(widget_t widget, int x, int y)
 {
 	diagram_delta_t* ptd = GETDIAGRAMDELTA(widget);
 	xpoint_t pt;
@@ -510,7 +510,7 @@ void noti_diagram_entity_drag(res_win_t widget, int x, int y)
 	noti_diagram_owner(widget, NC_DIAGRAMENTITYDRAG, ptd->diagram, ptd->entity, (void*)&pt);
 }
 
-void noti_diagram_entity_drop(res_win_t widget, int x, int y)
+void noti_diagram_entity_drop(widget_t widget, int x, int y)
 {
 	diagram_delta_t* ptd = GETDIAGRAMDELTA(widget);
 	
@@ -564,7 +564,7 @@ void noti_diagram_entity_drop(res_win_t widget, int x, int y)
 	noti_diagram_owner(widget, NC_DIAGRAMENTITYDROP, ptd->diagram, ptd->entity, (void*)&pt);
 }
 
-void noti_diagram_entity_sizing(res_win_t widget, int hint, int x, int y)
+void noti_diagram_entity_sizing(widget_t widget, int hint, int x, int y)
 {
 	diagram_delta_t* ptd = GETDIAGRAMDELTA(widget);
 	xrect_t xr;
@@ -600,7 +600,7 @@ void noti_diagram_entity_sizing(res_win_t widget, int hint, int x, int y)
 	noti_diagram_owner(widget, NC_DIAGRAMENTITYSIZING, ptd->diagram, ptd->entity, (void*)&xr);
 }
 
-void noti_diagram_entity_sized(res_win_t widget, int x, int y)
+void noti_diagram_entity_sized(widget_t widget, int x, int y)
 {
 	diagram_delta_t* ptd = GETDIAGRAMDELTA(widget);
 	float minw, minh, fw, fh;
@@ -682,12 +682,12 @@ void noti_diagram_entity_sized(res_win_t widget, int x, int y)
 	noti_diagram_owner(widget, NC_DIAGRAMENTITYSIZED, ptd->diagram, ptd->entity, (void*)&xr);
 }
 
-void noti_diagram_calc(res_win_t widget)
+void noti_diagram_calc(widget_t widget)
 {
 	diagram_delta_t* ptd = GETDIAGRAMDELTA(widget);
 }
 
-void noti_diagram_reset_scroll(res_win_t widget, bool_t bUpdate)
+void noti_diagram_reset_scroll(widget_t widget, bool_t bUpdate)
 {
 	diagram_delta_t* ptd = GETDIAGRAMDELTA(widget);
 
@@ -709,7 +709,7 @@ void noti_diagram_reset_scroll(res_win_t widget, bool_t bUpdate)
 }
 
 /*******************************************************************************/
-int hand_diagram_create(res_win_t widget, void* data)
+int hand_diagram_create(widget_t widget, void* data)
 {
 	diagram_delta_t* ptd;
 
@@ -725,7 +725,7 @@ int hand_diagram_create(res_win_t widget, void* data)
 	return 0;
 }
 
-void hand_diagram_destroy(res_win_t widget)
+void hand_diagram_destroy(widget_t widget)
 {
 	diagram_delta_t* ptd = GETDIAGRAMDELTA(widget);
 
@@ -747,7 +747,7 @@ void hand_diagram_destroy(res_win_t widget)
 	widget_hand_destroy(widget);
 }
 
-void hand_diagram_size(res_win_t widget, int code, const xsize_t* prs)
+void hand_diagram_size(widget_t widget, int code, const xsize_t* prs)
 {
 	diagram_delta_t* ptd = GETDIAGRAMDELTA(widget);
 
@@ -759,7 +759,7 @@ void hand_diagram_size(res_win_t widget, int code, const xsize_t* prs)
 	diagramctrl_redraw(widget);
 }
 
-void hand_diagram_scroll(res_win_t widget, bool_t bHorz, int nLine)
+void hand_diagram_scroll(widget_t widget, bool_t bHorz, int nLine)
 {
 	diagram_delta_t* ptd = GETDIAGRAMDELTA(widget);
 
@@ -769,12 +769,12 @@ void hand_diagram_scroll(res_win_t widget, bool_t bHorz, int nLine)
 	widget_hand_scroll(widget, bHorz, nLine);
 }
 
-void hand_diagram_wheel(res_win_t widget, bool_t bHorz, int nDelta)
+void hand_diagram_wheel(widget_t widget, bool_t bHorz, int nDelta)
 {
 	diagram_delta_t* ptd = GETDIAGRAMDELTA(widget);
 	scroll_t scr = { 0 };
 	int nLine;
-	res_win_t win;
+	widget_t win;
 
 	if (!ptd->diagram)
 		return;
@@ -823,7 +823,7 @@ void hand_diagram_wheel(res_win_t widget, bool_t bHorz, int nDelta)
 	}
 }
 
-void hand_diagram_mouse_move(res_win_t widget, dword_t dw, const xpoint_t* pxp)
+void hand_diagram_mouse_move(widget_t widget, dword_t dw, const xpoint_t* pxp)
 {
 	diagram_delta_t* ptd = GETDIAGRAMDELTA(widget);
 	int nHint;
@@ -912,7 +912,7 @@ void hand_diagram_mouse_move(res_win_t widget, dword_t dw, const xpoint_t* pxp)
 	}
 }
 
-void hand_diagram_mouse_hover(res_win_t widget, dword_t dw, const xpoint_t* pxp)
+void hand_diagram_mouse_hover(widget_t widget, dword_t dw, const xpoint_t* pxp)
 {
 	diagram_delta_t* ptd = GETDIAGRAMDELTA(widget);
 
@@ -923,7 +923,7 @@ void hand_diagram_mouse_hover(res_win_t widget, dword_t dw, const xpoint_t* pxp)
 		noti_diagram_entity_hover(widget, pxp->x, pxp->y);
 }
 
-void hand_diagram_mouse_leave(res_win_t widget, dword_t dw, const xpoint_t* pxp)
+void hand_diagram_mouse_leave(widget_t widget, dword_t dw, const xpoint_t* pxp)
 {
 	diagram_delta_t* ptd = GETDIAGRAMDELTA(widget);
 
@@ -934,7 +934,7 @@ void hand_diagram_mouse_leave(res_win_t widget, dword_t dw, const xpoint_t* pxp)
 		noti_diagram_entity_leave(widget);
 }
 
-void hand_diagram_lbutton_down(res_win_t widget, const xpoint_t* pxp)
+void hand_diagram_lbutton_down(widget_t widget, const xpoint_t* pxp)
 {
 	diagram_delta_t* ptd = GETDIAGRAMDELTA(widget);
 	int nHint;
@@ -972,7 +972,7 @@ void hand_diagram_lbutton_down(res_win_t widget, const xpoint_t* pxp)
 	}
 }
 
-void hand_diagram_lbutton_up(res_win_t widget, const xpoint_t* pxp)
+void hand_diagram_lbutton_up(widget_t widget, const xpoint_t* pxp)
 {
 	diagram_delta_t* ptd = GETDIAGRAMDELTA(widget);
 
@@ -1019,7 +1019,7 @@ void hand_diagram_lbutton_up(res_win_t widget, const xpoint_t* pxp)
 	}
 }
 
-void hand_diagram_lbutton_dbclick(res_win_t widget, const xpoint_t* pxp)
+void hand_diagram_lbutton_dbclick(widget_t widget, const xpoint_t* pxp)
 {
 	diagram_delta_t* ptd = GETDIAGRAMDELTA(widget);
 
@@ -1029,7 +1029,7 @@ void hand_diagram_lbutton_dbclick(res_win_t widget, const xpoint_t* pxp)
 	noti_diagram_owner(widget, NC_DIAGRAMDBCLK, ptd->diagram, ptd->entity, (void*)pxp);
 }
 
-void hand_diagram_rbutton_down(res_win_t widget, const xpoint_t* pxp)
+void hand_diagram_rbutton_down(widget_t widget, const xpoint_t* pxp)
 {
 	diagram_delta_t* ptd = GETDIAGRAMDELTA(widget);
 
@@ -1037,7 +1037,7 @@ void hand_diagram_rbutton_down(res_win_t widget, const xpoint_t* pxp)
 		return;
 }
 
-void hand_diagram_rbutton_up(res_win_t widget, const xpoint_t* pxp)
+void hand_diagram_rbutton_up(widget_t widget, const xpoint_t* pxp)
 {
 	diagram_delta_t* ptd = GETDIAGRAMDELTA(widget);
 
@@ -1047,7 +1047,7 @@ void hand_diagram_rbutton_up(res_win_t widget, const xpoint_t* pxp)
 	noti_diagram_owner(widget, NC_DIAGRAMRBCLK, ptd->diagram, ptd->entity, (void*)pxp);
 }
 
-void hand_diagram_keydown(res_win_t widget, dword_t ks, int nKey)
+void hand_diagram_keydown(widget_t widget, dword_t ks, int nKey)
 {
 	diagram_delta_t* ptd = GETDIAGRAMDELTA(widget);
 	float x, y, w, h, m;
@@ -1156,7 +1156,7 @@ void hand_diagram_keydown(res_win_t widget, dword_t ks, int nKey)
 	}
 }
 
-void hand_diagram_notice(res_win_t widget, NOTICE* pnt)
+void hand_diagram_notice(widget_t widget, NOTICE* pnt)
 {
 	diagram_delta_t* ptd = GETDIAGRAMDELTA(widget);
 
@@ -1164,7 +1164,7 @@ void hand_diagram_notice(res_win_t widget, NOTICE* pnt)
 		return;
 }
 
-void hand_diagram_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
+void hand_diagram_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 {
 	diagram_delta_t* ptd = GETDIAGRAMDELTA(widget);
 	xrect_t xr = { 0 };
@@ -1264,7 +1264,7 @@ void hand_diagram_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 
 /***********************************************function********************************************************/
 
-res_win_t diagramctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, res_win_t wparent)
+widget_t diagramctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, widget_t wparent)
 {
 	if_dispatch_t ev = { 0 };
 
@@ -1301,7 +1301,7 @@ res_win_t diagramctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t
 	return widget_create(wname, wstyle, pxr, wparent, &ev);
 }
 
-void diagramctrl_attach(res_win_t widget, link_t_ptr ptr)
+void diagramctrl_attach(widget_t widget, link_t_ptr ptr)
 {
 	diagram_delta_t* ptd = GETDIAGRAMDELTA(widget);
 
@@ -1315,7 +1315,7 @@ void diagramctrl_attach(res_win_t widget, link_t_ptr ptr)
 	diagramctrl_redraw(widget);
 }
 
-link_t_ptr diagramctrl_detach(res_win_t widget)
+link_t_ptr diagramctrl_detach(widget_t widget)
 {
 	diagram_delta_t* ptd = GETDIAGRAMDELTA(widget);
 	link_t_ptr data;
@@ -1331,7 +1331,7 @@ link_t_ptr diagramctrl_detach(res_win_t widget)
 	return data;
 }
 
-link_t_ptr diagramctrl_fetch(res_win_t widget)
+link_t_ptr diagramctrl_fetch(widget_t widget)
 {
 	diagram_delta_t* ptd = GETDIAGRAMDELTA(widget);
 
@@ -1340,7 +1340,7 @@ link_t_ptr diagramctrl_fetch(res_win_t widget)
 	return ptd->diagram;
 }
 
-void diagramctrl_redraw(res_win_t widget)
+void diagramctrl_redraw(widget_t widget)
 {
 	diagram_delta_t* ptd = GETDIAGRAMDELTA(widget);
 	link_t_ptr ilk;
@@ -1376,7 +1376,7 @@ void diagramctrl_redraw(res_win_t widget)
 	widget_paint(widget);
 }
 
-void diagramctrl_redraw_entity(res_win_t widget, link_t_ptr ilk)
+void diagramctrl_redraw_entity(widget_t widget, link_t_ptr ilk)
 {
 	diagram_delta_t* ptd = GETDIAGRAMDELTA(widget);
 	xrect_t xr;
@@ -1399,7 +1399,7 @@ void diagramctrl_redraw_entity(res_win_t widget, link_t_ptr ilk)
 	widget_erase(widget, &xr);
 }
 
-void diagramctrl_tabskip(res_win_t widget, int nSkip)
+void diagramctrl_tabskip(widget_t widget, int nSkip)
 {
 	diagram_delta_t* ptd = GETDIAGRAMDELTA(widget);
 	link_t_ptr ilk = NULL;
@@ -1436,7 +1436,7 @@ void diagramctrl_tabskip(res_win_t widget, int nSkip)
 	diagramctrl_set_focus_entity(widget, ilk);
 }
 
-bool_t diagramctrl_set_focus_entity(res_win_t widget, link_t_ptr ilk)
+bool_t diagramctrl_set_focus_entity(widget_t widget, link_t_ptr ilk)
 {
 	diagram_delta_t* ptd = GETDIAGRAMDELTA(widget);
 	bool_t bRe;
@@ -1471,7 +1471,7 @@ bool_t diagramctrl_set_focus_entity(res_win_t widget, link_t_ptr ilk)
 	return (bool_t)1;
 }
 
-link_t_ptr diagramctrl_get_focus_entity(res_win_t widget)
+link_t_ptr diagramctrl_get_focus_entity(widget_t widget)
 {
 	diagram_delta_t* ptd = GETDIAGRAMDELTA(widget);
 
@@ -1483,7 +1483,7 @@ link_t_ptr diagramctrl_get_focus_entity(res_win_t widget)
 	return ptd->entity;
 }
 
-void diagramctrl_set_opera(res_win_t widget, int opera)
+void diagramctrl_set_opera(widget_t widget, int opera)
 {
 	diagram_delta_t* ptd = GETDIAGRAMDELTA(widget);
 
@@ -1492,7 +1492,7 @@ void diagramctrl_set_opera(res_win_t widget, int opera)
 	ptd->opera = opera;
 }
 
-int diagramctrl_get_opera(res_win_t widget)
+int diagramctrl_get_opera(widget_t widget)
 {
 	diagram_delta_t* ptd = GETDIAGRAMDELTA(widget);
 
@@ -1501,7 +1501,7 @@ int diagramctrl_get_opera(res_win_t widget)
 	return ptd->opera;
 }
 
-void diagramctrl_get_diagram_entity_rect(res_win_t widget, link_t_ptr ilk, xrect_t* pxr)
+void diagramctrl_get_diagram_entity_rect(widget_t widget, link_t_ptr ilk, xrect_t* pxr)
 {
 	diagram_delta_t* ptd = GETDIAGRAMDELTA(widget);
 	
@@ -1517,7 +1517,7 @@ void diagramctrl_get_diagram_entity_rect(res_win_t widget, link_t_ptr ilk, xrect
 	_diagramctrl_entity_rect(widget, ilk, pxr);
 }
 
-bool_t diagramctrl_get_dirty(res_win_t widget)
+bool_t diagramctrl_get_dirty(widget_t widget)
 {
 	diagram_delta_t* ptd = GETDIAGRAMDELTA(widget);
 
@@ -1529,7 +1529,7 @@ bool_t diagramctrl_get_dirty(res_win_t widget)
 	return (peek_stack_node(ptd->stack, -1)) ? 1 : 0;
 }
 
-void diagramctrl_set_dirty(res_win_t widget, bool_t bDirty)
+void diagramctrl_set_dirty(widget_t widget, bool_t bDirty)
 {
 	diagram_delta_t* ptd = GETDIAGRAMDELTA(widget);
 

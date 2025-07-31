@@ -26,8 +26,8 @@ LICENSE.GPL3 for more details.
 
 #include "ctrl.h"
 
-#include "../xdcimp.h"
-#include "../xdcinit.h"
+#include "../xdcobj.h"
+
 
 typedef struct label_delta_t{
 	link_t_ptr label;
@@ -37,8 +37,8 @@ typedef struct label_delta_t{
 	int cur_page;
 	bool_t b_drag;
 
-	res_win_t hsc;
-	res_win_t vsc;
+	widget_t hsc;
+	widget_t vsc;
 
 }label_delta_t;
 
@@ -46,7 +46,7 @@ typedef struct label_delta_t{
 #define SETLABELDELTA(ph,ptd) widget_set_user_delta(ph,(vword_t)ptd)
 
 /********************************************************************************************/
-void _labelctrl_item_rect(res_win_t widget, link_t_ptr ilk, xrect_t* pxr)
+void _labelctrl_item_rect(widget_t widget, link_t_ptr ilk, xrect_t* pxr)
 {
 	label_delta_t* ptd = GETLABELDELTA(widget);
 
@@ -55,7 +55,7 @@ void _labelctrl_item_rect(res_win_t widget, link_t_ptr ilk, xrect_t* pxr)
 	widget_rect_to_pt(widget, pxr);
 }
 
-void _labelctrl_reset_page(res_win_t widget)
+void _labelctrl_reset_page(widget_t widget)
 {
 	label_delta_t* ptd = GETLABELDELTA(widget);
 
@@ -86,7 +86,7 @@ void _labelctrl_reset_page(res_win_t widget)
 	widget_reset_scroll(widget, 0);
 }
 
-void _labelctrl_ensure_visible(res_win_t widget)
+void _labelctrl_ensure_visible(widget_t widget)
 {
 	label_delta_t* ptd = GETLABELDELTA(widget);
 	xrect_t xr;
@@ -101,7 +101,7 @@ void _labelctrl_ensure_visible(res_win_t widget)
 
 /******************************************control event***************************************/
 
-int noti_label_owner(res_win_t widget, unsigned int code, link_t_ptr label, link_t_ptr ilk, void* data)
+int noti_label_owner(widget_t widget, unsigned int code, link_t_ptr label, link_t_ptr ilk, void* data)
 {
 	label_delta_t* ptd = GETLABELDELTA(widget);
 	NOTICE_LABEL nf = { 0 };
@@ -119,7 +119,7 @@ int noti_label_owner(res_win_t widget, unsigned int code, link_t_ptr label, link
 	return nf.ret;
 }
 
-bool_t noti_label_item_changing(res_win_t widget)
+bool_t noti_label_item_changing(widget_t widget)
 {
 	label_delta_t* ptd = GETLABELDELTA(widget);
 	xrect_t xr;
@@ -139,7 +139,7 @@ bool_t noti_label_item_changing(res_win_t widget)
 	return 1;
 }
 
-void noti_label_item_changed(res_win_t widget, link_t_ptr plk)
+void noti_label_item_changed(widget_t widget, link_t_ptr plk)
 {
 	label_delta_t* ptd = GETLABELDELTA(widget);
 	xrect_t xr;
@@ -157,7 +157,7 @@ void noti_label_item_changed(res_win_t widget, link_t_ptr plk)
 	noti_label_owner(widget, NC_LABELITEMCHANGED, ptd->label, ptd->item, NULL);
 }
 
-void noti_label_item_enter(res_win_t widget, link_t_ptr plk)
+void noti_label_item_enter(widget_t widget, link_t_ptr plk)
 {
 	label_delta_t* ptd = GETLABELDELTA(widget);
 
@@ -168,11 +168,11 @@ void noti_label_item_enter(res_win_t widget, link_t_ptr plk)
 
 	if (widget_is_hotvoer(widget))
 	{
-		widget_track_mouse(widget, MS_TRACK_HOVER | MS_TRACK_LEAVE);
+		//widget_track_mouse(widget, MS_TRACK_HOVER | MS_TRACK_LEAVE);
 	}
 }
 
-void noti_label_item_leave(res_win_t widget)
+void noti_label_item_leave(widget_t widget)
 {
 	label_delta_t* ptd = GETLABELDELTA(widget);
 
@@ -182,11 +182,11 @@ void noti_label_item_leave(res_win_t widget)
 
 	if (widget_is_hotvoer(widget))
 	{
-		widget_track_mouse(widget, MS_TRACK_HOVER | MS_TRACK_LEAVE);
+		//widget_track_mouse(widget, MS_TRACK_HOVER | MS_TRACK_LEAVE);
 	}
 }
 
-void noti_label_item_hover(res_win_t widget, int x, int y)
+void noti_label_item_hover(widget_t widget, int x, int y)
 {
 	label_delta_t* ptd = GETLABELDELTA(widget);
 	xpoint_t xp;
@@ -198,7 +198,7 @@ void noti_label_item_hover(res_win_t widget, int x, int y)
 	noti_label_owner(widget, NC_LABELITEMHOVER, ptd->label, ptd->hover, (void*)&xp);
 }
 
-void noti_label_item_drag(res_win_t widget, const xpoint_t* pxp)
+void noti_label_item_drag(widget_t widget, const xpoint_t* pxp)
 {
 	label_delta_t* ptd = GETLABELDELTA(widget);
 	xpoint_t pt;
@@ -218,7 +218,7 @@ void noti_label_item_drag(res_win_t widget, const xpoint_t* pxp)
 	noti_label_owner(widget, NC_LABELITEMDRAG, ptd->label, ptd->item, (void*)&pt);
 }
 
-void noti_label_item_drop(res_win_t widget, const xpoint_t* pxp)
+void noti_label_item_drop(widget_t widget, const xpoint_t* pxp)
 {
 	label_delta_t* ptd = GETLABELDELTA(widget);
 	xpoint_t pt;
@@ -238,7 +238,7 @@ void noti_label_item_drop(res_win_t widget, const xpoint_t* pxp)
 	noti_label_owner(widget, NC_LABELITEMDROP, ptd->label, ptd->item, (void*)&pt);
 }
 
-void noti_label_reset_scroll(res_win_t widget, bool_t bUpdate)
+void noti_label_reset_scroll(widget_t widget, bool_t bUpdate)
 {
 	label_delta_t* ptd = GETLABELDELTA(widget);
 
@@ -260,7 +260,7 @@ void noti_label_reset_scroll(res_win_t widget, bool_t bUpdate)
 }
 /******************************************************************************/
 
-int hand_label_create(res_win_t widget, void* data)
+int hand_label_create(widget_t widget, void* data)
 {
 	label_delta_t* ptd;
 
@@ -274,7 +274,7 @@ int hand_label_create(res_win_t widget, void* data)
 	return 0;
 }
 
-void hand_label_destroy(res_win_t widget)
+void hand_label_destroy(widget_t widget)
 {
 	label_delta_t* ptd = GETLABELDELTA(widget);
 
@@ -293,7 +293,7 @@ void hand_label_destroy(res_win_t widget)
 	widget_hand_destroy(widget);
 }
 
-void hand_label_size(res_win_t widget, int code, const xsize_t* prs)
+void hand_label_size(widget_t widget, int code, const xsize_t* prs)
 {
 	label_delta_t* ptd = GETLABELDELTA(widget);
 
@@ -305,7 +305,7 @@ void hand_label_size(res_win_t widget, int code, const xsize_t* prs)
 	labelctrl_redraw(widget);
 }
 
-void hand_label_scroll(res_win_t widget, bool_t bHorz, int nLine)
+void hand_label_scroll(widget_t widget, bool_t bHorz, int nLine)
 {
 	label_delta_t* ptd = GETLABELDELTA(widget);
 
@@ -315,12 +315,12 @@ void hand_label_scroll(res_win_t widget, bool_t bHorz, int nLine)
 	widget_hand_scroll(widget, bHorz, nLine);
 }
 
-void hand_label_wheel(res_win_t widget, bool_t bHorz, int nDelta)
+void hand_label_wheel(widget_t widget, bool_t bHorz, int nDelta)
 {
 	label_delta_t* ptd = GETLABELDELTA(widget);
 	scroll_t scr = { 0 };
 	int nLine;
-	res_win_t win;
+	widget_t win;
 
 	if (!ptd->label)
 		return;
@@ -369,7 +369,7 @@ void hand_label_wheel(res_win_t widget, bool_t bHorz, int nDelta)
 	}
 }
 
-void hand_label_mouse_move(res_win_t widget, dword_t dw, const xpoint_t* pxp)
+void hand_label_mouse_move(widget_t widget, dword_t dw, const xpoint_t* pxp)
 {
 	label_delta_t* ptd = GETLABELDELTA(widget);
 	int nHint;
@@ -411,7 +411,7 @@ void hand_label_mouse_move(res_win_t widget, dword_t dw, const xpoint_t* pxp)
 	}
 }
 
-void hand_label_mouse_hover(res_win_t widget, dword_t dw, const xpoint_t* pxp)
+void hand_label_mouse_hover(widget_t widget, dword_t dw, const xpoint_t* pxp)
 {
 	label_delta_t* ptd = GETLABELDELTA(widget);
 
@@ -422,7 +422,7 @@ void hand_label_mouse_hover(res_win_t widget, dword_t dw, const xpoint_t* pxp)
 		noti_label_item_hover(widget, pxp->x, pxp->y);
 }
 
-void hand_label_mouse_leave(res_win_t widget, dword_t dw, const xpoint_t* pxp)
+void hand_label_mouse_leave(widget_t widget, dword_t dw, const xpoint_t* pxp)
 {
 	label_delta_t* ptd = GETLABELDELTA(widget);
 
@@ -433,7 +433,7 @@ void hand_label_mouse_leave(res_win_t widget, dword_t dw, const xpoint_t* pxp)
 		noti_label_item_leave(widget);
 }
 
-void hand_label_lbutton_dbclick(res_win_t widget, const xpoint_t* pxp)
+void hand_label_lbutton_dbclick(widget_t widget, const xpoint_t* pxp)
 {
 	label_delta_t* ptd = GETLABELDELTA(widget);
 
@@ -443,7 +443,7 @@ void hand_label_lbutton_dbclick(res_win_t widget, const xpoint_t* pxp)
 	noti_label_owner(widget, NC_LABELDBCLK,ptd->label, ptd->item, (void*)pxp);
 }
 
-void hand_label_lbutton_down(res_win_t widget, const xpoint_t* pxp)
+void hand_label_lbutton_down(widget_t widget, const xpoint_t* pxp)
 {
 	label_delta_t* ptd = GETLABELDELTA(widget);
 
@@ -456,7 +456,7 @@ void hand_label_lbutton_down(res_win_t widget, const xpoint_t* pxp)
 	}
 }
 
-void hand_label_lbutton_up(res_win_t widget, const xpoint_t* pxp)
+void hand_label_lbutton_up(widget_t widget, const xpoint_t* pxp)
 {
 	label_delta_t* ptd = GETLABELDELTA(widget);
 	xpoint_t pt;
@@ -498,7 +498,7 @@ void hand_label_lbutton_up(res_win_t widget, const xpoint_t* pxp)
 	noti_label_owner(widget, NC_LABELLBCLK, ptd->label, ptd->item, (void*)pxp);
 }
 
-void hand_label_rbutton_down(res_win_t widget, const xpoint_t* pxp)
+void hand_label_rbutton_down(widget_t widget, const xpoint_t* pxp)
 {
 	label_delta_t* ptd = GETLABELDELTA(widget);
 
@@ -506,7 +506,7 @@ void hand_label_rbutton_down(res_win_t widget, const xpoint_t* pxp)
 		return;
 }
 
-void hand_label_rbutton_up(res_win_t widget, const xpoint_t* pxp)
+void hand_label_rbutton_up(widget_t widget, const xpoint_t* pxp)
 {
 	label_delta_t* ptd = GETLABELDELTA(widget);
 
@@ -516,7 +516,7 @@ void hand_label_rbutton_up(res_win_t widget, const xpoint_t* pxp)
 	noti_label_owner(widget, NC_LABELRBCLK, ptd->label, ptd->item, (void*)pxp);
 }
 
-void hand_label_keydown(res_win_t widget, dword_t ks, int nKey)
+void hand_label_keydown(widget_t widget, dword_t ks, int nKey)
 {
 	label_delta_t* ptd = GETLABELDELTA(widget);
 
@@ -552,7 +552,7 @@ void hand_label_keydown(res_win_t widget, dword_t ks, int nKey)
 	}
 }
 
-void hand_label_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
+void hand_label_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 {
 	label_delta_t* ptd = GETLABELDELTA(widget);
 	visual_t rdc;
@@ -600,7 +600,7 @@ void hand_label_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 }
 
 /**********************************************control method****************************************/
-res_win_t labelctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, res_win_t wparent)
+widget_t labelctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, widget_t wparent)
 {
 	if_dispatch_t ev = { 0 };
 
@@ -635,7 +635,7 @@ res_win_t labelctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* 
 	return widget_create(wname, wstyle, pxr, wparent, &ev);
 }
 
-void labelctrl_attach(res_win_t widget, link_t_ptr ptr)
+void labelctrl_attach(widget_t widget, link_t_ptr ptr)
 {
 	label_delta_t* ptd = GETLABELDELTA(widget);
 
@@ -648,7 +648,7 @@ void labelctrl_attach(res_win_t widget, link_t_ptr ptr)
 	labelctrl_redraw(widget);
 }
 
-link_t_ptr labelctrl_detach(res_win_t widget)
+link_t_ptr labelctrl_detach(widget_t widget)
 {
 	label_delta_t* ptd = GETLABELDELTA(widget);
 	link_t_ptr data;
@@ -670,7 +670,7 @@ link_t_ptr labelctrl_detach(res_win_t widget)
 	return data;
 }
 
-link_t_ptr labelctrl_fetch(res_win_t widget)
+link_t_ptr labelctrl_fetch(widget_t widget)
 {
 	label_delta_t* ptd = GETLABELDELTA(widget);
 
@@ -679,7 +679,7 @@ link_t_ptr labelctrl_fetch(res_win_t widget)
 	return ptd->label;
 }
 
-void labelctrl_redraw(res_win_t widget)
+void labelctrl_redraw(widget_t widget)
 {
 	label_delta_t* ptd = GETLABELDELTA(widget);
 	link_t_ptr ilk;
@@ -725,7 +725,7 @@ void labelctrl_redraw(res_win_t widget)
 	widget_paint(widget);
 }
 
-void labelctrl_tabskip(res_win_t widget, int nSkip)
+void labelctrl_tabskip(widget_t widget, int nSkip)
 {
 	label_delta_t* ptd = GETLABELDELTA(widget);
 	link_t_ptr plk = ptd->item;
@@ -772,7 +772,7 @@ void labelctrl_tabskip(res_win_t widget, int nSkip)
 	}
 }
 
-void labelctrl_redraw_item(res_win_t widget, link_t_ptr plk)
+void labelctrl_redraw_item(widget_t widget, link_t_ptr plk)
 {
 	label_delta_t* ptd = GETLABELDELTA(widget);
 	xrect_t xr;
@@ -795,7 +795,7 @@ void labelctrl_redraw_item(res_win_t widget, link_t_ptr plk)
 	widget_erase(widget, &xr);
 }
 
-bool_t labelctrl_set_focus_item(res_win_t widget, link_t_ptr ilk)
+bool_t labelctrl_set_focus_item(widget_t widget, link_t_ptr ilk)
 {
 	label_delta_t* ptd = GETLABELDELTA(widget);
 	bool_t bRe;
@@ -830,7 +830,7 @@ bool_t labelctrl_set_focus_item(res_win_t widget, link_t_ptr ilk)
 	return 1;
 }
 
-link_t_ptr labelctrl_get_focus_item(res_win_t widget)
+link_t_ptr labelctrl_get_focus_item(widget_t widget)
 {
 	label_delta_t* ptd = GETLABELDELTA(widget);
 
@@ -839,7 +839,7 @@ link_t_ptr labelctrl_get_focus_item(res_win_t widget)
 	return ptd->item;
 }
 
-void labelctrl_get_item_rect(res_win_t widget, link_t_ptr ilk, xrect_t* pxr)
+void labelctrl_get_item_rect(widget_t widget, link_t_ptr ilk, xrect_t* pxr)
 {
 	label_delta_t* ptd = GETLABELDELTA(widget);
 
@@ -855,7 +855,7 @@ void labelctrl_get_item_rect(res_win_t widget, link_t_ptr ilk, xrect_t* pxr)
 	_labelctrl_item_rect(widget, ilk, pxr);
 }
 
-void labelctrl_move_first_page(res_win_t widget)
+void labelctrl_move_first_page(widget_t widget)
 {
 	label_delta_t* ptd = GETLABELDELTA(widget);
 	int nCurPage;
@@ -876,7 +876,7 @@ void labelctrl_move_first_page(res_win_t widget)
 	}
 }
 
-void labelctrl_move_prev_page(res_win_t widget)
+void labelctrl_move_prev_page(widget_t widget)
 {
 	label_delta_t* ptd = GETLABELDELTA(widget);
 	int nCurPage;
@@ -897,7 +897,7 @@ void labelctrl_move_prev_page(res_win_t widget)
 	}
 }
 
-void labelctrl_move_next_page(res_win_t widget)
+void labelctrl_move_next_page(widget_t widget)
 {
 	label_delta_t* ptd = GETLABELDELTA(widget);
 	int nCurPage, nMaxPage;
@@ -919,7 +919,7 @@ void labelctrl_move_next_page(res_win_t widget)
 	}
 }
 
-void labelctrl_move_last_page(res_win_t widget)
+void labelctrl_move_last_page(widget_t widget)
 {
 	label_delta_t* ptd = GETLABELDELTA(widget);
 	int nCurPage, nMaxPage;
@@ -941,7 +941,7 @@ void labelctrl_move_last_page(res_win_t widget)
 	}
 }
 
-void labelctrl_move_to_page(res_win_t widget, int page)
+void labelctrl_move_to_page(widget_t widget, int page)
 {
 	label_delta_t* ptd = GETLABELDELTA(widget);
 	int nCurPage, nMaxPage;
@@ -963,7 +963,7 @@ void labelctrl_move_to_page(res_win_t widget, int page)
 	}
 }
 
-int labelctrl_get_max_page(res_win_t widget)
+int labelctrl_get_max_page(widget_t widget)
 {
 	label_delta_t* ptd = GETLABELDELTA(widget);
 
@@ -975,7 +975,7 @@ int labelctrl_get_max_page(res_win_t widget)
 	return calc_label_pages(ptd->label);
 }
 
-int labelctrl_get_cur_page(res_win_t widget)
+int labelctrl_get_cur_page(widget_t widget)
 {
 	label_delta_t* ptd = GETLABELDELTA(widget);
 
@@ -1014,7 +1014,7 @@ void calc_label_suit_size(link_t_ptr ptr, xsize_t* pxs)
 	}
 }
 
-void labelctrl_popup_size(res_win_t widget, xsize_t* pse)
+void labelctrl_popup_size(widget_t widget, xsize_t* pse)
 {
 	label_delta_t* ptd = GETLABELDELTA(widget);
 	float ih, iw;
@@ -1048,5 +1048,5 @@ void labelctrl_popup_size(res_win_t widget, xsize_t* pse)
 
 	widget_size_to_pt(widget, pse);
 
-	widget_adjust_size(widget_get_style(widget), pse);
+	adjust_widget_size(widget_get_style(widget), pse);
 }

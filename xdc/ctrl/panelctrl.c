@@ -26,8 +26,8 @@ LICENSE.GPL3 for more details.
 
 #include "ctrl.h"
 
-#include "../xdcimp.h"
-#include "../xdcinit.h"
+#include "../xdcobj.h"
+
 
 typedef struct _panel_delta_t{
 	link_t_ptr arch;
@@ -37,7 +37,7 @@ typedef struct _panel_delta_t{
 	int title_height;
 	int item_width;
 
-	res_win_t vsc;
+	widget_t vsc;
 	bool_t b_delete;
 
 	xfont_t xf;
@@ -58,7 +58,7 @@ typedef enum{
 }PANEL_HINT;
 /***************************************************************************************/
 
-static int _panelctrl_calc_width(res_win_t widget)
+static int _panelctrl_calc_width(widget_t widget)
 {
 	panel_delta_t* ptd = GETPANELDELTA(widget);
 	link_t_ptr ilk, doc;
@@ -86,7 +86,7 @@ static int _panelctrl_calc_width(res_win_t widget)
 	return pw;
 }
 
-static int _panelctrl_calc_height(res_win_t widget)
+static int _panelctrl_calc_height(widget_t widget)
 {
 	panel_delta_t* ptd = GETPANELDELTA(widget);
 	link_t_ptr ilk,doc;
@@ -113,7 +113,7 @@ static int _panelctrl_calc_height(res_win_t widget)
 	return ph;
 }
 
-static int _panelctrl_calc_hint(res_win_t widget, const xpoint_t* ppt, link_t_ptr* pplk)
+static int _panelctrl_calc_hint(widget_t widget, const xpoint_t* ppt, link_t_ptr* pplk)
 {
 	panel_delta_t* ptd = GETPANELDELTA(widget);
 	link_t_ptr ilk,doc;
@@ -172,7 +172,7 @@ static int _panelctrl_calc_hint(res_win_t widget, const xpoint_t* ppt, link_t_pt
 	return hint;
 }
 
-static void _panelctrl_item_rect(res_win_t widget, link_t_ptr plk, xrect_t* pxr)
+static void _panelctrl_item_rect(widget_t widget, link_t_ptr plk, xrect_t* pxr)
 {
 	panel_delta_t* ptd = GETPANELDELTA(widget);
 
@@ -205,7 +205,7 @@ static void _panelctrl_item_rect(res_win_t widget, link_t_ptr plk, xrect_t* pxr)
 	}
 }
 
-static void _panelctrl_reset_page(res_win_t widget)
+static void _panelctrl_reset_page(widget_t widget)
 {
 	panel_delta_t* ptd = GETPANELDELTA(widget);
 	xrect_t xr;
@@ -218,7 +218,7 @@ static void _panelctrl_reset_page(res_win_t widget)
 	widget_reset_paging(widget, xr.w, xr.h, xr.w, mh, ptd->item_width, ptd->title_height);
 }
 
-static void _panelctrl_ensure_visible(res_win_t widget)
+static void _panelctrl_ensure_visible(widget_t widget)
 {
 	panel_delta_t* ptd = GETPANELDELTA(widget);
 	xrect_t xr;
@@ -232,7 +232,7 @@ static void _panelctrl_ensure_visible(res_win_t widget)
 }
 
 /*************************************************************************/
-int noti_panel_owner(res_win_t widget, unsigned int code, link_t_ptr arch, link_t_ptr item, void* data)
+int noti_panel_owner(widget_t widget, unsigned int code, link_t_ptr arch, link_t_ptr item, void* data)
 {
 	panel_delta_t* ptd = GETPANELDELTA(widget);
 	NOTICE_PANEL nf = { 0 };
@@ -250,7 +250,7 @@ int noti_panel_owner(res_win_t widget, unsigned int code, link_t_ptr arch, link_
 	return nf.ret;
 }
 
-bool_t noti_panel_item_changing(res_win_t widget)
+bool_t noti_panel_item_changing(widget_t widget)
 {
 	panel_delta_t* ptd = GETPANELDELTA(widget);
 	xrect_t xr;
@@ -269,7 +269,7 @@ bool_t noti_panel_item_changing(res_win_t widget)
 	return 1;
 }
 
-void noti_panel_item_changed(res_win_t widget, link_t_ptr elk)
+void noti_panel_item_changed(widget_t widget, link_t_ptr elk)
 {
 	panel_delta_t* ptd = GETPANELDELTA(widget);
 	xrect_t xr;
@@ -283,7 +283,7 @@ void noti_panel_item_changed(res_win_t widget, link_t_ptr elk)
 	widget_erase(widget, NULL);
 }
 
-bool_t noti_panel_item_delete(res_win_t widget, link_t_ptr ilk)
+bool_t noti_panel_item_delete(widget_t widget, link_t_ptr ilk)
 {
 	panel_delta_t* ptd = GETPANELDELTA(widget);
 
@@ -291,7 +291,7 @@ bool_t noti_panel_item_delete(res_win_t widget, link_t_ptr ilk)
 	return 1;
 }
 
-void noti_panel_item_enter(res_win_t widget, link_t_ptr plk)
+void noti_panel_item_enter(widget_t widget, link_t_ptr plk)
 {
 	panel_delta_t* ptd = GETPANELDELTA(widget);
 
@@ -302,11 +302,11 @@ void noti_panel_item_enter(res_win_t widget, link_t_ptr plk)
 
 	if (widget_is_hotvoer(widget))
 	{
-		widget_track_mouse(widget, MS_TRACK_HOVER | MS_TRACK_LEAVE);
+		//widget_track_mouse(widget, MS_TRACK_HOVER | MS_TRACK_LEAVE);
 	}
 }
 
-void noti_panel_item_leave(res_win_t widget)
+void noti_panel_item_leave(widget_t widget)
 {
 	panel_delta_t* ptd = GETPANELDELTA(widget);
 
@@ -316,11 +316,11 @@ void noti_panel_item_leave(res_win_t widget)
 
 	if (widget_is_hotvoer(widget))
 	{
-		widget_track_mouse(widget, MS_TRACK_HOVER | MS_TRACK_LEAVE);
+		//widget_track_mouse(widget, MS_TRACK_HOVER | MS_TRACK_LEAVE);
 	}
 }
 
-void noti_panel_item_hover(res_win_t widget, int x, int y)
+void noti_panel_item_hover(widget_t widget, int x, int y)
 {
 	panel_delta_t* ptd = GETPANELDELTA(widget);
 	xpoint_t xp;
@@ -332,7 +332,7 @@ void noti_panel_item_hover(res_win_t widget, int x, int y)
 	noti_panel_owner(widget, NC_PANELITEMHOVER, ptd->arch, ptd->hover, (void*)&xp);
 }
 
-void noti_panel_reset_scroll(res_win_t widget, bool_t bUpdate)
+void noti_panel_reset_scroll(widget_t widget, bool_t bUpdate)
 {
 	panel_delta_t* ptd = GETPANELDELTA(widget);
 
@@ -345,7 +345,7 @@ void noti_panel_reset_scroll(res_win_t widget, bool_t bUpdate)
 	}
 }
 /********************************************************************************************/
-int hand_panel_create(res_win_t widget, void* data)
+int hand_panel_create(widget_t widget, void* data)
 {
 	panel_delta_t* ptd;
 
@@ -375,7 +375,7 @@ int hand_panel_create(res_win_t widget, void* data)
 	return 0;
 }
 
-void hand_panel_destroy(res_win_t widget)
+void hand_panel_destroy(widget_t widget)
 {
 	panel_delta_t* ptd = GETPANELDELTA(widget);
 
@@ -391,7 +391,7 @@ void hand_panel_destroy(res_win_t widget)
 	widget_hand_destroy(widget);
 }
 
-void hand_panel_keydown(res_win_t widget, dword_t ks, int key)
+void hand_panel_keydown(widget_t widget, dword_t ks, int key)
 {
 	panel_delta_t* ptd = GETPANELDELTA(widget);
 
@@ -419,7 +419,7 @@ void hand_panel_keydown(res_win_t widget, dword_t ks, int key)
 	}
 }
 
-void hand_panel_mouse_move(res_win_t widget, dword_t dw, const xpoint_t* pxp)
+void hand_panel_mouse_move(widget_t widget, dword_t dw, const xpoint_t* pxp)
 {
 	panel_delta_t* ptd = GETPANELDELTA(widget);
 	link_t_ptr plk = NULL;
@@ -440,7 +440,7 @@ void hand_panel_mouse_move(res_win_t widget, dword_t dw, const xpoint_t* pxp)
 	}
 }
 
-void hand_panel_mouse_hover(res_win_t widget, dword_t dw, const xpoint_t* pxp)
+void hand_panel_mouse_hover(widget_t widget, dword_t dw, const xpoint_t* pxp)
 {
 	panel_delta_t* ptd = GETPANELDELTA(widget);
 
@@ -451,7 +451,7 @@ void hand_panel_mouse_hover(res_win_t widget, dword_t dw, const xpoint_t* pxp)
 		noti_panel_item_hover(widget, pxp->x, pxp->y);
 }
 
-void hand_panel_mouse_leave(res_win_t widget, dword_t dw, const xpoint_t* pxp)
+void hand_panel_mouse_leave(widget_t widget, dword_t dw, const xpoint_t* pxp)
 {
 	panel_delta_t* ptd = GETPANELDELTA(widget);
 
@@ -462,7 +462,7 @@ void hand_panel_mouse_leave(res_win_t widget, dword_t dw, const xpoint_t* pxp)
 		noti_panel_item_leave(widget);
 }
 
-void hand_panel_lbutton_down(res_win_t widget, const xpoint_t* pxp)
+void hand_panel_lbutton_down(widget_t widget, const xpoint_t* pxp)
 {
 	panel_delta_t* ptd = GETPANELDELTA(widget);
 
@@ -475,7 +475,7 @@ void hand_panel_lbutton_down(res_win_t widget, const xpoint_t* pxp)
 	}
 }
 
-void hand_panel_lbutton_up(res_win_t widget, const xpoint_t* pxp)
+void hand_panel_lbutton_up(widget_t widget, const xpoint_t* pxp)
 {
 	panel_delta_t* ptd = GETPANELDELTA(widget);
 	link_t_ptr ilk = NULL;
@@ -514,7 +514,7 @@ void hand_panel_lbutton_up(res_win_t widget, const xpoint_t* pxp)
 	noti_panel_owner(widget, NC_PANELLBCLK, ptd->arch, ptd->item, (void*)pxp);
 }
 
-void hand_panel_lbutton_dbclick(res_win_t widget, const xpoint_t* pxp)
+void hand_panel_lbutton_dbclick(widget_t widget, const xpoint_t* pxp)
 {
 	panel_delta_t* ptd = GETPANELDELTA(widget);
 
@@ -524,7 +524,7 @@ void hand_panel_lbutton_dbclick(res_win_t widget, const xpoint_t* pxp)
 	noti_panel_owner(widget, NC_PANELDBCLK, ptd->arch, ptd->item, (void*)pxp);
 }
 
-void hand_panel_rbutton_down(res_win_t widget, const xpoint_t* pxp)
+void hand_panel_rbutton_down(widget_t widget, const xpoint_t* pxp)
 {
 	panel_delta_t* ptd = GETPANELDELTA(widget);
 
@@ -532,7 +532,7 @@ void hand_panel_rbutton_down(res_win_t widget, const xpoint_t* pxp)
 		return;
 }
 
-void hand_panel_rbutton_up(res_win_t widget, const xpoint_t* pxp)
+void hand_panel_rbutton_up(widget_t widget, const xpoint_t* pxp)
 {
 	panel_delta_t* ptd = GETPANELDELTA(widget);
 
@@ -542,7 +542,7 @@ void hand_panel_rbutton_up(res_win_t widget, const xpoint_t* pxp)
 	noti_panel_owner(widget, NC_PANELRBCLK, ptd->arch, ptd->item, (void*)pxp);
 }
 
-void hand_panel_size(res_win_t widget, int code, const xsize_t* prs)
+void hand_panel_size(widget_t widget, int code, const xsize_t* prs)
 {
 	panel_delta_t* ptd = GETPANELDELTA(widget);
 
@@ -554,7 +554,7 @@ void hand_panel_size(res_win_t widget, int code, const xsize_t* prs)
 	panelctrl_redraw(widget);
 }
 
-void hand_panel_scroll(res_win_t widget, bool_t bHorz, int nLine)
+void hand_panel_scroll(widget_t widget, bool_t bHorz, int nLine)
 {
 	panel_delta_t* ptd = GETPANELDELTA(widget);
 
@@ -564,12 +564,12 @@ void hand_panel_scroll(res_win_t widget, bool_t bHorz, int nLine)
 	widget_hand_scroll(widget, bHorz, nLine);
 }
 
-void hand_panel_wheel(res_win_t widget, bool_t bHorz, int nDelta)
+void hand_panel_wheel(widget_t widget, bool_t bHorz, int nDelta)
 {
 	panel_delta_t* ptd = GETPANELDELTA(widget);
 	scroll_t scr = { 0 };
 	int nLine;
-	res_win_t win;
+	widget_t win;
 
 	if (!ptd->arch)
 		return;
@@ -606,14 +606,14 @@ void hand_panel_wheel(res_win_t widget, bool_t bHorz, int nDelta)
 	}
 }
 
-void hand_panel_xfont(res_win_t widget, const xfont_t* pxf)
+void hand_panel_xfont(widget_t widget, const xfont_t* pxf)
 {
 	panel_delta_t* ptd = GETPANELDELTA(widget);
 
 	xmem_copy((void*)&ptd->xf, (void*)pxf, sizeof(xfont_t));
 }
 
-void hand_panel_xface(res_win_t widget, const xface_t* pxa)
+void hand_panel_xface(widget_t widget, const xface_t* pxa)
 {
 	panel_delta_t* ptd = GETPANELDELTA(widget);
 
@@ -622,7 +622,7 @@ void hand_panel_xface(res_win_t widget, const xface_t* pxa)
 	xscpy(ptd->xa.line_align, GDI_ATTR_TEXT_ALIGN_NEAR);
 }
 
-void hand_panel_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
+void hand_panel_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 {
 	panel_delta_t* ptd = GETPANELDELTA(widget);
 	visual_t rdc;
@@ -710,7 +710,7 @@ void hand_panel_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 		xr_icon.w = ptd->title_height;
 		xr_icon.h = ptd->title_height;
 		pt_center_rect(&xr_icon, 12, 12);
-		rect_pt_to_tm(canv, &xr_icon);
+		rect_pt_to_mm(canv, &xr_icon);
 		draw_gizmo(pif, &xc, &xr_icon, GDI_ATTR_GIZMO_BOOK);
 
 		xr_icon.x = xr.x + 12;
@@ -728,7 +728,7 @@ void hand_panel_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 }
 
 /************************************************************************************************/
-res_win_t panelctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, res_win_t wparent)
+widget_t panelctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, widget_t wparent)
 {
 	if_dispatch_t ev = { 0 };
 
@@ -766,7 +766,7 @@ res_win_t panelctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* 
 	return widget_create(wname, wstyle, pxr, wparent, &ev);
 }
 
-void panelctrl_attach(res_win_t widget, link_t_ptr ptr)
+void panelctrl_attach(widget_t widget, link_t_ptr ptr)
 {
 	panel_delta_t* ptd = GETPANELDELTA(widget);
 
@@ -779,7 +779,7 @@ void panelctrl_attach(res_win_t widget, link_t_ptr ptr)
 	panelctrl_redraw(widget);
 }
 
-link_t_ptr panelctrl_detach(res_win_t widget)
+link_t_ptr panelctrl_detach(widget_t widget)
 {
 	panel_delta_t* ptd = GETPANELDELTA(widget);
 	link_t_ptr data;
@@ -794,7 +794,7 @@ link_t_ptr panelctrl_detach(res_win_t widget)
 	return data;
 }
 
-link_t_ptr panelctrl_fetch(res_win_t widget)
+link_t_ptr panelctrl_fetch(widget_t widget)
 {
 	panel_delta_t* ptd = GETPANELDELTA(widget);
 
@@ -803,7 +803,7 @@ link_t_ptr panelctrl_fetch(res_win_t widget)
 	return ptd->arch;
 }
 
-void panelctrl_enable_delete(res_win_t widget, bool_t bDelete)
+void panelctrl_enable_delete(widget_t widget, bool_t bDelete)
 {
 	panel_delta_t* ptd = GETPANELDELTA(widget);
 
@@ -812,7 +812,7 @@ void panelctrl_enable_delete(res_win_t widget, bool_t bDelete)
 	ptd->b_delete = bDelete;
 }
 
-void panelctrl_redraw(res_win_t widget)
+void panelctrl_redraw(widget_t widget)
 {
 	panel_delta_t* ptd = GETPANELDELTA(widget);
 	link_t_ptr ilk, doc;
@@ -849,7 +849,7 @@ void panelctrl_redraw(res_win_t widget)
 	widget_paint(widget);
 }
 
-void panelctrl_redraw_item(res_win_t widget, link_t_ptr ilk)
+void panelctrl_redraw_item(widget_t widget, link_t_ptr ilk)
 {
 	panel_delta_t* ptd = GETPANELDELTA(widget);
 	xrect_t xr;
@@ -868,7 +868,7 @@ void panelctrl_redraw_item(res_win_t widget, link_t_ptr ilk)
 	widget_erase(widget, &xr);
 }
 
-bool_t panelctrl_set_focus_item(res_win_t widget, link_t_ptr ilk)
+bool_t panelctrl_set_focus_item(widget_t widget, link_t_ptr ilk)
 {
 	panel_delta_t* ptd = GETPANELDELTA(widget);
 	bool_t bRe;
@@ -903,7 +903,7 @@ bool_t panelctrl_set_focus_item(res_win_t widget, link_t_ptr ilk)
 	return 1;
 }
 
-link_t_ptr panelctrl_get_focus_item(res_win_t widget)
+link_t_ptr panelctrl_get_focus_item(widget_t widget)
 {
 	panel_delta_t* ptd = GETPANELDELTA(widget);
 
@@ -915,7 +915,7 @@ link_t_ptr panelctrl_get_focus_item(res_win_t widget)
 	return ptd->item;
 }
 
-void panelctrl_get_item_rect(res_win_t widget, link_t_ptr elk, xrect_t* prt)
+void panelctrl_get_item_rect(widget_t widget, link_t_ptr elk, xrect_t* prt)
 {
 	panel_delta_t* ptd = GETPANELDELTA(widget);
 
@@ -927,7 +927,7 @@ void panelctrl_get_item_rect(res_win_t widget, link_t_ptr elk, xrect_t* prt)
 	_panelctrl_item_rect(widget, elk, prt);
 }
 
-void panelctrl_tabskip(res_win_t widget, int nSkip)
+void panelctrl_tabskip(widget_t widget, int nSkip)
 {
 	panel_delta_t* ptd = GETPANELDELTA(widget);
 	link_t_ptr plk = NULL;

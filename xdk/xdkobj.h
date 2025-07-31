@@ -29,7 +29,4 @@
 #include "expr/expres.h"
 #include "expr/macro.h"
 
-#include "bio/bioimp.h"
-#include "bio/stream.h"
-
 #endif

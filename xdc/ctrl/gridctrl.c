@@ -26,8 +26,8 @@ LICENSE.GPL3 for more details.
 
 #include "ctrl.h"
 
-#include "../xdcimp.h"
-#include "../xdcinit.h"
+#include "../xdcobj.h"
+
 
 typedef struct _grid_delta_t{
 	link_t_ptr grid;
@@ -40,9 +40,9 @@ typedef struct _grid_delta_t{
 	int cur_x, cur_y;
 	short cur_page;
 
-	res_win_t editor;
-	res_win_t hsc;
-	res_win_t vsc;
+	widget_t editor;
+	widget_t hsc;
+	widget_t vsc;
 
 	bool_t b_drag_row, b_drag_col;
 	bool_t b_size_row, b_size_col;
@@ -58,7 +58,7 @@ typedef struct _grid_delta_t{
 #define SETGRIDDELTA(ph,ptd) widget_set_user_delta(ph,(vword_t)ptd)
 
 /**********************************************************************************************/
-static void _gridctrl_done(res_win_t widget)
+static void _gridctrl_done(widget_t widget)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 	byte_t* buf;
@@ -83,7 +83,7 @@ static void _gridctrl_done(res_win_t widget)
 	push_stack_node(ptd->stack, (void*)buf);
 }
 
-static void _gridctrl_undo(res_win_t widget)
+static void _gridctrl_undo(widget_t widget)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 	void* p;
@@ -110,7 +110,7 @@ static void _gridctrl_undo(res_win_t widget)
 	}
 }
 
-static void _gridctrl_discard(res_win_t widget)
+static void _gridctrl_discard(widget_t widget)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 	void* p;
@@ -124,7 +124,7 @@ static void _gridctrl_discard(res_win_t widget)
 	}
 }
 
-static void _gridctrl_clean(res_win_t widget)
+static void _gridctrl_clean(widget_t widget)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 	void* p;
@@ -137,7 +137,7 @@ static void _gridctrl_clean(res_win_t widget)
 	}
 }
 
-static bool_t _gridctrl_copy(res_win_t widget)
+static bool_t _gridctrl_copy(widget_t widget)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 
@@ -195,7 +195,7 @@ static bool_t _gridctrl_copy(res_win_t widget)
 	return 1;
 }
 
-static bool_t _gridctrl_cut(res_win_t widget)
+static bool_t _gridctrl_cut(widget_t widget)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 	link_t_ptr nxt, ilk;
@@ -222,7 +222,7 @@ static bool_t _gridctrl_cut(res_win_t widget)
 	return 1;
 }
 
-static bool_t _gridctrl_paste(res_win_t widget)
+static bool_t _gridctrl_paste(widget_t widget)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 
@@ -288,7 +288,7 @@ static bool_t _gridctrl_paste(res_win_t widget)
 	return 1;
 }
 
-static void _gridctrl_row_rect(res_win_t widget, link_t_ptr rlk, xrect_t* pxr)
+static void _gridctrl_row_rect(widget_t widget, link_t_ptr rlk, xrect_t* pxr)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 
@@ -297,7 +297,7 @@ static void _gridctrl_row_rect(res_win_t widget, link_t_ptr rlk, xrect_t* pxr)
 	widget_rect_to_pt(widget, pxr);
 }
 
-static void _gridctrl_col_rect(res_win_t widget, link_t_ptr rlk, link_t_ptr clk, xrect_t* pxr)
+static void _gridctrl_col_rect(widget_t widget, link_t_ptr rlk, link_t_ptr clk, xrect_t* pxr)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 
@@ -306,7 +306,7 @@ static void _gridctrl_col_rect(res_win_t widget, link_t_ptr rlk, link_t_ptr clk,
 	widget_rect_to_pt(widget, pxr);
 }
 
-static void _gridctrl_cell_rect(res_win_t widget, link_t_ptr rlk, link_t_ptr clk, xrect_t* pxr)
+static void _gridctrl_cell_rect(widget_t widget, link_t_ptr rlk, link_t_ptr clk, xrect_t* pxr)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 
@@ -315,7 +315,7 @@ static void _gridctrl_cell_rect(res_win_t widget, link_t_ptr rlk, link_t_ptr clk
 	widget_rect_to_pt(widget, pxr);
 }
 
-float _gridctrl_page_width(res_win_t widget)
+float _gridctrl_page_width(widget_t widget)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 	link_t_ptr clk;
@@ -344,7 +344,7 @@ float _gridctrl_page_width(res_win_t widget)
 	return w;
 }
 
-static void _gridctrl_reset_page(res_win_t widget)
+static void _gridctrl_reset_page(widget_t widget)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 	int pw, ph, fw, fh, lw, lh;
@@ -393,7 +393,7 @@ static void _gridctrl_reset_page(res_win_t widget)
 	widget_reset_scroll(widget, 0);
 }
 
-void _gridctrl_ensure_visible(res_win_t widget)
+void _gridctrl_ensure_visible(widget_t widget)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 
@@ -415,7 +415,7 @@ void _gridctrl_ensure_visible(res_win_t widget)
 }
 
 /*************************************************************************************************/
-int noti_grid_owner(res_win_t widget, unsigned int code, link_t_ptr grid, link_t_ptr rlk, link_t_ptr clk, void* data)
+int noti_grid_owner(widget_t widget, unsigned int code, link_t_ptr grid, link_t_ptr rlk, link_t_ptr clk, void* data)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 	NOTICE_GRID nf = { 0 };
@@ -434,7 +434,7 @@ int noti_grid_owner(res_win_t widget, unsigned int code, link_t_ptr grid, link_t
 	return nf.ret;
 }
 
-void noti_grid_reset_check(res_win_t widget)
+void noti_grid_reset_check(widget_t widget)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 	link_t_ptr rlk;
@@ -455,7 +455,7 @@ void noti_grid_reset_check(res_win_t widget)
 	widget_erase(widget, NULL);
 }
 
-void noti_grid_reset_select(res_win_t widget)
+void noti_grid_reset_select(widget_t widget)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 	link_t_ptr clk;
@@ -480,7 +480,7 @@ void noti_grid_reset_select(res_win_t widget)
 	widget_erase(widget, NULL);
 }
 
-void noti_grid_col_sizing(res_win_t widget, int x, int y)
+void noti_grid_col_sizing(widget_t widget, int x, int y)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 
@@ -497,7 +497,7 @@ void noti_grid_col_sizing(res_win_t widget, int x, int y)
 	noti_grid_owner(widget, NC_COLSIZING, ptd->grid, NULL, ptd->col, NULL);
 }
 
-void noti_grid_col_sized(res_win_t widget, int x, int y)
+void noti_grid_col_sized(widget_t widget, int x, int y)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 	float mw;
@@ -549,7 +549,7 @@ void noti_grid_col_sized(res_win_t widget, int x, int y)
 	noti_grid_owner(widget, NC_COLSIZED, ptd->grid, NULL, ptd->col, NULL);
 }
 
-void noti_grid_row_sizing(res_win_t widget, int x, int y)
+void noti_grid_row_sizing(widget_t widget, int x, int y)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 
@@ -566,7 +566,7 @@ void noti_grid_row_sizing(res_win_t widget, int x, int y)
 	noti_grid_owner(widget, NC_ROWSIZING, ptd->grid, ptd->row, NULL, NULL);
 }
 
-void noti_grid_row_sized(res_win_t widget, int x, int y)
+void noti_grid_row_sized(widget_t widget, int x, int y)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 	float mh;
@@ -601,7 +601,7 @@ void noti_grid_row_sized(res_win_t widget, int x, int y)
 	noti_grid_owner(widget, NC_ROWSIZED, ptd->grid, ptd->row, NULL, NULL);
 }
 
-void noti_grid_col_drag(res_win_t widget, int x, int y)
+void noti_grid_col_drag(widget_t widget, int x, int y)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 	xpoint_t pt;
@@ -623,7 +623,7 @@ void noti_grid_col_drag(res_win_t widget, int x, int y)
 	noti_grid_owner(widget, NC_COLDRAG, ptd->grid, NULL, ptd->col, (void*)&pt);
 }
 
-void noti_grid_col_drop(res_win_t widget, int x, int y)
+void noti_grid_col_drop(widget_t widget, int x, int y)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 	int nHint;
@@ -671,7 +671,7 @@ void noti_grid_col_drop(res_win_t widget, int x, int y)
 	noti_grid_owner(widget, NC_COLDROP, ptd->grid, NULL, ptd->col, (void*)&pt);
 }
 
-void noti_grid_row_drag(res_win_t widget, int x, int y)
+void noti_grid_row_drag(widget_t widget, int x, int y)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 	xpoint_t pt;
@@ -693,7 +693,7 @@ void noti_grid_row_drag(res_win_t widget, int x, int y)
 	noti_grid_owner(widget, NC_ROWDRAG, ptd->grid, ptd->row, NULL, (void*)&pt);
 }
 
-void noti_grid_row_drop(res_win_t widget, int x, int y)
+void noti_grid_row_drop(widget_t widget, int x, int y)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 	xpoint_t pt;
@@ -720,7 +720,7 @@ void noti_grid_row_drop(res_win_t widget, int x, int y)
 	noti_grid_owner(widget, NC_ROWDROP, ptd->grid, ptd->row, NULL, (void*)&pt);
 }
 
-void noti_grid_row_checked(res_win_t widget, link_t_ptr rlk)
+void noti_grid_row_checked(widget_t widget, link_t_ptr rlk)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 	xrect_t xr;
@@ -740,7 +740,7 @@ void noti_grid_row_checked(res_win_t widget, link_t_ptr rlk)
 	widget_erase(widget, &xr);
 }
 
-void noti_grid_col_selected(res_win_t widget, link_t_ptr clk)
+void noti_grid_col_selected(widget_t widget, link_t_ptr clk)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 	xrect_t xr;
@@ -760,7 +760,7 @@ void noti_grid_col_selected(res_win_t widget, link_t_ptr clk)
 	widget_erase(widget, &xr);
 }
 
-bool_t noti_grid_row_insert(res_win_t widget, link_t_ptr rlk)
+bool_t noti_grid_row_insert(widget_t widget, link_t_ptr rlk)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 
@@ -772,7 +772,7 @@ bool_t noti_grid_row_insert(res_win_t widget, link_t_ptr rlk)
 	return 1;
 }
 
-bool_t noti_grid_row_delete(res_win_t widget, link_t_ptr rlk)
+bool_t noti_grid_row_delete(widget_t widget, link_t_ptr rlk)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 
@@ -784,7 +784,7 @@ bool_t noti_grid_row_delete(res_win_t widget, link_t_ptr rlk)
 	return 1;
 }
 
-bool_t noti_grid_row_changing(res_win_t widget)
+bool_t noti_grid_row_changing(widget_t widget)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 	xrect_t xr;
@@ -804,7 +804,7 @@ bool_t noti_grid_row_changing(res_win_t widget)
 	return 1;
 }
 
-void noti_grid_row_changed(res_win_t widget, link_t_ptr rlk)
+void noti_grid_row_changed(widget_t widget, link_t_ptr rlk)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 	xrect_t xr;
@@ -823,7 +823,7 @@ void noti_grid_row_changed(res_win_t widget, link_t_ptr rlk)
 	noti_grid_owner(widget, NC_ROWCHANGED, ptd->grid, ptd->row, NULL, NULL);
 }
 
-void noti_grid_col_changing(res_win_t widget)
+void noti_grid_col_changing(widget_t widget)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 	xrect_t xr;
@@ -840,7 +840,7 @@ void noti_grid_col_changing(res_win_t widget)
 	widget_erase(widget, &xr);
 }
 
-void noti_grid_col_changed(res_win_t widget, link_t_ptr clk)
+void noti_grid_col_changed(widget_t widget, link_t_ptr clk)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 	xrect_t xr;
@@ -859,7 +859,7 @@ void noti_grid_col_changed(res_win_t widget, link_t_ptr clk)
 	noti_grid_owner(widget, NC_COLCHANGED, ptd->grid, NULL, ptd->col, NULL);
 }
 
-void noti_grid_col_enter(res_win_t widget, link_t_ptr clk)
+void noti_grid_col_enter(widget_t widget, link_t_ptr clk)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 
@@ -870,11 +870,11 @@ void noti_grid_col_enter(res_win_t widget, link_t_ptr clk)
 
 	if (widget_is_hotvoer(widget))
 	{
-		widget_track_mouse(widget, MS_TRACK_HOVER | MS_TRACK_LEAVE);
+		//widget_track_mouse(widget, MS_TRACK_HOVER | MS_TRACK_LEAVE);
 	}
 }
 
-void noti_grid_col_leave(res_win_t widget)
+void noti_grid_col_leave(widget_t widget)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 
@@ -884,11 +884,11 @@ void noti_grid_col_leave(res_win_t widget)
 
 	if (widget_is_hotvoer(widget))
 	{
-		widget_track_mouse(widget, MS_TRACK_HOVER | MS_TRACK_LEAVE);
+		//widget_track_mouse(widget, MS_TRACK_HOVER | MS_TRACK_LEAVE);
 	}
 }
 
-void noti_grid_col_hover(res_win_t widget)
+void noti_grid_col_hover(widget_t widget)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 
@@ -897,7 +897,7 @@ void noti_grid_col_hover(res_win_t widget)
 	noti_grid_owner(widget, NC_COLHOVER, ptd->grid, NULL, ptd->hover, NULL);
 }
 
-void noti_grid_begin_edit(res_win_t widget)
+void noti_grid_begin_edit(widget_t widget)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 	const tchar_t* editor;
@@ -1072,12 +1072,12 @@ void noti_grid_begin_edit(res_win_t widget)
 	}
 }
 
-void noti_grid_commit_edit(res_win_t widget)
+void noti_grid_commit_edit(widget_t widget)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 	const tchar_t* editor;
 	tchar_t* text;
-	res_win_t editctrl;
+	widget_t editctrl;
 	link_t_ptr ilk,rlk_new;
 	int n_ret = 0;
 
@@ -1163,7 +1163,7 @@ void noti_grid_commit_edit(res_win_t widget)
 	}
 
 	editctrl = ptd->editor;
-	ptd->editor = (res_win_t)0;
+	ptd->editor = (widget_t)0;
 
 	widget_destroy(editctrl);
 	widget_set_focus(widget);
@@ -1213,10 +1213,10 @@ void noti_grid_commit_edit(res_win_t widget)
 	}
 }
 
-void noti_grid_rollback_edit(res_win_t widget)
+void noti_grid_rollback_edit(widget_t widget)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
-	res_win_t editctrl;
+	widget_t editctrl;
 	const tchar_t* editor;
 	EDITDELTA fd = { 0 };
 
@@ -1245,13 +1245,13 @@ void noti_grid_rollback_edit(res_win_t widget)
 	}
 
 	editctrl = ptd->editor;
-	ptd->editor = (res_win_t)0;
+	ptd->editor = (widget_t)0;
 
 	widget_destroy(editctrl);
 	widget_set_focus(widget);
 }
 
-void noti_grid_reset_editor(res_win_t widget, bool_t bCommit)
+void noti_grid_reset_editor(widget_t widget, bool_t bCommit)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 
@@ -1264,7 +1264,7 @@ void noti_grid_reset_editor(res_win_t widget, bool_t bCommit)
 	}
 }
 
-void noti_grid_reset_scroll(res_win_t widget, bool_t bUpdate)
+void noti_grid_reset_scroll(widget_t widget, bool_t bUpdate)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 
@@ -1286,7 +1286,7 @@ void noti_grid_reset_scroll(res_win_t widget, bool_t bUpdate)
 }
 /*******************************************************************************************/
 
-int hand_grid_create(res_win_t widget, void* data)
+int hand_grid_create(widget_t widget, void* data)
 {
 	grid_delta_t* ptd;
 
@@ -1300,7 +1300,7 @@ int hand_grid_create(res_win_t widget, void* data)
 	return 0;
 }
 
-void hand_grid_destroy(res_win_t widget)
+void hand_grid_destroy(widget_t widget)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 
@@ -1324,7 +1324,7 @@ void hand_grid_destroy(res_win_t widget)
 	widget_hand_destroy(widget);
 }
 
-void hand_grid_undo(res_win_t widget)
+void hand_grid_undo(widget_t widget)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 
@@ -1334,7 +1334,7 @@ void hand_grid_undo(res_win_t widget)
 	_gridctrl_undo(widget);
 }
 
-void hand_grid_copy(res_win_t widget)
+void hand_grid_copy(widget_t widget)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 
@@ -1344,7 +1344,7 @@ void hand_grid_copy(res_win_t widget)
 	_gridctrl_copy(widget);
 }
 
-void hand_grid_cut(res_win_t widget)
+void hand_grid_cut(widget_t widget)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 
@@ -1359,7 +1359,7 @@ void hand_grid_cut(res_win_t widget)
 	}
 }
 
-void hand_grid_paste(res_win_t widget)
+void hand_grid_paste(widget_t widget)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 
@@ -1374,7 +1374,7 @@ void hand_grid_paste(res_win_t widget)
 	}
 }
 
-void hand_grid_size(res_win_t widget, int code, const xsize_t* prs)
+void hand_grid_size(widget_t widget, int code, const xsize_t* prs)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 
@@ -1386,7 +1386,7 @@ void hand_grid_size(res_win_t widget, int code, const xsize_t* prs)
 	gridctrl_redraw(widget, 1);
 }
 
-void hand_grid_scroll(res_win_t widget, bool_t bHorz, int nLine)
+void hand_grid_scroll(widget_t widget, bool_t bHorz, int nLine)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 
@@ -1398,12 +1398,12 @@ void hand_grid_scroll(res_win_t widget, bool_t bHorz, int nLine)
 	widget_hand_scroll(widget, bHorz, nLine);
 }
 
-void hand_grid_wheel(res_win_t widget, bool_t bHorz, int nDelta)
+void hand_grid_wheel(widget_t widget, bool_t bHorz, int nDelta)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 	scroll_t scr = { 0 };
 	int nLine;
-	res_win_t win;
+	widget_t win;
 
 	if (!ptd->grid)
 		return;
@@ -1454,7 +1454,7 @@ void hand_grid_wheel(res_win_t widget, bool_t bHorz, int nDelta)
 	}
 }
 
-void hand_grid_mouse_move(res_win_t widget, dword_t dw, const xpoint_t* pxp)
+void hand_grid_mouse_move(widget_t widget, dword_t dw, const xpoint_t* pxp)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 	link_t_ptr row, col;
@@ -1541,7 +1541,7 @@ void hand_grid_mouse_move(res_win_t widget, dword_t dw, const xpoint_t* pxp)
 	}
 }
 
-void hand_grid_mouse_hover(res_win_t widget, dword_t dw, const xpoint_t* pxp)
+void hand_grid_mouse_hover(widget_t widget, dword_t dw, const xpoint_t* pxp)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 
@@ -1552,7 +1552,7 @@ void hand_grid_mouse_hover(res_win_t widget, dword_t dw, const xpoint_t* pxp)
 		noti_grid_col_hover(widget);
 }
 
-void hand_grid_mouse_leave(res_win_t widget, dword_t dw, const xpoint_t* pxp)
+void hand_grid_mouse_leave(widget_t widget, dword_t dw, const xpoint_t* pxp)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 
@@ -1563,7 +1563,7 @@ void hand_grid_mouse_leave(res_win_t widget, dword_t dw, const xpoint_t* pxp)
 		noti_grid_col_leave(widget);
 }
 
-void hand_grid_lbutton_dbclick(res_win_t widget, const xpoint_t* pxp)
+void hand_grid_lbutton_dbclick(widget_t widget, const xpoint_t* pxp)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 
@@ -1585,7 +1585,7 @@ void hand_grid_lbutton_dbclick(res_win_t widget, const xpoint_t* pxp)
 	noti_grid_owner(widget, NC_GRIDDBCLK, ptd->grid, ptd->row, ptd->col, (void*)pxp);
 }
 
-void hand_grid_lbutton_down(res_win_t widget, const xpoint_t* pxp)
+void hand_grid_lbutton_down(widget_t widget, const xpoint_t* pxp)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 	link_t_ptr rlk, clk;
@@ -1655,7 +1655,7 @@ void hand_grid_lbutton_down(res_win_t widget, const xpoint_t* pxp)
 	}
 }
 
-void hand_grid_lbutton_up(res_win_t widget, const xpoint_t* pxp)
+void hand_grid_lbutton_up(widget_t widget, const xpoint_t* pxp)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 	link_t_ptr rlk, clk;
@@ -1742,7 +1742,7 @@ void hand_grid_lbutton_up(res_win_t widget, const xpoint_t* pxp)
 	noti_grid_owner(widget, NC_GRIDLBCLK, ptd->grid, ptd->row, ptd->col, (void*)pxp);
 }
 
-void hand_grid_rbutton_down(res_win_t widget, const xpoint_t* pxp)
+void hand_grid_rbutton_down(widget_t widget, const xpoint_t* pxp)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 
@@ -1752,7 +1752,7 @@ void hand_grid_rbutton_down(res_win_t widget, const xpoint_t* pxp)
 	noti_grid_reset_editor(widget, 1);
 }
 
-void hand_grid_rbutton_up(res_win_t widget, const xpoint_t* pxp)
+void hand_grid_rbutton_up(widget_t widget, const xpoint_t* pxp)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 
@@ -1762,7 +1762,7 @@ void hand_grid_rbutton_up(res_win_t widget, const xpoint_t* pxp)
 	noti_grid_owner(widget, NC_GRIDRBCLK, ptd->grid, ptd->row, ptd->col, (void*)pxp);
 }
 
-void hand_grid_keydown(res_win_t widget, dword_t ks, int nKey)
+void hand_grid_keydown(widget_t widget, dword_t ks, int nKey)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 	bool_t b_design;
@@ -1840,7 +1840,7 @@ void hand_grid_keydown(res_win_t widget, dword_t ks, int nKey)
 	}
 }
 
-void hand_grid_wchar(res_win_t widget, wchar_t nChar)
+void hand_grid_wchar(widget_t widget, wchar_t nChar)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 
@@ -1858,7 +1858,7 @@ void hand_grid_wchar(res_win_t widget, wchar_t nChar)
 	}
 }
 
-void hand_grid_child_command(res_win_t widget, int code, vword_t data)
+void hand_grid_child_command(widget_t widget, int code, vword_t data)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 
@@ -1873,7 +1873,7 @@ void hand_grid_child_command(res_win_t widget, int code, vword_t data)
 	}
 }
 
-void hand_grid_menu_command(res_win_t widget, int code, int cid, vword_t data)
+void hand_grid_menu_command(widget_t widget, int code, int cid, vword_t data)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 
@@ -1897,15 +1897,15 @@ void hand_grid_menu_command(res_win_t widget, int code, int cid, vword_t data)
 				break;
 			}
 
-			if (widget_is_valid((res_win_t)data))
+			if (widget_is_valid((widget_t)data))
 			{
-				widget_close((res_win_t)data, 1);
+				widget_close((widget_t)data, 1);
 			}
 		}
 	}
 }
 
-void hand_grid_notice(res_win_t widget, NOTICE* pnt)
+void hand_grid_notice(widget_t widget, NOTICE* pnt)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 
@@ -1913,7 +1913,7 @@ void hand_grid_notice(res_win_t widget, NOTICE* pnt)
 		return;
 }
 
-void hand_grid_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
+void hand_grid_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 	visual_t rdc;
@@ -2022,7 +2022,7 @@ void hand_grid_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 }
 
 /******************************************************************************************/
-res_win_t gridctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, res_win_t wparent)
+widget_t gridctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, widget_t wparent)
 {
 	if_dispatch_t ev = { 0 };
 
@@ -2062,7 +2062,7 @@ res_win_t gridctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* p
 	return widget_create(wname, wstyle, pxr, wparent, &ev);
 }
 
-void gridctrl_attach(res_win_t widget, link_t_ptr ptr)
+void gridctrl_attach(widget_t widget, link_t_ptr ptr)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 
@@ -2084,7 +2084,7 @@ void gridctrl_attach(res_win_t widget, link_t_ptr ptr)
 	}
 }
 
-link_t_ptr gridctrl_detach(res_win_t widget)
+link_t_ptr gridctrl_detach(widget_t widget)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 	link_t_ptr data;
@@ -2103,7 +2103,7 @@ link_t_ptr gridctrl_detach(res_win_t widget)
 	return data;
 }
 
-link_t_ptr gridctrl_fetch(res_win_t widget)
+link_t_ptr gridctrl_fetch(widget_t widget)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 
@@ -2112,7 +2112,7 @@ link_t_ptr gridctrl_fetch(res_win_t widget)
 	return ptd->grid;
 }
 
-void gridctrl_redraw(res_win_t widget, bool_t bCalc)
+void gridctrl_redraw(widget_t widget, bool_t bCalc)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 	link_t_ptr rlk, clk;
@@ -2188,7 +2188,7 @@ void gridctrl_redraw(res_win_t widget, bool_t bCalc)
 	widget_paint(widget);
 }
 
-void gridctrl_tabskip(res_win_t widget, int dir)
+void gridctrl_tabskip(widget_t widget, int dir)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 	link_t_ptr rlk, clk;
@@ -2264,7 +2264,7 @@ void gridctrl_tabskip(res_win_t widget, int dir)
 	}
 }
 
-bool_t gridctrl_set_cell_text(res_win_t widget, link_t_ptr rlk, link_t_ptr clk, const tchar_t* szText)
+bool_t gridctrl_set_cell_text(widget_t widget, link_t_ptr rlk, link_t_ptr clk, const tchar_t* szText)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 	const tchar_t* text;
@@ -2308,7 +2308,7 @@ bool_t gridctrl_set_cell_text(res_win_t widget, link_t_ptr rlk, link_t_ptr clk, 
 	return 1;
 }
 
-bool_t gridctrl_delete_row(res_win_t widget, link_t_ptr rlk)
+bool_t gridctrl_delete_row(widget_t widget, link_t_ptr rlk)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 	link_t_ptr nlk;
@@ -2349,7 +2349,7 @@ bool_t gridctrl_delete_row(res_win_t widget, link_t_ptr rlk)
 	return 1;
 }
 
-link_t_ptr gridctrl_insert_row(res_win_t widget, link_t_ptr pre)
+link_t_ptr gridctrl_insert_row(widget_t widget, link_t_ptr pre)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 	link_t_ptr rlk;
@@ -2393,7 +2393,7 @@ link_t_ptr gridctrl_insert_row(res_win_t widget, link_t_ptr pre)
 	return rlk;
 }
 
-bool_t gridctrl_copy_row(res_win_t widget, link_t_ptr srcGrid, link_t_ptr srcRow)
+bool_t gridctrl_copy_row(widget_t widget, link_t_ptr srcGrid, link_t_ptr srcRow)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 	link_t_ptr destGrid = ptd->grid;
@@ -2437,7 +2437,7 @@ bool_t gridctrl_copy_row(res_win_t widget, link_t_ptr srcGrid, link_t_ptr srcRow
 	return 1;
 }
 
-void gridctrl_redraw_row(res_win_t widget, link_t_ptr rlk, bool_t bCalc)
+void gridctrl_redraw_row(widget_t widget, link_t_ptr rlk, bool_t bCalc)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 	xrect_t xr, xrCli;
@@ -2468,7 +2468,7 @@ void gridctrl_redraw_row(res_win_t widget, link_t_ptr rlk, bool_t bCalc)
 	widget_erase(widget, &xrCli);
 }
 
-void gridctrl_redraw_col(res_win_t widget, link_t_ptr clk, bool_t bCalc)
+void gridctrl_redraw_col(widget_t widget, link_t_ptr clk, bool_t bCalc)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 	xrect_t xr,xrCli;
@@ -2499,7 +2499,7 @@ void gridctrl_redraw_col(res_win_t widget, link_t_ptr clk, bool_t bCalc)
 	widget_erase(widget, &xr);
 }
 
-bool_t gridctrl_set_focus_cell(res_win_t widget, link_t_ptr rlk, link_t_ptr clk)
+bool_t gridctrl_set_focus_cell(widget_t widget, link_t_ptr rlk, link_t_ptr clk)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 	bool_t bReRow, bReCol;
@@ -2561,7 +2561,7 @@ bool_t gridctrl_set_focus_cell(res_win_t widget, link_t_ptr rlk, link_t_ptr clk)
 	return 1;
 }
 
-link_t_ptr gridctrl_get_focus_col(res_win_t widget)
+link_t_ptr gridctrl_get_focus_col(widget_t widget)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 
@@ -2573,7 +2573,7 @@ link_t_ptr gridctrl_get_focus_col(res_win_t widget)
 	return ptd->col;
 }
 
-link_t_ptr gridctrl_get_focus_row(res_win_t widget)
+link_t_ptr gridctrl_get_focus_row(widget_t widget)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 
@@ -2585,7 +2585,7 @@ link_t_ptr gridctrl_get_focus_row(res_win_t widget)
 	return ptd->row;
 }
 
-void gridctrl_auto_insert(res_win_t widget, bool_t bAuto)
+void gridctrl_auto_insert(widget_t widget, bool_t bAuto)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 
@@ -2594,7 +2594,7 @@ void gridctrl_auto_insert(res_win_t widget, bool_t bAuto)
 	ptd->b_auto = bAuto;
 }
 
-void gridctrl_set_fixed(res_win_t widget, link_t_ptr clk)
+void gridctrl_set_fixed(widget_t widget, link_t_ptr clk)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 
@@ -2603,7 +2603,7 @@ void gridctrl_set_fixed(res_win_t widget, link_t_ptr clk)
 	ptd->fix = clk;
 }
 
-link_t_ptr	gridctrl_get_fixed(res_win_t widget)
+link_t_ptr	gridctrl_get_fixed(widget_t widget)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 
@@ -2612,7 +2612,7 @@ link_t_ptr	gridctrl_get_fixed(res_win_t widget)
 	return ptd->fix;
 }
 
-bool_t gridctrl_verify(res_win_t widget, bool_t bAlarm)
+bool_t gridctrl_verify(widget_t widget, bool_t bAlarm)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 	link_t_ptr rlk, clk;
@@ -2636,7 +2636,7 @@ bool_t gridctrl_verify(res_win_t widget, bool_t bAlarm)
 		return 1;
 }
 
-void gridctrl_accept(res_win_t widget, bool_t bAccept)
+void gridctrl_accept(widget_t widget, bool_t bAccept)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 	link_t_ptr nxt, rlk;
@@ -2664,7 +2664,7 @@ void gridctrl_accept(res_win_t widget, bool_t bAccept)
 	gridctrl_redraw(widget, 0);
 }
 
-bool_t gridctrl_is_update(res_win_t widget)
+bool_t gridctrl_is_update(widget_t widget)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 
@@ -2676,7 +2676,7 @@ bool_t gridctrl_is_update(res_win_t widget)
 	return (get_update_row_count(ptd->grid)) ? 1 : 0;
 }
 
-void gridctrl_move_first_page(res_win_t widget)
+void gridctrl_move_first_page(widget_t widget)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 	int nCurPage;
@@ -2699,7 +2699,7 @@ void gridctrl_move_first_page(res_win_t widget)
 	}
 }
 
-void gridctrl_move_prev_page(res_win_t widget)
+void gridctrl_move_prev_page(widget_t widget)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 	int nCurPage;
@@ -2722,7 +2722,7 @@ void gridctrl_move_prev_page(res_win_t widget)
 	}
 }
 
-void gridctrl_move_next_page(res_win_t widget)
+void gridctrl_move_next_page(widget_t widget)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 	int nCurPage, nMaxPage;
@@ -2746,7 +2746,7 @@ void gridctrl_move_next_page(res_win_t widget)
 	}
 }
 
-void gridctrl_move_last_page(res_win_t widget)
+void gridctrl_move_last_page(widget_t widget)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 	int nCurPage, nMaxPage;
@@ -2770,7 +2770,7 @@ void gridctrl_move_last_page(res_win_t widget)
 	}
 }
 
-void gridctrl_move_to_page(res_win_t widget, int page)
+void gridctrl_move_to_page(widget_t widget, int page)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 	int nCurPage, nMaxPage;
@@ -2794,7 +2794,7 @@ void gridctrl_move_to_page(res_win_t widget, int page)
 	}
 }
 
-int gridctrl_get_max_page(res_win_t widget)
+int gridctrl_get_max_page(widget_t widget)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 
@@ -2806,7 +2806,7 @@ int gridctrl_get_max_page(res_win_t widget)
 	return calc_grid_pages(ptd->grid);
 }
 
-int gridctrl_get_cur_page(res_win_t widget)
+int gridctrl_get_cur_page(widget_t widget)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 
@@ -2818,7 +2818,7 @@ int gridctrl_get_cur_page(res_win_t widget)
 	return ptd->cur_page;
 }
 
-void gridctrl_find(res_win_t widget, const tchar_t* token)
+void gridctrl_find(widget_t widget, const tchar_t* token)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 
@@ -2858,7 +2858,7 @@ void gridctrl_find(res_win_t widget, const tchar_t* token)
 		gridctrl_set_focus_cell(widget, NULL, NULL);
 }
 
-void gridctrl_filter(res_win_t widget, const tchar_t* token)
+void gridctrl_filter(widget_t widget, const tchar_t* token)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 	link_t_ptr rlk,clk;
@@ -2912,7 +2912,7 @@ void gridctrl_filter(res_win_t widget, const tchar_t* token)
 		gridctrl_redraw(widget, 1);
 }
 
-void gridctrl_popup_size(res_win_t widget, xsize_t* pse)
+void gridctrl_popup_size(widget_t widget, xsize_t* pse)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 	int count;
@@ -2933,10 +2933,10 @@ void gridctrl_popup_size(res_win_t widget, xsize_t* pse)
 
 	widget_size_to_pt(widget, pse);
 
-	widget_adjust_size(widget_get_style(widget), pse);
+	adjust_widget_size(widget_get_style(widget), pse);
 }
 
-void gridctrl_get_cell_rect(res_win_t widget, link_t_ptr rlk, link_t_ptr clk, xrect_t* pxr)
+void gridctrl_get_cell_rect(widget_t widget, link_t_ptr rlk, link_t_ptr clk, xrect_t* pxr)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 	
@@ -2948,7 +2948,7 @@ void gridctrl_get_cell_rect(res_win_t widget, link_t_ptr rlk, link_t_ptr clk, xr
 	_gridctrl_cell_rect(widget, rlk, clk, pxr);
 }
 
-bool_t gridctrl_get_lock(res_win_t widget)
+bool_t gridctrl_get_lock(widget_t widget)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 
@@ -2957,7 +2957,7 @@ bool_t gridctrl_get_lock(res_win_t widget)
 	return ptd->b_lock;
 }
 
-void gridctrl_set_lock(res_win_t widget, bool_t bLock)
+void gridctrl_set_lock(widget_t widget, bool_t bLock)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 
@@ -2966,7 +2966,7 @@ void gridctrl_set_lock(res_win_t widget, bool_t bLock)
 	ptd->b_lock = bLock;
 }
 
-bool_t gridctrl_get_dirty(res_win_t widget)
+bool_t gridctrl_get_dirty(widget_t widget)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 
@@ -2981,7 +2981,7 @@ bool_t gridctrl_get_dirty(res_win_t widget)
 	return (peek_stack_node(ptd->stack, -1)) ? 1 : 0;
 }
 
-void gridctrl_set_dirty(res_win_t widget, bool_t bDirty)
+void gridctrl_set_dirty(widget_t widget, bool_t bDirty)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 

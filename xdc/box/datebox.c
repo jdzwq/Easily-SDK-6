@@ -26,8 +26,8 @@ LICENSE.GPL3 for more details.
 
 #include "box.h"
 
-#include "../xdcimp.h"
-#include "../xdcinit.h"
+#include "../xdcobj.h"
+
 
 typedef struct _datebox_delta_t{
 	xdate_t dt;
@@ -39,7 +39,7 @@ typedef struct _datebox_delta_t{
 #define SETDATEBOXDELTA(ph,ptd) widget_set_user_delta(ph,(vword_t)ptd)
 
 /**************************************************************************************************/
-void noti_datebox_command(res_win_t widget, int code, vword_t data)
+void noti_datebox_command(widget_t widget, int code, vword_t data)
 {
 	datebox_delta_t* ptd = GETDATEBOXDELTA(widget);
 
@@ -49,7 +49,7 @@ void noti_datebox_command(res_win_t widget, int code, vword_t data)
 		widget_post_command(widget_get_owner(widget), code, widget_get_user_id(widget), data);
 }
 
-void datebox_on_prev_month(res_win_t widget)
+void datebox_on_prev_month(widget_t widget)
 {
 	datebox_delta_t* ptd = GETDATEBOXDELTA(widget);
 
@@ -64,7 +64,7 @@ void datebox_on_prev_month(res_win_t widget)
 	widget_erase(widget, NULL);
 }
 
-void datebox_on_next_month(res_win_t widget)
+void datebox_on_next_month(widget_t widget)
 {
 	datebox_delta_t* ptd = GETDATEBOXDELTA(widget);
 
@@ -79,7 +79,7 @@ void datebox_on_next_month(res_win_t widget)
 	widget_erase(widget, NULL);
 }
 
-void datebox_on_select_day(res_win_t widget, int day)
+void datebox_on_select_day(widget_t widget, int day)
 {
 	datebox_delta_t* ptd = GETDATEBOXDELTA(widget);
 
@@ -90,7 +90,7 @@ void datebox_on_select_day(res_win_t widget, int day)
 	noti_datebox_command(widget, COMMAND_UPDATE, (vword_t)NULL);
 }
 /**************************************************************************************************/
-int hand_datebox_create(res_win_t widget, void* data)
+int hand_datebox_create(widget_t widget, void* data)
 {
 	datebox_delta_t* ptd = GETDATEBOXDELTA(widget);
 
@@ -107,7 +107,7 @@ int hand_datebox_create(res_win_t widget, void* data)
 	return 0;
 }
 
-void hand_datebox_destroy(res_win_t widget)
+void hand_datebox_destroy(widget_t widget)
 {
 	datebox_delta_t* ptd = GETDATEBOXDELTA(widget);
 
@@ -118,13 +118,13 @@ void hand_datebox_destroy(res_win_t widget)
 	widget_hand_destroy(widget);
 }
 
-void hand_datebox_lbutton_down(res_win_t widget, const xpoint_t* pxp)
+void hand_datebox_lbutton_down(widget_t widget, const xpoint_t* pxp)
 {
 	datebox_delta_t* ptd = GETDATEBOXDELTA(widget);
 
 }
 
-void hand_datebox_lbutton_up(res_win_t widget, const xpoint_t* pxp)
+void hand_datebox_lbutton_up(widget_t widget, const xpoint_t* pxp)
 {
 	datebox_delta_t* ptd = GETDATEBOXDELTA(widget);
 
@@ -155,21 +155,21 @@ void hand_datebox_lbutton_up(res_win_t widget, const xpoint_t* pxp)
 	}
 }
 
-void hand_datebox_size(res_win_t widget, int code, const xsize_t* prs)
+void hand_datebox_size(widget_t widget, int code, const xsize_t* prs)
 {
 	datebox_delta_t* ptd = GETDATEBOXDELTA(widget);
 	
 	widget_erase(widget, NULL);
 }
 
-void hand_datebox_xfont(res_win_t widget, const xfont_t* pxf)
+void hand_datebox_xfont(widget_t widget, const xfont_t* pxf)
 {
 	datebox_delta_t* ptd = GETDATEBOXDELTA(widget);
 	
 	xmem_copy((void*)&ptd->xf, (void*)pxf, sizeof(xfont_t));
 }
 
-void hand_datebox_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
+void hand_datebox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 {
 	datebox_delta_t* ptd = GETDATEBOXDELTA(widget);
 	visual_t rdc;
@@ -202,7 +202,7 @@ void hand_datebox_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 }
 
 /*******************************************************************************************************/
-res_win_t datebox_create(res_win_t widget, dword_t style, const xrect_t* pxr)
+widget_t datebox_create(widget_t widget, dword_t style, const xrect_t* pxr)
 {
 	if_dispatch_t ev = { 0 };
 
@@ -227,7 +227,7 @@ res_win_t datebox_create(res_win_t widget, dword_t style, const xrect_t* pxr)
 	return widget_create(NULL, style, pxr, widget, &ev);
 }
 
-void datebox_popup_size(res_win_t widget, xsize_t* pxs)
+void datebox_popup_size(widget_t widget, xsize_t* pxs)
 {
 	datebox_delta_t* ptd = GETDATEBOXDELTA(widget);
 	measure_interface im = { 0 };
@@ -243,10 +243,10 @@ void datebox_popup_size(res_win_t widget, xsize_t* pxs)
 
 	widget_size_to_pt(widget, pxs);
 
-	widget_adjust_size(widget_get_style(widget), pxs);
+	adjust_widget_size(widget_get_style(widget), pxs);
 }
 
-void datebox_set_date(res_win_t widget, const xdate_t* pxd)
+void datebox_set_date(widget_t widget, const xdate_t* pxd)
 {
 	datebox_delta_t* ptd = GETDATEBOXDELTA(widget);
 
@@ -260,7 +260,7 @@ void datebox_set_date(res_win_t widget, const xdate_t* pxd)
 	widget_erase(widget, NULL);
 }
 
-void datebox_get_date(res_win_t widget, xdate_t* pxd)
+void datebox_get_date(widget_t widget, xdate_t* pxd)
 {
 	datebox_delta_t* ptd = GETDATEBOXDELTA(widget);
 

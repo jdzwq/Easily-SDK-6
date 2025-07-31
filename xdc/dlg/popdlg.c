@@ -26,14 +26,14 @@ LICENSE.GPL3 for more details.
 
 #include "dlg.h"
 
-#include "../xdcimp.h"
-#include "../xdcinit.h"
+#include "../xdcobj.h"
 
-res_win_t create_dialog(link_t_ptr ptr_dlg, res_win_t owner)
+
+widget_t create_dialog(link_t_ptr ptr_dlg, widget_t owner)
 {
-	res_win_t dlg,box = (res_win_t)0;
+	widget_t dlg,box = (widget_t)0;
 	xrect_t xr = { 0 };
-	xspan_t xn;
+	xspan_t xn = {0};
 	link_t_ptr ilk;
 	const tchar_t* type;
 	visual_t rdc;
@@ -56,19 +56,19 @@ res_win_t create_dialog(link_t_ptr ptr_dlg, res_win_t owner)
 	while (ilk)
 	{
 		xn.fs = get_dialog_item_x(ilk);
-		cast_mm_to_pt(rdc, 1, &xn);
+		//cast_mm_to_pt(rdc, 1, &xn);
 		xr.x = xn.s;
 
 		xn.fs = get_dialog_item_y(ilk);
-		cast_mm_to_pt(rdc, 0, &xn);
+		//cast_mm_to_pt(rdc, 0, &xn);
 		xr.y = xn.s;
 
 		xn.fs = get_dialog_item_width(ilk);
-		cast_mm_to_pt(rdc, 1, &xn);
+		//cast_mm_to_pt(rdc, 1, &xn);
 		xr.w = xn.s;
 
 		xn.fs = get_dialog_item_height(ilk);
-		cast_mm_to_pt(rdc, 1, &xn);
+		//cast_mm_to_pt(rdc, 1, &xn);
 		xr.h = xn.s;
 
 		type = get_dialog_item_class_ptr(ilk);
@@ -169,7 +169,7 @@ res_win_t create_dialog(link_t_ptr ptr_dlg, res_win_t owner)
 			else if (compare_text(get_dialog_item_text_ptr(ilk), -1, ATTR_CONTROL_TOPOGCTRL, -1, 1) == 0)
 				box = topogctrl_create(get_dialog_item_name_ptr(ilk), WD_STYLE_CONTROL | WD_STYLE_HSCROLL | WD_STYLE_VSCROLL, &xr, dlg);
 			else
-				box = (res_win_t)0;
+				box = (widget_t)0;
 		}
 
 		if (box)
@@ -184,16 +184,16 @@ res_win_t create_dialog(link_t_ptr ptr_dlg, res_win_t owner)
 	}
 
 	xn.fs = get_dialog_width(ptr_dlg);
-	cast_mm_to_pt(rdc, 1, &xn);
+	//cast_mm_to_pt(rdc, 1, &xn);
 	xr.w = xn.s;
 
 	xn.fs = get_dialog_height(ptr_dlg);
-	cast_mm_to_pt(rdc, 0, &xn);
+	//cast_mm_to_pt(rdc, 0, &xn);
 	xr.h = xn.s;
 
 	widget_release_ctx(owner, rdc);
 
-	widget_adjust_size(WD_STYLE_DIALOG, RECTSIZE(&xr));
+	adjust_widget_size(WD_STYLE_DIALOG, RECTSIZE(&xr));
 	widget_size(dlg, RECTSIZE(&xr));
 	widget_paint(dlg);
 	widget_center_window(dlg, owner);
@@ -202,7 +202,7 @@ res_win_t create_dialog(link_t_ptr ptr_dlg, res_win_t owner)
 }
 
 
-int sub_dialog_on_paint(res_win_t widget, visual_t dc, const xrect_t* pxr, uid_t sid, vword_t delta)
+int sub_dialog_on_paint(widget_t widget, visual_t dc, const xrect_t* pxr, uid_t sid, vword_t delta)
 {
 	visual_t rdc;
 	xrect_t xr;
@@ -245,21 +245,18 @@ int sub_dialog_on_paint(res_win_t widget, visual_t dc, const xrect_t* pxr, uid_t
 	return 1;
 }
 
-static int STDCALL _widget_set_child_point(res_win_t widget, vword_t pv)
+static int STDCALL _widget_set_child_point(widget_t widget, vword_t pv)
 {
 	xpoint_t pt;
 
-	if (widget_has_struct(widget))
-	{
-		widget_get_point(widget, &pt);
+	widget_get_point(widget, &pt);
 
-		widget_move(widget, &pt);
-	}
+	widget_move(widget, &pt);
 
 	return 1;
 }
 
-int sub_dialog_on_size(res_win_t widget, int code, const xsize_t* pxs, uid_t sid, vword_t delta)
+int sub_dialog_on_size(widget_t widget, int code, const xsize_t* pxs, uid_t sid, vword_t delta)
 {
 	if (code != WS_SIZE_MINIMIZED)
 	{

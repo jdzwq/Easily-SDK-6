@@ -26,11 +26,11 @@ LICENSE.GPL3 for more details.
 
 #include "editor.h"
 
-#include "../xdcimp.h"
-#include "../xdcinit.h"
+#include "../xdcobj.h"
 
 
-static int sub_editbox_keydown(res_win_t widget, dword_t ks, int nKey, uid_t subid, vword_t delta)
+
+static int sub_editbox_keydown(widget_t widget, dword_t ks, int nKey, uid_t subid, vword_t delta)
 {
 	if (subid != IDS_EDITBOX)
 		return 0;
@@ -51,9 +51,9 @@ static int sub_editbox_keydown(res_win_t widget, dword_t ks, int nKey, uid_t sub
 	return 0;
 }
 
-static int sub_editbox_self_command(res_win_t widget, int code, vword_t data, uid_t subid, vword_t delta)
+static int sub_editbox_self_command(widget_t widget, int code, vword_t data, uid_t subid, vword_t delta)
 {
-	//res_win_t keybox;
+	//widget_t keybox;
 
 	if (subid != IDS_EDITBOX)
 		return 0;
@@ -80,9 +80,9 @@ static int sub_editbox_self_command(res_win_t widget, int code, vword_t data, ui
 	return 0;
 }
 
-static int sub_editbox_show(res_win_t widget, bool_t show, uid_t subid, vword_t delta)
+static int sub_editbox_show(widget_t widget, bool_t show, uid_t subid, vword_t delta)
 {
-	//res_win_t keybox;
+	//widget_t keybox;
 
 	if (subid != IDS_EDITBOX)
 		return 0;
@@ -100,7 +100,7 @@ static int sub_editbox_show(res_win_t widget, bool_t show, uid_t subid, vword_t 
 	return 1;
 }
 
-static void sub_editbox_unsubbing(res_win_t widget, uid_t subid, vword_t delta)
+static void sub_editbox_unsubbing(widget_t widget, uid_t subid, vword_t delta)
 {
 	if (subid != IDS_EDITBOX)
 		return;
@@ -110,9 +110,9 @@ static void sub_editbox_unsubbing(res_win_t widget, uid_t subid, vword_t delta)
 
 /*************************************************************************************/
 
-res_win_t fireedit_create(res_win_t widget, const xrect_t* pxr)
+widget_t fireedit_create(widget_t widget, const xrect_t* pxr)
 {
-	res_win_t editor = (res_win_t)0;
+	widget_t editor = (widget_t)0;
 	if_subproc_t ev = { 0 };
 
 	/*if (widget_get_touch_mode(widget))

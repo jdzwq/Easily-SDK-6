@@ -26,8 +26,8 @@ LICENSE.GPL3 for more details.
 
 #include "box.h"
 
-#include "../xdcimp.h"
-#include "../xdcinit.h"
+#include "../xdcobj.h"
+
 
 typedef struct _radiobox_delta_t{
 	bool_t on;
@@ -39,7 +39,7 @@ typedef struct _radiobox_delta_t{
 #define SETRADIOBOXDELTA(ph,ptd) widget_set_user_delta(ph,(vword_t)ptd)
 
 /********************************************************************************/
-void noti_radiobox_command(res_win_t widget, int code, vword_t data)
+void noti_radiobox_command(widget_t widget, int code, vword_t data)
 {
 	radiobox_delta_t* ptd = GETRADIOBOXDELTA(widget);
 
@@ -49,7 +49,7 @@ void noti_radiobox_command(res_win_t widget, int code, vword_t data)
 		widget_post_command(widget_get_owner(widget), code, widget_get_user_id(widget), data);
 }
 /*********************************************************************************/
-int hand_radiobox_create(res_win_t widget, void* data)
+int hand_radiobox_create(widget_t widget, void* data)
 {
 	radiobox_delta_t* ptd = GETRADIOBOXDELTA(widget);
 
@@ -65,7 +65,7 @@ int hand_radiobox_create(res_win_t widget, void* data)
 	return 0;
 }
 
-void hand_radiobox_destroy(res_win_t widget)
+void hand_radiobox_destroy(widget_t widget)
 {
 	radiobox_delta_t* ptd = GETRADIOBOXDELTA(widget);
 
@@ -78,13 +78,13 @@ void hand_radiobox_destroy(res_win_t widget)
 	widget_hand_destroy(widget);
 }
 
-void hand_radiobox_lbutton_down(res_win_t widget, const xpoint_t* pxp)
+void hand_radiobox_lbutton_down(widget_t widget, const xpoint_t* pxp)
 {
 	radiobox_delta_t* ptd = GETRADIOBOXDELTA(widget);
 	
 }
 
-void hand_radiobox_lbutton_up(res_win_t widget, const xpoint_t* pxp)
+void hand_radiobox_lbutton_up(widget_t widget, const xpoint_t* pxp)
 {
 	radiobox_delta_t* ptd = GETRADIOBOXDELTA(widget);
 	
@@ -117,21 +117,21 @@ void hand_radiobox_lbutton_up(res_win_t widget, const xpoint_t* pxp)
 	}
 }
 
-void hand_radiobox_size(res_win_t widget, int code, const xsize_t* prs)
+void hand_radiobox_size(widget_t widget, int code, const xsize_t* prs)
 {
 	radiobox_delta_t* ptd = GETRADIOBOXDELTA(widget);
 	
 	widget_erase(widget, NULL);
 }
 
-void hand_radiobox_xfont(res_win_t widget, const xfont_t* pxf)
+void hand_radiobox_xfont(widget_t widget, const xfont_t* pxf)
 {
 	radiobox_delta_t* ptd = GETRADIOBOXDELTA(widget);
 	
 	xmem_copy((void*)&ptd->xf, (void*)pxf, sizeof(xfont_t));
 }
 
-void hand_radiobox_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
+void hand_radiobox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 {
 	radiobox_delta_t* ptd = GETRADIOBOXDELTA(widget);
 	visual_t rdc;
@@ -164,7 +164,7 @@ void hand_radiobox_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 }
 
 /***************************************************************************************/
-res_win_t radiobox_create(res_win_t widget, dword_t style, const xrect_t* pxr)
+widget_t radiobox_create(widget_t widget, dword_t style, const xrect_t* pxr)
 {
 	if_dispatch_t ev = { 0 };
 
@@ -189,7 +189,7 @@ res_win_t radiobox_create(res_win_t widget, dword_t style, const xrect_t* pxr)
 	return widget_create(NULL, style, pxr, widget, &ev);
 }
 
-void radiobox_popup_size(res_win_t widget, xsize_t* pxs)
+void radiobox_popup_size(widget_t widget, xsize_t* pxs)
 {
 	radiobox_delta_t* ptd = GETRADIOBOXDELTA(widget);
 	measure_interface im = { 0 };
@@ -202,10 +202,10 @@ void radiobox_popup_size(res_win_t widget, xsize_t* pxs)
 
 	widget_size_to_pt(widget, pxs);
 
-	widget_adjust_size(widget_get_style(widget), pxs);
+	adjust_widget_size(widget_get_style(widget), pxs);
 }
 
-void radiobox_set_state(res_win_t widget, bool_t cur)
+void radiobox_set_state(widget_t widget, bool_t cur)
 {
 	radiobox_delta_t* ptd = GETRADIOBOXDELTA(widget);
 
@@ -216,7 +216,7 @@ void radiobox_set_state(res_win_t widget, bool_t cur)
 	widget_erase(widget, NULL);
 }
 
-bool_t radiobox_get_state(res_win_t widget)
+bool_t radiobox_get_state(widget_t widget)
 {
 	radiobox_delta_t* ptd = GETRADIOBOXDELTA(widget);
 

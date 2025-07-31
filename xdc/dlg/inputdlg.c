@@ -26,16 +26,16 @@ LICENSE.GPL3 for more details.
 
 #include "dlg.h"
 
-#include "../xdcimp.h"
-#include "../xdcinit.h"
+#include "../xdcobj.h"
+
 
 #define IDC_INPUTDLG_PUSHBOX_CLOSE		10
 
 typedef struct _inputdlg_delta_t{
 	tchar_t* buf;
 	int max;
-	res_win_t editor;
-	res_win_t button;
+	widget_t editor;
+	widget_t button;
 
 	xfont_t xf;
 }inputdlg_delta_t;
@@ -49,7 +49,7 @@ typedef struct _INPUTPARAM{
 #define GETINPUTDLGDELTA(ph) 	(inputdlg_delta_t*)widget_get_user_delta(ph)
 #define SETINPUTDLGDELTA(ph,ptd) widget_set_user_delta(ph,(vword_t)ptd)
 /*********************************************************************************/
-void noti_inputdlg_commit_edit(res_win_t widget)
+void noti_inputdlg_commit_edit(widget_t widget)
 {
 	inputdlg_delta_t* ptd = GETINPUTDLGDELTA(widget);
 	
@@ -61,7 +61,7 @@ void noti_inputdlg_commit_edit(res_win_t widget)
 	widget_close(widget, 1);
 }
 
-void noti_inputdlg_rollback_edit(res_win_t widget)
+void noti_inputdlg_rollback_edit(widget_t widget)
 {
 	inputdlg_delta_t* ptd = GETINPUTDLGDELTA(widget);
 
@@ -73,7 +73,7 @@ void noti_inputdlg_rollback_edit(res_win_t widget)
 	widget_close(widget, 0);
 }
 /**********************************************************************************/
-int hand_inputdlg_create(res_win_t widget, void* data)
+int hand_inputdlg_create(widget_t widget, void* data)
 {
 	inputdlg_delta_t* ptd = GETINPUTDLGDELTA(widget);
 
@@ -129,7 +129,7 @@ int hand_inputdlg_create(res_win_t widget, void* data)
 	return 0;
 }
 
-void hand_inputdlg_destroy(res_win_t widget)
+void hand_inputdlg_destroy(widget_t widget)
 {
 	inputdlg_delta_t* ptd = GETINPUTDLGDELTA(widget);
 
@@ -148,7 +148,7 @@ void hand_inputdlg_destroy(res_win_t widget)
 	widget_hand_destroy(widget);
 }
 
-void hand_inputdlg_child_command(res_win_t widget, int code, vword_t data)
+void hand_inputdlg_child_command(widget_t widget, int code, vword_t data)
 {
 	inputdlg_delta_t* ptd = GETINPUTDLGDELTA(widget);
 
@@ -163,7 +163,7 @@ void hand_inputdlg_child_command(res_win_t widget, int code, vword_t data)
 	}
 }
 
-void hand_inputdlg_menu_command(res_win_t widget, int code, int cid, vword_t data)
+void hand_inputdlg_menu_command(widget_t widget, int code, int cid, vword_t data)
 {
 	inputdlg_delta_t* ptd = GETINPUTDLGDELTA(widget);
 
@@ -173,7 +173,7 @@ void hand_inputdlg_menu_command(res_win_t widget, int code, int cid, vword_t dat
 	}
 }
 
-void hand_inputdlg_size(res_win_t widget, int code, const xsize_t* prs)
+void hand_inputdlg_size(widget_t widget, int code, const xsize_t* prs)
 {
 	inputdlg_delta_t* ptd = GETINPUTDLGDELTA(widget);
 	xrect_t xr;
@@ -199,14 +199,14 @@ void hand_inputdlg_size(res_win_t widget, int code, const xsize_t* prs)
 	widget_erase(widget, NULL);
 }
 
-void hand_inputdlg_xfont(res_win_t widget, const xfont_t* pxf)
+void hand_inputdlg_xfont(widget_t widget, const xfont_t* pxf)
 {
 	inputdlg_delta_t* ptd = GETINPUTDLGDELTA(widget);
 
 	xmem_copy((void*)&ptd->xf, (void*)pxf, sizeof(xfont_t));
 }
 
-void hand_inputdlg_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
+void hand_inputdlg_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 {
 	inputdlg_delta_t* ptd = GETINPUTDLGDELTA(widget);
 	visual_t rdc;
@@ -236,13 +236,13 @@ void hand_inputdlg_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 }
 
 /***************************************************************************************/
-res_win_t inputdlg_create(const tchar_t* title, tchar_t* buf, int max, res_win_t owner)
+widget_t inputdlg_create(const tchar_t* title, tchar_t* buf, int max, widget_t owner)
 {
 	if_dispatch_t ev = { 0 };
 	INPUTPARAM pm = { 0 };
 	clr_mod_t clr = { 0 };
 	xrect_t xr = { 0 };
-	res_win_t dlg;
+	widget_t dlg;
 
 	pm.buf = buf;
 	pm.max = max;
@@ -278,7 +278,7 @@ res_win_t inputdlg_create(const tchar_t* title, tchar_t* buf, int max, res_win_t
 
 	widget_center_window(dlg, owner);
 
-	if (widget_is_valid(owner) && widget_has_struct(owner))
+	if (widget_is_valid(owner))
 	{
 		widget_get_color_mode(owner, &clr);
 		widget_set_color_mode(dlg, &clr);
@@ -287,7 +287,7 @@ res_win_t inputdlg_create(const tchar_t* title, tchar_t* buf, int max, res_win_t
 	return dlg;
 }
 
-void inputdlg_popup_size(res_win_t widget, xsize_t* pxs)
+void inputdlg_popup_size(widget_t widget, xsize_t* pxs)
 {
 	inputdlg_delta_t* ptd = GETINPUTDLGDELTA(widget);
 
@@ -302,7 +302,7 @@ void inputdlg_popup_size(res_win_t widget, xsize_t* pxs)
 	xs.h = (int)((float)xs.h * 1.25);
 	xs.w = 15 * xs.w;
 
-	widget_adjust_size(widget_get_style(widget), &xs);
+	adjust_widget_size(widget_get_style(widget), &xs);
 
 	pxs->w = xs.w;
 	pxs->h = xs.h;

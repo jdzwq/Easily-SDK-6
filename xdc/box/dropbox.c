@@ -26,8 +26,8 @@ LICENSE.GPL3 for more details.
 
 #include "box.h"
 
-#include "../xdcimp.h"
-#include "../xdcinit.h"
+#include "../xdcobj.h"
+
 
 typedef struct _dropbox_delta_t{
 	link_t_ptr table;
@@ -40,7 +40,7 @@ typedef struct _dropbox_delta_t{
 #define SETDROPBOXDELTA(ph,ptd) widget_set_user_delta(ph,(vword_t)ptd)
 
 /***************************************************************************************/
-static void _dropbox_item_rect(res_win_t widget, link_t_ptr plk, xrect_t* pxr)
+static void _dropbox_item_rect(widget_t widget, link_t_ptr plk, xrect_t* pxr)
 {
 	dropbox_delta_t* ptd = GETDROPBOXDELTA(widget);
 	xrect_t xr;
@@ -54,7 +54,7 @@ static void _dropbox_item_rect(res_win_t widget, link_t_ptr plk, xrect_t* pxr)
 	pxr->w = xr.w;
 }
 
-static void _dropbox_reset_page(res_win_t widget)
+static void _dropbox_reset_page(widget_t widget)
 {
 	dropbox_delta_t* ptd = GETDROPBOXDELTA(widget);
 
@@ -70,7 +70,7 @@ static void _dropbox_reset_page(res_win_t widget)
 	pif = widget_get_canvas_interface(widget);
 
 	(pif->pf_get_measure)(pif->ctx, &im);
-	(pif->pf_text_metric)(pif->ctx, &ptd->xf, &xs);
+	(pif->pf_font_size)(pif->ctx, &ptd->xf, &xs);
 
 	widget_size_to_pt(widget, &xs);
 	lw = xs.w;
@@ -88,7 +88,7 @@ static void _dropbox_reset_page(res_win_t widget)
 	widget_reset_scroll(widget, 0);
 }
 
-static void _dropbox_reset_visible(res_win_t widget)
+static void _dropbox_reset_visible(widget_t widget)
 {
 	dropbox_delta_t* ptd = GETDROPBOXDELTA(widget);
 	xrect_t xr;
@@ -100,7 +100,7 @@ static void _dropbox_reset_visible(res_win_t widget)
 	widget_ensure_visible(widget, &xr, 1);
 }
 
-static link_t_ptr _dropbox_get_next_entity(res_win_t widget, link_t_ptr pos)
+static link_t_ptr _dropbox_get_next_entity(widget_t widget, link_t_ptr pos)
 {
 	dropbox_delta_t* ptd = GETDROPBOXDELTA(widget);
 	link_t_ptr ent;
@@ -128,7 +128,7 @@ static link_t_ptr _dropbox_get_next_entity(res_win_t widget, link_t_ptr pos)
 	return NULL;
 }
 
-static link_t_ptr _dropbox_get_prev_entity(res_win_t widget, link_t_ptr pos)
+static link_t_ptr _dropbox_get_prev_entity(widget_t widget, link_t_ptr pos)
 {
 	dropbox_delta_t* ptd = GETDROPBOXDELTA(widget);
 	link_t_ptr ent;
@@ -157,7 +157,7 @@ static link_t_ptr _dropbox_get_prev_entity(res_win_t widget, link_t_ptr pos)
 }
 /*************************************************************************/
 
-void noti_dropbox_command(res_win_t widget, int code, vword_t data)
+void noti_dropbox_command(widget_t widget, int code, vword_t data)
 {
 	dropbox_delta_t* ptd = GETDROPBOXDELTA(widget);
 
@@ -167,7 +167,7 @@ void noti_dropbox_command(res_win_t widget, int code, vword_t data)
 		widget_post_command(widget_get_owner(widget), code, widget_get_user_id(widget), data);
 }
 
-void dropbox_on_item_changing(res_win_t widget)
+void dropbox_on_item_changing(widget_t widget)
 {
 	dropbox_delta_t* ptd = GETDROPBOXDELTA(widget);
 	xrect_t xr;
@@ -183,7 +183,7 @@ void dropbox_on_item_changing(res_win_t widget)
 	widget_erase(widget, &xr);
 }
 
-void dropbox_on_item_changed(res_win_t widget, link_t_ptr ent)
+void dropbox_on_item_changed(widget_t widget, link_t_ptr ent)
 {
 	dropbox_delta_t* ptd = GETDROPBOXDELTA(widget);
 	xrect_t xr;
@@ -202,7 +202,7 @@ void dropbox_on_item_changed(res_win_t widget, link_t_ptr ent)
 }
 
 /********************************************************************************************/
-int hand_dropbox_create(res_win_t widget, void* data)
+int hand_dropbox_create(widget_t widget, void* data)
 {
 	dropbox_delta_t* ptd;
 
@@ -220,7 +220,7 @@ int hand_dropbox_create(res_win_t widget, void* data)
 	return 0;
 }
 
-void hand_dropbox_destroy(res_win_t widget)
+void hand_dropbox_destroy(widget_t widget)
 {
 	dropbox_delta_t* ptd = GETDROPBOXDELTA(widget);
 
@@ -233,7 +233,7 @@ void hand_dropbox_destroy(res_win_t widget)
 	widget_hand_destroy(widget);
 }
 
-void hand_dropbox_keydown(res_win_t widget, dword_t ks, int key)
+void hand_dropbox_keydown(widget_t widget, dword_t ks, int key)
 {
 	dropbox_delta_t* ptd = GETDROPBOXDELTA(widget);
 
@@ -263,7 +263,7 @@ void hand_dropbox_keydown(res_win_t widget, dword_t ks, int key)
 	}
 }
 
-void hand_dropbox_lbutton_down(res_win_t widget, const xpoint_t* pxp)
+void hand_dropbox_lbutton_down(widget_t widget, const xpoint_t* pxp)
 {
 	dropbox_delta_t* ptd = GETDROPBOXDELTA(widget);
 
@@ -272,7 +272,7 @@ void hand_dropbox_lbutton_down(res_win_t widget, const xpoint_t* pxp)
 
 }
 
-void hand_dropbox_lbutton_up(res_win_t widget, const xpoint_t* pxp)
+void hand_dropbox_lbutton_up(widget_t widget, const xpoint_t* pxp)
 {
 	dropbox_delta_t* ptd = GETDROPBOXDELTA(widget);
 	measure_interface im = { 0 };
@@ -303,7 +303,7 @@ void hand_dropbox_lbutton_up(res_win_t widget, const xpoint_t* pxp)
 	noti_dropbox_command(widget, COMMAND_CHANGE, (vword_t)NULL);
 }
 
-void hand_dropbox_size(res_win_t widget, int code, const xsize_t* prs)
+void hand_dropbox_size(widget_t widget, int code, const xsize_t* prs)
 {
 	dropbox_delta_t* ptd = GETDROPBOXDELTA(widget);
 
@@ -313,7 +313,7 @@ void hand_dropbox_size(res_win_t widget, int code, const xsize_t* prs)
 	dropbox_redraw(widget);
 }
 
-void hand_dropbox_scroll(res_win_t widget, bool_t bHorz, int nLine)
+void hand_dropbox_scroll(widget_t widget, bool_t bHorz, int nLine)
 {
 	dropbox_delta_t* ptd = GETDROPBOXDELTA(widget);
 
@@ -323,14 +323,14 @@ void hand_dropbox_scroll(res_win_t widget, bool_t bHorz, int nLine)
 	widget_hand_scroll(widget, bHorz, nLine);
 }
 
-void hand_dropbox_xfont(res_win_t widget, const xfont_t* pxf)
+void hand_dropbox_xfont(widget_t widget, const xfont_t* pxf)
 {
 	dropbox_delta_t* ptd = GETDROPBOXDELTA(widget);
 
 	xmem_copy((void*)&ptd->xf, (void*)pxf, sizeof(xfont_t));
 }
 
-void hand_dropbox_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
+void hand_dropbox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 {
 	dropbox_delta_t* ptd = GETDROPBOXDELTA(widget);
 
@@ -377,7 +377,7 @@ void hand_dropbox_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 }
 
 /************************************************************************************************/
-res_win_t dropbox_create(res_win_t widget, dword_t style, const xrect_t* pxr)
+widget_t dropbox_create(widget_t widget, dword_t style, const xrect_t* pxr)
 {
 	if_dispatch_t ev = { 0 };
 
@@ -406,7 +406,7 @@ res_win_t dropbox_create(res_win_t widget, dword_t style, const xrect_t* pxr)
 	return widget_create(NULL,style, pxr, widget, &ev);
 }
 
-void dropbox_set_data(res_win_t widget, link_t_ptr ptr)
+void dropbox_set_data(widget_t widget, link_t_ptr ptr)
 {
 	dropbox_delta_t* ptd = GETDROPBOXDELTA(widget);
 
@@ -416,7 +416,7 @@ void dropbox_set_data(res_win_t widget, link_t_ptr ptr)
 	dropbox_redraw(widget);
 }
 
-link_t_ptr dropbox_get_data(res_win_t widget)
+link_t_ptr dropbox_get_data(widget_t widget)
 {
 	dropbox_delta_t* ptd = GETDROPBOXDELTA(widget);
 
@@ -425,7 +425,7 @@ link_t_ptr dropbox_get_data(res_win_t widget)
 	return ptd->table;
 }
 
-void dropbox_redraw(res_win_t widget)
+void dropbox_redraw(widget_t widget)
 {
 	dropbox_delta_t* ptd = GETDROPBOXDELTA(widget);
 	link_t_ptr ent;
@@ -456,7 +456,7 @@ void dropbox_redraw(res_win_t widget)
 	widget_erase(widget, NULL);
 }
 
-void dropbox_tabskip(res_win_t widget, int nSkip)
+void dropbox_tabskip(widget_t widget, int nSkip)
 {
 	dropbox_delta_t* ptd = GETDROPBOXDELTA(widget);
 	link_t_ptr ilk;
@@ -486,7 +486,7 @@ void dropbox_tabskip(res_win_t widget, int nSkip)
 	}
 }
 
-void dropbox_set_focus_item(res_win_t widget, link_t_ptr ilk)
+void dropbox_set_focus_item(widget_t widget, link_t_ptr ilk)
 {
 	dropbox_delta_t* ptd = GETDROPBOXDELTA(widget);
 
@@ -512,7 +512,7 @@ void dropbox_set_focus_item(res_win_t widget, link_t_ptr ilk)
 	}
 }
 
-link_t_ptr dropbox_get_focus_item(res_win_t widget)
+link_t_ptr dropbox_get_focus_item(widget_t widget)
 {
 	dropbox_delta_t* ptd = GETDROPBOXDELTA(widget);
 	
@@ -524,7 +524,7 @@ link_t_ptr dropbox_get_focus_item(res_win_t widget)
 	return ptd->entity;
 }
 
-void dropbox_popup_size(res_win_t widget, xsize_t* pxs)
+void dropbox_popup_size(widget_t widget, xsize_t* pxs)
 {
 	dropbox_delta_t* ptd = GETDROPBOXDELTA(widget);
 	measure_interface im = { 0 };
@@ -538,10 +538,10 @@ void dropbox_popup_size(res_win_t widget, xsize_t* pxs)
 
 	widget_size_to_pt(widget, pxs);
 
-	widget_adjust_size(widget_get_style(widget), pxs);
+	adjust_widget_size(widget_get_style(widget), pxs);
 }
 
-void dropbox_find(res_win_t widget, const tchar_t* token)
+void dropbox_find(widget_t widget, const tchar_t* token)
 {
 	dropbox_delta_t* ptd = GETDROPBOXDELTA(widget);
 
@@ -574,7 +574,7 @@ void dropbox_find(res_win_t widget, const tchar_t* token)
 	dropbox_set_focus_item(widget, ent);
 }
 
-void dropbox_filter(res_win_t widget, const tchar_t* token)
+void dropbox_filter(widget_t widget, const tchar_t* token)
 {
 	dropbox_delta_t* ptd = GETDROPBOXDELTA(widget);
 

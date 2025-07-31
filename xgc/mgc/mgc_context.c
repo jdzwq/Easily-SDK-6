@@ -262,7 +262,7 @@ int mgc_pt_per_in(canvas_t canv, bool_t horz)
 	return mgc_pt_per_in_raw(view, horz);
 }
 
-float mgc_pt_to_tm_raw(visual_t mgc, int pt, bool_t horz)
+float mgc_pt_to_mm_raw(visual_t mgc, int pt, bool_t horz)
 {
 	memo_context_t *pmgc = TypePtrFromHead(memo_context_t, mgc);
 
@@ -281,16 +281,16 @@ float mgc_pt_to_tm_raw(visual_t mgc, int pt, bool_t horz)
 	return (float)((float)pt * mmperpt);
 }
 
-float mgc_pt_to_tm(canvas_t canv, int pt, bool_t horz)
+float mgc_pt_to_mm(canvas_t canv, int pt, bool_t horz)
 {
 	visual_t view;
 
 	view = mgc_get_canvas_visual(canv);
 
-	return mgc_pt_to_tm_raw(view, pt, horz);
+	return mgc_pt_to_mm_raw(view, pt, horz);
 }
 
-int mgc_tm_to_pt_raw(visual_t mgc, float tm, bool_t horz)
+int mgc_mm_to_pt_raw(visual_t mgc, float tm, bool_t horz)
 {
 	memo_context_t *pmgc = TypePtrFromHead(memo_context_t, mgc);
 
@@ -309,13 +309,13 @@ int mgc_tm_to_pt_raw(visual_t mgc, float tm, bool_t horz)
 	return (int)((float)tm * ptpermm);
 }
 
-int mgc_tm_to_pt(canvas_t canv, float tm, bool_t horz)
+int mgc_mm_to_pt(canvas_t canv, float tm, bool_t horz)
 {
 	visual_t view;
 
 	view = mgc_get_canvas_visual(canv);
 
-	return mgc_tm_to_pt_raw(view, tm, horz);
+	return mgc_mm_to_pt_raw(view, tm, horz);
 }
 
 void mgc_draw_line_raw(visual_t mgc, const xpen_t *pxp, const xpoint_t *ppt1, const xpoint_t *ppt2)
@@ -363,8 +363,8 @@ void mgc_draw_line(canvas_t canv, const xpen_t *pxp, const xpoint_t *ppt1, const
 	pt[1].fx = ppt2->fx;
 	pt[1].fy = ppt2->fy;
 
-	mgc_point_tm_to_pt(canv, &pt[0]);
-	mgc_point_tm_to_pt(canv, &pt[1]);
+	mgc_point_mm_to_pt(canv, &pt[0]);
+	mgc_point_mm_to_pt(canv, &pt[1]);
 
 	mgc_draw_line_raw(view, pxp, &pt[0], &pt[1]);
 }
@@ -421,7 +421,7 @@ void mgc_draw_polyline(canvas_t canv, const xpen_t *pxp, const xpoint_t *ppt, in
 	{
 		pa[i].fx = ppt[i].fx;
 		pa[i].fy = ppt[i].fy;
-		mgc_point_tm_to_pt(canv, &pa[i]);
+		mgc_point_mm_to_pt(canv, &pa[i]);
 	}
 
 	mgc_draw_polyline_raw(view, pxp, pa, n);
@@ -479,10 +479,10 @@ void mgc_draw_bezier(canvas_t canv, const xpen_t *pxp, const xpoint_t *ppt1, con
 	pt[3].fx = ppt4->fx;
 	pt[3].fy = ppt4->fy;
 
-	mgc_point_tm_to_pt(canv, &pt[0]);
-	mgc_point_tm_to_pt(canv, &pt[1]);
-	mgc_point_tm_to_pt(canv, &pt[2]);
-	mgc_point_tm_to_pt(canv, &pt[3]);
+	mgc_point_mm_to_pt(canv, &pt[0]);
+	mgc_point_mm_to_pt(canv, &pt[1]);
+	mgc_point_mm_to_pt(canv, &pt[2]);
+	mgc_point_mm_to_pt(canv, &pt[3]);
 
 	mgc_draw_bezier_raw(view, pxp, &pt[0], &pt[1], &pt[2], &pt[3]);
 }
@@ -556,7 +556,7 @@ void mgc_draw_curve(canvas_t canv, const xpen_t *pxp, const xpoint_t *ppt, int n
 	for (i = 0; i < n; i++)
 	{
 		xmem_copy((void *)&pa[i], (void *)&ppt[i], sizeof(xpoint_t));
-		mgc_point_tm_to_pt(canv, &pa[i]);
+		mgc_point_mm_to_pt(canv, &pa[i]);
 	}
 
 	mgc_draw_curve_raw(view, pxp, pa, n);
@@ -608,15 +608,15 @@ void mgc_draw_arc(canvas_t canv, const xpen_t *pxp, const xpoint_t *ppt1, const 
 
 	pt1.fx = ppt1->fx;
 	pt1.fy = ppt1->fy;
-	mgc_point_tm_to_pt(canv, &pt1);
+	mgc_point_mm_to_pt(canv, &pt1);
 
 	pt2.fx = ppt2->fx;
 	pt2.fy = ppt2->fy;
-	mgc_point_tm_to_pt(canv, &pt2);
+	mgc_point_mm_to_pt(canv, &pt2);
 
 	xs.fw = pxs->fw;
 	xs.fh = pxs->fh;
-	mgc_size_tm_to_pt(canv, &xs);
+	mgc_size_mm_to_pt(canv, &xs);
 
 	mgc_draw_arc_raw(view, pxp, &pt1, &pt2, &xs, sflag, lflag);
 }
@@ -671,13 +671,13 @@ void mgc_flood_fill(canvas_t canv, const xbrush_t* pxb, const xrect_t* pxr, cons
 	xr.fy = pxr->fy;
 	xr.fw = pxr->fw;
 	xr.fh = pxr->fh;
-	mgc_rect_tm_to_pt(canv, &xr);
+	mgc_rect_mm_to_pt(canv, &xr);
 
 	if(ppt)
 	{
 		pt.x = ppt->x;
 		pt.y = ppt->y;
-		mgc_point_tm_to_pt(canv, &pt);
+		mgc_point_mm_to_pt(canv, &pt);
 	}
 
 	mgc_flood_fill_raw(view, pxb, &xr, ((ppt)? &pt : NULL));
@@ -784,7 +784,7 @@ void mgc_draw_triangle(canvas_t canv, const xpen_t *pxp, const xbrush_t *pxb, co
 	xr.fw = pxr->fw;
 	xr.fh = pxr->fh;
 
-	mgc_rect_tm_to_pt(canv, &xr);
+	mgc_rect_mm_to_pt(canv, &xr);
 
 	mgc_draw_triangle_raw(view, pxp, pxb, &xr, orient);
 }
@@ -838,7 +838,7 @@ void mgc_draw_rect(canvas_t canv, const xpen_t *pxp, const xbrush_t *pxb, const 
 	xr.fw = pxr->fw;
 	xr.fh = pxr->fh;
 
-	mgc_rect_tm_to_pt(canv, &xr);
+	mgc_rect_mm_to_pt(canv, &xr);
 
 	mgc_draw_rect_raw(view, pxp, pxb, &xr);
 }
@@ -928,13 +928,13 @@ void mgc_draw_round(canvas_t canv, const xpen_t *pxp, const xbrush_t *pxb, const
 	xr.fy = pxr->fy;
 	xr.fw = pxr->fw;
 	xr.fh = pxr->fh;
-	mgc_rect_tm_to_pt(canv, &xr);
+	mgc_rect_mm_to_pt(canv, &xr);
 
 	if (pxs)
 	{
 		xs.fw = pxs->fw;
 		xs.fh = pxs->fh;
-		mgc_size_tm_to_pt(canv, &xs);
+		mgc_size_mm_to_pt(canv, &xs);
 	}
 
 	mgc_draw_round_raw(view, pxp, pxb, &xr, ((pxs)? &xs : NULL));
@@ -988,7 +988,7 @@ void mgc_draw_ellipse(canvas_t canv, const xpen_t *pxp, const xbrush_t *pxb, con
 	xr.fw = pxr->fw;
 	xr.fh = pxr->fh;
 
-	mgc_rect_tm_to_pt(canv, &xr);
+	mgc_rect_mm_to_pt(canv, &xr);
 
 	mgc_draw_ellipse_raw(view, pxp, pxb, &xr);
 }
@@ -1071,7 +1071,7 @@ void mgc_draw_pie(canvas_t canv, const xpen_t *pxp, const xbrush_t *pxb, const x
 	xr.fw = prt->fw;
 	xr.fh = prt->fh;
 
-	mgc_rect_tm_to_pt(canv, &xr);
+	mgc_rect_mm_to_pt(canv, &xr);
 
 	mgc_draw_pie_raw(view, pxp, pxb, &xr, fang, tang);
 }
@@ -1147,13 +1147,13 @@ void mgc_draw_sector(canvas_t canv, const xpen_t *pxp, const xbrush_t *pxb, cons
 
 	pt.fx = ppt->fx;
 	pt.fy = ppt->fy;
-	mgc_point_tm_to_pt(canv, &pt);
+	mgc_point_mm_to_pt(canv, &pt);
 
 	rl.fs = prl->fs;
-	mgc_span_tm_to_pt(canv, &rl);
+	mgc_span_mm_to_pt(canv, &rl);
 
 	rs.fs = prs->fs;
-	mgc_span_tm_to_pt(canv, &rs);
+	mgc_span_mm_to_pt(canv, &rs);
 
 	mgc_draw_sector_raw(view, pxp, pxb, &pt, &rl, &rs, fang, tang);
 }
@@ -1246,7 +1246,7 @@ void mgc_draw_polygon(canvas_t canv, const xpen_t *pxp, const xbrush_t *pxb, con
 	{
 		pa[i].fx = ppt[i].fx;
 		pa[i].fy = ppt[i].fy;
-		mgc_point_tm_to_pt(canv, &pa[i]);
+		mgc_point_mm_to_pt(canv, &pa[i]);
 	}
 
 	mgc_draw_polygon_raw(view, pxp, pxb, pa, n);
@@ -1345,10 +1345,10 @@ void mgc_draw_equilagon(canvas_t canv, const xpen_t *pxp, const xbrush_t *pxb, c
 	pt.fx = ppt->fx;
 	pt.fy = ppt->fy;
 
-	mgc_point_tm_to_pt(canv, &pt);
+	mgc_point_mm_to_pt(canv, &pt);
 
 	xn.fs = pxn->fs;
-	mgc_span_tm_to_pt(canv, &xn);
+	mgc_span_mm_to_pt(canv, &xn);
 
 	mgc_draw_equilagon_raw(view, pxp, pxb, &pt, &xn, n);
 }
@@ -1727,43 +1727,43 @@ void mgc_draw_path(canvas_t canv, const xpen_t *pxp, const xbrush_t *pxb, const 
 	{
 		if (*(aa + j) == _T('M') || *(aa + j) == _T('m'))
 		{
-			mgc_point_tm_to_pt(canv, &ppt[i]);
+			mgc_point_mm_to_pt(canv, &ppt[i]);
 			i += 1;
 		}
 		else if (*(aa + j) == _T('L') || *(aa + j) == _T('l'))
 		{
-			mgc_point_tm_to_pt(canv, &ppt[i]);
+			mgc_point_mm_to_pt(canv, &ppt[i]);
 			i += 1;
 		}
 		else if (*(aa + j) == _T('Q') || *(aa + j) == _T('q'))
 		{
-			mgc_point_tm_to_pt(canv, &ppt[i]);
-			mgc_point_tm_to_pt(canv, &ppt[i + 1]);
+			mgc_point_mm_to_pt(canv, &ppt[i]);
+			mgc_point_mm_to_pt(canv, &ppt[i + 1]);
 			i += 2;
 		}
 		else if (*(aa + j) == _T('T') || *(aa + j) == _T('t'))
 		{
-			mgc_point_tm_to_pt(canv, &ppt[i]);
+			mgc_point_mm_to_pt(canv, &ppt[i]);
 			i += 1;
 		}
 		else if (*(aa + j) == _T('C') || *(aa + j) == _T('c'))
 		{
-			mgc_point_tm_to_pt(canv, &ppt[i]);
-			mgc_point_tm_to_pt(canv, &ppt[i + 1]);
-			mgc_point_tm_to_pt(canv, &ppt[i + 2]);
+			mgc_point_mm_to_pt(canv, &ppt[i]);
+			mgc_point_mm_to_pt(canv, &ppt[i + 1]);
+			mgc_point_mm_to_pt(canv, &ppt[i + 2]);
 			i += 3;
 		}
 		else if (*(aa + j) == _T('S') || *(aa + j) == _T('s'))
 		{
-			mgc_point_tm_to_pt(canv, &ppt[i]);
-			mgc_point_tm_to_pt(canv, &ppt[i + 1]);
+			mgc_point_mm_to_pt(canv, &ppt[i]);
+			mgc_point_mm_to_pt(canv, &ppt[i + 1]);
 			i += 2;
 		}
 		else if (*(aa + j) == _T('A') || *(aa + j) == _T('a'))
 		{
-			mgc_size_tm_to_pt(canv, (xsize_t *)(&ppt[i]));
-			mgc_size_tm_to_pt(canv, (xsize_t *)(&ppt[i + 1]));
-			mgc_point_tm_to_pt(canv, &ppt[i + 2]);
+			mgc_size_mm_to_pt(canv, (xsize_t *)(&ppt[i]));
+			mgc_size_mm_to_pt(canv, (xsize_t *)(&ppt[i + 1]));
+			mgc_point_mm_to_pt(canv, &ppt[i + 2]);
 			i += 3;
 		}
 		else if (*(aa + j) == _T('Z') || *(aa + j) == _T('z'))
@@ -1800,7 +1800,7 @@ void mgc_multi_line_raw(visual_t mgc, const xfont_t *pxf, const xface_t *pxa, co
 	if (line_rati < 1.0)
 		line_rati = 1.0;
 
-	mgc_text_metric_raw(mgc, pxf, &xs);
+	mgc_font_size_raw(mgc, pxf, &xs);
 
 	th = xs.h;
 	lh = (int)((float)th * (line_rati - 1.0));
@@ -1827,7 +1827,7 @@ void mgc_multi_line(canvas_t canv, const xfont_t *pxf, const xface_t *pxa, const
 	xrect_t xr;
 
 	xmem_copy((void *)&xr, (void *)pxr, sizeof(xrect_t));
-	mgc_rect_tm_to_pt(canv, &xr);
+	mgc_rect_mm_to_pt(canv, &xr);
 
 	view = mgc_get_canvas_visual(canv);
 
@@ -1930,7 +1930,7 @@ void mgc_text_out(canvas_t canv, const xfont_t *pxf, const xpoint_t *ppt, const 
 	pt.fx = ppt->fx;
 	pt.fy = ppt->fy;
 
-	mgc_point_tm_to_pt(canv, &pt);
+	mgc_point_mm_to_pt(canv, &pt);
 
 	mgc_text_out_raw(view, pxf, &pt, txt, len);
 }
@@ -2042,7 +2042,7 @@ void mgc_draw_text(canvas_t canv, const xfont_t *pxf, const xface_t *pxa, const 
 	xr.fw = pxr->fw;
 	xr.fh = pxr->fh;
 
-	mgc_rect_tm_to_pt(canv, &xr);
+	mgc_rect_mm_to_pt(canv, &xr);
 
 	mgc_draw_text_raw(view, pxf, pxa, &xr, txt, len);
 }
@@ -2302,7 +2302,7 @@ void mgc_text_size(canvas_t canv, const xfont_t *pxf, const tchar_t *txt, int le
 	pxs->fh = pm * 1.2f;
 }
 
-void mgc_text_metric_raw(visual_t mgc, const xfont_t *pxf, xsize_t *pxs)
+void mgc_font_size_raw(visual_t mgc, const xfont_t *pxf, xsize_t *pxs)
 {
 	memo_context_t *pgc = (memo_context_t *)mgc;
 
@@ -2345,15 +2345,25 @@ ONERROR:
 	return;
 }
 
-void mgc_text_metric(canvas_t canv, const xfont_t *pxf, xsize_t *pxs)
+void mgc_font_size(canvas_t canv, const xfont_t *pxf, xsize_t *pxs)
 {
 	visual_t view;
 
 	view = mgc_get_canvas_visual(canv);
 
-	mgc_text_metric_raw(view, pxf, pxs);
+	mgc_font_size_raw(view, pxf, pxs);
 
-	mgc_size_pt_to_tm(canv, pxs);
+	mgc_size_pt_to_mm(canv, pxs);
+}
+
+float mgc_pixel_size_raw(visual_t mgc)
+{
+	return LOGMMPERPT;
+}
+
+float mgc_pixel_size(canvas_t canv)
+{
+	return LOGMMPERPT;
 }
 
 void mgc_text_indicate_raw(visual_t mgc, const xfont_t *pxf, const xface_t *pxa, const tchar_t *txt, int len, const xrect_t* pxr, xrect_t *pr, int pn)
@@ -2529,22 +2539,8 @@ void mgc_text_indicate(canvas_t canv, const xfont_t *pxf, const xface_t *pxa, co
 
 	for (i = 0; i < n; i++)
 	{
-		mgc_rect_pt_to_tm(canv, &pa[i]);
+		mgc_rect_pt_to_mm(canv, &pa[i]);
 	}
-}
-
-float mgc_pixel_metric_raw(visual_t mgc, bool_t horz)
-{
-	return 1.0;
-}
-
-float mgc_pixel_metric(canvas_t canv, bool_t horz)
-{
-	visual_t view;
-
-	view = mgc_get_canvas_visual(canv);
-
-	return mgc_pixel_metric_raw(view, horz);
 }
 
 void mgc_color_out_raw(visual_t mgc, const xrect_t *pxr, bool_t horz, const tchar_t *rgbstr, int len)
@@ -2773,7 +2769,7 @@ void mgc_draw_image(canvas_t canv, const ximage_t *pxi, const xrect_t *pxr)
 	xr.fw = pxr->fw;
 	xr.fh = pxr->fh;
 
-	mgc_rect_tm_to_pt(canv, &xr);
+	mgc_rect_mm_to_pt(canv, &xr);
 
 	mgc_draw_image_raw(view, pxi, &xr);
 }

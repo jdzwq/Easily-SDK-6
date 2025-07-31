@@ -242,7 +242,7 @@ void draw_table(const drawing_interface* pif, const xfont_t* pxf, const xface_t*
 	if (lr < 1)
 		lr = 1.0;
 
-	(*pif->pf_text_metric)(pif->ctx, pxf, &xs);
+	(*pif->pf_font_size)(pif->ctx, pxf, &xs);
 
 	lh = (float)(xs.fh * lr);
 

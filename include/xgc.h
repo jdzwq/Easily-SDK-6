@@ -3,6 +3,7 @@
 #define _XGC_H
 
 #include "../xgc/xgcobj.h"
+#include "../xgc/xgcbio.h"
 #include "../xgc/xgcoem.h"
 #include "../xgc/xgcutil.h"
 

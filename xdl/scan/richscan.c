@@ -557,7 +557,7 @@ void scan_rich_text(link_t_ptr ptr, const measure_interface* pif, const xfont_t*
 	ro.pf_text_size = pif->pf_measure_size;
 	ro.ctx = pif->ctx;
 	ro.pxf = pxf;
-	ro.permm = (*pif->pf_measure_pixel)(pif->ctx, 1);
+	ro.permm = (*pif->pf_measure_pixel)(pif->ctx);
 
 	it.ctx = (void*)&ro;
 	it.pf_is_paging = call_rich_is_paging;

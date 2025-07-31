@@ -26,8 +26,8 @@ LICENSE.GPL3 for more details.
 
 #include "box.h"
 
-#include "../xdcimp.h"
-#include "../xdcinit.h"
+#include "../xdcobj.h"
+
 
 #define PUSHBOX_ATTR_BUTTON_SPAN	(float)5 //TM
 
@@ -42,7 +42,7 @@ typedef struct _pushbox_delta_t{
 #define SETPUSHBOXDELTA(ph,ptd) widget_set_user_delta(ph,(vword_t)ptd)
 
 /********************************************************************************/
-void _pushbox_reset_page(res_win_t widget)
+void _pushbox_reset_page(widget_t widget)
 {
 	pushbox_delta_t* ptd = GETPUSHBOXDELTA(widget);
 	xrect_t xr;
@@ -53,7 +53,7 @@ void _pushbox_reset_page(res_win_t widget)
 }
 
 /**********************************************************************************/
-int hand_pushbox_create(res_win_t widget, void* data)
+int hand_pushbox_create(widget_t widget, void* data)
 {
 	pushbox_delta_t* ptd;
 
@@ -69,7 +69,7 @@ int hand_pushbox_create(res_win_t widget, void* data)
 	return 0;
 }
 
-void hand_pushbox_destroy(res_win_t widget)
+void hand_pushbox_destroy(widget_t widget)
 {
 	pushbox_delta_t* ptd = GETPUSHBOXDELTA(widget);
 
@@ -85,7 +85,7 @@ void hand_pushbox_destroy(res_win_t widget)
 	widget_hand_destroy(widget);
 }
 
-void hand_pushbox_lbutton_down(res_win_t widget, const xpoint_t* pxp)
+void hand_pushbox_lbutton_down(widget_t widget, const xpoint_t* pxp)
 {
 	pushbox_delta_t* ptd = GETPUSHBOXDELTA(widget);
 	dword_t ws;
@@ -104,7 +104,7 @@ void hand_pushbox_lbutton_down(res_win_t widget, const xpoint_t* pxp)
 	}
 }
 
-void hand_pushbox_lbutton_up(res_win_t widget, const xpoint_t* pxp)
+void hand_pushbox_lbutton_up(widget_t widget, const xpoint_t* pxp)
 {
 	pushbox_delta_t* ptd = GETPUSHBOXDELTA(widget);
 	dword_t ws;
@@ -133,7 +133,7 @@ void hand_pushbox_lbutton_up(res_win_t widget, const xpoint_t* pxp)
 	widget_post_command(widget_get_owner(widget), ptd->b_check, widget_get_user_id(widget), (vword_t)widget);
 }
 
-void hand_pushbox_size(res_win_t widget, int code, const xsize_t* prs)
+void hand_pushbox_size(widget_t widget, int code, const xsize_t* prs)
 {
 	pushbox_delta_t* ptd = GETPUSHBOXDELTA(widget);
 	
@@ -142,14 +142,14 @@ void hand_pushbox_size(res_win_t widget, int code, const xsize_t* prs)
 	widget_erase(widget, NULL);
 }
 
-void hand_pushbox_xfont(res_win_t widget, const xfont_t* pxf)
+void hand_pushbox_xfont(widget_t widget, const xfont_t* pxf)
 {
 	pushbox_delta_t* ptd = GETPUSHBOXDELTA(widget);
 	
 	xmem_copy((void*)&ptd->xf, (void*)pxf, sizeof(xfont_t));
 }
 
-void hand_pushbox_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
+void hand_pushbox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 {
 	pushbox_delta_t* ptd = GETPUSHBOXDELTA(widget);
 	visual_t rdc;
@@ -298,7 +298,7 @@ void hand_pushbox_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 }
 
 /***************************************************************************************/
-res_win_t pushbox_create(res_win_t widget, dword_t style, const xrect_t* pxr)
+widget_t pushbox_create(widget_t widget, dword_t style, const xrect_t* pxr)
 {
 	if_dispatch_t ev = { 0 };
 
@@ -323,7 +323,7 @@ res_win_t pushbox_create(res_win_t widget, dword_t style, const xrect_t* pxr)
 	return widget_create(NULL, style, pxr, widget, &ev);
 }
 
-void pushbox_set_state(res_win_t widget, bool_t bChecked)
+void pushbox_set_state(widget_t widget, bool_t bChecked)
 {
 	pushbox_delta_t* ptd = GETPUSHBOXDELTA(widget);
 
@@ -332,7 +332,7 @@ void pushbox_set_state(res_win_t widget, bool_t bChecked)
 	ptd->b_check = bChecked;
 }
 
-bool_t pushbox_get_state(res_win_t widget)
+bool_t pushbox_get_state(widget_t widget)
 {
 	pushbox_delta_t* ptd = GETPUSHBOXDELTA(widget);
 
@@ -341,7 +341,7 @@ bool_t pushbox_get_state(res_win_t widget)
 	return ptd->b_check;
 }
 
-void pushbox_set_text(res_win_t widget, const tchar_t* text, int len)
+void pushbox_set_text(widget_t widget, const tchar_t* text, int len)
 {
 	pushbox_delta_t* ptd = GETPUSHBOXDELTA(widget);
 
@@ -359,7 +359,7 @@ void pushbox_set_text(res_win_t widget, const tchar_t* text, int len)
 	widget_erase(widget, NULL);
 }
 
-void pushbox_popup_size(res_win_t widget, xsize_t* pxs)
+void pushbox_popup_size(widget_t widget, xsize_t* pxs)
 {
 	pushbox_delta_t* ptd = GETPUSHBOXDELTA(widget);
 	xsize_t xs;
@@ -376,5 +376,5 @@ void pushbox_popup_size(res_win_t widget, xsize_t* pxs)
 
 	widget_size_to_pt(widget, pxs);
 
-	widget_adjust_size(widget_get_style(widget), pxs);
+	adjust_widget_size(widget_get_style(widget), pxs);
 }

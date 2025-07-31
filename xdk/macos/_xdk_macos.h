@@ -32,6 +32,18 @@ LICENSE.GPL3 for more details.
 #ifndef _XDK_MACOS_H
 #define _XDK_MACOS_H
 
+#ifndef LIT_ENDIAN
+#define LIT_ENDIAN	__LITTLE_ENDIAN
+#endif
+
+#ifndef BIG_ENDIAN
+#define BIG_ENDIAN	__BIG_ENDIAN
+#endif
+
+#ifndef PDP_ENDIAN
+#define PDP_ENDIAN	__PDP_ENDIAN
+#endif
+
 #define XDK_SUPPORT_MEMO_HEAP
 #define XDK_SUPPORT_MEMO_PAGE
 //#define XDK_SUPPORT_MEMO_GLOB

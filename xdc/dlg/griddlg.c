@@ -26,8 +26,8 @@ LICENSE.GPL3 for more details.
 
 #include "dlg.h"
 
-#include "../xdcimp.h"
-#include "../xdcinit.h"
+#include "../xdcobj.h"
+
 
 #define IDC_GRIDDLG_GRID			10
 #define IDC_GRIDDLG_PUSHBOX_OK		11
@@ -46,10 +46,10 @@ typedef struct _griddlg_delta_t{
 #define SETGRIDDLGDELTA(ph,ptd) widget_set_user_delta(ph,(vword_t)ptd)
 
 /**********************************************************************************/
-void griddlg_on_ok(res_win_t widget)
+void griddlg_on_ok(widget_t widget)
 {
 	griddlg_delta_t* ptd = GETGRIDDLGDELTA(widget);
-	res_win_t ctrl;
+	widget_t ctrl;
 
 	ctrl = widget_get_child(widget, IDC_GRIDDLG_GRID);
 	(*ptd->prow) = gridctrl_get_focus_row(ctrl);
@@ -57,9 +57,9 @@ void griddlg_on_ok(res_win_t widget)
 	widget_close(widget, 1);
 }
 
-void griddlg_on_find(res_win_t widget)
+void griddlg_on_find(widget_t widget)
 {
-	res_win_t ctrl;
+	widget_t ctrl;
 	tchar_t token[RES_LEN + 1];
 
 	ctrl = widget_get_child(widget, IDC_GRIDDLG_EDITBOX);
@@ -69,13 +69,13 @@ void griddlg_on_find(res_win_t widget)
 	gridctrl_find(ctrl, token);
 }
 /**********************************************************************************/
-int hand_griddlg_create(res_win_t widget, void* data)
+int hand_griddlg_create(widget_t widget, void* data)
 {
 	griddlg_delta_t* ptd;
 
 	xrect_t xr;
 	xsize_t xs;
-	res_win_t gridctrl, pushbox, editbox;
+	widget_t gridctrl, pushbox, editbox;
 
 	widget_hand_create(widget);
 
@@ -149,10 +149,10 @@ int hand_griddlg_create(res_win_t widget, void* data)
 	return 0;
 }
 
-void hand_griddlg_destroy(res_win_t widget)
+void hand_griddlg_destroy(widget_t widget)
 {
 	griddlg_delta_t* ptd = GETGRIDDLGDELTA(widget);
-	res_win_t ctrl;
+	widget_t ctrl;
 
 	XDK_ASSERT(ptd != NULL);
 
@@ -175,12 +175,12 @@ void hand_griddlg_destroy(res_win_t widget)
 	widget_hand_destroy(widget);
 }
 
-void hand_griddlg_size(res_win_t widget, int code, const xsize_t* prs)
+void hand_griddlg_size(widget_t widget, int code, const xsize_t* prs)
 {
 	griddlg_delta_t* ptd = GETGRIDDLGDELTA(widget);
 	xsize_t xs;
 	xrect_t xr;
-	res_win_t ctrl;
+	widget_t ctrl;
 
 	xs.fw = GRIDDLG_BUTTON_WIDTH;
 	xs.fh = GRIDDLG_BUTTON_HEIGHT;
@@ -248,7 +248,7 @@ void hand_griddlg_size(res_win_t widget, int code, const xsize_t* prs)
 	widget_erase(widget, NULL);
 }
 
-void hand_griddlg_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
+void hand_griddlg_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 {
 	griddlg_delta_t* ptd = GETGRIDDLGDELTA(widget);
 
@@ -296,10 +296,10 @@ void hand_griddlg_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 	end_canvas_paint(canv, dc, pxr);
 }
 
-void hand_griddlg_menu_command(res_win_t widget, int code, int cid, vword_t data)
+void hand_griddlg_menu_command(widget_t widget, int code, int cid, vword_t data)
 {
 	griddlg_delta_t* ptd = GETGRIDDLGDELTA(widget);
-	res_win_t ctl;
+	widget_t ctl;
 
 	switch (cid)
 	{
@@ -335,7 +335,7 @@ void hand_griddlg_menu_command(res_win_t widget, int code, int cid, vword_t data
 	}
 }
 
-void hand_griddlg_notice(res_win_t widget, NOTICE* pnt)
+void hand_griddlg_notice(widget_t widget, NOTICE* pnt)
 {
 	griddlg_delta_t* ptd = GETGRIDDLGDELTA(widget);
 
@@ -352,10 +352,10 @@ void hand_griddlg_notice(res_win_t widget, NOTICE* pnt)
 }
 
 /***************************************************************************************/
-res_win_t griddlg_create(const tchar_t* title, link_t_ptr ptr, link_t_ptr* prow, res_win_t owner)
+widget_t griddlg_create(const tchar_t* title, link_t_ptr ptr, link_t_ptr* prow, widget_t owner)
 {
 	if_dispatch_t ev = { 0 };
-	res_win_t dlg;
+	widget_t dlg;
 	xrect_t xr = { 0 };
 	clr_mod_t clr;
 	griddlg_delta_t* ptd;
@@ -400,12 +400,12 @@ res_win_t griddlg_create(const tchar_t* title, link_t_ptr ptr, link_t_ptr* prow,
 	return dlg;
 }
 
-void griddlg_popup_size(res_win_t widget, xsize_t* pxs)
+void griddlg_popup_size(widget_t widget, xsize_t* pxs)
 {
 	griddlg_delta_t* ptd = GETGRIDDLGDELTA(widget);
 	xrect_t xr;
 	xsize_t xs;
-	res_win_t ctrl;
+	widget_t ctrl;
 
 	XDK_ASSERT(ptd->grid != NULL);
 
@@ -420,7 +420,7 @@ void griddlg_popup_size(res_win_t widget, xsize_t* pxs)
 	xs.w = xr.w;
 	xs.h += xr.h;
 
-	widget_adjust_size(widget_get_style(widget), &xs);
+	adjust_widget_size(widget_get_style(widget), &xs);
 
 	pxs->w = xs.w;
 	pxs->h = xs.h;

@@ -157,7 +157,6 @@ typedef struct _page_cator_t{
 typedef struct _handle_head	*xdb_t;
 
 
-#include "inf/gdiinf.h"
 #include "inf/hintinf.h"
 #include "inf/xdbinf.h"
 #include "inf/xmlinf.h"

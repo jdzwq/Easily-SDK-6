@@ -1569,7 +1569,7 @@ void _gdi_text_size(visual_t rdc, const xfont_t* pxf, const tchar_t* txt, int le
 	pxs->h = si.cy;
 }
 
-void _gdi_text_metric(visual_t rdc, const xfont_t* pxf, xsize_t* pxs)
+void _gdi_font_size(visual_t rdc, const xfont_t* pxf, xsize_t* pxs)
 {
 	win32_context_t* ctx = (win32_context_t*)rdc;
 

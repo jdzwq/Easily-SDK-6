@@ -1,8 +1,8 @@
 SOURCES= \
-../../../Easily-tmp/windows/xgc/x64/Debug/clrhsl.c \
+../../../Easily-tmp/windows/xgc/x64/Debug/points.c \
 ../../../Easily-tmp/windows/xgc/x64/Debug/clrutil.c \
 ../../../Easily-tmp/windows/xgc/x64/Debug/fontutil.c \
-../../../Easily-tmp/windows/xgc/x64/Debug/points.c \
+../../../Easily-tmp/windows/xgc/x64/Debug/clrhsl.c \
 ../../../Easily-tmp/windows/xgc/x64/Debug/styles.c \
 ../../../Easily-tmp/windows/xgc/x64/Debug/gly_finder.c \
 ../../../Easily-tmp/windows/xgc/x64/Debug/gly_loader.c \
@@ -36,4 +36,6 @@ SOURCES= \
 ../../../Easily-tmp/windows/xgc/x64/Debug/jpg.c \
 ../../../Easily-tmp/windows/xgc/x64/Debug/pdg.c \
 ../../../Easily-tmp/windows/xgc/x64/Debug/png.c \
+../../../Easily-tmp/windows/xgc/x64/Debug/mgcinf.c \
+../../../Easily-tmp/windows/xgc/x64/Debug/imgbio.c \
 ../../../Easily-tmp/windows/xgc/x64/Debug/xgcutil.c \

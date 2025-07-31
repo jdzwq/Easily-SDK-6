@@ -80,7 +80,7 @@ void calc_text_rect(const drawing_interface* pif, const xfont_t* pxf, const xfac
 
 	calc_text_rect_raw(&iv, pxf, pxa, txt, len, &xr);
 
-	(pif->pf_rect_pt_to_tm)(pif->ctx, &xr);
+	(pif->pf_rect_pt_to_mm)(pif->ctx, &xr);
 
 	xmem_copy((void*)pxr, (void*)&xr, sizeof(xrect_t));
 }
@@ -130,7 +130,7 @@ void draw_var_text(const drawing_interface* pif, const xfont_t* pxf, const xface
 	drawing_interface iv = { 0 };
 
 	xmem_copy((void*)&xr, (void*)pxr, sizeof(xrect_t));
-	(*pif->pf_rect_tm_to_pt)(pif->ctx, &xr);
+	(*pif->pf_rect_mm_to_pt)(pif->ctx, &xr);
 
 	visu = (*pif->pf_get_visual_handle)(pif->ctx);
 	(*pif->pf_get_visual_interface)(visu, &iv);
@@ -189,7 +189,7 @@ void draw_tag_text(const drawing_interface* pif, const xfont_t* pxf, const xface
 	drawing_interface iv = { 0 };
 
 	xmem_copy((void*)&xr, (void*)pxr, sizeof(xrect_t));
-	(*pif->pf_rect_tm_to_pt)(pif->ctx, &xr);
+	(*pif->pf_rect_mm_to_pt)(pif->ctx, &xr);
 
 	visu = (*pif->pf_get_visual_handle)(pif->ctx);
 	(*pif->pf_get_visual_interface)(visu, &iv);
@@ -236,7 +236,7 @@ int calc_tag_pages(const drawing_interface* pif, const xfont_t* pxf, const xface
 	drawing_interface iv = { 0 };
 
 	xmem_copy((void*)&xr, (void*)pxr, sizeof(xrect_t));
-	(*pif->pf_rect_tm_to_pt)(pif->ctx, &xr);
+	(*pif->pf_rect_mm_to_pt)(pif->ctx, &xr);
 
 	visu = (*pif->pf_get_visual_handle)(pif->ctx);
 	(*pif->pf_get_visual_interface)(visu, &iv);
@@ -295,7 +295,7 @@ void draw_memo_text(const drawing_interface* pif, const xfont_t* pxf, const xfac
 	drawing_interface iv = { 0 };
 
 	xmem_copy((void*)&xr, (void*)pxr, sizeof(xrect_t));
-	(*pif->pf_rect_tm_to_pt)(pif->ctx, &xr);
+	(*pif->pf_rect_mm_to_pt)(pif->ctx, &xr);
 
 	visu = (*pif->pf_get_visual_handle)(pif->ctx);
 	(*pif->pf_get_visual_interface)(visu, &iv);
@@ -342,7 +342,7 @@ int calc_memo_pages(const drawing_interface* pif, const xfont_t* pxf, const xfac
 	drawing_interface iv = { 0 };
 
 	xmem_copy((void*)&xr, (void*)pxr, sizeof(xrect_t));
-	(*pif->pf_rect_tm_to_pt)(pif->ctx, &xr);
+	(*pif->pf_rect_mm_to_pt)(pif->ctx, &xr);
 
 	visu = (*pif->pf_get_visual_handle)(pif->ctx);
 	(*pif->pf_get_visual_interface)(visu, &iv);
@@ -404,7 +404,7 @@ void draw_rich_text(const drawing_interface* pif, const xfont_t* pxf, const xfac
 	drawing_interface iv = { 0 };
 
 	xmem_copy((void*)&xr, (void*)pxr, sizeof(xrect_t));
-	(*pif->pf_rect_tm_to_pt)(pif->ctx, &xr);
+	(*pif->pf_rect_mm_to_pt)(pif->ctx, &xr);
 
 	visu = (*pif->pf_get_visual_handle)(pif->ctx);
 	(*pif->pf_get_visual_interface)(visu, &iv);
@@ -451,7 +451,7 @@ int calc_rich_pages(const drawing_interface* pif, const xfont_t* pxf, const xfac
 	drawing_interface iv = { 0 };
 
 	xmem_copy((void*)&xr, (void*)pxr, sizeof(xrect_t));
-	(*pif->pf_rect_tm_to_pt)(pif->ctx, &xr);
+	(*pif->pf_rect_mm_to_pt)(pif->ctx, &xr);
 
 	visu = (*pif->pf_get_visual_handle)(pif->ctx);
 	(*pif->pf_get_visual_interface)(visu, &iv);

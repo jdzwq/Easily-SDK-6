@@ -26,8 +26,8 @@ LICENSE.GPL3 for more details.
 
 #include "box.h"
 
-#include "../xdcimp.h"
-#include "../xdcinit.h"
+#include "../xdcobj.h"
+
 
 typedef struct _TIPBOX_DATA{
 	int type;
@@ -46,7 +46,7 @@ typedef struct _tipbox_delta_t{
 #define SETTIPBOXDELTA(ph,ptd) widget_set_user_delta(ph,(vword_t)ptd)
 
 /*********************************************************************************/
-int hand_tipbox_create(res_win_t widget, void* data)
+int hand_tipbox_create(widget_t widget, void* data)
 {
 	tipbox_delta_t* ptd = GETTIPBOXDELTA(widget);
 	TIPBOX_DATA* ppd;
@@ -71,7 +71,7 @@ int hand_tipbox_create(res_win_t widget, void* data)
 	return 0;
 }
 
-void hand_tipbox_destroy(res_win_t widget)
+void hand_tipbox_destroy(widget_t widget)
 {
 	tipbox_delta_t* ptd = GETTIPBOXDELTA(widget);
 
@@ -87,21 +87,21 @@ void hand_tipbox_destroy(res_win_t widget)
 	widget_hand_destroy(widget);
 }
 
-void hand_tipbox_mouse_move(res_win_t widget, dword_t dw, const xpoint_t* pxp)
+void hand_tipbox_mouse_move(widget_t widget, dword_t dw, const xpoint_t* pxp)
 {
 	tipbox_delta_t* ptd = GETTIPBOXDELTA(widget);
 
 	widget_close(widget, 0);
 }
 
-void hand_tipbox_size(res_win_t widget, int code, const xsize_t* prs)
+void hand_tipbox_size(widget_t widget, int code, const xsize_t* prs)
 {
 	tipbox_delta_t* ptd = GETTIPBOXDELTA(widget);
 	
 	widget_erase(widget, NULL);
 }
 
-void hand_tipbox_timer(res_win_t widget, vword_t tid)
+void hand_tipbox_timer(widget_t widget, vword_t tid)
 {
 	tipbox_delta_t* ptd = GETTIPBOXDELTA(widget);
 
@@ -110,7 +110,7 @@ void hand_tipbox_timer(res_win_t widget, vword_t tid)
 	widget_close(widget, 0);
 }
 
-void hand_tipbox_xfont(res_win_t widget, const xfont_t* pxf)
+void hand_tipbox_xfont(widget_t widget, const xfont_t* pxf)
 {
 	tipbox_delta_t* ptd = GETTIPBOXDELTA(widget);
 
@@ -119,7 +119,7 @@ void hand_tipbox_xfont(res_win_t widget, const xfont_t* pxf)
 	xmem_copy((void*)&ptd->xf, (void*)pxf, sizeof(xfont_t));
 }
 
-void hand_tipbox_xface(res_win_t widget, const xface_t* pxa)
+void hand_tipbox_xface(widget_t widget, const xface_t* pxa)
 {
 	tipbox_delta_t* ptd = GETTIPBOXDELTA(widget);
 
@@ -128,7 +128,7 @@ void hand_tipbox_xface(res_win_t widget, const xface_t* pxa)
 	xmem_copy((void*)&ptd->xa, (void*)pxa, sizeof(xface_t));
 }
 
-void hand_tipbox_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
+void hand_tipbox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 {
 	tipbox_delta_t* ptd = GETTIPBOXDELTA(widget);
 	visual_t rdc;
@@ -166,7 +166,7 @@ void hand_tipbox_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 }
 
 /***************************************************************************************/
-res_win_t tipbox_create(res_win_t widget, dword_t style, const xrect_t* pxr, int type, const tchar_t* text)
+widget_t tipbox_create(widget_t widget, dword_t style, const xrect_t* pxr, int type, const tchar_t* text)
 {
 	if_dispatch_t ev = { 0 };
 	TIPBOX_DATA pd = { 0 };
@@ -199,7 +199,7 @@ res_win_t tipbox_create(res_win_t widget, dword_t style, const xrect_t* pxr, int
 	return widget_create(NULL, style, pxr, widget, &ev);
 }
 
-void tipbox_set_text(res_win_t widget, const tchar_t* sz_text)
+void tipbox_set_text(widget_t widget, const tchar_t* sz_text)
 {
 	tipbox_delta_t* ptd = GETTIPBOXDELTA(widget);
 
@@ -210,7 +210,7 @@ void tipbox_set_text(res_win_t widget, const tchar_t* sz_text)
 	xscpy(ptd->sz_text, sz_text);
 }
 
-void tipbox_popup_size(res_win_t widget, xsize_t* pxs)
+void tipbox_popup_size(widget_t widget, xsize_t* pxs)
 {
 	tipbox_delta_t* ptd = GETTIPBOXDELTA(widget);
 
@@ -229,19 +229,19 @@ void tipbox_popup_size(res_win_t widget, xsize_t* pxs)
 	pxs->w = xr.w + 10;
 	pxs->h = xr.h + 4;
 
-	widget_adjust_size(widget_get_style(widget), pxs);
+	adjust_widget_size(widget_get_style(widget), pxs);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////
-res_win_t show_toolbox(const xpoint_t* ppt, const tchar_t* sz_text)
+widget_t show_toolbox(const xpoint_t* ppt, const tchar_t* sz_text)
 {
-	res_win_t wt;
+	widget_t wt;
 	xrect_t xr = { 0 };
 	xsize_t xs = { 0 };
 	clr_mod_t clr;
 
-	wt = tipbox_create((res_win_t)0, WD_STYLE_POPUP | WD_STYLE_NOACTIVE, &xr, 1, sz_text);
-	if (!wt) return (res_win_t)0;
+	wt = tipbox_create((widget_t)0, WD_STYLE_POPUP | WD_STYLE_NOACTIVE, &xr, 1, sz_text);
+	if (!wt) return (widget_t)0;
 
 	tipbox_popup_size(wt, RECTSIZE(&xr));
 
@@ -274,7 +274,7 @@ res_win_t show_toolbox(const xpoint_t* ppt, const tchar_t* sz_text)
 	return wt;
 }
 
-bool_t reset_toolbox(res_win_t widget, const xpoint_t* ppt, const tchar_t* sz_text)
+bool_t reset_toolbox(widget_t widget, const xpoint_t* ppt, const tchar_t* sz_text)
 {
 	xrect_t xr;
 	xsize_t xs;

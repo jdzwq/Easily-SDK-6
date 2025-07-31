@@ -26,14 +26,14 @@ LICENSE.GPL3 for more details.
 
 #include "ctrl.h"
 
-#include "../xdcimp.h"
-#include "../xdcinit.h"
+#include "../xdcobj.h"
+
 
 typedef struct _owner_delta_t{
 	vword_t var;
 
-	res_win_t hsc;
-	res_win_t vsc;
+	widget_t hsc;
+	widget_t vsc;
 }owner_delta_t;
 
 #define GETOWNERDELTA(ph) 	(owner_delta_t*)widget_get_user_delta(ph)
@@ -41,7 +41,7 @@ typedef struct _owner_delta_t{
 
 /***************************************************************************************/
 
-static int noti_owner_owner(res_win_t widget, unsigned int code, void* data)
+static int noti_owner_owner(widget_t widget, unsigned int code, void* data)
 {
 	owner_delta_t* ptd = GETOWNERDELTA(widget);
 
@@ -57,7 +57,7 @@ static int noti_owner_owner(res_win_t widget, unsigned int code, void* data)
 	return nf.ret;
 }
 
-void noti_owner_reset_scroll(res_win_t widget, bool_t bUpdate)
+void noti_owner_reset_scroll(widget_t widget, bool_t bUpdate)
 {
 	owner_delta_t* ptd = GETOWNERDELTA(widget);
 
@@ -78,7 +78,7 @@ void noti_owner_reset_scroll(res_win_t widget, bool_t bUpdate)
 	}
 }
 
-static void _ownerctrl_reset_page(res_win_t widget)
+static void _ownerctrl_reset_page(widget_t widget)
 {
 	owner_delta_t* ptd = GETOWNERDELTA(widget);
 
@@ -93,7 +93,7 @@ static void _ownerctrl_reset_page(res_win_t widget)
 }
 
 /********************************************************************************************/
-int hand_owner_create(res_win_t widget, void* data)
+int hand_owner_create(widget_t widget, void* data)
 {
 	owner_delta_t* ptd;
 
@@ -106,7 +106,7 @@ int hand_owner_create(res_win_t widget, void* data)
 	return 0;
 }
 
-void hand_owner_destroy(res_win_t widget)
+void hand_owner_destroy(widget_t widget)
 {
 	owner_delta_t* ptd = GETOWNERDELTA(widget);
 
@@ -125,7 +125,7 @@ void hand_owner_destroy(res_win_t widget)
 	widget_hand_destroy(widget);
 }
 
-void hand_owner_keydown(res_win_t widget, dword_t ks, int key)
+void hand_owner_keydown(widget_t widget, dword_t ks, int key)
 {
 	owner_delta_t* ptd = GETOWNERDELTA(widget);
 	int ch;
@@ -137,7 +137,7 @@ void hand_owner_keydown(res_win_t widget, dword_t ks, int key)
 	noti_owner_owner(widget, NC_OWNERKEY, (void*)&ch);
 }
 
-void hand_owner_mouse_move(res_win_t widget, dword_t dw, const xpoint_t* pxp)
+void hand_owner_mouse_move(widget_t widget, dword_t dw, const xpoint_t* pxp)
 {
 	owner_delta_t* ptd = GETOWNERDELTA(widget);
 
@@ -146,7 +146,7 @@ void hand_owner_mouse_move(res_win_t widget, dword_t dw, const xpoint_t* pxp)
 	noti_owner_owner(widget, NC_OWNERMOVE, (void*)pxp);
 }
 
-void hand_owner_lbutton_down(res_win_t widget, const xpoint_t* pxp)
+void hand_owner_lbutton_down(widget_t widget, const xpoint_t* pxp)
 {
 	owner_delta_t* ptd = GETOWNERDELTA(widget);
 
@@ -168,7 +168,7 @@ void hand_owner_lbutton_down(res_win_t widget, const xpoint_t* pxp)
 	}
 }
 
-void hand_owner_lbutton_up(res_win_t widget, const xpoint_t* pxp)
+void hand_owner_lbutton_up(widget_t widget, const xpoint_t* pxp)
 {
 	owner_delta_t* ptd = GETOWNERDELTA(widget);
 
@@ -177,7 +177,7 @@ void hand_owner_lbutton_up(res_win_t widget, const xpoint_t* pxp)
 	noti_owner_owner(widget, NC_OWNERLBCLK, (void*)pxp);
 }
 
-void hand_owner_lbutton_dbclick(res_win_t widget, const xpoint_t* pxp)
+void hand_owner_lbutton_dbclick(widget_t widget, const xpoint_t* pxp)
 {
 	owner_delta_t* ptd = GETOWNERDELTA(widget);
 
@@ -186,7 +186,7 @@ void hand_owner_lbutton_dbclick(res_win_t widget, const xpoint_t* pxp)
 	noti_owner_owner(widget, NC_OWNERDBCLK, (void*)pxp);
 }
 
-void hand_owner_rbutton_down(res_win_t widget, const xpoint_t* pxp)
+void hand_owner_rbutton_down(widget_t widget, const xpoint_t* pxp)
 {
 	owner_delta_t* ptd = GETOWNERDELTA(widget);
 
@@ -203,7 +203,7 @@ void hand_owner_rbutton_down(res_win_t widget, const xpoint_t* pxp)
 	}
 }
 
-void hand_owner_rbutton_up(res_win_t widget, const xpoint_t* pxp)
+void hand_owner_rbutton_up(widget_t widget, const xpoint_t* pxp)
 {
 	owner_delta_t* ptd = GETOWNERDELTA(widget);
 
@@ -212,7 +212,7 @@ void hand_owner_rbutton_up(res_win_t widget, const xpoint_t* pxp)
 	noti_owner_owner(widget, NC_OWNERRBCLK, (void*)pxp);
 }
 
-void hand_owner_size(res_win_t widget, int code, const xsize_t* prs)
+void hand_owner_size(widget_t widget, int code, const xsize_t* prs)
 {
 	owner_delta_t* ptd = GETOWNERDELTA(widget);
 
@@ -223,7 +223,7 @@ void hand_owner_size(res_win_t widget, int code, const xsize_t* prs)
 	ownerctrl_redraw(widget);
 }
 
-void hand_owner_scroll(res_win_t widget, bool_t bHorz, int nLine)
+void hand_owner_scroll(widget_t widget, bool_t bHorz, int nLine)
 {
 	owner_delta_t* ptd = GETOWNERDELTA(widget);
 
@@ -232,13 +232,13 @@ void hand_owner_scroll(res_win_t widget, bool_t bHorz, int nLine)
 	widget_hand_scroll(widget, bHorz, nLine);
 }
 
-void hand_owner_wheel(res_win_t widget, bool_t bHorz, int nDelta)
+void hand_owner_wheel(widget_t widget, bool_t bHorz, int nDelta)
 {
 	owner_delta_t* ptd = GETOWNERDELTA(widget);
 
 	scroll_t scr = { 0 };
 	int nLine;
-	res_win_t win;
+	widget_t win;
 
 	XDK_ASSERT(ptd != NULL);
 
@@ -286,7 +286,7 @@ void hand_owner_wheel(res_win_t widget, bool_t bHorz, int nDelta)
 	}
 }
 
-void hand_owner_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
+void hand_owner_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 {
 	owner_delta_t* ptd = GETOWNERDELTA(widget);
 
@@ -324,7 +324,7 @@ void hand_owner_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 }
 
 /************************************************************************************************/
-res_win_t ownerctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, res_win_t wparent)
+widget_t ownerctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, widget_t wparent)
 {
 	if_dispatch_t ev = { 0 };
 
@@ -357,7 +357,7 @@ res_win_t ownerctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* 
 	return widget_create(wname, wstyle, pxr, wparent, &ev);
 }
 
-void ownerctrl_redraw(res_win_t widget)
+void ownerctrl_redraw(widget_t widget)
 {
 	owner_delta_t* ptd = GETOWNERDELTA(widget);
 
@@ -370,7 +370,7 @@ void ownerctrl_redraw(res_win_t widget)
 	widget_erase(widget, NULL);
 }
 
-void ownerctrl_set_delta(res_win_t widget, vword_t var)
+void ownerctrl_set_delta(widget_t widget, vword_t var)
 {
 	owner_delta_t* ptd = GETOWNERDELTA(widget);
 
@@ -379,7 +379,7 @@ void ownerctrl_set_delta(res_win_t widget, vword_t var)
 	ptd->var = var;
 }
 
-vword_t ownerctrl_get_delta(res_win_t widget)
+vword_t ownerctrl_get_delta(widget_t widget)
 {
 	owner_delta_t* ptd = GETOWNERDELTA(widget);
 

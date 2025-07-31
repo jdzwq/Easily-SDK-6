@@ -2992,6 +2992,11 @@ void _adjust_widget_size(dword_t wstyle, xsize_t* pxs)
     pxs->h += (int)(titleBarHeight + borderBottom);
 }}
 
+void _calc_widget_border(dword_t ws, border_t* pbd)
+{@autoreleasepool {
+    NOP;
+}}
+
 void _get_screen_size(xsize_t* pxs)
 {@autoreleasepool {
     NSScreen *mainScreen = [NSScreen mainScreen];
@@ -3010,7 +3015,7 @@ void _get_desktop_size(xsize_t* pxs)
     pxs->h = (int)visibleFrame.size.height;
 }}
 
-void _screen_size_to_tm(xsize_t* pxs)
+void _screen_size_to_mm(xsize_t* pxs)
 {
 	pxs->fw = (float)((double)pxs->w * MMPERPT);
 	pxs->fh = (float)((double)pxs->h * MMPERPT);

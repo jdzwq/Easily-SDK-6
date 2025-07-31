@@ -35,6 +35,8 @@ DIRS = $(wildcard \
 		$(SRC_PATH)/mgc/*.c \
 		$(SRC_PATH)/dib/*.c \
 		$(SRC_PATH)/img/*.c \
+		$(SRC_PATH)/bio/*.c \
+		$(SRC_PATH)/inf/*.c \
 		$(SRC_PATH)/*.c)
 SRCS = $(notdir $(DIRS))
 COBS = $(patsubst %.c, %.o, $(SRCS))
@@ -62,6 +64,12 @@ $(OBJ_PATH)/%.o : $(SRC_PATH)/dib/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
 
 $(OBJ_PATH)/%.o : $(SRC_PATH)/img/%.c
+	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
+
+$(OBJ_PATH)/%.o : $(SRC_PATH)/bio/%.c
+	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
+
+$(OBJ_PATH)/%.o : $(SRC_PATH)/inf/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
 
 $(OBJ_PATH)/%.o : $(SRC_PATH)/%.c

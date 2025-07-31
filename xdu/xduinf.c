@@ -71,6 +71,9 @@ void xdu_impl_context(if_context_t* pif)
 	pif->pf_destroy_context = _destroy_context;
 	pif->pf_get_device_caps = _get_device_caps;
 	pif->pf_render_context = _render_context;
+
+	pif->pf_pixel_metric = _pixel_metric;
+	pif->pf_font_metric = _font_metric;
 }
 
 #ifdef XDU_SUPPORT_CONTEXT_BITMAP
@@ -132,7 +135,7 @@ void xdu_impl_context_graphic(if_context_t* pif)
 	pif->pf_gdi_text_out = _gdi_text_out;
 	pif->pf_gdi_text_rect = _gdi_text_rect;
 	pif->pf_gdi_text_size = _gdi_text_size;
-	pif->pf_gdi_text_metric = _gdi_text_metric;
+	pif->pf_gdi_font_size = _gdi_font_size;
 	pif->pf_gdi_gradient_rect = _gdi_gradient_rect;
 	pif->pf_gdi_alphablend_rect = _gdi_alphablend_rect;
 	pif->pf_gdi_invert_rect = _gdi_invert_rect;
@@ -264,10 +267,11 @@ void xdu_impl_widget(if_widget_t* pif)
 	pif->pf_message_quit = _message_quit;
 
 	pif->pf_adjust_widget_size = _adjust_widget_size;
+	pif->pf_calc_widget_border = _calc_widget_border;
 	pif->pf_get_screen_size = _get_screen_size;
 	pif->pf_get_desktop_size = _get_desktop_size;
 	pif->pf_screen_size_to_pt = _screen_size_to_pt;
-	pif->pf_screen_size_to_tm = _screen_size_to_tm;
+	pif->pf_screen_size_to_mm = _screen_size_to_mm;
 
 #ifdef XDU_SUPPORT_CONTEXT_OPENGL
 	pif->pf_widget_get_glctx = _widget_get_glctx;

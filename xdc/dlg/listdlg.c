@@ -26,8 +26,8 @@ LICENSE.GPL3 for more details.
 
 #include "dlg.h"
 
-#include "../xdcimp.h"
-#include "../xdcinit.h"
+#include "../xdcobj.h"
+
 
 #define IDC_LISTDLG_LIST			10
 #define IDC_LISTDLG_PUSHBOX_OK		11
@@ -43,9 +43,9 @@ typedef struct _listdlg_delta_t{
 #define SETLISTDLGDELTA(ph,ptd) widget_set_user_delta(ph,(vword_t)ptd)
 
 /**********************************************************************************/
-void listdlg_on_ok(res_win_t widget)
+void listdlg_on_ok(widget_t widget)
 {
-	res_win_t ctrl;
+	widget_t ctrl;
 	link_t_ptr ilk;
 	int ret;
 
@@ -57,13 +57,13 @@ void listdlg_on_ok(res_win_t widget)
 	widget_close(widget, ret);
 }
 /**********************************************************************************/
-int hand_listdlg_create(res_win_t widget, void* data)
+int hand_listdlg_create(widget_t widget, void* data)
 {
 	listdlg_delta_t* ptd;
 
 	xrect_t xr;
 	xsize_t xs;
-	res_win_t listctrl, pushbox;
+	widget_t listctrl, pushbox;
 
 	widget_hand_create(widget);
 
@@ -108,10 +108,10 @@ int hand_listdlg_create(res_win_t widget, void* data)
 	return 0;
 }
 
-void hand_listdlg_destroy(res_win_t widget)
+void hand_listdlg_destroy(widget_t widget)
 {
 	listdlg_delta_t* ptd = GETLISTDLGDELTA(widget);
-	res_win_t ctrl;
+	widget_t ctrl;
 
 	XDK_ASSERT(ptd != NULL);
 
@@ -130,12 +130,12 @@ void hand_listdlg_destroy(res_win_t widget)
 	widget_hand_destroy(widget);
 }
 
-void hand_listdlg_size(res_win_t widget, int code, const xsize_t* prs)
+void hand_listdlg_size(widget_t widget, int code, const xsize_t* prs)
 {
 	listdlg_delta_t* ptd = GETLISTDLGDELTA(widget);
 	xsize_t xs;
 	xrect_t xr;
-	res_win_t ctrl;
+	widget_t ctrl;
 
 	xs.fw = LISTDLG_BUTTON_WIDTH;
 	xs.fh = LISTDLG_BUTTON_HEIGHT;
@@ -175,7 +175,7 @@ void hand_listdlg_size(res_win_t widget, int code, const xsize_t* prs)
 	widget_erase(widget, NULL);
 }
 
-void hand_listdlg_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
+void hand_listdlg_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 {
 	listdlg_delta_t* ptd = GETLISTDLGDELTA(widget);
 
@@ -224,7 +224,7 @@ void hand_listdlg_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 	end_canvas_paint(canv, dc, pxr);
 }
 
-void hand_listdlg_menu_command(res_win_t widget, int code, int cid, vword_t data)
+void hand_listdlg_menu_command(widget_t widget, int code, int cid, vword_t data)
 {
 	listdlg_delta_t* ptd = GETLISTDLGDELTA(widget);
 
@@ -234,7 +234,7 @@ void hand_listdlg_menu_command(res_win_t widget, int code, int cid, vword_t data
 	}
 }
 
-void hand_listdlg_notice(res_win_t widget, NOTICE* pnt)
+void hand_listdlg_notice(widget_t widget, NOTICE* pnt)
 {
 	listdlg_delta_t* ptd = GETLISTDLGDELTA(widget);
 
@@ -250,10 +250,10 @@ void hand_listdlg_notice(res_win_t widget, NOTICE* pnt)
 	}
 }
 /***************************************************************************************/
-res_win_t listdlg_create(const tchar_t* title, link_t_ptr ptr, res_win_t owner)
+widget_t listdlg_create(const tchar_t* title, link_t_ptr ptr, widget_t owner)
 {
 	if_dispatch_t ev = { 0 };
-	res_win_t dlg;
+	widget_t dlg;
 	xrect_t xr = { 0 };
 	clr_mod_t clr;
 
@@ -294,7 +294,7 @@ res_win_t listdlg_create(const tchar_t* title, link_t_ptr ptr, res_win_t owner)
 	return dlg;
 }
 
-void listdlg_popup_size(res_win_t widget, xsize_t* pxs)
+void listdlg_popup_size(widget_t widget, xsize_t* pxs)
 {
 	listdlg_delta_t* ptd = GETLISTDLGDELTA(widget);
 
@@ -305,6 +305,6 @@ void listdlg_popup_size(res_win_t widget, xsize_t* pxs)
 	
 	widget_size_to_pt(widget, pxs);
 
-	widget_adjust_size(widget_get_style(widget), pxs);
+	adjust_widget_size(widget_get_style(widget), pxs);
 }
 

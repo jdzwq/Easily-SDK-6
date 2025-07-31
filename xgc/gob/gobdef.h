@@ -42,6 +42,7 @@ LICENSE.GPL3 for more details.
 #define MMPERPT		0.2646f
 #define MMPERLOGPT	0.25f
 #define LOGPTPERMM	4
+#define LOGMMPERPT	0.25f
 
 #define BDPI		96
 #define SDPI		120

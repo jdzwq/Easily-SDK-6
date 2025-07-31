@@ -26,11 +26,11 @@ LICENSE.GPL3 for more details.
 
 #include "editor.h"
 
-#include "../xdcimp.h"
-#include "../xdcinit.h"
+#include "../xdcobj.h"
 
 
-static int sub_checkbox_keydown(res_win_t widget, dword_t ks, int nKey, uid_t subid, vword_t delta)
+
+static int sub_checkbox_keydown(widget_t widget, dword_t ks, int nKey, uid_t subid, vword_t delta)
 {
 	if (subid != IDS_CHECKBOX)
 		return 0;
@@ -51,7 +51,7 @@ static int sub_checkbox_keydown(res_win_t widget, dword_t ks, int nKey, uid_t su
 	return 0;
 }
 
-static void sub_checkbox_unsubbing(res_win_t widget, uid_t subid, vword_t delta)
+static void sub_checkbox_unsubbing(widget_t widget, uid_t subid, vword_t delta)
 {
 	if (subid != IDS_CHECKBOX)
 		return ;
@@ -61,9 +61,9 @@ static void sub_checkbox_unsubbing(res_win_t widget, uid_t subid, vword_t delta)
 
 /*************************************************************************************/
 
-res_win_t firecheck_create(res_win_t widget, const xrect_t* pxr)
+widget_t firecheck_create(widget_t widget, const xrect_t* pxr)
 {
-	res_win_t editor;
+	widget_t editor;
 	if_subproc_t ev = { 0 };
 
 	ev.sub_on_keydown = sub_checkbox_keydown;

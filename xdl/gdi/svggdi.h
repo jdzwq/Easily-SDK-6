@@ -254,21 +254,15 @@ LOC_API void	svg_text_out_raw(visual_t view, const xfont_t* pxf, const xpoint_t*
 LOC_API void	svg_text_size(canvas_t canv, const xfont_t* pxf, const tchar_t* txt, int len, xsize_t* pxs);
 LOC_API void	svg_text_size_raw(visual_t view, const xfont_t* pxf, const tchar_t* txt, int len, xsize_t* pxs);
 
-/*
-@FUNCTION svg_text_metric: calc the image size in svg canvas using millimeter coordinate.
-@INPUT canvas_t canv: the canvas svg object.
-@INPUT cont ximage_t* pxi: the image struct.
-@OUTPUT xsize_t* pxs: the size struct for returning float member.
-@RETURN void: none.
-*/
-LOC_API void	svg_text_metric(canvas_t canv, const xfont_t* pxf, xsize_t* pxs);
-LOC_API void	svg_text_metric_raw(visual_t view, const xfont_t* pxf, xsize_t* pxs);
 
 LOC_API void	svg_text_rect(canvas_t canv, const xfont_t* pxf, const xface_t* pxa, const tchar_t* txt, int len, xrect_t* pxr);
 LOC_API void	svg_text_rect_raw(visual_t view, const xfont_t* pxf, const xface_t* pxa, const tchar_t* txt, int len, xrect_t* pxr);
 
-LOC_API float	svg_pixel_metric(canvas_t canv, bool_t horz);
-LOC_API float	svg_pixel_metric_raw(visual_t view, bool_t horz);
+LOC_API void	svg_font_size(canvas_t canv, const xfont_t* pxf, xsize_t* pxs);
+LOC_API void	svg_font_size_raw(visual_t view, const xfont_t* pxf, xsize_t* pxs);
+
+LOC_API float	svg_pixel_size(canvas_t canv);
+LOC_API float	svg_pixel_size_raw(visual_t mgc);
 
 /*
 @FUNCTION svg_color_out: output color sequence in svg canvas using millimeter coordinate.

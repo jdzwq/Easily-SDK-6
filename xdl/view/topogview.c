@@ -194,7 +194,7 @@ void draw_topog(const drawing_interface* pif, link_t_ptr ptr)
 		default_xface(&xa);
 		parse_xface_from_style(&xa, style);
 
-		(*pif->pf_text_metric)(pif->ctx, &xf, &xs);
+		(*pif->pf_font_size)(pif->ctx, &xf, &xs);
 
 		calc_topog_spot_rect(ptr, ilk, &xr);
 		xr.fw = xs.fw;

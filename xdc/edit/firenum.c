@@ -26,11 +26,11 @@ LICENSE.GPL3 for more details.
 
 #include "editor.h"
 
-#include "../xdcimp.h"
-#include "../xdcinit.h"
+#include "../xdcobj.h"
 
 
-static int sub_editbox_keydown(res_win_t widget, dword_t ks, int nKey, uid_t subid, vword_t delta)
+
+static int sub_editbox_keydown(widget_t widget, dword_t ks, int nKey, uid_t subid, vword_t delta)
 {
 	if (subid != IDS_EDITBOX)
 		return 0;
@@ -55,14 +55,14 @@ static int sub_editbox_keydown(res_win_t widget, dword_t ks, int nKey, uid_t sub
 	return 0;
 }
 
-static int sub_editbox_self_command(res_win_t widget, int code, vword_t data, uid_t subid, vword_t delta)
+static int sub_editbox_self_command(widget_t widget, int code, vword_t data, uid_t subid, vword_t delta)
 {
-	res_win_t numbox;
+	widget_t numbox;
 
 	if (subid != IDS_EDITBOX)
 		return 0;
 
-	numbox = (res_win_t)delta;
+	numbox = (widget_t)delta;
 
 	switch (code)
 	{
@@ -86,14 +86,14 @@ static int sub_editbox_self_command(res_win_t widget, int code, vword_t data, ui
 	return 0;
 }
 
-static int sub_editbox_show(res_win_t widget, bool_t show, uid_t subid, vword_t delta)
+static int sub_editbox_show(widget_t widget, bool_t show, uid_t subid, vword_t delta)
 {
-	res_win_t numbox;
+	widget_t numbox;
 
 	if (subid != IDS_EDITBOX)
 		return 0;
 
-	numbox = (res_win_t)delta;
+	numbox = (widget_t)delta;
 
 	if (widget_is_valid(numbox))
 	{
@@ -106,14 +106,14 @@ static int sub_editbox_show(res_win_t widget, bool_t show, uid_t subid, vword_t 
 	return 1;
 }
 
-static void sub_editbox_unsubbing(res_win_t widget, uid_t subid, vword_t delta)
+static void sub_editbox_unsubbing(widget_t widget, uid_t subid, vword_t delta)
 {
-	res_win_t numbox;
+	widget_t numbox;
 
 	if (subid != IDS_EDITBOX)
 		return;
 
-	numbox = (res_win_t)delta;
+	numbox = (widget_t)delta;
 	if (widget_is_valid(numbox))
 	{
 		widget_destroy(numbox);
@@ -123,9 +123,9 @@ static void sub_editbox_unsubbing(res_win_t widget, uid_t subid, vword_t delta)
 }
 
 /*************************************************************************************/
-res_win_t firenum_create(res_win_t widget, const xrect_t* pxr)
+widget_t firenum_create(widget_t widget, const xrect_t* pxr)
 {
-	res_win_t editor,numbox;
+	widget_t editor,numbox;
 	xsize_t xs;
 	xrect_t xr_ed, xr = { 0 };
 

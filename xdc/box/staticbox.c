@@ -26,8 +26,8 @@ LICENSE.GPL3 for more details.
 
 #include "box.h"
 
-#include "../xdcimp.h"
-#include "../xdcinit.h"
+#include "../xdcobj.h"
+
 
 typedef struct _staticbox_delta_t{
 	tchar_t* text;
@@ -40,7 +40,7 @@ typedef struct _staticbox_delta_t{
 #define SETSTATICBOXDELTA(ph,ptd) widget_set_user_delta(ph,(vword_t)ptd)
 
 /*********************************************************************************/
-int hand_staticbox_create(res_win_t widget, void* data)
+int hand_staticbox_create(widget_t widget, void* data)
 {
 	staticbox_delta_t* ptd = GETSTATICBOXDELTA(widget);
 	xsize_t xs;
@@ -65,7 +65,7 @@ int hand_staticbox_create(res_win_t widget, void* data)
 	return 0;
 }
 
-void hand_staticbox_destroy(res_win_t widget)
+void hand_staticbox_destroy(widget_t widget)
 {
 	staticbox_delta_t* ptd = GETSTATICBOXDELTA(widget);
 
@@ -78,13 +78,13 @@ void hand_staticbox_destroy(res_win_t widget)
 	widget_hand_destroy(widget);
 }
 
-void hand_staticbox_lbutton_down(res_win_t widget, const xpoint_t* pxp)
+void hand_staticbox_lbutton_down(widget_t widget, const xpoint_t* pxp)
 {
 	staticbox_delta_t* ptd = GETSTATICBOXDELTA(widget);
 	
 }
 
-void hand_staticbox_lbutton_up(res_win_t widget, const xpoint_t* pxp)
+void hand_staticbox_lbutton_up(widget_t widget, const xpoint_t* pxp)
 {
 	staticbox_delta_t* ptd = GETSTATICBOXDELTA(widget);
 	
@@ -93,14 +93,14 @@ void hand_staticbox_lbutton_up(res_win_t widget, const xpoint_t* pxp)
 	widget_post_command(widget, COMMAND_CHANGE, IDC_SELF, (vword_t)NULL);
 }
 
-void hand_staticbox_size(res_win_t widget, int code, const xsize_t* prs)
+void hand_staticbox_size(widget_t widget, int code, const xsize_t* prs)
 {
 	staticbox_delta_t* ptd = GETSTATICBOXDELTA(widget);
 	
 	widget_erase(widget, NULL);
 }
 
-void hand_staticbox_xfont(res_win_t widget, const xfont_t* pxf)
+void hand_staticbox_xfont(widget_t widget, const xfont_t* pxf)
 {
 	staticbox_delta_t* ptd = GETSTATICBOXDELTA(widget);
 
@@ -109,7 +109,7 @@ void hand_staticbox_xfont(res_win_t widget, const xfont_t* pxf)
 	xmem_copy((void*)&ptd->xf, (void*)pxf, sizeof(xfont_t));
 }
 
-void hand_staticbox_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
+void hand_staticbox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 {
 	staticbox_delta_t* ptd = GETSTATICBOXDELTA(widget);
 	visual_t rdc;
@@ -143,7 +143,7 @@ void hand_staticbox_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 }
 
 /***************************************************************************************/
-res_win_t staticbox_create(res_win_t widget, dword_t style, const xrect_t* pxr)
+widget_t staticbox_create(widget_t widget, dword_t style, const xrect_t* pxr)
 {
 	if_dispatch_t ev = { 0 };
 
@@ -168,7 +168,7 @@ res_win_t staticbox_create(res_win_t widget, dword_t style, const xrect_t* pxr)
 	return widget_create(NULL, style, pxr, widget, &ev);
 }
 
-void staticbox_popup_size(res_win_t widget, xsize_t* pxs)
+void staticbox_popup_size(widget_t widget, xsize_t* pxs)
 {
 	staticbox_delta_t* ptd = GETSTATICBOXDELTA(widget);
 
@@ -177,10 +177,10 @@ void staticbox_popup_size(res_win_t widget, xsize_t* pxs)
 	pxs->w = ptd->bw * 3;
 	pxs->h = ptd->bh * 2;
 	
-	widget_adjust_size(widget_get_style(widget), pxs);
+	adjust_widget_size(widget_get_style(widget), pxs);
 }
 
-void staticbox_set_text(res_win_t widget, const tchar_t* text)
+void staticbox_set_text(widget_t widget, const tchar_t* text)
 {
 	staticbox_delta_t* ptd = GETSTATICBOXDELTA(widget);
 	int len;

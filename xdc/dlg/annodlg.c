@@ -26,8 +26,8 @@ LICENSE.GPL3 for more details.
 
 #include "dlg.h"
 
-#include "../xdcimp.h"
-#include "../xdcinit.h"
+#include "../xdcobj.h"
+
 
 #define IDC_ANNODLG_PHOTO			10
 #define IDC_ANNODLG_ICONBOX			11
@@ -50,7 +50,7 @@ LICENSE.GPL3 for more details.
 #define IS_ANNO_ICON(token) ((compare_text(token,-1,ICON_RECT,-1,1) == 0 || compare_text(token,-1,ICON_ELLIPSE,-1,1) == 0 || compare_text(token,-1,ICON_CROSS,-1,1) == 0 || compare_text(token,-1,ICON_STAR,-1,1) == 0 ||compare_text(token,-1,ICON_DIAMOND,-1,1) == 0)? 1 : 0)
 
 typedef struct _annodlg_delta_t{
-	res_win_t photo;
+	widget_t photo;
 	string_t varimg;
 }annodlg_delta_t;
 
@@ -58,7 +58,7 @@ typedef struct _annodlg_delta_t{
 #define SETANNODLGDELTA(ph,ptd) widget_set_user_delta(ph,(vword_t)ptd)
 
 /************************************************************************************/
-void annodlg_on_ok(res_win_t widget)
+void annodlg_on_ok(widget_t widget)
 {
 	annodlg_delta_t* ptd = GETANNODLGDELTA(widget);
 	byte_t* buf_zip = NULL;
@@ -130,14 +130,14 @@ void annodlg_on_ok(res_win_t widget)
 	widget_close(widget, 1);
 }
 
-void annodlg_on_commit(res_win_t widget)
+void annodlg_on_commit(widget_t widget)
 {
 	annodlg_delta_t* ptd = GETANNODLGDELTA(widget);
 
 	photoctrl_commit(ptd->photo);
 }
 
-void annodlg_on_show_color(res_win_t widget, const xrect_t* pxr)
+void annodlg_on_show_color(widget_t widget, const xrect_t* pxr)
 {
 	annodlg_delta_t* ptd = GETANNODLGDELTA(widget);
 	xpoint_t pt;
@@ -150,7 +150,7 @@ void annodlg_on_show_color(res_win_t widget, const xrect_t* pxr)
 	color_menu(widget, IDC_ANNODLG_MENU_COLOR, &pt, WS_LAYOUT_RIGHTTOP);
 }
 
-void annodlg_on_select_color(res_win_t widget, const tchar_t* mid)
+void annodlg_on_select_color(widget_t widget, const tchar_t* mid)
 {
 	annodlg_delta_t* ptd = GETANNODLGDELTA(widget);
 	link_t_ptr ilk;
@@ -175,7 +175,7 @@ void annodlg_on_select_color(res_win_t widget, const tchar_t* mid)
 	photoctrl_redraw(ptd->photo);
 }
 
-void annodlg_on_show_font(res_win_t widget, const xrect_t* pxr)
+void annodlg_on_show_font(widget_t widget, const xrect_t* pxr)
 {
 	annodlg_delta_t* ptd = GETANNODLGDELTA(widget);
 	xpoint_t pt;
@@ -188,7 +188,7 @@ void annodlg_on_show_font(res_win_t widget, const xrect_t* pxr)
 	fontsize_menu(widget, IDC_ANNODLG_MENU_COLOR, &pt, WS_LAYOUT_RIGHTTOP);
 }
 
-void annodlg_on_select_font(res_win_t widget, const tchar_t* mid)
+void annodlg_on_select_font(widget_t widget, const tchar_t* mid)
 {
 	annodlg_delta_t* ptd = GETANNODLGDELTA(widget);
 	link_t_ptr ilk;
@@ -213,7 +213,7 @@ void annodlg_on_select_font(res_win_t widget, const tchar_t* mid)
 	photoctrl_redraw(ptd->photo);
 }
 
-void annodlg_on_append_item(res_win_t widget, const tchar_t* mid)
+void annodlg_on_append_item(widget_t widget, const tchar_t* mid)
 {
 	annodlg_delta_t* ptd = GETANNODLGDELTA(widget);
 	link_t_ptr ptr, ilk;
@@ -233,13 +233,13 @@ void annodlg_on_append_item(res_win_t widget, const tchar_t* mid)
 }
 
 /**********************************************************************************/
-int hand_annodlg_create(res_win_t widget, void* data)
+int hand_annodlg_create(widget_t widget, void* data)
 {
 	annodlg_delta_t* ptd;
 
 	xrect_t xr;
 	xsize_t xs;
-	res_win_t iconbox, pushbox;
+	widget_t iconbox, pushbox;
 	long nBar, nSplit;
 	tchar_t icons[1024] = { 0 };
 
@@ -395,10 +395,10 @@ int hand_annodlg_create(res_win_t widget, void* data)
 	return 0;
 }
 
-void hand_annodlg_destroy(res_win_t widget)
+void hand_annodlg_destroy(widget_t widget)
 {
 	annodlg_delta_t* ptd = GETANNODLGDELTA(widget);
-	res_win_t ctrl;
+	widget_t ctrl;
 
 	XDK_ASSERT(ptd != NULL);
 
@@ -433,12 +433,12 @@ void hand_annodlg_destroy(res_win_t widget)
 	widget_hand_destroy(widget);
 }
 
-void hand_annodlg_size(res_win_t widget, int code, const xsize_t* prs)
+void hand_annodlg_size(widget_t widget, int code, const xsize_t* prs)
 {
 	annodlg_delta_t* ptd = GETANNODLGDELTA(widget);
 	xsize_t xs;
 	xrect_t xr;
-	res_win_t ctrl;
+	widget_t ctrl;
 	int nBar, nSplit;
 
 	xs.fw = ZERO_WIDTH;
@@ -536,11 +536,11 @@ void hand_annodlg_size(res_win_t widget, int code, const xsize_t* prs)
 	widget_erase(widget, NULL);
 }
 
-void hand_annodlg_menu_command(res_win_t widget, int code, int cid, vword_t data)
+void hand_annodlg_menu_command(widget_t widget, int code, int cid, vword_t data)
 {
 	annodlg_delta_t* ptd = GETANNODLGDELTA(widget);
 	xrect_t xr;
-	res_win_t ctrl;
+	widget_t ctrl;
 
 	if (!ptd->varimg)
 		return;
@@ -589,17 +589,17 @@ void hand_annodlg_menu_command(res_win_t widget, int code, int cid, vword_t data
 	{
 		//annodlg_on_select_color(widget, code);
 
-		widget_close((res_win_t)data, 1);
+		widget_close((widget_t)data, 1);
 	}
 	else if (cid == IDC_ANNODLG_MENU_FONT)
 	{
 		//annodlg_on_select_font(widget, code);
 
-		widget_close((res_win_t)data, 1);
+		widget_close((widget_t)data, 1);
 	}
 }
 
-void hand_annodlg_notice(res_win_t widget, NOTICE* pnt)
+void hand_annodlg_notice(widget_t widget, NOTICE* pnt)
 {
 	annodlg_delta_t* ptd = GETANNODLGDELTA(widget);
 
@@ -620,7 +620,7 @@ void hand_annodlg_notice(res_win_t widget, NOTICE* pnt)
 	
 }
 
-void hand_annodlg_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
+void hand_annodlg_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 {
 	annodlg_delta_t* ptd = GETANNODLGDELTA(widget);
 
@@ -671,13 +671,13 @@ void hand_annodlg_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 
 
 /***************************************************************************************/
-res_win_t annodlg_create(const tchar_t* title, string_t var, res_win_t owner)
+widget_t annodlg_create(const tchar_t* title, string_t var, widget_t owner)
 {
 	if_dispatch_t ev = { 0 };
 	clr_mod_t clr = { 0 };
 	xrect_t xr = { 0 };
 	xsize_t xs = { 0 };
-	res_win_t dlg;
+	widget_t dlg;
 
 	ev.param = (void*)var;
 
@@ -698,7 +698,7 @@ res_win_t annodlg_create(const tchar_t* title, string_t var, res_win_t owner)
 	EVENT_END_DISPATH
 
 	dlg = widget_create(NULL, WD_STYLE_DIALOG, &xr, owner, &ev);	
-	if (!dlg) return (res_win_t)0;
+	if (!dlg) return (widget_t)0;
 
 	widget_set_owner(dlg, owner);
 	widget_set_user_id(dlg, IDC_ANNODLG);
@@ -708,7 +708,7 @@ res_win_t annodlg_create(const tchar_t* title, string_t var, res_win_t owner)
 
 	xs.w = xs.w / 3;
 	xs.h = xs.h / 3;
-	widget_adjust_size(WD_STYLE_DIALOG, &xs);
+	adjust_widget_size(WD_STYLE_DIALOG, &xs);
 
 	widget_size(dlg, &xs);
 	widget_paint(dlg);

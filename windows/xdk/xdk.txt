@@ -92,6 +92,7 @@ SOURCES= \
 ../../../Easily-tmp/windows/xdk/x64/Debug/expres.c \
 ../../../Easily-tmp/windows/xdk/x64/Debug/macro.c \
 ../../../Easily-tmp/windows/xdk/x64/Debug/bioimp.c \
+../../../Easily-tmp/windows/xdk/x64/Debug/filebio.c \
 ../../../Easily-tmp/windows/xdk/x64/Debug/stream.c \
 ../../../Easily-tmp/windows/xdk/x64/Debug/netcoap.c \
 ../../../Easily-tmp/windows/xdk/x64/Debug/netdtls.c \

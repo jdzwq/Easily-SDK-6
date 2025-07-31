@@ -26,11 +26,11 @@ LICENSE.GPL3 for more details.
 
 #include "editor.h"
 
-#include "../xdcimp.h"
-#include "../xdcinit.h"
+#include "../xdcobj.h"
 
 
-static int sub_editbox_keydown(res_win_t widget, dword_t ks, int nKey, uid_t subid, vword_t delta)
+
+static int sub_editbox_keydown(widget_t widget, dword_t ks, int nKey, uid_t subid, vword_t delta)
 {
 	if (subid != IDS_EDITBOX)
 		return 0;
@@ -47,10 +47,10 @@ static int sub_editbox_keydown(res_win_t widget, dword_t ks, int nKey, uid_t sub
 		widget_post_command(widget_get_owner(widget), COMMAND_ROLLBACK, IDC_CHILD, (vword_t)NULL);
 		return 1;
 	case KEY_DOWN:
-		dropbox_tabskip((res_win_t)delta,TABORDER_DOWN);
+		dropbox_tabskip((widget_t)delta,TABORDER_DOWN);
 		return 1;
 	case KEY_UP:
-		dropbox_tabskip((res_win_t)delta,TABORDER_UP);
+		dropbox_tabskip((widget_t)delta,TABORDER_UP);
 		return 1;
 	case KEY_SPACE:
 		editbox_set_text(widget, NULL);
@@ -61,9 +61,9 @@ static int sub_editbox_keydown(res_win_t widget, dword_t ks, int nKey, uid_t sub
 	return 0;
 }
 
-static int sub_editbox_scroll(res_win_t widget, bool_t bHorz, int nLine, uid_t subid, vword_t delta)
+static int sub_editbox_scroll(widget_t widget, bool_t bHorz, int nLine, uid_t subid, vword_t delta)
 {
-	res_win_t dropbox;
+	widget_t dropbox;
 
 	if (subid != IDS_EDITBOX)
 		return 0;
@@ -71,28 +71,28 @@ static int sub_editbox_scroll(res_win_t widget, bool_t bHorz, int nLine, uid_t s
 	if (bHorz)
 		return 1;
 
-	dropbox = (res_win_t)delta;
+	dropbox = (widget_t)delta;
 
 	if (widget_is_valid(dropbox))
 	{
 		if (nLine < 0)
-			dropbox_tabskip((res_win_t)delta,TABORDER_DOWN);
+			dropbox_tabskip((widget_t)delta,TABORDER_DOWN);
 		else
-			dropbox_tabskip((res_win_t)delta,TABORDER_UP);
+			dropbox_tabskip((widget_t)delta,TABORDER_UP);
 	}
 
 	return 1;
 }
 
-static int sub_editbox_self_command(res_win_t widget, int code, vword_t data, uid_t subid, vword_t delta)
+static int sub_editbox_self_command(widget_t widget, int code, vword_t data, uid_t subid, vword_t delta)
 {
-	res_win_t dropbox;
-	//res_win_t keybox;
+	widget_t dropbox;
+	//widget_t keybox;
 
 	if (subid != IDS_EDITBOX)
 		return 0;
 
-	dropbox = (res_win_t)delta;
+	dropbox = (widget_t)delta;
 
 	switch (code)
 	{
@@ -123,14 +123,14 @@ static int sub_editbox_self_command(res_win_t widget, int code, vword_t data, ui
 	return 0;
 }
 
-static void sub_editbox_unsubbing(res_win_t widget, uid_t subid, vword_t delta)
+static void sub_editbox_unsubbing(widget_t widget, uid_t subid, vword_t delta)
 {
-	res_win_t dropbox;
+	widget_t dropbox;
 
 	if (subid != IDS_EDITBOX)
 		return;
 
-	dropbox = (res_win_t)delta;
+	dropbox = (widget_t)delta;
 	if (widget_is_valid(dropbox))
 	{
 		widget_destroy(dropbox);
@@ -139,10 +139,10 @@ static void sub_editbox_unsubbing(res_win_t widget, uid_t subid, vword_t delta)
 	widget_del_subproc(widget, IDS_EDITBOX);
 }
 
-static int sub_editbox_show(res_win_t widget, bool_t show, uid_t subid, vword_t delta)
+static int sub_editbox_show(widget_t widget, bool_t show, uid_t subid, vword_t delta)
 {
-	res_win_t dropbox;
-	//res_win_t keybox;
+	widget_t dropbox;
+	//widget_t keybox;
 
 	if (subid != IDS_EDITBOX)
 		return 0;
@@ -156,7 +156,7 @@ static int sub_editbox_show(res_win_t widget, bool_t show, uid_t subid, vword_t 
 			widget_show(keybox, WS_SHOW_HIDE);
 	}*/
 
-	dropbox = (res_win_t)delta;
+	dropbox = (widget_t)delta;
 	if (widget_is_valid(dropbox))
 	{
 		if (show)
@@ -170,16 +170,16 @@ static int sub_editbox_show(res_win_t widget, bool_t show, uid_t subid, vword_t 
 
 //////////////////////////////////////////////////////////////////////////////////////
 
-static int sub_dropbox_self_command(res_win_t widget, int code, vword_t data, uid_t subid, vword_t delta)
+static int sub_dropbox_self_command(widget_t widget, int code, vword_t data, uid_t subid, vword_t delta)
 {
-	res_win_t editbox;
+	widget_t editbox;
 	link_t_ptr ent;
 	const tchar_t* token = NULL;
 
 	if (subid != IDS_DROPBOX)
 		return 0;
 
-	editbox = (res_win_t)delta;
+	editbox = (widget_t)delta;
 
 	switch (code)
 	{
@@ -204,7 +204,7 @@ static int sub_dropbox_self_command(res_win_t widget, int code, vword_t data, ui
 	return 0;
 }
 
-static void sub_dropbox_unsubbing(res_win_t widget, uid_t subid, vword_t delta)
+static void sub_dropbox_unsubbing(widget_t widget, uid_t subid, vword_t delta)
 {
 	if (subid != IDS_DROPBOX)
 		return;
@@ -214,9 +214,9 @@ static void sub_dropbox_unsubbing(res_win_t widget, uid_t subid, vword_t delta)
 
 /*********************************************************************************************************/
 
-res_win_t firelist_create(res_win_t widget, const xrect_t* pxr, link_t_ptr data)
+widget_t firelist_create(widget_t widget, const xrect_t* pxr, link_t_ptr data)
 {
-	res_win_t editor,dropbox;
+	widget_t editor,dropbox;
 	xrect_t xr_ed, xr = { 0 };
 	xsize_t xs;
 
@@ -276,11 +276,11 @@ res_win_t firelist_create(res_win_t widget, const xrect_t* pxr, link_t_ptr data)
 	return editor;
 }
 
-link_t_ptr firelist_get_data(res_win_t widget)
+link_t_ptr firelist_get_data(widget_t widget)
 {
-	res_win_t dropbox;
+	widget_t dropbox;
 
-	dropbox = (res_win_t)widget_get_subproc_delta(widget, IDS_EDITBOX);
+	dropbox = (widget_t)widget_get_subproc_delta(widget, IDS_EDITBOX);
 
 	if (!widget_is_valid(dropbox))
 		return NULL;
@@ -288,11 +288,11 @@ link_t_ptr firelist_get_data(res_win_t widget)
 	return dropbox_get_data(dropbox);
 }
 
-link_t_ptr firelist_get_item(res_win_t widget)
+link_t_ptr firelist_get_item(widget_t widget)
 {
-	res_win_t dropbox;
+	widget_t dropbox;
 
-	dropbox = (res_win_t)widget_get_subproc_delta(widget, IDS_EDITBOX);
+	dropbox = (widget_t)widget_get_subproc_delta(widget, IDS_EDITBOX);
 
 	if (!widget_is_valid(dropbox))
 		return NULL;

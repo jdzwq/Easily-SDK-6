@@ -26,8 +26,8 @@ LICENSE.GPL3 for more details.
 
 #include "ctrl.h"
 
-#include "../xdcimp.h"
-#include "../xdcinit.h"
+#include "../xdcobj.h"
+
 
 typedef struct _tool_delta_t{
 	link_t_ptr tool;
@@ -41,7 +41,7 @@ typedef struct _tool_delta_t{
 #define SETTOOLDELTA(ph,ptd)	widget_set_user_delta(ph,(vword_t)ptd)
 
 /********************************************************************************************************/
-static void _toolctrl_item_rect(res_win_t widget, link_t_ptr ilk, xrect_t* pxr)
+static void _toolctrl_item_rect(widget_t widget, link_t_ptr ilk, xrect_t* pxr)
 {
 	tool_delta_t* ptd = GETTOOLDELTA(widget);
 
@@ -50,7 +50,7 @@ static void _toolctrl_item_rect(res_win_t widget, link_t_ptr ilk, xrect_t* pxr)
 	widget_rect_to_pt(widget, pxr);
 }
 
-static void _toolctrl_group_rect(res_win_t widget, link_t_ptr glk, xrect_t* pxr)
+static void _toolctrl_group_rect(widget_t widget, link_t_ptr glk, xrect_t* pxr)
 {
 	tool_delta_t* ptd = GETTOOLDELTA(widget);
 
@@ -59,7 +59,7 @@ static void _toolctrl_group_rect(res_win_t widget, link_t_ptr glk, xrect_t* pxr)
 	widget_rect_to_pt(widget, pxr);
 }
 
-static void _toolctrl_reset_page(res_win_t widget)
+static void _toolctrl_reset_page(widget_t widget)
 {
 	tool_delta_t* ptd = GETTOOLDELTA(widget);
 	int pw, ph;
@@ -73,7 +73,7 @@ static void _toolctrl_reset_page(res_win_t widget)
 }
 
 /*********************************************************************************************************/
-int noti_tool_owner(res_win_t widget, unsigned int code, link_t_ptr tool, link_t_ptr ilk, void* data)
+int noti_tool_owner(widget_t widget, unsigned int code, link_t_ptr tool, link_t_ptr ilk, void* data)
 {
 	tool_delta_t* ptd = GETTOOLDELTA(widget);
 	NOTICE_TOOL nf = { 0 };
@@ -91,7 +91,7 @@ int noti_tool_owner(res_win_t widget, unsigned int code, link_t_ptr tool, link_t
 	return nf.ret;
 }
 
-void noti_tool_item_leave(res_win_t widget)
+void noti_tool_item_leave(widget_t widget)
 {
 	tool_delta_t* ptd = GETTOOLDELTA(widget);
 
@@ -101,11 +101,11 @@ void noti_tool_item_leave(res_win_t widget)
 
 	if (widget_is_hotvoer(widget))
 	{
-		widget_track_mouse(widget, MS_TRACK_HOVER | MS_TRACK_LEAVE);
+		//widget_track_mouse(widget, MS_TRACK_HOVER | MS_TRACK_LEAVE);
 	}
 }
 
-void noti_tool_item_enter(res_win_t widget, link_t_ptr plk)
+void noti_tool_item_enter(widget_t widget, link_t_ptr plk)
 {
 	tool_delta_t* ptd = GETTOOLDELTA(widget);
 
@@ -116,11 +116,11 @@ void noti_tool_item_enter(res_win_t widget, link_t_ptr plk)
 
 	if (widget_is_hotvoer(widget))
 	{
-		widget_track_mouse(widget, MS_TRACK_HOVER | MS_TRACK_LEAVE);
+		//widget_track_mouse(widget, MS_TRACK_HOVER | MS_TRACK_LEAVE);
 	}
 }
 
-void noti_tool_item_hover(res_win_t widget, int x, int y)
+void noti_tool_item_hover(widget_t widget, int x, int y)
 {
 	tool_delta_t* ptd = GETTOOLDELTA(widget);
 	xpoint_t xp;
@@ -132,7 +132,7 @@ void noti_tool_item_hover(res_win_t widget, int x, int y)
 	noti_tool_owner(widget, NC_TOOLITEMHOVER, ptd->tool, ptd->hover, (void*)&xp);
 }
 
-bool_t noti_tool_item_changing(res_win_t widget)
+bool_t noti_tool_item_changing(widget_t widget)
 {
 	tool_delta_t* ptd = GETTOOLDELTA(widget);
 	xrect_t xr;
@@ -149,7 +149,7 @@ bool_t noti_tool_item_changing(res_win_t widget)
 	return 1;
 }
 
-void noti_tool_item_changed(res_win_t widget, link_t_ptr plk)
+void noti_tool_item_changed(widget_t widget, link_t_ptr plk)
 {
 	tool_delta_t* ptd = GETTOOLDELTA(widget);
 	xrect_t xr;
@@ -164,7 +164,7 @@ void noti_tool_item_changed(res_win_t widget, link_t_ptr plk)
 	widget_erase(widget, &xr);
 }
 
-void noti_tool_group_expand(res_win_t widget, link_t_ptr glk)
+void noti_tool_group_expand(widget_t widget, link_t_ptr glk)
 {
 	tool_delta_t* ptd = GETTOOLDELTA(widget);
 	xrect_t xr_sec, xr;
@@ -186,7 +186,7 @@ void noti_tool_group_expand(res_win_t widget, link_t_ptr glk)
 }
 
 /*******************************************************************************/
-int hand_tool_create(res_win_t widget, void* data)
+int hand_tool_create(widget_t widget, void* data)
 {
 	tool_delta_t* ptd;
 
@@ -200,7 +200,7 @@ int hand_tool_create(res_win_t widget, void* data)
 	return 0;
 }
 
-void hand_tool_destroy(res_win_t widget)
+void hand_tool_destroy(widget_t widget)
 {
 	tool_delta_t* ptd = GETTOOLDELTA(widget);
 
@@ -213,7 +213,7 @@ void hand_tool_destroy(res_win_t widget)
 	widget_hand_destroy(widget);
 }
 
-void hand_tool_size(res_win_t widget, int code, const xsize_t* prs)
+void hand_tool_size(widget_t widget, int code, const xsize_t* prs)
 {
 	tool_delta_t* ptd = GETTOOLDELTA(widget);
 	xrect_t xr;
@@ -230,7 +230,7 @@ void hand_tool_size(res_win_t widget, int code, const xsize_t* prs)
 	toolctrl_redraw(widget);
 }
 
-void hand_tool_mouse_move(res_win_t widget, dword_t dw, const xpoint_t* pxp)
+void hand_tool_mouse_move(widget_t widget, dword_t dw, const xpoint_t* pxp)
 {
 	tool_delta_t* ptd = GETTOOLDELTA(widget);
 	int nHint;
@@ -264,7 +264,7 @@ void hand_tool_mouse_move(res_win_t widget, dword_t dw, const xpoint_t* pxp)
 	}
 }
 
-void hand_tool_mouse_hover(res_win_t widget, dword_t dw, const xpoint_t* pxp)
+void hand_tool_mouse_hover(widget_t widget, dword_t dw, const xpoint_t* pxp)
 {
 	tool_delta_t* ptd = GETTOOLDELTA(widget);
 
@@ -275,7 +275,7 @@ void hand_tool_mouse_hover(res_win_t widget, dword_t dw, const xpoint_t* pxp)
 		noti_tool_item_hover(widget, pxp->x, pxp->y);
 }
 
-void hand_tool_mouse_leave(res_win_t widget, dword_t dw, const xpoint_t* pxp)
+void hand_tool_mouse_leave(widget_t widget, dword_t dw, const xpoint_t* pxp)
 {
 	tool_delta_t* ptd = GETTOOLDELTA(widget);
 
@@ -286,7 +286,7 @@ void hand_tool_mouse_leave(res_win_t widget, dword_t dw, const xpoint_t* pxp)
 		noti_tool_item_leave(widget);
 }
 
-void hand_tool_lbutton_dbclick(res_win_t widget, const xpoint_t* pxp)
+void hand_tool_lbutton_dbclick(widget_t widget, const xpoint_t* pxp)
 {
 	tool_delta_t* ptd = GETTOOLDELTA(widget);
 
@@ -296,7 +296,7 @@ void hand_tool_lbutton_dbclick(res_win_t widget, const xpoint_t* pxp)
 	noti_tool_owner(widget, NC_TOOLDBCLK, ptd->tool, ptd->item, (void*)pxp);
 }
 
-void hand_tool_lbutton_down(res_win_t widget, const xpoint_t* pxp)
+void hand_tool_lbutton_down(widget_t widget, const xpoint_t* pxp)
 {
 	tool_delta_t* ptd = GETTOOLDELTA(widget);
 	xrect_t xr;
@@ -313,7 +313,7 @@ void hand_tool_lbutton_down(res_win_t widget, const xpoint_t* pxp)
 	}
 }
 
-void hand_tool_lbutton_up(res_win_t widget, const xpoint_t* pxp)
+void hand_tool_lbutton_up(widget_t widget, const xpoint_t* pxp)
 {
 	tool_delta_t* ptd = GETTOOLDELTA(widget);
 
@@ -362,7 +362,7 @@ void hand_tool_lbutton_up(res_win_t widget, const xpoint_t* pxp)
 	noti_tool_owner(widget, NC_TOOLLBCLK, ptd->tool, ptd->item, (void*)pxp);
 }
 
-void hand_tool_rbutton_down(res_win_t widget, const xpoint_t* pxp)
+void hand_tool_rbutton_down(widget_t widget, const xpoint_t* pxp)
 {
 	tool_delta_t* ptd = GETTOOLDELTA(widget);
 
@@ -370,7 +370,7 @@ void hand_tool_rbutton_down(res_win_t widget, const xpoint_t* pxp)
 		return;
 }
 
-void hand_tool_rbutton_up(res_win_t widget, const xpoint_t* pxp)
+void hand_tool_rbutton_up(widget_t widget, const xpoint_t* pxp)
 {
 	tool_delta_t* ptd = GETTOOLDELTA(widget);
 
@@ -391,7 +391,7 @@ void hand_tool_rbutton_up(res_win_t widget, const xpoint_t* pxp)
 	noti_tool_owner(widget, NC_TOOLRBCLK, ptd->tool, plk, (void*)pxp);
 }
 
-void hand_tool_keydown(res_win_t widget, dword_t ks, int nKey)
+void hand_tool_keydown(widget_t widget, dword_t ks, int nKey)
 {
 	tool_delta_t* ptd = GETTOOLDELTA(widget);
 
@@ -417,7 +417,7 @@ void hand_tool_keydown(res_win_t widget, dword_t ks, int nKey)
 	}
 }
 
-void hand_tool_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
+void hand_tool_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 {
 	tool_delta_t* ptd = GETTOOLDELTA(widget);
 	visual_t rdc;
@@ -470,7 +470,7 @@ void hand_tool_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 
 /*******************************************************************************************/
 
-res_win_t toolctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, res_win_t wparent)
+widget_t toolctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, widget_t wparent)
 {
 	if_dispatch_t ev = { 0 };
 
@@ -502,7 +502,7 @@ res_win_t toolctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* p
 	return widget_create(wname, wstyle, pxr, wparent, &ev);
 }
 
-void toolctrl_attach(res_win_t widget, link_t_ptr ptr)
+void toolctrl_attach(widget_t widget, link_t_ptr ptr)
 {
 	tool_delta_t* ptd = GETTOOLDELTA(widget);
 	xrect_t xr;
@@ -523,7 +523,7 @@ void toolctrl_attach(res_win_t widget, link_t_ptr ptr)
 	toolctrl_redraw(widget);
 }
 
-link_t_ptr toolctrl_detach(res_win_t widget)
+link_t_ptr toolctrl_detach(widget_t widget)
 {
 	tool_delta_t* ptd = GETTOOLDELTA(widget);
 	link_t_ptr data;
@@ -540,7 +540,7 @@ link_t_ptr toolctrl_detach(res_win_t widget)
 	return data;
 }
 
-link_t_ptr toolctrl_fetch(res_win_t widget)
+link_t_ptr toolctrl_fetch(widget_t widget)
 {
 	tool_delta_t* ptd = GETTOOLDELTA(widget);
 	
@@ -549,7 +549,7 @@ link_t_ptr toolctrl_fetch(res_win_t widget)
 	return ptd->tool;
 }
 
-void toolctrl_redraw(res_win_t widget)
+void toolctrl_redraw(widget_t widget)
 {
 	tool_delta_t* ptd = GETTOOLDELTA(widget);
 	link_t_ptr glk,ilk;
@@ -591,7 +591,7 @@ void toolctrl_redraw(res_win_t widget)
 	widget_erase(widget, NULL);
 }
 
-void toolctrl_redraw_item(res_win_t widget, link_t_ptr plk)
+void toolctrl_redraw_item(widget_t widget, link_t_ptr plk)
 {
 	tool_delta_t* ptd = GETTOOLDELTA(widget);
 	xrect_t xr;
@@ -621,7 +621,7 @@ void toolctrl_redraw_item(res_win_t widget, link_t_ptr plk)
 	widget_erase(widget, &xr);
 }
 
-void toolctrl_tabskip(res_win_t widget, int nSkip)
+void toolctrl_tabskip(widget_t widget, int nSkip)
 {
 	tool_delta_t* ptd = GETTOOLDELTA(widget);
 	link_t_ptr plk = NULL;
@@ -670,7 +670,7 @@ void toolctrl_tabskip(res_win_t widget, int nSkip)
 	}
 }
 
-bool_t toolctrl_set_focus_item(res_win_t widget, link_t_ptr ilk)
+bool_t toolctrl_set_focus_item(widget_t widget, link_t_ptr ilk)
 {
 	tool_delta_t* ptd = GETTOOLDELTA(widget);
 	bool_t bRe;
@@ -705,7 +705,7 @@ bool_t toolctrl_set_focus_item(res_win_t widget, link_t_ptr ilk)
 	return 1;
 }
 
-link_t_ptr toolctrl_get_focus_item(res_win_t widget)
+link_t_ptr toolctrl_get_focus_item(widget_t widget)
 {
 	tool_delta_t* ptd = GETTOOLDELTA(widget);
 
@@ -717,7 +717,7 @@ link_t_ptr toolctrl_get_focus_item(res_win_t widget)
 	return ptd->item;
 }
 
-void toolctrl_get_item_rect(res_win_t widget, link_t_ptr ilk, xrect_t* prt)
+void toolctrl_get_item_rect(widget_t widget, link_t_ptr ilk, xrect_t* prt)
 {
 	tool_delta_t* ptd = GETTOOLDELTA(widget);
 	

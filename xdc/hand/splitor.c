@@ -26,18 +26,18 @@ LICENSE.GPL3 for more details.
 
 #include "splitor.h"
 
-#include "../xdcimp.h"
-#include "../xdcinit.h"
+#include "../xdcobj.h"
+
 
 static bool_t _splitor_item_resize(link_t_ptr ilk, void* pv)
 {
-	res_win_t owner, win;
+	widget_t owner, win;
 	xrect_t xr;
 
 	if (get_split_item_splited(ilk))
 		return 1;
 
-	owner = (res_win_t)(pv);
+	owner = (widget_t)(pv);
 
 	xr.fx = get_split_item_x(ilk);
 	xr.fw = get_split_item_width(ilk);
@@ -46,7 +46,7 @@ static bool_t _splitor_item_resize(link_t_ptr ilk, void* pv)
 
 	widget_rect_to_pt(owner, &xr);
 
-	win = (res_win_t)get_split_item_delta(ilk);
+	win = (widget_t)get_split_item_delta(ilk);
 
 	if (widget_is_valid(win))
 	{

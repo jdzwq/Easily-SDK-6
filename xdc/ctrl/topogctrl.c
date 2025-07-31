@@ -26,16 +26,16 @@ LICENSE.GPL3 for more details.
 
 #include "ctrl.h"
 
-#include "../xdcimp.h"
-#include "../xdcinit.h"
+#include "../xdcobj.h"
+
 
 typedef struct _topog_delta_t{
 	link_t_ptr topog;
 	link_t_ptr spot;
 	link_t_ptr hover;
 
-	res_win_t hsc;
-	res_win_t vsc;
+	widget_t hsc;
+	widget_t vsc;
 
 	bool_t b_drag;
 	int org_x, org_y;
@@ -51,7 +51,7 @@ typedef struct _topog_delta_t{
 #define SETTOPOGDELTA(ph,ptd) widget_set_user_delta(ph,(vword_t)ptd)
 
 /*****************************************************************************/
-static void _topogctrl_done(res_win_t widget)
+static void _topogctrl_done(widget_t widget)
 {
 	topog_delta_t* ptd = GETTOPOGDELTA(widget);
 	byte_t* buf;
@@ -76,7 +76,7 @@ static void _topogctrl_done(res_win_t widget)
 	push_stack_node(ptd->stack, (void*)buf);
 }
 
-static void _topogctrl_undo(res_win_t widget)
+static void _topogctrl_undo(widget_t widget)
 {
 	topog_delta_t* ptd = GETTOPOGDELTA(widget);
 	void* p;
@@ -103,7 +103,7 @@ static void _topogctrl_undo(res_win_t widget)
 	}
 }
 
-static void _topogctrl_discard(res_win_t widget)
+static void _topogctrl_discard(widget_t widget)
 {
 	topog_delta_t* ptd = GETTOPOGDELTA(widget);
 	void* p;
@@ -117,7 +117,7 @@ static void _topogctrl_discard(res_win_t widget)
 	}
 }
 
-static void _topogctrl_clean(res_win_t widget)
+static void _topogctrl_clean(widget_t widget)
 {
 	topog_delta_t* ptd = GETTOPOGDELTA(widget);
 	void* p;
@@ -130,7 +130,7 @@ static void _topogctrl_clean(res_win_t widget)
 	}
 }
 
-static bool_t _topogctrl_copy(res_win_t widget)
+static bool_t _topogctrl_copy(widget_t widget)
 {
 	topog_delta_t* ptd = GETTOPOGDELTA(widget);
 	dword_t len;
@@ -184,7 +184,7 @@ static bool_t _topogctrl_copy(res_win_t widget)
 	return 1;
 }
 
-static bool_t _topogctrl_cut(res_win_t widget)
+static bool_t _topogctrl_cut(widget_t widget)
 {
 	topog_delta_t* ptd = GETTOPOGDELTA(widget);
 	link_t_ptr nxt, ilk;
@@ -211,7 +211,7 @@ static bool_t _topogctrl_cut(res_win_t widget)
 	return 1;
 }
 
-static bool_t _topogctrl_paste(res_win_t widget)
+static bool_t _topogctrl_paste(widget_t widget)
 {
 	topog_delta_t* ptd = GETTOPOGDELTA(widget);
 	dword_t len;
@@ -272,7 +272,7 @@ static bool_t _topogctrl_paste(res_win_t widget)
 	return 1;
 }
 
-static void _topogctrl_spot_rect(res_win_t widget, link_t_ptr ilk, xrect_t* pxr)
+static void _topogctrl_spot_rect(widget_t widget, link_t_ptr ilk, xrect_t* pxr)
 {
 	topog_delta_t* ptd = GETTOPOGDELTA(widget);
 
@@ -281,7 +281,7 @@ static void _topogctrl_spot_rect(res_win_t widget, link_t_ptr ilk, xrect_t* pxr)
 	widget_rect_to_pt(widget, pxr);
 }
 
-static void _topogctrl_ensure_visible(res_win_t widget)
+static void _topogctrl_ensure_visible(widget_t widget)
 {
 	topog_delta_t* ptd = GETTOPOGDELTA(widget);
 	xrect_t xr = { 0 };
@@ -294,7 +294,7 @@ static void _topogctrl_ensure_visible(res_win_t widget)
 	widget_ensure_visible(widget, &xr, 1);
 }
 
-static void _topogctrl_reset_matrix(res_win_t widget, int row, int col)
+static void _topogctrl_reset_matrix(widget_t widget, int row, int col)
 {
 	topog_delta_t* ptd = GETTOPOGDELTA(widget);
 	int rows, cols;
@@ -334,7 +334,7 @@ static void _topogctrl_reset_matrix(res_win_t widget, int row, int col)
 	widget_erase(widget, NULL);
 }
 
-static void _topogctrl_reset_page(res_win_t widget)
+static void _topogctrl_reset_page(widget_t widget)
 {
 	topog_delta_t* ptd = GETTOPOGDELTA(widget);
 	int pw, ph, fw, fh, lw, lh;
@@ -366,7 +366,7 @@ static void _topogctrl_reset_page(res_win_t widget)
 
 
 /*****************************************************************************/
-int noti_topog_owner(res_win_t widget, unsigned int code, link_t_ptr topog, link_t_ptr spot, int row, int col, void* data)
+int noti_topog_owner(widget_t widget, unsigned int code, link_t_ptr topog, link_t_ptr spot, int row, int col, void* data)
 {
 	topog_delta_t* ptd = GETTOPOGDELTA(widget);
 	NOTICE_TOPOG nf = { 0 };
@@ -386,7 +386,7 @@ int noti_topog_owner(res_win_t widget, unsigned int code, link_t_ptr topog, link
 	return nf.ret;
 }
 
-void noti_topog_reset_select(res_win_t widget)
+void noti_topog_reset_select(widget_t widget)
 {
 	topog_delta_t* ptd = GETTOPOGDELTA(widget);
 	link_t_ptr ilk;
@@ -412,7 +412,7 @@ void noti_topog_reset_select(res_win_t widget)
 	}
 }
 
-void noti_topog_spot_selected(res_win_t widget, link_t_ptr ilk)
+void noti_topog_spot_selected(widget_t widget, link_t_ptr ilk)
 {
 	topog_delta_t* ptd = GETTOPOGDELTA(widget);
 	xrect_t xr;
@@ -434,7 +434,7 @@ void noti_topog_spot_selected(res_win_t widget, link_t_ptr ilk)
 	widget_erase(widget, &xr);
 }
 
-bool_t noti_topog_spot_changing(res_win_t widget)
+bool_t noti_topog_spot_changing(widget_t widget)
 {
 	topog_delta_t* ptd = GETTOPOGDELTA(widget);
 	xrect_t xr;
@@ -457,7 +457,7 @@ bool_t noti_topog_spot_changing(res_win_t widget)
 	return (bool_t)1;
 }
 
-void noti_topog_spot_changed(res_win_t widget, link_t_ptr ilk)
+void noti_topog_spot_changed(widget_t widget, link_t_ptr ilk)
 {
 	topog_delta_t* ptd = GETTOPOGDELTA(widget);
 	xrect_t xr;
@@ -478,7 +478,7 @@ void noti_topog_spot_changed(res_win_t widget, link_t_ptr ilk)
 	noti_topog_owner(widget, NC_TOPOGSPOTCHANGED, ptd->topog, ptd->spot, ptd->row, ptd->col, NULL);
 }
 
-void noti_topog_spot_enter(res_win_t widget, link_t_ptr ilk)
+void noti_topog_spot_enter(widget_t widget, link_t_ptr ilk)
 {
 	topog_delta_t* ptd = GETTOPOGDELTA(widget);
 
@@ -489,11 +489,11 @@ void noti_topog_spot_enter(res_win_t widget, link_t_ptr ilk)
 
 	if (widget_is_hotvoer(widget))
 	{
-		widget_track_mouse(widget, MS_TRACK_HOVER | MS_TRACK_LEAVE);
+		//widget_track_mouse(widget, MS_TRACK_HOVER | MS_TRACK_LEAVE);
 	}
 }
 
-void noti_topog_spot_leave(res_win_t widget)
+void noti_topog_spot_leave(widget_t widget)
 {
 	topog_delta_t* ptd = GETTOPOGDELTA(widget);
 
@@ -503,11 +503,11 @@ void noti_topog_spot_leave(res_win_t widget)
 
 	if (widget_is_hotvoer(widget))
 	{
-		widget_track_mouse(widget, MS_TRACK_HOVER | MS_TRACK_LEAVE);
+		//widget_track_mouse(widget, MS_TRACK_HOVER | MS_TRACK_LEAVE);
 	}
 }
 
-void noti_topog_spot_hover(res_win_t widget, int x, int y)
+void noti_topog_spot_hover(widget_t widget, int x, int y)
 {
 	topog_delta_t* ptd = GETTOPOGDELTA(widget);
 	xpoint_t xp;
@@ -519,7 +519,7 @@ void noti_topog_spot_hover(res_win_t widget, int x, int y)
 	noti_topog_owner(widget, NC_TOPOGSPOTHOVER, ptd->topog, ptd->hover, get_topog_spot_row(ptd->hover), get_topog_spot_col(ptd->hover), (void*)&xp);
 }
 
-void noti_topog_spot_drag(res_win_t widget, int x, int y)
+void noti_topog_spot_drag(widget_t widget, int x, int y)
 {
 	topog_delta_t* ptd = GETTOPOGDELTA(widget);
 	xpoint_t pt;
@@ -541,7 +541,7 @@ void noti_topog_spot_drag(res_win_t widget, int x, int y)
 	noti_topog_owner(widget, NC_TOPOGSPOTDRAG, ptd->topog, ptd->spot, ptd->row, ptd->col, (void*)&pt);
 }
 
-void noti_topog_spot_drop(res_win_t widget, int x, int y)
+void noti_topog_spot_drop(widget_t widget, int x, int y)
 {
 	topog_delta_t* ptd = GETTOPOGDELTA(widget);
 	xpoint_t pt;
@@ -598,7 +598,7 @@ void noti_topog_spot_drop(res_win_t widget, int x, int y)
 	noti_topog_owner(widget, NC_TOPOGSPOTDROP, ptd->topog, ptd->spot, ptd->row, ptd->col, (void*)&pt);
 }
 
-void noti_topog_reset_scroll(res_win_t widget, bool_t bUpdate)
+void noti_topog_reset_scroll(widget_t widget, bool_t bUpdate)
 {
 	topog_delta_t* ptd = GETTOPOGDELTA(widget);
 
@@ -619,7 +619,7 @@ void noti_topog_reset_scroll(res_win_t widget, bool_t bUpdate)
 	}
 }
 /*****************************************************************************/
-int hand_topogctrl_create(res_win_t widget, void* data)
+int hand_topogctrl_create(widget_t widget, void* data)
 {
 	topog_delta_t* ptd = GETTOPOGDELTA(widget);
 
@@ -637,7 +637,7 @@ int hand_topogctrl_create(res_win_t widget, void* data)
 	return 0;
 }
 
-void hand_topogctrl_destroy(res_win_t widget)
+void hand_topogctrl_destroy(widget_t widget)
 {
 	topog_delta_t* ptd = GETTOPOGDELTA(widget);
 
@@ -662,7 +662,7 @@ void hand_topogctrl_destroy(res_win_t widget)
 	widget_hand_destroy(widget);
 }
 
-void hand_topogctrl_mouse_move(res_win_t widget, dword_t dw, const xpoint_t* pxp)
+void hand_topogctrl_mouse_move(widget_t widget, dword_t dw, const xpoint_t* pxp)
 {
 	topog_delta_t* ptd = GETTOPOGDELTA(widget);
 	int nHint;
@@ -703,7 +703,7 @@ void hand_topogctrl_mouse_move(res_win_t widget, dword_t dw, const xpoint_t* pxp
 	}
 }
 
-void hand_topogctrl_mouse_hover(res_win_t widget, dword_t dw, const xpoint_t* pxp)
+void hand_topogctrl_mouse_hover(widget_t widget, dword_t dw, const xpoint_t* pxp)
 {
 	topog_delta_t* ptd = GETTOPOGDELTA(widget);
 
@@ -714,7 +714,7 @@ void hand_topogctrl_mouse_hover(res_win_t widget, dword_t dw, const xpoint_t* px
 		noti_topog_spot_hover(widget, pxp->x, pxp->y);
 }
 
-void hand_topogctrl_mouse_leave(res_win_t widget, dword_t dw, const xpoint_t* pxp)
+void hand_topogctrl_mouse_leave(widget_t widget, dword_t dw, const xpoint_t* pxp)
 {
 	topog_delta_t* ptd = GETTOPOGDELTA(widget);
 
@@ -725,7 +725,7 @@ void hand_topogctrl_mouse_leave(res_win_t widget, dword_t dw, const xpoint_t* px
 		noti_topog_spot_leave(widget);
 }
 
-void hand_topogctrl_lbutton_down(res_win_t widget, const xpoint_t* pxp)
+void hand_topogctrl_lbutton_down(widget_t widget, const xpoint_t* pxp)
 {
 	topog_delta_t* ptd = GETTOPOGDELTA(widget);
 	int nHint;
@@ -770,7 +770,7 @@ void hand_topogctrl_lbutton_down(res_win_t widget, const xpoint_t* pxp)
 	}
 }
 
-void hand_topogctrl_lbutton_up(res_win_t widget, const xpoint_t* pxp)
+void hand_topogctrl_lbutton_up(widget_t widget, const xpoint_t* pxp)
 {
 	topog_delta_t* ptd = GETTOPOGDELTA(widget);
 
@@ -827,7 +827,7 @@ void hand_topogctrl_lbutton_up(res_win_t widget, const xpoint_t* pxp)
 	noti_topog_owner(widget, NC_TOPOGLBCLK, ptd->topog, ptd->spot, ptd->row, ptd->col, (void*)pxp);
 }
 
-void hand_topogctrl_lbutton_dbclick(res_win_t widget, const xpoint_t* pxp)
+void hand_topogctrl_lbutton_dbclick(widget_t widget, const xpoint_t* pxp)
 {
 	topog_delta_t* ptd = GETTOPOGDELTA(widget);
 
@@ -837,7 +837,7 @@ void hand_topogctrl_lbutton_dbclick(res_win_t widget, const xpoint_t* pxp)
 	noti_topog_owner(widget, NC_TOPOGDBCLK, ptd->topog, ptd->spot, ptd->row, ptd->col, (void*)pxp);
 }
 
-void hand_topogctrl_rbutton_down(res_win_t widget, const xpoint_t* pxp)
+void hand_topogctrl_rbutton_down(widget_t widget, const xpoint_t* pxp)
 {
 	topog_delta_t* ptd = GETTOPOGDELTA(widget);
 
@@ -845,7 +845,7 @@ void hand_topogctrl_rbutton_down(res_win_t widget, const xpoint_t* pxp)
 		return;
 }
 
-void hand_topogctrl_rbutton_up(res_win_t widget, const xpoint_t* pxp)
+void hand_topogctrl_rbutton_up(widget_t widget, const xpoint_t* pxp)
 {
 	topog_delta_t* ptd = GETTOPOGDELTA(widget);
 
@@ -855,7 +855,7 @@ void hand_topogctrl_rbutton_up(res_win_t widget, const xpoint_t* pxp)
 	noti_topog_owner(widget, NC_TOPOGRBCLK, ptd->topog, ptd->spot, ptd->row, ptd->col, (void*)pxp);
 }
 
-void hand_topogctrl_scroll(res_win_t widget, bool_t bHorz, int nLine)
+void hand_topogctrl_scroll(widget_t widget, bool_t bHorz, int nLine)
 {
 	topog_delta_t* ptd = GETTOPOGDELTA(widget);
 
@@ -865,12 +865,12 @@ void hand_topogctrl_scroll(res_win_t widget, bool_t bHorz, int nLine)
 	widget_hand_scroll(widget, bHorz, nLine);
 }
 
-void hand_topogctrl_wheel(res_win_t widget, bool_t bHorz, int nDelta)
+void hand_topogctrl_wheel(widget_t widget, bool_t bHorz, int nDelta)
 {
 	topog_delta_t* ptd = GETTOPOGDELTA(widget);
 	scroll_t scr = { 0 };
 	int nLine;
-	res_win_t win;
+	widget_t win;
 
 	if (!ptd->topog)
 		return;
@@ -919,7 +919,7 @@ void hand_topogctrl_wheel(res_win_t widget, bool_t bHorz, int nDelta)
 	}
 }
 
-void hand_topogctrl_keydown(res_win_t widget, dword_t ks, int nKey)
+void hand_topogctrl_keydown(widget_t widget, dword_t ks, int nKey)
 {
 	topog_delta_t* ptd = GETTOPOGDELTA(widget);
 
@@ -1030,7 +1030,7 @@ void hand_topogctrl_keydown(res_win_t widget, dword_t ks, int nKey)
 	}
 }
 
-void hand_topogctrl_copy(res_win_t widget)
+void hand_topogctrl_copy(widget_t widget)
 {
 	topog_delta_t* ptd = GETTOPOGDELTA(widget);
 
@@ -1040,7 +1040,7 @@ void hand_topogctrl_copy(res_win_t widget)
 	
 }
 
-void hand_topogctrl_size(res_win_t widget, int code, const xsize_t* prs)
+void hand_topogctrl_size(widget_t widget, int code, const xsize_t* prs)
 {
 	topog_delta_t* ptd = GETTOPOGDELTA(widget);
 	xrect_t xr;
@@ -1059,7 +1059,7 @@ void hand_topogctrl_size(res_win_t widget, int code, const xsize_t* prs)
 	topogctrl_redraw(widget);
 }
 
-void hand_topogctrl_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
+void hand_topogctrl_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 {
 	topog_delta_t* ptd = GETTOPOGDELTA(widget);
 	visual_t rdc;
@@ -1126,7 +1126,7 @@ void hand_topogctrl_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 }
 
 /***************************************************************************************/
-res_win_t topogctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, res_win_t wparent)
+widget_t topogctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, widget_t wparent)
 {
 	if_dispatch_t ev = { 0 };
 
@@ -1161,7 +1161,7 @@ res_win_t topogctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* 
 	return widget_create(wname, wstyle, pxr, wparent, &ev);
 }
 
-void topogctrl_attach(res_win_t widget, link_t_ptr data)
+void topogctrl_attach(widget_t widget, link_t_ptr data)
 {
 	topog_delta_t* ptd = GETTOPOGDELTA(widget);
 	xrect_t xr;
@@ -1184,7 +1184,7 @@ void topogctrl_attach(res_win_t widget, link_t_ptr data)
 	topogctrl_redraw(widget);
 }
 
-link_t_ptr topogctrl_detach(res_win_t widget)
+link_t_ptr topogctrl_detach(widget_t widget)
 {
 	topog_delta_t* ptd = GETTOPOGDELTA(widget);
 	link_t_ptr data;
@@ -1202,7 +1202,7 @@ link_t_ptr topogctrl_detach(res_win_t widget)
 	return data;
 }
 
-link_t_ptr topogctrl_fetch(res_win_t widget)
+link_t_ptr topogctrl_fetch(widget_t widget)
 {
 	topog_delta_t* ptd = GETTOPOGDELTA(widget);
 
@@ -1211,7 +1211,7 @@ link_t_ptr topogctrl_fetch(res_win_t widget)
 	return ptd->topog;
 }
 
-void topogctrl_redraw(res_win_t widget)
+void topogctrl_redraw(widget_t widget)
 {
 	topog_delta_t* ptd = GETTOPOGDELTA(widget);
 	link_t_ptr ilk;
@@ -1250,7 +1250,7 @@ void topogctrl_redraw(res_win_t widget)
 	widget_paint(widget);
 }
 
-void topogctrl_tabskip(res_win_t widget, int nSkip)
+void topogctrl_tabskip(widget_t widget, int nSkip)
 {
 	topog_delta_t* ptd = GETTOPOGDELTA(widget);
 	link_t_ptr plk = ptd->spot;
@@ -1285,7 +1285,7 @@ void topogctrl_tabskip(res_win_t widget, int nSkip)
 	}
 }
 
-void topogctrl_redraw_spot(res_win_t widget, link_t_ptr plk)
+void topogctrl_redraw_spot(widget_t widget, link_t_ptr plk)
 {
 	topog_delta_t* ptd = GETTOPOGDELTA(widget);
 	xrect_t xr;
@@ -1308,7 +1308,7 @@ void topogctrl_redraw_spot(res_win_t widget, link_t_ptr plk)
 	widget_erase(widget, &xr);
 }
 
-bool_t topogctrl_set_focus_spot(res_win_t widget, link_t_ptr ilk)
+bool_t topogctrl_set_focus_spot(widget_t widget, link_t_ptr ilk)
 {
 	topog_delta_t* ptd = GETTOPOGDELTA(widget);
 	bool_t bRe;
@@ -1343,7 +1343,7 @@ bool_t topogctrl_set_focus_spot(res_win_t widget, link_t_ptr ilk)
 	return 1;
 }
 
-link_t_ptr topogctrl_get_focus_spot(res_win_t widget)
+link_t_ptr topogctrl_get_focus_spot(widget_t widget)
 {
 	topog_delta_t* ptd = GETTOPOGDELTA(widget);
 
@@ -1352,7 +1352,7 @@ link_t_ptr topogctrl_get_focus_spot(res_win_t widget)
 	return ptd->spot;
 }
 
-void topogctrl_get_spot_rect(res_win_t widget, link_t_ptr ilk, xrect_t* pxr)
+void topogctrl_get_spot_rect(widget_t widget, link_t_ptr ilk, xrect_t* pxr)
 {
 	topog_delta_t* ptd = GETTOPOGDELTA(widget);
 
@@ -1368,7 +1368,7 @@ void topogctrl_get_spot_rect(res_win_t widget, link_t_ptr ilk, xrect_t* pxr)
 	_topogctrl_spot_rect(widget, ilk, pxr);
 }
 
-void topogctrl_get_focus_dot(res_win_t widget, int* prow, int* pcol)
+void topogctrl_get_focus_dot(widget_t widget, int* prow, int* pcol)
 {
 	topog_delta_t* ptd = GETTOPOGDELTA(widget);
 
@@ -1378,7 +1378,7 @@ void topogctrl_get_focus_dot(res_win_t widget, int* prow, int* pcol)
 	*pcol = ptd->col;
 }
 
-bool_t topogctrl_get_dirty(res_win_t widget)
+bool_t topogctrl_get_dirty(widget_t widget)
 {
 	topog_delta_t* ptd = GETTOPOGDELTA(widget);
 
@@ -1393,7 +1393,7 @@ bool_t topogctrl_get_dirty(res_win_t widget)
 	return (peek_stack_node(ptd->stack, -1)) ? 1 : 0;
 }
 
-void topogctrl_set_dirty(res_win_t widget, bool_t bDirty)
+void topogctrl_set_dirty(widget_t widget, bool_t bDirty)
 {
 	topog_delta_t* ptd = GETTOPOGDELTA(widget);
 
@@ -1411,7 +1411,7 @@ void topogctrl_set_dirty(res_win_t widget, bool_t bDirty)
 		_topogctrl_clean(widget);
 }
 
-bool_t topogctrl_set_bitmap(res_win_t widget, bitmap_t bmp)
+bool_t topogctrl_set_bitmap(widget_t widget, bitmap_t bmp)
 {
 	topog_delta_t* ptd = GETTOPOGDELTA(widget);
 	bool_t rt;

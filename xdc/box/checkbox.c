@@ -26,8 +26,8 @@ LICENSE.GPL3 for more details.
 
 #include "box.h"
 
-#include "../xdcimp.h"
-#include "../xdcinit.h"
+#include "../xdcobj.h"
+
 
 typedef struct _checkbox_delta_t{
 	bool_t on;
@@ -39,7 +39,7 @@ typedef struct _checkbox_delta_t{
 #define SETCHECKBOXDELTA(ph,ptd) widget_set_user_delta(ph,(vword_t)ptd)
 
 /********************************************************************************/
-void _checkbox_reset_page(res_win_t widget)
+void _checkbox_reset_page(widget_t widget)
 {
 	checkbox_delta_t* ptd = GETCHECKBOXDELTA(widget);
 	xrect_t xr;
@@ -51,7 +51,7 @@ void _checkbox_reset_page(res_win_t widget)
 	widget_reset_scroll(widget, 0);
 }
 ////////////////////////////////////////////////////////////////////////////////////////
-void noti_checkbox_command(res_win_t widget, int code, vword_t data)
+void noti_checkbox_command(widget_t widget, int code, vword_t data)
 {
 	checkbox_delta_t* ptd = GETCHECKBOXDELTA(widget);
 
@@ -61,7 +61,7 @@ void noti_checkbox_command(res_win_t widget, int code, vword_t data)
 		widget_post_command(widget_get_owner(widget), code, widget_get_user_id(widget), data);
 }
 
-void checkbox_on_switch(res_win_t widget)
+void checkbox_on_switch(widget_t widget)
 {
 	checkbox_delta_t* ptd = GETCHECKBOXDELTA(widget);
 
@@ -76,7 +76,7 @@ void checkbox_on_switch(res_win_t widget)
 }
 
 /*********************************************************************************/
-int hand_checkbox_create(res_win_t widget, void* data)
+int hand_checkbox_create(widget_t widget, void* data)
 {
 	checkbox_delta_t* ptd = GETCHECKBOXDELTA(widget);
 
@@ -90,7 +90,7 @@ int hand_checkbox_create(res_win_t widget, void* data)
 	return 0;
 }
 
-void hand_checkbox_destroy(res_win_t widget)
+void hand_checkbox_destroy(widget_t widget)
 {
 	checkbox_delta_t* ptd = GETCHECKBOXDELTA(widget);
 
@@ -103,20 +103,20 @@ void hand_checkbox_destroy(res_win_t widget)
 	widget_hand_destroy(widget);
 }
 
-void hand_checkbox_lbutton_down(res_win_t widget, const xpoint_t* pxp)
+void hand_checkbox_lbutton_down(widget_t widget, const xpoint_t* pxp)
 {
 	checkbox_delta_t* ptd = GETCHECKBOXDELTA(widget);
 	
 }
 
-void hand_checkbox_lbutton_up(res_win_t widget, const xpoint_t* pxp)
+void hand_checkbox_lbutton_up(widget_t widget, const xpoint_t* pxp)
 {
 	checkbox_delta_t* ptd = GETCHECKBOXDELTA(widget);
 
 	checkbox_on_switch(widget);
 }
 
-void hand_checkbox_keydown(res_win_t widget, dword_t ks, int key)
+void hand_checkbox_keydown(widget_t widget, dword_t ks, int key)
 {
 	checkbox_delta_t* ptd = GETCHECKBOXDELTA(widget);
 
@@ -128,7 +128,7 @@ void hand_checkbox_keydown(res_win_t widget, dword_t ks, int key)
 	}
 }
 
-void hand_checkbox_size(res_win_t widget, int code, const xsize_t* prs)
+void hand_checkbox_size(widget_t widget, int code, const xsize_t* prs)
 {
 	checkbox_delta_t* ptd = GETCHECKBOXDELTA(widget);
 	
@@ -137,14 +137,14 @@ void hand_checkbox_size(res_win_t widget, int code, const xsize_t* prs)
 	widget_erase(widget, NULL);
 }
 
-void hand_checkbox_xfont(res_win_t widget, const xfont_t* pxf)
+void hand_checkbox_xfont(widget_t widget, const xfont_t* pxf)
 {
 	checkbox_delta_t* ptd = GETCHECKBOXDELTA(widget);
 	
 	xmem_copy((void*)&ptd->xf, (void*)pxf, sizeof(xfont_t));
 }
 
-void hand_checkbox_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
+void hand_checkbox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 {
 	checkbox_delta_t* ptd = GETCHECKBOXDELTA(widget);
 
@@ -179,7 +179,7 @@ void hand_checkbox_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 }
 
 /***************************************************************************************/
-res_win_t checkbox_create(res_win_t widget, dword_t style, const xrect_t* pxr)
+widget_t checkbox_create(widget_t widget, dword_t style, const xrect_t* pxr)
 {
 	if_dispatch_t ev = { 0 };
 
@@ -206,7 +206,7 @@ res_win_t checkbox_create(res_win_t widget, dword_t style, const xrect_t* pxr)
 	return widget_create(NULL, style, pxr, widget, &ev);
 }
 
-void checkbox_popup_size(res_win_t widget, xsize_t* pxs)
+void checkbox_popup_size(widget_t widget, xsize_t* pxs)
 {
 	checkbox_delta_t* ptd = GETCHECKBOXDELTA(widget);
 	measure_interface im = { 0 };
@@ -219,10 +219,10 @@ void checkbox_popup_size(res_win_t widget, xsize_t* pxs)
 
 	widget_size_to_pt(widget, pxs);
 
-	widget_adjust_size(widget_get_style(widget), pxs);
+	adjust_widget_size(widget_get_style(widget), pxs);
 }
 
-void checkbox_set_state(res_win_t widget, bool_t cur)
+void checkbox_set_state(widget_t widget, bool_t cur)
 {
 	checkbox_delta_t* ptd = GETCHECKBOXDELTA(widget);
 
@@ -233,7 +233,7 @@ void checkbox_set_state(res_win_t widget, bool_t cur)
 	widget_erase(widget, NULL);
 }
 
-bool_t checkbox_get_state(res_win_t widget)
+bool_t checkbox_get_state(widget_t widget)
 {
 	checkbox_delta_t* ptd = GETCHECKBOXDELTA(widget);
 

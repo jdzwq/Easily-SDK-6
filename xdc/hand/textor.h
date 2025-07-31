@@ -58,10 +58,10 @@ typedef enum{
 typedef void(*PF_SCAN_TEXT)(void* data, measure_interface* pif, const xfont_t* pxf, const xface_t* pxa, int bx, int by, int bw, int bh, bool_t paged, PF_SCAN_TEXTOR_CALLBACK pf, void* pp);
 typedef int(*PF_GET_TEXT)(void* data, tchar_t* buf, int max);
 typedef void(*PF_SET_TEXT)(void* data, const tchar_t* buf, int len);
-typedef bool_t(*PF_GET_PAGING)(res_win_t wt, xsize_t* pse);
+typedef bool_t(*PF_GET_PAGING)(widget_t wt, xsize_t* pse);
 
 typedef struct _textor_context{
-	res_win_t widget;
+	widget_t widget;
 	visual_t cdc;
 	viewbox_t vb;
 
@@ -95,9 +95,9 @@ typedef struct _textor_context{
 extern "C" {
 #endif
 
-LOC_API void hand_textor_set_focus(textor_context* ptd, res_win_t wt);
+LOC_API void hand_textor_set_focus(textor_context* ptd, widget_t wt);
 
-LOC_API void hand_textor_kill_focus(textor_context* ptd, res_win_t wt);
+LOC_API void hand_textor_kill_focus(textor_context* ptd, widget_t wt);
 
 LOC_API int hand_textor_word(textor_context* ptd, tchar_t* pch);
 

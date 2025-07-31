@@ -26,12 +26,12 @@ LICENSE.GPL3 for more details.
 
 #include "box.h"
 
-#include "../xdcimp.h"
-#include "../xdcinit.h"
+#include "../xdcobj.h"
+
 
 typedef struct _navibox_delta_t{
-	res_win_t target;
-	res_win_t keybox;
+	widget_t target;
+	widget_t keybox;
 
 	xfont_t xf;
 }navibox_delta_t;
@@ -40,7 +40,7 @@ typedef struct _navibox_delta_t{
 #define SETNAVIBOXDELTA(ph,ptd) widget_set_user_delta(ph,(vword_t)ptd)
 
 /*********************************************************************************/
-void navibox_on_home(res_win_t widget)
+void navibox_on_home(widget_t widget)
 {
 	navibox_delta_t* ptd = GETNAVIBOXDELTA(widget);
 
@@ -49,7 +49,7 @@ void navibox_on_home(res_win_t widget)
 	widget_erase(widget, NULL);
 }
 
-void navibox_on_end(res_win_t widget)
+void navibox_on_end(widget_t widget)
 {
 	navibox_delta_t* ptd = GETNAVIBOXDELTA(widget);
 
@@ -58,7 +58,7 @@ void navibox_on_end(res_win_t widget)
 	widget_erase(widget, NULL);
 }
 
-void navibox_on_prev(res_win_t widget)
+void navibox_on_prev(widget_t widget)
 {
 	navibox_delta_t* ptd = GETNAVIBOXDELTA(widget);
 
@@ -67,7 +67,7 @@ void navibox_on_prev(res_win_t widget)
 	widget_erase(widget, NULL);
 }
 
-void navibox_on_next(res_win_t widget)
+void navibox_on_next(widget_t widget)
 {
 	navibox_delta_t* ptd = GETNAVIBOXDELTA(widget);
 
@@ -76,17 +76,17 @@ void navibox_on_next(res_win_t widget)
 	widget_erase(widget, NULL);
 }
 
-void navibox_on_keyboard(res_win_t widget)
+void navibox_on_keyboard(widget_t widget)
 {
 	navibox_delta_t* ptd = GETNAVIBOXDELTA(widget);
 	xrect_t xr_owner, xr = { 0 };
 	clr_mod_t clr;
-	res_win_t owner;
+	widget_t owner;
 
 	if (widget_is_valid(ptd->keybox))
 	{
 		widget_destroy(ptd->keybox);
-		ptd->keybox = (res_win_t)0;
+		ptd->keybox = (widget_t)0;
 
 		widget_erase(widget, NULL);
 		return;
@@ -133,7 +133,7 @@ void navibox_on_keyboard(res_win_t widget)
 
 /*********************************************************************************/
 
-int hand_navibox_create(res_win_t widget, void* data)
+int hand_navibox_create(widget_t widget, void* data)
 {
 	navibox_delta_t* ptd = GETNAVIBOXDELTA(widget);
 
@@ -149,7 +149,7 @@ int hand_navibox_create(res_win_t widget, void* data)
 	return 0;
 }
 
-void hand_navibox_destroy(res_win_t widget)
+void hand_navibox_destroy(widget_t widget)
 {
 	navibox_delta_t* ptd = GETNAVIBOXDELTA(widget);
 
@@ -162,13 +162,13 @@ void hand_navibox_destroy(res_win_t widget)
 	widget_hand_destroy(widget);
 }
 
-void hand_navibox_lbutton_down(res_win_t widget, const xpoint_t* pxp)
+void hand_navibox_lbutton_down(widget_t widget, const xpoint_t* pxp)
 {
 	navibox_delta_t* ptd = GETNAVIBOXDELTA(widget);
 	
 }
 
-void hand_navibox_lbutton_up(res_win_t widget, const xpoint_t* pxp)
+void hand_navibox_lbutton_up(widget_t widget, const xpoint_t* pxp)
 {
 	navibox_delta_t* ptd = GETNAVIBOXDELTA(widget);
 	measure_interface im = { 0 };
@@ -197,21 +197,21 @@ void hand_navibox_lbutton_up(res_win_t widget, const xpoint_t* pxp)
 		navibox_on_keyboard(widget);
 }
 
-void hand_navibox_size(res_win_t widget, int code, const xsize_t* prs)
+void hand_navibox_size(widget_t widget, int code, const xsize_t* prs)
 {
 	navibox_delta_t* ptd = GETNAVIBOXDELTA(widget);
 	
 	widget_erase(widget, NULL);
 }
 
-void hand_navibox_xfont(res_win_t widget, const xfont_t* pxf)
+void hand_navibox_xfont(widget_t widget, const xfont_t* pxf)
 {
 	navibox_delta_t* ptd = GETNAVIBOXDELTA(widget);
 
 	xmem_copy((void*)&ptd->xf, (void*)pxf, sizeof(xfont_t));
 }
 
-void hand_navibox_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
+void hand_navibox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 {
 	navibox_delta_t* ptd = GETNAVIBOXDELTA(widget);
 	visual_t rdc;
@@ -250,7 +250,7 @@ void hand_navibox_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 }
 
 /***************************************************************************************/
-res_win_t navibox_create(res_win_t widget, dword_t style, const xrect_t* pxr)
+widget_t navibox_create(widget_t widget, dword_t style, const xrect_t* pxr)
 {
 	if_dispatch_t ev = { 0 };
 
@@ -275,14 +275,14 @@ res_win_t navibox_create(res_win_t widget, dword_t style, const xrect_t* pxr)
 	return widget_create(NULL, style, pxr, widget, &ev);
 }
 
-void navibox_set_target(res_win_t widget, res_win_t target)
+void navibox_set_target(widget_t widget, widget_t target)
 {
 	navibox_delta_t* ptd = GETNAVIBOXDELTA(widget);
 
 	ptd->target = target;
 }
 
-void navibox_popup_size(res_win_t widget, xsize_t* pxs)
+void navibox_popup_size(widget_t widget, xsize_t* pxs)
 {
 	navibox_delta_t* ptd = GETNAVIBOXDELTA(widget);
 	measure_interface im = { 0 };
@@ -295,6 +295,6 @@ void navibox_popup_size(res_win_t widget, xsize_t* pxs)
 
 	widget_size_to_pt(widget, pxs);
 
-	widget_adjust_size(widget_get_style(widget), pxs);
+	adjust_widget_size(widget_get_style(widget), pxs);
 }
 

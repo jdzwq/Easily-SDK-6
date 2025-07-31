@@ -26,8 +26,8 @@ LICENSE.GPL3 for more details.
 
 #include "dlg.h"
 
-#include "../xdcimp.h"
-#include "../xdcinit.h"
+#include "../xdcobj.h"
+
 #include "../xdcutil.h"
 
 #define IDC_PREVIEWDLG_SVGCTRL			10
@@ -59,10 +59,10 @@ typedef struct _previewdlg_delta_t{
 	link_t_ptr arch;
 	dev_prn_t mod;
 
-	res_win_t svgctrl;
-	res_win_t treectrl;
-	res_win_t statusctrl;
-	res_win_t navibox;
+	widget_t svgctrl;
+	widget_t treectrl;
+	widget_t statusctrl;
+	widget_t navibox;
 }previewdlg_delta_t;
 
 #define GETPREVIEWDLGDELTA(ph) 	(previewdlg_delta_t*)widget_get_user_delta(ph)
@@ -70,7 +70,7 @@ typedef struct _previewdlg_delta_t{
 
 /************************************************************************************/
 
-void _previewdlg_fresh_tree(res_win_t widget)
+void _previewdlg_fresh_tree(widget_t widget)
 {
 	previewdlg_delta_t* ptd = GETPREVIEWDLGDELTA(widget);
 
@@ -134,7 +134,7 @@ void _previewdlg_fresh_tree(res_win_t widget)
 	treectrl_redraw(ptd->treectrl);
 }
 
-void _previewdlg_fresh_info(res_win_t widget)
+void _previewdlg_fresh_info(widget_t widget)
 {
 	previewdlg_delta_t* ptd = GETPREVIEWDLGDELTA(widget);
 	tchar_t title[RES_LEN + 1] = { 0 };
@@ -175,16 +175,16 @@ void _previewdlg_fresh_info(res_win_t widget)
 }
 
 /************************************************************************************/
-void previewdlg_on_close(res_win_t widget)
+void previewdlg_on_close(widget_t widget)
 {
 	widget_close(widget, 0);
 }
 
 #ifdef XDU_SUPPORT_CONTEXT_PRINTER
-void previewdlg_on_printcur(res_win_t widget)
+void previewdlg_on_printcur(widget_t widget)
 {
 	previewdlg_delta_t* ptd = GETPREVIEWDLGDELTA(widget);
-	res_win_t svgctrl;
+	widget_t svgctrl;
 	link_t_ptr svg;
 
 	svgctrl = widget_get_child(widget, IDC_PREVIEWDLG_SVGCTRL);
@@ -195,7 +195,7 @@ void previewdlg_on_printcur(res_win_t widget)
 }
 
 typedef struct _PREVIEWDLG_ENUM_PARAM{
-	res_win_t widget;
+	widget_t widget;
 	bool_t b_sel;
 }PREVIEWDLG_ENUM_PARAM;
 
@@ -220,10 +220,10 @@ static bool_t _enum_tree_item(link_t_ptr ilk, void* param)
 	return 1;
 }
 
-void previewdlg_on_printsel(res_win_t widget)
+void previewdlg_on_printsel(widget_t widget)
 {
 	previewdlg_delta_t* ptd = GETPREVIEWDLGDELTA(widget);
-	res_win_t treectrl;
+	widget_t treectrl;
 	link_t_ptr tree;
 	PREVIEWDLG_ENUM_PARAM pa = { 0 };
 
@@ -235,10 +235,10 @@ void previewdlg_on_printsel(res_win_t widget)
 	enum_dom_node(tree, (CALLBACK_ENUMLINK)_enum_tree_item, (void*)&pa);
 }
 
-void previewdlg_on_printall(res_win_t widget)
+void previewdlg_on_printall(widget_t widget)
 {
 	previewdlg_delta_t* ptd = GETPREVIEWDLGDELTA(widget);
-	res_win_t treectrl;
+	widget_t treectrl;
 	link_t_ptr tree;
 	PREVIEWDLG_ENUM_PARAM pa = { 0 };
 
@@ -250,10 +250,10 @@ void previewdlg_on_printall(res_win_t widget)
 	enum_dom_node(tree, (CALLBACK_ENUMLINK)_enum_tree_item, (void*)&pa);
 }
 
-void previewdlg_on_setup(res_win_t widget)
+void previewdlg_on_setup(widget_t widget)
 {
 	previewdlg_delta_t* ptd = GETPREVIEWDLGDELTA(widget);
-	res_win_t svgctrl;
+	widget_t svgctrl;
 	link_t_ptr svg;
 
 	setup_printer_mode(widget, &ptd->mod);
@@ -280,7 +280,7 @@ void previewdlg_on_setup(res_win_t widget)
 #endif
 
 #ifdef XDU_SUPPORT_SHELL_DIALOG
-void previewdlg_on_saveas(res_win_t widget)
+void previewdlg_on_saveas(widget_t widget)
 {
 	previewdlg_delta_t* ptd = GETPREVIEWDLGDELTA(widget);
 
@@ -305,7 +305,7 @@ void previewdlg_on_saveas(res_win_t widget)
 	save_dom_doc_to_file(svg, NULL, szPath);
 }
 
-void previewdlg_on_save(res_win_t widget)
+void previewdlg_on_save(widget_t widget)
 {
 	previewdlg_delta_t* ptd = GETPREVIEWDLGDELTA(widget);
 
@@ -327,7 +327,7 @@ void previewdlg_on_save(res_win_t widget)
 	save_dom_doc_to_file(ptd->arch, NULL, szPath);
 }
 
-void previewdlg_on_open(res_win_t widget)
+void previewdlg_on_open(widget_t widget)
 {
 	previewdlg_delta_t* ptd = GETPREVIEWDLGDELTA(widget);
 
@@ -335,7 +335,7 @@ void previewdlg_on_open(res_win_t widget)
 	tchar_t szFile[PATH_LEN * 10] = { 0 };
 	tchar_t szName[RES_LEN + 1] = { 0 };
 
-	res_win_t svgctrl;
+	widget_t svgctrl;
 
 	shell_get_docpath(szPath, PATH_LEN);
 
@@ -358,7 +358,7 @@ void previewdlg_on_open(res_win_t widget)
 }
 #endif
 
-void previewdlg_on_select(res_win_t widget, link_t_ptr ilk)
+void previewdlg_on_select(widget_t widget, link_t_ptr ilk)
 {
 	previewdlg_delta_t* ptd = GETPREVIEWDLGDELTA(widget);
 
@@ -371,39 +371,39 @@ void previewdlg_on_select(res_win_t widget, link_t_ptr ilk)
 }
 
 /**********************************************************************************/
-void _previewdlg_calc_toolbar(res_win_t widget, xrect_t* pxr)
+void _previewdlg_calc_toolbar(widget_t widget, xrect_t* pxr)
 {
 	previewdlg_delta_t* ptd = GETPREVIEWDLGDELTA(widget);
 
 	widget_get_dock_rect(widget, WS_DOCK_TOP, pxr);
 }
 
-void _previewdlg_calc_treebar(res_win_t widget, xrect_t* pxr)
+void _previewdlg_calc_treebar(widget_t widget, xrect_t* pxr)
 {
 	previewdlg_delta_t* ptd = GETPREVIEWDLGDELTA(widget);
 
 	widget_get_dock_rect(widget, WS_DOCK_LEFT, pxr);
 }
 
-void _previewdlg_calc_statusbar(res_win_t widget, xrect_t* pxr)
+void _previewdlg_calc_statusbar(widget_t widget, xrect_t* pxr)
 {
 	previewdlg_delta_t* ptd = GETPREVIEWDLGDELTA(widget);
 
 	widget_get_dock_rect(widget, WS_DOCK_BOTTOM, pxr);
 }
 
-void _previewdlg_calc_svgbar(res_win_t widget, xrect_t* pxr)
+void _previewdlg_calc_svgbar(widget_t widget, xrect_t* pxr)
 {
 	previewdlg_delta_t* ptd = GETPREVIEWDLGDELTA(widget);
 	
 	widget_get_dock_rect(widget, 0, pxr);
 }
 
-void _previewdlg_create_toolbar(res_win_t widget)
+void _previewdlg_create_toolbar(widget_t widget)
 {
 	previewdlg_delta_t* ptd = GETPREVIEWDLGDELTA(widget);
 
-	res_win_t pushbox;
+	widget_t pushbox;
 	xrect_t xr;
 	xsize_t xs;
 	int nSplit;
@@ -483,7 +483,7 @@ void _previewdlg_create_toolbar(res_win_t widget)
 	widget_show(pushbox, WS_SHOW_NORMAL);
 }
 
-void _previewdlg_create_treebar(res_win_t widget)
+void _previewdlg_create_treebar(widget_t widget)
 {
 	previewdlg_delta_t* ptd = GETPREVIEWDLGDELTA(widget);
 
@@ -504,7 +504,7 @@ void _previewdlg_create_treebar(res_win_t widget)
 	widget_show(ptd->treectrl, WS_SHOW_NORMAL);
 }
 
-void _previewdlg_create_statusbar(res_win_t widget)
+void _previewdlg_create_statusbar(widget_t widget)
 {
 	previewdlg_delta_t* ptd = GETPREVIEWDLGDELTA(widget);
 
@@ -543,7 +543,7 @@ void _previewdlg_create_statusbar(res_win_t widget)
 	widget_show(ptd->navibox, WS_SHOW_NORMAL);
 }
 
-void _previewdlg_create_svgbar(res_win_t widget)
+void _previewdlg_create_svgbar(widget_t widget)
 {
 	previewdlg_delta_t* ptd = GETPREVIEWDLGDELTA(widget);
 
@@ -559,7 +559,7 @@ void _previewdlg_create_svgbar(res_win_t widget)
 }
 
 /*******************************************************************************/
-int hand_previewdlg_create(res_win_t widget, void* data)
+int hand_previewdlg_create(widget_t widget, void* data)
 {
 	previewdlg_delta_t* ptd;
 	xsize_t xs;
@@ -601,11 +601,11 @@ int hand_previewdlg_create(res_win_t widget, void* data)
 	return 0;
 }
 
-void hand_previewdlg_destroy(res_win_t widget)
+void hand_previewdlg_destroy(widget_t widget)
 {
 	previewdlg_delta_t* ptd = GETPREVIEWDLGDELTA(widget);
 
-	res_win_t pushbox;
+	widget_t pushbox;
 	link_t_ptr ptr;
 
 	XDK_ASSERT(ptd != NULL);
@@ -670,12 +670,12 @@ void hand_previewdlg_destroy(res_win_t widget)
 	widget_hand_destroy(widget);
 }
 
-void hand_previewdlg_size(res_win_t widget, int code, const xsize_t* prs)
+void hand_previewdlg_size(widget_t widget, int code, const xsize_t* prs)
 {
 	previewdlg_delta_t* ptd = GETPREVIEWDLGDELTA(widget);
 	xsize_t xs;
 	xrect_t xr;
-	res_win_t pushbox;
+	widget_t pushbox;
 	int nSplit;
 	link_t_ptr status, ilk;
 
@@ -806,7 +806,7 @@ void hand_previewdlg_size(res_win_t widget, int code, const xsize_t* prs)
 	widget_erase(widget, NULL);
 }
 
-void hand_previewdlg_menu_command(res_win_t widget, int code, int cid, vword_t data)
+void hand_previewdlg_menu_command(widget_t widget, int code, int cid, vword_t data)
 {
 	previewdlg_delta_t* ptd = GETPREVIEWDLGDELTA(widget);
 
@@ -843,7 +843,7 @@ void hand_previewdlg_menu_command(res_win_t widget, int code, int cid, vword_t d
 	}
 }
 
-void hand_previewdlg_notice(res_win_t widget, LPNOTICE phdr)
+void hand_previewdlg_notice(widget_t widget, LPNOTICE phdr)
 {
 	previewdlg_delta_t* ptd = GETPREVIEWDLGDELTA(widget);
 
@@ -862,9 +862,9 @@ void hand_previewdlg_notice(res_win_t widget, LPNOTICE phdr)
 	}
 }
 /***************************************************************************************/
-res_win_t previewdlg_create(const tchar_t* title, res_win_t owner)
+widget_t previewdlg_create(const tchar_t* title, widget_t owner)
 {
-	res_win_t dlg;
+	widget_t dlg;
 	xrect_t xr = { 0 };
 	if_dispatch_t ev = { 0 };
 
@@ -893,14 +893,14 @@ res_win_t previewdlg_create(const tchar_t* title, res_win_t owner)
 	return dlg;
 }
 
-link_t_ptr previewdlg_get_arch(res_win_t widget)
+link_t_ptr previewdlg_get_arch(widget_t widget)
 {
 	previewdlg_delta_t* ptd = GETPREVIEWDLGDELTA(widget);
 
 	return ptd->arch;
 }
 
-void previewdlg_redraw(res_win_t widget)
+void previewdlg_redraw(widget_t widget)
 {
 	previewdlg_delta_t* ptd = GETPREVIEWDLGDELTA(widget);
 	link_t_ptr plk;

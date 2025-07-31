@@ -33,7 +33,7 @@ DIRS = $(wildcard $(SRC_PATH)/*.c \
 	$(SRC_PATH)/dlg/*.c \
 	$(SRC_PATH)/edit/*.c \
 	$(SRC_PATH)/hand/*.c \
-	$(SRC_PATH)/imp/*.c \
+	$(SRC_PATH)/win/*.c \
 	$(SRC_PATH)/menu/*.c \
 	$(SRC_PATH)/linux/*.c)
 SRCS = $(notdir $(DIRS))
@@ -61,7 +61,7 @@ $(OBJ_PATH)/%.o : $(SRC_PATH)/edit/%.c
 $(OBJ_PATH)/%.o : $(SRC_PATH)/hand/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
 
-$(OBJ_PATH)/%.o : $(SRC_PATH)/imp/%.c
+$(OBJ_PATH)/%.o : $(SRC_PATH)/win/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
 
 $(OBJ_PATH)/%.o : $(SRC_PATH)/menu/%.c

@@ -26,15 +26,15 @@ LICENSE.GPL3 for more details.
 
 #include "ctrl.h"
 
-#include "../xdcimp.h"
-#include "../xdcinit.h"
+#include "../xdcobj.h"
+
 
 typedef struct _memoctrl_delta_t{
 	textor_context textor;
 	link_t_ptr line;
 
-	res_win_t hsc;
-	res_win_t vsc;
+	widget_t hsc;
+	widget_t vsc;
 
 	bool_t b_lock;
 
@@ -62,7 +62,7 @@ static void _memoctrl_set_text(void* data, const tchar_t* buf, int len)
 	parse_memo_doc(text, buf, len);
 }
 
-static bool_t _memoctrl_get_paging(res_win_t widget, xsize_t* pse)
+static bool_t _memoctrl_get_paging(widget_t widget, xsize_t* pse)
 {
 	memoctrl_delta_t* ptd = GETMEMOCTRLDELTA(widget);
 	xrect_t xr;
@@ -89,7 +89,7 @@ static bool_t _memoctrl_get_paging(res_win_t widget, xsize_t* pse)
 }
 
 /********************************************************************************************/
-int noti_memoctrl_owner(res_win_t widget, unsigned int code, link_t_ptr ptr, link_t_ptr nlk, void* data)
+int noti_memoctrl_owner(widget_t widget, unsigned int code, link_t_ptr ptr, link_t_ptr nlk, void* data)
 {
 	memoctrl_delta_t* ptd = GETMEMOCTRLDELTA(widget);
 	NOTICE_MEMO nf = { 0 };
@@ -108,7 +108,7 @@ int noti_memoctrl_owner(res_win_t widget, unsigned int code, link_t_ptr ptr, lin
 	return nf.ret;
 }
 
-void noti_memoctrl_reset_scroll(res_win_t widget, bool_t bUpdate)
+void noti_memoctrl_reset_scroll(widget_t widget, bool_t bUpdate)
 {
 	memoctrl_delta_t* ptd = GETMEMOCTRLDELTA(widget);
 
@@ -129,7 +129,7 @@ void noti_memoctrl_reset_scroll(res_win_t widget, bool_t bUpdate)
 	}
 }
 /********************************************************************************************/
-int hand_memoctrl_create(res_win_t widget, void* data)
+int hand_memoctrl_create(widget_t widget, void* data)
 {
 	memoctrl_delta_t* ptd;
 
@@ -160,7 +160,7 @@ int hand_memoctrl_create(res_win_t widget, void* data)
 	return 0;
 }
 
-void hand_memoctrl_destroy(res_win_t widget)
+void hand_memoctrl_destroy(widget_t widget)
 {
 	memoctrl_delta_t* ptd = GETMEMOCTRLDELTA(widget);
 
@@ -184,7 +184,7 @@ void hand_memoctrl_destroy(res_win_t widget)
 }
 
 
-void hand_memoctrl_copy(res_win_t widget)
+void hand_memoctrl_copy(widget_t widget)
 {
 	memoctrl_delta_t* ptd = GETMEMOCTRLDELTA(widget);
 
@@ -197,7 +197,7 @@ void hand_memoctrl_copy(res_win_t widget)
 	hand_textor_copy(&ptd->textor);
 }
 
-void hand_memoctrl_cut(res_win_t widget)
+void hand_memoctrl_cut(widget_t widget)
 {
 	memoctrl_delta_t* ptd = GETMEMOCTRLDELTA(widget);
 
@@ -222,7 +222,7 @@ void hand_memoctrl_cut(res_win_t widget)
 	}
 }
 
-void hand_memoctrl_paste(res_win_t widget)
+void hand_memoctrl_paste(widget_t widget)
 {
 	memoctrl_delta_t* ptd = GETMEMOCTRLDELTA(widget);
 
@@ -247,7 +247,7 @@ void hand_memoctrl_paste(res_win_t widget)
 	}
 }
 
-void hand_memoctrl_undo(res_win_t widget)
+void hand_memoctrl_undo(widget_t widget)
 {
 	memoctrl_delta_t* ptd = GETMEMOCTRLDELTA(widget);
 
@@ -272,7 +272,7 @@ void hand_memoctrl_undo(res_win_t widget)
 	}
 }
 
-void hand_memoctrl_set_focus(res_win_t widget, res_win_t wt)
+void hand_memoctrl_set_focus(widget_t widget, widget_t wt)
 {
 	memoctrl_delta_t* ptd = GETMEMOCTRLDELTA(widget);
 
@@ -285,7 +285,7 @@ void hand_memoctrl_set_focus(res_win_t widget, res_win_t wt)
 	hand_textor_set_focus(&ptd->textor, wt);
 }
 
-void hand_memoctrl_kill_focus(res_win_t widget, res_win_t wt)
+void hand_memoctrl_kill_focus(widget_t widget, widget_t wt)
 {
 	memoctrl_delta_t* ptd = GETMEMOCTRLDELTA(widget);
 
@@ -306,7 +306,7 @@ void hand_memoctrl_kill_focus(res_win_t widget, res_win_t wt)
 	}
 }
 
-void hand_memoctrl_keydown(res_win_t widget, dword_t ks, int key)
+void hand_memoctrl_keydown(widget_t widget, dword_t ks, int key)
 {
 	memoctrl_delta_t* ptd = GETMEMOCTRLDELTA(widget);
 
@@ -437,7 +437,7 @@ void hand_memoctrl_keydown(res_win_t widget, dword_t ks, int key)
 	}
 }
 
-void hand_memoctrl_wchar(res_win_t widget, wchar_t ch)
+void hand_memoctrl_wchar(widget_t widget, wchar_t ch)
 {
 	memoctrl_delta_t* ptd = GETMEMOCTRLDELTA(widget);
 
@@ -481,7 +481,7 @@ void hand_memoctrl_wchar(res_win_t widget, wchar_t ch)
 	}
 }
 
-void hand_memoctrl_lbutton_down(res_win_t widget, const xpoint_t* pxp)
+void hand_memoctrl_lbutton_down(widget_t widget, const xpoint_t* pxp)
 {
 	memoctrl_delta_t* ptd = GETMEMOCTRLDELTA(widget);
 	
@@ -494,7 +494,7 @@ void hand_memoctrl_lbutton_down(res_win_t widget, const xpoint_t* pxp)
 	hand_textor_lbutton_down(&ptd->textor, pxp);
 }
 
-void hand_memoctrl_lbutton_up(res_win_t widget, const xpoint_t* pxp)
+void hand_memoctrl_lbutton_up(widget_t widget, const xpoint_t* pxp)
 {
 	memoctrl_delta_t* ptd = GETMEMOCTRLDELTA(widget);
 
@@ -513,7 +513,7 @@ void hand_memoctrl_lbutton_up(res_win_t widget, const xpoint_t* pxp)
 	}
 }
 
-void hand_memoctrl_lbutton_dbclick(res_win_t widget, const xpoint_t* pxp)
+void hand_memoctrl_lbutton_dbclick(widget_t widget, const xpoint_t* pxp)
 {
 	memoctrl_delta_t* ptd = GETMEMOCTRLDELTA(widget);
 
@@ -529,7 +529,7 @@ void hand_memoctrl_lbutton_dbclick(res_win_t widget, const xpoint_t* pxp)
 	}
 }
 
-void hand_memoctrl_rbutton_down(res_win_t widget, const xpoint_t* pxp)
+void hand_memoctrl_rbutton_down(widget_t widget, const xpoint_t* pxp)
 {
 	memoctrl_delta_t* ptd = GETMEMOCTRLDELTA(widget);
 
@@ -541,7 +541,7 @@ void hand_memoctrl_rbutton_down(res_win_t widget, const xpoint_t* pxp)
 
 }
 
-void hand_memoctrl_rbutton_up(res_win_t widget, const xpoint_t* pxp)
+void hand_memoctrl_rbutton_up(widget_t widget, const xpoint_t* pxp)
 {
 	memoctrl_delta_t* ptd = GETMEMOCTRLDELTA(widget);
 	xpoint_t xp;
@@ -559,7 +559,7 @@ void hand_memoctrl_rbutton_up(res_win_t widget, const xpoint_t* pxp)
 	textor_menu(widget, &xp, WS_LAYOUT_LEFTBOTTOM);
 }
 
-void hand_memoctrl_mousemove(res_win_t widget, dword_t mk, const xpoint_t* ppt)
+void hand_memoctrl_mousemove(widget_t widget, dword_t mk, const xpoint_t* ppt)
 {
 	memoctrl_delta_t* ptd = GETMEMOCTRLDELTA(widget);
 
@@ -572,7 +572,7 @@ void hand_memoctrl_mousemove(res_win_t widget, dword_t mk, const xpoint_t* ppt)
 	hand_textor_mousemove(&ptd->textor, mk, ppt);
 }
 
-void hand_memoctrl_size(res_win_t widget, int code, const xsize_t* prs)
+void hand_memoctrl_size(widget_t widget, int code, const xsize_t* prs)
 {
 	memoctrl_delta_t* ptd = GETMEMOCTRLDELTA(widget);
 
@@ -587,7 +587,7 @@ void hand_memoctrl_size(res_win_t widget, int code, const xsize_t* prs)
 	hand_textor_size(&ptd->textor, code, prs);
 }
 
-void hand_memoctrl_scroll(res_win_t widget, bool_t bHorz, int nLine)
+void hand_memoctrl_scroll(widget_t widget, bool_t bHorz, int nLine)
 {
 	memoctrl_delta_t* ptd = GETMEMOCTRLDELTA(widget);
 
@@ -600,12 +600,12 @@ void hand_memoctrl_scroll(res_win_t widget, bool_t bHorz, int nLine)
 	hand_textor_scroll(&ptd->textor, bHorz, nLine);
 }
 
-void hand_memoctrl_wheel(res_win_t widget, bool_t bHorz, int nDelta)
+void hand_memoctrl_wheel(widget_t widget, bool_t bHorz, int nDelta)
 {
 	memoctrl_delta_t* ptd = GETMEMOCTRLDELTA(widget);
 	scroll_t scr = { 0 };
 	int nLine;
-	res_win_t win;
+	widget_t win;
 
 	if (!ptd)
 		return;
@@ -657,7 +657,7 @@ void hand_memoctrl_wheel(res_win_t widget, bool_t bHorz, int nDelta)
 	}
 }
 
-void hand_memoctrl_self_command(res_win_t widget, int code, vword_t data)
+void hand_memoctrl_self_command(widget_t widget, int code, vword_t data)
 {
 	memoctrl_delta_t* ptd = GETMEMOCTRLDELTA(widget);
 
@@ -677,7 +677,7 @@ void hand_memoctrl_self_command(res_win_t widget, int code, vword_t data)
 	}
 }
 
-void hand_memoctrl_menu_command(res_win_t widget, int code, int cid, vword_t data)
+void hand_memoctrl_menu_command(widget_t widget, int code, int cid, vword_t data)
 {
 	memoctrl_delta_t* ptd = GETMEMOCTRLDELTA(widget);
 
@@ -699,28 +699,28 @@ void hand_memoctrl_menu_command(res_win_t widget, int code, int cid, vword_t dat
 			break;
 		}
 
-		if (widget_is_valid((res_win_t)data))
+		if (widget_is_valid((widget_t)data))
 		{
-			widget_close((res_win_t)data, 1);
+			widget_close((widget_t)data, 1);
 		}
 	}
 }
 
-void hand_memoctrl_xfont(res_win_t widget, const xfont_t* pxf)
+void hand_memoctrl_xfont(widget_t widget, const xfont_t* pxf)
 {
 	memoctrl_delta_t* ptd = GETMEMOCTRLDELTA(widget);
 
 	xmem_copy((void*)&ptd->xf, (void*)pxf, sizeof(xfont_t));
 }
 
-void hand_memoctrl_xface(res_win_t widget, const xface_t* pxa)
+void hand_memoctrl_xface(widget_t widget, const xface_t* pxa)
 {
 	memoctrl_delta_t* ptd = GETMEMOCTRLDELTA(widget);
 
 	xmem_copy((void*)&ptd->xa, (void*)pxa, sizeof(xface_t));
 }
 
-void hand_memoctrl_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
+void hand_memoctrl_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 {
 	memoctrl_delta_t* ptd = GETMEMOCTRLDELTA(widget);
 
@@ -734,10 +734,10 @@ void hand_memoctrl_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 }
 
 /************************************************************************************************/
-res_win_t memoctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, res_win_t wparent)
+widget_t memoctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, widget_t wparent)
 {
 	if_dispatch_t ev = { 0 };
-	res_win_t wt;
+	widget_t wt;
 	xface_t xa;
 
 	EVENT_BEGIN_DISPATH(&ev)
@@ -775,7 +775,7 @@ res_win_t memoctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* p
 	EVENT_END_DISPATH
 
 	wt = widget_create(wname, wstyle, pxr, wparent, &ev);
-	if (!wt) return (res_win_t)0;
+	if (!wt) return (widget_t)0;
 
 	default_xface(&xa);
 	xscpy(xa.text_wrap, GDI_ATTR_TEXT_WRAP_WORDBREAK);
@@ -784,7 +784,7 @@ res_win_t memoctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* p
 	return wt;
 }
 
-void memoctrl_attach(res_win_t widget, link_t_ptr data)
+void memoctrl_attach(widget_t widget, link_t_ptr data)
 {
 	memoctrl_delta_t* ptd = GETMEMOCTRLDELTA(widget);
 
@@ -803,7 +803,7 @@ void memoctrl_attach(res_win_t widget, link_t_ptr data)
 	widget_post_command(widget, COMMAND_CHANGE, IDC_SELF, (vword_t)NULL);
 }
 
-link_t_ptr memoctrl_fetch(res_win_t widget)
+link_t_ptr memoctrl_fetch(widget_t widget)
 {
 	memoctrl_delta_t* ptd = GETMEMOCTRLDELTA(widget);
 
@@ -812,7 +812,7 @@ link_t_ptr memoctrl_fetch(res_win_t widget)
 	return (link_t_ptr)ptd->textor.data;
 }
 
-link_t_ptr memoctrl_detach(res_win_t widget)
+link_t_ptr memoctrl_detach(widget_t widget)
 {
 	memoctrl_delta_t* ptd = GETMEMOCTRLDELTA(widget);
 	link_t_ptr ptr;
@@ -829,7 +829,7 @@ link_t_ptr memoctrl_detach(res_win_t widget)
 	return ptr;
 }
 
-link_t_ptr memoctrl_get_focus_line(res_win_t widget)
+link_t_ptr memoctrl_get_focus_line(widget_t widget)
 {
 	memoctrl_delta_t* ptd = GETMEMOCTRLDELTA(widget);
 	link_t_ptr nlk = NULL;
@@ -842,7 +842,7 @@ link_t_ptr memoctrl_get_focus_line(res_win_t widget)
 	return ptd->line;
 }
 
-void memoctrl_set_focus_line(res_win_t widget, link_t_ptr nlk)
+void memoctrl_set_focus_line(widget_t widget, link_t_ptr nlk)
 {
 	memoctrl_delta_t* ptd = GETMEMOCTRLDELTA(widget);
 
@@ -860,7 +860,7 @@ void memoctrl_set_focus_line(res_win_t widget, link_t_ptr nlk)
 	}
 }
 
-void memoctrl_delete_line(res_win_t widget, link_t_ptr nlk)
+void memoctrl_delete_line(widget_t widget, link_t_ptr nlk)
 {
 	memoctrl_delta_t* ptd = GETMEMOCTRLDELTA(widget);
 
@@ -879,7 +879,7 @@ void memoctrl_delete_line(res_win_t widget, link_t_ptr nlk)
 	memoctrl_redraw(widget);
 }
 
-link_t_ptr memoctrl_insert_line(res_win_t widget, link_t_ptr pos)
+link_t_ptr memoctrl_insert_line(widget_t widget, link_t_ptr pos)
 {
 	memoctrl_delta_t* ptd = GETMEMOCTRLDELTA(widget);
 	link_t_ptr nlk;
@@ -901,7 +901,7 @@ link_t_ptr memoctrl_insert_line(res_win_t widget, link_t_ptr pos)
 	return nlk;
 }
 
-void memoctrl_set_line_text(res_win_t widget, link_t_ptr nlk, const tchar_t* token, int len)
+void memoctrl_set_line_text(widget_t widget, link_t_ptr nlk, const tchar_t* token, int len)
 {
 	memoctrl_delta_t* ptd = GETMEMOCTRLDELTA(widget);
 
@@ -920,7 +920,7 @@ void memoctrl_set_line_text(res_win_t widget, link_t_ptr nlk, const tchar_t* tok
 	memoctrl_redraw(widget);
 }
 
-void memoctrl_set_text(res_win_t widget, const tchar_t* token, int len)
+void memoctrl_set_text(widget_t widget, const tchar_t* token, int len)
 {
 	memoctrl_delta_t* ptd = GETMEMOCTRLDELTA(widget);
 
@@ -941,7 +941,7 @@ void memoctrl_set_text(res_win_t widget, const tchar_t* token, int len)
 	memoctrl_redraw(widget);
 }
 
-int memoctrl_get_text(res_win_t widget, tchar_t* buf, int max)
+int memoctrl_get_text(widget_t widget, tchar_t* buf, int max)
 {
 	memoctrl_delta_t* ptd = GETMEMOCTRLDELTA(widget);
 
@@ -953,7 +953,7 @@ int memoctrl_get_text(res_win_t widget, tchar_t* buf, int max)
 	return format_memo_doc(ptd->textor.data, buf, max);
 }
 
-void memoctrl_get_line_rect(res_win_t widget, link_t_ptr nlk, xrect_t* pxr)
+void memoctrl_get_line_rect(widget_t widget, link_t_ptr nlk, xrect_t* pxr)
 {
 	memoctrl_delta_t* ptd = GETMEMOCTRLDELTA(widget);
 
@@ -965,7 +965,7 @@ void memoctrl_get_line_rect(res_win_t widget, link_t_ptr nlk, xrect_t* pxr)
 	textor_object_rect(&ptd->textor, nlk, pxr);
 }
 
-void memoctrl_redraw(res_win_t widget)
+void memoctrl_redraw(widget_t widget)
 {
 	memoctrl_delta_t* ptd = GETMEMOCTRLDELTA(widget);
 
@@ -983,7 +983,7 @@ void memoctrl_redraw(res_win_t widget)
 	}
 }
 
-void memoctrl_select_cur(res_win_t widget)
+void memoctrl_select_cur(widget_t widget)
 {
 	memoctrl_delta_t* ptd = GETMEMOCTRLDELTA(widget);
 
@@ -1001,7 +1001,7 @@ void memoctrl_select_cur(res_win_t widget)
 	}
 }
 
-void memoctrl_select_all(res_win_t widget)
+void memoctrl_select_all(widget_t widget)
 {
 	memoctrl_delta_t* ptd = GETMEMOCTRLDELTA(widget);
 
@@ -1019,7 +1019,7 @@ void memoctrl_select_all(res_win_t widget)
 	}
 }
 
-int memoctrl_get_selected_text(res_win_t widget, tchar_t* buf, int max)
+int memoctrl_get_selected_text(widget_t widget, tchar_t* buf, int max)
 {
 	memoctrl_delta_t* ptd = GETMEMOCTRLDELTA(widget);
 
@@ -1031,7 +1031,7 @@ int memoctrl_get_selected_text(res_win_t widget, tchar_t* buf, int max)
 	return hand_textor_selected_text(&ptd->textor, buf, max);
 }
 
-bool_t memoctrl_get_dirty(res_win_t widget)
+bool_t memoctrl_get_dirty(widget_t widget)
 {
 	memoctrl_delta_t* ptd = GETMEMOCTRLDELTA(widget);
 
@@ -1043,7 +1043,7 @@ bool_t memoctrl_get_dirty(res_win_t widget)
 	return (ptd->textor.ptu != NULL) ? 1 : 0;
 }
 
-void memoctrl_set_dirty(res_win_t widget, bool_t bDirty)
+void memoctrl_set_dirty(widget_t widget, bool_t bDirty)
 {
 	memoctrl_delta_t* ptd = GETMEMOCTRLDELTA(widget);
 
@@ -1058,7 +1058,7 @@ void memoctrl_set_dirty(res_win_t widget, bool_t bDirty)
 		hand_textor_clean(&ptd->textor);
 }
 
-void memoctrl_move_to_page(res_win_t widget, int page)
+void memoctrl_move_to_page(widget_t widget, int page)
 {
 	memoctrl_delta_t* ptd = GETMEMOCTRLDELTA(widget);
 
@@ -1070,7 +1070,7 @@ void memoctrl_move_to_page(res_win_t widget, int page)
 	hand_textor_move_to_page(&ptd->textor, page);
 }
 
-void memoctrl_move_first_page(res_win_t widget)
+void memoctrl_move_first_page(widget_t widget)
 {
 	memoctrl_delta_t* ptd = GETMEMOCTRLDELTA(widget);
 
@@ -1082,7 +1082,7 @@ void memoctrl_move_first_page(res_win_t widget)
 	hand_textor_move_first_page(&ptd->textor);
 }
 
-void memoctrl_move_last_page(res_win_t widget)
+void memoctrl_move_last_page(widget_t widget)
 {
 	memoctrl_delta_t* ptd = GETMEMOCTRLDELTA(widget);
 
@@ -1094,7 +1094,7 @@ void memoctrl_move_last_page(res_win_t widget)
 	hand_textor_move_last_page(&ptd->textor);
 }
 
-void memoctrl_move_next_page(res_win_t widget)
+void memoctrl_move_next_page(widget_t widget)
 {
 	memoctrl_delta_t* ptd = GETMEMOCTRLDELTA(widget);
 
@@ -1106,7 +1106,7 @@ void memoctrl_move_next_page(res_win_t widget)
 	hand_textor_move_next_page(&ptd->textor);
 }
 
-void memoctrl_move_prev_page(res_win_t widget)
+void memoctrl_move_prev_page(widget_t widget)
 {
 	memoctrl_delta_t* ptd = GETMEMOCTRLDELTA(widget);
 
@@ -1118,7 +1118,7 @@ void memoctrl_move_prev_page(res_win_t widget)
 	hand_textor_move_prev_page(&ptd->textor);
 }
 
-int memoctrl_get_cur_page(res_win_t widget)
+int memoctrl_get_cur_page(widget_t widget)
 {
 	memoctrl_delta_t* ptd = GETMEMOCTRLDELTA(widget);
 
@@ -1130,7 +1130,7 @@ int memoctrl_get_cur_page(res_win_t widget)
 	return textor_cur_page(&ptd->textor);
 }
 
-int memoctrl_get_max_page(res_win_t widget)
+int memoctrl_get_max_page(widget_t widget)
 {
 	memoctrl_delta_t* ptd = GETMEMOCTRLDELTA(widget);
 
@@ -1142,7 +1142,7 @@ int memoctrl_get_max_page(res_win_t widget)
 	return textor_max_page(&ptd->textor);
 }
 
-bool_t memoctrl_get_lock(res_win_t widget)
+bool_t memoctrl_get_lock(widget_t widget)
 {
 	memoctrl_delta_t* ptd = GETMEMOCTRLDELTA(widget);
 
@@ -1151,7 +1151,7 @@ bool_t memoctrl_get_lock(res_win_t widget)
 	return ptd->b_lock;
 }
 
-void memoctrl_set_lock(res_win_t widget, bool_t bLock)
+void memoctrl_set_lock(widget_t widget, bool_t bLock)
 {
 	memoctrl_delta_t* ptd = GETMEMOCTRLDELTA(widget);
 

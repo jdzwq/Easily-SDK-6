@@ -7,5 +7,14 @@ SOURCES= \
 ../../../Easily-tmp/windows/xdu/x64/Debug/_if_printer_win32.cc \
 ../../../Easily-tmp/windows/xdu/x64/Debug/_if_shell_win32.cc \
 ../../../Easily-tmp/windows/xdu/x64/Debug/_if_widget_win32.cc \
+../../../Easily-tmp/windows/xdu/x64/Debug/gdicanv.c \
+../../../Easily-tmp/windows/xdu/x64/Debug/gdiinf.c \
+../../../Easily-tmp/windows/xdu/x64/Debug/impbitmap.c \
+../../../Easily-tmp/windows/xdu/x64/Debug/impclip.c \
+../../../Easily-tmp/windows/xdu/x64/Debug/impcontext.c \
+../../../Easily-tmp/windows/xdu/x64/Debug/impgdi.c \
+../../../Easily-tmp/windows/xdu/x64/Debug/impshell.c \
+../../../Easily-tmp/windows/xdu/x64/Debug/impwidget.c \
 ../../../Easily-tmp/windows/xdu/x64/Debug/xduinf.c \
+../../../Easily-tmp/windows/xdu/x64/Debug/xduinit.c \
 ../../../Easily-tmp/windows/xdu/x64/Debug/xduutil.c \

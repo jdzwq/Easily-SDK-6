@@ -26,8 +26,8 @@ LICENSE.GPL3 for more details.
 
 #include "box.h"
 
-#include "../xdcimp.h"
-#include "../xdcinit.h"
+#include "../xdcobj.h"
+
 
 typedef struct _numbox_delta_t{
 	int index;
@@ -67,7 +67,7 @@ static NUMBOX_RECT NUMBOX_POS[NUMBOX_COUNT] = {
 #define SETNUMBOXDELTA(ph,ptd) widget_set_user_delta(ph,(vword_t)ptd)
 
 
-int hand_numbox_create(res_win_t widget, void* data)
+int hand_numbox_create(widget_t widget, void* data)
 {
 	numbox_delta_t* ptd = GETNUMBOXDELTA(widget);
 	xsize_t xs;
@@ -92,7 +92,7 @@ int hand_numbox_create(res_win_t widget, void* data)
 	return 0;
 }
 
-void hand_numbox_destroy(res_win_t widget)
+void hand_numbox_destroy(widget_t widget)
 {
 	numbox_delta_t* ptd = GETNUMBOXDELTA(widget);
 
@@ -105,7 +105,7 @@ void hand_numbox_destroy(res_win_t widget)
 	widget_hand_destroy(widget);
 }
 
-void hand_numbox_lbutton_down(res_win_t widget, const xpoint_t* pxp)
+void hand_numbox_lbutton_down(widget_t widget, const xpoint_t* pxp)
 {
 	numbox_delta_t* ptd = GETNUMBOXDELTA(widget);
 	
@@ -131,7 +131,7 @@ void hand_numbox_lbutton_down(res_win_t widget, const xpoint_t* pxp)
 	widget_erase(widget, NULL);
 }
 
-void hand_numbox_lbutton_up(res_win_t widget, const xpoint_t* pxp)
+void hand_numbox_lbutton_up(widget_t widget, const xpoint_t* pxp)
 {
 	numbox_delta_t* ptd = GETNUMBOXDELTA(widget);
 	xrect_t xr;
@@ -162,14 +162,14 @@ void hand_numbox_lbutton_up(res_win_t widget, const xpoint_t* pxp)
 		return;
 
 	if (ch == _T('-'))
-		widget_post_key((res_win_t)0, KEY_BACK);
+		widget_post_key((widget_t)0, KEY_BACK);
 	else if (ch == _T('\n'))
-		widget_post_key((res_win_t)0, KEY_ENTER);
+		widget_post_key((widget_t)0, KEY_ENTER);
 	else
-		widget_post_wchar((res_win_t)0, ch);
+		widget_post_wchar((widget_t)0, ch);
 }
 
-void hand_numbox_size(res_win_t widget, int code, const xsize_t* prs)
+void hand_numbox_size(widget_t widget, int code, const xsize_t* prs)
 {
 	numbox_delta_t* ptd = GETNUMBOXDELTA(widget);
 	xrect_t xr;
@@ -179,14 +179,14 @@ void hand_numbox_size(res_win_t widget, int code, const xsize_t* prs)
 	widget_erase(widget, NULL);
 }
 
-void hand_numbox_xfont(res_win_t widget, const xfont_t* pxf)
+void hand_numbox_xfont(widget_t widget, const xfont_t* pxf)
 {
 	numbox_delta_t* ptd = GETNUMBOXDELTA(widget);
 
 	xmem_copy((void*)&ptd->xf, (void*)pxf, sizeof(xfont_t));
 }
 
-void hand_numbox_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
+void hand_numbox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 {
 	numbox_delta_t* ptd = GETNUMBOXDELTA(widget);
 	canvas_t canv;
@@ -254,7 +254,7 @@ void hand_numbox_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 }
 
 /***************************************************************************************/
-res_win_t numbox_create(res_win_t widget, dword_t style, const xrect_t* pxr)
+widget_t numbox_create(widget_t widget, dword_t style, const xrect_t* pxr)
 {
 	if_dispatch_t ev = { 0 };
 
@@ -279,12 +279,12 @@ res_win_t numbox_create(res_win_t widget, dword_t style, const xrect_t* pxr)
 	return widget_create(NULL, style, pxr, widget, &ev);
 }
 
-void numbox_popup_size(res_win_t widget, xsize_t* pxs)
+void numbox_popup_size(widget_t widget, xsize_t* pxs)
 {
 	numbox_delta_t* ptd = GETNUMBOXDELTA(widget);
 
 	pxs->w = ptd->bw * NUMBOX_COLS;
 	pxs->h = ptd->bh * NUMBOX_ROWS;
 
-	widget_adjust_size(widget_get_style(widget), pxs);
+	adjust_widget_size(widget_get_style(widget), pxs);
 }

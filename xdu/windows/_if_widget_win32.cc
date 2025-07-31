@@ -2946,6 +2946,66 @@ void _adjust_widget_size(dword_t ws, xsize_t* pxs)
 	pxs->h += 2;
 }
 
+void _calc_widget_border(dword_t ws, border_t* pbd)
+{
+	xsize_t xs;
+
+	pbd->edge = pbd->title = pbd->hscroll = pbd->vscroll = pbd->menu = pbd->icon = 0;
+
+	if (ws & WD_STYLE_TITLE)
+	{
+		xs.fw = ZERO_WIDTH;
+		xs.fh = WIDGET_TITLE_SPAN;
+		_screen_size_to_pt(&xs);
+
+		pbd->title = xs.h;
+	}
+
+	if (ws & WD_STYLE_BORDER)
+	{
+		xs.fw = ZERO_WIDTH;
+		if (ws & WD_STYLE_CHILD)
+			xs.fh = WIDGET_CHILD_EDGE;
+		else
+			xs.fh = WIDGET_FRAME_EDGE;
+		_screen_size_to_pt(&xs);
+
+		pbd->edge = xs.h;
+	}
+
+	if (ws & WD_STYLE_HSCROLL)
+	{
+		xs.fw = ZERO_WIDTH;
+		xs.fh = WIDGET_SCROLL_SPAN;
+		_screen_size_to_pt(&xs);
+
+		pbd->hscroll = xs.h;
+	}
+
+	if (ws & WD_STYLE_VSCROLL)
+	{
+		xs.fw = WIDGET_SCROLL_SPAN;
+		xs.fh = ZERO_HEIGHT;
+		_screen_size_to_pt(&xs);
+
+		pbd->vscroll = xs.w;
+	}
+
+	if (ws & WD_STYLE_MENUBAR)
+	{
+		xs.fw = ZERO_WIDTH;
+		xs.fh = WIDGET_MENU_SPAN;
+		_screen_size_to_pt(&xs);
+
+		pbd->menu = xs.h;
+	}
+
+	xs.fw = ZERO_WIDTH;
+	xs.fh = WIDGET_ICON_SPAN;
+	_screen_size_to_pt(&xs);
+	pbd->icon = xs.h;
+}
+
 void _get_screen_size(xsize_t* pxs)
 {
 	pxs->w = GetSystemMetrics(SM_CXFULLSCREEN);
@@ -2961,7 +3021,7 @@ void _get_desktop_size(xsize_t* pxs)
 	pxs->h = rt.bottom - rt.top;
 }
 
-void _screen_size_to_tm(xsize_t* pxs)
+void _screen_size_to_mm(xsize_t* pxs)
 {
 	HDC hDC;
 	float htpermm, vtpermm;

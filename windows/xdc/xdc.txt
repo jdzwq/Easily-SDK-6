@@ -1,5 +1,7 @@
 SOURCES= \
 ../../../Easily-tmp/windows/xdc/x64/Debug/printbag.c \
+../../../Easily-tmp/windows/xdc/x64/Debug/widgetex.c \
+../../../Easily-tmp/windows/xdc/x64/Debug/widgetnc.c \
 ../../../Easily-tmp/windows/xdc/x64/Debug/checkbox.c \
 ../../../Easily-tmp/windows/xdc/x64/Debug/datebox.c \
 ../../../Easily-tmp/windows/xdc/x64/Debug/dropbox.c \
@@ -70,15 +72,4 @@ SOURCES= \
 ../../../Easily-tmp/windows/xdc/x64/Debug/docker.c \
 ../../../Easily-tmp/windows/xdc/x64/Debug/splitor.c \
 ../../../Easily-tmp/windows/xdc/x64/Debug/textor.c \
-../../../Easily-tmp/windows/xdc/x64/Debug/gdicanv.c \
-../../../Easily-tmp/windows/xdc/x64/Debug/gdiface.c \
-../../../Easily-tmp/windows/xdc/x64/Debug/impbitmap.c \
-../../../Easily-tmp/windows/xdc/x64/Debug/impclip.c \
-../../../Easily-tmp/windows/xdc/x64/Debug/impcontext.c \
-../../../Easily-tmp/windows/xdc/x64/Debug/impgdi.c \
-../../../Easily-tmp/windows/xdc/x64/Debug/impshell.c \
-../../../Easily-tmp/windows/xdc/x64/Debug/impwidget.c \
-../../../Easily-tmp/windows/xdc/x64/Debug/widgetex.c \
-../../../Easily-tmp/windows/xdc/x64/Debug/widgetnc.c \
 ../../../Easily-tmp/windows/xdc/x64/Debug/menu.c \
-../../../Easily-tmp/windows/xdc/x64/Debug/xdcinit.c \

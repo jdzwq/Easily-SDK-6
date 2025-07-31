@@ -26,8 +26,8 @@ LICENSE.GPL3 for more details.
 
 #include "docker.h"
 
-#include "../xdcimp.h"
-#include "../xdcinit.h"
+#include "../xdcobj.h"
+
 
 #define DOCKER_SPLIT_SPAN		(int)10 //pt
 

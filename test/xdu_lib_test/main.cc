@@ -46,9 +46,9 @@ void test_blut()
 
 if_context_t if_context = {0};
 if_widget_t if_widget = {0};
-res_win_t g_main = NULL;
+widget_t g_main = NULL;
 
-int pop_on_create(res_win_t wt, void* param)
+int pop_on_create(widget_t wt, void* param)
 {
     printf("pop on_create\n");
 
@@ -57,12 +57,12 @@ int pop_on_create(res_win_t wt, void* param)
     return 0;
 }
 
-void pop_on_destroy(res_win_t wt)
+void pop_on_destroy(widget_t wt)
 {
     printf("pop on_destroy\n");
 }
 
-void pop_on_mouse_move(res_win_t wt, dword_t ms, const xpoint_t* ppt)
+void pop_on_mouse_move(widget_t wt, dword_t ms, const xpoint_t* ppt)
 {
     if(ms & MS_WITH_LBUTTON)
         printf("pop on_mouse_move x:%d y:%d with lbutton\n", ppt->x, ppt->y);
@@ -72,7 +72,7 @@ void pop_on_mouse_move(res_win_t wt, dword_t ms, const xpoint_t* ppt)
         printf("pop on_mouse_move x:%d y:%d\n", ppt->x, ppt->y);
 }
 
-void pop_on_mouse_hover(res_win_t wt, dword_t ms, const xpoint_t* ppt)
+void pop_on_mouse_hover(widget_t wt, dword_t ms, const xpoint_t* ppt)
 {
     if(ms & MS_WITH_LBUTTON)
         printf("pop on_mouse_hover x:%d y:%d with lbutton\n", ppt->x, ppt->y);
@@ -82,7 +82,7 @@ void pop_on_mouse_hover(res_win_t wt, dword_t ms, const xpoint_t* ppt)
         printf("pop on_mouse_hover x:%d y:%d\n", ppt->x, ppt->y);
 }
 
-void pop_on_mouse_leave(res_win_t wt, dword_t ms, const xpoint_t* ppt)
+void pop_on_mouse_leave(widget_t wt, dword_t ms, const xpoint_t* ppt)
 {
     if(ms & MS_WITH_LBUTTON)
         printf("pop on_mouse_leave x:%d y:%d with lbutton\n", ppt->x, ppt->y);
@@ -92,44 +92,44 @@ void pop_on_mouse_leave(res_win_t wt, dword_t ms, const xpoint_t* ppt)
         printf("pop on_mouse_leave x:%d y:%d\n", ppt->x, ppt->y);
 }
 
-void pop_on_lbutton_down(res_win_t wt, const xpoint_t* ppt)
+void pop_on_lbutton_down(widget_t wt, const xpoint_t* ppt)
 {
     printf("pop on_lbutton_down x:%d y:%d\n", ppt->x, ppt->y);
 
-    res_win_t par =  (*if_widget.pf_widget_get_owner)(wt);
+    widget_t par =  (*if_widget.pf_widget_get_owner)(wt);
 
     (*if_widget.pf_widget_send_command)(par, 1, 1000, 100);
 }
 
-void pop_on_lbutton_up(res_win_t wt, const xpoint_t* ppt)
+void pop_on_lbutton_up(widget_t wt, const xpoint_t* ppt)
 {
     printf("pop on_lbutton_up x:%d y:%d\n", ppt->x, ppt->y);
 
-    res_win_t par =  (*if_widget.pf_widget_get_parent)(wt);
+    widget_t par =  (*if_widget.pf_widget_get_parent)(wt);
 
     (*if_widget.pf_widget_post_command)(par, 2, IDC_CHILD, 100);
 
     (*if_widget.pf_widget_destroy)(wt);
 }
 
-void pop_on_self_command(res_win_t wt, int code, vword_t data)
+void pop_on_self_command(widget_t wt, int code, vword_t data)
 {
     printf("pop on_self_command code: %d \n", code);
 }
 /****************************************************************************/
-int child_on_create(res_win_t wt, void* param)
+int child_on_create(widget_t wt, void* param)
 {
     printf("child on_create\n");
 
     return 0;
 }
 
-void child_on_destroy(res_win_t wt)
+void child_on_destroy(widget_t wt)
 {
     printf("child on_destroy\n");
 }
 
-void child_on_mouse_move(res_win_t wt, dword_t ms, const xpoint_t* ppt)
+void child_on_mouse_move(widget_t wt, dword_t ms, const xpoint_t* ppt)
 {
     if(ms & MS_WITH_LBUTTON)
         printf("child on_mouse_move x:%d y:%d with lbutton\n", ppt->x, ppt->y);
@@ -139,7 +139,7 @@ void child_on_mouse_move(res_win_t wt, dword_t ms, const xpoint_t* ppt)
         printf("child on_mouse_move x:%d y:%d\n", ppt->x, ppt->y);
 }
 
-void child_on_mouse_hover(res_win_t wt, dword_t ms, const xpoint_t* ppt)
+void child_on_mouse_hover(widget_t wt, dword_t ms, const xpoint_t* ppt)
 {
     if(ms & MS_WITH_LBUTTON)
         printf("child on_mouse_hover x:%d y:%d with lbutton\n", ppt->x, ppt->y);
@@ -149,7 +149,7 @@ void child_on_mouse_hover(res_win_t wt, dword_t ms, const xpoint_t* ppt)
         printf("child on_mouse_hover x:%d y:%d\n", ppt->x, ppt->y);
 }
 
-void child_on_mouse_leave(res_win_t wt, dword_t ms, const xpoint_t* ppt)
+void child_on_mouse_leave(widget_t wt, dword_t ms, const xpoint_t* ppt)
 {
     if(ms & MS_WITH_LBUTTON)
         printf("child on_mouse_leave x:%d y:%d with lbutton\n", ppt->x, ppt->y);
@@ -159,13 +159,13 @@ void child_on_mouse_leave(res_win_t wt, dword_t ms, const xpoint_t* ppt)
         printf("child on_mouse_leave x:%d y:%d\n", ppt->x, ppt->y);
 }
 
-void child_on_lbutton_down(res_win_t wt, const xpoint_t* ppt)
+void child_on_lbutton_down(widget_t wt, const xpoint_t* ppt)
 {
     printf("child on_lbutton_down x:%d y:%d\n", ppt->x, ppt->y);
 
     (*if_widget.pf_widget_set_focus)(wt);
 
-    res_win_t par =  (*if_widget.pf_widget_get_parent)(wt);
+    widget_t par =  (*if_widget.pf_widget_get_parent)(wt);
 
     NOTICE nt = {0};
 
@@ -186,7 +186,7 @@ void child_on_lbutton_down(res_win_t wt, const xpoint_t* ppt)
    (*if_widget.pf_widget_set_capture)(wt, 1);
 }
 
-void child_on_lbutton_up(res_win_t wt, const xpoint_t* ppt)
+void child_on_lbutton_up(widget_t wt, const xpoint_t* ppt)
 {
     printf("child on_lbutton_up x:%d y:%d\n", ppt->x, ppt->y);
 
@@ -197,12 +197,12 @@ void child_on_lbutton_up(res_win_t wt, const xpoint_t* ppt)
     (*if_widget.pf_widget_erase)(wt, NULL);
 }
 
-void child_on_lbutton_dbclick(res_win_t wt, const xpoint_t* ppt)
+void child_on_lbutton_dbclick(widget_t wt, const xpoint_t* ppt)
 {
     printf("child on_lbutton_dbclick x:%d y:%d\n", ppt->x, ppt->y);
 }
 
-void child_on_rbutton_up(res_win_t wt, const xpoint_t* ppt)
+void child_on_rbutton_up(widget_t wt, const xpoint_t* ppt)
 {
     printf("child on_rbutton_up x:%d y:%d\n", ppt->x, ppt->y);
 
@@ -225,7 +225,7 @@ void child_on_rbutton_up(res_win_t wt, const xpoint_t* ppt)
 
     (*if_widget.pf_widget_client_to_screen)(wt, RECTPOINT(&xr));
 
-    res_win_t pop = (*if_widget.pf_widget_create)(_T("popup"),WD_STYLE_MENU,&xr,g_main,&ev);
+    widget_t pop = (*if_widget.pf_widget_create)(_T("popup"),WD_STYLE_MENU,&xr,g_main,&ev);
 
     (*if_widget.pf_widget_show)(pop, 0);
 
@@ -236,7 +236,7 @@ void child_on_rbutton_up(res_win_t wt, const xpoint_t* ppt)
     (*if_widget.pf_widget_do_track)(pop);
 }
 
-void child_on_keydown(res_win_t wt, dword_t ks, int key)
+void child_on_keydown(widget_t wt, dword_t ks, int key)
 {
     if(ks & KS_WITH_CONTROL)
         printf("child on_key_down keycode:%02x with control\n", key);
@@ -246,31 +246,31 @@ void child_on_keydown(res_win_t wt, dword_t ks, int key)
         printf("child on_key_down keycode:%02x\n", key);
 }
 
-void child_on_set_focus(res_win_t wt, res_win_t from)
+void child_on_set_focus(widget_t wt, widget_t from)
 {
     printf("child on_set_focus \n");
 
     (*if_widget.pf_widget_create_caret)(wt, 100, 100);
 }
 
-void child_on_kill_focus(res_win_t wt, res_win_t to)
+void child_on_kill_focus(widget_t wt, widget_t to)
 {
     printf("child on_kill_focus \n");
 
     (*if_widget.pf_widget_destroy_caret)(wt);
 }
 
-void child_on_menu_command(res_win_t wt, int code, int cid, vword_t data)
+void child_on_menu_command(widget_t wt, int code, int cid, vword_t data)
 {
     printf("child on_menu_command code: %d cid: %d \n", code, cid);
 }
 
-void child_on_parent_command(res_win_t, int code, vword_t data)
+void child_on_parent_command(widget_t, int code, vword_t data)
 {
     printf("child on_parent_command code: %d \n", code);
 }
 
-void child_on_paint(res_win_t wt, visual_t rdc, const xrect_t* prt)
+void child_on_paint(widget_t wt, visual_t rdc, const xrect_t* prt)
 {
     printf("child on_paint the rect is x:%d y:%d w:%d h:%d \n", prt->x, prt->y, prt->w, prt->h);
 
@@ -470,7 +470,7 @@ void child_on_paint(res_win_t wt, visual_t rdc, const xrect_t* prt)
     default_xface(&xa);
 
     xsize_t xs = {0};
-    //(*if_context.pf_gdi_text_metric)(ctx, &xf, &xs);
+    //(*if_context.pf_gdi_font_size)(ctx, &xf, &xs);
 
 	(*if_context.pf_gdi_text_size)(ctx, &xf,  _T("Hello World!"), -1, &xs);
 	xp1.x = 0;
@@ -542,7 +542,7 @@ void child_on_paint(res_win_t wt, visual_t rdc, const xrect_t* prt)
 }
 /**********************************************************************************/
 
-int main_on_create(res_win_t wt, void* param)
+int main_on_create(widget_t wt, void* param)
 {
     printf("on_create: main\n");
 
@@ -570,7 +570,7 @@ int main_on_create(res_win_t wt, void* param)
 	xr.w = 400;
 	xr.h = 300;
 
-    res_win_t child = (*if_widget.pf_widget_create)(_T("child"),WD_STYLE_CHILD,&xr,wt,&ev);
+    widget_t child = (*if_widget.pf_widget_create)(_T("child"),WD_STYLE_CHILD,&xr,wt,&ev);
 
     (*if_widget.pf_widget_set_user_id)(child, 1000);
 
@@ -581,54 +581,54 @@ int main_on_create(res_win_t wt, void* param)
     return 0;
 }
 
-int main_on_close(res_win_t wt)
+int main_on_close(widget_t wt)
 {
     printf("main on_closein\n");
 
     return 0;
 }
 
-void main_on_destroy(res_win_t wt)
+void main_on_destroy(widget_t wt)
 {
     printf("main on_destroy\n");
 
-    res_win_t child = (*if_widget.pf_widget_get_child)(wt, 1000);
+    widget_t child = (*if_widget.pf_widget_get_child)(wt, 1000);
 
     (*if_widget.pf_widget_destroy)(child);
 }
 
-void main_on_lbutton_down(res_win_t wt, const xpoint_t* ppt)
+void main_on_lbutton_down(widget_t wt, const xpoint_t* ppt)
 {
     printf("main on_lbutton_down x:%d y:%d\n", ppt->x, ppt->y);
 }
 
-void main_on_lbutton_up(res_win_t wt, const xpoint_t* ppt)
+void main_on_lbutton_up(widget_t wt, const xpoint_t* ppt)
 {
     printf("main on_lbutton_up x:%d y:%d\n", ppt->x, ppt->y);
 
-    res_win_t cld = (*if_widget.pf_widget_get_child)(wt, 1000);
+    widget_t cld = (*if_widget.pf_widget_get_child)(wt, 1000);
     if(cld)
     {
      (*if_widget.pf_widget_post_command)(cld, 3, IDC_PARENT, 100);
     }
 }
 
-void main_on_lbutton_dbclick(res_win_t wt, const xpoint_t* ppt)
+void main_on_lbutton_dbclick(widget_t wt, const xpoint_t* ppt)
 {
     printf("main on_lbutton_dbclick x:%d y:%d\n", ppt->x, ppt->y);
 }
 
-void main_on_rbutton_down(res_win_t wt, const xpoint_t* ppt)
+void main_on_rbutton_down(widget_t wt, const xpoint_t* ppt)
 {
     printf("main on_rbutton_down x:%d y:%d\n", ppt->x, ppt->y);
 }
 
-void main_on_rbutton_up(res_win_t wt, const xpoint_t* ppt)
+void main_on_rbutton_up(widget_t wt, const xpoint_t* ppt)
 {
     printf("main on_rbutton_up x:%d y:%d\n", ppt->x, ppt->y);
 }
 
-void main_on_mouse_move(res_win_t wt, dword_t ms, const xpoint_t* ppt)
+void main_on_mouse_move(widget_t wt, dword_t ms, const xpoint_t* ppt)
 {
     if(ms & MS_WITH_LBUTTON)
         printf("main on_mouse_move x:%d y:%d with lbutton\n", ppt->x, ppt->y);
@@ -638,7 +638,7 @@ void main_on_mouse_move(res_win_t wt, dword_t ms, const xpoint_t* ppt)
         printf("main on_mouse_move x:%d y:%d\n", ppt->x, ppt->y);
 }
 
-void main_on_mouse_hover(res_win_t wt, dword_t ms, const xpoint_t* ppt)
+void main_on_mouse_hover(widget_t wt, dword_t ms, const xpoint_t* ppt)
 {
     if(ms & MS_WITH_LBUTTON)
         printf("main on_mouse_hover x:%d y:%d with lbutton\n", ppt->x, ppt->y);
@@ -648,7 +648,7 @@ void main_on_mouse_hover(res_win_t wt, dword_t ms, const xpoint_t* ppt)
         printf("main on_mouse_hover x:%d y:%d\n", ppt->x, ppt->y);
 }
 
-void main_on_mouse_leave(res_win_t wt, dword_t ms, const xpoint_t* ppt)
+void main_on_mouse_leave(widget_t wt, dword_t ms, const xpoint_t* ppt)
 {
     if(ms & MS_WITH_LBUTTON)
         printf("main on_mouse_leave x:%d y:%d with lbutton\n", ppt->x, ppt->y);
@@ -658,7 +658,7 @@ void main_on_mouse_leave(res_win_t wt, dword_t ms, const xpoint_t* ppt)
         printf("main on_mouse_leave x:%d y:%d\n", ppt->x, ppt->y);
 }
 
-void main_on_whell(res_win_t wt, bool_t horz, int delta)
+void main_on_whell(widget_t wt, bool_t horz, int delta)
 {
     if(horz)
         printf("main on_whell_horz delta:%d\n", delta);
@@ -668,14 +668,14 @@ void main_on_whell(res_win_t wt, bool_t horz, int delta)
     (*if_widget.pf_widget_scroll)(g_main, horz, delta);
 }
 
-void main_on_scroll(res_win_t wt, bool_t horz, int pos)
+void main_on_scroll(widget_t wt, bool_t horz, int pos)
 {
     if(horz)
         printf("main on_scroll_horz position:%d\n", pos);
     else
        printf("main on_scroll_vert position:%d\n", pos);
 
-	res_win_t child = (*if_widget.pf_widget_get_child)(wt, 1000);
+	widget_t child = (*if_widget.pf_widget_get_child)(wt, 1000);
 	if (child)
 	{
 		xrect_t xr;
@@ -693,7 +693,7 @@ void main_on_scroll(res_win_t wt, bool_t horz, int pos)
 	}
 }
 
-void main_on_keydown(res_win_t wt, dword_t ks, int key)
+void main_on_keydown(widget_t wt, dword_t ks, int key)
 {
     if(ks & KS_WITH_CONTROL)
         printf("main on_key_down keycode:%02x with control\n", key);
@@ -703,7 +703,7 @@ void main_on_keydown(res_win_t wt, dword_t ks, int key)
         printf("main on_key_down keycode:%02x\n", key);
 }
 
-void main_on_keyup(res_win_t wt, dword_t ks, int key)
+void main_on_keyup(widget_t wt, dword_t ks, int key)
 {
     if(ks & KS_WITH_CONTROL)
         printf("main on_key_up keycode:%02x with control\n", key);
@@ -713,12 +713,12 @@ void main_on_keyup(res_win_t wt, dword_t ks, int key)
         printf("main on_key_up keycode:%02x\n", key);
 }
 
-void main_on_char(res_win_t wt, tchar_t ch)
+void main_on_char(widget_t wt, tchar_t ch)
 {
     printf("main on_char keycode:%c\n", ch);
 }
 
-void main_on_size(res_win_t wt, int type, const xsize_t* pst)
+void main_on_size(widget_t wt, int type, const xsize_t* pst)
 {
     if(type == WS_SIZE_MAXIMIZED)
         printf("main on_size maximized width:%d height:%d\n", pst->w, pst->h);
@@ -729,7 +729,7 @@ void main_on_size(res_win_t wt, int type, const xsize_t* pst)
     else
         printf("main on_size restore width:%d height:%d\n", pst->w, pst->h);
 
-	res_win_t child = (*if_widget.pf_widget_get_child)(wt, 1000);
+	widget_t child = (*if_widget.pf_widget_get_child)(wt, 1000);
 	if (child)
 	{
 		xrect_t xr;
@@ -742,12 +742,12 @@ void main_on_size(res_win_t wt, int type, const xsize_t* pst)
 	}
 }
 
-void main_on_move(res_win_t wt, const xpoint_t* ppt)
+void main_on_move(widget_t wt, const xpoint_t* ppt)
 {
     printf("main on_move position x:%d y:%d\n", ppt->x, ppt->y);
 }
 
-void main_on_show(res_win_t wt, bool_t show)
+void main_on_show(widget_t wt, bool_t show)
 {
     if(show)
         printf("main on_show \n");
@@ -755,7 +755,7 @@ void main_on_show(res_win_t wt, bool_t show)
         printf("main on_hide \n");
 }
 
-void main_on_activate(res_win_t wt, int ma)
+void main_on_activate(widget_t wt, int ma)
 {
     if(ma == WS_ACTIVE_CLICK)
         printf("main on_activate by mouse click \n");
@@ -763,7 +763,7 @@ void main_on_activate(res_win_t wt, int ma)
         printf("main on_activate by application \n");
 }
 
-void main_on_paint(res_win_t wt, visual_t rdc, const xrect_t* prt)
+void main_on_paint(widget_t wt, visual_t rdc, const xrect_t* prt)
 {
     printf("main main on_paint the rect is x:%d y:%d w:%d h:%d \n", prt->x, prt->y, prt->w, prt->h);
 
@@ -793,54 +793,54 @@ void main_on_paint(res_win_t wt, visual_t rdc, const xrect_t* prt)
 	(*if_context.pf_destroy_context)(ctx);
 }
 
-void main_on_set_focus(res_win_t wt, res_win_t from)
+void main_on_set_focus(widget_t wt, widget_t from)
 {
     printf("main on_set_focus \n");
 }
 
-void main_on_kill_focus(res_win_t wt, res_win_t to)
+void main_on_kill_focus(widget_t wt, widget_t to)
 {
     printf("main on_kill_focus \n");
 }
 
-void main_on_notice(res_win_t, NOTICE* pnt)
+void main_on_notice(widget_t, NOTICE* pnt)
 {
     printf("main on_notice child id: %d code: %d \n", pnt->user, pnt->code);
 }
 
-void main_on_menu_command(res_win_t wt, int code, int cid, vword_t data)
+void main_on_menu_command(widget_t wt, int code, int cid, vword_t data)
 {
     printf("main on_menu_command child id: %d code: %d \n", cid, code);
 }
 
-void main_on_parent_command(res_win_t, int code, vword_t data)
+void main_on_parent_command(widget_t, int code, vword_t data)
 {
     printf("main on_parent_command code: %d \n", code);
 }
 
-void main_on_child_command(res_win_t wt, int code, vword_t data)
+void main_on_child_command(widget_t wt, int code, vword_t data)
 {
     printf("main on_child_command code: %d \n", code);
 }
 
-void main_on_self_command(res_win_t wt, int code, vword_t data)
+void main_on_self_command(widget_t wt, int code, vword_t data)
 {
     printf("main on_self_command code: %d \n", code);
 }
 
-void main_on_command_find(res_win_t, str_find_t*)
+void main_on_command_find(widget_t, str_find_t*)
 {
 }
 
-void main_on_comamnd_replace(res_win_t, str_replace_t*)
+void main_on_comamnd_replace(widget_t, str_replace_t*)
 {
 }
 
-void main_on_syscmd_click(res_win_t, const xpoint_t*)
+void main_on_syscmd_click(widget_t, const xpoint_t*)
 {
 }
 
-void main_on_timer(res_win_t, vword_t)
+void main_on_timer(widget_t, vword_t)
 {
 }
 

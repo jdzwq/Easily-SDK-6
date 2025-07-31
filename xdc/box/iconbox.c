@@ -26,8 +26,8 @@ LICENSE.GPL3 for more details.
 
 #include "box.h"
 
-#include "../xdcimp.h"
-#include "../xdcinit.h"
+#include "../xdcobj.h"
+
 
 typedef struct _iconbox_delta_t{
 	link_t_ptr string;
@@ -42,7 +42,7 @@ typedef struct _iconbox_delta_t{
 #define SETICONBOXDELTA(ph,ptd) widget_set_user_delta(ph,(vword_t)ptd)
 
 /*********************************************************************************/
-void _iconbox_item_rect(res_win_t widget, link_t_ptr ent, xrect_t* pxr)
+void _iconbox_item_rect(widget_t widget, link_t_ptr ent, xrect_t* pxr)
 {
 	iconbox_delta_t* ptd = GETICONBOXDELTA(widget);
 	measure_interface im = { 0 };
@@ -59,7 +59,7 @@ void _iconbox_item_rect(res_win_t widget, link_t_ptr ent, xrect_t* pxr)
 	widget_rect_to_tm(widget, pxr);
 }
 
-void _iconbox_reset_page(res_win_t widget)
+void _iconbox_reset_page(widget_t widget)
 {
 	iconbox_delta_t* ptd = GETICONBOXDELTA(widget);
 	int vw, vh, lw, lh;
@@ -75,7 +75,7 @@ void _iconbox_reset_page(res_win_t widget)
 
 	(pif->pf_get_measure)(pif->ctx, &im);
 
-	(pif->pf_text_metric)(pif->ctx, &ptd->xf, &xs);
+	(pif->pf_font_size)(pif->ctx, &ptd->xf, &xs);
 
 	widget_size_to_pt(widget, &xs);
 	lw = xs.w;
@@ -93,7 +93,7 @@ void _iconbox_reset_page(res_win_t widget)
 	widget_reset_scroll(widget, 0);
 }
 /*********************************************************************************/
-void noti_iconbox_command(res_win_t widget, int code, vword_t data)
+void noti_iconbox_command(widget_t widget, int code, vword_t data)
 {
 	iconbox_delta_t* ptd = GETICONBOXDELTA(widget);
 
@@ -103,7 +103,7 @@ void noti_iconbox_command(res_win_t widget, int code, vword_t data)
 		widget_post_command(widget_get_owner(widget), code, widget_get_user_id(widget), data);
 }
 
-void iconbox_on_click_item(res_win_t widget, link_t_ptr ent)
+void iconbox_on_click_item(widget_t widget, link_t_ptr ent)
 {
 	iconbox_delta_t* ptd = GETICONBOXDELTA(widget);
 
@@ -113,7 +113,7 @@ void iconbox_on_click_item(res_win_t widget, link_t_ptr ent)
 }
 
 /*********************************************************************************/
-int hand_iconbox_create(res_win_t widget, void* data)
+int hand_iconbox_create(widget_t widget, void* data)
 {
 	iconbox_delta_t* ptd = GETICONBOXDELTA(widget);
 
@@ -129,7 +129,7 @@ int hand_iconbox_create(res_win_t widget, void* data)
 	return 0;
 }
 
-void hand_iconbox_destroy(res_win_t widget)
+void hand_iconbox_destroy(widget_t widget)
 {
 	iconbox_delta_t* ptd = GETICONBOXDELTA(widget);
 
@@ -143,13 +143,13 @@ void hand_iconbox_destroy(res_win_t widget)
 	SETICONBOXDELTA(widget, 0);
 }
 
-void hand_iconbox_lbutton_down(res_win_t widget, const xpoint_t* pxp)
+void hand_iconbox_lbutton_down(widget_t widget, const xpoint_t* pxp)
 {
 	iconbox_delta_t* ptd = GETICONBOXDELTA(widget);
 	
 }
 
-void hand_iconbox_lbutton_up(res_win_t widget, const xpoint_t* pxp)
+void hand_iconbox_lbutton_up(widget_t widget, const xpoint_t* pxp)
 {
 	iconbox_delta_t* ptd = GETICONBOXDELTA(widget);
 	measure_interface im = { 0 };
@@ -182,7 +182,7 @@ void hand_iconbox_lbutton_up(res_win_t widget, const xpoint_t* pxp)
 	}
 }
 
-void hand_iconbox_size(res_win_t widget, int code, const xsize_t* prs)
+void hand_iconbox_size(widget_t widget, int code, const xsize_t* prs)
 {
 	iconbox_delta_t* ptd = GETICONBOXDELTA(widget);
 	
@@ -191,7 +191,7 @@ void hand_iconbox_size(res_win_t widget, int code, const xsize_t* prs)
 	widget_erase(widget, NULL);
 }
 
-void hand_iconbox_xfont(res_win_t widget, const xfont_t* pxf)
+void hand_iconbox_xfont(widget_t widget, const xfont_t* pxf)
 {
 	iconbox_delta_t* ptd = GETICONBOXDELTA(widget);
 
@@ -200,7 +200,7 @@ void hand_iconbox_xfont(res_win_t widget, const xfont_t* pxf)
 	xmem_copy((void*)&ptd->xf, (void*)pxf, sizeof(xfont_t));
 }
 
-void hand_iconbox_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
+void hand_iconbox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 {
 	iconbox_delta_t* ptd = GETICONBOXDELTA(widget);
 	visual_t rdc;
@@ -233,7 +233,7 @@ void hand_iconbox_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 }
 
 /***************************************************************************************/
-res_win_t iconbox_create(res_win_t widget, dword_t style, const xrect_t* pxr)
+widget_t iconbox_create(widget_t widget, dword_t style, const xrect_t* pxr)
 {
 	if_dispatch_t ev = { 0 };
 
@@ -258,7 +258,7 @@ res_win_t iconbox_create(res_win_t widget, dword_t style, const xrect_t* pxr)
 	return widget_create(NULL, style, pxr, widget, &ev);
 }
 
-void iconbox_set_options(res_win_t widget, const tchar_t* opt, int len)
+void iconbox_set_options(widget_t widget, const tchar_t* opt, int len)
 {
 	iconbox_delta_t* ptd = GETICONBOXDELTA(widget);
 
@@ -269,7 +269,7 @@ void iconbox_set_options(res_win_t widget, const tchar_t* opt, int len)
 	widget_erase(widget, NULL);
 }
 
-void iconbox_set_layer(res_win_t widget, const tchar_t* layer)
+void iconbox_set_layer(widget_t widget, const tchar_t* layer)
 {
 	iconbox_delta_t* ptd = GETICONBOXDELTA(widget);
 
@@ -278,7 +278,7 @@ void iconbox_set_layer(res_win_t widget, const tchar_t* layer)
 	xsncpy(ptd->layer, layer, RES_LEN);
 }
 
-void iconbox_set_alignment(res_win_t widget, const tchar_t* align)
+void iconbox_set_alignment(widget_t widget, const tchar_t* align)
 {
 	iconbox_delta_t* ptd = GETICONBOXDELTA(widget);
 
@@ -287,7 +287,7 @@ void iconbox_set_alignment(res_win_t widget, const tchar_t* align)
 	xsncpy(ptd->align, align, RES_LEN);
 }
 
-void iconbox_get_item_rect(res_win_t widget, const tchar_t* key, xrect_t* pxr)
+void iconbox_get_item_rect(widget_t widget, const tchar_t* key, xrect_t* pxr)
 {
 	iconbox_delta_t* ptd = GETICONBOXDELTA(widget);
 	link_t_ptr ent;
@@ -305,7 +305,7 @@ void iconbox_get_item_rect(res_win_t widget, const tchar_t* key, xrect_t* pxr)
 	}
 }
 
-void iconbox_popup_size(res_win_t widget, xsize_t* pxs)
+void iconbox_popup_size(widget_t widget, xsize_t* pxs)
 {
 	iconbox_delta_t* ptd = GETICONBOXDELTA(widget);
 	measure_interface im = { 0 };
@@ -321,5 +321,5 @@ void iconbox_popup_size(res_win_t widget, xsize_t* pxs)
 
 	widget_size_to_pt(widget, pxs);
 
-	widget_adjust_size(widget_get_style(widget), pxs);
+	adjust_widget_size(widget_get_style(widget), pxs);
 }

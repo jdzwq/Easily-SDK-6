@@ -53,9 +53,15 @@ LICENSE.GPL3 for more details.
 #include "linux/_xdk_linux.h"
 #endif
 
+#ifndef LIT_ENDIAN
 #define	LIT_ENDIAN	1234	/* least-significant byte first (vax, pc) */
+#endif
+#ifndef BIG_ENDIAN
 #define	BIG_ENDIAN	4321	/* most-significant byte first (IBM, net) */
+#endif
+#ifndef PDP_ENDIAN
 #define	PDP_ENDIAN	3412	/* LSB first in word, MSW first in int (pdp)*/
+#endif
 
 #if defined(_WIN32) || defined(_WIN64) || defined(__i386__) || defined(__x86_64__) || defined(__amd64__) || \
    defined(__arm__) || defined(__aarch64__) || \
@@ -73,18 +79,6 @@ LICENSE.GPL3 for more details.
     defined(__hp9000s300) || defined(__hp9000s700) || \
     defined (BIT_ZERO_ON_LEFT) || defined(m68k) || defined(__sparc)
 #define ACP_BYTE_ORDER	BIG_ENDIAN
-#endif
-
-#ifndef LIT_ENDIAN
-#define LIT_ENDIAN	__LITTLE_ENDIAN
-#endif
-
-#ifndef BIG_ENDIAN
-#define BIG_ENDIAN	__BIG_ENDIAN
-#endif
-
-#ifndef PDP_ENDIAN
-#define PDP_ENDIAN	__PDP_ENDIAN
 #endif
 
 #if defined(_OS_WINDOWS)

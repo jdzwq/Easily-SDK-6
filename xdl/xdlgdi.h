@@ -4,8 +4,7 @@
 
 #include "gdi/svgcanv.h"
 #include "gdi/svggdi.h"
-#include "gdi/svgiml.h"
-#include "gdi/mgciml.h"
+#include "gdi/svginf.h"
 
 #include "hint/hintner.h"
 

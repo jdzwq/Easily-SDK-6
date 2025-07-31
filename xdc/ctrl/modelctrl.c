@@ -26,8 +26,8 @@ LICENSE.GPL3 for more details.
 
 #include "ctrl.h"
 
-#include "../xdcimp.h"
-#include "../xdcinit.h"
+#include "../xdcobj.h"
+
 
 #define BITMAP_BYTES(buf)		GET_DWORD(buf, 2)
 #define BITMAP_WIDTH(buf)		GET_DWORD(BITMAPINFOHEADERPTR(buf), 4)
@@ -40,9 +40,9 @@ typedef struct _model_delta_t{
 
 	bitmap_t bmp;
 
-	res_win_t editor;
-	res_win_t hsc;
-	res_win_t vsc;
+	widget_t editor;
+	widget_t hsc;
+	widget_t vsc;
 
 	bool_t b_drag;
 	bool_t b_size;
@@ -58,9 +58,9 @@ typedef struct _model_delta_t{
 #define GETMODELDELTA(ph) 	(model_delta_t*)widget_get_user_delta(ph)
 #define SETMODELDELTA(ph,ptd) widget_set_user_delta(ph,(vword_t)ptd)
 
-int noti_model_owner(res_win_t widget, unsigned int code, link_t_ptr arti, void* data, visual_t rdc);
+int noti_model_owner(widget_t widget, unsigned int code, link_t_ptr arti, void* data, visual_t rdc);
 /*******************************************************************************************************/
-static void _modelctrl_done(res_win_t widget)
+static void _modelctrl_done(widget_t widget)
 {
 	model_delta_t* ptd = GETMODELDELTA(widget);
 	byte_t* buf;
@@ -85,7 +85,7 @@ static void _modelctrl_done(res_win_t widget)
 	push_stack_node(ptd->stack, (void*)buf);
 }
 
-static void _modelctrl_undo(res_win_t widget)
+static void _modelctrl_undo(widget_t widget)
 {
 	model_delta_t* ptd = GETMODELDELTA(widget);
 	void* p;
@@ -112,7 +112,7 @@ static void _modelctrl_undo(res_win_t widget)
 	}
 }
 
-static void _modelctrl_discard(res_win_t widget)
+static void _modelctrl_discard(widget_t widget)
 {
 	model_delta_t* ptd = GETMODELDELTA(widget);
 	void* p;
@@ -126,7 +126,7 @@ static void _modelctrl_discard(res_win_t widget)
 	}
 }
 
-static void _modelctrl_clean(res_win_t widget)
+static void _modelctrl_clean(widget_t widget)
 {
 	model_delta_t* ptd = GETMODELDELTA(widget);
 	void* p;
@@ -139,7 +139,7 @@ static void _modelctrl_clean(res_win_t widget)
 	}
 }
 
-static bool_t _modelctrl_copy(res_win_t widget)
+static bool_t _modelctrl_copy(widget_t widget)
 {
 	model_delta_t* ptd = GETMODELDELTA(widget);
 	dword_t len;
@@ -194,7 +194,7 @@ static bool_t _modelctrl_copy(res_win_t widget)
 	return 1;
 }
 
-static bool_t _modelctrl_cut(res_win_t widget)
+static bool_t _modelctrl_cut(widget_t widget)
 {
 	model_delta_t* ptd = GETMODELDELTA(widget);
 	link_t_ptr nxt, ilk;
@@ -221,7 +221,7 @@ static bool_t _modelctrl_cut(res_win_t widget)
 	return 1;
 }
 
-static bool_t _modelctrl_paste(res_win_t widget)
+static bool_t _modelctrl_paste(widget_t widget)
 {
 	model_delta_t* ptd = GETMODELDELTA(widget);
 	dword_t len;
@@ -273,7 +273,7 @@ static bool_t _modelctrl_paste(res_win_t widget)
 	return 1;
 }
 
-static void _modelctrl_arti_rect(res_win_t widget, link_t_ptr ilk, xrect_t* pxr)
+static void _modelctrl_arti_rect(widget_t widget, link_t_ptr ilk, xrect_t* pxr)
 {
 	model_delta_t* ptd = GETMODELDELTA(widget);
 
@@ -282,7 +282,7 @@ static void _modelctrl_arti_rect(res_win_t widget, link_t_ptr ilk, xrect_t* pxr)
 	widget_rect_to_pt(widget, pxr);
 }
 
-static bitmap_t _modelctrl_merge_anno(res_win_t widget)
+static bitmap_t _modelctrl_merge_anno(widget_t widget)
 {
 	model_delta_t* ptd = GETMODELDELTA(widget);
 
@@ -328,7 +328,7 @@ static bitmap_t _modelctrl_merge_anno(res_win_t widget)
 	return membm;
 }
 
-static void _modelctrl_reset_page(res_win_t widget)
+static void _modelctrl_reset_page(widget_t widget)
 {
 	model_delta_t* ptd = GETMODELDELTA(widget);
 	int pw, ph, fw, fh;
@@ -356,7 +356,7 @@ static void _modelctrl_reset_page(res_win_t widget)
 	widget_reset_scroll(widget, 0);
 }
 /*******************************************************************************************************/
-int noti_model_owner(res_win_t widget, unsigned int code, link_t_ptr arti, void* data, visual_t rdc)
+int noti_model_owner(widget_t widget, unsigned int code, link_t_ptr arti, void* data, visual_t rdc)
 {
 	model_delta_t* ptd = GETMODELDELTA(widget);
 	NOTICE_MODEL nf = { 0 };
@@ -375,7 +375,7 @@ int noti_model_owner(res_win_t widget, unsigned int code, link_t_ptr arti, void*
 	return nf.ret;
 }
 
-void noti_model_arti_drag(res_win_t widget, int x, int y)
+void noti_model_arti_drag(widget_t widget, int x, int y)
 {
 	model_delta_t* ptd = GETMODELDELTA(widget);
 	xpoint_t pt;
@@ -389,7 +389,7 @@ void noti_model_arti_drag(res_win_t widget, int x, int y)
 	noti_model_owner(widget, NC_MODELANNODRAG, ptd->arti, (void*)&pt, NULL);
 }
 
-void noti_model_arti_drop(res_win_t widget, int x, int y)
+void noti_model_arti_drop(widget_t widget, int x, int y)
 {
 	model_delta_t* ptd = GETMODELDELTA(widget);
 	xpoint_t pt;
@@ -440,7 +440,7 @@ void noti_model_arti_drop(res_win_t widget, int x, int y)
 	noti_model_owner(widget, NC_MODELANNODROP, ptd->arti, (void*)&pt, NULL);
 }
 
-void noti_model_arti_sizing(res_win_t widget, int x, int y)
+void noti_model_arti_sizing(widget_t widget, int x, int y)
 {
 	model_delta_t* ptd = GETMODELDELTA(widget);
 	xrect_t xr;
@@ -454,7 +454,7 @@ void noti_model_arti_sizing(res_win_t widget, int x, int y)
 	noti_model_owner(widget, NC_MODELANNOSIZING, ptd->arti, (void*)&xr, NULL);
 }
 
-void noti_model_arti_sized(res_win_t widget, int x, int y)
+void noti_model_arti_sized(widget_t widget, int x, int y)
 {
 	model_delta_t* ptd = GETMODELDELTA(widget);
 	xrect_t xr_org,xr;
@@ -504,7 +504,7 @@ void noti_model_arti_sized(res_win_t widget, int x, int y)
 	noti_model_owner(widget, NC_MODELANNOSIZED, ptd->arti, (void*)&xr, NULL);
 }
 
-bool_t noti_model_arti_changing(res_win_t widget)
+bool_t noti_model_arti_changing(widget_t widget)
 {
 	model_delta_t* ptd = GETMODELDELTA(widget);
 	xrect_t xr;
@@ -525,7 +525,7 @@ bool_t noti_model_arti_changing(res_win_t widget)
 	return 1;
 }
 
-void noti_model_arti_changed(res_win_t widget, link_t_ptr ilk)
+void noti_model_arti_changed(widget_t widget, link_t_ptr ilk)
 {
 	model_delta_t* ptd = GETMODELDELTA(widget);
 	xrect_t xr;
@@ -543,7 +543,7 @@ void noti_model_arti_changed(res_win_t widget, link_t_ptr ilk)
 	noti_model_owner(widget, NC_MODELANNOCHANGED, ptd->arti, NULL, NULL);
 }
 
-void noti_model_begin_edit(res_win_t widget)
+void noti_model_begin_edit(widget_t widget)
 {
 	model_delta_t* ptd = GETMODELDELTA(widget);
 	xrect_t xr = { 0 };
@@ -577,12 +577,12 @@ void noti_model_begin_edit(res_win_t widget)
 	editbox_auto_size(ptd->editor, 1);
 }
 
-void noti_model_commit_edit(res_win_t widget)
+void noti_model_commit_edit(widget_t widget)
 {
 	model_delta_t* ptd = GETMODELDELTA(widget);
 
 	const tchar_t* text;
-	res_win_t editctrl;
+	widget_t editctrl;
 	xrect_t xr;
 
 	if (!widget_is_valid(ptd->editor))
@@ -600,7 +600,7 @@ void noti_model_commit_edit(res_win_t widget)
 	}
 
 	editctrl = ptd->editor;
-	ptd->editor = (res_win_t)0;
+	ptd->editor = (widget_t)0;
 
 	widget_destroy(editctrl);
 
@@ -613,10 +613,10 @@ void noti_model_commit_edit(res_win_t widget)
 	widget_set_focus(widget);
 }
 
-void noti_model_rollback_edit(res_win_t widget)
+void noti_model_rollback_edit(widget_t widget)
 {
 	model_delta_t* ptd = GETMODELDELTA(widget);
-	res_win_t editctrl;
+	widget_t editctrl;
 
 	if (!widget_is_valid(ptd->editor))
 		return;
@@ -626,13 +626,13 @@ void noti_model_rollback_edit(res_win_t widget)
 	noti_model_owner(widget, NC_MODELANNOROLLBACK, ptd->arti, NULL, NULL);
 
 	editctrl = ptd->editor;
-	ptd->editor = (res_win_t)0;
+	ptd->editor = (widget_t)0;
 
 	widget_destroy(editctrl);
 	widget_set_focus(widget);
 }
 
-void noti_model_reset_editor(res_win_t widget, bool_t bCommit)
+void noti_model_reset_editor(widget_t widget, bool_t bCommit)
 {
 	model_delta_t* ptd = GETMODELDELTA(widget);
 
@@ -645,7 +645,7 @@ void noti_model_reset_editor(res_win_t widget, bool_t bCommit)
 	}
 }
 
-void noti_model_reset_scroll(res_win_t widget, bool_t bUpdate)
+void noti_model_reset_scroll(widget_t widget, bool_t bUpdate)
 {
 	model_delta_t* ptd = GETMODELDELTA(widget);
 
@@ -666,7 +666,7 @@ void noti_model_reset_scroll(res_win_t widget, bool_t bUpdate)
 	}
 }
 /*****************************************************************************/
-int hand_model_create(res_win_t widget, void* data)
+int hand_model_create(widget_t widget, void* data)
 {
 	model_delta_t* ptd = GETMODELDELTA(widget);
 
@@ -684,7 +684,7 @@ int hand_model_create(res_win_t widget, void* data)
 	return 0;
 }
 
-void hand_model_destroy(res_win_t widget)
+void hand_model_destroy(widget_t widget)
 {
 	model_delta_t* ptd = GETMODELDELTA(widget);
 
@@ -711,7 +711,7 @@ void hand_model_destroy(res_win_t widget)
 	widget_hand_destroy(widget);
 }
 
-void hand_model_mouse_move(res_win_t widget, dword_t dw, const xpoint_t* pxp)
+void hand_model_mouse_move(widget_t widget, dword_t dw, const xpoint_t* pxp)
 {
 	model_delta_t* ptd = GETMODELDELTA(widget);
 	int hint;
@@ -749,7 +749,7 @@ void hand_model_mouse_move(res_win_t widget, dword_t dw, const xpoint_t* pxp)
 	}
 }
 
-void hand_model_lbutton_down(res_win_t widget, const xpoint_t* pxp)
+void hand_model_lbutton_down(widget_t widget, const xpoint_t* pxp)
 {
 	model_delta_t* ptd = GETMODELDELTA(widget);
 	int hint;
@@ -799,7 +799,7 @@ void hand_model_lbutton_down(res_win_t widget, const xpoint_t* pxp)
 	}
 }
 
-void hand_model_lbutton_up(res_win_t widget, const xpoint_t* pxp)
+void hand_model_lbutton_up(widget_t widget, const xpoint_t* pxp)
 {
 	model_delta_t* ptd = GETMODELDELTA(widget);
 	link_t_ptr ilk = NULL;
@@ -850,7 +850,7 @@ void hand_model_lbutton_up(res_win_t widget, const xpoint_t* pxp)
 	noti_model_owner(widget, NC_MODELLBCLK, ptd->arti, (void*)pxp, NULL);
 }
 
-void hand_model_lbutton_dbclick(res_win_t widget, const xpoint_t* pxp)
+void hand_model_lbutton_dbclick(widget_t widget, const xpoint_t* pxp)
 {
 	model_delta_t* ptd = GETMODELDELTA(widget);
 
@@ -862,21 +862,21 @@ void hand_model_lbutton_dbclick(res_win_t widget, const xpoint_t* pxp)
 	noti_model_owner(widget, NC_MODELDBCLK, ptd->arti, (void*)pxp, NULL);
 }
 
-void hand_model_rbutton_down(res_win_t widget, const xpoint_t* pxp)
+void hand_model_rbutton_down(widget_t widget, const xpoint_t* pxp)
 {
 	model_delta_t* ptd = GETMODELDELTA(widget);
 
 	noti_model_reset_editor(widget, 1);
 }
 
-void hand_model_rbutton_up(res_win_t widget, const xpoint_t* pxp)
+void hand_model_rbutton_up(widget_t widget, const xpoint_t* pxp)
 {
 	model_delta_t* ptd = GETMODELDELTA(widget);
 
 	noti_model_owner(widget, NC_MODELRBCLK, ptd->arti, (void*)pxp, NULL);
 }
 
-void hand_model_scroll(res_win_t widget, bool_t bHorz, int nLine)
+void hand_model_scroll(widget_t widget, bool_t bHorz, int nLine)
 {
 	model_delta_t* ptd = GETMODELDELTA(widget);
 
@@ -888,12 +888,12 @@ void hand_model_scroll(res_win_t widget, bool_t bHorz, int nLine)
 	widget_hand_scroll(widget, bHorz, nLine);
 }
 
-void hand_model_wheel(res_win_t widget, bool_t bHorz, int nDelta)
+void hand_model_wheel(widget_t widget, bool_t bHorz, int nDelta)
 {
 	model_delta_t* ptd = GETMODELDELTA(widget);
 	scroll_t scr = { 0 };
 	int nLine;
-	res_win_t win;
+	widget_t win;
 
 	if (!ptd)
 		return;
@@ -944,7 +944,7 @@ void hand_model_wheel(res_win_t widget, bool_t bHorz, int nDelta)
 	}
 }
 
-void hand_model_keydown(res_win_t widget, dword_t ks, int key)
+void hand_model_keydown(widget_t widget, dword_t ks, int key)
 {
 	model_delta_t* ptd = GETMODELDELTA(widget);
 
@@ -979,7 +979,7 @@ void hand_model_keydown(res_win_t widget, dword_t ks, int key)
 	}
 }
 
-void hand_model_set_focus(res_win_t widget, res_win_t wt)
+void hand_model_set_focus(widget_t widget, widget_t wt)
 {
 	model_delta_t* ptd = GETMODELDELTA(widget);
 
@@ -987,7 +987,7 @@ void hand_model_set_focus(res_win_t widget, res_win_t wt)
 		return;
 }
 
-void hand_model_kill_focus(res_win_t widget, res_win_t wt)
+void hand_model_kill_focus(widget_t widget, widget_t wt)
 {
 	model_delta_t* ptd = GETMODELDELTA(widget);
 
@@ -1003,7 +1003,7 @@ void hand_model_kill_focus(res_win_t widget, res_win_t wt)
 	}
 }
 
-void hand_model_child_command(res_win_t widget, int code, vword_t data)
+void hand_model_child_command(widget_t widget, int code, vword_t data)
 {
 	model_delta_t* ptd = GETMODELDELTA(widget);
 
@@ -1018,7 +1018,7 @@ void hand_model_child_command(res_win_t widget, int code, vword_t data)
 	}
 }
 
-void hand_model_size(res_win_t widget, int code, const xsize_t* prs)
+void hand_model_size(widget_t widget, int code, const xsize_t* prs)
 {
 	model_delta_t* ptd = GETMODELDELTA(widget);
 
@@ -1029,7 +1029,7 @@ void hand_model_size(res_win_t widget, int code, const xsize_t* prs)
 	widget_erase(widget, NULL);
 }
 
-void hand_model_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
+void hand_model_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 {
 	model_delta_t* ptd = GETMODELDELTA(widget);
 	visual_t rdc;
@@ -1083,7 +1083,7 @@ void hand_model_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 }
 
 /***************************************************************************************/
-res_win_t modelctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, res_win_t wparent)
+widget_t modelctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, widget_t wparent)
 {
 	if_dispatch_t ev = { 0 };
 
@@ -1120,7 +1120,7 @@ res_win_t modelctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* 
 	return widget_create(wname, wstyle, pxr, wparent, &ev);
 }
 
-void modelctrl_attach(res_win_t widget, link_t_ptr ptr)
+void modelctrl_attach(widget_t widget, link_t_ptr ptr)
 {
 	model_delta_t* ptd = GETMODELDELTA(widget);
 
@@ -1132,7 +1132,7 @@ void modelctrl_attach(res_win_t widget, link_t_ptr ptr)
 	modelctrl_redraw(widget);
 }
 
-link_t_ptr modelctrl_detach(res_win_t widget)
+link_t_ptr modelctrl_detach(widget_t widget)
 {
 	model_delta_t* ptd = GETMODELDELTA(widget);
 	link_t_ptr ptr;
@@ -1149,14 +1149,14 @@ link_t_ptr modelctrl_detach(res_win_t widget)
 	return ptr;
 }
 
-link_t_ptr modelctrl_fetch(res_win_t widget)
+link_t_ptr modelctrl_fetch(widget_t widget)
 {
 	model_delta_t* ptd = GETMODELDELTA(widget);
 
 	return ptd->anno;
 }
 
-void modelctrl_set_object(res_win_t widget, const byte_t* data, dword_t size)
+void modelctrl_set_object(widget_t widget, const byte_t* data, dword_t size)
 {
 	model_delta_t* ptd = GETMODELDELTA(widget);
 	visual_t rdc;
@@ -1182,7 +1182,7 @@ void modelctrl_set_object(res_win_t widget, const byte_t* data, dword_t size)
 	widget_erase(widget, NULL);
 }
 
-dword_t modelctrl_get_object(res_win_t widget, byte_t* buf, dword_t max)
+dword_t modelctrl_get_object(widget_t widget, byte_t* buf, dword_t max)
 {
 	model_delta_t* ptd = GETMODELDELTA(widget);
 	dword_t len_bmp;
@@ -1206,7 +1206,7 @@ dword_t modelctrl_get_object(res_win_t widget, byte_t* buf, dword_t max)
 	return max;
 }
 
-void modelctrl_redraw(res_win_t widget)
+void modelctrl_redraw(widget_t widget)
 {
 	model_delta_t* ptd = GETMODELDELTA(widget);
 
@@ -1217,7 +1217,7 @@ void modelctrl_redraw(res_win_t widget)
 	widget_erase(widget, NULL);
 }
 
-void modelctrl_set_lock(res_win_t widget,bool_t bLock)
+void modelctrl_set_lock(widget_t widget,bool_t bLock)
 {
 	model_delta_t* ptd = GETMODELDELTA(widget);
 
@@ -1226,7 +1226,7 @@ void modelctrl_set_lock(res_win_t widget,bool_t bLock)
 	ptd->b_lock = bLock;
 }
 
-bool_t modelctrl_get_lock(res_win_t widget)
+bool_t modelctrl_get_lock(widget_t widget)
 {
 	model_delta_t* ptd = GETMODELDELTA(widget);
 
@@ -1235,7 +1235,7 @@ bool_t modelctrl_get_lock(res_win_t widget)
 	return ptd->b_lock;
 }
 
-bool_t modelctrl_set_focus_arti(res_win_t widget, link_t_ptr ilk)
+bool_t modelctrl_set_focus_arti(widget_t widget, link_t_ptr ilk)
 {
 	model_delta_t* ptd = GETMODELDELTA(widget);
 	bool_t bRe;
@@ -1266,7 +1266,7 @@ bool_t modelctrl_set_focus_arti(res_win_t widget, link_t_ptr ilk)
 	return 1;
 }
 
-link_t_ptr modelctrl_get_focus_arti(res_win_t widget)
+link_t_ptr modelctrl_get_focus_arti(widget_t widget)
 {
 	model_delta_t* ptd = GETMODELDELTA(widget);
 
@@ -1275,7 +1275,7 @@ link_t_ptr modelctrl_get_focus_arti(res_win_t widget)
 	return ptd->arti;
 }
 
-bool_t modelctrl_get_dirty(res_win_t widget)
+bool_t modelctrl_get_dirty(widget_t widget)
 {
 	model_delta_t* ptd = GETMODELDELTA(widget);
 
@@ -1284,7 +1284,7 @@ bool_t modelctrl_get_dirty(res_win_t widget)
 	return peek_stack_node(ptd->stack, -1) ? 1 : 0;
 }
 
-void modelctrl_set_dirty(res_win_t widget, bool_t bDirty)
+void modelctrl_set_dirty(widget_t widget, bool_t bDirty)
 {
 	model_delta_t* ptd = GETMODELDELTA(widget);
 

@@ -73,86 +73,86 @@ EXP_API float svg_pt_per_in(canvas_t canv, bool_t horz);
 EXP_API float svg_pt_per_mm(canvas_t canv, bool_t horz);
 
 /*
-@FUNCTION svg_pt_to_tm: mapping points to millimeter in svg canvas.
+@FUNCTION svg_pt_to_mm: mapping points to millimeter in svg canvas.
 @INPUT canvas_t canv: the svg canvas object.
 @INPUT int pt: the points value.
 @INPUT bool_t horz: nonzero fro horizon mapping, zero for vertical mapping.
 @RETURN float: return the value in millimeter.
 */
-EXP_API float svg_pt_to_tm(canvas_t canv, int pt, bool_t horz);
+EXP_API float svg_pt_to_mm(canvas_t canv, int pt, bool_t horz);
 
 /*
-@FUNCTION svg_tm_to_pt: mapping millimeter to points in svg canvas.
+@FUNCTION svg_mm_to_pt: mapping millimeter to points in svg canvas.
 @INPUT canvas_t canv: the svg canvas object.
 @INPUT float tm: the millimeter value.
 @INPUT bool_t horz: nonzero fro horizon mapping, zero for vertical mapping.
 @RETURN float: return the value in points.
 */
-EXP_API int svg_tm_to_pt(canvas_t canv, float tm, bool_t horz);
+EXP_API int svg_mm_to_pt(canvas_t canv, float tm, bool_t horz);
 
 /*
-@FUNCTION svg_rect_tm_to_pt: mapping rectangle points to millimeter in svg canvas.
+@FUNCTION svg_rect_mm_to_pt: mapping rectangle points to millimeter in svg canvas.
 @INPUT canvas_t canv: the svg canvas object.
 @INOUTPUT xrect_t* pxr: the rect struct for inputing integer member and outputing float member.
 @RETURN void: none.
 */
-EXP_API void svg_rect_tm_to_pt(canvas_t canv, xrect_t* pxr);
+EXP_API void svg_rect_mm_to_pt(canvas_t canv, xrect_t* pxr);
 
 /*
-@FUNCTION svg_rect_pt_to_tm: mapping rectangle millimeter to points in svg canvas.
+@FUNCTION svg_rect_pt_to_mm: mapping rectangle millimeter to points in svg canvas.
 @INPUT canvas_t canv: the svg canvas object.
 @INOUTPUT xrect_t* pxr: the rect struct for inputing float member and outputing integer member.
 @RETURN void: none.
 */
-EXP_API void svg_rect_pt_to_tm(canvas_t canv, xrect_t* pxr);
+EXP_API void svg_rect_pt_to_mm(canvas_t canv, xrect_t* pxr);
 
 /*
-@FUNCTION svg_size_tm_to_pt: mapping size points to millimeter in svg canvas.
+@FUNCTION svg_size_mm_to_pt: mapping size points to millimeter in svg canvas.
 @INPUT canvas_t canv: the svg canvas object.
 @INOUTPUT xsize_t* pxs: the size struct for inputing integer member and outputing float member.
 @RETURN void: none.
 */
-EXP_API void svg_size_tm_to_pt(canvas_t canv, xsize_t* pxs);
+EXP_API void svg_size_mm_to_pt(canvas_t canv, xsize_t* pxs);
 
 /*
-@FUNCTION svg_size_pt_to_tm: mapping size points to millimeter in svg canvas.
+@FUNCTION svg_size_pt_to_mm: mapping size points to millimeter in svg canvas.
 @INPUT canvas_t canv: the svg canvas object.
 @INOUTPUT xsize_t* pxs: the size struct for inputing integer member and outputing float member.
 @RETURN void: none.
 */
-EXP_API void svg_size_pt_to_tm(canvas_t canv, xsize_t* pxs);
+EXP_API void svg_size_pt_to_mm(canvas_t canv, xsize_t* pxs);
 
 /*
-@FUNCTION svg_point_tm_to_pt: mapping point points to millimeter in svg canvas.
+@FUNCTION svg_point_mm_to_pt: mapping point points to millimeter in svg canvas.
 @INPUT canvas_t canv: the svg canvas object.
 @INOUTPUT xpoint_t* ppt: the point struct for inputing integer member and outputing float member.
 @RETURN void: none.
 */
-EXP_API void svg_point_tm_to_pt(canvas_t canv, xpoint_t* ppt);
+EXP_API void svg_point_mm_to_pt(canvas_t canv, xpoint_t* ppt);
 
 /*
-@FUNCTION svg_point_pt_to_tm: mapping point points to millimeter in svg canvas.
+@FUNCTION svg_point_pt_to_mm: mapping point points to millimeter in svg canvas.
 @INPUT canvas_t canv: the svg canvas object.
 @INOUTPUT xpoint_t* ppt: the point struct for inputing integer member and outputing float member.
 @RETURN void: none.
 */
-EXP_API void svg_point_pt_to_tm(canvas_t canv, xpoint_t* ppt);
+EXP_API void svg_point_pt_to_mm(canvas_t canv, xpoint_t* ppt);
 
 /*
-@FUNCTION svg_point_tm_to_pt: mapping point points to millimeter in svg canvas.
+@FUNCTION svg_point_mm_to_pt: mapping point points to millimeter in svg canvas.
 @INPUT canvas_t canv: the svg canvas object.
 @INOUTPUT xspan_t* ppt: the span struct for inputing integer member and outputing float member.
 @RETURN void: none.
 */
-EXP_API void svg_span_tm_to_pt(canvas_t canv, xspan_t* ppn);
+EXP_API void svg_span_mm_to_pt(canvas_t canv, xspan_t* ppn);
 
 /*
-@FUNCTION svg_point_pt_to_tm: mapping point points to millimeter in svg canvas.
+@FUNCTION svg_point_pt_to_mm: mapping point points to millimeter in svg canvas.
 @INPUT canvas_t canv: the svg canvas object.
 @INOUTPUT xspan_t* ppn: the span struct for inputing integer member and outputing float member.
 @RETURN void: none.
 */
-EXP_API void svg_span_pt_to_tm(canvas_t canv, xspan_t* ppn);
+EXP_API void svg_span_pt_to_mm(canvas_t canv, xspan_t* ppn);
 
 /*
 @FUNCTION create_svg_visual: create a svg visual.
@@ -176,22 +176,22 @@ EXP_API void destroy_svg_visual(visual_t view);
 EXP_API link_t_ptr svg_get_visual_doc(visual_t view);
 
 /*
-@FUNCTION svg_pt_to_tm: mapping points to millimeter in svg canvas.
+@FUNCTION svg_pt_to_mm: mapping points to millimeter in svg canvas.
 @INPUT visual_t view: the svg visual object.
 @INPUT int pt: the points value.
 @INPUT bool_t horz: nonzero fro horizon mapping, zero for vertical mapping.
 @RETURN float: return the value in millimeter.
 */
-EXP_API float svg_pt_to_tm_raw(visual_t view, int pt, bool_t horz);
+EXP_API float svg_pt_to_mm_raw(visual_t view, int pt, bool_t horz);
 
 /*
-@FUNCTION svg_tm_to_pt_raw: mapping millimeter to points in svg canvas.
+@FUNCTION svg_mm_to_pt_raw: mapping millimeter to points in svg canvas.
 @INPUT visual_t view: the svg visual object.
 @INPUT float tm: the millimeter value.
 @INPUT bool_t horz: nonzero fro horizon mapping, zero for vertical mapping.
 @RETURN float: return the value in points.
 */
-EXP_API int svg_tm_to_pt_raw(visual_t view, float tm, bool_t horz);
+EXP_API int svg_mm_to_pt_raw(visual_t view, float tm, bool_t horz);
 
 #ifdef	__cplusplus
 }

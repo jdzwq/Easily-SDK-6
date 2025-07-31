@@ -26,8 +26,8 @@ LICENSE.GPL3 for more details.
 
 #include "ctrl.h"
 
-#include "../xdcimp.h"
-#include "../xdcinit.h"
+#include "../xdcobj.h"
+
 
 typedef struct _tablectrl_delta_t{
 	link_t_ptr table;
@@ -36,8 +36,8 @@ typedef struct _tablectrl_delta_t{
 	float ratio;
 	bool_t onkey;
 
-	res_win_t editor;
-	res_win_t vsc;
+	widget_t editor;
+	widget_t vsc;
 
 	int org_x, org_y;
 	bool_t b_size;
@@ -54,7 +54,7 @@ typedef struct _tablectrl_delta_t{
 #define TABLECTRL_MIN_SPLIT		10
 /***************************************************************************************/
 
-static void _tablectrl_item_rect(res_win_t widget, link_t_ptr plk, xrect_t* pxr)
+static void _tablectrl_item_rect(widget_t widget, link_t_ptr plk, xrect_t* pxr)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
 
@@ -70,7 +70,7 @@ static void _tablectrl_item_rect(res_win_t widget, link_t_ptr plk, xrect_t* pxr)
 	widget_rect_to_pt(widget, pxr);
 }
 
-static void _tablectrl_item_key_rect(res_win_t widget, link_t_ptr plk, xrect_t* pxr)
+static void _tablectrl_item_key_rect(widget_t widget, link_t_ptr plk, xrect_t* pxr)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
 
@@ -86,7 +86,7 @@ static void _tablectrl_item_key_rect(res_win_t widget, link_t_ptr plk, xrect_t* 
 	widget_rect_to_pt(widget, pxr);
 }
 
-static void _tablectrl_item_val_rect(res_win_t widget, link_t_ptr plk, xrect_t* pxr)
+static void _tablectrl_item_val_rect(widget_t widget, link_t_ptr plk, xrect_t* pxr)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
 
@@ -102,7 +102,7 @@ static void _tablectrl_item_val_rect(res_win_t widget, link_t_ptr plk, xrect_t* 
 	widget_rect_to_pt(widget, pxr);
 }
 
-static void _tablectrl_reset_page(res_win_t widget)
+static void _tablectrl_reset_page(widget_t widget)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
 	xrect_t xr;
@@ -126,7 +126,7 @@ static void _tablectrl_reset_page(res_win_t widget)
 	widget_reset_paging(widget, xr.w, xr.h, xr.w, xs.h, xs.w, xs.w);
 }
 
-static void _tablectrl_ensure_visible(res_win_t widget)
+static void _tablectrl_ensure_visible(widget_t widget)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
 	xrect_t xr;
@@ -139,7 +139,7 @@ static void _tablectrl_ensure_visible(res_win_t widget)
 }
 
 /*****************************************************************************************************************/
-int noti_tablectrl_owner(res_win_t widget, unsigned int code, link_t_ptr table, link_t_ptr ilk, bool_t onkey, void* data)
+int noti_tablectrl_owner(widget_t widget, unsigned int code, link_t_ptr table, link_t_ptr ilk, bool_t onkey, void* data)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
 	NOTICE_TABLE nf = { 0 };
@@ -158,7 +158,7 @@ int noti_tablectrl_owner(res_win_t widget, unsigned int code, link_t_ptr table, 
 	return nf.ret;
 }
 
-void noti_tablectrl_begin_size(res_win_t widget, int x, int y)
+void noti_tablectrl_begin_size(widget_t widget, int x, int y)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
 
@@ -170,7 +170,7 @@ void noti_tablectrl_begin_size(res_win_t widget, int x, int y)
 	widget_set_cursor(widget, CURSOR_SIZEWE);
 }
 
-void noti_tablectrl_end_size(res_win_t widget, int x, int y)
+void noti_tablectrl_end_size(widget_t widget, int x, int y)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
 	canvbox_t cb;
@@ -196,7 +196,7 @@ void noti_tablectrl_end_size(res_win_t widget, int x, int y)
 	widget_erase(widget, NULL);
 }
 
-bool_t noti_tablectrl_item_insert(res_win_t widget, link_t_ptr ilk)
+bool_t noti_tablectrl_item_insert(widget_t widget, link_t_ptr ilk)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
 
@@ -208,7 +208,7 @@ bool_t noti_tablectrl_item_insert(res_win_t widget, link_t_ptr ilk)
 	return 1;
 }
 
-bool_t noti_tablectrl_item_delete(res_win_t widget, link_t_ptr ilk)
+bool_t noti_tablectrl_item_delete(widget_t widget, link_t_ptr ilk)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
 
@@ -220,7 +220,7 @@ bool_t noti_tablectrl_item_delete(res_win_t widget, link_t_ptr ilk)
 	return 1;
 }
 
-bool_t noti_tablectrl_item_changing(res_win_t widget)
+bool_t noti_tablectrl_item_changing(widget_t widget)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
 	xrect_t xr;
@@ -240,7 +240,7 @@ bool_t noti_tablectrl_item_changing(res_win_t widget)
 	return 1;
 }
 
-void noti_tablectrl_item_changed(res_win_t widget, link_t_ptr elk, bool_t onkey)
+void noti_tablectrl_item_changed(widget_t widget, link_t_ptr elk, bool_t onkey)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
 	xrect_t xr;
@@ -255,7 +255,7 @@ void noti_tablectrl_item_changed(res_win_t widget, link_t_ptr elk, bool_t onkey)
 	widget_erase(widget, &xr);
 }
 
-void noti_tablectrl_begin_edit(res_win_t widget)
+void noti_tablectrl_begin_edit(widget_t widget)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
 	const tchar_t* text;
@@ -302,11 +302,11 @@ void noti_tablectrl_begin_edit(res_win_t widget)
 	editbox_selectall(ptd->editor);
 }
 
-void noti_tablectrl_commit_edit(res_win_t widget)
+void noti_tablectrl_commit_edit(widget_t widget)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
 	const tchar_t* text;
-	res_win_t editctrl;
+	widget_t editctrl;
 	link_t_ptr ilk_new;
 
 	if (!widget_is_valid(ptd->editor))
@@ -325,7 +325,7 @@ void noti_tablectrl_commit_edit(res_win_t widget)
 	}
 
 	editctrl = ptd->editor;
-	ptd->editor = (res_win_t)0;
+	ptd->editor = (widget_t)0;
 
 	widget_destroy(editctrl);
 	widget_set_focus(widget);
@@ -357,10 +357,10 @@ void noti_tablectrl_commit_edit(res_win_t widget)
 	}
 }
 
-void noti_tablectrl_rollback_edit(res_win_t widget)
+void noti_tablectrl_rollback_edit(widget_t widget)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
-	res_win_t editctrl;
+	widget_t editctrl;
 
 	if (!widget_is_valid(ptd->editor))
 		return;
@@ -368,13 +368,13 @@ void noti_tablectrl_rollback_edit(res_win_t widget)
 	XDK_ASSERT(ptd->item);
 
 	editctrl = ptd->editor;
-	ptd->editor = (res_win_t)0;
+	ptd->editor = (widget_t)0;
 
 	widget_destroy(editctrl);
 	widget_set_focus(widget);
 }
 
-void noti_tablectrl_reset_editor(res_win_t widget, bool_t bCommit)
+void noti_tablectrl_reset_editor(widget_t widget, bool_t bCommit)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
 
@@ -387,7 +387,7 @@ void noti_tablectrl_reset_editor(res_win_t widget, bool_t bCommit)
 	}
 }
 
-void noti_tablectrl_reset_scroll(res_win_t widget, bool_t bUpdate)
+void noti_tablectrl_reset_scroll(widget_t widget, bool_t bUpdate)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
 
@@ -401,7 +401,7 @@ void noti_tablectrl_reset_scroll(res_win_t widget, bool_t bUpdate)
 }
 /********************************************************************************************/
 
-int hand_tablectrl_create(res_win_t widget, void* data)
+int hand_tablectrl_create(widget_t widget, void* data)
 {
 	tablectrl_delta_t* ptd;
 
@@ -420,7 +420,7 @@ int hand_tablectrl_create(res_win_t widget, void* data)
 	return 0;
 }
 
-void hand_tablectrl_destroy(res_win_t widget)
+void hand_tablectrl_destroy(widget_t widget)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
 
@@ -436,7 +436,7 @@ void hand_tablectrl_destroy(res_win_t widget)
 	widget_hand_destroy(widget);
 }
 
-void hand_tablectrl_keydown(res_win_t widget, dword_t ks, int key)
+void hand_tablectrl_keydown(widget_t widget, dword_t ks, int key)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
 
@@ -474,7 +474,7 @@ void hand_tablectrl_keydown(res_win_t widget, dword_t ks, int key)
 	}
 }
 
-void hand_tablectrl_wchar(res_win_t widget, wchar_t nChar)
+void hand_tablectrl_wchar(widget_t widget, wchar_t nChar)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
 
@@ -492,7 +492,7 @@ void hand_tablectrl_wchar(res_win_t widget, wchar_t nChar)
 	}
 }
 
-void hand_tablectrl_mouse_move(res_win_t widget, dword_t dw, const xpoint_t* pxp)
+void hand_tablectrl_mouse_move(widget_t widget, dword_t dw, const xpoint_t* pxp)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
 
@@ -500,7 +500,7 @@ void hand_tablectrl_mouse_move(res_win_t widget, dword_t dw, const xpoint_t* pxp
 		return;
 }
 
-void hand_tablectrl_mouse_hover(res_win_t widget, dword_t dw, const xpoint_t* pxp)
+void hand_tablectrl_mouse_hover(widget_t widget, dword_t dw, const xpoint_t* pxp)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
 
@@ -508,7 +508,7 @@ void hand_tablectrl_mouse_hover(res_win_t widget, dword_t dw, const xpoint_t* px
 		return;
 }
 
-void hand_tablectrl_mouse_leave(res_win_t widget, dword_t dw, const xpoint_t* pxp)
+void hand_tablectrl_mouse_leave(widget_t widget, dword_t dw, const xpoint_t* pxp)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
 
@@ -516,7 +516,7 @@ void hand_tablectrl_mouse_leave(res_win_t widget, dword_t dw, const xpoint_t* px
 		return;
 }
 
-void hand_tablectrl_lbutton_down(res_win_t widget, const xpoint_t* pxp)
+void hand_tablectrl_lbutton_down(widget_t widget, const xpoint_t* pxp)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
 	xpoint_t pt;
@@ -553,7 +553,7 @@ void hand_tablectrl_lbutton_down(res_win_t widget, const xpoint_t* pxp)
 	}
 }
 
-void hand_tablectrl_lbutton_up(res_win_t widget, const xpoint_t* pxp)
+void hand_tablectrl_lbutton_up(widget_t widget, const xpoint_t* pxp)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
 	xpoint_t pt;
@@ -603,7 +603,7 @@ void hand_tablectrl_lbutton_up(res_win_t widget, const xpoint_t* pxp)
 	noti_tablectrl_owner(widget, NC_TABLELBCLK, ptd->table, ptd->item, ptd->onkey, (void*)pxp);
 }
 
-void hand_tablectrl_lbutton_dbclick(res_win_t widget, const xpoint_t* pxp)
+void hand_tablectrl_lbutton_dbclick(widget_t widget, const xpoint_t* pxp)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
 
@@ -613,7 +613,7 @@ void hand_tablectrl_lbutton_dbclick(res_win_t widget, const xpoint_t* pxp)
 	noti_tablectrl_owner(widget, NC_TABLEDBCLK, ptd->table, ptd->item, 0, (void*)pxp);
 }
 
-void hand_tablectrl_rbutton_down(res_win_t widget, const xpoint_t* pxp)
+void hand_tablectrl_rbutton_down(widget_t widget, const xpoint_t* pxp)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
 
@@ -623,7 +623,7 @@ void hand_tablectrl_rbutton_down(res_win_t widget, const xpoint_t* pxp)
 	noti_tablectrl_reset_editor(widget, 1);
 }
 
-void hand_tablectrl_rbutton_up(res_win_t widget, const xpoint_t* pxp)
+void hand_tablectrl_rbutton_up(widget_t widget, const xpoint_t* pxp)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
 
@@ -633,7 +633,7 @@ void hand_tablectrl_rbutton_up(res_win_t widget, const xpoint_t* pxp)
 	noti_tablectrl_owner(widget, NC_TABLERBCLK, ptd->table, ptd->item, 0, (void*)pxp);
 }
 
-void hand_tablectrl_size(res_win_t widget, int code, const xsize_t* prs)
+void hand_tablectrl_size(widget_t widget, int code, const xsize_t* prs)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
 
@@ -645,7 +645,7 @@ void hand_tablectrl_size(res_win_t widget, int code, const xsize_t* prs)
 	tablectrl_redraw(widget);
 }
 
-void hand_tablectrl_scroll(res_win_t widget, bool_t bHorz, int nLine)
+void hand_tablectrl_scroll(widget_t widget, bool_t bHorz, int nLine)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
 
@@ -655,12 +655,12 @@ void hand_tablectrl_scroll(res_win_t widget, bool_t bHorz, int nLine)
 	widget_hand_scroll(widget, bHorz, nLine);
 }
 
-void hand_tablectrl_wheel(res_win_t widget, bool_t bHorz, int nDelta)
+void hand_tablectrl_wheel(widget_t widget, bool_t bHorz, int nDelta)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
 	scroll_t scr = { 0 };
 	int nLine;
-	res_win_t win;
+	widget_t win;
 
 	if (!ptd->table)
 		return;
@@ -697,7 +697,7 @@ void hand_tablectrl_wheel(res_win_t widget, bool_t bHorz, int nDelta)
 	}
 }
 
-void hand_tablectrl_child_command(res_win_t widget, int code, vword_t data)
+void hand_tablectrl_child_command(widget_t widget, int code, vword_t data)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
 
@@ -712,21 +712,21 @@ void hand_tablectrl_child_command(res_win_t widget, int code, vword_t data)
 	}
 }
 
-void hand_tablectrl_xfont(res_win_t widget, const xfont_t* pxf)
+void hand_tablectrl_xfont(widget_t widget, const xfont_t* pxf)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
 
 	xmem_copy((void*)&ptd->xf, (void*)pxf, sizeof(xfont_t));
 }
 
-void hand_tablectrl_xface(res_win_t widget, const xface_t* pxa)
+void hand_tablectrl_xface(widget_t widget, const xface_t* pxa)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
 
 	xmem_copy((void*)&ptd->xa, (void*)pxa, sizeof(xface_t));
 }
 
-void hand_tablectrl_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
+void hand_tablectrl_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
 	visual_t rdc;
@@ -779,7 +779,7 @@ void hand_tablectrl_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 }
 
 /************************************************************************************************/
-res_win_t tablectrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, res_win_t wparent)
+widget_t tablectrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, widget_t wparent)
 {
 	if_dispatch_t ev = { 0 };
 
@@ -819,7 +819,7 @@ res_win_t tablectrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* 
 	return widget_create(wname, wstyle, pxr, wparent, &ev);
 }
 
-void tablectrl_attach(res_win_t widget, link_t_ptr ptr)
+void tablectrl_attach(widget_t widget, link_t_ptr ptr)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
 
@@ -836,7 +836,7 @@ void tablectrl_attach(res_win_t widget, link_t_ptr ptr)
 	}
 }
 
-link_t_ptr tablectrl_detach(res_win_t widget)
+link_t_ptr tablectrl_detach(widget_t widget)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
 	link_t_ptr data;
@@ -851,7 +851,7 @@ link_t_ptr tablectrl_detach(res_win_t widget)
 	return data;
 }
 
-link_t_ptr tablectrl_fetch(res_win_t widget)
+link_t_ptr tablectrl_fetch(widget_t widget)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
 
@@ -860,7 +860,7 @@ link_t_ptr tablectrl_fetch(res_win_t widget)
 	return ptd->table;
 }
 
-void tablectrl_redraw(res_win_t widget)
+void tablectrl_redraw(widget_t widget)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
 	link_t_ptr ilk;
@@ -897,7 +897,7 @@ void tablectrl_redraw(res_win_t widget)
 	widget_paint(widget);
 }
 
-void tablectrl_redraw_item(res_win_t widget, link_t_ptr ent)
+void tablectrl_redraw_item(widget_t widget, link_t_ptr ent)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
 	xrect_t xr;
@@ -922,7 +922,7 @@ void tablectrl_redraw_item(res_win_t widget, link_t_ptr ent)
 	widget_erase(widget, &xr);
 }
 
-bool_t tablectrl_set_focus_item(res_win_t widget, link_t_ptr ent)
+bool_t tablectrl_set_focus_item(widget_t widget, link_t_ptr ent)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
 	bool_t bRe;
@@ -955,7 +955,7 @@ bool_t tablectrl_set_focus_item(res_win_t widget, link_t_ptr ent)
 	return 1;
 }
 
-link_t_ptr tablectrl_get_focus_item(res_win_t widget)
+link_t_ptr tablectrl_get_focus_item(widget_t widget)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
 
@@ -967,7 +967,7 @@ link_t_ptr tablectrl_get_focus_item(res_win_t widget)
 	return ptd->item;
 }
 
-void tablectrl_get_item_rect(res_win_t widget, link_t_ptr elk, xrect_t* prt)
+void tablectrl_get_item_rect(widget_t widget, link_t_ptr elk, xrect_t* prt)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
 
@@ -983,7 +983,7 @@ void tablectrl_get_item_rect(res_win_t widget, link_t_ptr elk, xrect_t* prt)
 	_tablectrl_item_rect(widget, elk, prt);
 }
 
-void tablectrl_tabskip(res_win_t widget, int nSkip)
+void tablectrl_tabskip(widget_t widget, int nSkip)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
 	link_t_ptr plk = NULL;
@@ -1056,7 +1056,7 @@ void tablectrl_tabskip(res_win_t widget, int nSkip)
 	}
 }
 
-void tablectrl_set_item_key_text(res_win_t widget, link_t_ptr elk, const tchar_t* token)
+void tablectrl_set_item_key_text(widget_t widget, link_t_ptr elk, const tchar_t* token)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
 	xrect_t xr;
@@ -1084,7 +1084,7 @@ void tablectrl_set_item_key_text(res_win_t widget, link_t_ptr elk, const tchar_t
 	widget_erase(widget, &xr);
 }
 
-void tablectrl_set_item_val_text(res_win_t widget, link_t_ptr elk, const tchar_t* token)
+void tablectrl_set_item_val_text(widget_t widget, link_t_ptr elk, const tchar_t* token)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
 	xrect_t xr;
@@ -1111,7 +1111,7 @@ void tablectrl_set_item_val_text(res_win_t widget, link_t_ptr elk, const tchar_t
 	widget_erase(widget, &xr);
 }
 
-void tablectrl_accept(res_win_t widget, bool_t bAccept)
+void tablectrl_accept(widget_t widget, bool_t bAccept)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
 	link_t_ptr nxt, ilk;
@@ -1137,7 +1137,7 @@ void tablectrl_accept(res_win_t widget, bool_t bAccept)
 	tablectrl_redraw(widget);
 }
 
-void tablectrl_auto_insert(res_win_t widget, bool_t bAuto)
+void tablectrl_auto_insert(widget_t widget, bool_t bAuto)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
 
@@ -1146,7 +1146,7 @@ void tablectrl_auto_insert(res_win_t widget, bool_t bAuto)
 	ptd->b_auto = bAuto;
 }
 
-bool_t tablectrl_delete_item(res_win_t widget, link_t_ptr ilk)
+bool_t tablectrl_delete_item(widget_t widget, link_t_ptr ilk)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
 	link_t_ptr nlk;
@@ -1185,7 +1185,7 @@ bool_t tablectrl_delete_item(res_win_t widget, link_t_ptr ilk)
 	return 1;
 }
 
-link_t_ptr tablectrl_insert_item(res_win_t widget, link_t_ptr pre)
+link_t_ptr tablectrl_insert_item(widget_t widget, link_t_ptr pre)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
 	link_t_ptr ilk;
@@ -1227,7 +1227,7 @@ link_t_ptr tablectrl_insert_item(res_win_t widget, link_t_ptr pre)
 	return ilk;
 }
 
-bool_t tablectrl_is_update(res_win_t widget)
+bool_t tablectrl_is_update(widget_t widget)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
 
@@ -1239,7 +1239,7 @@ bool_t tablectrl_is_update(res_win_t widget)
 	return (get_string_updated_entity_count(ptd->table)) ? 1 : 0;
 }
 
-void tablectrl_set_ratio(res_win_t widget, float r)
+void tablectrl_set_ratio(widget_t widget, float r)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
 
@@ -1248,7 +1248,7 @@ void tablectrl_set_ratio(res_win_t widget, float r)
 	ptd->ratio = r;
 }
 
-float tablectrl_get_ratio(res_win_t widget)
+float tablectrl_get_ratio(widget_t widget)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
 
@@ -1257,7 +1257,7 @@ float tablectrl_get_ratio(res_win_t widget)
 	return ptd->ratio;
 }
 
-void tablectrl_set_lock(res_win_t widget, bool_t b)
+void tablectrl_set_lock(widget_t widget, bool_t b)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
 
@@ -1266,7 +1266,7 @@ void tablectrl_set_lock(res_win_t widget, bool_t b)
 	ptd->b_lock = b;
 }
 
-bool_t tablectrl_get_lock(res_win_t widget)
+bool_t tablectrl_get_lock(widget_t widget)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
 

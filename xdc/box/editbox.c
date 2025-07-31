@@ -26,8 +26,8 @@ LICENSE.GPL3 for more details.
 
 #include "box.h"
 
-#include "../xdcimp.h"
-#include "../xdcinit.h"
+#include "../xdcobj.h"
+
 
 typedef struct _editbox_delta_t{
 	textor_context textor;
@@ -66,7 +66,7 @@ void _editbox_set_text(void* data, const tchar_t* buf, int len)
 	string_cpy(vs, buf, len);
 }
 
-static bool_t _editbox_get_paging(res_win_t widget, xsize_t* pse)
+static bool_t _editbox_get_paging(widget_t widget, xsize_t* pse)
 {
 	xrect_t xr;
 
@@ -78,7 +78,7 @@ static bool_t _editbox_get_paging(res_win_t widget, xsize_t* pse)
 	return 0;
 }
 
-void _editbox_auto_resize(res_win_t widget)
+void _editbox_auto_resize(widget_t widget)
 {
 	editbox_delta_t* ptd = GETEDITBOXDELTA(widget);
 	string_t vs;
@@ -95,7 +95,7 @@ void _editbox_auto_resize(res_win_t widget)
 
 	get_visual_interface(ptd->textor.cdc, &ifv);
 
-	(*ifv.pf_text_metric)(ifv.ctx, &ptd->xf, &xs);
+	(*ifv.pf_font_size)(ifv.ctx, &ptd->xf, &xs);
 	cx = xs.w;
 	(*ifv.pf_text_size)(ifv.ctx, &ptd->xf, string_ptr(vs), string_len(vs), &xs);
 
@@ -110,7 +110,7 @@ void _editbox_auto_resize(res_win_t widget)
 }
 
 /*****************************************************************************/
-void noti_editbox_command(res_win_t widget, int code, vword_t data)
+void noti_editbox_command(widget_t widget, int code, vword_t data)
 {
 	editbox_delta_t* ptd = GETEDITBOXDELTA(widget);
 
@@ -121,7 +121,7 @@ void noti_editbox_command(res_win_t widget, int code, vword_t data)
 }
 
 /**********************************************************************************/
-int hand_editbox_create(res_win_t widget, void* data)
+int hand_editbox_create(widget_t widget, void* data)
 {
 	editbox_delta_t* ptd;
 
@@ -151,10 +151,10 @@ int hand_editbox_create(res_win_t widget, void* data)
 	return 0;
 }
 
-void hand_editbox_destroy(res_win_t widget)
+void hand_editbox_destroy(widget_t widget)
 {
 	editbox_delta_t* ptd = GETEDITBOXDELTA(widget);
-	res_win_t keybox;
+	widget_t keybox;
 
 	XDK_ASSERT(ptd != NULL);
 
@@ -169,20 +169,20 @@ void hand_editbox_destroy(res_win_t widget)
 
 	widget_hand_destroy(widget);
 
-	keybox = (res_win_t)widget_get_user_prop(widget, XDCKEYBOX);
+	keybox = (widget_t)widget_get_user_prop(widget, XDCKEYBOX);
 
 	if (widget_is_valid(keybox))
 		widget_destroy(keybox);
 }
 
-void hand_editbox_copy(res_win_t widget)
+void hand_editbox_copy(widget_t widget)
 {
 	editbox_delta_t* ptd = GETEDITBOXDELTA(widget);
 
 	hand_textor_copy(&ptd->textor);
 }
 
-void hand_editbox_cut(res_win_t widget)
+void hand_editbox_cut(widget_t widget)
 {
 	editbox_delta_t* ptd = GETEDITBOXDELTA(widget);
 
@@ -200,7 +200,7 @@ void hand_editbox_cut(res_win_t widget)
 	}
 }
 
-void hand_editbox_paste(res_win_t widget)
+void hand_editbox_paste(widget_t widget)
 {
 	editbox_delta_t* ptd = GETEDITBOXDELTA(widget);
 
@@ -218,7 +218,7 @@ void hand_editbox_paste(res_win_t widget)
 	}
 }
 
-void hand_editbox_undo(res_win_t widget)
+void hand_editbox_undo(widget_t widget)
 {
 	editbox_delta_t* ptd = GETEDITBOXDELTA(widget);
 
@@ -236,14 +236,14 @@ void hand_editbox_undo(res_win_t widget)
 	}
 }
 
-void hand_editbox_set_focus(res_win_t widget, res_win_t wt)
+void hand_editbox_set_focus(widget_t widget, widget_t wt)
 {
 	editbox_delta_t* ptd = GETEDITBOXDELTA(widget);
 
 	hand_textor_set_focus(&ptd->textor, wt);
 }
 
-void hand_editbox_kill_focus(res_win_t widget, res_win_t wt)
+void hand_editbox_kill_focus(widget_t widget, widget_t wt)
 {
 	editbox_delta_t* ptd = GETEDITBOXDELTA(widget);
 
@@ -255,7 +255,7 @@ void hand_editbox_kill_focus(res_win_t widget, res_win_t wt)
 	}
 }
 
-void hand_editbox_keydown(res_win_t widget, dword_t ks, int key)
+void hand_editbox_keydown(widget_t widget, dword_t ks, int key)
 {
 	editbox_delta_t* ptd = GETEDITBOXDELTA(widget);
 
@@ -352,7 +352,7 @@ void hand_editbox_keydown(res_win_t widget, dword_t ks, int key)
 	}
 }
 
-void hand_editbox_wchar(res_win_t widget, wchar_t ch)
+void hand_editbox_wchar(widget_t widget, wchar_t ch)
 {
 	editbox_delta_t* ptd = GETEDITBOXDELTA(widget);
 
@@ -395,27 +395,27 @@ void hand_editbox_wchar(res_win_t widget, wchar_t ch)
 	}
 }
 
-void hand_editbox_lbutton_down(res_win_t widget, const xpoint_t* pxp)
+void hand_editbox_lbutton_down(widget_t widget, const xpoint_t* pxp)
 {
 	editbox_delta_t* ptd = GETEDITBOXDELTA(widget);
 
 	hand_textor_lbutton_down(&ptd->textor, pxp);
 }
 
-void hand_editbox_lbutton_up(res_win_t widget, const xpoint_t* pxp)
+void hand_editbox_lbutton_up(widget_t widget, const xpoint_t* pxp)
 {
 	editbox_delta_t* ptd = GETEDITBOXDELTA(widget);
 
 	hand_textor_lbutton_up(&ptd->textor, pxp);
 }
 
-void hand_editbox_rbutton_down(res_win_t widget, const xpoint_t* pxp)
+void hand_editbox_rbutton_down(widget_t widget, const xpoint_t* pxp)
 {
 	editbox_delta_t* ptd = GETEDITBOXDELTA(widget);
 
 }
 
-void hand_editbox_lbutton_dbclick(res_win_t widget, const xpoint_t* pxp)
+void hand_editbox_lbutton_dbclick(widget_t widget, const xpoint_t* pxp)
 {
 	editbox_delta_t* ptd = GETEDITBOXDELTA(widget);
 
@@ -425,7 +425,7 @@ void hand_editbox_lbutton_dbclick(res_win_t widget, const xpoint_t* pxp)
 		hand_textor_selectall(&ptd->textor);
 }
 
-void hand_editbox_rbutton_up(res_win_t widget, const xpoint_t* pxp)
+void hand_editbox_rbutton_up(widget_t widget, const xpoint_t* pxp)
 {
 	editbox_delta_t* ptd = GETEDITBOXDELTA(widget);
 	xpoint_t xp;
@@ -437,28 +437,28 @@ void hand_editbox_rbutton_up(res_win_t widget, const xpoint_t* pxp)
 	textor_menu(widget, &xp, WS_LAYOUT_LEFTBOTTOM);
 }
 
-void hand_editbox_mousemove(res_win_t widget, dword_t mk, const xpoint_t* ppt)
+void hand_editbox_mousemove(widget_t widget, dword_t mk, const xpoint_t* ppt)
 {
 	editbox_delta_t* ptd = GETEDITBOXDELTA(widget);
 
 	hand_textor_mousemove(&ptd->textor, mk, ppt);
 }
 
-void hand_editbox_size(res_win_t widget, int code, const xsize_t* prs)
+void hand_editbox_size(widget_t widget, int code, const xsize_t* prs)
 {
 	editbox_delta_t* ptd = GETEDITBOXDELTA(widget);
 
 	hand_textor_size(&ptd->textor, code, prs);
 }
 
-void hand_editbox_scroll(res_win_t widget, bool_t bHorz, int nLine)
+void hand_editbox_scroll(widget_t widget, bool_t bHorz, int nLine)
 {
 	editbox_delta_t* ptd = GETEDITBOXDELTA(widget);
 
 	hand_textor_scroll(&ptd->textor, bHorz, nLine);
 }
 
-void hand_editbox_menu_command(res_win_t widget, int code, int cid, vword_t data)
+void hand_editbox_menu_command(widget_t widget, int code, int cid, vword_t data)
 {
 	editbox_delta_t* ptd = GETEDITBOXDELTA(widget);
 
@@ -480,25 +480,25 @@ void hand_editbox_menu_command(res_win_t widget, int code, int cid, vword_t data
 			break;
 		}
 
-		widget_close((res_win_t)data, 1);
+		widget_close((widget_t)data, 1);
 	}
 }
 
-void hand_editbox_xfont(res_win_t widget, const xfont_t* pxf)
+void hand_editbox_xfont(widget_t widget, const xfont_t* pxf)
 {
 	editbox_delta_t* ptd = GETEDITBOXDELTA(widget);
 
 	xmem_copy((void*)&ptd->xf, (void*)pxf, sizeof(xfont_t));
 }
 
-void hand_editbox_xface(res_win_t widget, const xface_t* pxa)
+void hand_editbox_xface(widget_t widget, const xface_t* pxa)
 {
 	editbox_delta_t* ptd = GETEDITBOXDELTA(widget);
 
 	xmem_copy((void*)&ptd->xa, (void*)pxa, sizeof(xface_t));
 }
 
-void hand_editbox_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
+void hand_editbox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 {
 	editbox_delta_t* ptd = GETEDITBOXDELTA(widget);
 	xrect_t xr;
@@ -521,10 +521,10 @@ void hand_editbox_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 
 /************************************************************************************************/
 
-res_win_t editbox_create(res_win_t widget, dword_t style, const xrect_t* pxr)
+widget_t editbox_create(widget_t widget, dword_t style, const xrect_t* pxr)
 {
 	if_dispatch_t ev = { 0 };
-	res_win_t wt;
+	widget_t wt;
 
 	EVENT_BEGIN_DISPATH(&ev)
 
@@ -559,7 +559,7 @@ res_win_t editbox_create(res_win_t widget, dword_t style, const xrect_t* pxr)
 	EVENT_END_DISPATH
 
 	wt = widget_create(NULL, style, pxr, widget, &ev);
-	if (!wt) return (res_win_t)0;
+	if (!wt) return (widget_t)0;
 
 	/*widget_get_xface(wt, &xa);
 	xscpy(xa.text_wrap, GDI_ATTR_TEXT_WRAP_LINEBREAK);
@@ -568,7 +568,7 @@ res_win_t editbox_create(res_win_t widget, dword_t style, const xrect_t* pxr)
 	return wt;
 }
 
-void editbox_redraw(res_win_t widget)
+void editbox_redraw(widget_t widget)
 {
 	editbox_delta_t* ptd = GETEDITBOXDELTA(widget);
 
@@ -577,7 +577,7 @@ void editbox_redraw(res_win_t widget)
 	hand_textor_redraw(&ptd->textor);
 }
 
-void editbox_selectall(res_win_t widget)
+void editbox_selectall(widget_t widget)
 {
 	editbox_delta_t* ptd = GETEDITBOXDELTA(widget);
 
@@ -586,7 +586,7 @@ void editbox_selectall(res_win_t widget)
 	hand_textor_selectall(&ptd->textor);
 }
 
-void editbox_set_text(res_win_t widget, const tchar_t* text)
+void editbox_set_text(widget_t widget, const tchar_t* text)
 {
 	editbox_delta_t* ptd = GETEDITBOXDELTA(widget);
 
@@ -608,7 +608,7 @@ void editbox_set_text(res_win_t widget, const tchar_t* text)
 	noti_editbox_command(widget, COMMAND_UPDATE, (vword_t)NULL);
 }
 
-int editbox_get_text(res_win_t widget, tchar_t* buf, int max)
+int editbox_get_text(widget_t widget, tchar_t* buf, int max)
 {
 	editbox_delta_t* ptd = GETEDITBOXDELTA(widget);
 	string_t vs;
@@ -628,7 +628,7 @@ int editbox_get_text(res_win_t widget, tchar_t* buf, int max)
 	return len;
 }
 
-const tchar_t* editbox_get_text_ptr(res_win_t widget)
+const tchar_t* editbox_get_text_ptr(widget_t widget)
 {
 	editbox_delta_t* ptd = GETEDITBOXDELTA(widget);
 	string_t vs;
@@ -640,14 +640,14 @@ const tchar_t* editbox_get_text_ptr(res_win_t widget)
 	return string_ptr(vs);
 }
 
-bool_t editbox_is_select(res_win_t widget)
+bool_t editbox_is_select(widget_t widget)
 {
 	editbox_delta_t* ptd = GETEDITBOXDELTA(widget);
 
 	return textor_is_select(&ptd->textor);
 }
 
-bool_t editbox_is_multiline(res_win_t widget)
+bool_t editbox_is_multiline(widget_t widget)
 {
 	editbox_delta_t* ptd = GETEDITBOXDELTA(widget);
 
@@ -656,7 +656,7 @@ bool_t editbox_is_multiline(res_win_t widget)
 	return is_null(ptd->xa.text_wrap) ? 0 : 1;
 }
 
-void editbox_auto_size(res_win_t widget, bool_t bSize)
+void editbox_auto_size(widget_t widget, bool_t bSize)
 {
 	editbox_delta_t* ptd = GETEDITBOXDELTA(widget);
 
@@ -670,7 +670,7 @@ void editbox_auto_size(res_win_t widget, bool_t bSize)
 	}
 }
 
-void editbox_set_lock(res_win_t widget, bool_t bLock)
+void editbox_set_lock(widget_t widget, bool_t bLock)
 {
 	editbox_delta_t* ptd = GETEDITBOXDELTA(widget);
 
@@ -679,7 +679,7 @@ void editbox_set_lock(res_win_t widget, bool_t bLock)
 	ptd->b_lock = bLock;
 }
 
-bool_t editbox_get_lock(res_win_t widget)
+bool_t editbox_get_lock(widget_t widget)
 {
 	editbox_delta_t* ptd = GETEDITBOXDELTA(widget);
 
@@ -688,9 +688,9 @@ bool_t editbox_get_lock(res_win_t widget)
 	return ptd->b_lock;
 }
 
-res_win_t editbox_create_keybox(res_win_t widget, dword_t style, const xrect_t* pxr)
+widget_t editbox_create_keybox(widget_t widget, dword_t style, const xrect_t* pxr)
 {
-	res_win_t editbox, keybox;
+	widget_t editbox, keybox;
 	xrect_t xr = { 0 };
 
 	editbox = editbox_create(widget, style, pxr);
@@ -712,7 +712,7 @@ res_win_t editbox_create_keybox(res_win_t widget, dword_t style, const xrect_t* 
 	return editbox;
 }
 
-res_win_t editbox_get_keybox(res_win_t widget)
+widget_t editbox_get_keybox(widget_t widget)
 {
-	return (res_win_t)widget_get_user_prop(widget, XDCKEYBOX);
+	return (widget_t)widget_get_user_prop(widget, XDCKEYBOX);
 }

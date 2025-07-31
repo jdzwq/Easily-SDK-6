@@ -547,7 +547,7 @@ void child_on_paint(widget_t wt, visual_t rdc, const xrect_t* prt)
     default_xface(&xa);
 
     xsize_t xs = {0};
-    (*if_context.pf_gdi_text_metric)(ctx, &xf, &xs);
+    (*if_context.pf_gdi_font_size)(ctx, &xf, &xs);
 	(*if_context.pf_gdi_text_size)(ctx, &xf,  _T("Hello World!"), -1, &xs);
 	xp1.x = 0;
 	xp1.y = 30;

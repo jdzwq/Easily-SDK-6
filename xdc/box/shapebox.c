@@ -26,8 +26,8 @@ LICENSE.GPL3 for more details.
 
 #include "box.h"
 
-#include "../xdcimp.h"
-#include "../xdcinit.h"
+#include "../xdcobj.h"
+
 
 typedef struct _shapebox_delta_t{
 	tchar_t shape[INT_LEN + 1];
@@ -40,7 +40,7 @@ typedef struct _shapebox_delta_t{
 #define SETSHAPEBOXDELTA(ph,ptd) widget_set_user_delta(ph,(vword_t)ptd)
 
 /*********************************************************************************/
-int hand_shapebox_create(res_win_t widget, void* data)
+int hand_shapebox_create(widget_t widget, void* data)
 {
 	shapebox_delta_t* ptd = GETSHAPEBOXDELTA(widget);
 
@@ -54,7 +54,7 @@ int hand_shapebox_create(res_win_t widget, void* data)
 	return 0;
 }
 
-void hand_shapebox_destroy(res_win_t widget)
+void hand_shapebox_destroy(widget_t widget)
 {
 	shapebox_delta_t* ptd = GETSHAPEBOXDELTA(widget);
 
@@ -67,40 +67,40 @@ void hand_shapebox_destroy(res_win_t widget)
 	widget_hand_destroy(widget);
 }
 
-void hand_shapebox_lbutton_down(res_win_t widget, const xpoint_t* pxp)
+void hand_shapebox_lbutton_down(widget_t widget, const xpoint_t* pxp)
 {
 	shapebox_delta_t* ptd = GETSHAPEBOXDELTA(widget);
 	
 }
 
-void hand_shapebox_lbutton_up(res_win_t widget, const xpoint_t* pxp)
+void hand_shapebox_lbutton_up(widget_t widget, const xpoint_t* pxp)
 {
 	shapebox_delta_t* ptd = GETSHAPEBOXDELTA(widget);
 	
 }
 
-void hand_shapebox_size(res_win_t widget, int code, const xsize_t* prs)
+void hand_shapebox_size(widget_t widget, int code, const xsize_t* prs)
 {
 	shapebox_delta_t* ptd = GETSHAPEBOXDELTA(widget);
 	
 	widget_erase(widget, NULL);
 }
 
-void hand_shapebox_xbrush(res_win_t widget, const xbrush_t* pxb)
+void hand_shapebox_xbrush(widget_t widget, const xbrush_t* pxb)
 {
 	shapebox_delta_t* ptd = GETSHAPEBOXDELTA(widget);
 	
 	xmem_copy((void*)&ptd->xb, (void*)pxb, sizeof(xbrush_t));
 }
 
-void hand_shapebox_xpen(res_win_t widget, const xpen_t* pxp)
+void hand_shapebox_xpen(widget_t widget, const xpen_t* pxp)
 {
 	shapebox_delta_t* ptd = GETSHAPEBOXDELTA(widget);
 	
 	xmem_copy((void*)&ptd->xp, (void*)pxp, sizeof(xpen_t));
 }
 
-void hand_shapebox_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
+void hand_shapebox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 {
 	shapebox_delta_t* ptd = GETSHAPEBOXDELTA(widget);
 	visual_t rdc;
@@ -128,7 +128,7 @@ void hand_shapebox_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 }
 
 /***************************************************************************************/
-res_win_t shapebox_create(res_win_t widget, dword_t style, const xrect_t* pxr)
+widget_t shapebox_create(widget_t widget, dword_t style, const xrect_t* pxr)
 {
 	if_dispatch_t ev = { 0 };
 
@@ -154,7 +154,7 @@ res_win_t shapebox_create(res_win_t widget, dword_t style, const xrect_t* pxr)
 	return widget_create(NULL, style, pxr, widget, &ev);
 }
 
-void shapebox_set_shape(res_win_t widget, const tchar_t* shape)
+void shapebox_set_shape(widget_t widget, const tchar_t* shape)
 {
 	shapebox_delta_t* ptd = GETSHAPEBOXDELTA(widget);
 
@@ -165,7 +165,7 @@ void shapebox_set_shape(res_win_t widget, const tchar_t* shape)
 	widget_erase(widget, NULL);
 }
 
-int shapebox_get_shape(res_win_t widget, tchar_t* buf)
+int shapebox_get_shape(widget_t widget, tchar_t* buf)
 {
 	shapebox_delta_t* ptd = GETSHAPEBOXDELTA(widget);
 	int len;

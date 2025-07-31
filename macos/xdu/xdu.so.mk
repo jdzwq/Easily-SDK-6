@@ -20,7 +20,6 @@ LNK_PATH = /usr/local/lib
 
 INC_PATH = ../../include
 SRC_PATH = ../../xdu
-SUB_PATH = ../../xdu/macos
 OUT_PATH = ../../../Easily-app-6/macos/sbin/api
 OBJ_PATH = ../../../Easily-tmp/macos/$(MODULE)/$(ARCH)
 
@@ -28,21 +27,24 @@ TARGET = lib$(MODULE).so.$(VER)
 LINKIT = lib$(MODULE).so
 
 LIBS = -lm -ldl -lutil -lxdk -lxgc
-DIRS = $(wildcard $(SRC_PATH)/*.c $(SUB_PATH)/*.c $(SUB_PATH)/*.m)
+DIRS = $(wildcard \
+	$(SRC_PATH)/macos/*.m \
+	$(SRC_PATH)/imp/*.c \
+	$(SRC_PATH)/*.c)
 SRCS = $(notdir $(DIRS))
 COB1 = $(patsubst %.c, %.o, $(SRCS))
 COB2 = $(patsubst %.m, %.o, $(COB1))
 COBS = $(patsubst %.c, %.o, $(COB2))
 OBJS = $(addprefix $(OBJ_PATH)/,$(COBS))
 
+$(OBJ_PATH)/%.o : $(SRC_PATH)/macos/%.m
+	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
+
+$(OBJ_PATH)/%.o : $(SRC_PATH)/imp/%.c
+	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
+
 $(OBJ_PATH)/%.o : $(SRC_PATH)/%.c
-	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH) -I $(SRC_PATH)
-
-$(OBJ_PATH)/%.o : $(SUB_PATH)/%.c
-	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH) -I $(SRC_PATH)
-
-$(OBJ_PATH)/%.o : $(SUB_PATH)/%.m
-	$(CC) $(MFLAGS) -c $< -o $@ -I $(INC_PATH) -I $(SRC_PATH)
+	$(CC) $(MFLAGS) -c $< -o $@ -I $(INC_PATH)
 
 all : $(OBJS)
 	rm -f $@

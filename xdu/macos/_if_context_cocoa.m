@@ -152,44 +152,19 @@ void _render_context(visual_t src, int srcx, int srcy, visual_t dst, int dstx, i
 
 /*******************************************************************************************************************/
 
-float _pt_per_mm(visual_t rdc, bool_t horz)
+float _pixel_metric(visual_t rdc)
 {
-	return 0.0f;
+	return LOGMMPERPT;
 }
 
-static int _font_size(visual_t rdc, int height)
+float _font_metric(visual_t rdc, const xfont_t* pxf)
 {
-    return 0;
-}
+	float pt = xstof(pxf->size);
+	float pm = 0.0f;
 
-void _text_pt_size(visual_t rdc, const xfont_t* pxf, const tchar_t* txt, int len, xsize_t* pxs)
-{
-    NOP;
-}
+	font_metric_by_pt(pt, &pm, NULL);
 
-void _text_mm_size(visual_t rdc, const xfont_t* pxf, const tchar_t* txt, int len, xsize_t* pxs)
-{
-   NOP;
-}
-
-void _text_pt_metric(visual_t rdc, const xfont_t* pxf, xsize_t* pxs)
-{
-    NOP;
-}
-
-void _text_mm_metric(visual_t rdc, const xfont_t* pxf, xsize_t* pxs)
-{
-   NOP;
-}
-
-void _cast_pt_to_mm(visual_t rdc, bool_t horz, xspan_t* pan)
-{
-   NOP;
-}
-
-void _cast_mm_to_pt(visual_t rdc, bool_t horz, xspan_t* pan)
-{
-    NOP;
+	return pm;
 }
 
 

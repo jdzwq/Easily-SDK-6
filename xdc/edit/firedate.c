@@ -26,11 +26,11 @@ LICENSE.GPL3 for more details.
 
 #include "editor.h"
 
-#include "../xdcimp.h"
-#include "../xdcinit.h"
+#include "../xdcobj.h"
 
 
-static int sub_editbox_keydown(res_win_t widget, dword_t ks, int nKey, uid_t subid, vword_t delta)
+
+static int sub_editbox_keydown(widget_t widget, dword_t ks, int nKey, uid_t subid, vword_t delta)
 {
 	if (subid != IDS_EDITBOX)
 		return 0;
@@ -55,16 +55,16 @@ static int sub_editbox_keydown(res_win_t widget, dword_t ks, int nKey, uid_t sub
 	return 0;
 }
 
-static int sub_editbox_self_command(res_win_t widget, int code, vword_t data, uid_t subid, vword_t delta)
+static int sub_editbox_self_command(widget_t widget, int code, vword_t data, uid_t subid, vword_t delta)
 {
-	res_win_t datebox;
+	widget_t datebox;
 	xdate_t dt;
 	const tchar_t* text;
 
 	if (subid != IDS_EDITBOX)
 		return 0;
 
-	datebox = (res_win_t)delta;
+	datebox = (widget_t)delta;
 
 	switch (code)
 	{
@@ -98,14 +98,14 @@ static int sub_editbox_self_command(res_win_t widget, int code, vword_t data, ui
 	return 0;
 }
 
-static int sub_editbox_show(res_win_t widget, bool_t show, uid_t subid, vword_t delta)
+static int sub_editbox_show(widget_t widget, bool_t show, uid_t subid, vword_t delta)
 {
-	res_win_t datebox;
+	widget_t datebox;
 
 	if (subid != IDS_EDITBOX)
 		return 0;
 
-	datebox = (res_win_t)delta;
+	datebox = (widget_t)delta;
 
 	if (widget_is_valid(datebox))
 	{
@@ -118,14 +118,14 @@ static int sub_editbox_show(res_win_t widget, bool_t show, uid_t subid, vword_t 
 	return 1;
 }
 
-static void sub_editbox_unsubbing(res_win_t widget, uid_t subid, vword_t delta)
+static void sub_editbox_unsubbing(widget_t widget, uid_t subid, vword_t delta)
 {
-	res_win_t datebox;
+	widget_t datebox;
 
 	if (subid != IDS_EDITBOX)
 		return;
 
-	datebox = (res_win_t)delta;
+	datebox = (widget_t)delta;
 	if (widget_is_valid(datebox))
 	{
 		widget_destroy(datebox);
@@ -135,16 +135,16 @@ static void sub_editbox_unsubbing(res_win_t widget, uid_t subid, vword_t delta)
 }
 
 /////////////////////////////////////////////////////////////////////////////
-static int sub_datebox_self_command(res_win_t widget, int code, vword_t data, uid_t subid, vword_t delta)
+static int sub_datebox_self_command(widget_t widget, int code, vword_t data, uid_t subid, vword_t delta)
 {
-	res_win_t editbox;
+	widget_t editbox;
 	tchar_t token[DATE_LEN + 1] = { 0 };
 	xdate_t dt = { 0 };
 
 	if (subid != IDS_DATEBOX)
 		return 0;
 
-	editbox = (res_win_t)delta;
+	editbox = (widget_t)delta;
 
 	switch (code)
 	{
@@ -168,7 +168,7 @@ static int sub_datebox_self_command(res_win_t widget, int code, vword_t data, ui
 	return 0;
 }
 
-static void sub_datebox_unsubbing(res_win_t widget, uid_t subid, vword_t delta)
+static void sub_datebox_unsubbing(widget_t widget, uid_t subid, vword_t delta)
 {
 	if (subid != IDS_DATEBOX)
 		return;
@@ -177,9 +177,9 @@ static void sub_datebox_unsubbing(res_win_t widget, uid_t subid, vword_t delta)
 }
 
 /*************************************************************************************/
-res_win_t firedate_create(res_win_t widget, const xrect_t* pxr)
+widget_t firedate_create(widget_t widget, const xrect_t* pxr)
 {
-	res_win_t editor, datebox;
+	widget_t editor, datebox;
 	xrect_t xr_ed, xr = { 0 };
 	xsize_t xs;
 

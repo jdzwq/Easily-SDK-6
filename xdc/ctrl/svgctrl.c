@@ -26,16 +26,16 @@ LICENSE.GPL3 for more details.
 
 #include "ctrl.h"
 
-#include "../xdcimp.h"
-#include "../xdcinit.h"
+#include "../xdcobj.h"
+
 
 #define SVG_LINE_FEED		(int)100
 
 typedef struct _svg_delta_t{
 	link_t_ptr svg;
 
-	res_win_t hsc;
-	res_win_t vsc;
+	widget_t hsc;
+	widget_t vsc;
 }svg_delta_t;
 
 #define GETSVGDELTA(ph) 		(svg_delta_t*)widget_get_user_delta(ph)
@@ -43,7 +43,7 @@ typedef struct _svg_delta_t{
 
 /************************************************************************************************/
 
-static void _svgctrl_reset_page(res_win_t widget)
+static void _svgctrl_reset_page(widget_t widget)
 {
 	svg_delta_t* ptd = GETSVGDELTA(widget);
 	int pw, ph, fw, fh, lw, lh;
@@ -74,7 +74,7 @@ static void _svgctrl_reset_page(res_win_t widget)
 }
 
 /*********************************************control event**************************************/
-int noti_svg_owner(res_win_t widget, unsigned int code, link_t_ptr svg, void* data)
+int noti_svg_owner(widget_t widget, unsigned int code, link_t_ptr svg, void* data)
 {
 	svg_delta_t* ptd = GETSVGDELTA(widget);
 	NOTICE_SVG nf = { 0 };
@@ -92,7 +92,7 @@ int noti_svg_owner(res_win_t widget, unsigned int code, link_t_ptr svg, void* da
 	return nf.ret;
 }
 
-void noti_svg_reset_scroll(res_win_t widget, bool_t bUpdate)
+void noti_svg_reset_scroll(widget_t widget, bool_t bUpdate)
 {
 	svg_delta_t* ptd = GETSVGDELTA(widget);
 
@@ -114,7 +114,7 @@ void noti_svg_reset_scroll(res_win_t widget, bool_t bUpdate)
 }
 /********************************************************************************************/
 
-int hand_svg_create(res_win_t widget, void* data)
+int hand_svg_create(widget_t widget, void* data)
 {
 	svg_delta_t* ptd;
 
@@ -128,7 +128,7 @@ int hand_svg_create(res_win_t widget, void* data)
 	return 0;
 }
 
-void hand_svg_destroy(res_win_t widget)
+void hand_svg_destroy(widget_t widget)
 {
 	svg_delta_t* ptd = GETSVGDELTA(widget);
 
@@ -147,7 +147,7 @@ void hand_svg_destroy(res_win_t widget)
 	widget_hand_destroy(widget);
 }
 
-void hand_svg_size(res_win_t widget, int code, const xsize_t* pxs)
+void hand_svg_size(widget_t widget, int code, const xsize_t* pxs)
 {
 	svg_delta_t* ptd = GETSVGDELTA(widget);
 
@@ -161,7 +161,7 @@ void hand_svg_size(res_win_t widget, int code, const xsize_t* pxs)
 	widget_erase(widget, NULL);
 }
 
-void hand_svg_lbutton_down(res_win_t widget, const xpoint_t* pxp)
+void hand_svg_lbutton_down(widget_t widget, const xpoint_t* pxp)
 {
 	svg_delta_t* ptd = GETSVGDELTA(widget);
 
@@ -174,7 +174,7 @@ void hand_svg_lbutton_down(res_win_t widget, const xpoint_t* pxp)
 	}
 }
 
-void hand_svg_lbutton_up(res_win_t widget, const xpoint_t* pxp)
+void hand_svg_lbutton_up(widget_t widget, const xpoint_t* pxp)
 {
 	svg_delta_t* ptd = GETSVGDELTA(widget);
 
@@ -184,7 +184,7 @@ void hand_svg_lbutton_up(res_win_t widget, const xpoint_t* pxp)
 	noti_svg_owner(widget, NC_SVGLBCLK, ptd->svg, (void*)pxp);
 }
 
-void hand_svg_lbutton_dbclick(res_win_t widget, const xpoint_t* pxp)
+void hand_svg_lbutton_dbclick(widget_t widget, const xpoint_t* pxp)
 {
 	svg_delta_t* ptd = GETSVGDELTA(widget);
 
@@ -194,7 +194,7 @@ void hand_svg_lbutton_dbclick(res_win_t widget, const xpoint_t* pxp)
 	noti_svg_owner(widget, NC_SVGDBCLK, ptd->svg, (void*)pxp);
 }
 
-void hand_svg_rbutton_down(res_win_t widget, const xpoint_t* pxp)
+void hand_svg_rbutton_down(widget_t widget, const xpoint_t* pxp)
 {
 	svg_delta_t* ptd = GETSVGDELTA(widget);
 
@@ -203,7 +203,7 @@ void hand_svg_rbutton_down(res_win_t widget, const xpoint_t* pxp)
 
 }
 
-void hand_svg_rbutton_up(res_win_t widget, const xpoint_t* pxp)
+void hand_svg_rbutton_up(widget_t widget, const xpoint_t* pxp)
 {
 	svg_delta_t* ptd = GETSVGDELTA(widget);
 
@@ -213,7 +213,7 @@ void hand_svg_rbutton_up(res_win_t widget, const xpoint_t* pxp)
 	noti_svg_owner(widget, NC_SVGRBCLK, ptd->svg, (void*)pxp);
 }
 
-void hand_svg_scroll(res_win_t widget, bool_t bHorz, int nLine)
+void hand_svg_scroll(widget_t widget, bool_t bHorz, int nLine)
 {
 	svg_delta_t* ptd = GETSVGDELTA(widget);
 
@@ -223,12 +223,12 @@ void hand_svg_scroll(res_win_t widget, bool_t bHorz, int nLine)
 	widget_hand_scroll(widget, bHorz, nLine);
 }
 
-void hand_svg_wheel(res_win_t widget, bool_t bHorz, int nDelta)
+void hand_svg_wheel(widget_t widget, bool_t bHorz, int nDelta)
 {
 	svg_delta_t* ptd = GETSVGDELTA(widget);
 	scroll_t scr = { 0 };
 	int nLine;
-	res_win_t win;
+	widget_t win;
 
 	if (!ptd->svg)
 		return;
@@ -277,7 +277,7 @@ void hand_svg_wheel(res_win_t widget, bool_t bHorz, int nDelta)
 	}
 }
 
-void hand_svg_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
+void hand_svg_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 {
 	svg_delta_t* ptd = GETSVGDELTA(widget);
 	visual_t rdc;
@@ -327,7 +327,7 @@ void hand_svg_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 
 /*****************************************************************************************************/
 
-res_win_t svgctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, res_win_t wparent)
+widget_t svgctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, widget_t wparent)
 {
 	if_dispatch_t ev = { 0 };
 
@@ -356,7 +356,7 @@ res_win_t svgctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* px
 	return widget_create(wname, wstyle, pxr, wparent, &ev);
 }
 
-void svgctrl_attach(res_win_t widget, link_t_ptr ptr)
+void svgctrl_attach(widget_t widget, link_t_ptr ptr)
 {
 	svg_delta_t* ptd = GETSVGDELTA(widget);
 
@@ -369,7 +369,7 @@ void svgctrl_attach(res_win_t widget, link_t_ptr ptr)
 	svgctrl_redraw(widget);
 }
 
-link_t_ptr svgctrl_detach(res_win_t widget)
+link_t_ptr svgctrl_detach(widget_t widget)
 {
 	svg_delta_t* ptd = GETSVGDELTA(widget);
 	link_t_ptr ptr;
@@ -383,7 +383,7 @@ link_t_ptr svgctrl_detach(res_win_t widget)
 	return ptr;
 }
 
-link_t_ptr svgctrl_fetch(res_win_t widget)
+link_t_ptr svgctrl_fetch(widget_t widget)
 {
 	svg_delta_t* ptd = GETSVGDELTA(widget);
 
@@ -392,7 +392,7 @@ link_t_ptr svgctrl_fetch(res_win_t widget)
 	return ptd->svg;
 }
 
-void svgctrl_redraw(res_win_t widget)
+void svgctrl_redraw(widget_t widget)
 {
 	svg_delta_t* ptd = GETSVGDELTA(widget);
 

@@ -880,13 +880,15 @@ void _gdi_text_size(visual_t rdc, const xfont_t* pxf, const tchar_t* txt, int le
 	if(pxs->h < (int)height) pxs->h = (int)height;
 }
 
-void _gdi_text_metric(visual_t rdc, const xfont_t* pxf, xsize_t* pxs)
+void _gdi_font_size(visual_t rdc, const xfont_t* pxf, xsize_t* pxs)
 {
 	cocoa_context_t* ctx = (cocoa_context_t*)rdc;
 
 	CFStringRef family = CFStringCreateWithCString(NULL, pxf->family, kCFStringEncodingUTF8);
 	float px = 0.0f;
+
 	font_metric_by_pt(xstof(pxf->size), NULL, &px); 
+	
     CTFontRef font = CTFontCreateWithName(family, px, NULL);
 	CFRelease(family);
 

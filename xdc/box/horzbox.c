@@ -26,11 +26,11 @@ LICENSE.GPL3 for more details.
 
 #include "box.h"
 
-#include "../xdcimp.h"
-#include "../xdcinit.h"
+#include "../xdcobj.h"
+
 
 typedef struct _horzbox_delta_t{
-	res_win_t target;
+	widget_t target;
 
 	bool_t b_drag;
 	int org_x, org_y;
@@ -44,7 +44,7 @@ typedef struct _horzbox_delta_t{
 #define HORZBOX_LINE_DELTA		10
 /*********************************************************************************/
 
-static void _horzbox_bar_rect(res_win_t widget, xrect_t* pxr)
+static void _horzbox_bar_rect(widget_t widget, xrect_t* pxr)
 {
 	horzbox_delta_t* ptd = GETHORZBOXDELTA(widget);
 	viewbox_t vb;
@@ -65,7 +65,7 @@ static void _horzbox_bar_rect(res_win_t widget, xrect_t* pxr)
 	pxr->h = xr.h - HORZBOX_BAR_FEED * 2;
 }
 
-static int _horzbox_hint_bar(res_win_t widget, const xpoint_t* pxp)
+static int _horzbox_hint_bar(widget_t widget, const xpoint_t* pxp)
 {
 	horzbox_delta_t* ptd = GETHORZBOXDELTA(widget);
 	xrect_t xr, xr2;
@@ -92,7 +92,7 @@ static int _horzbox_hint_bar(res_win_t widget, const xpoint_t* pxp)
 }
 
 /*********************************************************************************/
-int hand_horzbox_create(res_win_t widget, void* data)
+int hand_horzbox_create(widget_t widget, void* data)
 {
 	horzbox_delta_t* ptd;
 
@@ -106,7 +106,7 @@ int hand_horzbox_create(res_win_t widget, void* data)
 	return 0;
 }
 
-void hand_horzbox_destroy(res_win_t widget)
+void hand_horzbox_destroy(widget_t widget)
 {
 	horzbox_delta_t* ptd = GETHORZBOXDELTA(widget);
 
@@ -119,7 +119,7 @@ void hand_horzbox_destroy(res_win_t widget)
 	widget_hand_destroy(widget);
 }
 
-void hand_horzbox_lbutton_down(res_win_t widget, const xpoint_t* pxp)
+void hand_horzbox_lbutton_down(widget_t widget, const xpoint_t* pxp)
 {
 	horzbox_delta_t* ptd = GETHORZBOXDELTA(widget);
 	int delta; 
@@ -144,7 +144,7 @@ void hand_horzbox_lbutton_down(res_win_t widget, const xpoint_t* pxp)
 	}
 }
 
-void hand_horzbox_mouse_move(res_win_t widget, dword_t dw, const xpoint_t* pxp)
+void hand_horzbox_mouse_move(widget_t widget, dword_t dw, const xpoint_t* pxp)
 {
 	horzbox_delta_t* ptd = GETHORZBOXDELTA(widget);
 	int delta;
@@ -171,7 +171,7 @@ void hand_horzbox_mouse_move(res_win_t widget, dword_t dw, const xpoint_t* pxp)
 	}
 }
 
-void hand_horzbox_lbutton_up(res_win_t widget, const xpoint_t* pxp)
+void hand_horzbox_lbutton_up(widget_t widget, const xpoint_t* pxp)
 {
 	horzbox_delta_t* ptd = GETHORZBOXDELTA(widget);
 
@@ -188,14 +188,14 @@ void hand_horzbox_lbutton_up(res_win_t widget, const xpoint_t* pxp)
 	widget_set_timer(widget, DEF_TIPTIME);
 }
 
-void hand_horzbox_size(res_win_t widget, int code, const xsize_t* prs)
+void hand_horzbox_size(widget_t widget, int code, const xsize_t* prs)
 {
 	horzbox_delta_t* ptd = GETHORZBOXDELTA(widget);
 	
 	widget_erase(widget, NULL);
 }
 
-void hand_horzbox_timer(res_win_t widget, vword_t tid)
+void hand_horzbox_timer(widget_t widget, vword_t tid)
 {
 	horzbox_delta_t* ptd = GETHORZBOXDELTA(widget);
 
@@ -214,7 +214,7 @@ void hand_horzbox_timer(res_win_t widget, vword_t tid)
 	}
 }
 
-void hand_horzbox_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
+void hand_horzbox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 {
 	horzbox_delta_t* ptd = GETHORZBOXDELTA(widget);
 	visual_t rdc;
@@ -255,7 +255,7 @@ void hand_horzbox_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 }
 
 /***************************************************************************************/
-res_win_t horzbox_create(res_win_t widget, dword_t style, const xrect_t* pxr)
+widget_t horzbox_create(widget_t widget, dword_t style, const xrect_t* pxr)
 {
 	if_dispatch_t ev = { 0 };
 
@@ -281,7 +281,7 @@ res_win_t horzbox_create(res_win_t widget, dword_t style, const xrect_t* pxr)
 	return widget_create(NULL, style, pxr, widget, &ev);
 }
 
-void horzbox_popup_size(res_win_t widget, xsize_t* pxs)
+void horzbox_popup_size(widget_t widget, xsize_t* pxs)
 {
 	horzbox_delta_t* ptd = GETHORZBOXDELTA(widget);
 	measure_interface im = { 0 };
@@ -297,10 +297,10 @@ void horzbox_popup_size(res_win_t widget, xsize_t* pxs)
 
 	widget_size_to_pt(widget, pxs);
 
-	widget_adjust_size(widget_get_style(widget), pxs);
+	adjust_widget_size(widget_get_style(widget), pxs);
 }
 
-void horzbox_set_target(res_win_t widget, res_win_t target)
+void horzbox_set_target(widget_t widget, widget_t target)
 {
 	horzbox_delta_t* ptd = GETHORZBOXDELTA(widget);
 
@@ -309,9 +309,9 @@ void horzbox_set_target(res_win_t widget, res_win_t target)
 	ptd->target = target;
 }
 
-res_win_t show_horzbox(res_win_t owner)
+widget_t show_horzbox(widget_t owner)
 {
-	res_win_t wt;
+	widget_t wt;
 	xrect_t xr = { 0 };
 	xsize_t xs = { 0 };
 	clr_mod_t clr = { 0 };
@@ -333,7 +333,7 @@ res_win_t show_horzbox(res_win_t owner)
 
 	widget_move(wt, RECTPOINT(&xr));
 	widget_size(wt, RECTSIZE(&xr));
-	widget_set_alpha(wt, 250);
+	widget_set_diaph(wt, 0.9f);
 
 	widget_set_timer(wt, DEF_TIPTIME);
 

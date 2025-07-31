@@ -111,7 +111,7 @@ float svg_pt_per_mm(canvas_t canv, bool_t horz)
 	}
 }
 
-float svg_pt_to_tm(canvas_t canv, int pt, bool_t horz)
+float svg_pt_to_mm(canvas_t canv, int pt, bool_t horz)
 {
 	svg_canvas_t* pcanv = TypePtrFromHead(svg_canvas_t, canv);
 	link_t_ptr svg;
@@ -138,7 +138,7 @@ float svg_pt_to_tm(canvas_t canv, int pt, bool_t horz)
 	}
 }
 
-int svg_tm_to_pt(canvas_t canv, float tm, bool_t horz)
+int svg_mm_to_pt(canvas_t canv, float tm, bool_t horz)
 {
 	svg_canvas_t* pcanv = TypePtrFromHead(svg_canvas_t, canv);
 	link_t_ptr svg;
@@ -165,30 +165,30 @@ int svg_tm_to_pt(canvas_t canv, float tm, bool_t horz)
 	}
 }
 
-void svg_rect_tm_to_pt(canvas_t canv, xrect_t* pxr)
+void svg_rect_mm_to_pt(canvas_t canv, xrect_t* pxr)
 {
 	int left, right, top, bottom;
 
 	if (pxr->fw < 0)
 	{
-		left = svg_tm_to_pt(canv, pxr->fx + pxr->fw, 1);
-		right = svg_tm_to_pt(canv, pxr->fx, 1);
+		left = svg_mm_to_pt(canv, pxr->fx + pxr->fw, 1);
+		right = svg_mm_to_pt(canv, pxr->fx, 1);
 	}
 	else
 	{
-		left = svg_tm_to_pt(canv, pxr->fx, 1);
-		right = svg_tm_to_pt(canv, pxr->fx + pxr->fw, 1);
+		left = svg_mm_to_pt(canv, pxr->fx, 1);
+		right = svg_mm_to_pt(canv, pxr->fx + pxr->fw, 1);
 	}
 
 	if (pxr->fh < 0)
 	{
-		top = svg_tm_to_pt(canv, pxr->fy + pxr->fh, 0);
-		bottom = svg_tm_to_pt(canv, pxr->fy, 0);
+		top = svg_mm_to_pt(canv, pxr->fy + pxr->fh, 0);
+		bottom = svg_mm_to_pt(canv, pxr->fy, 0);
 	}
 	else
 	{
-		top = svg_tm_to_pt(canv, pxr->fy, 0);
-		bottom = svg_tm_to_pt(canv, pxr->fy + pxr->fh, 0);
+		top = svg_mm_to_pt(canv, pxr->fy, 0);
+		bottom = svg_mm_to_pt(canv, pxr->fy + pxr->fh, 0);
 	}
 
 	pxr->x = left;
@@ -197,30 +197,30 @@ void svg_rect_tm_to_pt(canvas_t canv, xrect_t* pxr)
 	pxr->h = bottom - top;
 }
 
-void svg_rect_pt_to_tm(canvas_t canv, xrect_t* pxr)
+void svg_rect_pt_to_mm(canvas_t canv, xrect_t* pxr)
 {
 	float left, right, top, bottom;
 
 	if (pxr->w < 0)
 	{
-		left = svg_pt_to_tm(canv, pxr->x + pxr->w, 1);
-		right = svg_pt_to_tm(canv, pxr->x, 1);
+		left = svg_pt_to_mm(canv, pxr->x + pxr->w, 1);
+		right = svg_pt_to_mm(canv, pxr->x, 1);
 	}
 	else
 	{
-		left = svg_pt_to_tm(canv, pxr->x, 1);
-		right = svg_pt_to_tm(canv, pxr->x + pxr->w, 1);
+		left = svg_pt_to_mm(canv, pxr->x, 1);
+		right = svg_pt_to_mm(canv, pxr->x + pxr->w, 1);
 	}
 
 	if (pxr->h < 0)
 	{
-		top = svg_pt_to_tm(canv, pxr->y + pxr->h, 0);
-		bottom = svg_pt_to_tm(canv, pxr->y, 0);
+		top = svg_pt_to_mm(canv, pxr->y + pxr->h, 0);
+		bottom = svg_pt_to_mm(canv, pxr->y, 0);
 	}
 	else
 	{
-		top = svg_pt_to_tm(canv, pxr->y, 0);
-		bottom = svg_pt_to_tm(canv, pxr->y + pxr->h, 0);
+		top = svg_pt_to_mm(canv, pxr->y, 0);
+		bottom = svg_pt_to_mm(canv, pxr->y + pxr->h, 0);
 	}
 
 	pxr->fx = left;
@@ -229,58 +229,58 @@ void svg_rect_pt_to_tm(canvas_t canv, xrect_t* pxr)
 	pxr->fh = bottom - top;
 }
 
-void svg_size_tm_to_pt(canvas_t canv, xsize_t* pxs)
+void svg_size_mm_to_pt(canvas_t canv, xsize_t* pxs)
 {
 	int cx, cy;
 
-	cx = svg_tm_to_pt(canv, pxs->fw, 1) - svg_tm_to_pt(canv, 0, 1);
-	cy = svg_tm_to_pt(canv, pxs->fh, 0) - svg_tm_to_pt(canv, 0, 0);
+	cx = svg_mm_to_pt(canv, pxs->fw, 1) - svg_mm_to_pt(canv, 0, 1);
+	cy = svg_mm_to_pt(canv, pxs->fh, 0) - svg_mm_to_pt(canv, 0, 0);
 
 	pxs->w = cx;
 	pxs->h = cy;
 }
 
-void svg_size_pt_to_tm(canvas_t canv, xsize_t* pxs)
+void svg_size_pt_to_mm(canvas_t canv, xsize_t* pxs)
 {
 	float cx, cy;
 
-	cx = svg_pt_to_tm(canv, pxs->w, 1) - svg_pt_to_tm(canv, 0, 1);
-	cy = svg_pt_to_tm(canv, pxs->h, 0) - svg_pt_to_tm(canv, 0, 0);
+	cx = svg_pt_to_mm(canv, pxs->w, 1) - svg_pt_to_mm(canv, 0, 1);
+	cy = svg_pt_to_mm(canv, pxs->h, 0) - svg_pt_to_mm(canv, 0, 0);
 
 	pxs->fw = cx;
 	pxs->fh = cy;
 }
 
-void svg_point_tm_to_pt(canvas_t canv, xpoint_t* ppt)
+void svg_point_mm_to_pt(canvas_t canv, xpoint_t* ppt)
 {
 	int x, y;
 
-	x = svg_tm_to_pt(canv, ppt->fx, 1);
-	y = svg_tm_to_pt(canv, ppt->fy, 0);
+	x = svg_mm_to_pt(canv, ppt->fx, 1);
+	y = svg_mm_to_pt(canv, ppt->fy, 0);
 
 	ppt->x = x;
 	ppt->y = y;
 }
 
-void svg_point_pt_to_tm(canvas_t canv, xpoint_t* ppt)
+void svg_point_pt_to_mm(canvas_t canv, xpoint_t* ppt)
 {
 	float x, y;
 
-	x = svg_pt_to_tm(canv, ppt->x, 1);
-	y = svg_pt_to_tm(canv, ppt->y, 0);
+	x = svg_pt_to_mm(canv, ppt->x, 1);
+	y = svg_pt_to_mm(canv, ppt->y, 0);
 
 	ppt->fx = x;
 	ppt->fy = y;
 }
 
-void svg_span_tm_to_pt(canvas_t canv, xspan_t* ppn)
+void svg_span_mm_to_pt(canvas_t canv, xspan_t* ppn)
 {
-	ppn->s = svg_tm_to_pt(canv, ppn->fs, 1) - svg_tm_to_pt(canv, 0, 1);
+	ppn->s = svg_mm_to_pt(canv, ppn->fs, 1) - svg_mm_to_pt(canv, 0, 1);
 }
 
-void svg_span_pt_to_tm(canvas_t canv, xspan_t* ppn)
+void svg_span_pt_to_mm(canvas_t canv, xspan_t* ppn)
 {
-	ppn->fs = svg_pt_to_tm(canv, ppn->s, 1) - svg_pt_to_tm(canv, 0, 1);
+	ppn->fs = svg_pt_to_mm(canv, ppn->s, 1) - svg_pt_to_mm(canv, 0, 1);
 }
 
 typedef struct _svg_visual_t{
@@ -324,7 +324,7 @@ link_t_ptr svg_get_visual_doc(visual_t view)
 	return pview->g;
 }
 
-float svg_pt_to_tm_raw(visual_t view, int pt, bool_t horz)
+float svg_pt_to_mm_raw(visual_t view, int pt, bool_t horz)
 {
 	svg_visual_t* pview = TypePtrFromHead(svg_visual_t, view);
 
@@ -349,7 +349,7 @@ float svg_pt_to_tm_raw(visual_t view, int pt, bool_t horz)
 	}
 }
 
-int svg_tm_to_pt_raw(visual_t view, float tm, bool_t horz)
+int svg_mm_to_pt_raw(visual_t view, float tm, bool_t horz)
 {
 	svg_visual_t* pview = TypePtrFromHead(svg_visual_t, view);
 

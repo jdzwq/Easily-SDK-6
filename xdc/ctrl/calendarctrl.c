@@ -26,8 +26,8 @@ LICENSE.GPL3 for more details.
 
 #include "ctrl.h"
 
-#include "../xdcimp.h"
-#include "../xdcinit.h"
+#include "../xdcobj.h"
+
 
 #define CALENDAR_LINE_FEED		(float)50
 #define CALENDAR_DAILY_MIN_WIDTH	(float)10
@@ -49,7 +49,7 @@ typedef struct _calendar_delta_t{
 
 /******************************************calendar event********************************************************/
 
-static void _calendarctrl_daily_rect(res_win_t widget, link_t_ptr ilk, xrect_t* pxr)
+static void _calendarctrl_daily_rect(widget_t widget, link_t_ptr ilk, xrect_t* pxr)
 {
 	calendar_delta_t* ptd = GETCALENDARDELTA(widget);
 
@@ -58,7 +58,7 @@ static void _calendarctrl_daily_rect(res_win_t widget, link_t_ptr ilk, xrect_t* 
 	widget_rect_to_pt(widget, pxr);
 }
 
-static void _calendarctrl_reset_page(res_win_t widget)
+static void _calendarctrl_reset_page(widget_t widget)
 {
 	calendar_delta_t* ptd = GETCALENDARDELTA(widget);
 
@@ -90,7 +90,7 @@ static void _calendarctrl_reset_page(res_win_t widget)
 	widget_reset_scroll(widget, 0);
 }
 
-static void _calendarctrl_ensure_visible(res_win_t widget)
+static void _calendarctrl_ensure_visible(widget_t widget)
 {
 	calendar_delta_t* ptd = GETCALENDARDELTA(widget);
 
@@ -104,7 +104,7 @@ static void _calendarctrl_ensure_visible(res_win_t widget)
 	widget_ensure_visible(widget, &xr, 1);
 }
 /*********************************************************************************************************/
-int noti_calendar_owner(res_win_t widget, unsigned int code, link_t_ptr ptr, link_t_ptr ilk, void* data)
+int noti_calendar_owner(widget_t widget, unsigned int code, link_t_ptr ptr, link_t_ptr ilk, void* data)
 {
 	calendar_delta_t* ptd = GETCALENDARDELTA(widget);
 	NOTICE_CALENDAR nf = { 0 };
@@ -122,7 +122,7 @@ int noti_calendar_owner(res_win_t widget, unsigned int code, link_t_ptr ptr, lin
 	return nf.ret;
 }
 
-void noti_calendar_reset_select(res_win_t widget)
+void noti_calendar_reset_select(widget_t widget)
 {
 	calendar_delta_t* ptd = GETCALENDARDELTA(widget);
 	link_t_ptr ilk;
@@ -148,7 +148,7 @@ void noti_calendar_reset_select(res_win_t widget)
 	}
 }
 
-void noti_calendar_daily_selected(res_win_t widget, link_t_ptr ilk)
+void noti_calendar_daily_selected(widget_t widget, link_t_ptr ilk)
 {
 	calendar_delta_t* ptd = GETCALENDARDELTA(widget);
 	xrect_t xr;
@@ -170,7 +170,7 @@ void noti_calendar_daily_selected(res_win_t widget, link_t_ptr ilk)
 	widget_erase(widget, &xr);
 }
 
-bool_t noti_calendar_daily_changing(res_win_t widget)
+bool_t noti_calendar_daily_changing(widget_t widget)
 {
 	calendar_delta_t* ptd = GETCALENDARDELTA(widget);
 	xrect_t xr;
@@ -191,7 +191,7 @@ bool_t noti_calendar_daily_changing(res_win_t widget)
 	return (bool_t)1;
 }
 
-void noti_calendar_daily_changed(res_win_t widget, link_t_ptr ilk)
+void noti_calendar_daily_changed(widget_t widget, link_t_ptr ilk)
 {
 	calendar_delta_t* ptd = GETCALENDARDELTA(widget);
 	xrect_t xr;
@@ -210,7 +210,7 @@ void noti_calendar_daily_changed(res_win_t widget, link_t_ptr ilk)
 	noti_calendar_owner(widget, NC_CALENDARDAILYCHANGED, ptd->calendar, ilk, NULL);
 }
 
-void noti_calendar_daily_enter(res_win_t widget, link_t_ptr ilk)
+void noti_calendar_daily_enter(widget_t widget, link_t_ptr ilk)
 {
 	calendar_delta_t* ptd = GETCALENDARDELTA(widget);
 
@@ -219,10 +219,10 @@ void noti_calendar_daily_enter(res_win_t widget, link_t_ptr ilk)
 
 	ptd->hover = ilk;
 
-	widget_track_mouse(widget, MS_TRACK_HOVER | MS_TRACK_LEAVE);
+	//widget_track_mouse(widget, MS_TRACK_HOVER | MS_TRACK_LEAVE);
 }
 
-void noti_calendar_daily_leave(res_win_t widget)
+void noti_calendar_daily_leave(widget_t widget)
 {
 	calendar_delta_t* ptd = GETCALENDARDELTA(widget);
 
@@ -230,10 +230,10 @@ void noti_calendar_daily_leave(res_win_t widget)
 
 	ptd->hover = NULL;
 
-	widget_track_mouse(widget, MS_TRACK_HOVER | MS_TRACK_LEAVE);
+	//widget_track_mouse(widget, MS_TRACK_HOVER | MS_TRACK_LEAVE);
 }
 
-void noti_calendar_daily_hover(res_win_t widget, int x, int y)
+void noti_calendar_daily_hover(widget_t widget, int x, int y)
 {
 	calendar_delta_t* ptd = GETCALENDARDELTA(widget);
 	xpoint_t pt;
@@ -246,7 +246,7 @@ void noti_calendar_daily_hover(res_win_t widget, int x, int y)
 }
 
 /*******************************************************************************/
-int hand_calendar_create(res_win_t widget, void* data)
+int hand_calendar_create(widget_t widget, void* data)
 {
 	calendar_delta_t* ptd;
 
@@ -260,7 +260,7 @@ int hand_calendar_create(res_win_t widget, void* data)
 	return 0;
 }
 
-void hand_calendar_destroy(res_win_t widget)
+void hand_calendar_destroy(widget_t widget)
 {
 	calendar_delta_t* ptd = GETCALENDARDELTA(widget);
 
@@ -273,7 +273,7 @@ void hand_calendar_destroy(res_win_t widget)
 	widget_hand_destroy(widget);
 }
 
-void hand_calendar_size(res_win_t widget, int code, const xsize_t* prs)
+void hand_calendar_size(widget_t widget, int code, const xsize_t* prs)
 {
 	calendar_delta_t* ptd = GETCALENDARDELTA(widget);
 
@@ -283,7 +283,7 @@ void hand_calendar_size(res_win_t widget, int code, const xsize_t* prs)
 	calendarctrl_redraw(widget);
 }
 
-void hand_calendar_scroll(res_win_t widget, bool_t bHorz, int nLine)
+void hand_calendar_scroll(widget_t widget, bool_t bHorz, int nLine)
 {
 	calendar_delta_t* ptd = GETCALENDARDELTA(widget);
 
@@ -293,12 +293,12 @@ void hand_calendar_scroll(res_win_t widget, bool_t bHorz, int nLine)
 	widget_hand_scroll(widget, bHorz, nLine);
 }
 
-void hand_calendar_wheel(res_win_t widget, bool_t bHorz, int nDelta)
+void hand_calendar_wheel(widget_t widget, bool_t bHorz, int nDelta)
 {
 	calendar_delta_t* ptd = GETCALENDARDELTA(widget);
 	scroll_t scr = { 0 };
 	int nLine;
-	res_win_t win;
+	widget_t win;
 
 	if (!ptd->calendar)
 		return;
@@ -321,7 +321,7 @@ void hand_calendar_wheel(res_win_t widget, bool_t bHorz, int nDelta)
 	}
 }
 
-void hand_calendar_mouse_move(res_win_t widget, dword_t dw, const xpoint_t* pxp)
+void hand_calendar_mouse_move(widget_t widget, dword_t dw, const xpoint_t* pxp)
 {
 	calendar_delta_t* ptd = GETCALENDARDELTA(widget);
 	int nHint;
@@ -359,7 +359,7 @@ void hand_calendar_mouse_move(res_win_t widget, dword_t dw, const xpoint_t* pxp)
 	}
 }
 
-void hand_calendar_mouse_hover(res_win_t widget, dword_t dw, const xpoint_t* pxp)
+void hand_calendar_mouse_hover(widget_t widget, dword_t dw, const xpoint_t* pxp)
 {
 	calendar_delta_t* ptd = GETCALENDARDELTA(widget);
 
@@ -370,7 +370,7 @@ void hand_calendar_mouse_hover(res_win_t widget, dword_t dw, const xpoint_t* pxp
 		noti_calendar_daily_hover(widget, pxp->x, pxp->y);
 }
 
-void hand_calendar_mouse_leave(res_win_t widget, dword_t dw, const xpoint_t* pxp)
+void hand_calendar_mouse_leave(widget_t widget, dword_t dw, const xpoint_t* pxp)
 {
 	calendar_delta_t* ptd = GETCALENDARDELTA(widget);
 
@@ -381,7 +381,7 @@ void hand_calendar_mouse_leave(res_win_t widget, dword_t dw, const xpoint_t* pxp
 		noti_calendar_daily_leave(widget);
 }
 
-void hand_calendar_lbutton_down(res_win_t widget, const xpoint_t* pxp)
+void hand_calendar_lbutton_down(widget_t widget, const xpoint_t* pxp)
 {
 	calendar_delta_t* ptd = GETCALENDARDELTA(widget);
 	int nHint;
@@ -419,7 +419,7 @@ void hand_calendar_lbutton_down(res_win_t widget, const xpoint_t* pxp)
 	}
 }
 
-void hand_calendar_lbutton_up(res_win_t widget, const xpoint_t* pxp)
+void hand_calendar_lbutton_up(widget_t widget, const xpoint_t* pxp)
 {
 	calendar_delta_t* ptd = GETCALENDARDELTA(widget);
 
@@ -454,7 +454,7 @@ void hand_calendar_lbutton_up(res_win_t widget, const xpoint_t* pxp)
 	}
 }
 
-void hand_calendar_lbutton_dbclick(res_win_t widget, const xpoint_t* pxp)
+void hand_calendar_lbutton_dbclick(widget_t widget, const xpoint_t* pxp)
 {
 	calendar_delta_t* ptd = GETCALENDARDELTA(widget);
 
@@ -464,7 +464,7 @@ void hand_calendar_lbutton_dbclick(res_win_t widget, const xpoint_t* pxp)
 	noti_calendar_owner(widget, NC_CALENDARDBCLK, ptd->calendar, ptd->daily, (void*)pxp);
 }
 
-void hand_calendar_rbutton_down(res_win_t widget, const xpoint_t* pxp)
+void hand_calendar_rbutton_down(widget_t widget, const xpoint_t* pxp)
 {
 	calendar_delta_t* ptd = GETCALENDARDELTA(widget);
 
@@ -472,7 +472,7 @@ void hand_calendar_rbutton_down(res_win_t widget, const xpoint_t* pxp)
 		return;
 }
 
-void hand_calendar_rbutton_up(res_win_t widget, const xpoint_t* pxp)
+void hand_calendar_rbutton_up(widget_t widget, const xpoint_t* pxp)
 {
 	calendar_delta_t* ptd = GETCALENDARDELTA(widget);
 
@@ -482,7 +482,7 @@ void hand_calendar_rbutton_up(res_win_t widget, const xpoint_t* pxp)
 	noti_calendar_owner(widget, NC_CALENDARRBCLK, ptd->calendar, ptd->daily, (void*)pxp);
 }
 
-void hand_calendar_keydown(res_win_t widget, dword_t ks, int key)
+void hand_calendar_keydown(widget_t widget, dword_t ks, int key)
 {
 	calendar_delta_t* ptd = GETCALENDARDELTA(widget);
 
@@ -491,7 +491,7 @@ void hand_calendar_keydown(res_win_t widget, dword_t ks, int key)
 
 }
 
-void hand_calendar_notice(res_win_t widget, NOTICE* pnt)
+void hand_calendar_notice(widget_t widget, NOTICE* pnt)
 {
 	calendar_delta_t* ptd = GETCALENDARDELTA(widget);
 
@@ -499,7 +499,7 @@ void hand_calendar_notice(res_win_t widget, NOTICE* pnt)
 		return;
 }
 
-void hand_calendar_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
+void hand_calendar_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 {
 	calendar_delta_t* ptd = GETCALENDARDELTA(widget);
 	xrect_t xr = { 0 };
@@ -555,7 +555,7 @@ void hand_calendar_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 
 /***********************************************function********************************************************/
 
-res_win_t calendarctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, res_win_t wparent)
+widget_t calendarctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, widget_t wparent)
 {
 	if_dispatch_t ev = { 0 };
 
@@ -592,7 +592,7 @@ res_win_t calendarctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_
 	return widget_create(wname, wstyle, pxr, wparent, &ev);
 }
 
-void calendarctrl_attach(res_win_t widget, link_t_ptr ptr)
+void calendarctrl_attach(widget_t widget, link_t_ptr ptr)
 {
 	calendar_delta_t* ptd = GETCALENDARDELTA(widget);
 
@@ -606,7 +606,7 @@ void calendarctrl_attach(res_win_t widget, link_t_ptr ptr)
 	calendarctrl_redraw(widget);
 }
 
-link_t_ptr calendarctrl_detach(res_win_t widget)
+link_t_ptr calendarctrl_detach(widget_t widget)
 {
 	calendar_delta_t* ptd = GETCALENDARDELTA(widget);
 	link_t_ptr data;
@@ -622,7 +622,7 @@ link_t_ptr calendarctrl_detach(res_win_t widget)
 	return data;
 }
 
-link_t_ptr calendarctrl_fetch(res_win_t widget)
+link_t_ptr calendarctrl_fetch(widget_t widget)
 {
 	calendar_delta_t* ptd = GETCALENDARDELTA(widget);
 
@@ -631,7 +631,7 @@ link_t_ptr calendarctrl_fetch(res_win_t widget)
 	return ptd->calendar;
 }
 
-void calendarctrl_redraw(res_win_t widget)
+void calendarctrl_redraw(widget_t widget)
 {
 	calendar_delta_t* ptd = GETCALENDARDELTA(widget);
 	link_t_ptr ilk;
@@ -667,7 +667,7 @@ void calendarctrl_redraw(res_win_t widget)
 	widget_paint(widget);
 }
 
-void calendarctrl_redraw_daily(res_win_t widget, link_t_ptr ilk)
+void calendarctrl_redraw_daily(widget_t widget, link_t_ptr ilk)
 {
 	calendar_delta_t* ptd = GETCALENDARDELTA(widget);
 	xrect_t xr;
@@ -690,7 +690,7 @@ void calendarctrl_redraw_daily(res_win_t widget, link_t_ptr ilk)
 	widget_erase(widget, &xr);
 }
 
-void calendarctrl_tabskip(res_win_t widget, int nSkip)
+void calendarctrl_tabskip(widget_t widget, int nSkip)
 {
 	calendar_delta_t* ptd = GETCALENDARDELTA(widget);
 	link_t_ptr ilk = NULL;
@@ -727,7 +727,7 @@ void calendarctrl_tabskip(res_win_t widget, int nSkip)
 	calendarctrl_set_focus_daily(widget, ilk);
 }
 
-bool_t calendarctrl_set_focus_daily(res_win_t widget, link_t_ptr ilk)
+bool_t calendarctrl_set_focus_daily(widget_t widget, link_t_ptr ilk)
 {
 	calendar_delta_t* ptd = GETCALENDARDELTA(widget);
 	bool_t bRe;
@@ -762,7 +762,7 @@ bool_t calendarctrl_set_focus_daily(res_win_t widget, link_t_ptr ilk)
 	return (bool_t)1;
 }
 
-link_t_ptr calendarctrl_get_focus_daily(res_win_t widget)
+link_t_ptr calendarctrl_get_focus_daily(widget_t widget)
 {
 	calendar_delta_t* ptd = GETCALENDARDELTA(widget);
 
@@ -774,7 +774,7 @@ link_t_ptr calendarctrl_get_focus_daily(res_win_t widget)
 	return ptd->daily;
 }
 
-void calendarctrl_get_calendar_daily_rect(res_win_t widget, link_t_ptr ilk, xrect_t* pxr)
+void calendarctrl_get_calendar_daily_rect(widget_t widget, link_t_ptr ilk, xrect_t* pxr)
 {
 	calendar_delta_t* ptd = GETCALENDARDELTA(widget);
 	

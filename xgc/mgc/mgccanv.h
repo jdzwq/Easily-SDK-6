@@ -71,86 +71,86 @@ EXP_API float mgc_pt_per_in(canvas_t canv, bool_t horz);
 EXP_API float mgc_pt_per_mm(canvas_t canv, bool_t horz);
 
 /*
-@FUNCTION mgc_pt_to_tm: mapping points to millimeter in mgc canvas.
+@FUNCTION mgc_pt_to_mm: mapping points to millimeter in mgc canvas.
 @INPUT canvas_t canv: the mgc canvas object.
 @INPUT int pt: the points value.
 @INPUT bool_t horz: nonzero fro horizon mapping, zero for vertical mapping.
 @RETURN float: return the value in millimeter.
 */
-EXP_API float mgc_pt_to_tm(canvas_t canv, int pt, bool_t horz);
+EXP_API float mgc_pt_to_mm(canvas_t canv, int pt, bool_t horz);
 
 /*
-@FUNCTION mgc_tm_to_pt: mapping millimeter to points in mgc canvas.
+@FUNCTION mgc_mm_to_pt: mapping millimeter to points in mgc canvas.
 @INPUT canvas_t canv: the mgc canvas object.
 @INPUT float tm: the millimeter value.
 @INPUT bool_t horz: nonzero fro horizon mapping, zero for vertical mapping.
 @RETURN float: return the value in points.
 */
-EXP_API int mgc_tm_to_pt(canvas_t canv, float tm, bool_t horz);
+EXP_API int mgc_mm_to_pt(canvas_t canv, float tm, bool_t horz);
 
 /*
-@FUNCTION mgc_rect_tm_to_pt: mapping rectangle points to millimeter in mgc canvas.
+@FUNCTION mgc_rect_mm_to_pt: mapping rectangle points to millimeter in mgc canvas.
 @INPUT canvas_t canv: the mgc canvas object.
 @INOUTPUT xrect_t* pxr: the rect struct for inputing integer member and outputing float member.
 @RETURN void: none.
 */
-EXP_API void mgc_rect_tm_to_pt(canvas_t canv, xrect_t* pxr);
+EXP_API void mgc_rect_mm_to_pt(canvas_t canv, xrect_t* pxr);
 
 /*
-@FUNCTION mgc_rect_pt_to_tm: mapping rectangle millimeter to points in mgc canvas.
+@FUNCTION mgc_rect_pt_to_mm: mapping rectangle millimeter to points in mgc canvas.
 @INPUT canvas_t canv: the mgc canvas object.
 @INOUTPUT xrect_t* pxr: the rect struct for inputing float member and outputing integer member.
 @RETURN void: none.
 */
-EXP_API void mgc_rect_pt_to_tm(canvas_t canv, xrect_t* pxr);
+EXP_API void mgc_rect_pt_to_mm(canvas_t canv, xrect_t* pxr);
 
 /*
-@FUNCTION mgc_size_tm_to_pt: mapping size points to millimeter in mgc canvas.
+@FUNCTION mgc_size_mm_to_pt: mapping size points to millimeter in mgc canvas.
 @INPUT canvas_t canv: the mgc canvas object.
 @INOUTPUT xsize_t* pxs: the size struct for inputing integer member and outputing float member.
 @RETURN void: none.
 */
-EXP_API void mgc_size_tm_to_pt(canvas_t canv, xsize_t* pxs);
+EXP_API void mgc_size_mm_to_pt(canvas_t canv, xsize_t* pxs);
 
 /*
-@FUNCTION mgc_size_pt_to_tm: mapping size points to millimeter in mgc canvas.
+@FUNCTION mgc_size_pt_to_mm: mapping size points to millimeter in mgc canvas.
 @INPUT canvas_t canv: the mgc canvas object.
 @INOUTPUT xsize_t* pxs: the size struct for inputing integer member and outputing float member.
 @RETURN void: none.
 */
-EXP_API void mgc_size_pt_to_tm(canvas_t canv, xsize_t* pxs);
+EXP_API void mgc_size_pt_to_mm(canvas_t canv, xsize_t* pxs);
 
 /*
-@FUNCTION mgc_point_tm_to_pt: mapping point points to millimeter in mgc canvas.
+@FUNCTION mgc_point_mm_to_pt: mapping point points to millimeter in mgc canvas.
 @INPUT canvas_t canv: the mgc canvas object.
 @INOUTPUT xpoint_t* ppt: the point struct for inputing integer member and outputing float member.
 @RETURN void: none.
 */
-EXP_API void mgc_point_tm_to_pt(canvas_t canv, xpoint_t* ppt);
+EXP_API void mgc_point_mm_to_pt(canvas_t canv, xpoint_t* ppt);
 
 /*
-@FUNCTION mgc_point_pt_to_tm: mapping point points to millimeter in mgc canvas.
+@FUNCTION mgc_point_pt_to_mm: mapping point points to millimeter in mgc canvas.
 @INPUT canvas_t canv: the mgc canvas object.
 @INOUTPUT xpoint_t* ppt: the point struct for inputing integer member and outputing float member.
 @RETURN void: none.
 */
-EXP_API void mgc_point_pt_to_tm(canvas_t canv, xpoint_t* ppt);
+EXP_API void mgc_point_pt_to_mm(canvas_t canv, xpoint_t* ppt);
 
 /*
-@FUNCTION mgc_point_tm_to_pt: mapping point points to millimeter in mgc canvas.
+@FUNCTION mgc_point_mm_to_pt: mapping point points to millimeter in mgc canvas.
 @INPUT canvas_t canv: the mgc canvas object.
 @INOUTPUT xspan_t* ppt: the span struct for inputing integer member and outputing float member.
 @RETURN void: none.
 */
-EXP_API void mgc_span_tm_to_pt(canvas_t canv, xspan_t* ppn);
+EXP_API void mgc_span_mm_to_pt(canvas_t canv, xspan_t* ppn);
 
 /*
-@FUNCTION mgc_point_pt_to_tm: mapping point points to millimeter in mgc canvas.
+@FUNCTION mgc_point_pt_to_mm: mapping point points to millimeter in mgc canvas.
 @INPUT canvas_t canv: the mgc canvas object.
 @INOUTPUT xspan_t* ppn: the span struct for inputing integer member and outputing float member.
 @RETURN void: none.
 */
-EXP_API void mgc_span_pt_to_tm(canvas_t canv, xspan_t* ppn);
+EXP_API void mgc_span_pt_to_mm(canvas_t canv, xspan_t* ppn);
 
 
 #ifdef	__cplusplus

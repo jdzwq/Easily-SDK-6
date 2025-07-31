@@ -1284,7 +1284,7 @@ void _gdi_text_size(visual_t rdc, const xfont_t* pxf, const tchar_t* txt, int le
 	XFreeFont(g_display, pfs);
 }
 
-void _gdi_text_metric(visual_t rdc, const xfont_t* pxf, xsize_t* pxs)
+void _gdi_font_size(visual_t rdc, const xfont_t* pxf, xsize_t* pxs)
 {
 	X11_context_t* ctx = (X11_context_t*)rdc;
 	GContext cid;

@@ -26,8 +26,8 @@ LICENSE.GPL3 for more details.
 
 #include "ctrl.h"
 
-#include "../xdcimp.h"
-#include "../xdcinit.h"
+#include "../xdcobj.h"
+
 
 #define BITMAP_BYTES(buf)		GET_DWORD(buf, 2)
 #define BITMAP_WIDTH(buf)		GET_DWORD(BITMAPINFOHEADERPTR(buf), 4)
@@ -40,9 +40,9 @@ typedef struct _photo_delta_t{
 
 	bitmap_t bmp;
 
-	res_win_t editor;
-	res_win_t hsc;
-	res_win_t vsc;
+	widget_t editor;
+	widget_t hsc;
+	widget_t vsc;
 
 	bool_t b_drag;
 	bool_t b_size;
@@ -58,9 +58,9 @@ typedef struct _photo_delta_t{
 #define GETPHOTODELTA(ph) 	(photo_delta_t*)widget_get_user_delta(ph)
 #define SETPHOTODELTA(ph,ptd) widget_set_user_delta(ph,(vword_t)ptd)
 
-int noti_photo_owner(res_win_t widget, unsigned int code, link_t_ptr arti, void* data, visual_t rdc);
+int noti_photo_owner(widget_t widget, unsigned int code, link_t_ptr arti, void* data, visual_t rdc);
 /*******************************************************************************************************/
-static void _photoctrl_done(res_win_t widget)
+static void _photoctrl_done(widget_t widget)
 {
 	photo_delta_t* ptd = GETPHOTODELTA(widget);
 	byte_t* buf;
@@ -85,7 +85,7 @@ static void _photoctrl_done(res_win_t widget)
 	push_stack_node(ptd->stack, (void*)buf);
 }
 
-static void _photoctrl_undo(res_win_t widget)
+static void _photoctrl_undo(widget_t widget)
 {
 	photo_delta_t* ptd = GETPHOTODELTA(widget);
 	void* p;
@@ -112,7 +112,7 @@ static void _photoctrl_undo(res_win_t widget)
 	}
 }
 
-static void _photoctrl_discard(res_win_t widget)
+static void _photoctrl_discard(widget_t widget)
 {
 	photo_delta_t* ptd = GETPHOTODELTA(widget);
 	void* p;
@@ -126,7 +126,7 @@ static void _photoctrl_discard(res_win_t widget)
 	}
 }
 
-static void _photoctrl_clean(res_win_t widget)
+static void _photoctrl_clean(widget_t widget)
 {
 	photo_delta_t* ptd = GETPHOTODELTA(widget);
 	void* p;
@@ -139,7 +139,7 @@ static void _photoctrl_clean(res_win_t widget)
 	}
 }
 
-static bool_t _photoctrl_copy(res_win_t widget)
+static bool_t _photoctrl_copy(widget_t widget)
 {
 	photo_delta_t* ptd = GETPHOTODELTA(widget);
 	dword_t len;
@@ -193,7 +193,7 @@ static bool_t _photoctrl_copy(res_win_t widget)
 	return 1;
 }
 
-static bool_t _photoctrl_cut(res_win_t widget)
+static bool_t _photoctrl_cut(widget_t widget)
 {
 	photo_delta_t* ptd = GETPHOTODELTA(widget);
 	link_t_ptr nxt, ilk;
@@ -220,7 +220,7 @@ static bool_t _photoctrl_cut(res_win_t widget)
 	return 1;
 }
 
-static bool_t _photoctrl_paste(res_win_t widget)
+static bool_t _photoctrl_paste(widget_t widget)
 {
 	photo_delta_t* ptd = GETPHOTODELTA(widget);
 
@@ -274,7 +274,7 @@ static bool_t _photoctrl_paste(res_win_t widget)
 	return 1;
 }
 
-static void _photoctrl_arti_rect(res_win_t widget, link_t_ptr ilk, xrect_t* pxr)
+static void _photoctrl_arti_rect(widget_t widget, link_t_ptr ilk, xrect_t* pxr)
 {
 	photo_delta_t* ptd = GETPHOTODELTA(widget);
 
@@ -283,7 +283,7 @@ static void _photoctrl_arti_rect(res_win_t widget, link_t_ptr ilk, xrect_t* pxr)
 	widget_rect_to_pt(widget, pxr);
 }
 
-static bitmap_t _photoctrl_merge_anno(res_win_t widget)
+static bitmap_t _photoctrl_merge_anno(widget_t widget)
 {
 	photo_delta_t* ptd = GETPHOTODELTA(widget);
 
@@ -337,7 +337,7 @@ static bitmap_t _photoctrl_merge_anno(res_win_t widget)
 	return membm;
 }
 
-static void _photoctrl_reset_page(res_win_t widget)
+static void _photoctrl_reset_page(widget_t widget)
 {
 	photo_delta_t* ptd = GETPHOTODELTA(widget);
 	int pw, ph, fw, fh;
@@ -365,7 +365,7 @@ static void _photoctrl_reset_page(res_win_t widget)
 	widget_reset_scroll(widget, 0);
 }
 /*******************************************************************************************************/
-int noti_photo_owner(res_win_t widget, unsigned int code, link_t_ptr arti, void* data, visual_t rdc)
+int noti_photo_owner(widget_t widget, unsigned int code, link_t_ptr arti, void* data, visual_t rdc)
 {
 	photo_delta_t* ptd = GETPHOTODELTA(widget);
 	NOTICE_PHOTO nf = { 0 };
@@ -384,7 +384,7 @@ int noti_photo_owner(res_win_t widget, unsigned int code, link_t_ptr arti, void*
 	return nf.ret;
 }
 
-void noti_photo_arti_drag(res_win_t widget, int x, int y)
+void noti_photo_arti_drag(widget_t widget, int x, int y)
 {
 	photo_delta_t* ptd = GETPHOTODELTA(widget);
 	xpoint_t pt;
@@ -398,7 +398,7 @@ void noti_photo_arti_drag(res_win_t widget, int x, int y)
 	noti_photo_owner(widget, NC_PHOTOANNODRAG, ptd->arti, (void*)&pt, NULL);
 }
 
-void noti_photo_arti_drop(res_win_t widget, int x, int y)
+void noti_photo_arti_drop(widget_t widget, int x, int y)
 {
 	photo_delta_t* ptd = GETPHOTODELTA(widget);
 	xpoint_t pt;
@@ -449,7 +449,7 @@ void noti_photo_arti_drop(res_win_t widget, int x, int y)
 	noti_photo_owner(widget, NC_PHOTOANNODROP, ptd->arti, (void*)&pt, NULL);
 }
 
-void noti_photo_arti_sizing(res_win_t widget, int x, int y)
+void noti_photo_arti_sizing(widget_t widget, int x, int y)
 {
 	photo_delta_t* ptd = GETPHOTODELTA(widget);
 	xrect_t xr;
@@ -463,7 +463,7 @@ void noti_photo_arti_sizing(res_win_t widget, int x, int y)
 	noti_photo_owner(widget, NC_PHOTOANNOSIZING, ptd->arti, (void*)&xr, NULL);
 }
 
-void noti_photo_arti_sized(res_win_t widget, int x, int y)
+void noti_photo_arti_sized(widget_t widget, int x, int y)
 {
 	photo_delta_t* ptd = GETPHOTODELTA(widget);
 	xrect_t xr_org,xr;
@@ -513,7 +513,7 @@ void noti_photo_arti_sized(res_win_t widget, int x, int y)
 	noti_photo_owner(widget, NC_PHOTOANNOSIZED, ptd->arti, (void*)&xr, NULL);
 }
 
-bool_t noti_photo_arti_changing(res_win_t widget)
+bool_t noti_photo_arti_changing(widget_t widget)
 {
 	photo_delta_t* ptd = GETPHOTODELTA(widget);
 	xrect_t xr;
@@ -534,7 +534,7 @@ bool_t noti_photo_arti_changing(res_win_t widget)
 	return 1;
 }
 
-void noti_photo_arti_changed(res_win_t widget, link_t_ptr ilk)
+void noti_photo_arti_changed(widget_t widget, link_t_ptr ilk)
 {
 	photo_delta_t* ptd = GETPHOTODELTA(widget);
 	xrect_t xr;
@@ -552,7 +552,7 @@ void noti_photo_arti_changed(res_win_t widget, link_t_ptr ilk)
 	noti_photo_owner(widget, NC_PHOTOANNOCHANGED, ptd->arti, NULL, NULL);
 }
 
-void noti_photo_begin_edit(res_win_t widget)
+void noti_photo_begin_edit(widget_t widget)
 {
 	photo_delta_t* ptd = GETPHOTODELTA(widget);
 	xrect_t xr = { 0 };
@@ -586,12 +586,12 @@ void noti_photo_begin_edit(res_win_t widget)
 	editbox_auto_size(ptd->editor, 1);
 }
 
-void noti_photo_commit_edit(res_win_t widget)
+void noti_photo_commit_edit(widget_t widget)
 {
 	photo_delta_t* ptd = GETPHOTODELTA(widget);
 
 	const tchar_t* text;
-	res_win_t editctrl;
+	widget_t editctrl;
 	xrect_t xr;
 
 	if (!widget_is_valid(ptd->editor))
@@ -609,7 +609,7 @@ void noti_photo_commit_edit(res_win_t widget)
 	}
 
 	editctrl = ptd->editor;
-	ptd->editor = (res_win_t)0;
+	ptd->editor = (widget_t)0;
 
 	widget_destroy(editctrl);
 
@@ -622,10 +622,10 @@ void noti_photo_commit_edit(res_win_t widget)
 	widget_set_focus(widget);
 }
 
-void noti_photo_rollback_edit(res_win_t widget)
+void noti_photo_rollback_edit(widget_t widget)
 {
 	photo_delta_t* ptd = GETPHOTODELTA(widget);
-	res_win_t editctrl;
+	widget_t editctrl;
 
 	if (!widget_is_valid(ptd->editor))
 		return;
@@ -635,13 +635,13 @@ void noti_photo_rollback_edit(res_win_t widget)
 	noti_photo_owner(widget, NC_PHOTOANNOROLLBACK, ptd->arti, NULL, NULL);
 
 	editctrl = ptd->editor;
-	ptd->editor = (res_win_t)0;
+	ptd->editor = (widget_t)0;
 
 	widget_destroy(editctrl);
 	widget_set_focus(widget);
 }
 
-void noti_photo_reset_editor(res_win_t widget, bool_t bCommit)
+void noti_photo_reset_editor(widget_t widget, bool_t bCommit)
 {
 	photo_delta_t* ptd = GETPHOTODELTA(widget);
 
@@ -654,7 +654,7 @@ void noti_photo_reset_editor(res_win_t widget, bool_t bCommit)
 	}
 }
 
-void noti_photo_reset_scroll(res_win_t widget, bool_t bUpdate)
+void noti_photo_reset_scroll(widget_t widget, bool_t bUpdate)
 {
 	photo_delta_t* ptd = GETPHOTODELTA(widget);
 
@@ -675,7 +675,7 @@ void noti_photo_reset_scroll(res_win_t widget, bool_t bUpdate)
 	}
 }
 /*****************************************************************************/
-int hand_photo_create(res_win_t widget, void* data)
+int hand_photo_create(widget_t widget, void* data)
 {
 	photo_delta_t* ptd = GETPHOTODELTA(widget);
 
@@ -693,7 +693,7 @@ int hand_photo_create(res_win_t widget, void* data)
 	return 0;
 }
 
-void hand_photo_destroy(res_win_t widget)
+void hand_photo_destroy(widget_t widget)
 {
 	photo_delta_t* ptd = GETPHOTODELTA(widget);
 
@@ -720,7 +720,7 @@ void hand_photo_destroy(res_win_t widget)
 	widget_hand_destroy(widget);
 }
 
-void hand_photo_mouse_move(res_win_t widget, dword_t dw, const xpoint_t* pxp)
+void hand_photo_mouse_move(widget_t widget, dword_t dw, const xpoint_t* pxp)
 {
 	photo_delta_t* ptd = GETPHOTODELTA(widget);
 	int hint;
@@ -758,7 +758,7 @@ void hand_photo_mouse_move(res_win_t widget, dword_t dw, const xpoint_t* pxp)
 	}
 }
 
-void hand_photo_lbutton_down(res_win_t widget, const xpoint_t* pxp)
+void hand_photo_lbutton_down(widget_t widget, const xpoint_t* pxp)
 {
 	photo_delta_t* ptd = GETPHOTODELTA(widget);
 	int hint;
@@ -808,7 +808,7 @@ void hand_photo_lbutton_down(res_win_t widget, const xpoint_t* pxp)
 	}
 }
 
-void hand_photo_lbutton_up(res_win_t widget, const xpoint_t* pxp)
+void hand_photo_lbutton_up(widget_t widget, const xpoint_t* pxp)
 {
 	photo_delta_t* ptd = GETPHOTODELTA(widget);
 	link_t_ptr ilk = NULL;
@@ -859,7 +859,7 @@ void hand_photo_lbutton_up(res_win_t widget, const xpoint_t* pxp)
 	noti_photo_owner(widget, NC_PHOTOLBCLK, ptd->arti, (void*)pxp, NULL);
 }
 
-void hand_photo_lbutton_dbclick(res_win_t widget, const xpoint_t* pxp)
+void hand_photo_lbutton_dbclick(widget_t widget, const xpoint_t* pxp)
 {
 	photo_delta_t* ptd = GETPHOTODELTA(widget);
 
@@ -871,21 +871,21 @@ void hand_photo_lbutton_dbclick(res_win_t widget, const xpoint_t* pxp)
 	noti_photo_owner(widget, NC_PHOTODBCLK, ptd->arti, (void*)pxp, NULL);
 }
 
-void hand_photo_rbutton_down(res_win_t widget, const xpoint_t* pxp)
+void hand_photo_rbutton_down(widget_t widget, const xpoint_t* pxp)
 {
 	photo_delta_t* ptd = GETPHOTODELTA(widget);
 
 	noti_photo_reset_editor(widget, 1);
 }
 
-void hand_photo_rbutton_up(res_win_t widget, const xpoint_t* pxp)
+void hand_photo_rbutton_up(widget_t widget, const xpoint_t* pxp)
 {
 	photo_delta_t* ptd = GETPHOTODELTA(widget);
 
 	noti_photo_owner(widget, NC_PHOTORBCLK, ptd->arti, (void*)pxp, NULL);
 }
 
-void hand_photo_scroll(res_win_t widget, bool_t bHorz, int nLine)
+void hand_photo_scroll(widget_t widget, bool_t bHorz, int nLine)
 {
 	photo_delta_t* ptd = GETPHOTODELTA(widget);
 
@@ -897,12 +897,12 @@ void hand_photo_scroll(res_win_t widget, bool_t bHorz, int nLine)
 	widget_hand_scroll(widget, bHorz, nLine);
 }
 
-void hand_photo_wheel(res_win_t widget, bool_t bHorz, int nDelta)
+void hand_photo_wheel(widget_t widget, bool_t bHorz, int nDelta)
 {
 	photo_delta_t* ptd = GETPHOTODELTA(widget);
 	scroll_t scr = { 0 };
 	int nLine;
-	res_win_t win;
+	widget_t win;
 
 	if (!ptd)
 		return;
@@ -953,7 +953,7 @@ void hand_photo_wheel(res_win_t widget, bool_t bHorz, int nDelta)
 	}
 }
 
-void hand_photo_keydown(res_win_t widget, dword_t ks, int key)
+void hand_photo_keydown(widget_t widget, dword_t ks, int key)
 {
 	photo_delta_t* ptd = GETPHOTODELTA(widget);
 
@@ -988,7 +988,7 @@ void hand_photo_keydown(res_win_t widget, dword_t ks, int key)
 	}
 }
 
-void hand_photo_set_focus(res_win_t widget, res_win_t wt)
+void hand_photo_set_focus(widget_t widget, widget_t wt)
 {
 	photo_delta_t* ptd = GETPHOTODELTA(widget);
 
@@ -996,7 +996,7 @@ void hand_photo_set_focus(res_win_t widget, res_win_t wt)
 		return;
 }
 
-void hand_photo_kill_focus(res_win_t widget, res_win_t wt)
+void hand_photo_kill_focus(widget_t widget, widget_t wt)
 {
 	photo_delta_t* ptd = GETPHOTODELTA(widget);
 
@@ -1012,7 +1012,7 @@ void hand_photo_kill_focus(res_win_t widget, res_win_t wt)
 	}
 }
 
-void hand_photo_child_command(res_win_t widget, int code, vword_t data)
+void hand_photo_child_command(widget_t widget, int code, vword_t data)
 {
 	photo_delta_t* ptd = GETPHOTODELTA(widget);
 
@@ -1027,7 +1027,7 @@ void hand_photo_child_command(res_win_t widget, int code, vword_t data)
 	}
 }
 
-void hand_photo_size(res_win_t widget, int code, const xsize_t* prs)
+void hand_photo_size(widget_t widget, int code, const xsize_t* prs)
 {
 	photo_delta_t* ptd = GETPHOTODELTA(widget);
 
@@ -1038,7 +1038,7 @@ void hand_photo_size(res_win_t widget, int code, const xsize_t* prs)
 	widget_erase(widget, NULL);
 }
 
-void hand_photo_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
+void hand_photo_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 {
 	photo_delta_t* ptd = GETPHOTODELTA(widget);
 	visual_t rdc;
@@ -1092,7 +1092,7 @@ void hand_photo_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 }
 
 /***************************************************************************************/
-res_win_t photoctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, res_win_t wparent)
+widget_t photoctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, widget_t wparent)
 {
 	if_dispatch_t ev = { 0 };
 
@@ -1129,7 +1129,7 @@ res_win_t photoctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* 
 	return widget_create(wname, wstyle, pxr, wparent, &ev);
 }
 
-void photoctrl_attach(res_win_t widget, link_t_ptr ptr)
+void photoctrl_attach(widget_t widget, link_t_ptr ptr)
 {
 	photo_delta_t* ptd = GETPHOTODELTA(widget);
 
@@ -1141,7 +1141,7 @@ void photoctrl_attach(res_win_t widget, link_t_ptr ptr)
 	photoctrl_redraw(widget);
 }
 
-link_t_ptr photoctrl_detach(res_win_t widget)
+link_t_ptr photoctrl_detach(widget_t widget)
 {
 	photo_delta_t* ptd = GETPHOTODELTA(widget);
 	link_t_ptr ptr;
@@ -1158,14 +1158,14 @@ link_t_ptr photoctrl_detach(res_win_t widget)
 	return ptr;
 }
 
-link_t_ptr photoctrl_fetch(res_win_t widget)
+link_t_ptr photoctrl_fetch(widget_t widget)
 {
 	photo_delta_t* ptd = GETPHOTODELTA(widget);
 
 	return ptd->anno;
 }
 
-void photoctrl_set_bitmap(res_win_t widget, const byte_t* data, dword_t size)
+void photoctrl_set_bitmap(widget_t widget, const byte_t* data, dword_t size)
 {
 	photo_delta_t* ptd = GETPHOTODELTA(widget);
 	visual_t rdc;
@@ -1191,7 +1191,7 @@ void photoctrl_set_bitmap(res_win_t widget, const byte_t* data, dword_t size)
 	widget_erase(widget, NULL);
 }
 
-dword_t photoctrl_get_bitmap(res_win_t widget, byte_t* buf, dword_t max)
+dword_t photoctrl_get_bitmap(widget_t widget, byte_t* buf, dword_t max)
 {
 	photo_delta_t* ptd = GETPHOTODELTA(widget);
 	dword_t len_bmp;
@@ -1215,7 +1215,7 @@ dword_t photoctrl_get_bitmap(res_win_t widget, byte_t* buf, dword_t max)
 	return max;
 }
 
-void photoctrl_redraw(res_win_t widget)
+void photoctrl_redraw(widget_t widget)
 {
 	photo_delta_t* ptd = GETPHOTODELTA(widget);
 
@@ -1226,7 +1226,7 @@ void photoctrl_redraw(res_win_t widget)
 	widget_erase(widget, NULL);
 }
 
-void photoctrl_set_lock(res_win_t widget,bool_t bLock)
+void photoctrl_set_lock(widget_t widget,bool_t bLock)
 {
 	photo_delta_t* ptd = GETPHOTODELTA(widget);
 
@@ -1235,7 +1235,7 @@ void photoctrl_set_lock(res_win_t widget,bool_t bLock)
 	ptd->b_lock = bLock;
 }
 
-bool_t photoctrl_get_lock(res_win_t widget)
+bool_t photoctrl_get_lock(widget_t widget)
 {
 	photo_delta_t* ptd = GETPHOTODELTA(widget);
 
@@ -1244,7 +1244,7 @@ bool_t photoctrl_get_lock(res_win_t widget)
 	return ptd->b_lock;
 }
 
-bool_t photoctrl_set_focus_arti(res_win_t widget, link_t_ptr ilk)
+bool_t photoctrl_set_focus_arti(widget_t widget, link_t_ptr ilk)
 {
 	photo_delta_t* ptd = GETPHOTODELTA(widget);
 	bool_t bRe;
@@ -1275,7 +1275,7 @@ bool_t photoctrl_set_focus_arti(res_win_t widget, link_t_ptr ilk)
 	return 1;
 }
 
-link_t_ptr photoctrl_get_focus_arti(res_win_t widget)
+link_t_ptr photoctrl_get_focus_arti(widget_t widget)
 {
 	photo_delta_t* ptd = GETPHOTODELTA(widget);
 
@@ -1284,7 +1284,7 @@ link_t_ptr photoctrl_get_focus_arti(res_win_t widget)
 	return ptd->arti;
 }
 
-void photoctrl_commit(res_win_t widget)
+void photoctrl_commit(widget_t widget)
 {
 	photo_delta_t* ptd = GETPHOTODELTA(widget);
 	bitmap_t newbmp;
@@ -1307,7 +1307,7 @@ void photoctrl_commit(res_win_t widget)
 	photoctrl_redraw(widget);
 }
 
-bool_t photoctrl_get_dirty(res_win_t widget)
+bool_t photoctrl_get_dirty(widget_t widget)
 {
 	photo_delta_t* ptd = GETPHOTODELTA(widget);
 
@@ -1316,7 +1316,7 @@ bool_t photoctrl_get_dirty(res_win_t widget)
 	return peek_stack_node(ptd->stack, -1) ? 1 : 0;
 }
 
-void photoctrl_set_dirty(res_win_t widget, bool_t bDirty)
+void photoctrl_set_dirty(widget_t widget, bool_t bDirty)
 {
 	photo_delta_t* ptd = GETPHOTODELTA(widget);
 

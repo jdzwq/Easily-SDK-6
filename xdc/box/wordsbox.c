@@ -26,8 +26,8 @@ LICENSE.GPL3 for more details.
 
 #include "box.h"
 
-#include "../xdcimp.h"
-#include "../xdcinit.h"
+#include "../xdcobj.h"
+
 
 typedef struct _words_delta_t{
 	link_t_ptr words;
@@ -46,7 +46,7 @@ typedef struct _words_delta_t{
 #define WORDSBOX_GUID_SPAN		(float)6
 
 /***************************************************************************************/
-void _wordsbox_item_rect(res_win_t widget, link_t_ptr plk, xrect_t* pxr)
+void _wordsbox_item_rect(widget_t widget, link_t_ptr plk, xrect_t* pxr)
 {
 	words_delta_t* ptd = GETWORDSDELTA(widget);
 
@@ -61,7 +61,7 @@ void _wordsbox_item_rect(res_win_t widget, link_t_ptr plk, xrect_t* pxr)
 	widget_rect_to_pt(widget, pxr);
 }
 
-void _wordsbox_reset_page(res_win_t widget)
+void _wordsbox_reset_page(widget_t widget)
 {
 	words_delta_t* ptd = GETWORDSDELTA(widget);
 	measure_interface im = { 0 };
@@ -79,7 +79,7 @@ void _wordsbox_reset_page(res_win_t widget)
 	widget_reset_paging(widget, xr.w, xr.h, xs.w, xs.h, 0, 0);
 }
 
-void _wordsbox_ensure_visible(res_win_t widget)
+void _wordsbox_ensure_visible(widget_t widget)
 {
 	words_delta_t* ptd = GETWORDSDELTA(widget);
 	xrect_t xr;
@@ -94,7 +94,7 @@ void _wordsbox_ensure_visible(res_win_t widget)
 
 /*************************************************************************/
 
-void noti_wordsbox_command(res_win_t widget, int code, vword_t data)
+void noti_wordsbox_command(widget_t widget, int code, vword_t data)
 {
 	words_delta_t* ptd = GETWORDSDELTA(widget);
 
@@ -104,7 +104,7 @@ void noti_wordsbox_command(res_win_t widget, int code, vword_t data)
 		widget_post_command(widget_get_owner(widget), code, widget_get_user_id(widget), data);
 }
 
-void wordsbox_on_item_changing(res_win_t widget)
+void wordsbox_on_item_changing(widget_t widget)
 {
 	words_delta_t* ptd = GETWORDSDELTA(widget);
 	xrect_t xr;
@@ -118,7 +118,7 @@ void wordsbox_on_item_changing(res_win_t widget)
 	widget_erase(widget, &xr);
 }
 
-void wordsbox_on_item_changed(res_win_t widget, link_t_ptr elk)
+void wordsbox_on_item_changed(widget_t widget, link_t_ptr elk)
 {
 	words_delta_t* ptd = GETWORDSDELTA(widget);
 	xrect_t xr;
@@ -135,7 +135,7 @@ void wordsbox_on_item_changed(res_win_t widget, link_t_ptr elk)
 }
 
 /********************************************************************************************/
-int hand_words_create(res_win_t widget, void* data)
+int hand_words_create(widget_t widget, void* data)
 {
 	words_delta_t* ptd;
 
@@ -162,7 +162,7 @@ int hand_words_create(res_win_t widget, void* data)
 	return 0;
 }
 
-void hand_words_destroy(res_win_t widget)
+void hand_words_destroy(widget_t widget)
 {
 	words_delta_t* ptd = GETWORDSDELTA(widget);
 
@@ -173,7 +173,7 @@ void hand_words_destroy(res_win_t widget)
 	SETWORDSDELTA(widget, 0);
 }
 
-void hand_words_keydown(res_win_t widget, dword_t ks, int key)
+void hand_words_keydown(widget_t widget, dword_t ks, int key)
 {
 	words_delta_t* ptd = GETWORDSDELTA(widget);
 
@@ -210,7 +210,7 @@ void hand_words_keydown(res_win_t widget, dword_t ks, int key)
 }
 
 
-void hand_words_mouse_move(res_win_t widget, dword_t dw, const xpoint_t* pxp)
+void hand_words_mouse_move(widget_t widget, dword_t dw, const xpoint_t* pxp)
 {
 	words_delta_t* ptd = GETWORDSDELTA(widget);
 
@@ -218,7 +218,7 @@ void hand_words_mouse_move(res_win_t widget, dword_t dw, const xpoint_t* pxp)
 		return;
 }
 
-void hand_words_lbutton_down(res_win_t widget, const xpoint_t* pxp)
+void hand_words_lbutton_down(widget_t widget, const xpoint_t* pxp)
 {
 	words_delta_t* ptd = GETWORDSDELTA(widget);
 
@@ -226,7 +226,7 @@ void hand_words_lbutton_down(res_win_t widget, const xpoint_t* pxp)
 		return;
 }
 
-void hand_words_lbutton_up(res_win_t widget, const xpoint_t* pxp)
+void hand_words_lbutton_up(widget_t widget, const xpoint_t* pxp)
 {
 	words_delta_t* ptd = GETWORDSDELTA(widget);
 	measure_interface im = { 0 };
@@ -257,7 +257,7 @@ void hand_words_lbutton_up(res_win_t widget, const xpoint_t* pxp)
 	noti_wordsbox_command(widget, COMMAND_CHANGE, (vword_t)NULL);
 }
 
-void hand_words_size(res_win_t widget, int code, const xsize_t* prs)
+void hand_words_size(widget_t widget, int code, const xsize_t* prs)
 {
 	words_delta_t* ptd = GETWORDSDELTA(widget);
 
@@ -267,7 +267,7 @@ void hand_words_size(res_win_t widget, int code, const xsize_t* prs)
 	wordsbox_redraw(widget);
 }
 
-void hand_words_scroll(res_win_t widget, bool_t bHorz, int nLine)
+void hand_words_scroll(widget_t widget, bool_t bHorz, int nLine)
 {
 	words_delta_t* ptd = GETWORDSDELTA(widget);
 
@@ -277,14 +277,14 @@ void hand_words_scroll(res_win_t widget, bool_t bHorz, int nLine)
 	widget_hand_scroll(widget, bHorz, nLine);
 }
 
-void hand_words_xfont(res_win_t widget, const xfont_t* pxf)
+void hand_words_xfont(widget_t widget, const xfont_t* pxf)
 {
 	words_delta_t* ptd = GETWORDSDELTA(widget);
 
 	xmem_copy((void*)&ptd->xf, (void*)pxf, sizeof(xfont_t));
 }
 
-void hand_words_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
+void hand_words_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 {
 	words_delta_t* ptd = GETWORDSDELTA(widget);
 	visual_t rdc;
@@ -332,7 +332,7 @@ void hand_words_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 }
 
 /************************************************************************************************/
-res_win_t wordsbox_create(res_win_t widget, dword_t style, const xrect_t* pxr)
+widget_t wordsbox_create(widget_t widget, dword_t style, const xrect_t* pxr)
 {
 	if_dispatch_t ev = { 0 };
 
@@ -357,7 +357,7 @@ res_win_t wordsbox_create(res_win_t widget, dword_t style, const xrect_t* pxr)
 	return widget_create(NULL, style, pxr, widget, &ev);
 }
 
-void wordsbox_set_data(res_win_t widget, link_t_ptr ptr)
+void wordsbox_set_data(widget_t widget, link_t_ptr ptr)
 {
 	words_delta_t* ptd = GETWORDSDELTA(widget);
 
@@ -371,7 +371,7 @@ void wordsbox_set_data(res_win_t widget, link_t_ptr ptr)
 	wordsbox_redraw(widget);
 }
 
-link_t_ptr wordsbox_get_data(res_win_t widget)
+link_t_ptr wordsbox_get_data(widget_t widget)
 {
 	words_delta_t* ptd = GETWORDSDELTA(widget);
 
@@ -380,7 +380,7 @@ link_t_ptr wordsbox_get_data(res_win_t widget)
 	return ptd->words;
 }
 
-void wordsbox_redraw(res_win_t widget)
+void wordsbox_redraw(widget_t widget)
 {
 	words_delta_t* ptd = GETWORDSDELTA(widget);
 	link_t_ptr ilk;
@@ -416,7 +416,7 @@ void wordsbox_redraw(res_win_t widget)
 	widget_paint(widget);
 }
 
-bool_t wordsbox_set_focus_item(res_win_t widget, link_t_ptr ent)
+bool_t wordsbox_set_focus_item(widget_t widget, link_t_ptr ent)
 {
 	words_delta_t* ptd = GETWORDSDELTA(widget);
 	bool_t bRe;
@@ -458,7 +458,7 @@ bool_t wordsbox_set_focus_item(res_win_t widget, link_t_ptr ent)
 	return 1;
 }
 
-link_t_ptr wordsbox_get_focus_item(res_win_t widget)
+link_t_ptr wordsbox_get_focus_item(widget_t widget)
 {
 	words_delta_t* ptd = GETWORDSDELTA(widget);
 
@@ -470,7 +470,7 @@ link_t_ptr wordsbox_get_focus_item(res_win_t widget)
 	return ptd->item;
 }
 
-void wordsbox_get_item_rect(res_win_t widget, link_t_ptr elk, xrect_t* prt)
+void wordsbox_get_item_rect(widget_t widget, link_t_ptr elk, xrect_t* prt)
 {
 	words_delta_t* ptd = GETWORDSDELTA(widget);
 
@@ -486,7 +486,7 @@ void wordsbox_get_item_rect(res_win_t widget, link_t_ptr elk, xrect_t* prt)
 	_wordsbox_item_rect(widget, elk, prt);
 }
 
-void wordsbox_tabskip(res_win_t widget, int nSkip)
+void wordsbox_tabskip(widget_t widget, int nSkip)
 {
 	words_delta_t* ptd = GETWORDSDELTA(widget);
 	link_t_ptr plk = NULL;
@@ -533,7 +533,7 @@ void wordsbox_tabskip(res_win_t widget, int nSkip)
 	}
 }
 
-void wordsbox_move_prev_page(res_win_t widget)
+void wordsbox_move_prev_page(widget_t widget)
 {
 	words_delta_t* ptd = GETWORDSDELTA(widget);
 	int nCurPage;
@@ -554,7 +554,7 @@ void wordsbox_move_prev_page(res_win_t widget)
 	}
 }
 
-void wordsbox_move_next_page(res_win_t widget)
+void wordsbox_move_next_page(widget_t widget)
 {
 	words_delta_t* ptd = GETWORDSDELTA(widget);
 	int nCurPage, nMaxPage;
@@ -579,7 +579,7 @@ void wordsbox_move_next_page(res_win_t widget)
 	}
 }
 
-void wordsbox_move_first_page(res_win_t widget)
+void wordsbox_move_first_page(widget_t widget)
 {
 	words_delta_t* ptd = GETWORDSDELTA(widget);
 	int nCurPage;
@@ -600,7 +600,7 @@ void wordsbox_move_first_page(res_win_t widget)
 	}
 }
 
-void wordsbox_move_last_page(res_win_t widget)
+void wordsbox_move_last_page(widget_t widget)
 {
 	words_delta_t* ptd = GETWORDSDELTA(widget);
 	int nCurPage, nMaxPage;
@@ -625,7 +625,7 @@ void wordsbox_move_last_page(res_win_t widget)
 	}
 }
 
-void wordsbox_move_to_page(res_win_t widget, int page)
+void wordsbox_move_to_page(widget_t widget, int page)
 {
 	words_delta_t* ptd = GETWORDSDELTA(widget);
 	int nCurPage, nMaxPage;
@@ -650,7 +650,7 @@ void wordsbox_move_to_page(res_win_t widget, int page)
 	}
 }
 
-int wordsbox_get_max_page(res_win_t widget)
+int wordsbox_get_max_page(widget_t widget)
 {
 	words_delta_t* ptd = GETWORDSDELTA(widget);
 	xsize_t xs;
@@ -665,7 +665,7 @@ int wordsbox_get_max_page(res_win_t widget)
 	return calc_wordsbox_pages(ptd->words);
 }
 
-int wordsbox_get_page(res_win_t widget)
+int wordsbox_get_page(widget_t widget)
 {
 	words_delta_t* ptd = GETWORDSDELTA(widget);
 
@@ -677,7 +677,7 @@ int wordsbox_get_page(res_win_t widget)
 	return ptd->page;
 }
 
-void wordsbox_find(res_win_t widget, link_t_ptr pos, const tchar_t* token)
+void wordsbox_find(widget_t widget, link_t_ptr pos, const tchar_t* token)
 {
 	words_delta_t* ptd = GETWORDSDELTA(widget);
 	link_t_ptr elk;
@@ -717,7 +717,7 @@ void wordsbox_find(res_win_t widget, link_t_ptr pos, const tchar_t* token)
 	wordsbox_set_focus_item(widget, elk);
 }
 
-void wordsbox_filter(res_win_t widget, const tchar_t* token)
+void wordsbox_filter(widget_t widget, const tchar_t* token)
 {
 	words_delta_t* ptd = GETWORDSDELTA(widget);
 	link_t_ptr elk;
@@ -766,7 +766,7 @@ void wordsbox_filter(res_win_t widget, const tchar_t* token)
 		wordsbox_redraw(widget);
 }
 
-link_t_ptr wordsbox_seek(res_win_t widget, int index)
+link_t_ptr wordsbox_seek(widget_t widget, int index)
 {
 	words_delta_t* ptd = GETWORDSDELTA(widget);
 	link_t_ptr elk;
@@ -783,7 +783,7 @@ link_t_ptr wordsbox_seek(res_win_t widget, int index)
 	return elk;
 }
 
-void wordsbox_popup_size(res_win_t widget, xsize_t* pxs)
+void wordsbox_popup_size(widget_t widget, xsize_t* pxs)
 {
 	words_delta_t* ptd = GETWORDSDELTA(widget);
 	measure_interface im = { 0 };
@@ -796,5 +796,5 @@ void wordsbox_popup_size(res_win_t widget, xsize_t* pxs)
 
 	widget_size_to_pt(widget, pxs);
 
-	widget_adjust_size(widget_get_style(widget), pxs);
+	adjust_widget_size(widget_get_style(widget), pxs);
 }

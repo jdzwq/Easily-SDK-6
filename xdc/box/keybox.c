@@ -26,8 +26,8 @@ LICENSE.GPL3 for more details.
 
 #include "box.h"
 
-#include "../xdcimp.h"
-#include "../xdcinit.h"
+#include "../xdcobj.h"
+
 
 typedef struct _keybox_delta_t{
 	int index;
@@ -116,7 +116,7 @@ static KEYBOX_RECT KEYBOX_POS[KEYBOX_COUNT] = {
 #define SETKEYBOXDELTA(ph,ptd) widget_set_user_delta(ph,(vword_t)ptd)
 
 /***********************************************************************************/
-static int _keybox_calc_hint(res_win_t widget, int x, int y, tchar_t* pch)
+static int _keybox_calc_hint(widget_t widget, int x, int y, tchar_t* pch)
 {
 	keybox_delta_t* ptd = GETKEYBOXDELTA(widget);
 	xpoint_t xp;
@@ -189,7 +189,7 @@ static int _keybox_calc_hint(res_win_t widget, int x, int y, tchar_t* pch)
 }
 
 /***********************************************************************************/
-int hand_keybox_create(res_win_t widget, void* data)
+int hand_keybox_create(widget_t widget, void* data)
 {
 	keybox_delta_t* ptd;
 	xsize_t xs;
@@ -216,7 +216,7 @@ int hand_keybox_create(res_win_t widget, void* data)
 	return 0;
 }
 
-void hand_keybox_destroy(res_win_t widget)
+void hand_keybox_destroy(widget_t widget)
 {
 	keybox_delta_t* ptd = GETKEYBOXDELTA(widget);
 
@@ -229,7 +229,7 @@ void hand_keybox_destroy(res_win_t widget)
 	widget_hand_destroy(widget);
 }
 
-void hand_keybox_mouse_move(res_win_t widget, dword_t dw, const xpoint_t* pxp)
+void hand_keybox_mouse_move(widget_t widget, dword_t dw, const xpoint_t* pxp)
 {
 	keybox_delta_t* ptd = GETKEYBOXDELTA(widget);
 	int hint;
@@ -261,7 +261,7 @@ void hand_keybox_mouse_move(res_win_t widget, dword_t dw, const xpoint_t* pxp)
 	}
 }
 
-void hand_keybox_lbutton_down(res_win_t widget, const xpoint_t* pxp)
+void hand_keybox_lbutton_down(widget_t widget, const xpoint_t* pxp)
 {
 	keybox_delta_t* ptd = GETKEYBOXDELTA(widget);
 	tchar_t ch = 0;
@@ -281,15 +281,15 @@ void hand_keybox_lbutton_down(res_win_t widget, const xpoint_t* pxp)
 
 	if (ch == KEY_ESC)
 	{
-		widget_post_key((res_win_t)0, KEY_ESC);
+		widget_post_key((widget_t)0, KEY_ESC);
 	}
 	else if (ch == _T('\b'))
 	{
-		widget_post_key((res_win_t)0, KEY_BACK);
+		widget_post_key((widget_t)0, KEY_BACK);
 	}
 	else if (ch == _T('\n'))
 	{
-		widget_post_key((res_win_t)0, KEY_ENTER);
+		widget_post_key((widget_t)0, KEY_ENTER);
 	}
 	else if (ch == _T('\0'))
 	{
@@ -309,49 +309,49 @@ void hand_keybox_lbutton_down(res_win_t widget, const xpoint_t* pxp)
 	}
 	else if (ch == 0x1)
 	{
-		widget_post_key((res_win_t)0, KEY_UP);
+		widget_post_key((widget_t)0, KEY_UP);
 	}
 	else if (ch == 0x3)
 	{
-		widget_post_key((res_win_t)0, KEY_LEFT);
+		widget_post_key((widget_t)0, KEY_LEFT);
 	}
 	else if (ch == KEY_ESC)
 	{
-		widget_post_key((res_win_t)0, KEY_LEFT);
+		widget_post_key((widget_t)0, KEY_LEFT);
 	}
 	else if (ch == _T('\a'))
 	{
-		//widget_copy((res_win_t)0);
+		//widget_copy((widget_t)0);
 	}
 	else if (ch == _T('\r'))
 	{
-		//widget_cut((res_win_t)0);
+		//widget_cut((widget_t)0);
 	}
 	else if (ch == _T('\f'))
 	{
-		//widget_paste((res_win_t)0);
+		//widget_paste((widget_t)0);
 	}
 	else if (ch == _T('\v'))
 	{
-		//widget_undo((res_win_t)0);
+		//widget_undo((widget_t)0);
 	}
 	else if (ch == 0x2)
 	{
-		widget_post_key((res_win_t)0, KEY_DOWN);
+		widget_post_key((widget_t)0, KEY_DOWN);
 	}
 	else if (ch == 0x4)
 	{
-		widget_post_key((res_win_t)0, KEY_RIGHT);
+		widget_post_key((widget_t)0, KEY_RIGHT);
 	}
 	else if (ch && ch != 0x5)
 	{
-		widget_post_wchar((res_win_t)0, ch);
+		widget_post_wchar((widget_t)0, ch);
 	}
 
 	widget_erase(widget, NULL);
 }
 
-void hand_keybox_lbutton_up(res_win_t widget, const xpoint_t* pxp)
+void hand_keybox_lbutton_up(widget_t widget, const xpoint_t* pxp)
 {
 	keybox_delta_t* ptd = GETKEYBOXDELTA(widget);
 	int hint;
@@ -371,21 +371,21 @@ void hand_keybox_lbutton_up(res_win_t widget, const xpoint_t* pxp)
 	widget_erase(widget, NULL);
 }
 
-void hand_keybox_size(res_win_t widget, int code, const xsize_t* prs)
+void hand_keybox_size(widget_t widget, int code, const xsize_t* prs)
 {
 	keybox_delta_t* ptd = GETKEYBOXDELTA(widget);
 	
 	widget_erase(widget, NULL);
 }
 
-void hand_keybox_xfont(res_win_t widget, const xfont_t* pxf)
+void hand_keybox_xfont(widget_t widget, const xfont_t* pxf)
 {
 	keybox_delta_t* ptd = GETKEYBOXDELTA(widget);
 
 	xmem_copy((void*)&ptd->xf, (void*)pxf, sizeof(xfont_t));
 }
 
-void hand_keybox_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
+void hand_keybox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 {
 	keybox_delta_t* ptd = GETKEYBOXDELTA(widget);
 
@@ -489,7 +489,7 @@ void hand_keybox_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 }
 
 /**********************************************************************************************/
-res_win_t keybox_create(res_win_t widget, dword_t style, const xrect_t* pxr)
+widget_t keybox_create(widget_t widget, dword_t style, const xrect_t* pxr)
 {
 	if_dispatch_t ev = { 0 };
 
@@ -516,24 +516,24 @@ res_win_t keybox_create(res_win_t widget, dword_t style, const xrect_t* pxr)
 	return widget_create(NULL, style, pxr, widget, &ev);
 }
 
-void keybox_popup_size(res_win_t widget, xsize_t* pxs)
+void keybox_popup_size(widget_t widget, xsize_t* pxs)
 {
 	keybox_delta_t* ptd = GETKEYBOXDELTA(widget);
 
 	pxs->w = ptd->bw * KEYBOX_COLS;
 	pxs->h = ptd->bh * (KEYBOX_ROWS + 1);
 	
-	widget_adjust_size(widget_get_style(widget), pxs);
+	adjust_widget_size(widget_get_style(widget), pxs);
 }
 
-res_win_t show_keybox(const xpoint_t* ppt)
+widget_t show_keybox(const xpoint_t* ppt)
 {
-	res_win_t wt;
+	widget_t wt;
 	xrect_t xr = { 0 };
 	xsize_t xs = { 0 };
 
-	wt = keybox_create((res_win_t)0, WD_STYLE_POPUP | WD_STYLE_BORDER | WD_STYLE_NOACTIVE, &xr);
-	if (!wt) return (res_win_t)0;
+	wt = keybox_create((widget_t)0, WD_STYLE_POPUP | WD_STYLE_BORDER | WD_STYLE_NOACTIVE, &xr);
+	if (!wt) return (widget_t)0;
 
 	keybox_popup_size(wt, RECTSIZE(&xr));
 

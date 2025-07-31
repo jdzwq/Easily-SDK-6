@@ -26,8 +26,8 @@ LICENSE.GPL3 for more details.
 
 #include "box.h"
 
-#include "../xdcimp.h"
-#include "../xdcinit.h"
+#include "../xdcobj.h"
+
 
 typedef struct _listbox_delta_t{
 	link_t_ptr string;
@@ -40,7 +40,7 @@ typedef struct _listbox_delta_t{
 #define SETLISTBOXDELTA(ph,ptd) widget_set_user_delta(ph,(vword_t)ptd)
 
 /***************************************************************************************/
-void _listbox_item_rect(res_win_t widget, link_t_ptr ent, xrect_t* pxr)
+void _listbox_item_rect(widget_t widget, link_t_ptr ent, xrect_t* pxr)
 {
 	listbox_delta_t* ptd = GETLISTBOXDELTA(widget);
 	xrect_t xr;
@@ -55,7 +55,7 @@ void _listbox_item_rect(res_win_t widget, link_t_ptr ent, xrect_t* pxr)
 	pxr->w = xr.w;
 }
 
-void _listbox_reset_page(res_win_t widget)
+void _listbox_reset_page(widget_t widget)
 {
 	listbox_delta_t* ptd = GETLISTBOXDELTA(widget);
 	int vw, vh, lw, lh;
@@ -70,7 +70,7 @@ void _listbox_reset_page(res_win_t widget)
 	pif = widget_get_canvas_interface(widget);
 
 	(pif->pf_get_measure)(pif->ctx, &im);
-	(pif->pf_text_metric)(pif->ctx, &ptd->xf, &xs);
+	(pif->pf_font_size)(pif->ctx, &ptd->xf, &xs);
 
 	widget_size_to_pt(widget, &xs);
 	lw = xs.w;
@@ -88,7 +88,7 @@ void _listbox_reset_page(res_win_t widget)
 	widget_reset_scroll(widget, 0);
 }
 
-void _listbox_reset_visible(res_win_t widget)
+void _listbox_reset_visible(widget_t widget)
 {
 	listbox_delta_t* ptd = GETLISTBOXDELTA(widget);
 	xrect_t xr;
@@ -101,7 +101,7 @@ void _listbox_reset_visible(res_win_t widget)
 	widget_ensure_visible(widget, &xr, 1);
 }
 
-static link_t_ptr _listbox_get_next_entity(res_win_t widget, link_t_ptr pos)
+static link_t_ptr _listbox_get_next_entity(widget_t widget, link_t_ptr pos)
 {
 	listbox_delta_t* ptd = GETLISTBOXDELTA(widget);
 	link_t_ptr ent;
@@ -129,7 +129,7 @@ static link_t_ptr _listbox_get_next_entity(res_win_t widget, link_t_ptr pos)
 	return NULL;
 }
 
-static link_t_ptr _listbox_get_prev_entity(res_win_t widget, link_t_ptr pos)
+static link_t_ptr _listbox_get_prev_entity(widget_t widget, link_t_ptr pos)
 {
 	listbox_delta_t* ptd = GETLISTBOXDELTA(widget);
 	link_t_ptr ent;
@@ -158,7 +158,7 @@ static link_t_ptr _listbox_get_prev_entity(res_win_t widget, link_t_ptr pos)
 }
 /*************************************************************************/
 
-void noti_listbox_command(res_win_t widget, int code, vword_t data)
+void noti_listbox_command(widget_t widget, int code, vword_t data)
 {
 	listbox_delta_t* ptd = GETLISTBOXDELTA(widget);
 
@@ -168,7 +168,7 @@ void noti_listbox_command(res_win_t widget, int code, vword_t data)
 		widget_post_command(widget_get_owner(widget), code, widget_get_user_id(widget), data);
 }
 
-void listbox_on_item_changing(res_win_t widget)
+void listbox_on_item_changing(widget_t widget)
 {
 	listbox_delta_t* ptd = GETLISTBOXDELTA(widget);
 	xrect_t xr;
@@ -184,7 +184,7 @@ void listbox_on_item_changing(res_win_t widget)
 	widget_erase(widget, &xr);
 }
 
-void listbox_on_item_changed(res_win_t widget, link_t_ptr ent)
+void listbox_on_item_changed(widget_t widget, link_t_ptr ent)
 {
 	listbox_delta_t* ptd = GETLISTBOXDELTA(widget);
 	xrect_t xr;
@@ -203,7 +203,7 @@ void listbox_on_item_changed(res_win_t widget, link_t_ptr ent)
 }
 
 /********************************************************************************************/
-int hand_listbox_create(res_win_t widget, void* data)
+int hand_listbox_create(widget_t widget, void* data)
 {
 	listbox_delta_t* ptd;
 
@@ -219,7 +219,7 @@ int hand_listbox_create(res_win_t widget, void* data)
 	return 0;
 }
 
-void hand_listbox_destroy(res_win_t widget)
+void hand_listbox_destroy(widget_t widget)
 {
 	listbox_delta_t* ptd = GETLISTBOXDELTA(widget);
 
@@ -234,7 +234,7 @@ void hand_listbox_destroy(res_win_t widget)
 	widget_hand_destroy(widget);
 }
 
-void hand_listbox_keydown(res_win_t widget, dword_t ks, int key)
+void hand_listbox_keydown(widget_t widget, dword_t ks, int key)
 {
 	listbox_delta_t* ptd = GETLISTBOXDELTA(widget);
 
@@ -264,7 +264,7 @@ void hand_listbox_keydown(res_win_t widget, dword_t ks, int key)
 	}
 }
 
-void hand_listbox_lbutton_down(res_win_t widget, const xpoint_t* pxp)
+void hand_listbox_lbutton_down(widget_t widget, const xpoint_t* pxp)
 {
 	listbox_delta_t* ptd = GETLISTBOXDELTA(widget);
 
@@ -273,7 +273,7 @@ void hand_listbox_lbutton_down(res_win_t widget, const xpoint_t* pxp)
 
 }
 
-void hand_listbox_lbutton_up(res_win_t widget, const xpoint_t* pxp)
+void hand_listbox_lbutton_up(widget_t widget, const xpoint_t* pxp)
 {
 	listbox_delta_t* ptd = GETLISTBOXDELTA(widget);
 	measure_interface im = { 0 };
@@ -304,7 +304,7 @@ void hand_listbox_lbutton_up(res_win_t widget, const xpoint_t* pxp)
 	noti_listbox_command(widget, COMMAND_CHANGE, (vword_t)NULL);
 }
 
-void hand_listbox_size(res_win_t widget, int code, const xsize_t* prs)
+void hand_listbox_size(widget_t widget, int code, const xsize_t* prs)
 {
 	listbox_delta_t* ptd = GETLISTBOXDELTA(widget);
 
@@ -314,7 +314,7 @@ void hand_listbox_size(res_win_t widget, int code, const xsize_t* prs)
 	listbox_redraw(widget);
 }
 
-void hand_listbox_scroll(res_win_t widget, bool_t bHorz, int nLine)
+void hand_listbox_scroll(widget_t widget, bool_t bHorz, int nLine)
 {
 	listbox_delta_t* ptd = GETLISTBOXDELTA(widget);
 
@@ -324,14 +324,14 @@ void hand_listbox_scroll(res_win_t widget, bool_t bHorz, int nLine)
 	widget_hand_scroll(widget, bHorz, nLine);
 }
 
-void hand_listbox_xfont(res_win_t widget, const xfont_t* pxf)
+void hand_listbox_xfont(widget_t widget, const xfont_t* pxf)
 {
 	listbox_delta_t* ptd = GETLISTBOXDELTA(widget);
 
 	xmem_copy((void*)&ptd->xf, (void*)pxf, sizeof(xfont_t));
 }
 
-void hand_listbox_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
+void hand_listbox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 {
 	listbox_delta_t* ptd = GETLISTBOXDELTA(widget);
 	visual_t rdc;
@@ -376,7 +376,7 @@ void hand_listbox_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 }
 
 /************************************************************************************************/
-res_win_t listbox_create(res_win_t widget, dword_t style, const xrect_t* pxr)
+widget_t listbox_create(widget_t widget, dword_t style, const xrect_t* pxr)
 {
 	if_dispatch_t ev = { 0 };
 
@@ -405,7 +405,7 @@ res_win_t listbox_create(res_win_t widget, dword_t style, const xrect_t* pxr)
 	return widget_create(NULL,style, pxr, widget, &ev);
 }
 
-void listbox_set_options(res_win_t widget, const tchar_t* options, int len)
+void listbox_set_options(widget_t widget, const tchar_t* options, int len)
 {
 	listbox_delta_t* ptd = GETLISTBOXDELTA(widget);
 
@@ -417,7 +417,7 @@ void listbox_set_options(res_win_t widget, const tchar_t* options, int len)
 	listbox_redraw(widget);
 }
 
-const tchar_t* listbox_get_cur_key(res_win_t widget)
+const tchar_t* listbox_get_cur_key(widget_t widget)
 {
 	listbox_delta_t* ptd = GETLISTBOXDELTA(widget);
 
@@ -429,7 +429,7 @@ const tchar_t* listbox_get_cur_key(res_win_t widget)
 	return get_string_entity_key_ptr(ptd->entity);
 }
 
-int listbox_get_cur_val(res_win_t widget, tchar_t* val, int max)
+int listbox_get_cur_val(widget_t widget, tchar_t* val, int max)
 {
 	listbox_delta_t* ptd = GETLISTBOXDELTA(widget);
 
@@ -441,7 +441,7 @@ int listbox_get_cur_val(res_win_t widget, tchar_t* val, int max)
 	return get_string_entity_val(ptd->entity, val, max);
 }
 
-void listbox_redraw(res_win_t widget)
+void listbox_redraw(widget_t widget)
 {
 	listbox_delta_t* ptd = GETLISTBOXDELTA(widget);
 	link_t_ptr ent;
@@ -472,7 +472,7 @@ void listbox_redraw(res_win_t widget)
 	widget_erase(widget, NULL);
 }
 
-void listbox_set_focus_item(res_win_t widget, link_t_ptr ilk)
+void listbox_set_focus_item(widget_t widget, link_t_ptr ilk)
 {
 	listbox_delta_t* ptd = GETLISTBOXDELTA(widget);
 
@@ -493,7 +493,7 @@ void listbox_set_focus_item(res_win_t widget, link_t_ptr ilk)
 	}
 }
 
-void listbox_tabskip(res_win_t widget, int nSkip)
+void listbox_tabskip(widget_t widget, int nSkip)
 {
 	listbox_delta_t* ptd = GETLISTBOXDELTA(widget);
 	link_t_ptr ilk;
@@ -521,7 +521,7 @@ void listbox_tabskip(res_win_t widget, int nSkip)
 		listbox_set_focus_item(widget, ilk);
 }
 
-void listbox_popup_size(res_win_t widget, xsize_t* pxs)
+void listbox_popup_size(widget_t widget, xsize_t* pxs)
 {
 	listbox_delta_t* ptd = GETLISTBOXDELTA(widget);
 
@@ -536,10 +536,10 @@ void listbox_popup_size(res_win_t widget, xsize_t* pxs)
 
 	widget_size_to_pt(widget, pxs);
 
-	widget_adjust_size(widget_get_style(widget), pxs);
+	adjust_widget_size(widget_get_style(widget), pxs);
 }
 
-void listbox_find(res_win_t widget, const tchar_t* token)
+void listbox_find(widget_t widget, const tchar_t* token)
 {
 	listbox_delta_t* ptd = GETLISTBOXDELTA(widget);
 
@@ -572,7 +572,7 @@ void listbox_find(res_win_t widget, const tchar_t* token)
 	listbox_set_focus_item(widget, ent);
 }
 
-void listbox_filter(res_win_t widget, const tchar_t* token)
+void listbox_filter(widget_t widget, const tchar_t* token)
 {
 	listbox_delta_t* ptd = GETLISTBOXDELTA(widget);
 

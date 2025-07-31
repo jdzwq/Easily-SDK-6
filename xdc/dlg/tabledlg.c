@@ -26,8 +26,8 @@ LICENSE.GPL3 for more details.
 
 #include "dlg.h"
 
-#include "../xdcimp.h"
-#include "../xdcinit.h"
+#include "../xdcobj.h"
+
 
 #define IDC_TABLEDLG_TABLE			10
 #define IDC_TABLEDLG_PUSHBOX_OK		11
@@ -43,9 +43,9 @@ typedef struct _tabledlg_delta_t{
 #define SETTABLEDLGDELTA(ph,ptd) widget_set_user_delta(ph,(vword_t)ptd)
 
 /************************************************************************************/
-void tabledlg_on_ok(res_win_t widget)
+void tabledlg_on_ok(widget_t widget)
 {
-	res_win_t ctrl;
+	widget_t ctrl;
 
 	ctrl = widget_get_child(widget, IDC_TABLEDLG_TABLE);
 	tablectrl_accept(ctrl, 1);
@@ -53,10 +53,10 @@ void tabledlg_on_ok(res_win_t widget)
 	widget_close(widget, 1);
 }
 
-void tabledlg_on_first(res_win_t widget)
+void tabledlg_on_first(widget_t widget)
 {
 	tabledlg_delta_t* ptd = GETTABLEDLGDELTA(widget);
-	res_win_t tablectrl;
+	widget_t tablectrl;
 	link_t_ptr ilk, root;
 
 	tablectrl = widget_get_child(widget, IDC_TABLEDLG_TABLE);
@@ -74,10 +74,10 @@ void tabledlg_on_first(res_win_t widget)
 	tablectrl_redraw(tablectrl);
 }
 
-void tabledlg_on_last(res_win_t widget)
+void tabledlg_on_last(widget_t widget)
 {
 	tabledlg_delta_t* ptd = GETTABLEDLGDELTA(widget);
-	res_win_t tablectrl;
+	widget_t tablectrl;
 	link_t_ptr ilk, root;
 
 	tablectrl = widget_get_child(widget, IDC_TABLEDLG_TABLE);
@@ -95,10 +95,10 @@ void tabledlg_on_last(res_win_t widget)
 	tablectrl_redraw(tablectrl);
 }
 
-void tabledlg_on_prev(res_win_t widget)
+void tabledlg_on_prev(widget_t widget)
 {
 	tabledlg_delta_t* ptd = GETTABLEDLGDELTA(widget);
-	res_win_t tablectrl;
+	widget_t tablectrl;
 	link_t_ptr ilk, root;
 
 	tablectrl = widget_get_child(widget, IDC_TABLEDLG_TABLE);
@@ -116,10 +116,10 @@ void tabledlg_on_prev(res_win_t widget)
 	tablectrl_redraw(tablectrl);
 }
 
-void tabledlg_on_next(res_win_t widget)
+void tabledlg_on_next(widget_t widget)
 {
 	tabledlg_delta_t* ptd = GETTABLEDLGDELTA(widget);
-	res_win_t tablectrl;
+	widget_t tablectrl;
 	link_t_ptr ilk, root;
 
 	tablectrl = widget_get_child(widget, IDC_TABLEDLG_TABLE);
@@ -137,20 +137,20 @@ void tabledlg_on_next(res_win_t widget)
 	tablectrl_redraw(tablectrl);
 }
 
-void tabledlg_on_insert(res_win_t widget)
+void tabledlg_on_insert(widget_t widget)
 {
 	tabledlg_delta_t* ptd = GETTABLEDLGDELTA(widget);
-	res_win_t tablectrl;
+	widget_t tablectrl;
 
 	tablectrl = widget_get_child(widget, IDC_TABLEDLG_TABLE);
 
 	tablectrl_insert_item(tablectrl, LINK_LAST);
 }
 
-void tabledlg_on_delete(res_win_t widget)
+void tabledlg_on_delete(widget_t widget)
 {
 	tabledlg_delta_t* ptd = GETTABLEDLGDELTA(widget);
-	res_win_t tablectrl;
+	widget_t tablectrl;
 	link_t_ptr ilk;
 
 	tablectrl = widget_get_child(widget, IDC_TABLEDLG_TABLE);
@@ -162,13 +162,13 @@ void tabledlg_on_delete(res_win_t widget)
 	tablectrl_delete_item(tablectrl, ilk);
 }
 /**********************************************************************************/
-int hand_tabledlg_create(res_win_t widget, void* data)
+int hand_tabledlg_create(widget_t widget, void* data)
 {
 	tabledlg_delta_t* ptd;
 
 	xrect_t xr;
 	xsize_t xs;
-	res_win_t tablectrl, pushbox;
+	widget_t tablectrl, pushbox;
 
 	widget_hand_create(widget);
 
@@ -217,10 +217,10 @@ int hand_tabledlg_create(res_win_t widget, void* data)
 	return 0;
 }
 
-void hand_tabledlg_destroy(res_win_t widget)
+void hand_tabledlg_destroy(widget_t widget)
 {
 	tabledlg_delta_t* ptd = GETTABLEDLGDELTA(widget);
-	res_win_t ctrl;
+	widget_t ctrl;
 
 	if (!ptd)
 		return;
@@ -240,12 +240,12 @@ void hand_tabledlg_destroy(res_win_t widget)
 	widget_hand_destroy(widget);
 }
 
-void hand_tabledlg_size(res_win_t widget, int code, const xsize_t* prs)
+void hand_tabledlg_size(widget_t widget, int code, const xsize_t* prs)
 {
 	tabledlg_delta_t* ptd = GETTABLEDLGDELTA(widget);
 	xsize_t xs;
 	xrect_t xr;
-	res_win_t ctrl;
+	widget_t ctrl;
 
 	xs.fw = TABLEDLG_BUTTON_WIDTH;
 	xs.fh = TABLEDLG_BUTTON_HEIGHT;
@@ -285,7 +285,7 @@ void hand_tabledlg_size(res_win_t widget, int code, const xsize_t* prs)
 	widget_erase(widget, NULL);
 }
 
-void hand_tabledlg_menu_command(res_win_t widget, int code, int cid, vword_t data)
+void hand_tabledlg_menu_command(widget_t widget, int code, int cid, vword_t data)
 {
 	tabledlg_delta_t* ptd = GETTABLEDLGDELTA(widget);
 
@@ -295,7 +295,7 @@ void hand_tabledlg_menu_command(res_win_t widget, int code, int cid, vword_t dat
 	}
 }
 
-void hand_tabledlg_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
+void hand_tabledlg_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 {
 	tabledlg_delta_t* ptd = GETTABLEDLGDELTA(widget);
 	visual_t rdc;
@@ -341,10 +341,10 @@ void hand_tabledlg_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 }
 
 /***************************************************************************************/
-res_win_t tabledlg_create(const tchar_t* title, link_t_ptr ptr, res_win_t owner)
+widget_t tabledlg_create(const tchar_t* title, link_t_ptr ptr, widget_t owner)
 {
 	if_dispatch_t ev = { 0 };
-	res_win_t dlg;
+	widget_t dlg;
 	xrect_t xr = { 0 };
 	clr_mod_t clr;
 
@@ -384,7 +384,7 @@ res_win_t tabledlg_create(const tchar_t* title, link_t_ptr ptr, res_win_t owner)
 	return dlg;
 }
 
-void tabledlg_popup_size(res_win_t widget, xsize_t* pxs)
+void tabledlg_popup_size(widget_t widget, xsize_t* pxs)
 {
 	tabledlg_delta_t* ptd = GETTABLEDLGDELTA(widget);
 	int n;
@@ -402,7 +402,7 @@ void tabledlg_popup_size(res_win_t widget, xsize_t* pxs)
 
 	widget_size_to_pt(widget, pxs);
 
-	widget_adjust_size(widget_get_style(widget), pxs);
+	adjust_widget_size(widget_get_style(widget), pxs);
 }
 
 

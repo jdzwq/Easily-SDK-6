@@ -26,16 +26,16 @@ LICENSE.GPL3 for more details.
 
 #include "ctrl.h"
 
-#include "../xdcimp.h"
-#include "../xdcinit.h"
+#include "../xdcobj.h"
+
 
 #define PLOT_LINE_FEED		(int)100
 
 typedef struct _plot_delta_t{
 	link_t_ptr plot;
 
-	res_win_t hsc;
-	res_win_t vsc;
+	widget_t hsc;
+	widget_t vsc;
 }plot_delta_t;
 
 #define GETPLOTDELTA(ph) 		(plot_delta_t*)widget_get_user_delta(ph)
@@ -43,7 +43,7 @@ typedef struct _plot_delta_t{
 
 /************************************************************************************************/
 
-static void _plotctrl_reset_page(res_win_t widget)
+static void _plotctrl_reset_page(widget_t widget)
 {
 	plot_delta_t* ptd = GETPLOTDELTA(widget);
 	int pw, ph, fw, fh, lw, lh;
@@ -74,7 +74,7 @@ static void _plotctrl_reset_page(res_win_t widget)
 }
 
 /*********************************************control event**************************************/
-int noti_plot_owner(res_win_t widget, unsigned int code, link_t_ptr plot, void* data)
+int noti_plot_owner(widget_t widget, unsigned int code, link_t_ptr plot, void* data)
 {
 	plot_delta_t* ptd = GETPLOTDELTA(widget);
 	NOTICE_PLOT nf = { 0 };
@@ -92,7 +92,7 @@ int noti_plot_owner(res_win_t widget, unsigned int code, link_t_ptr plot, void* 
 	return nf.ret;
 }
 
-void noti_plot_reset_scroll(res_win_t widget, bool_t bUpdate)
+void noti_plot_reset_scroll(widget_t widget, bool_t bUpdate)
 {
 	plot_delta_t* ptd = GETPLOTDELTA(widget);
 
@@ -114,7 +114,7 @@ void noti_plot_reset_scroll(res_win_t widget, bool_t bUpdate)
 }
 /********************************************************************************************/
 
-int hand_plot_create(res_win_t widget, void* data)
+int hand_plot_create(widget_t widget, void* data)
 {
 	plot_delta_t* ptd;
 
@@ -128,7 +128,7 @@ int hand_plot_create(res_win_t widget, void* data)
 	return 0;
 }
 
-void hand_plot_destroy(res_win_t widget)
+void hand_plot_destroy(widget_t widget)
 {
 	plot_delta_t* ptd = GETPLOTDELTA(widget);
 
@@ -147,7 +147,7 @@ void hand_plot_destroy(res_win_t widget)
 	widget_hand_destroy(widget);
 }
 
-void hand_plot_size(res_win_t widget, int code, const xsize_t* pxs)
+void hand_plot_size(widget_t widget, int code, const xsize_t* pxs)
 {
 	plot_delta_t* ptd = GETPLOTDELTA(widget);
 
@@ -161,7 +161,7 @@ void hand_plot_size(res_win_t widget, int code, const xsize_t* pxs)
 	widget_erase(widget, NULL);
 }
 
-void hand_plot_lbutton_down(res_win_t widget, const xpoint_t* pxp)
+void hand_plot_lbutton_down(widget_t widget, const xpoint_t* pxp)
 {
 	plot_delta_t* ptd = GETPLOTDELTA(widget);
 
@@ -174,7 +174,7 @@ void hand_plot_lbutton_down(res_win_t widget, const xpoint_t* pxp)
 	}
 }
 
-void hand_plot_lbutton_up(res_win_t widget, const xpoint_t* pxp)
+void hand_plot_lbutton_up(widget_t widget, const xpoint_t* pxp)
 {
 	plot_delta_t* ptd = GETPLOTDELTA(widget);
 
@@ -184,7 +184,7 @@ void hand_plot_lbutton_up(res_win_t widget, const xpoint_t* pxp)
 	noti_plot_owner(widget, NC_PLOTLBCLK, ptd->plot, (void*)pxp);
 }
 
-void hand_plot_lbutton_dbclick(res_win_t widget, const xpoint_t* pxp)
+void hand_plot_lbutton_dbclick(widget_t widget, const xpoint_t* pxp)
 {
 	plot_delta_t* ptd = GETPLOTDELTA(widget);
 
@@ -194,7 +194,7 @@ void hand_plot_lbutton_dbclick(res_win_t widget, const xpoint_t* pxp)
 	noti_plot_owner(widget, NC_PLOTDBCLK, ptd->plot, (void*)pxp);
 }
 
-void hand_plot_rbutton_down(res_win_t widget, const xpoint_t* pxp)
+void hand_plot_rbutton_down(widget_t widget, const xpoint_t* pxp)
 {
 	plot_delta_t* ptd = GETPLOTDELTA(widget);
 
@@ -203,7 +203,7 @@ void hand_plot_rbutton_down(res_win_t widget, const xpoint_t* pxp)
 
 }
 
-void hand_plot_rbutton_up(res_win_t widget, const xpoint_t* pxp)
+void hand_plot_rbutton_up(widget_t widget, const xpoint_t* pxp)
 {
 	plot_delta_t* ptd = GETPLOTDELTA(widget);
 
@@ -213,7 +213,7 @@ void hand_plot_rbutton_up(res_win_t widget, const xpoint_t* pxp)
 	noti_plot_owner(widget, NC_PLOTRBCLK, ptd->plot, (void*)pxp);
 }
 
-void hand_plot_scroll(res_win_t widget, bool_t bHorz, int nLine)
+void hand_plot_scroll(widget_t widget, bool_t bHorz, int nLine)
 {
 	plot_delta_t* ptd = GETPLOTDELTA(widget);
 
@@ -223,12 +223,12 @@ void hand_plot_scroll(res_win_t widget, bool_t bHorz, int nLine)
 	widget_hand_scroll(widget, bHorz, nLine);
 }
 
-void hand_plot_wheel(res_win_t widget, bool_t bHorz, int nDelta)
+void hand_plot_wheel(widget_t widget, bool_t bHorz, int nDelta)
 {
 	plot_delta_t* ptd = GETPLOTDELTA(widget);
 	scroll_t scr = { 0 };
 	int nLine;
-	res_win_t win;
+	widget_t win;
 
 	if (!ptd->plot)
 		return;
@@ -277,7 +277,7 @@ void hand_plot_wheel(res_win_t widget, bool_t bHorz, int nDelta)
 	}
 }
 
-void hand_plot_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
+void hand_plot_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 {
 	plot_delta_t* ptd = GETPLOTDELTA(widget);
 	visual_t rdc;
@@ -326,7 +326,7 @@ void hand_plot_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 
 /*****************************************************************************************************/
 
-res_win_t plotctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, res_win_t wparent)
+widget_t plotctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, widget_t wparent)
 {
 	if_dispatch_t ev = { 0 };
 
@@ -355,7 +355,7 @@ res_win_t plotctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* p
 	return widget_create(wname, wstyle, pxr, wparent, &ev);
 }
 
-void plotctrl_attach(res_win_t widget, link_t_ptr ptr)
+void plotctrl_attach(widget_t widget, link_t_ptr ptr)
 {
 	plot_delta_t* ptd = GETPLOTDELTA(widget);
 
@@ -368,7 +368,7 @@ void plotctrl_attach(res_win_t widget, link_t_ptr ptr)
 	plotctrl_redraw(widget);
 }
 
-link_t_ptr plotctrl_detach(res_win_t widget)
+link_t_ptr plotctrl_detach(widget_t widget)
 {
 	plot_delta_t* ptd = GETPLOTDELTA(widget);
 	link_t_ptr ptr;
@@ -382,7 +382,7 @@ link_t_ptr plotctrl_detach(res_win_t widget)
 	return ptr;
 }
 
-link_t_ptr plotctrl_fetch(res_win_t widget)
+link_t_ptr plotctrl_fetch(widget_t widget)
 {
 	plot_delta_t* ptd = GETPLOTDELTA(widget);
 
@@ -391,7 +391,7 @@ link_t_ptr plotctrl_fetch(res_win_t widget)
 	return ptd->plot;
 }
 
-void plotctrl_redraw(res_win_t widget)
+void plotctrl_redraw(widget_t widget)
 {
 	plot_delta_t* ptd = GETPLOTDELTA(widget);
 

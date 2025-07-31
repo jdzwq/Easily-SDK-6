@@ -285,6 +285,13 @@ typedef struct _handle_head	 *widget_t;
 #define KEY_F11			0x7A
 #define KEY_F12			0x7B
 
+#define WIDGET_TITLE_SPAN		(float)10	//mm
+#define WIDGET_MENU_SPAN		(float)7.5	//mm
+#define WIDGET_SCROLL_SPAN		(float)5	//mm
+#define WIDGET_ICON_SPAN		(float)3	//mm
+#define WIDGET_FRAME_EDGE		(float)1.5	//mm
+#define WIDGET_CHILD_EDGE		(float)0.5	//mm
+
 typedef struct _acl_table_t{
 	unsigned char vir;
 	unsigned short key;

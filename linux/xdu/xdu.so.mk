@@ -20,7 +20,6 @@ SYS_PATH = /usr/include
 
 INC_PATH = ../../include
 SRC_PATH = ../../xdu
-SUB_PATH = ../../xdu/linux
 OUT_PATH = ../../../Easily-app-6/linux/sbin/api
 OBJ_PATH = ../../../Easily-tmp/linux/$(MODULE)/$(ARCH)
 
@@ -28,15 +27,18 @@ TARGET = lib$(MODULE).so.$(VER)
 LINKIT = lib$(MODULE).so
 
 LIBS = -lm -ldl -lutil -lrt -lX11 -lXrender -L $(LNK_PATH) -lxdk -lxgc
-DIRS = $(wildcard $(SRC_PATH)/*.c $(SUB_PATH)/*.c)
+DIRS = $(wildcard $(SRC_PATH)/*.c $(SRC_PATH)/linux/*.c $(SRC_PATH)/imp/*.c)
 SRCS = $(notdir $(DIRS))
 COBS = $(patsubst %.c, %.o, $(SRCS))
 OBJS = $(addprefix $(OBJ_PATH)/,$(COBS))
 
-$(OBJ_PATH)/%.o : $(SRC_PATH)/%.c
+$(OBJ_PATH)/%.o : $(SRC_PATH)/linux/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(SYS_PATH) -I $(INC_PATH) -I $(SRC_PATH)
 
-$(OBJ_PATH)/%.o : $(SUB_PATH)/%.c
+$(OBJ_PATH)/%.o : $(SRC_PATH)/imp/%.c
+	$(CC) $(CFLAGS) -c $< -o $@ -I $(SYS_PATH) -I $(INC_PATH) -I $(SRC_PATH)
+
+$(OBJ_PATH)/%.o : $(SRC_PATH)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(SYS_PATH) -I $(INC_PATH) -I $(SRC_PATH)
 
 all : $(OBJS)

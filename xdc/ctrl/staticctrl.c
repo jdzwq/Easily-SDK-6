@@ -26,8 +26,8 @@ LICENSE.GPL3 for more details.
 
 #include "ctrl.h"
 
-#include "../xdcimp.h"
-#include "../xdcinit.h"
+#include "../xdcobj.h"
+
 
 typedef struct _statis_delta_t{
 	link_t_ptr statis;
@@ -40,9 +40,9 @@ typedef struct _statis_delta_t{
 	int cur_x, cur_y;
 	int cur_page;
 
-	res_win_t editor;
-	res_win_t hsc;
-	res_win_t vsc;
+	widget_t editor;
+	widget_t hsc;
+	widget_t vsc;
 
 	bool_t b_drag_xax, b_drag_yax;
 	bool_t b_size_xax, b_size_yax;
@@ -57,7 +57,7 @@ typedef struct _statis_delta_t{
 #define SETSTATISDELTA(ph,ptd) widget_set_user_delta(ph,(vword_t)ptd)
 
 /******************************************************************************************/
-static void _statisctrl_done(res_win_t widget)
+static void _statisctrl_done(widget_t widget)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 	byte_t* buf;
@@ -82,7 +82,7 @@ static void _statisctrl_done(res_win_t widget)
 	push_stack_node(ptd->stack, (void*)buf);
 }
 
-static void _statisctrl_undo(res_win_t widget)
+static void _statisctrl_undo(widget_t widget)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 	void* p;
@@ -109,7 +109,7 @@ static void _statisctrl_undo(res_win_t widget)
 	}
 }
 
-static void _statisctrl_discard(res_win_t widget)
+static void _statisctrl_discard(widget_t widget)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 	void* p;
@@ -123,7 +123,7 @@ static void _statisctrl_discard(res_win_t widget)
 	}
 }
 
-static void _statisctrl_clean(res_win_t widget)
+static void _statisctrl_clean(widget_t widget)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 	void* p;
@@ -136,7 +136,7 @@ static void _statisctrl_clean(res_win_t widget)
 	}
 }
 
-static bool_t _statisctrl_copy(res_win_t widget)
+static bool_t _statisctrl_copy(widget_t widget)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 
@@ -194,7 +194,7 @@ static bool_t _statisctrl_copy(res_win_t widget)
 	return 1;
 }
 
-static bool_t _statisctrl_cut(res_win_t widget)
+static bool_t _statisctrl_cut(widget_t widget)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 	link_t_ptr nxt, ilk;
@@ -221,7 +221,7 @@ static bool_t _statisctrl_cut(res_win_t widget)
 	return 1;
 }
 
-static bool_t _statisctrl_paste(res_win_t widget)
+static bool_t _statisctrl_paste(widget_t widget)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 
@@ -289,7 +289,7 @@ static bool_t _statisctrl_paste(res_win_t widget)
 	return 1;
 }
 
-static void _statisctrl_xaxbar_rect(res_win_t widget, link_t_ptr xlk, xrect_t* pxr)
+static void _statisctrl_xaxbar_rect(widget_t widget, link_t_ptr xlk, xrect_t* pxr)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 
@@ -298,7 +298,7 @@ static void _statisctrl_xaxbar_rect(res_win_t widget, link_t_ptr xlk, xrect_t* p
 	widget_rect_to_pt(widget, pxr);
 }
 
-static void _statisctrl_xax_rect(res_win_t widget, link_t_ptr xlk, xrect_t* pxr)
+static void _statisctrl_xax_rect(widget_t widget, link_t_ptr xlk, xrect_t* pxr)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 
@@ -307,7 +307,7 @@ static void _statisctrl_xax_rect(res_win_t widget, link_t_ptr xlk, xrect_t* pxr)
 	widget_rect_to_pt(widget, pxr);
 }
 
-static void _statisctrl_gaxbar_rect(res_win_t widget, link_t_ptr glk, xrect_t* pxr)
+static void _statisctrl_gaxbar_rect(widget_t widget, link_t_ptr glk, xrect_t* pxr)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 
@@ -316,7 +316,7 @@ static void _statisctrl_gaxbar_rect(res_win_t widget, link_t_ptr glk, xrect_t* p
 	widget_rect_to_pt(widget, pxr);
 }
 
-static void _statisctrl_yax_rect(res_win_t widget, link_t_ptr ylk, xrect_t* pxr)
+static void _statisctrl_yax_rect(widget_t widget, link_t_ptr ylk, xrect_t* pxr)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 
@@ -327,7 +327,7 @@ static void _statisctrl_yax_rect(res_win_t widget, link_t_ptr ylk, xrect_t* pxr)
 	widget_rect_to_pt(widget, pxr);
 }
 
-static void _statisctrl_yaxbar_rect(res_win_t widget, link_t_ptr ylk, xrect_t* pxr)
+static void _statisctrl_yaxbar_rect(widget_t widget, link_t_ptr ylk, xrect_t* pxr)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 
@@ -336,7 +336,7 @@ static void _statisctrl_yaxbar_rect(res_win_t widget, link_t_ptr ylk, xrect_t* p
 	widget_rect_to_pt(widget, pxr);
 }
 
-static void _statisctrl_coor_rect(res_win_t widget, link_t_ptr xlk, link_t_ptr ylk, xrect_t* pxr)
+static void _statisctrl_coor_rect(widget_t widget, link_t_ptr xlk, link_t_ptr ylk, xrect_t* pxr)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 
@@ -345,7 +345,7 @@ static void _statisctrl_coor_rect(res_win_t widget, link_t_ptr xlk, link_t_ptr y
 	widget_rect_to_pt(widget, pxr);
 }
 
-static void _statisctrl_reset_page(res_win_t widget)
+static void _statisctrl_reset_page(widget_t widget)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 
@@ -386,7 +386,7 @@ static void _statisctrl_reset_page(res_win_t widget)
 	widget_reset_scroll(widget, 0);
 }
 
-void _statisctrl_ensure_visible(res_win_t widget)
+void _statisctrl_ensure_visible(widget_t widget)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 	xrect_t xr;
@@ -409,7 +409,7 @@ void _statisctrl_ensure_visible(res_win_t widget)
 }
 
 /***********************************************************************************************************************/
-int noti_statis_owner(res_win_t widget, unsigned int code, link_t_ptr statis, link_t_ptr xlk, link_t_ptr ylk, link_t_ptr glk, void* data)
+int noti_statis_owner(widget_t widget, unsigned int code, link_t_ptr statis, link_t_ptr xlk, link_t_ptr ylk, link_t_ptr glk, void* data)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 	NOTICE_STATIS nf = { 0 };
@@ -430,7 +430,7 @@ int noti_statis_owner(res_win_t widget, unsigned int code, link_t_ptr statis, li
 	return nf.ret;
 }
 
-void noti_statis_reset_select(res_win_t widget)
+void noti_statis_reset_select(widget_t widget)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 	link_t_ptr ylk;
@@ -453,7 +453,7 @@ void noti_statis_reset_select(res_win_t widget)
 		widget_erase(widget, NULL);
 }
 
-void noti_statis_reset_check(res_win_t widget)
+void noti_statis_reset_check(widget_t widget)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 	link_t_ptr xlk;
@@ -479,7 +479,7 @@ void noti_statis_reset_check(res_win_t widget)
 		widget_erase(widget, NULL);
 }
 
-void noti_statis_xax_sizing(res_win_t widget, int x, int y)
+void noti_statis_xax_sizing(widget_t widget, int x, int y)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 
@@ -491,7 +491,7 @@ void noti_statis_xax_sizing(res_win_t widget, int x, int y)
 	widget_set_cursor(widget,CURSOR_SIZEWE);
 }
 
-void noti_statis_xax_sized(res_win_t widget, int x, int y)
+void noti_statis_xax_sized(widget_t widget, int x, int y)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 	float mw;
@@ -523,7 +523,7 @@ void noti_statis_xax_sized(res_win_t widget, int x, int y)
 	noti_statis_owner(widget, NC_XAXSIZED, ptd->statis, ptd->xax, NULL, NULL, NULL);
 }
 
-void noti_statis_yax_sizing(res_win_t widget, int x, int y)
+void noti_statis_yax_sizing(widget_t widget, int x, int y)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 
@@ -538,7 +538,7 @@ void noti_statis_yax_sizing(res_win_t widget, int x, int y)
 	widget_set_cursor(widget,CURSOR_SIZENS);
 }
 
-void noti_statis_yax_sized(res_win_t widget, int x, int y)
+void noti_statis_yax_sized(widget_t widget, int x, int y)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 	float mh;
@@ -573,7 +573,7 @@ void noti_statis_yax_sized(res_win_t widget, int x, int y)
 	noti_statis_owner(widget, NC_YAXSIZED, ptd->statis, NULL, ptd->yax, NULL, NULL);
 }
 
-void noti_statis_yax_drag(res_win_t widget, int x, int y)
+void noti_statis_yax_drag(widget_t widget, int x, int y)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 	xpoint_t pt;
@@ -595,7 +595,7 @@ void noti_statis_yax_drag(res_win_t widget, int x, int y)
 	noti_statis_owner(widget, NC_YAXDRAG, ptd->statis, NULL, ptd->yax, NULL, (void*)&pt);
 }
 
-void noti_statis_yax_drop(res_win_t widget, int x, int y)
+void noti_statis_yax_drop(widget_t widget, int x, int y)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 	int nHint;
@@ -646,7 +646,7 @@ void noti_statis_yax_drop(res_win_t widget, int x, int y)
 	noti_statis_owner(widget, NC_YAXDROP, ptd->statis, NULL, ptd->yax, NULL, (void*)&pt);
 }
 
-void noti_statis_xax_drag(res_win_t widget, int x, int y)
+void noti_statis_xax_drag(widget_t widget, int x, int y)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 	xpoint_t pt;
@@ -668,7 +668,7 @@ void noti_statis_xax_drag(res_win_t widget, int x, int y)
 	noti_statis_owner(widget, NC_XAXDRAG, ptd->statis, ptd->xax, NULL, NULL, (void*)&pt);
 }
 
-void noti_statis_xax_drop(res_win_t widget, int x, int y)
+void noti_statis_xax_drop(widget_t widget, int x, int y)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 	int nHint;
@@ -719,7 +719,7 @@ void noti_statis_xax_drop(res_win_t widget, int x, int y)
 	noti_statis_owner(widget, NC_XAXDROP, ptd->statis, ptd->xax, NULL, NULL, (void*)&pt);
 }
 
-void noti_statis_yax_selected(res_win_t widget, link_t_ptr ylk)
+void noti_statis_yax_selected(widget_t widget, link_t_ptr ylk)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 	xrect_t xr;
@@ -739,7 +739,7 @@ void noti_statis_yax_selected(res_win_t widget, link_t_ptr ylk)
 	widget_erase(widget, &xr);
 }
 
-bool_t noti_statis_xax_insert(res_win_t widget, link_t_ptr xlk)
+bool_t noti_statis_xax_insert(widget_t widget, link_t_ptr xlk)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 
@@ -751,7 +751,7 @@ bool_t noti_statis_xax_insert(res_win_t widget, link_t_ptr xlk)
 	return 1;
 }
 
-bool_t noti_statis_xax_delete(res_win_t widget, link_t_ptr xlk)
+bool_t noti_statis_xax_delete(widget_t widget, link_t_ptr xlk)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 
@@ -763,7 +763,7 @@ bool_t noti_statis_xax_delete(res_win_t widget, link_t_ptr xlk)
 	return 1;
 }
 
-bool_t noti_statis_xax_changing(res_win_t widget)
+bool_t noti_statis_xax_changing(widget_t widget)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 	xrect_t xr;
@@ -783,7 +783,7 @@ bool_t noti_statis_xax_changing(res_win_t widget)
 	return (bool_t)1;
 }
 
-void noti_statis_xax_changed(res_win_t widget, link_t_ptr xlk)
+void noti_statis_xax_changed(widget_t widget, link_t_ptr xlk)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 	xrect_t xr;
@@ -800,7 +800,7 @@ void noti_statis_xax_changed(res_win_t widget, link_t_ptr xlk)
 	noti_statis_owner(widget, NC_XAXCHANGED, ptd->statis, ptd->xax, NULL, NULL, NULL);
 }
 
-void noti_statis_xax_checked(res_win_t widget, link_t_ptr xlk)
+void noti_statis_xax_checked(widget_t widget, link_t_ptr xlk)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 	xrect_t xr;
@@ -817,7 +817,7 @@ void noti_statis_xax_checked(res_win_t widget, link_t_ptr xlk)
 	widget_erase(widget, &xr);
 }
 
-void noti_statis_gax_changing(res_win_t widget)
+void noti_statis_gax_changing(widget_t widget)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 	xrect_t xr;
@@ -834,7 +834,7 @@ void noti_statis_gax_changing(res_win_t widget)
 	widget_erase(widget, &xr);
 }
 
-void noti_statis_gax_changed(res_win_t widget, link_t_ptr glk)
+void noti_statis_gax_changed(widget_t widget, link_t_ptr glk)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 	xrect_t xr;
@@ -851,7 +851,7 @@ void noti_statis_gax_changed(res_win_t widget, link_t_ptr glk)
 	noti_statis_owner(widget, NC_GAXCHANGED, ptd->statis, NULL, NULL, ptd->gax, NULL);
 }
 
-void noti_statis_yax_changing(res_win_t widget)
+void noti_statis_yax_changing(widget_t widget)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 	xrect_t xr;
@@ -868,7 +868,7 @@ void noti_statis_yax_changing(res_win_t widget)
 	widget_erase(widget, &xr);
 }
 
-void noti_statis_yax_changed(res_win_t widget, link_t_ptr ylk)
+void noti_statis_yax_changed(widget_t widget, link_t_ptr ylk)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 	xrect_t xr;
@@ -885,7 +885,7 @@ void noti_statis_yax_changed(res_win_t widget, link_t_ptr ylk)
 	noti_statis_owner(widget, NC_YAXCHANGED, ptd->statis, NULL, ptd->yax, NULL, NULL);
 }
 
-void noti_statis_yax_enter(res_win_t widget, link_t_ptr yax)
+void noti_statis_yax_enter(widget_t widget, link_t_ptr yax)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 
@@ -894,10 +894,10 @@ void noti_statis_yax_enter(res_win_t widget, link_t_ptr yax)
 
 	ptd->hover = yax;
 
-	widget_track_mouse(widget, MS_TRACK_HOVER | MS_TRACK_LEAVE);
+	//widget_track_mouse(widget, MS_TRACK_HOVER | MS_TRACK_LEAVE);
 }
 
-void noti_statis_yax_leave(res_win_t widget)
+void noti_statis_yax_leave(widget_t widget)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 
@@ -905,10 +905,10 @@ void noti_statis_yax_leave(res_win_t widget)
 
 	ptd->hover = NULL;
 
-	widget_track_mouse(widget, MS_TRACK_HOVER | MS_TRACK_LEAVE);
+	//widget_track_mouse(widget, MS_TRACK_HOVER | MS_TRACK_LEAVE);
 }
 
-void noti_statis_yax_hover(res_win_t widget, int x, int y)
+void noti_statis_yax_hover(widget_t widget, int x, int y)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 	xpoint_t xp;
@@ -920,7 +920,7 @@ void noti_statis_yax_hover(res_win_t widget, int x, int y)
 	noti_statis_owner(widget, NC_YAXHOVER, ptd->statis, NULL, ptd->hover, NULL, (void*)&xp);
 }
 
-void noti_statis_begin_edit(res_win_t widget)
+void noti_statis_begin_edit(widget_t widget)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 	const tchar_t* text;
@@ -974,11 +974,11 @@ void noti_statis_begin_edit(res_win_t widget)
 	editbox_selectall(ptd->editor);
 }
 
-void noti_statis_commit_edit(res_win_t widget)
+void noti_statis_commit_edit(widget_t widget)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 	const tchar_t* text;
-	res_win_t editctrl;
+	widget_t editctrl;
 	link_t_ptr xlk_new;
 	bool_t b_accept = 0;
 
@@ -995,7 +995,7 @@ void noti_statis_commit_edit(res_win_t widget)
 	}
 
 	editctrl = ptd->editor;
-	ptd->editor = (res_win_t)0;
+	ptd->editor = (widget_t)0;
 
 	widget_destroy(editctrl);
 	widget_set_focus(widget);
@@ -1033,10 +1033,10 @@ void noti_statis_commit_edit(res_win_t widget)
 	}
 }
 
-void noti_statis_rollback_edit(res_win_t widget)
+void noti_statis_rollback_edit(widget_t widget)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
-	res_win_t editctrl;
+	widget_t editctrl;
 
 	if (!widget_is_valid(ptd->editor))
 		return;
@@ -1044,13 +1044,13 @@ void noti_statis_rollback_edit(res_win_t widget)
 	XDK_ASSERT(ptd->xax);
 
 	editctrl = ptd->editor;
-	ptd->editor = (res_win_t)0;
+	ptd->editor = (widget_t)0;
 
 	widget_destroy(editctrl);
 	widget_set_focus(widget);
 }
 
-void noti_statis_reset_editor(res_win_t widget, bool_t bCommit)
+void noti_statis_reset_editor(widget_t widget, bool_t bCommit)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 
@@ -1063,7 +1063,7 @@ void noti_statis_reset_editor(res_win_t widget, bool_t bCommit)
 	}
 }
 
-void noti_statis_reset_scroll(res_win_t widget, bool_t bUpdate)
+void noti_statis_reset_scroll(widget_t widget, bool_t bUpdate)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 
@@ -1085,7 +1085,7 @@ void noti_statis_reset_scroll(res_win_t widget, bool_t bUpdate)
 }
 /*******************************************************************************************/
 
-int hand_statis_create(res_win_t widget, void* data)
+int hand_statis_create(widget_t widget, void* data)
 {
 	statis_delta_t* ptd;
 
@@ -1101,7 +1101,7 @@ int hand_statis_create(res_win_t widget, void* data)
 	return 0;
 }
 
-void hand_statis_destroy(res_win_t widget)
+void hand_statis_destroy(widget_t widget)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 
@@ -1125,7 +1125,7 @@ void hand_statis_destroy(res_win_t widget)
 	widget_hand_destroy(widget);
 }
 
-void hand_statis_undo(res_win_t widget)
+void hand_statis_undo(widget_t widget)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 
@@ -1135,7 +1135,7 @@ void hand_statis_undo(res_win_t widget)
 	_statisctrl_undo(widget);
 }
 
-void hand_statis_copy(res_win_t widget)
+void hand_statis_copy(widget_t widget)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 
@@ -1145,7 +1145,7 @@ void hand_statis_copy(res_win_t widget)
 	_statisctrl_copy(widget);
 }
 
-void hand_statis_cut(res_win_t widget)
+void hand_statis_cut(widget_t widget)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 
@@ -1160,7 +1160,7 @@ void hand_statis_cut(res_win_t widget)
 	}
 }
 
-void hand_statis_paste(res_win_t widget)
+void hand_statis_paste(widget_t widget)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 
@@ -1175,7 +1175,7 @@ void hand_statis_paste(res_win_t widget)
 	}
 }
 
-void hand_statis_size(res_win_t widget, int code, const xsize_t* psc)
+void hand_statis_size(widget_t widget, int code, const xsize_t* psc)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 
@@ -1187,7 +1187,7 @@ void hand_statis_size(res_win_t widget, int code, const xsize_t* psc)
 	statisctrl_redraw(widget, 1);
 }
 
-void hand_statis_scroll(res_win_t widget, bool_t bHorz, int nLine)
+void hand_statis_scroll(widget_t widget, bool_t bHorz, int nLine)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 
@@ -1199,12 +1199,12 @@ void hand_statis_scroll(res_win_t widget, bool_t bHorz, int nLine)
 	widget_hand_scroll(widget, bHorz, nLine);
 }
 
-void hand_statis_wheel(res_win_t widget, bool_t bHorz, int nDelta)
+void hand_statis_wheel(widget_t widget, bool_t bHorz, int nDelta)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 	scroll_t scr = { 0 };
 	int nLine;
-	res_win_t win;
+	widget_t win;
 
 	if (!ptd->statis)
 		return;
@@ -1255,7 +1255,7 @@ void hand_statis_wheel(res_win_t widget, bool_t bHorz, int nDelta)
 	}
 }
 
-void hand_statis_mouse_move(res_win_t widget, dword_t dw, const xpoint_t* pxp)
+void hand_statis_mouse_move(widget_t widget, dword_t dw, const xpoint_t* pxp)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 	link_t_ptr xax, yax, gax;
@@ -1320,7 +1320,7 @@ void hand_statis_mouse_move(res_win_t widget, dword_t dw, const xpoint_t* pxp)
 	}
 }
 
-void hand_statis_mouse_hover(res_win_t widget, dword_t dw, const xpoint_t* pxp)
+void hand_statis_mouse_hover(widget_t widget, dword_t dw, const xpoint_t* pxp)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 
@@ -1331,7 +1331,7 @@ void hand_statis_mouse_hover(res_win_t widget, dword_t dw, const xpoint_t* pxp)
 		noti_statis_yax_hover(widget, pxp->x, pxp->y);
 }
 
-void hand_statis_mouse_leave(res_win_t widget, dword_t dw, const xpoint_t* pxp)
+void hand_statis_mouse_leave(widget_t widget, dword_t dw, const xpoint_t* pxp)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 
@@ -1342,7 +1342,7 @@ void hand_statis_mouse_leave(res_win_t widget, dword_t dw, const xpoint_t* pxp)
 		noti_statis_yax_leave(widget);
 }
 
-void hand_statis_lbutton_dbclick(res_win_t widget, const xpoint_t* pxp)
+void hand_statis_lbutton_dbclick(widget_t widget, const xpoint_t* pxp)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 
@@ -1363,7 +1363,7 @@ void hand_statis_lbutton_dbclick(res_win_t widget, const xpoint_t* pxp)
 	noti_statis_owner(widget, NC_STATISDBCLK, ptd->statis, ptd->xax, ptd->yax, NULL, (void*)pxp);
 }
 
-void hand_statis_lbutton_down(res_win_t widget, const xpoint_t* pxp)
+void hand_statis_lbutton_down(widget_t widget, const xpoint_t* pxp)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 	link_t_ptr xlk, ylk, glk;
@@ -1413,7 +1413,7 @@ void hand_statis_lbutton_down(res_win_t widget, const xpoint_t* pxp)
 	}
 }
 
-void hand_statis_lbutton_up(res_win_t widget, const xpoint_t* pxp)
+void hand_statis_lbutton_up(widget_t widget, const xpoint_t* pxp)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 	link_t_ptr xlk, ylk, glk;
@@ -1504,7 +1504,7 @@ void hand_statis_lbutton_up(res_win_t widget, const xpoint_t* pxp)
 	noti_statis_owner(widget, NC_STATISLBCLK, ptd->statis, ptd->xax, ptd->yax, ptd->gax, (void*)pxp);
 }
 
-void hand_statis_rbutton_down(res_win_t widget, const xpoint_t* pxp)
+void hand_statis_rbutton_down(widget_t widget, const xpoint_t* pxp)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 
@@ -1514,7 +1514,7 @@ void hand_statis_rbutton_down(res_win_t widget, const xpoint_t* pxp)
 	noti_statis_reset_editor(widget, 1);
 }
 
-void hand_statis_rbutton_up(res_win_t widget, const xpoint_t* pxp)
+void hand_statis_rbutton_up(widget_t widget, const xpoint_t* pxp)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 
@@ -1524,7 +1524,7 @@ void hand_statis_rbutton_up(res_win_t widget, const xpoint_t* pxp)
 	noti_statis_owner(widget, NC_STATISRBCLK, ptd->statis, ptd->xax, ptd->yax, ptd->gax, (void*)pxp);
 }
 
-void hand_statis_keydown(res_win_t widget, dword_t ks, int nKey)
+void hand_statis_keydown(widget_t widget, dword_t ks, int nKey)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 
@@ -1590,7 +1590,7 @@ void hand_statis_keydown(res_win_t widget, dword_t ks, int nKey)
 	}
 }
 
-void hand_statis_wchar(res_win_t widget, wchar_t nChar)
+void hand_statis_wchar(widget_t widget, wchar_t nChar)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 
@@ -1608,7 +1608,7 @@ void hand_statis_wchar(res_win_t widget, wchar_t nChar)
 	}
 }
 
-void hand_statis_child_command(res_win_t widget, int code, vword_t data)
+void hand_statis_child_command(widget_t widget, int code, vword_t data)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 
@@ -1623,7 +1623,7 @@ void hand_statis_child_command(res_win_t widget, int code, vword_t data)
 	}
 }
 
-void hand_statis_menu_command(res_win_t widget, int code, int cid, vword_t data)
+void hand_statis_menu_command(widget_t widget, int code, int cid, vword_t data)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 
@@ -1647,15 +1647,15 @@ void hand_statis_menu_command(res_win_t widget, int code, int cid, vword_t data)
 				break;
 			}
 
-			if (widget_is_valid((res_win_t)data))
+			if (widget_is_valid((widget_t)data))
 			{
-				widget_close((res_win_t)data, 1);
+				widget_close((widget_t)data, 1);
 			}
 		}
 	}
 }
 
-void hand_statis_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
+void hand_statis_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 	visual_t rdc;
@@ -1724,7 +1724,7 @@ void hand_statis_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 
 /*********************************************************************************/
 
-res_win_t statisctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, res_win_t wparent)
+widget_t statisctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, widget_t wparent)
 {
 	if_dispatch_t ev = { 0 };
 
@@ -1763,7 +1763,7 @@ res_win_t statisctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t*
 	return widget_create(wname, wstyle, pxr, wparent, &ev);
 }
 
-void statisctrl_attach(res_win_t widget, link_t_ptr ptr)
+void statisctrl_attach(widget_t widget, link_t_ptr ptr)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 
@@ -1787,7 +1787,7 @@ void statisctrl_attach(res_win_t widget, link_t_ptr ptr)
 	}
 }
 
-link_t_ptr statisctrl_detach(res_win_t widget)
+link_t_ptr statisctrl_detach(widget_t widget)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 	link_t_ptr data;
@@ -1806,7 +1806,7 @@ link_t_ptr statisctrl_detach(res_win_t widget)
 	return data;
 }
 
-link_t_ptr statisctrl_fetch(res_win_t widget)
+link_t_ptr statisctrl_fetch(widget_t widget)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 
@@ -1815,7 +1815,7 @@ link_t_ptr statisctrl_fetch(res_win_t widget)
 	return ptd->statis;
 }
 
-void statisctrl_accept(res_win_t widget, bool_t bAccept)
+void statisctrl_accept(widget_t widget, bool_t bAccept)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 	link_t_ptr xlk, nxt;
@@ -1843,7 +1843,7 @@ void statisctrl_accept(res_win_t widget, bool_t bAccept)
 	statisctrl_redraw(widget, 0);
 }
 
-bool_t statisctrl_is_update(res_win_t widget)
+bool_t statisctrl_is_update(widget_t widget)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 
@@ -1855,7 +1855,7 @@ bool_t statisctrl_is_update(res_win_t widget)
 	return (get_update_xax_count(ptd->statis)) ? 1 : 0;
 }
 
-void statisctrl_auto_insert(res_win_t widget, bool_t bAuto)
+void statisctrl_auto_insert(widget_t widget, bool_t bAuto)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 
@@ -1864,7 +1864,7 @@ void statisctrl_auto_insert(res_win_t widget, bool_t bAuto)
 	ptd->b_auto = bAuto;
 }
 
-void statisctrl_redraw(res_win_t widget, bool_t bCalc)
+void statisctrl_redraw(widget_t widget, bool_t bCalc)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 	link_t_ptr xlk, ylk, glk;
@@ -1939,7 +1939,7 @@ void statisctrl_redraw(res_win_t widget, bool_t bCalc)
 	widget_paint(widget);
 }
 
-void statisctrl_redraw_xax(res_win_t widget, link_t_ptr xlk, bool_t bCalc)
+void statisctrl_redraw_xax(widget_t widget, link_t_ptr xlk, bool_t bCalc)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 	xrect_t xr;
@@ -1964,7 +1964,7 @@ void statisctrl_redraw_xax(res_win_t widget, link_t_ptr xlk, bool_t bCalc)
 	widget_erase(widget, &xr);
 }
 
-void statisctrl_redraw_yax(res_win_t widget, link_t_ptr ylk, bool_t bCalc)
+void statisctrl_redraw_yax(widget_t widget, link_t_ptr ylk, bool_t bCalc)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 	xrect_t xr;
@@ -1989,7 +1989,7 @@ void statisctrl_redraw_yax(res_win_t widget, link_t_ptr ylk, bool_t bCalc)
 	widget_erase(widget, &xr);
 }
 
-void statisctrl_tabskip(res_win_t widget, int dir)
+void statisctrl_tabskip(widget_t widget, int dir)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 	link_t_ptr xlk, ylk;
@@ -2055,7 +2055,7 @@ void statisctrl_tabskip(res_win_t widget, int dir)
 	}
 }
 
-bool_t statisctrl_delete_xax(res_win_t widget, link_t_ptr xlk)
+bool_t statisctrl_delete_xax(widget_t widget, link_t_ptr xlk)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 	link_t_ptr nlk;
@@ -2096,7 +2096,7 @@ bool_t statisctrl_delete_xax(res_win_t widget, link_t_ptr xlk)
 	return 1;
 }
 
-link_t_ptr statisctrl_insert_xax(res_win_t widget, link_t_ptr pre)
+link_t_ptr statisctrl_insert_xax(widget_t widget, link_t_ptr pre)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 	link_t_ptr xlk;
@@ -2140,7 +2140,7 @@ link_t_ptr statisctrl_insert_xax(res_win_t widget, link_t_ptr pre)
 	return xlk;
 }
 
-bool_t statisctrl_set_coor_text(res_win_t widget, link_t_ptr xlk, link_t_ptr ylk, const tchar_t* szText)
+bool_t statisctrl_set_coor_text(widget_t widget, link_t_ptr xlk, link_t_ptr ylk, const tchar_t* szText)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 	const tchar_t* text;
@@ -2190,7 +2190,7 @@ bool_t statisctrl_set_coor_text(res_win_t widget, link_t_ptr xlk, link_t_ptr ylk
 	return 1;
 }
 
-bool_t statisctrl_set_focus_coor(res_win_t widget, link_t_ptr xlk, link_t_ptr ylk)
+bool_t statisctrl_set_focus_coor(widget_t widget, link_t_ptr xlk, link_t_ptr ylk)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 	bool_t bReXax, bReYax;
@@ -2252,7 +2252,7 @@ bool_t statisctrl_set_focus_coor(res_win_t widget, link_t_ptr xlk, link_t_ptr yl
 	return 1;
 }
 
-link_t_ptr statisctrl_get_focus_xax(res_win_t widget)
+link_t_ptr statisctrl_get_focus_xax(widget_t widget)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 
@@ -2264,7 +2264,7 @@ link_t_ptr statisctrl_get_focus_xax(res_win_t widget)
 	return ptd->xax;
 }
 
-link_t_ptr statisctrl_get_focus_yax(res_win_t widget)
+link_t_ptr statisctrl_get_focus_yax(widget_t widget)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 
@@ -2276,7 +2276,7 @@ link_t_ptr statisctrl_get_focus_yax(res_win_t widget)
 	return ptd->yax;
 }
 
-link_t_ptr statisctrl_get_focus_gax(res_win_t widget)
+link_t_ptr statisctrl_get_focus_gax(widget_t widget)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 
@@ -2288,7 +2288,7 @@ link_t_ptr statisctrl_get_focus_gax(res_win_t widget)
 	return ptd->gax;
 }
 
-void statisctrl_move_first_page(res_win_t widget)
+void statisctrl_move_first_page(widget_t widget)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 	int nCurPage;
@@ -2311,7 +2311,7 @@ void statisctrl_move_first_page(res_win_t widget)
 	}
 }
 
-void statisctrl_move_prev_page(res_win_t widget)
+void statisctrl_move_prev_page(widget_t widget)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 	int nCurPage;
@@ -2334,7 +2334,7 @@ void statisctrl_move_prev_page(res_win_t widget)
 	}
 }
 
-void statisctrl_move_next_page(res_win_t widget)
+void statisctrl_move_next_page(widget_t widget)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 	int nCurPage, nMaxPage;
@@ -2358,7 +2358,7 @@ void statisctrl_move_next_page(res_win_t widget)
 	}
 }
 
-void statisctrl_move_last_page(res_win_t widget)
+void statisctrl_move_last_page(widget_t widget)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 	int nCurPage, nMaxPage;
@@ -2382,7 +2382,7 @@ void statisctrl_move_last_page(res_win_t widget)
 	}
 }
 
-void statisctrl_move_to_page(res_win_t widget, int page)
+void statisctrl_move_to_page(widget_t widget, int page)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 	int nCurPage, nMaxPage;
@@ -2406,7 +2406,7 @@ void statisctrl_move_to_page(res_win_t widget, int page)
 	}
 }
 
-int statisctrl_get_cur_page(res_win_t widget)
+int statisctrl_get_cur_page(widget_t widget)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 
@@ -2418,7 +2418,7 @@ int statisctrl_get_cur_page(res_win_t widget)
 	return ptd->cur_page;
 }
 
-int statisctrl_get_max_page(res_win_t widget)
+int statisctrl_get_max_page(widget_t widget)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 
@@ -2430,7 +2430,7 @@ int statisctrl_get_max_page(res_win_t widget)
 	return calc_statis_pages(ptd->statis);
 }
 
-void statisctrl_get_coor_rect(res_win_t widget, link_t_ptr xlk, link_t_ptr ylk, xrect_t* pxr)
+void statisctrl_get_coor_rect(widget_t widget, link_t_ptr xlk, link_t_ptr ylk, xrect_t* pxr)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 	
@@ -2442,7 +2442,7 @@ void statisctrl_get_coor_rect(res_win_t widget, link_t_ptr xlk, link_t_ptr ylk, 
 	_statisctrl_coor_rect(widget, xlk, ylk, pxr);
 }
 
-bool_t statisctrl_get_lock(res_win_t widget)
+bool_t statisctrl_get_lock(widget_t widget)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 
@@ -2451,7 +2451,7 @@ bool_t statisctrl_get_lock(res_win_t widget)
 	return ptd->b_lock;
 }
 
-void statisctrl_set_lock(res_win_t widget, bool_t bLock)
+void statisctrl_set_lock(widget_t widget, bool_t bLock)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 
@@ -2460,7 +2460,7 @@ void statisctrl_set_lock(res_win_t widget, bool_t bLock)
 	ptd->b_lock = bLock;
 }
 
-bool_t statisctrl_get_dirty(res_win_t widget)
+bool_t statisctrl_get_dirty(widget_t widget)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 
@@ -2475,7 +2475,7 @@ bool_t statisctrl_get_dirty(res_win_t widget)
 	return (peek_stack_node(ptd->stack, -1)) ? 1 : 0;
 }
 
-void statisctrl_set_dirty(res_win_t widget, bool_t bDirty)
+void statisctrl_set_dirty(widget_t widget, bool_t bDirty)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 

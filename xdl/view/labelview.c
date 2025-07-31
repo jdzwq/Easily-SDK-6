@@ -300,7 +300,7 @@ void draw_label(const drawing_interface* pif, link_t_ptr ptr, int page)
 	xmem_copy((void*)&xb_shape, (void*)&xb, sizeof(xbrush_t));
 	lighten_xbrush(&xb_shape, DEF_SOFT_DARKEN);
 
-	(*pif->pf_text_metric)(pif->ctx, &xf, &xs);
+	(*pif->pf_font_size)(pif->ctx, &xf, &xs);
 
 	iw = get_label_item_width(ptr);
 	ih = get_label_item_height(ptr);

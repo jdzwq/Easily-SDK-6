@@ -26,8 +26,8 @@ LICENSE.GPL3 for more details.
 
 #include "ctrl.h"
 
-#include "../xdcimp.h"
-#include "../xdcinit.h"
+#include "../xdcobj.h"
+
 
 typedef struct title_delta_t{
 	link_t_ptr title;
@@ -40,7 +40,7 @@ typedef struct title_delta_t{
 
 /****************************************************************************************************/
 
-static void _titlectrl_item_rect(res_win_t widget, link_t_ptr ilk, xrect_t* pxr)
+static void _titlectrl_item_rect(widget_t widget, link_t_ptr ilk, xrect_t* pxr)
 {
 	title_delta_t* ptd = GETTITLEDELTA(widget);
 
@@ -49,7 +49,7 @@ static void _titlectrl_item_rect(res_win_t widget, link_t_ptr ilk, xrect_t* pxr)
 	widget_rect_to_pt(widget, pxr);
 }
 
-static void _titlectrl_reset_page(res_win_t widget)
+static void _titlectrl_reset_page(widget_t widget)
 {
 	title_delta_t* ptd = GETTITLEDELTA(widget);
 	int pw, ph;
@@ -63,7 +63,7 @@ static void _titlectrl_reset_page(res_win_t widget)
 }
 
 /*********************************************control event******************************************/
-int noti_title_owner(res_win_t widget, unsigned int code, link_t_ptr title, link_t_ptr ilk, void* data)
+int noti_title_owner(widget_t widget, unsigned int code, link_t_ptr title, link_t_ptr ilk, void* data)
 {
 	title_delta_t* ptd = GETTITLEDELTA(widget);
 	NOTICE_TITLE nf = { 0 };
@@ -81,7 +81,7 @@ int noti_title_owner(res_win_t widget, unsigned int code, link_t_ptr title, link
 	return nf.ret;
 }
 
-void noti_title_item_leave(res_win_t widget)
+void noti_title_item_leave(widget_t widget)
 {
 	title_delta_t* ptd = GETTITLEDELTA(widget);
 
@@ -93,11 +93,11 @@ void noti_title_item_leave(res_win_t widget)
 
 	if (widget_is_hotvoer(widget))
 	{
-		widget_track_mouse(widget, MS_TRACK_HOVER | MS_TRACK_LEAVE);
+		//widget_track_mouse(widget, MS_TRACK_HOVER | MS_TRACK_LEAVE);
 	}
 }
 
-void noti_title_item_enter(res_win_t widget, link_t_ptr plk)
+void noti_title_item_enter(widget_t widget, link_t_ptr plk)
 {
 	title_delta_t* ptd = GETTITLEDELTA(widget);
 
@@ -110,11 +110,11 @@ void noti_title_item_enter(res_win_t widget, link_t_ptr plk)
 
 	if (widget_is_hotvoer(widget))
 	{
-		widget_track_mouse(widget, MS_TRACK_HOVER | MS_TRACK_LEAVE);
+		//widget_track_mouse(widget, MS_TRACK_HOVER | MS_TRACK_LEAVE);
 	}
 }
 
-void noti_title_item_hover(res_win_t widget, int x, int y)
+void noti_title_item_hover(widget_t widget, int x, int y)
 {
 	title_delta_t* ptd = GETTITLEDELTA(widget);
 	xpoint_t xp;
@@ -126,7 +126,7 @@ void noti_title_item_hover(res_win_t widget, int x, int y)
 	noti_title_owner(widget, NC_TITLEITEMHOVER, ptd->title, ptd->hover, (void*)&xp);
 }
 
-bool_t noti_title_item_changing(res_win_t widget)
+bool_t noti_title_item_changing(widget_t widget)
 {
 	title_delta_t* ptd = GETTITLEDELTA(widget);
 
@@ -142,7 +142,7 @@ bool_t noti_title_item_changing(res_win_t widget)
 	return 1;
 }
 
-void noti_title_item_changed(res_win_t widget, link_t_ptr plk)
+void noti_title_item_changed(widget_t widget, link_t_ptr plk)
 {
 	title_delta_t* ptd = GETTITLEDELTA(widget);
 
@@ -157,7 +157,7 @@ void noti_title_item_changed(res_win_t widget, link_t_ptr plk)
 }
 
 /*********************************************************************************************/
-int hand_title_create(res_win_t widget, void* data)
+int hand_title_create(widget_t widget, void* data)
 {
 	title_delta_t* ptd;
 
@@ -171,7 +171,7 @@ int hand_title_create(res_win_t widget, void* data)
 	return 0;
 }
 
-void hand_title_destroy(res_win_t widget)
+void hand_title_destroy(widget_t widget)
 {
 	title_delta_t* ptd = GETTITLEDELTA(widget);
 
@@ -184,7 +184,7 @@ void hand_title_destroy(res_win_t widget)
 	widget_hand_destroy(widget);
 }
 
-void hand_title_size(res_win_t widget, int code, const xsize_t* pxs)
+void hand_title_size(widget_t widget, int code, const xsize_t* pxs)
 {
 	title_delta_t* ptd = GETTITLEDELTA(widget);
 	xrect_t xr;
@@ -201,7 +201,7 @@ void hand_title_size(res_win_t widget, int code, const xsize_t* pxs)
 	titlectrl_redraw(widget);
 }
 
-void hand_title_mouse_move(res_win_t widget, dword_t dw, const xpoint_t* pxp)
+void hand_title_mouse_move(widget_t widget, dword_t dw, const xpoint_t* pxp)
 {
 	title_delta_t* ptd = GETTITLEDELTA(widget);
 	int nHint;
@@ -234,7 +234,7 @@ void hand_title_mouse_move(res_win_t widget, dword_t dw, const xpoint_t* pxp)
 	}
 }
 
-void hand_title_mouse_hover(res_win_t widget, dword_t dw, const xpoint_t* pxp)
+void hand_title_mouse_hover(widget_t widget, dword_t dw, const xpoint_t* pxp)
 {
 	title_delta_t* ptd = GETTITLEDELTA(widget);
 
@@ -245,7 +245,7 @@ void hand_title_mouse_hover(res_win_t widget, dword_t dw, const xpoint_t* pxp)
 		noti_title_item_hover(widget, pxp->x, pxp->y);
 }
 
-void hand_title_mouse_leave(res_win_t widget, dword_t dw, const xpoint_t* pxp)
+void hand_title_mouse_leave(widget_t widget, dword_t dw, const xpoint_t* pxp)
 {
 	title_delta_t* ptd = GETTITLEDELTA(widget);
 
@@ -256,7 +256,7 @@ void hand_title_mouse_leave(res_win_t widget, dword_t dw, const xpoint_t* pxp)
 		noti_title_item_leave(widget);
 }
 
-void hand_title_lbutton_dbclick(res_win_t widget, const xpoint_t* pxp)
+void hand_title_lbutton_dbclick(widget_t widget, const xpoint_t* pxp)
 {
 	title_delta_t* ptd = GETTITLEDELTA(widget);
 
@@ -266,7 +266,7 @@ void hand_title_lbutton_dbclick(res_win_t widget, const xpoint_t* pxp)
 	noti_title_owner(widget, NC_TITLEDBCLK,ptd->title, ptd->item, (void*)pxp);
 }
 
-void hand_title_lbutton_down(res_win_t widget, const xpoint_t* pxp)
+void hand_title_lbutton_down(widget_t widget, const xpoint_t* pxp)
 {
 	title_delta_t* ptd = GETTITLEDELTA(widget);
 
@@ -274,7 +274,7 @@ void hand_title_lbutton_down(res_win_t widget, const xpoint_t* pxp)
 		return;
 }
 
-void hand_title_lbutton_up(res_win_t widget, const xpoint_t* pxp)
+void hand_title_lbutton_up(widget_t widget, const xpoint_t* pxp)
 {
 	title_delta_t* ptd = GETTITLEDELTA(widget);
 	link_t_ptr plk;
@@ -314,7 +314,7 @@ void hand_title_lbutton_up(res_win_t widget, const xpoint_t* pxp)
 	noti_title_owner(widget, NC_TITLELBCLK, ptd->title, ptd->item, (void*)pxp);
 }
 
-void hand_title_rbutton_down(res_win_t widget, const xpoint_t* pxp)
+void hand_title_rbutton_down(widget_t widget, const xpoint_t* pxp)
 {
 	title_delta_t* ptd = GETTITLEDELTA(widget);
 
@@ -322,7 +322,7 @@ void hand_title_rbutton_down(res_win_t widget, const xpoint_t* pxp)
 		return;
 }
 
-void hand_title_rbutton_up(res_win_t widget, const xpoint_t* pxp)
+void hand_title_rbutton_up(widget_t widget, const xpoint_t* pxp)
 {
 	title_delta_t* ptd = GETTITLEDELTA(widget);
 
@@ -332,7 +332,7 @@ void hand_title_rbutton_up(res_win_t widget, const xpoint_t* pxp)
 	noti_title_owner(widget, NC_TITLERBCLK, ptd->title, ptd->item, (void*)pxp);
 }
 
-void hand_title_mouse_wheel(res_win_t widget, dword_t dw, short delta)
+void hand_title_mouse_wheel(widget_t widget, dword_t dw, short delta)
 {
 	title_delta_t* ptd = GETTITLEDELTA(widget);
 
@@ -340,7 +340,7 @@ void hand_title_mouse_wheel(res_win_t widget, dword_t dw, short delta)
 		return;
 }
 
-void hand_title_keydown(res_win_t widget, dword_t ks, int nKey)
+void hand_title_keydown(widget_t widget, dword_t ks, int nKey)
 {
 	title_delta_t* ptd = GETTITLEDELTA(widget);
 
@@ -366,7 +366,7 @@ void hand_title_keydown(res_win_t widget, dword_t ks, int nKey)
 	}
 }
 
-void hand_title_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
+void hand_title_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 {
 	title_delta_t* ptd = GETTITLEDELTA(widget);
 	visual_t rdc;
@@ -418,7 +418,7 @@ void hand_title_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 
 /************************************************************************************************/
 
-res_win_t titlectrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, res_win_t wparent)
+widget_t titlectrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, widget_t wparent)
 {
 	if_dispatch_t ev = { 0 };
 
@@ -450,7 +450,7 @@ res_win_t titlectrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* 
 	return widget_create(wname, wstyle, pxr, wparent, &ev);
 }
 
-void titlectrl_attach(res_win_t widget, link_t_ptr ptr)
+void titlectrl_attach(widget_t widget, link_t_ptr ptr)
 {
 	title_delta_t* ptd = GETTITLEDELTA(widget);
 	xrect_t xr;
@@ -473,7 +473,7 @@ void titlectrl_attach(res_win_t widget, link_t_ptr ptr)
 	titlectrl_set_focus_item(widget, get_title_next_item(ptd->title, LINK_FIRST));
 }
 
-link_t_ptr titlectrl_detach(res_win_t widget)
+link_t_ptr titlectrl_detach(widget_t widget)
 {
 	title_delta_t* ptd = GETTITLEDELTA(widget);
 	link_t_ptr data;
@@ -490,7 +490,7 @@ link_t_ptr titlectrl_detach(res_win_t widget)
 	return data;
 }
 
-link_t_ptr titlectrl_fetch(res_win_t widget)
+link_t_ptr titlectrl_fetch(widget_t widget)
 {
 	title_delta_t* ptd = GETTITLEDELTA(widget);
 
@@ -499,7 +499,7 @@ link_t_ptr titlectrl_fetch(res_win_t widget)
 	return ptd->title;
 }
 
-void titlectrl_tabskip(res_win_t widget, int nSkip)
+void titlectrl_tabskip(widget_t widget, int nSkip)
 {
 	title_delta_t* ptd = GETTITLEDELTA(widget);
 	link_t_ptr plk = NULL;
@@ -548,7 +548,7 @@ void titlectrl_tabskip(res_win_t widget, int nSkip)
 	}
 }
 
-void titlectrl_redraw(res_win_t widget)
+void titlectrl_redraw(widget_t widget)
 {
 	title_delta_t* ptd = GETTITLEDELTA(widget);
 	link_t_ptr ilk;
@@ -584,7 +584,7 @@ void titlectrl_redraw(res_win_t widget)
 	widget_erase(widget, NULL);
 }
 
-void titlectrl_redraw_item(res_win_t widget, link_t_ptr plk)
+void titlectrl_redraw_item(widget_t widget, link_t_ptr plk)
 {
 	title_delta_t* ptd = GETTITLEDELTA(widget);
 	xrect_t xr;
@@ -614,7 +614,7 @@ void titlectrl_redraw_item(res_win_t widget, link_t_ptr plk)
 	widget_erase(widget, &xr);
 }
 
-link_t_ptr titlectrl_insert_item(res_win_t widget, link_t_ptr pos)
+link_t_ptr titlectrl_insert_item(widget_t widget, link_t_ptr pos)
 {
 	title_delta_t* ptd = GETTITLEDELTA(widget);
 	link_t_ptr ilk;
@@ -648,7 +648,7 @@ link_t_ptr titlectrl_insert_item(res_win_t widget, link_t_ptr pos)
 	return ilk;
 }
 
-bool_t titlectrl_delete_item(res_win_t widget, link_t_ptr plk)
+bool_t titlectrl_delete_item(widget_t widget, link_t_ptr plk)
 {
 	title_delta_t* ptd = GETTITLEDELTA(widget);
 	link_t_ptr nlk;
@@ -687,7 +687,7 @@ bool_t titlectrl_delete_item(res_win_t widget, link_t_ptr plk)
 	return 1;
 }
 
-bool_t titlectrl_set_focus_item(res_win_t widget, link_t_ptr ilk)
+bool_t titlectrl_set_focus_item(widget_t widget, link_t_ptr ilk)
 {
 	title_delta_t* ptd = GETTITLEDELTA(widget);
 	bool_t bRe;
@@ -720,7 +720,7 @@ bool_t titlectrl_set_focus_item(res_win_t widget, link_t_ptr ilk)
 	return 1;
 }
 
-link_t_ptr titlectrl_get_focus_item(res_win_t widget)
+link_t_ptr titlectrl_get_focus_item(widget_t widget)
 {
 	title_delta_t* ptd = GETTITLEDELTA(widget);
 
@@ -732,7 +732,7 @@ link_t_ptr titlectrl_get_focus_item(res_win_t widget)
 	return ptd->item;
 }
 
-void titlectrl_get_item_rect(res_win_t widget, link_t_ptr ilk, xrect_t* pxr)
+void titlectrl_get_item_rect(widget_t widget, link_t_ptr ilk, xrect_t* pxr)
 {
 	title_delta_t* ptd = GETTITLEDELTA(widget);
 	

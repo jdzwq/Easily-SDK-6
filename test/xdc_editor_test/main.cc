@@ -1,9 +1,9 @@
 #include <xdl.h>
 #include <xdc.h>
 
-res_win_t g_main = NULL;
+widget_t g_main = NULL;
 
-res_win_t MainFrame_Create(const tchar_t* mname);
+widget_t MainFrame_Create(const tchar_t* mname);
 
 #ifdef _OS_WINDOWS
 int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
@@ -44,7 +44,7 @@ accel_t	MAINFRAME_ACCEL[MAINFRAME_ACCEL_COUNT] = {
 };
 
 typedef struct tagMainFrameDelta{
-	res_win_t hEditor;
+	widget_t hEditor;
 
 	bool_t bDirty;
 	bool_t bMode;
@@ -54,7 +54,7 @@ typedef struct tagMainFrameDelta{
 #define SETMAINFRAMEDELTA(widget,ptd)		widget_set_user_delta(widget,(vword_t)ptd)
 
 /*******************************************************************************************************/
-void _MainFrame_CreateEditor(res_win_t widget)
+void _MainFrame_CreateEditor(widget_t widget)
 {
 	MainFrameDelta* pdt = GETMAINFRAMEDELTA(widget);
 
@@ -70,7 +70,7 @@ void _MainFrame_CreateEditor(res_win_t widget)
 	widget_show(pdt->hEditor, WS_SHOW_NORMAL);
 }
 
-void _MainFrame_DestroyEditor(res_win_t widget)
+void _MainFrame_DestroyEditor(widget_t widget)
 {
 	MainFrameDelta* pdt = GETMAINFRAMEDELTA(widget);
 
@@ -78,7 +78,7 @@ void _MainFrame_DestroyEditor(res_win_t widget)
 		widget_destroy(pdt->hEditor);
 }
 
-int MainFrame_OnCreate(res_win_t widget, void* data)
+int MainFrame_OnCreate(widget_t widget, void* data)
 {
 	MainFrameDelta* pdt;
 
@@ -96,7 +96,7 @@ int MainFrame_OnCreate(res_win_t widget, void* data)
 	return 0;
 }
 
-void MainFrame_OnDestroy(res_win_t widget)
+void MainFrame_OnDestroy(widget_t widget)
 {
 	MainFrameDelta* pdt = GETMAINFRAMEDELTA(widget);
 
@@ -111,7 +111,7 @@ void MainFrame_OnDestroy(res_win_t widget)
 	widget_hand_destroy(widget);
 }
 
-int MainFrame_OnClose(res_win_t widget)
+int MainFrame_OnClose(widget_t widget)
 {
 	MainFrameDelta* pdt = GETMAINFRAMEDELTA(widget);
 
@@ -122,7 +122,7 @@ int MainFrame_OnClose(res_win_t widget)
 	return 0;
 }
 
-void MainFrame_OnSize(res_win_t widget, int code, const xsize_t* pxs)
+void MainFrame_OnSize(widget_t widget, int code, const xsize_t* pxs)
 {
 	MainFrameDelta* pdt = GETMAINFRAMEDELTA(widget);
 
@@ -138,28 +138,28 @@ void MainFrame_OnSize(res_win_t widget, int code, const xsize_t* pxs)
 	}
 }
 
-void MainFrame_OnScroll(res_win_t widget, bool_t bHorz, int nLine)
+void MainFrame_OnScroll(widget_t widget, bool_t bHorz, int nLine)
 {
 	MainFrameDelta* pdt = GETMAINFRAMEDELTA(widget);
 
 	widget_hand_scroll(widget, bHorz, nLine);
 }
 
-void MainFrame_OnMenuCommand(res_win_t widget, int code, int cid, vword_t data)
+void MainFrame_OnMenuCommand(widget_t widget, int code, int cid, vword_t data)
 {
 	MainFrameDelta* pdt = GETMAINFRAMEDELTA(widget);
 
 }
 
-void MainFrame_OnNotice(res_win_t widget, LPNOTICE phdr)
+void MainFrame_OnNotice(widget_t widget, LPNOTICE phdr)
 {
 	MainFrameDelta* pdt = GETMAINFRAMEDELTA(widget);
 
 }
 
-res_win_t MainFrame_Create(const tchar_t* mname)
+widget_t MainFrame_Create(const tchar_t* mname)
 {
-	res_win_t widget;
+	widget_t widget;
 	xrect_t xr = { 0 };
 
 	if_dispatch_t ev = { 0 };

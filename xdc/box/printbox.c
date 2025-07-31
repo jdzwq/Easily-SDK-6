@@ -26,8 +26,8 @@ LICENSE.GPL3 for more details.
 
 #include "box.h"
 
-#include "../xdcimp.h"
-#include "../xdcinit.h"
+#include "../xdcobj.h"
+
 
 
 #define SVG_LINE_FEED		(int)100
@@ -37,8 +37,8 @@ typedef struct _print_delta_t{
 
 	int pages, page;
 
-	res_win_t hsc;
-	res_win_t vsc;
+	widget_t hsc;
+	widget_t vsc;
 
 	xfont_t xf;
 	xface_t xa;
@@ -48,7 +48,7 @@ typedef struct _print_delta_t{
 #define SETPRINTDELTA(ph,ptd)	widget_set_user_delta(ph,(vword_t)ptd)
 
 /************************************************************************************************/
-static int _printbox_calc_pages(res_win_t widget)
+static int _printbox_calc_pages(widget_t widget)
 {
 	print_delta_t* ptd = GETPRINTDELTA(widget);
 
@@ -85,7 +85,7 @@ static int _printbox_calc_pages(res_win_t widget)
 	return pages;
 }
 
-static void _printbox_reset_page(res_win_t widget)
+static void _printbox_reset_page(widget_t widget)
 {
 	print_delta_t* ptd = GETPRINTDELTA(widget);
 	int pw, ph, fw, fh, lw, lh;
@@ -141,7 +141,7 @@ static void _printbox_reset_page(res_win_t widget)
 
 /********************************************************************************************/
 
-int hand_print_create(res_win_t widget, void* data)
+int hand_print_create(widget_t widget, void* data)
 {
 	print_delta_t* ptd;
 
@@ -158,7 +158,7 @@ int hand_print_create(res_win_t widget, void* data)
 	return 0;
 }
 
-void hand_print_destroy(res_win_t widget)
+void hand_print_destroy(widget_t widget)
 {
 	print_delta_t* ptd = GETPRINTDELTA(widget);
 
@@ -177,7 +177,7 @@ void hand_print_destroy(res_win_t widget)
 	widget_hand_destroy(widget);
 }
 
-void hand_print_size(res_win_t widget, int code, const xsize_t* pxs)
+void hand_print_size(widget_t widget, int code, const xsize_t* pxs)
 {
 	print_delta_t* ptd = GETPRINTDELTA(widget);
 
@@ -189,7 +189,7 @@ void hand_print_size(res_win_t widget, int code, const xsize_t* pxs)
 	widget_erase(widget, NULL);
 }
 
-void hand_print_lbutton_down(res_win_t widget, const xpoint_t* pxp)
+void hand_print_lbutton_down(widget_t widget, const xpoint_t* pxp)
 {
 	print_delta_t* ptd = GETPRINTDELTA(widget);
 
@@ -202,7 +202,7 @@ void hand_print_lbutton_down(res_win_t widget, const xpoint_t* pxp)
 	}
 }
 
-void hand_print_lbutton_up(res_win_t widget, const xpoint_t* pxp)
+void hand_print_lbutton_up(widget_t widget, const xpoint_t* pxp)
 {
 	print_delta_t* ptd = GETPRINTDELTA(widget);
 
@@ -210,16 +210,7 @@ void hand_print_lbutton_up(res_win_t widget, const xpoint_t* pxp)
 		return;
 }
 
-void hand_print_lbutton_dbclick(res_win_t widget, const xpoint_t* pxp)
-{
-	print_delta_t* ptd = GETPRINTDELTA(widget);
-
-	if (!ptd->sheet)
-		return;
-
-}
-
-void hand_print_rbutton_down(res_win_t widget, const xpoint_t* pxp)
+void hand_print_lbutton_dbclick(widget_t widget, const xpoint_t* pxp)
 {
 	print_delta_t* ptd = GETPRINTDELTA(widget);
 
@@ -228,7 +219,7 @@ void hand_print_rbutton_down(res_win_t widget, const xpoint_t* pxp)
 
 }
 
-void hand_print_rbutton_up(res_win_t widget, const xpoint_t* pxp)
+void hand_print_rbutton_down(widget_t widget, const xpoint_t* pxp)
 {
 	print_delta_t* ptd = GETPRINTDELTA(widget);
 
@@ -237,7 +228,16 @@ void hand_print_rbutton_up(res_win_t widget, const xpoint_t* pxp)
 
 }
 
-void hand_print_scroll(res_win_t widget, bool_t bHorz, int nLine)
+void hand_print_rbutton_up(widget_t widget, const xpoint_t* pxp)
+{
+	print_delta_t* ptd = GETPRINTDELTA(widget);
+
+	if (!ptd->sheet)
+		return;
+
+}
+
+void hand_print_scroll(widget_t widget, bool_t bHorz, int nLine)
 {
 	print_delta_t* ptd = GETPRINTDELTA(widget);
 
@@ -247,12 +247,12 @@ void hand_print_scroll(res_win_t widget, bool_t bHorz, int nLine)
 	widget_hand_scroll(widget, bHorz, nLine);
 }
 
-void hand_print_wheel(res_win_t widget, bool_t bHorz, int nDelta)
+void hand_print_wheel(widget_t widget, bool_t bHorz, int nDelta)
 {
 	print_delta_t* ptd = GETPRINTDELTA(widget);
 	scroll_t scr = { 0 };
 	int nLine;
-	res_win_t win;
+	widget_t win;
 
 	if (!ptd->sheet)
 		return;
@@ -293,7 +293,7 @@ void hand_print_wheel(res_win_t widget, bool_t bHorz, int nDelta)
 	}
 }
 
-void hand_print_xfont(res_win_t widget, const xfont_t* pxf)
+void hand_print_xfont(widget_t widget, const xfont_t* pxf)
 {
 	print_delta_t* ptd = GETPRINTDELTA(widget);
 
@@ -302,7 +302,7 @@ void hand_print_xfont(res_win_t widget, const xfont_t* pxf)
 	xmem_copy((void*)&ptd->xf, (void*)pxf, sizeof(xfont_t));
 }
 
-void hand_print_xface(res_win_t widget, const xface_t* pxa)
+void hand_print_xface(widget_t widget, const xface_t* pxa)
 {
 	print_delta_t* ptd = GETPRINTDELTA(widget);
 
@@ -311,7 +311,7 @@ void hand_print_xface(res_win_t widget, const xface_t* pxa)
 	xmem_copy((void*)&ptd->xa, (void*)pxa, sizeof(xface_t));
 }
 
-void hand_print_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
+void hand_print_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 {
 	print_delta_t* ptd = GETPRINTDELTA(widget);
 	visual_t rdc;
@@ -381,7 +381,7 @@ void hand_print_paint(res_win_t widget, visual_t dc, const xrect_t* pxr)
 
 /*****************************************************************************************************/
 
-res_win_t printbox_create(res_win_t widget, dword_t style, const xrect_t* pxr)
+widget_t printbox_create(widget_t widget, dword_t style, const xrect_t* pxr)
 {
 	if_dispatch_t ev = { 0 };
 
@@ -413,7 +413,7 @@ res_win_t printbox_create(res_win_t widget, dword_t style, const xrect_t* pxr)
 	return widget_create(NULL, style, pxr, widget, &ev);
 }
 
-void printbox_set_data(res_win_t widget, link_t_ptr ptr)
+void printbox_set_data(widget_t widget, link_t_ptr ptr)
 {
 	print_delta_t* ptd = GETPRINTDELTA(widget);
 
@@ -426,7 +426,7 @@ void printbox_set_data(res_win_t widget, link_t_ptr ptr)
 	printbox_redraw(widget);
 }
 
-link_t_ptr printbox_get_data(res_win_t widget)
+link_t_ptr printbox_get_data(widget_t widget)
 {
 	print_delta_t* ptd = GETPRINTDELTA(widget);
 
@@ -435,7 +435,7 @@ link_t_ptr printbox_get_data(res_win_t widget)
 	return ptd->sheet;
 }
 
-void printbox_redraw(res_win_t widget)
+void printbox_redraw(widget_t widget)
 {
 	print_delta_t* ptd = GETPRINTDELTA(widget);
 	int pages;
@@ -454,7 +454,7 @@ void printbox_redraw(res_win_t widget)
 	widget_paint(widget);
 }
 
-void printbox_move_prev_page(res_win_t widget)
+void printbox_move_prev_page(widget_t widget)
 {
 	print_delta_t* ptd = GETPRINTDELTA(widget);
 	int nCurPage;
@@ -475,7 +475,7 @@ void printbox_move_prev_page(res_win_t widget)
 	}
 }
 
-void printbox_move_next_page(res_win_t widget)
+void printbox_move_next_page(widget_t widget)
 {
 	print_delta_t* ptd = GETPRINTDELTA(widget);
 	int nCurPage, nMaxPage;
@@ -500,7 +500,7 @@ void printbox_move_next_page(res_win_t widget)
 	}
 }
 
-void printbox_move_first_page(res_win_t widget)
+void printbox_move_first_page(widget_t widget)
 {
 	print_delta_t* ptd = GETPRINTDELTA(widget);
 	int nCurPage;
@@ -521,7 +521,7 @@ void printbox_move_first_page(res_win_t widget)
 	}
 }
 
-void printbox_move_last_page(res_win_t widget)
+void printbox_move_last_page(widget_t widget)
 {
 	print_delta_t* ptd = GETPRINTDELTA(widget);
 	int nCurPage, nMaxPage;
@@ -546,7 +546,7 @@ void printbox_move_last_page(res_win_t widget)
 	}
 }
 
-void printbox_move_to_page(res_win_t widget, int page)
+void printbox_move_to_page(widget_t widget, int page)
 {
 	print_delta_t* ptd = GETPRINTDELTA(widget);
 	int nCurPage, nMaxPage;
@@ -571,7 +571,7 @@ void printbox_move_to_page(res_win_t widget, int page)
 	}
 }
 
-int printbox_get_max_page(res_win_t widget)
+int printbox_get_max_page(widget_t widget)
 {
 	print_delta_t* ptd = GETPRINTDELTA(widget);
 	xsize_t xs;
@@ -586,7 +586,7 @@ int printbox_get_max_page(res_win_t widget)
 	return _printbox_calc_pages(widget);
 }
 
-int printbox_get_page(res_win_t widget)
+int printbox_get_page(widget_t widget)
 {
 	print_delta_t* ptd = GETPRINTDELTA(widget);
 

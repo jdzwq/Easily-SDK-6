@@ -26,11 +26,11 @@ LICENSE.GPL3 for more details.
 
 #include "editor.h"
 
-#include "../xdcimp.h"
-#include "../xdcinit.h"
+#include "../xdcobj.h"
 
 
-static int sub_editbox_keydown(res_win_t widget, dword_t ks, int nKey, uid_t subid, vword_t delta)
+
+static int sub_editbox_keydown(widget_t widget, dword_t ks, int nKey, uid_t subid, vword_t delta)
 {
 	if (subid != IDS_EDITBOX)
 		return 0;
@@ -55,15 +55,15 @@ static int sub_editbox_keydown(res_win_t widget, dword_t ks, int nKey, uid_t sub
 	return 0;
 }
 
-static int sub_editbox_self_command(res_win_t widget, int code, vword_t data, uid_t subid, vword_t delta)
+static int sub_editbox_self_command(widget_t widget, int code, vword_t data, uid_t subid, vword_t delta)
 {
-	res_win_t timebox;
+	widget_t timebox;
 	xdate_t tt;
 
 	if (subid != IDS_EDITBOX)
 		return 0;
 
-	timebox = (res_win_t)delta;
+	timebox = (widget_t)delta;
 
 	switch (code)
 	{
@@ -92,14 +92,14 @@ static int sub_editbox_self_command(res_win_t widget, int code, vword_t data, ui
 	return 0;
 }
 
-static void sub_editbox_unsubbing(res_win_t widget, uid_t subid, vword_t delta)
+static void sub_editbox_unsubbing(widget_t widget, uid_t subid, vword_t delta)
 {
-	res_win_t timebox;
+	widget_t timebox;
 
 	if (subid != IDS_EDITBOX)
 		return;
 
-	timebox = (res_win_t)delta;
+	timebox = (widget_t)delta;
 	if (widget_is_valid(timebox))
 	{
 		widget_destroy(timebox);
@@ -108,14 +108,14 @@ static void sub_editbox_unsubbing(res_win_t widget, uid_t subid, vword_t delta)
 	widget_del_subproc(widget, IDS_EDITBOX);
 }
 
-static int sub_editbox_show(res_win_t widget, bool_t show, uid_t subid, vword_t delta)
+static int sub_editbox_show(widget_t widget, bool_t show, uid_t subid, vword_t delta)
 {
-	res_win_t timebox;
+	widget_t timebox;
 
 	if (subid != IDS_EDITBOX)
 		return 0;
 
-	timebox = (res_win_t)delta;
+	timebox = (widget_t)delta;
 
 	if (widget_is_valid(timebox))
 	{
@@ -129,16 +129,16 @@ static int sub_editbox_show(res_win_t widget, bool_t show, uid_t subid, vword_t 
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
-int sub_timebox_self_command(res_win_t widget, int code, vword_t data, uid_t subid, vword_t delta)
+int sub_timebox_self_command(widget_t widget, int code, vword_t data, uid_t subid, vword_t delta)
 {
-	res_win_t editbox;
+	widget_t editbox;
 	tchar_t token[DATE_LEN + 1] = { 0 };
 	xdate_t tt = { 0 };
 
 	if (subid != IDS_TIMEBOX)
 		return 0;
 
-	editbox = (res_win_t)delta;
+	editbox = (widget_t)delta;
 
 	switch (code)
 	{
@@ -162,7 +162,7 @@ int sub_timebox_self_command(res_win_t widget, int code, vword_t data, uid_t sub
 	return 0;
 }
 
-void sub_timebox_unsubbing(res_win_t widget, uid_t subid, vword_t delta)
+void sub_timebox_unsubbing(widget_t widget, uid_t subid, vword_t delta)
 {
 	if (subid != IDS_TIMEBOX)
 		return;
@@ -172,9 +172,9 @@ void sub_timebox_unsubbing(res_win_t widget, uid_t subid, vword_t delta)
 
 /*************************************************************************************/
 
-res_win_t firetime_create(res_win_t widget, const xrect_t* pxr)
+widget_t firetime_create(widget_t widget, const xrect_t* pxr)
 {
-	res_win_t editor,timebox;
+	widget_t editor,timebox;
 	xrect_t xr_ed, xr = { 0 };
 	xsize_t xs;
 

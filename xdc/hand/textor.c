@@ -26,8 +26,8 @@ LICENSE.GPL3 for more details.
 
 #include "textor.h"
 
-#include "../xdcimp.h"
-#include "../xdcinit.h"
+#include "../xdcobj.h"
+
 
 #define MAX_UNDO		7
 
@@ -1495,7 +1495,7 @@ void _textor_reset_page(textor_context* ptd, bool_t repage)
 
 	get_visual_interface(ptd->cdc, &ifv);
 
-	(*ifv.pf_text_metric)(ifv.ctx, pxf, &xs);
+	(*ifv.pf_font_size)(ifv.ctx, pxf, &xs);
 
 	line_feed = (int)(xs.h * line_height);
 
@@ -1639,7 +1639,7 @@ void _textor_clean(textor_context* ptd)
 
 /********************************************************************************************/
 
-void hand_textor_set_focus(textor_context* ptd, res_win_t wt)
+void hand_textor_set_focus(textor_context* ptd, widget_t wt)
 {
 	xsize_t xs;
 	float pm, lh;
@@ -1658,7 +1658,7 @@ void hand_textor_set_focus(textor_context* ptd, res_win_t wt)
 	widget_create_caret(ptd->widget, 2, xs.h);
 }
 
-void hand_textor_kill_focus(textor_context* ptd, res_win_t wt)
+void hand_textor_kill_focus(textor_context* ptd, widget_t wt)
 {
 	XDK_ASSERT(ptd && ptd->widget);
 

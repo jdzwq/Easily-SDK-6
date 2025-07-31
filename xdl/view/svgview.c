@@ -76,8 +76,8 @@ void draw_svg(const drawing_interface* pif, const xrect_t* pbox, link_t_ptr ptr)
 		{
 			xmem_zero((void*)&xp, sizeof(xpen_t));
 			read_line_from_svg_node(ilk, &xp, &pt[0], &pt[1]);
-			svg_point_pt_to_tm(canv, &pt[0]);
-			svg_point_pt_to_tm(canv, &pt[1]);
+			svg_point_pt_to_mm(canv, &pt[0]);
+			svg_point_pt_to_mm(canv, &pt[1]);
 
 			pt[0].fx += pbox->fx;
 			pt[0].fy += pbox->fy;
@@ -95,7 +95,7 @@ void draw_svg(const drawing_interface* pif, const xrect_t* pbox, link_t_ptr ptr)
 			else
 				read_rect_from_svg_node(ilk, &xp, &xb, &xr);
 
-			svg_rect_pt_to_tm(canv, &xr);
+			svg_rect_pt_to_mm(canv, &xr);
 
 			xr.fx += pbox->fx;
 			xr.fy += pbox->fy;
@@ -110,7 +110,7 @@ void draw_svg(const drawing_interface* pif, const xrect_t* pbox, link_t_ptr ptr)
 			xmem_zero((void*)&xp, sizeof(xpen_t));
 			xmem_zero((void*)&xb, sizeof(xbrush_t));
 			read_ellipse_from_svg_node(ilk, &xp, &xb, &xr);
-			svg_rect_pt_to_tm(canv, &xr);
+			svg_rect_pt_to_mm(canv, &xr);
 
 			xr.fx += pbox->fx;
 			xr.fy += pbox->fy;
@@ -128,7 +128,7 @@ void draw_svg(const drawing_interface* pif, const xrect_t* pbox, link_t_ptr ptr)
 				read_polyline_from_svg_node(ilk, &xp, ppt, count);
 				for (i = 0; i < count; i++)
 				{
-					svg_point_pt_to_tm(canv, &ppt[i]);
+					svg_point_pt_to_mm(canv, &ppt[i]);
 
 					ppt[i].fx += pbox->fx;
 					ppt[i].fy += pbox->fy;
@@ -150,7 +150,7 @@ void draw_svg(const drawing_interface* pif, const xrect_t* pbox, link_t_ptr ptr)
 				read_polygon_from_svg_node(ilk, &xp, &xb, ppt, count);
 				for (i = 0; i < count; i++)
 				{
-					svg_point_pt_to_tm(canv, &ppt[i]);
+					svg_point_pt_to_mm(canv, &ppt[i]);
 
 					ppt[i].fx += pbox->fx;
 					ppt[i].fy += pbox->fy;
@@ -165,7 +165,7 @@ void draw_svg(const drawing_interface* pif, const xrect_t* pbox, link_t_ptr ptr)
 			xmem_zero((void*)&xf, sizeof(xfont_t));
 			xmem_zero((void*)&xa, sizeof(xface_t));
 			sz_text = read_text_from_svg_node(ilk, &xf, &xa, &xr);
-			svg_rect_pt_to_tm(canv, &xr);
+			svg_rect_pt_to_mm(canv, &xr);
 
 			xr.fx += pbox->fx;
 			xr.fy += pbox->fy;
@@ -188,7 +188,7 @@ void draw_svg(const drawing_interface* pif, const xrect_t* pbox, link_t_ptr ptr)
 				xmem_zero((void*)&xb, sizeof(xbrush_t));
 				read_pie_from_svg_node(ilk, &xp, &xb, &xr, &fang, &tang);
 
-				svg_rect_pt_to_tm(canv, &xr);
+				svg_rect_pt_to_mm(canv, &xr);
 				xr.fx += pbox->fx;
 				xr.fy += pbox->fy;
 
@@ -199,15 +199,15 @@ void draw_svg(const drawing_interface* pif, const xrect_t* pbox, link_t_ptr ptr)
 				xmem_zero((void*)&xp, sizeof(xpen_t));
 				read_arc_from_svg_node(ilk, &xp, &pt[0], &pt[1], &xs, &sflag, &lflag);
 
-				svg_point_pt_to_tm(canv, &pt[0]);
+				svg_point_pt_to_mm(canv, &pt[0]);
 				pt[0].fx += pbox->fx;
 				pt[0].fy += pbox->fy;
 
-				svg_point_pt_to_tm(canv, &pt[1]);
+				svg_point_pt_to_mm(canv, &pt[1]);
 				pt[1].fx += pbox->fx;
 				pt[1].fy += pbox->fy;
 
-				svg_size_pt_to_tm(canv, &xs);
+				svg_size_pt_to_mm(canv, &xs);
 
 				(*pif->pf_draw_arc)(pif->ctx, &xp, &pt[0], &pt[1], &xs, sflag, lflag);
 			}
@@ -217,7 +217,7 @@ void draw_svg(const drawing_interface* pif, const xrect_t* pbox, link_t_ptr ptr)
 				xmem_zero((void*)&xb, sizeof(xbrush_t));
 				read_path_from_svg_node(ilk, &xp, &xb, NULL, &an, NULL, &pn);
 
-				svg_rect_pt_to_tm(canv, &xr);
+				svg_rect_pt_to_mm(canv, &xr);
 				xr.fx += pbox->fx;
 				xr.fy += pbox->fy;
 
@@ -229,7 +229,7 @@ void draw_svg(const drawing_interface* pif, const xrect_t* pbox, link_t_ptr ptr)
 			xmem_zero((void*)&xi, sizeof(ximage_t));
 			read_ximage_from_svg_node(ilk, &xi, &xr);
 
-			svg_rect_pt_to_tm(canv, &xr);
+			svg_rect_pt_to_mm(canv, &xr);
 			xr.fx += pbox->fx;
 			xr.fy += pbox->fy;
 
@@ -240,7 +240,7 @@ void draw_svg(const drawing_interface* pif, const xrect_t* pbox, link_t_ptr ptr)
 			xmem_zero((void*)&xi, sizeof(ximage_t));
 			read_ximage_from_svg_node(ilk, &xi, &xr);
 
-			svg_rect_pt_to_tm(canv, &xr);
+			svg_rect_pt_to_mm(canv, &xr);
 			xr.fx += pbox->fx;
 			xr.fy += pbox->fy;
 

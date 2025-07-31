@@ -90,6 +90,8 @@ typedef struct _handle_head	 *bitmap_t;
 
 #include "gob/gobdef.h"
 #include "gob/gobattr.h"
+#include "inf/drwinf.h"
+#include "inf/mgcinf.h"
 
 #endif	/* _XGCDEF_H */
 

@@ -3,7 +3,7 @@ CFLAGS = -g -Wall
 
 FT_PATH = -I /opt/homebrew/opt/freetype/include/freetype2
 FT_LIBS = -L /opt/homebrew/opt/freetype/lib -lfreetype
-LIB_PATH = -L /usr/local/lib -lxdk -lxgc
+LIB_PATH = -L /usr/local/lib -lxdk -lxdg
 
 INC_PATH = -I ~/工程/Easily-sdk-6/include
 SRC_PATH = ~/工程/Easily-sdk-6/tools/gen_freetype_glyph

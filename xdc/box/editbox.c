@@ -365,24 +365,15 @@ void hand_editbox_wchar(widget_t widget, wchar_t ch)
 	if (ch != KEY_ENTER && ch != KEY_TAB && ch > 0 && ch < 32)
 		return;
 
-	if (!ptd->chs)
-	{
-		ptd->chs = xschs(&ch);
-
-		xsncpy(ptd->pch, &ch, 1);
-		ptd->chs--;
-
-		if (ptd->chs)
-			return;
-	}
-	else
-	{
-		xsncat(ptd->pch, &ch, 1);
-		ptd->chs--;
-
-		if (ptd->chs)
-			return;
-	}
+#if defined(_UNICODE) || defined(UNICODE)
+	ptd->pch[0] = ch;
+	ptd->chs = 1;
+	ptd->pch[ptd->chs] = L'\0';
+#else
+	ucs_byte_to_mbs(ch, ptd->pch);
+	ptd->chs = xschs(ptd->pch);
+	ptd->pch[ptd->chs] = '\0';
+#endif
 
 	if (_TEXTOR_PRESS_ACCEPT == hand_textor_word(&ptd->textor, ptd->pch))
 	{

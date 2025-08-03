@@ -113,14 +113,14 @@ typedef struct _cocoa_widget_t{
 
 	uid_t uid;
 	dword_t style;
+	dword_t mask;
+	int state;
 	bool_t disable;
 	bool_t idling;
 
 	void* acl;
 
-	int state;
 	int result;
-    dword_t keymsk;
 
 	border_t bd;
 	xpoint_t pt;

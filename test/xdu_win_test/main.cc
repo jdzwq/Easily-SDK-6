@@ -1,5 +1,5 @@
 #include <xdk.h>
-#include <xgc.h>
+#include <xdg.h>
 #include <xdu.h>
 
 if_context_t if_context = {0};
@@ -19,36 +19,6 @@ int pop_on_create(widget_t wt, void* param)
 void pop_on_destroy(widget_t wt)
 {
     printf("pop on_destroy\n");
-}
-
-void pop_on_mouse_move(widget_t wt, dword_t ms, const xpoint_t* ppt)
-{
-    if(ms & MS_WITH_LBUTTON)
-        printf("pop on_mouse_move x:%d y:%d with lbutton\n", ppt->x, ppt->y);
-    else if(ms & MS_WITH_RBUTTON)
-        printf("pop on_mouse_move x:%d y:%d with rbutton\n", ppt->x, ppt->y);
-    else
-        printf("pop on_mouse_move x:%d y:%d\n", ppt->x, ppt->y);
-}
-
-void pop_on_mouse_hover(widget_t wt, dword_t ms, const xpoint_t* ppt)
-{
-    if(ms & MS_WITH_LBUTTON)
-        printf("pop on_mouse_hover x:%d y:%d with lbutton\n", ppt->x, ppt->y);
-    else if(ms & MS_WITH_RBUTTON)
-        printf("pop on_mouse_hover x:%d y:%d with rbutton\n", ppt->x, ppt->y);
-    else
-        printf("pop on_mouse_hover x:%d y:%d\n", ppt->x, ppt->y);
-}
-
-void pop_on_mouse_leave(widget_t wt, dword_t ms, const xpoint_t* ppt)
-{
-    if(ms & MS_WITH_LBUTTON)
-        printf("pop on_mouse_leave x:%d y:%d with lbutton\n", ppt->x, ppt->y);
-    else if(ms & MS_WITH_RBUTTON)
-        printf("pop on_mouse_leave x:%d y:%d with rbutton\n", ppt->x, ppt->y);
-    else
-        printf("pop on_mouse_leave x:%d y:%d\n", ppt->x, ppt->y);
 }
 
 void pop_on_lbutton_down(widget_t wt, const xpoint_t* ppt)
@@ -106,6 +76,16 @@ void child_on_mouse_hover(widget_t wt, dword_t ms, const xpoint_t* ppt)
         printf("child on_mouse_hover x:%d y:%d with rbutton\n", ppt->x, ppt->y);
     else
         printf("child on_mouse_hover x:%d y:%d\n", ppt->x, ppt->y);
+}
+
+void child_on_mouse_enter(widget_t wt, dword_t ms, const xpoint_t* ppt)
+{
+    if(ms & MS_WITH_LBUTTON)
+        printf("child on_mouse_enter x:%d y:%d with lbutton\n", ppt->x, ppt->y);
+    else if(ms & MS_WITH_RBUTTON)
+        printf("child on_mouse_enter x:%d y:%d with rbutton\n", ppt->x, ppt->y);
+    else
+        printf("child on_mouse_enter x:%d y:%d\n", ppt->x, ppt->y);
 }
 
 void child_on_mouse_leave(widget_t wt, dword_t ms, const xpoint_t* ppt)
@@ -173,6 +153,11 @@ void child_on_lbutton_dbclick(widget_t wt, const xpoint_t* ppt)
     printf("child post notice\n");    
 }
 
+void child_on_rbutton_down(widget_t wt, const xpoint_t* ppt)
+{
+    printf("child on_rbutton_down x:%d y:%d\n", ppt->x, ppt->y);
+}
+
 void child_on_rbutton_up(widget_t wt, const xpoint_t* ppt)
 {
     printf("child on_rbutton_up x:%d y:%d\n", ppt->x, ppt->y);
@@ -181,9 +166,6 @@ void child_on_rbutton_up(widget_t wt, const xpoint_t* ppt)
 
     ev.pf_on_create = pop_on_create;
 	ev.pf_on_destroy = pop_on_destroy;
-    ev.pf_on_mouse_move = pop_on_mouse_move;
-	ev.pf_on_mouse_hover = pop_on_mouse_hover;
-	ev.pf_on_mouse_leave = pop_on_mouse_leave;
     ev.pf_on_lbutton_down = pop_on_lbutton_down;
     ev.pf_on_lbutton_up = pop_on_lbutton_up;
     ev.pf_on_self_command = pop_on_self_command;
@@ -311,9 +293,9 @@ void child_on_paint(widget_t wt, visual_t rdc, const xrect_t* prt)
 
     (*if_context.pf_gdi_draw_rect)(ctx, &xp, &xb, &rt);
 
-	/*xrect_t xr;
+	xrect_t xr;
 	xr.x = 10;
-	xr.y = 100;
+	xr.y = 10;
 	xr.w = rt.w / 2;
 	xr.h = rt.h / 2;
 
@@ -360,8 +342,8 @@ void child_on_paint(widget_t wt, visual_t rdc, const xrect_t* prt)
    xscpy(xb.color, GDI_ATTR_RGB_SOFTRED);
    //(*if_context.pf_gdi_draw_round)(ctx, &xp, &xb, &xr, &xs1);
 
-   xr.x = 100;
-   xr.y = 100;
+   xr.x = 50;
+   xr.y = 50;
    xr.w = 80;
    xr.h = 100;
    xscpy(xb.color, GDI_ATTR_RGB_SOFTRED);
@@ -379,8 +361,8 @@ void child_on_paint(widget_t wt, visual_t rdc, const xrect_t* prt)
    //(*if_context.pf_gdi_draw_arc)(ctx, &xp, &xp1, &xp2, &xs1, 1, 1);
    //(*if_context.pf_gdi_draw_line)(ctx, &xp, &xp1, &xp2);
 
-   xr.x = 200;
-   xr.y = 100;
+   xr.x = 100;
+   xr.y = 50;
    xr.w = 100;
    xr.h = 120;
    xscpy(xp.color, GDI_ATTR_RGB_GREEN);
@@ -506,25 +488,49 @@ void child_on_paint(widget_t wt, visual_t rdc, const xrect_t* prt)
 	xcolor_t brim_color, core_color;
 	parse_xcolor(&brim_color, GDI_ATTR_RGB_GRAY);
 	parse_xcolor(&core_color, GDI_ATTR_RGB_BLACK);
-	//lighten_xcolor(&core_color, -5);
+	lighten_xcolor(&core_color, -5);
 
 	xr.x = 2;
 	xr.y = 2;
 	xr.w = 96;
 	xr.h = 96;
-	//(*if_context.pf_gdi_gradient_rect)(ctx, &brim_color, &core_color, GDI_ATTR_GRADIENT_RADIAL, &xr);
+	//(*if_context.pf_gdi_gradient_rect)(ctx, &brim_color, &core_color, GDI_ATTR_GRADIENT_HORZ, &xr);
 
     xr.x = 10;
 	xr.y = 10;
 	xr.w = 50;
 	xr.h = 50;
     //(*if_context.pf_gdi_exclude_rect)(ctx, &xr);
+    xr.x -= 1;
+    xr.y -= 1;
+    xr.w += 2;
+    xr.h += 2;
+    xscpy(xp.color, GDI_ATTR_RGB_SOFTWHITE);
+    xscpy(xb.color, GDI_ATTR_RGB_SOFTBLACK);
+    //(*if_context.pf_gdi_draw_rect)(ctx, &xp, NULL, &xr);
+    xr.x = 30;
+	xr.y = 30;
+	xr.w = 50;
+	xr.h = 50;
+    //(*if_context.pf_gdi_draw_rect)(ctx, &xp, &xb, &xr);
 
     xr.x = 40;
 	xr.y = 40;
 	xr.w = 50;
 	xr.h = 50;
     //(*if_context.pf_gdi_inclip_rect)(ctx, &xr);
+    xr.x -= 1;
+    xr.y -= 1;
+    xr.w += 2;
+    xr.h += 2;
+    xscpy(xp.color, GDI_ATTR_RGB_SOFTWHITE);
+    xscpy(xb.color, GDI_ATTR_RGB_SOFTBLACK);
+    //(*if_context.pf_gdi_draw_rect)(ctx, &xp, NULL, &xr);
+    xr.x = 30;
+	xr.y = 30;
+	xr.w = 50;
+	xr.h = 50;
+    //(*if_context.pf_gdi_draw_rect)(ctx, &xp, &xb, &xr);
 
     xr.x = 10;
 	xr.y = 10;
@@ -543,6 +549,7 @@ void child_on_paint(widget_t wt, visual_t rdc, const xrect_t* prt)
     xfont_t xf = {0};
     default_textor_xfont(&xf);
     xscpy(xf.size, _T("13"));
+    xscpy(xf.color, GDI_ATTR_RGB_GREEN);
     xface_t xa = {0};
     default_xface(&xa);
 
@@ -594,6 +601,7 @@ void child_on_paint(widget_t wt, visual_t rdc, const xrect_t* prt)
        //(*if_context.pf_gdi_draw_bitmap)(ctx, bmp, RECTPOINT(&xr));
     
         (*if_context.pf_destroy_bitmap)(bmp);
+        bmp = NULL;
     }
 
     //bmp = (*if_context.pf_create_storage_bitmap)(ctx, _T("./title.jpg"));
@@ -609,7 +617,8 @@ void child_on_paint(widget_t wt, visual_t rdc, const xrect_t* prt)
        //(*if_context.pf_gdi_draw_image)(ctx, bmp, GDI_ATTR_RGB_AZURE, &xr);
 
         (*if_context.pf_destroy_bitmap)(bmp);
-    }*/
+        bmp = NULL;
+    }
 
     (*if_context.pf_render_context)(ctx, 0,0, rdc, 0, 0, rt.w, rt.h);
 
@@ -654,10 +663,12 @@ int main_on_create(widget_t wt, void* param)
 	ev.pf_on_destroy = child_on_destroy;
     ev.pf_on_mouse_move = child_on_mouse_move;
 	ev.pf_on_mouse_hover = child_on_mouse_hover;
+    ev.pf_on_mouse_enter = child_on_mouse_enter;
 	ev.pf_on_mouse_leave = child_on_mouse_leave;
     ev.pf_on_lbutton_down = child_on_lbutton_down;
     ev.pf_on_lbutton_up = child_on_lbutton_up;
 	ev.pf_on_lbutton_dbclick = child_on_lbutton_dbclick;
+    ev.pf_on_rbutton_down = child_on_rbutton_down;
 	ev.pf_on_rbutton_up = child_on_rbutton_up;
 	ev.pf_on_keydown = child_on_keydown;
     ev.pf_on_wchar = child_on_wchar;
@@ -782,14 +793,14 @@ void main_on_mouse_move(widget_t wt, dword_t ms, const xpoint_t* ppt)
         printf("main on_mouse_move x:%d y:%d\n", ppt->x, ppt->y);
 }
 
-void main_on_mouse_hover(widget_t wt, dword_t ms, const xpoint_t* ppt)
+void main_on_mouse_enter(widget_t wt, dword_t ms, const xpoint_t* ppt)
 {
     if(ms & MS_WITH_LBUTTON)
-        printf("main on_mouse_hover x:%d y:%d with lbutton\n", ppt->x, ppt->y);
+        printf("main on_mouse_enter x:%d y:%d with lbutton\n", ppt->x, ppt->y);
     else if(ms & MS_WITH_RBUTTON)
-        printf("main on_mouse_hover x:%d y:%d with rbutton\n", ppt->x, ppt->y);
+        printf("main on_mouse_enter x:%d y:%d with rbutton\n", ppt->x, ppt->y);
     else
-        printf("main on_mouse_hover x:%d y:%d\n", ppt->x, ppt->y);
+        printf("main on_mouse_enter x:%d y:%d\n", ppt->x, ppt->y);
 }
 
 void main_on_mouse_leave(widget_t wt, dword_t ms, const xpoint_t* ppt)
@@ -800,6 +811,16 @@ void main_on_mouse_leave(widget_t wt, dword_t ms, const xpoint_t* ppt)
         printf("main on_mouse_leave x:%d y:%d with rbutton\n", ppt->x, ppt->y);
     else
         printf("main on_mouse_leave x:%d y:%d\n", ppt->x, ppt->y);
+}
+
+void main_on_mouse_hover(widget_t wt, dword_t ms, const xpoint_t* ppt)
+{
+    if(ms & MS_WITH_LBUTTON)
+        printf("main on_mouse_hover x:%d y:%d with lbutton\n", ppt->x, ppt->y);
+    else if(ms & MS_WITH_RBUTTON)
+        printf("main on_mouse_hover x:%d y:%d with rbutton\n", ppt->x, ppt->y);
+    else
+        printf("main on_mouse_hover x:%d y:%d\n", ppt->x, ppt->y);
 }
 
 void main_on_whell(widget_t wt, bool_t horz, int delta)
@@ -1020,7 +1041,7 @@ void init_instance()
 
     (*if_widget.pf_widget_startup)(0);
 
-    acl_table_t acs[3] = {
+    accel_table_t acs[3] = {
         {KS_WITH_CONTROL, 'a', 10},
         {KS_WITH_ALT, 's', 20},
         {KS_WITH_SHIFT, '\t', 30}
@@ -1044,8 +1065,9 @@ void init_instance()
 	ev.pf_on_rbutton_down = main_on_rbutton_down;
 	ev.pf_on_rbutton_up = main_on_rbutton_up;
 	ev.pf_on_mouse_move = main_on_mouse_move;
-	ev.pf_on_mouse_hover = main_on_mouse_hover;
+	ev.pf_on_mouse_enter = main_on_mouse_enter;
 	ev.pf_on_mouse_leave = main_on_mouse_leave;
+    ev.pf_on_mouse_hover = main_on_mouse_hover;
 	ev.pf_on_wheel = main_on_whell;
 	ev.pf_on_scroll = main_on_scroll;
 	ev.pf_on_keydown = main_on_keydown;
@@ -1074,7 +1096,7 @@ void init_instance()
 	xr.h = 300;
 
 	g_main = (*if_widget.pf_widget_create)(_T("frame1"), (WD_STYLE_FRAME & (~WD_STYLE_OWNERNC)), &xr, NULL, &ev);
-	(*if_widget.pf_widget_set_accel)(g_main, acs, sizeof(acs) / sizeof(acl_table_t));
+	(*if_widget.pf_widget_set_accel)(g_main, acs, sizeof(acs) / sizeof(accel_table_t));
 
     (*if_widget.pf_widget_set_color_mode)(g_main, &clrs);
 	(*if_widget.pf_widget_paint)(g_main);

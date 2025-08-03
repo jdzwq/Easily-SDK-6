@@ -227,6 +227,7 @@ static void _parent_to_child(NSView* child, NSPoint* point)
 @interface _CocoaView : NSView <NSTextInputClient>
 {
     NSTrackingArea* tracking;
+    NSMutableAttributedString* texting;
 }
     @property (assign, nonatomic) id delegate;
     @property (assign, nonatomic) id widget;
@@ -339,28 +340,29 @@ NSString *const CommandMessage = @"CommandMessage";
 - (void)handleViewNotice:(NSNotification *)notification 
 {@autoreleasepool {
     _CocoaView* ref_view = notification.object;
-
-    if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
     cocoa_widget_t* pwidg = (cocoa_widget_t*)ref_view.widget;
 
     NSDictionary *userInfo = notification.userInfo;
     NOTICE* pnt = (NOTICE*)[userInfo[@"delta"] unsignedLongValue];
 
-    int result = 0;
+    if_subproc_t* psubp = (if_subproc_t*)ref_view.subproc;
+    if(psubp && psubp->sub_on_notice)
+    {
+        pwidg->result = (*psubp->sub_on_notice)((widget_t)&(pwidg->head), pnt, psubp->sid, psubp->delta);
+        if(pwidg->result) return;
+    }
+
+    if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
     if (pdisp && pdisp->pf_on_notice)
     {
         (*pdisp->pf_on_notice)((widget_t)&(pwidg->head), pnt);
-        result = 1;
+        pwidg->result = 1;
     }
-
-    pwidg->result = result;
 }}
 
 - (void)handleViewCommand:(NSNotification *)notification 
 {@autoreleasepool {
     _CocoaView* ref_view = notification.object;
-
-    if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
     cocoa_widget_t* pwidg = (cocoa_widget_t*)ref_view.widget;
 
     NSDictionary *userInfo = notification.userInfo;
@@ -368,40 +370,71 @@ NSString *const CommandMessage = @"CommandMessage";
     dword_t cid = (dword_t)[userInfo[@"user"] unsignedIntValue];
     vword_t data = (vword_t)[userInfo[@"data"] unsignedLongValue];
 
-    int result = 0;
+    if_subproc_t* psubp = (if_subproc_t*)ref_view.subproc;
+    switch(cid)
+    {
+    case IDC_PARENT:
+        if (psubp && psubp->sub_on_parent_command)
+        {
+            pwidg->result = (*psubp->sub_on_parent_command)((widget_t)&(pwidg->head), code, data, psubp->sid, psubp->delta);
+            if(pwidg->result) return;
+        }
+    break;
+    case IDC_CHILD:
+        if (psubp && psubp->sub_on_child_command)
+        {
+            pwidg->result = (*psubp->sub_on_child_command)((widget_t)&(pwidg->head), code, data, psubp->sid, psubp->delta);
+            if(pwidg->result) return;
+        }
+    break;
+    case IDC_SELF:
+        if (psubp && psubp->sub_on_self_command)
+        {
+            pwidg->result = (*psubp->sub_on_self_command)((widget_t)&(pwidg->head), code, data, psubp->sid, psubp->delta);
+            if(pwidg->result) return;
+        }
+    break;
+    default:
+        if (psubp && psubp->sub_on_menu_command)
+        {
+            pwidg->result = (*psubp->sub_on_menu_command)((widget_t)&(pwidg->head), code, cid, data, psubp->sid, psubp->delta);
+            if(pwidg->result) return;
+        }
+    break;
+    }
+
+    if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
     switch(cid)
     {
     case IDC_PARENT:
         if (pdisp && pdisp->pf_on_parent_command)
         {
             (*pdisp->pf_on_parent_command)((widget_t)&(pwidg->head), code, data);
-            result = 1;
+            pwidg->result = 1;
         }
     break;
     case IDC_CHILD:
         if (pdisp && pdisp->pf_on_child_command)
         {
             (*pdisp->pf_on_child_command)((widget_t)&(pwidg->head), code, data);
-            result = 1;
+            pwidg->result = 1;
         }
     break;
     case IDC_SELF:
         if (pdisp && pdisp->pf_on_self_command)
         {
             (*pdisp->pf_on_self_command)((widget_t)&(pwidg->head), code, data);
-            result = 1;
+            pwidg->result = 1;
         }
     break;
     default:
         if (pdisp && pdisp->pf_on_menu_command)
         {
             (*pdisp->pf_on_menu_command)((widget_t)&(pwidg->head), code, cid, data);
-            result = 1;
+            pwidg->result = 1;
         }
     break;
     }
-
-    pwidg->result = result;
 }}
 
 @end
@@ -449,29 +482,30 @@ NSString *const CommandMessage = @"CommandMessage";
 {@autoreleasepool {
     _CocoaWindow* ref_window = notification.object;
     _CocoaView* ref_view = [ref_window contentView];
-
-    if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
     cocoa_widget_t* pwidg = (cocoa_widget_t*)ref_view.widget;
 
     NSMutableDictionary *userInfo = notification.userInfo;
     NOTICE* pnt = (NOTICE*)[userInfo[@"delta"] unsignedLongValue];
 
-    int result = 0;
+    if_subproc_t* psubp = (if_subproc_t*)ref_view.subproc;
+    if(psubp && psubp->sub_on_notice)
+    {
+        pwidg->result = (*psubp->sub_on_notice)((widget_t)&(pwidg->head), pnt, psubp->sid, psubp->delta);
+        if(pwidg->result) return;
+    }
+
+    if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
     if (pdisp && pdisp->pf_on_notice)
     {
         (*pdisp->pf_on_notice)((widget_t)&(pwidg->head), pnt);
-        result = 1;
+        pwidg->result = 1;
     }
-
-   pwidg->result = result;
 }}
 
 - (void)handleWindowCommand:(NSNotification *)notification 
 {@autoreleasepool {
     _CocoaWindow* ref_window = notification.object;
     _CocoaView* ref_view = [ref_window contentView];
-
-    if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
     cocoa_widget_t* pwidg = (cocoa_widget_t*)ref_view.widget;
     
     NSDictionary *userInfo = notification.userInfo;
@@ -479,51 +513,87 @@ NSString *const CommandMessage = @"CommandMessage";
     dword_t cid = (dword_t)[userInfo[@"user"] unsignedIntValue];
     vword_t data = (vword_t)[userInfo[@"data"] unsignedLongValue];
 
-    int result = 0;
+    if_subproc_t* psubp = (if_subproc_t*)ref_view.subproc;
+    switch(cid)
+    {
+    case IDC_PARENT:
+        if (psubp && psubp->sub_on_parent_command)
+        {
+            pwidg->result = (*psubp->sub_on_parent_command)((widget_t)&(pwidg->head), code, data, psubp->sid, psubp->delta);
+            if(pwidg->result) return;
+        }
+    break;
+    case IDC_CHILD:
+        if (psubp && psubp->sub_on_child_command)
+        {
+            pwidg->result = (*psubp->sub_on_child_command)((widget_t)&(pwidg->head), code, data, psubp->sid, psubp->delta);
+            if(pwidg->result) return;
+        }
+    break;
+    case IDC_SELF:
+        if (psubp && psubp->sub_on_self_command)
+        {
+            pwidg->result = (*psubp->sub_on_self_command)((widget_t)&(pwidg->head), code, data, psubp->sid, psubp->delta);
+            if(pwidg->result) return;
+        }
+    break;
+    default:
+        if (psubp && psubp->sub_on_menu_command)
+        {
+            pwidg->result = (*psubp->sub_on_menu_command)((widget_t)&(pwidg->head), code, cid, data, psubp->sid, psubp->delta);
+            if(pwidg->result) return;
+        }
+    break;
+    }
 
+    if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
     switch(cid)
     {
     case IDC_PARENT:
         if (pdisp && pdisp->pf_on_parent_command)
         {
             (*pdisp->pf_on_parent_command)((widget_t)&(pwidg->head), code, data);
-            result = 1;
+            pwidg->result = 1;
         }
     break;
     case IDC_CHILD:
         if (pdisp && pdisp->pf_on_child_command)
         {
             (*pdisp->pf_on_child_command)((widget_t)&(pwidg->head), code, data);
-            result = 1;
+            pwidg->result = 1;
         }
     break;
     case IDC_SELF:
         if (pdisp && pdisp->pf_on_self_command)
         {
             (*pdisp->pf_on_self_command)((widget_t)&(pwidg->head), code, data);
-            result = 1;
+            pwidg->result = 1;
         }
     break;
     default:
         if (pdisp && pdisp->pf_on_menu_command)
         {
             (*pdisp->pf_on_menu_command)((widget_t)&(pwidg->head), code, cid, data);
-            result = 1;
+            pwidg->result = 1;
         }
     break;
     }
-
-    pwidg->result = result;
 }}
 
 - (BOOL)windowShouldClose:(NSWindow *)sender
 {@autoreleasepool {
     _CocoaWindow* ref_window = sender;
     _CocoaView* ref_view = [ref_window contentView];
-
     cocoa_widget_t* pwidg = (cocoa_widget_t*)ref_view.widget;
-    if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
 
+    if_subproc_t* psubp = (if_subproc_t*)ref_view.subproc;
+    if(psubp && psubp->sub_on_close)
+    {
+        pwidg->result = (*psubp->sub_on_close)((widget_t)&(pwidg->head), psubp->sid, psubp->delta);
+        if(pwidg->result) return NO;
+    }
+
+    if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
     if (pdisp && pdisp->pf_on_close)
      {
         if((*pdisp->pf_on_close)((widget_t)&(pwidg->head)))
@@ -552,19 +622,12 @@ NSString *const CommandMessage = @"CommandMessage";
         [NSApp stopModal];
         break;
     }
-
-    if(run_type != _CocoaWindowRunInvalid)
-    {
-        _widget_destroy((widget_t)&(pwidg->head));
-    }
 }}
 
 - (void)windowDidResize:(NSNotification *)notification
 {@autoreleasepool {
     _CocoaWindow* ref_window = notification.object;
     _CocoaView* ref_view = [ref_window contentView];
-
-    if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
     cocoa_widget_t* pwidg = (cocoa_widget_t*)ref_view.widget;
 
     NSScreen *nsScreen = [ref_window screen] ?: [NSScreen mainScreen];
@@ -576,17 +639,28 @@ NSString *const CommandMessage = @"CommandMessage";
     xs.w = (int)newFrame.size.width;
     xs.h = (int)newFrame.size.height;
 
+    if_subproc_t* psubp = (if_subproc_t*)ref_view.subproc;
+    if(psubp && psubp->sub_on_size)
+    {
+        if (NSEqualRects(newFrame, scrFrame))
+            pwidg->result = (*psubp->sub_on_size)((widget_t)&(pwidg->head), WS_SIZE_MAXIMIZED, &xs, psubp->sid, psubp->delta);
+        else if(pwidg->st.w == xs.w && pwidg->st.h == xs.h)
+            pwidg->result = (*psubp->sub_on_size)((widget_t)&(pwidg->head), WS_SIZE_LAYOUT, &xs, psubp->sid, psubp->delta);
+        else
+            pwidg->result = (*psubp->sub_on_size)((widget_t)&(pwidg->head), WS_SIZE_RESTORE, &xs, psubp->sid, psubp->delta);
+        
+        if(pwidg->result) return;
+    }
+
+    if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
     if(pdisp && pdisp->pf_on_size)
     {
-         if (NSEqualRects(newFrame, scrFrame))
+        if (NSEqualRects(newFrame, scrFrame))
             (*pdisp->pf_on_size)((widget_t)&(pwidg->head), WS_SIZE_MAXIMIZED, &xs);
         else if(pwidg->st.w == xs.w && pwidg->st.h == xs.h)
             (*pdisp->pf_on_size)((widget_t)&(pwidg->head), WS_SIZE_LAYOUT, &xs);
         else
             (*pdisp->pf_on_size)((widget_t)&(pwidg->head), WS_SIZE_RESTORE, &xs);
-
-        pwidg->st.w = xs.w;
-        pwidg->st.h = xs.h;
     }
 }}
 
@@ -594,8 +668,6 @@ NSString *const CommandMessage = @"CommandMessage";
 {@autoreleasepool {
     _CocoaWindow* ref_window = notification.object;
     _CocoaView* ref_view = [ref_window contentView];
-
-    if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
     cocoa_widget_t* pwidg = (cocoa_widget_t*)ref_view.widget;
 
     if(pwidg->state == WS_SHOW_FULLSCREEN)
@@ -607,20 +679,26 @@ NSString *const CommandMessage = @"CommandMessage";
     xs.w = (int)newFrame.size.width;
     xs.h = (int)newFrame.size.height;
 
+    pwidg->state = WS_SHOW_FULLSCREEN;
+
+    if_subproc_t* psubp = (if_subproc_t*)ref_view.subproc;
+    if(psubp && psubp->sub_on_size)
+    {
+        pwidg->result = (*psubp->sub_on_size)((widget_t)&(pwidg->head), WS_SIZE_FULLSCREEN, &xs, psubp->sid, psubp->delta);
+        if(pwidg->result) return;
+    }
+
+    if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
     if(pdisp && pdisp->pf_on_size)
     {
         (*pdisp->pf_on_size)((widget_t)&(pwidg->head), WS_SIZE_FULLSCREEN, &xs);
     }
-
-    pwidg->state = WS_SHOW_FULLSCREEN;
 }}
 
 - (void)windowDidExitFullScreen:(NSNotification *)notification
 {@autoreleasepool {
     _CocoaWindow* ref_window = notification.object;
     _CocoaView* ref_view = [ref_window contentView];
-
-    if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
     cocoa_widget_t* pwidg = (cocoa_widget_t*)ref_view.widget;
 
     if(pwidg->state != WS_SHOW_FULLSCREEN)
@@ -632,20 +710,26 @@ NSString *const CommandMessage = @"CommandMessage";
     xs.w = (int)newFrame.size.width;
     xs.h = (int)newFrame.size.height;
 
+    pwidg->state = WS_SHOW_NORMAL;
+
+    if_subproc_t* psubp = (if_subproc_t*)ref_view.subproc;
+    if(psubp && psubp->sub_on_size)
+    {
+        pwidg->result = (*psubp->sub_on_size)((widget_t)&(pwidg->head), WS_SIZE_RESTORE, &xs, psubp->sid, psubp->delta);
+        if(pwidg->result) return;
+    }
+
+    if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
     if(pdisp && pdisp->pf_on_size)
     {
         (*pdisp->pf_on_size)((widget_t)&(pwidg->head), WS_SIZE_RESTORE, &xs);
     }
-
-    pwidg->state = WS_SHOW_NORMAL;
 }}
 
 - (void)windowDidMove:(NSNotification *)notification
 {@autoreleasepool {
     _CocoaWindow* ref_window = notification.object;
     _CocoaView* ref_view = [ref_window contentView];
-
-    if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
     cocoa_widget_t* pwidg = (cocoa_widget_t*)ref_view.widget;
 
     NSScreen* nsScreen = [ref_window screen] ?: [NSScreen mainScreen];
@@ -663,6 +747,14 @@ NSString *const CommandMessage = @"CommandMessage";
     if(pwidg->pt.x == pt.x && pwidg->pt.y == pt.y)
         return;
 
+    if_subproc_t* psubp = (if_subproc_t*)ref_view.subproc;
+    if(psubp && psubp->sub_on_move)
+    {
+        pwidg->result = (*psubp->sub_on_move)((widget_t)&(pwidg->head), &pt, psubp->sid, psubp->delta);
+        if(pwidg->result) return;
+    }
+
+    if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
     if(pdisp && pdisp->pf_on_move)
     {
         (*pdisp->pf_on_move)((widget_t)&(pwidg->head), &pt);
@@ -676,33 +768,37 @@ NSString *const CommandMessage = @"CommandMessage";
 {@autoreleasepool {
     _CocoaWindow* ref_window = notification.object;
     _CocoaView* ref_view = [ref_window contentView];
-
-    if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
     cocoa_widget_t* pwidg = (cocoa_widget_t*)ref_view.widget;
 
     if(pwidg->state == WS_SHOW_MINIMIZE)
         return;
     
+    pwidg->state = WS_SHOW_MINIMIZE;
+
+    if_subproc_t* psubp = (if_subproc_t*)ref_view.subproc;
+    if(psubp && psubp->sub_on_size)
+    {
+        xsize_t xs;
+        xs.w = 0;
+        xs.h = 0;
+        pwidg->result = (*psubp->sub_on_size)((widget_t)&(pwidg->head), WS_SIZE_MINIMIZED, &xs, psubp->sid, psubp->delta);
+        if(pwidg->result) return;
+    }
+
+    if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
     if(pdisp && pdisp->pf_on_size)
     {
         xsize_t xs;
         xs.w = 0;
         xs.h = 0;
         (*pdisp->pf_on_size)((widget_t)&(pwidg->head), WS_SIZE_MINIMIZED, &xs);
-
-        pwidg->st.w = xs.w;
-        pwidg->st.h = xs.h;
     }
-
-    pwidg->state = WS_SHOW_MINIMIZE;
 }}
 
 - (void)windowDidDeminiaturize:(NSNotification *)notification
 {@autoreleasepool {
     _CocoaWindow* ref_window = notification.object;
     _CocoaView* ref_view = [ref_window contentView];
-
-    if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
     cocoa_widget_t* pwidg = (cocoa_widget_t*)ref_view.widget;
 
     NSRect newFrame = [ref_window frame];
@@ -714,25 +810,36 @@ NSString *const CommandMessage = @"CommandMessage";
     if(pwidg->state != WS_SHOW_MINIMIZE)
         return;
 
+    pwidg->state = WS_SHOW_NORMAL;
+
+    if_subproc_t* psubp = (if_subproc_t*)ref_view.subproc;
+    if(psubp && psubp->sub_on_size)
+    {
+        pwidg->result = (*psubp->sub_on_size)((widget_t)&(pwidg->head), WS_SIZE_RESTORE, &xs, psubp->sid, psubp->delta);
+        if(pwidg->result) return;
+    }
+
+    if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
     if(pdisp && pdisp->pf_on_size)
     {
         (*pdisp->pf_on_size)((widget_t)&(pwidg->head), WS_SIZE_RESTORE, &xs);
-
-        pwidg->st.w = xs.w;
-        pwidg->st.h = xs.h;
     }
-
-    pwidg->state = WS_SHOW_NORMAL;
 }}
 
 - (void)windowDidBecomeMain:(NSNotification *)notification
 {@autoreleasepool {
     _CocoaWindow* ref_window = notification.object;
     _CocoaView* ref_view = [ref_window contentView];
-
     cocoa_widget_t* pwidg = (cocoa_widget_t*)ref_view.widget;
-    if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
 
+    if_subproc_t* psubp = (if_subproc_t*)ref_view.subproc;
+    if(psubp && psubp->sub_on_activate)
+    {
+        pwidg->result = (*psubp->sub_on_activate)((widget_t)&(pwidg->head), 1, psubp->sid, psubp->delta);
+        if(pwidg->result) return;
+    }
+
+    if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
     if(pdisp && pdisp->pf_on_activate)
     {
         (*pdisp->pf_on_activate)((widget_t)&(pwidg->head), 1);
@@ -744,7 +851,7 @@ NSString *const CommandMessage = @"CommandMessage";
     _CocoaWindow* ref_window = notification.object;
     _CocoaView* ref_view = [ref_window contentView];
 
-    [ref_window makeFirstResponder:[ref_window contentView]];
+    [ref_window makeFirstResponder:ref_view];
 }}
 
 - (void)windowDidResignKey:(NSNotification *)notification
@@ -757,12 +864,18 @@ NSString *const CommandMessage = @"CommandMessage";
 {@autoreleasepool {
     _CocoaWindow* ref_window = notification.object;
     _CocoaView* ref_view = [ref_window contentView];
-
     cocoa_widget_t* pwidg = (cocoa_widget_t*)ref_view.widget;
-    if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
 
     bool_t visible = (ref_window.occlusionState & NSWindowOcclusionStateVisible)? 1 : 0;
 
+    if_subproc_t* psubp = (if_subproc_t*)ref_view.subproc;
+    if(psubp && psubp->sub_on_show)
+    {
+        pwidg->result = (*psubp->sub_on_show)((widget_t)&(pwidg->head), visible, psubp->sid, psubp->delta);
+        if(pwidg->result) return;
+    }
+
+    if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
     if(pdisp && pdisp->pf_on_show)
     {
         (*pdisp->pf_on_show)((widget_t)&(pwidg->head), visible);
@@ -839,6 +952,7 @@ NSString *const CommandMessage = @"CommandMessage";
     if (self != nil)
     {
         tracking = nil;
+        texting = [[NSMutableAttributedString alloc] init];
 
         [self updateTrackingAreas];
         [self registerForDraggedTypes:@[NSPasteboardTypeURL]];
@@ -853,6 +967,7 @@ NSString *const CommandMessage = @"CommandMessage";
         return [super dealloc];
 
     if(tracking != nil) [tracking release];
+    if(texting != nil) [texting release];
 
     [super dealloc];
 }}
@@ -888,11 +1003,18 @@ NSString *const CommandMessage = @"CommandMessage";
 
     _CocoaView* ref_view = self;
     cocoa_widget_t* pwidg = (cocoa_widget_t*)ref_view.widget;
-    if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
 
+    if_subproc_t* psubp = (if_subproc_t*)ref_view.subproc;
+    if(psubp && psubp->sub_on_set_focus)
+    {
+        pwidg->result = (*psubp->sub_on_set_focus)((widget_t)&(pwidg->head), NULL, psubp->sid, psubp->delta);
+        if(pwidg->result) return YES;
+    }
+
+    if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
     if (pdisp && pdisp->pf_on_set_focus)
     {
-        (*pdisp->pf_on_set_focus)((widget_t)&(pwidg->head), ref_view);
+        (*pdisp->pf_on_set_focus)((widget_t)&(pwidg->head), NULL);
     }
 
     return YES;
@@ -905,11 +1027,18 @@ NSString *const CommandMessage = @"CommandMessage";
 
     _CocoaView* ref_view = self;
     cocoa_widget_t* pwidg = (cocoa_widget_t*)ref_view.widget;
-    if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
 
+    if_subproc_t* psubp = (if_subproc_t*)ref_view.subproc;
+    if(psubp && psubp->sub_on_kill_focus)
+    {
+        pwidg->result = (*psubp->sub_on_kill_focus)((widget_t)&(pwidg->head), NULL, psubp->sid, psubp->delta);
+        if(pwidg->result) return YES;
+    }
+
+    if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
     if (pdisp && pdisp->pf_on_kill_focus)
     {
-        (*pdisp->pf_on_kill_focus)((widget_t)&(pwidg->head), 0);
+        (*pdisp->pf_on_kill_focus)((widget_t)&(pwidg->head), NULL);
     }
 
     return YES;
@@ -921,10 +1050,11 @@ NSString *const CommandMessage = @"CommandMessage";
         return [super hitTest:aPoint];
 
     _CocoaView* coc_view = self;
-
 	cocoa_widget_t* pwidg = (cocoa_widget_t*)coc_view.widget;
 
-    return (pwidg->disable)? nil : [super hitTest:aPoint];
+    if(pwidg && pwidg->disable) return nil;
+
+    return [super hitTest:aPoint];
 }}
 
 - (BOOL)acceptsFirstMouse:(NSEvent *)nsEvent
@@ -937,12 +1067,11 @@ NSString *const CommandMessage = @"CommandMessage";
 
 - (void)mouseDown:(NSEvent *)nsEvent
 {@autoreleasepool {
-    [super mouseDown:nsEvent];
+    //[super mouseDown:nsEvent];
     if([self isKindOfClass:[_CocoaView class]] == NO) return;
     
     _CocoaView* ref_view = self;
     cocoa_widget_t* pwidg = (cocoa_widget_t*)ref_view.widget;
-    if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
 
     NSPoint cliPoint = [ref_view convertPoint:[nsEvent locationInWindow] fromView:nil];
     _cocoa_to_view(ref_view, &cliPoint);
@@ -952,6 +1081,14 @@ NSString *const CommandMessage = @"CommandMessage";
 
    if ([nsEvent clickCount] == 1)
     {
+        if_subproc_t* psubp = (if_subproc_t*)ref_view.subproc;
+        if(psubp && psubp->sub_on_lbutton_down)
+        {
+            pwidg->result = (*psubp->sub_on_lbutton_down)((widget_t)&(pwidg->head), &pt, psubp->sid, psubp->delta);
+            if(pwidg->result) return;
+        }
+
+        if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
         if(pdisp && pdisp->pf_on_lbutton_down)
         {
             (*pdisp->pf_on_lbutton_down)((widget_t)&(pwidg->head), &pt);
@@ -961,12 +1098,11 @@ NSString *const CommandMessage = @"CommandMessage";
 
 - (void)mouseUp:(NSEvent *)nsEvent
 {@autoreleasepool {
-    [super mouseUp:nsEvent];
+    //[super mouseUp:nsEvent];
     if([self isKindOfClass:[_CocoaView class]] == NO) return;
 
     _CocoaView* ref_view = self;
     cocoa_widget_t* pwidg = (cocoa_widget_t*)ref_view.widget;
-    if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
 
     NSPoint cliPoint = [ref_view convertPoint:[nsEvent locationInWindow] fromView:nil];
 
@@ -975,6 +1111,24 @@ NSString *const CommandMessage = @"CommandMessage";
     xpoint_t pt;
     pt.x = (int)cliPoint.x, pt.y = (int)cliPoint.y;
 
+    if_subproc_t* psubp = (if_subproc_t*)ref_view.subproc;
+    if ([nsEvent clickCount] == 1)
+    {
+        if(psubp && psubp->sub_on_lbutton_up)
+        {
+            pwidg->result = (*psubp->sub_on_lbutton_up)((widget_t)&(pwidg->head), &pt, psubp->sid, psubp->delta);
+            if(pwidg->result) return;
+        }
+    }else
+    {
+        if(psubp && psubp->sub_on_lbutton_dbclick)
+        {
+            pwidg->result = (*psubp->sub_on_lbutton_dbclick)((widget_t)&(pwidg->head), &pt, psubp->sid, psubp->delta);
+            if(pwidg->result) return;
+        }
+    }
+
+    if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
     if ([nsEvent clickCount] == 1)
     {
         if(pdisp && pdisp->pf_on_lbutton_up)
@@ -992,12 +1146,11 @@ NSString *const CommandMessage = @"CommandMessage";
 
 - (void)mouseMoved:(NSEvent *)nsEvent
 {@autoreleasepool {
-    [super mouseMoved:nsEvent];
+    //[super mouseMoved:nsEvent];
     if([self isKindOfClass:[_CocoaView class]] == NO) return;
 
     _CocoaView* ref_view = self;
     cocoa_widget_t* pwidg = (cocoa_widget_t*)ref_view.widget;
-    if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
 
     NSPoint cliPoint = [ref_view convertPoint:[nsEvent locationInWindow] fromView:nil];
 
@@ -1012,6 +1165,14 @@ NSString *const CommandMessage = @"CommandMessage";
     NSUInteger nsState = [NSEvent pressedMouseButtons];
     mask |= _mouse_state(nsState);
 
+    if_subproc_t* psubp = (if_subproc_t*)ref_view.subproc;
+    if(psubp && psubp->sub_on_mouse_move)
+    {
+        pwidg->result = (*psubp->sub_on_mouse_move)((widget_t)&(pwidg->head), mask, &pt, psubp->sid, psubp->delta);
+        if(pwidg->result) return;
+    }
+
+    if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
     if(pdisp && pdisp->pf_on_mouse_move)
     {
         (*pdisp->pf_on_mouse_move)((widget_t)&(pwidg->head), mask, &pt);
@@ -1020,12 +1181,11 @@ NSString *const CommandMessage = @"CommandMessage";
 
 - (void)rightMouseDown:(NSEvent *)nsEvent
 {@autoreleasepool {
-    [super rightMouseDown:nsEvent];
+    //[super rightMouseDown:nsEvent];
     if([self isKindOfClass:[_CocoaView class]] == NO) return;
 
     _CocoaView* ref_view = self;
     cocoa_widget_t* pwidg = (cocoa_widget_t*)ref_view.widget;
-    if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
 
     NSPoint cliPoint = [ref_view convertPoint:[nsEvent locationInWindow] fromView:nil];
 
@@ -1034,6 +1194,14 @@ NSString *const CommandMessage = @"CommandMessage";
     xpoint_t pt;
     pt.x = (int)cliPoint.x, pt.y = (int)cliPoint.y;
 
+    if_subproc_t* psubp = (if_subproc_t*)ref_view.subproc;
+    if(psubp && psubp->sub_on_rbutton_down)
+    {
+        pwidg->result = (*psubp->sub_on_rbutton_down)((widget_t)&(pwidg->head), &pt, psubp->sid, psubp->delta);
+        if(pwidg->result) return;
+    }
+
+    if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
     if(pdisp && pdisp->pf_on_rbutton_down)
     {
         (*pdisp->pf_on_rbutton_down)((widget_t)&(pwidg->head), &pt);
@@ -1042,12 +1210,11 @@ NSString *const CommandMessage = @"CommandMessage";
 
 - (void)rightMouseUp:(NSEvent *)nsEvent
 {@autoreleasepool {
-    [super rightMouseUp:nsEvent];
+    //[super rightMouseUp:nsEvent];
     if([self isKindOfClass:[_CocoaView class]] == NO) return ;
 
     _CocoaView* ref_view = self;
     cocoa_widget_t* pwidg = (cocoa_widget_t*)ref_view.widget;
-    if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
 
     NSPoint cliPoint = [ref_view convertPoint:[nsEvent locationInWindow] fromView:nil];
 
@@ -1056,6 +1223,14 @@ NSString *const CommandMessage = @"CommandMessage";
     xpoint_t pt;
     pt.x = (int)cliPoint.x, pt.y = (int)cliPoint.y;
 
+    if_subproc_t* psubp = (if_subproc_t*)ref_view.subproc;
+    if(psubp && psubp->sub_on_rbutton_up)
+    {
+        pwidg->result = (*psubp->sub_on_rbutton_up)((widget_t)&(pwidg->head), &pt, psubp->sid, psubp->delta);
+        if(pwidg->result) return;
+    }
+
+    if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
     if(pdisp && pdisp->pf_on_rbutton_up)
     {
         (*pdisp->pf_on_rbutton_up)((widget_t)&(pwidg->head), &pt);
@@ -1064,12 +1239,11 @@ NSString *const CommandMessage = @"CommandMessage";
 
 - (void)mouseEntered:(NSEvent *)nsEvent
 {@autoreleasepool {
-    [super mouseEntered:nsEvent];
+    //[super mouseEntered:nsEvent];
     if([self isKindOfClass:[_CocoaView class]] == NO) return ;
 
     _CocoaView* ref_view = self;
     cocoa_widget_t* pwidg = (cocoa_widget_t*)ref_view.widget;
-    if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
 
     NSPoint cliPoint = [ref_view convertPoint:[nsEvent locationInWindow] fromView:nil];
 
@@ -1084,20 +1258,27 @@ NSString *const CommandMessage = @"CommandMessage";
     NSUInteger nsState = [NSEvent pressedMouseButtons];
     mask |= _mouse_state(nsState);
 
-    if(pdisp && pdisp->pf_on_mouse_hover)
+    if_subproc_t* psubp = (if_subproc_t*)ref_view.subproc;
+    if(psubp && psubp->sub_on_mouse_enter)
     {
-        (*pdisp->pf_on_mouse_hover)((widget_t)&(pwidg->head), mask, &pt);
+        pwidg->result = (*psubp->sub_on_mouse_enter)((widget_t)&(pwidg->head), mask, &pt, psubp->sid, psubp->delta);
+        if(pwidg->result) return;
+    }
+
+    if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
+    if(pdisp && pdisp->pf_on_mouse_enter)
+    {
+        (*pdisp->pf_on_mouse_enter)((widget_t)&(pwidg->head), mask, &pt);
     }
 }}
 
 - (void)mouseExited:(NSEvent *)nsEvent
 {@autoreleasepool {
-    [super mouseExited:nsEvent];
+    //[super mouseExited:nsEvent];
     if([self isKindOfClass:[_CocoaView class]] == NO) return ;
 
     _CocoaView* ref_view = self;
     cocoa_widget_t* pwidg = (cocoa_widget_t*)ref_view.widget;
-    if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
 
     NSPoint cliPoint = [ref_view convertPoint:[nsEvent locationInWindow] fromView:nil];
 
@@ -1112,25 +1293,33 @@ NSString *const CommandMessage = @"CommandMessage";
     NSUInteger nsState = [NSEvent pressedMouseButtons];
     mask |= _mouse_state(nsState);
 
+    if_subproc_t* psubp = (if_subproc_t*)ref_view.subproc;
+    if(psubp && psubp->sub_on_mouse_leave)
+    {
+        pwidg->result = (*psubp->sub_on_mouse_leave)((widget_t)&(pwidg->head), mask, &pt, psubp->sid, psubp->delta);
+        if(pwidg->result) return;
+    }
+
+    if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
     if(pdisp && pdisp->pf_on_mouse_leave)
     {
         (*pdisp->pf_on_mouse_leave)((widget_t)&(pwidg->head), mask, &pt);
     }
 }}
 
-- (void)drawRect:(NSRect)rect
+- (void)drawRect:(NSRect)dirtyRect
 {@autoreleasepool {
-    [super drawRect:rect];
+    //[super drawRect:rect];
     if([self isKindOfClass:[_CocoaView class]] == NO) return ;
     
     _CocoaView* ref_view = self;
-    if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
     cocoa_widget_t* pwidg = (cocoa_widget_t*)ref_view.widget;
 
     visual_t rdc = _create_display_context((widget_t)&(pwidg->head));
     if(!rdc) return;
 
-    NSPoint nsOrigin = NSMakePoint(rect.origin.x, rect.origin.y);
+    NSRect rect = [ref_view frame];
+    NSPoint nsOrigin = NSMakePoint(rect.origin.x, rect.origin.y + rect.size.height);
     _cocoa_to_view(ref_view, &nsOrigin);
 
 	xrect_t xr = {0};
@@ -1139,7 +1328,17 @@ NSString *const CommandMessage = @"CommandMessage";
 	xr.w = rect.size.width;
 	xr.h = rect.size.height;
 
-    if(pdisp && pdisp->pf_on_paint)
+    if_subproc_t* psubp = (if_subproc_t*)ref_view.subproc;
+    if(psubp && psubp->sub_on_paint)
+    {
+        pwidg->result = (*psubp->sub_on_paint)((widget_t)&(pwidg->head), rdc, &xr, psubp->sid, psubp->delta);
+        if(pwidg->result) return;
+    }else{
+        pwidg->result = 0;
+    }
+
+    if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
+    if(!pwidg->result && pdisp && pdisp->pf_on_paint)
     {
         (*pdisp->pf_on_paint)((widget_t)&(pwidg->head), rdc, &xr);
     }
@@ -1179,17 +1378,18 @@ NSString *const CommandMessage = @"CommandMessage";
     if([self isKindOfClass:[_CocoaView class]] == NO) return ;
 
     _CocoaView* ref_view = self;
-    if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
+    cocoa_widget_t* pwidg = (cocoa_widget_t*)ref_view.widget;
 
     if (tracking != nil)
     {
         [self removeTrackingArea:tracking];
         [tracking release];
+        tracking = nil;
     }
 
     const NSTrackingAreaOptions options = NSTrackingMouseEnteredAndExited |
+                                          NSTrackingMouseMoved |
                                           NSTrackingActiveInKeyWindow |
-                                          NSTrackingEnabledDuringMouseDrag |
                                           NSTrackingCursorUpdate |
                                           NSTrackingInVisibleRect |
                                           NSTrackingAssumeInside;
@@ -1204,18 +1404,16 @@ NSString *const CommandMessage = @"CommandMessage";
 
 - (void)keyDown:(NSEvent *)nsEvent
 {@autoreleasepool {
-    [super keyDown:nsEvent];
     if([self isKindOfClass:[_CocoaView class]] == NO) return ;
 
     _CocoaView* ref_view = self;
     cocoa_widget_t* pwidg = (cocoa_widget_t*)ref_view.widget;
-    if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
 
     unsigned short key = [nsEvent keyCode];
     NSUInteger nsFlags = [nsEvent modifierFlags];
     dword_t mask = _key_state(nsFlags);
 
-    acl_table_t* pac = (acl_table_t*)pwidg->acl;
+    accel_table_t* pac = (accel_table_t*)pwidg->acl;
     if(pac)
     {
         for (int i = 0; pac[i].vir != 0; ++i) 
@@ -1228,15 +1426,24 @@ NSString *const CommandMessage = @"CommandMessage";
         }
     }
 
+    if_subproc_t* psubp = (if_subproc_t*)ref_view.subproc;
+    if(psubp && psubp->sub_on_keydown)
+    {
+        pwidg->result = (*psubp->sub_on_keydown)((widget_t)&(pwidg->head), mask, (int)key, psubp->sid, psubp->delta);
+        if(pwidg->result) return;
+    }
+
+    if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
     if(pdisp && pdisp->pf_on_keydown)
     {
         (*pdisp->pf_on_keydown)((widget_t)&(pwidg->head), mask, (int)key);
     }
+
+    [self interpretKeyEvents:@[nsEvent]];
 }}
 
 - (void)flagsChanged:(NSEvent *)nsEvent
 {@autoreleasepool {
-    [super flagsChanged:nsEvent];
     if([self isKindOfClass:[_CocoaView class]] == NO) return ;
 
     _CocoaView* ref_view = self;
@@ -1245,36 +1452,41 @@ NSString *const CommandMessage = @"CommandMessage";
 
     const unsigned int modifierFlags = [nsEvent modifierFlags] & NSEventModifierFlagDeviceIndependentFlagsMask;
 
-    pwidg->keymsk = _key_state(modifierFlags);
+    pwidg->mask = _key_state(modifierFlags);
 }}
 
 - (void)keyUp:(NSEvent *)nsEvent
 {@autoreleasepool {
-    [super keyUp:nsEvent];
     if([self isKindOfClass:[_CocoaView class]] == NO) return ;
 
     _CocoaView* ref_view = self;
     cocoa_widget_t* pwidg = (cocoa_widget_t*)ref_view.widget;
-    if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
 
     unsigned short key = [nsEvent keyCode];
     NSUInteger nsFlags = [nsEvent modifierFlags];
     dword_t mask = _key_state(nsFlags);
 
+    if_subproc_t* psubp = (if_subproc_t*)ref_view.subproc;
+    if(psubp && psubp->sub_on_keyup)
+    {
+        pwidg->result = (*psubp->sub_on_keyup)((widget_t)&(pwidg->head), mask, (int)key, psubp->sid, psubp->delta);
+        if(pwidg->result) return;
+    }
+
+    if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
     if(pdisp && pdisp->pf_on_keyup)
     {
-        (*pdisp->pf_on_keyup)((widget_t)&(pwidg->head), mask, key);
+        (*pdisp->pf_on_keyup)((widget_t)&(pwidg->head), mask, (int)key);
     }
 }}
 
 - (void)scrollWheel:(NSEvent *)nsEvent
 {@autoreleasepool {
-    [super scrollWheel:nsEvent];
+    //[super scrollWheel:nsEvent];
     if([self isKindOfClass:[_CocoaView class]] == NO) return ;
 
     _CocoaView* ref_view = self;
     cocoa_widget_t* pwidg = (cocoa_widget_t*)ref_view.widget;
-    if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
 
     double deltaX = [nsEvent scrollingDeltaX];
     double deltaY = [nsEvent scrollingDeltaY];
@@ -1291,6 +1503,23 @@ NSString *const CommandMessage = @"CommandMessage";
         sy = -(int)(deltaY * 0.1);
     }
 
+    if_subproc_t* psubp = (if_subproc_t*)ref_view.subproc;
+    if(psubp && psubp->sub_on_scroll)
+    {
+        if(sx)
+            pwidg->result = (*psubp->sub_on_scroll)((widget_t)&(pwidg->head), 1, sx, psubp->sid, psubp->delta);
+        else
+            pwidg->result = 0;
+
+        if(sy)
+            pwidg->result = (*psubp->sub_on_scroll)((widget_t)&(pwidg->head), 0, sy, psubp->sid, psubp->delta);
+        else
+            pwidg->result = 0;
+
+        if(pwidg->result) return;
+    }
+
+    if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
     if(pdisp && pdisp->pf_on_scroll)
     {
         if(sx)
@@ -1301,14 +1530,73 @@ NSString *const CommandMessage = @"CommandMessage";
     }
 }}
 
+- (BOOL)hasMarkedText
+{
+    return [texting length] > 0;
+}
+
+static const NSRange emptyRange = { NSNotFound, 0 };
+
+- (NSRange)markedRange
+{
+    if ([texting length] > 0)
+        return NSMakeRange(0, [texting length] - 1);
+    else
+        return emptyRange;
+}
+
+- (NSRange)selectedRange
+{
+    return emptyRange;
+}
+
+- (void)setMarkedText:(id)string
+        selectedRange:(NSRange)selectedRange
+     replacementRange:(NSRange)replacementRange
+{
+    [texting release];
+
+    if ([string isKindOfClass:[NSAttributedString class]])
+        texting = [[NSMutableAttributedString alloc] initWithAttributedString:string];
+    else
+        texting = [[NSMutableAttributedString alloc] initWithString:string];
+}
+
+- (void)unmarkText
+{
+    [[texting mutableString] setString:@""];
+}
+
+- (NSArray*)validAttributesForMarkedText
+{
+    return @[NSUnderlineStyleAttributeName, NSForegroundColorAttributeName];
+}
+
+- (NSAttributedString*)attributedSubstringForProposedRange:(NSRange)range
+                                               actualRange:(NSRangePointer)actualRange
+{
+    return nil;
+}
+
+- (NSUInteger)characterIndexForPoint:(NSPoint)point
+{
+    return NSNotFound;
+}
+
+- (NSRect)firstRectForCharacterRange:(NSRange)range
+                         actualRange:(NSRangePointer)actualRange
+{
+    const NSRect frame = [self frame];
+    return NSMakeRect(frame.origin.x, frame.origin.y, 0.0, 0.0);
+}
+
 - (void)insertText:(id)string replacementRange:(NSRange)replacementRange
 {@autoreleasepool {
-    [super insertText:string replacementRange:replacementRange];
+    //[super insertText:string replacementRange:replacementRange];
     if([self isKindOfClass:[_CocoaView class]] == NO) return ;
 
     _CocoaView* ref_view = self;
     cocoa_widget_t* pwidg = (cocoa_widget_t*)ref_view.widget;
-    if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
 
     NSString* token;
     NSEvent* nsEvent = [NSApp currentEvent];
@@ -1334,6 +1622,14 @@ NSString *const CommandMessage = @"CommandMessage";
             if (widechar >= 0xf700 && widechar <= 0xf7ff)
                 continue;
 
+            if_subproc_t* psubp = (if_subproc_t*)ref_view.subproc;
+            if(psubp && psubp->sub_on_wchar)
+            {
+                pwidg->result = (*psubp->sub_on_wchar)((widget_t)&(pwidg->head), (wchar_t)widechar, psubp->sid, psubp->delta);
+                if(pwidg->result) continue;
+            }
+
+            if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
             if(pdisp && pdisp->pf_on_wchar)
             {
                 (*pdisp->pf_on_wchar)((widget_t)&(pwidg->head), (wchar_t)widechar);
@@ -1344,7 +1640,7 @@ NSString *const CommandMessage = @"CommandMessage";
 
 - (void)doCommandBySelector:(SEL)selector
 {@autoreleasepool {
-    [super doCommandBySelector:selector];
+    //[super doCommandBySelector:selector];
     if([self isKindOfClass:[_CocoaView class]] == NO) return;
 
     _CocoaView* ref_view = self;
@@ -1407,11 +1703,12 @@ widget_t _widget_create(const tchar_t* wname, dword_t wstyle, const xrect_t* wre
 
         new_view = [[_CocoaView alloc] initWithFrame:nsRect];
 
-        if(new_view == nil) {xmem_free_handle(pwidg); xmem_free(pdisp); return (widget_t)nil;}
+        if(new_view == nil) {xmem_free_handle((xhand_t)pwidg); xmem_free(pdisp); return (widget_t)nil;}
 
         new_view.properties = [[NSMutableDictionary alloc] init];
         new_view.widget = pwidg;
         new_view.dispatch = pdisp;
+        [new_view setAutoresizingMask:(NSViewWidthSizable | NSViewHeightSizable)];
 
         if(nsView)
         {
@@ -1420,7 +1717,7 @@ widget_t _widget_create(const tchar_t* wname, dword_t wstyle, const xrect_t* wre
 
         _CocoaViewDelegate* view_delegate = [[_CocoaViewDelegate alloc] initWithCocoaView:new_view];
         
-        if(view_delegate == nil) {xmem_free_handle(pwidg); xmem_free(pdisp); return (widget_t)nil;}
+        if(view_delegate == nil) {xmem_free_handle((xhand_t)pwidg); xmem_free(pdisp); return (widget_t)nil;}
 
         new_view.delegate = view_delegate;
     }else
@@ -1447,7 +1744,7 @@ widget_t _widget_create(const tchar_t* wname, dword_t wstyle, const xrect_t* wre
                                     backing:NSBackingStoreBuffered
                                     defer:NO];
 
-	    if(coc_window == nil) {xmem_free_handle(pwidg); xmem_free(pdisp); return (widget_t)nil;}
+	    if(coc_window == nil) {xmem_free_handle((xhand_t)pwidg); xmem_free(pdisp); return (widget_t)nil;}
         
         if(!(wstyle & WD_STYLE_TITLE))
         {
@@ -1457,7 +1754,7 @@ widget_t _widget_create(const tchar_t* wname, dword_t wstyle, const xrect_t* wre
 
         new_view = [[_CocoaView alloc] initWithFrame:[[coc_window contentView] bounds]];
 
-        if(new_view == nil) {xmem_free_handle(pwidg); xmem_free(pdisp); return (widget_t)nil;}
+        if(new_view == nil) {xmem_free_handle((xhand_t)pwidg); xmem_free(pdisp); return (widget_t)nil;}
 
         new_view.properties = [[NSMutableDictionary alloc] init];
         new_view.widget = pwidg;
@@ -1475,7 +1772,7 @@ widget_t _widget_create(const tchar_t* wname, dword_t wstyle, const xrect_t* wre
 
         _CocoaWindowDelegate* win_delegate = [[_CocoaWindowDelegate alloc] initWithCocoaWindow:coc_window];
         
-        if(win_delegate == nil) {xmem_free_handle(pwidg); xmem_free(pdisp); return (widget_t)nil;}
+        if(win_delegate == nil) {xmem_free_handle((xhand_t)pwidg); xmem_free(pdisp); return (widget_t)nil;}
 
         [coc_window setDelegate:win_delegate];
         coc_window.running = _CocoaWindowRunNormal;
@@ -1495,10 +1792,16 @@ void _widget_destroy(widget_t wt)
 {@autoreleasepool {
 	cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
     _CocoaView* coc_view = pwidg->self;
-	if_dispatch_t* pdisp = (if_dispatch_t*)coc_view.dispatch;
 
     BOOL b_windowless = (pwidg->style & WD_STYLE_CHILD) ? YES : NO;
 
+    if_subproc_t* psubp = (if_subproc_t*)coc_view.subproc;
+    if(psubp && psubp->sub_on_unsubbed)
+    {
+        (*psubp->sub_on_unsubbed)((widget_t)&(pwidg->head), psubp->sid, psubp->delta);
+    }
+
+	if_dispatch_t* pdisp = (if_dispatch_t*)coc_view.dispatch;
 	if(pdisp && pdisp->pf_on_destroy)
 	{
 		(*pdisp->pf_on_destroy)(wt);
@@ -1506,7 +1809,7 @@ void _widget_destroy(widget_t wt)
 
     if(pwidg && pwidg->acl) xmem_free(pwidg->acl);
 
-    if(pwidg) xmem_free_handle(pwidg);
+    if(pwidg) xmem_free_handle((xhand_t)pwidg);
     if(pdisp) xmem_free(pdisp);
 
     if(coc_view.caret_timer)
@@ -1603,6 +1906,12 @@ bool_t _widget_set_subproc(widget_t wt, uid_t sid, if_subproc_t* sub)
 
 	coc_view.subproc = (id)sub;
 
+    if_subproc_t* psubp = (if_subproc_t*)coc_view.subproc;
+    if(psubp && psubp->sub_on_subbing)
+    {
+        (*psubp->sub_on_subbing)((widget_t)&(pwidg->head), psubp->sid, psubp->delta);
+    }
+
 	return 1;
 }}
 
@@ -1611,8 +1920,7 @@ void _widget_del_subproc(widget_t wt, uid_t sid)
     cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
     _CocoaView* coc_view = pwidg->self;
 
-	coc_view.subproc = 0;
-
+    coc_view.subproc = 0;
 }}
 
 bool_t _widget_set_subproc_delta(widget_t wt, uid_t sid, vword_t delta)
@@ -1699,15 +2007,15 @@ dword_t _widget_get_style(widget_t wt)
 	return pwidg->style;
 }}
 
-void _widget_set_accel(widget_t wt, const acl_table_t* pacl, int n)
+void _widget_set_accel(widget_t wt, const accel_table_t* pacl, int n)
 {@autoreleasepool {
     cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
     _CocoaView* coc_view = pwidg->self;
 
     if(pwidg->acl) xmem_free(pwidg->acl);
 
-	acl_table_t* pa = (acl_table_t*)xmem_alloc((n + 1) * sizeof(acl_table_t));
-	xmem_copy((void*)pa, (void*)pacl, n * sizeof(acl_table_t));
+	accel_table_t* pa = (accel_table_t*)xmem_alloc((n + 1) * sizeof(accel_table_t));
+	xmem_copy((void*)pa, (void*)pacl, n * sizeof(accel_table_t));
 
 	pa[n].vir = 0, pa[n].key = 0, pa[n].cmd = 0;
 	pwidg->acl = pa;
@@ -1922,9 +2230,11 @@ void _widget_release_ctx(widget_t wt, visual_t dc)
     cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
     _CocoaView* coc_view = pwidg->self;
 
-    cocoa_context_t* ctx = (cocoa_context_t*)dc;
-	
-    xmem_free_handle(ctx);
+    cocoa_context_t* ctx = TypePtrFromHead(cocoa_context_t, dc);
+
+	if(ctx->context) CGContextRelease(ctx->context);
+
+    xmem_free_handle((xhand_t)ctx);
 }}
 
 void _widget_get_client_rect(widget_t wt, xrect_t* prt)
@@ -2156,7 +2466,7 @@ void _widget_create_caret(widget_t wt, int w, int h)
                                                     selector:@selector(toggleCaret)
                                                     userInfo:nil
                                                     repeats:YES];
-    coc_view.caret_rect = NSMakeRect(0, 0, w, h);                                              
+    coc_view.caret_rect = NSMakeRect(0, h, w, h);                                              
     [coc_view setNeedsDisplayInRect:[coc_view caret_rect]];
 }}
 
@@ -2184,7 +2494,7 @@ void _widget_show_caret(widget_t wt, int x, int y, bool_t b)
     coc_view.caret_visible = b;
     if(b)
     {
-        NSPoint nsPoint = NSMakePoint(x, y);
+        NSPoint nsPoint = NSMakePoint(x, y + coc_view.caret_rect.size.height);
         _view_to_cocoa(coc_view, &nsPoint);
         coc_view.caret_rect = NSMakeRect(nsPoint.x, nsPoint.y, coc_view.caret_rect.size.width, coc_view.caret_rect.size.height);
     }
@@ -2214,11 +2524,13 @@ bool_t _widget_key_state(widget_t wt, int ks)
     cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
     _CocoaView* coc_view = pwidg->self;
 
-    return (ks & pwidg->keymsk)? 1 : 0;
+    return (ks & pwidg->mask)? 1 : 0;
 }}
 
 bool_t _widget_is_valid(widget_t wt)
 {@autoreleasepool {
+    if(!wt) return 0;
+
     cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
     _CocoaView* coc_view = pwidg->self;
 
@@ -2263,6 +2575,9 @@ void _widget_move(widget_t wt, const xpoint_t* ppt)
     if(pwidg->style & WD_STYLE_CHILD)
     {
         _view_to_cocoa(coc_view, &newPosition);
+        int h = [coc_view frame].size.height;
+        newPosition.y -= h;
+        [coc_view setTranslatesAutoresizingMaskIntoConstraints:YES];
         [coc_view setFrameOrigin:newPosition];
     }
     else
@@ -2271,6 +2586,8 @@ void _widget_move(widget_t wt, const xpoint_t* ppt)
         NSScreen* nsScreen = [nsWindow screen] ?: [NSScreen mainScreen];
 
         _screen_to_cocoa(nsScreen, &newPosition);
+        int h = [nsScreen frame].size.height;
+        newPosition.y -= h;
         [nsWindow setFrameOrigin:newPosition];
     }
 }}
@@ -2284,6 +2601,7 @@ void _widget_size(widget_t wt, const xsize_t* pxs)
     {
         NSRect frmRect = [coc_view frame];
         frmRect.size = NSMakeSize(pxs->w, pxs->h);
+        [coc_view setTranslatesAutoresizingMaskIntoConstraints:YES];
         [coc_view setFrame:frmRect display:YES];
     }
     else
@@ -2959,7 +3277,7 @@ void _widget_do_track(widget_t wt)
 
 void _message_quit(int code)
 {
-    [NSApp stop];
+    [NSApp stop:nil];
 }
 
 void _message_position(xpoint_t* pxp)

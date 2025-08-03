@@ -159,7 +159,7 @@ LOC_API void	_widget_set_user_result(widget_t wt, int code);
 LOC_API int		_widget_get_user_result(widget_t wt);
 LOC_API void	_widget_set_style(widget_t wt, dword_t ws);
 LOC_API dword_t	_widget_get_style(widget_t wt);
-LOC_API void	_widget_set_accel(widget_t wt, const acl_table_t* pact, int n);
+LOC_API void	_widget_set_accel(widget_t wt, const accel_table_t* pact, int n);
 LOC_API void	_widget_set_owner(widget_t wt, widget_t win);
 LOC_API widget_t _widget_get_owner(widget_t wt);
 LOC_API widget_t _widget_get_child(widget_t wt, uid_t uid);

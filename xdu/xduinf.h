@@ -241,7 +241,7 @@ typedef void(*PF_WIDGET_CLOSE)(widget_t, int);
 typedef const if_dispatch_t* (*PF_WIDGET_GET_DISPATCH)(widget_t);
 typedef void(*PF_WIDGET_SET_STYLE)(widget_t, dword_t);
 typedef dword_t(*PF_WIDGET_GET_STYLE)(widget_t);
-typedef void(*PF_WIDGET_SET_ACCEL)(widget_t, const acl_table_t*, int);
+typedef void(*PF_WIDGET_SET_ACCEL)(widget_t, const accel_table_t*, int);
 typedef void(*PF_WIDGET_SET_OWNER)(widget_t, widget_t);
 typedef widget_t(*PF_WIDGET_GET_OWNER)(widget_t);
 typedef void(*PF_WIDGET_SET_USER_ID)(widget_t, uid_t);

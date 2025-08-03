@@ -114,7 +114,7 @@ widget_t widget_get_owner(widget_t wt)
 	return (pif->pf_widget_get_owner)(wt);
 }
 
-void widget_set_accel(widget_t wt, const acl_table_t* pacl, int n)
+void widget_set_accel(widget_t wt, const accel_table_t* pacl, int n)
 {
 	if_widget_t* pif;
 
@@ -900,6 +900,24 @@ void widget_do_track(widget_t wt)
 	pif = PROCESS_WIDGET_INTERFACE;
 
 	(pif->pf_widget_do_track)(wt);
+}
+
+void message_quit(int ret)
+{
+	if_widget_t* pif;
+
+	pif = PROCESS_WIDGET_INTERFACE;
+
+	(pif->pf_message_quit)(ret);
+}
+
+void message_position(xpoint_t* pxp)
+{
+	if_widget_t* pif;
+
+	pif = PROCESS_WIDGET_INTERFACE;
+
+	(pif->pf_message_position)(pxp);
 }
 
 void calc_widget_border(dword_t ws, border_t* pbd)

@@ -67,7 +67,7 @@ widget_t firecheck_create(widget_t widget, const xrect_t* pxr)
 	if_subproc_t ev = { 0 };
 
 	ev.sub_on_keydown = sub_checkbox_keydown;
-	ev.sub_on_unsubbing = sub_checkbox_unsubbing;
+	ev.sub_on_unsubbed = sub_checkbox_unsubbing;
 
 	editor = checkbox_create(widget, WD_STYLE_CONTROL | WD_STYLE_EDITOR, pxr);
 	widget_set_user_id(editor, IDC_CHECKBOX);

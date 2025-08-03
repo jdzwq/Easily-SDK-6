@@ -135,7 +135,7 @@ void _destroy_context(visual_t rdc)
     if(ctx->context)
 	    XFreeGC(g_display, ctx->context);
     
-    xmem_free_handle(ctx);
+    xmem_free_handle((xhand_t)ctx);
 }
 
 void _get_device_caps(visual_t rdc, dev_cap_t* pcap)

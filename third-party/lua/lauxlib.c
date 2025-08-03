@@ -485,15 +485,15 @@ static void *resizebox (lua_State *L, int idx, size_t newsize) {
 }
 
 
-static int boxgc (lua_State *L) {
+static int boxdg (lua_State *L) {
   resizebox(L, 1, 0);
   return 0;
 }
 
 
 static const luaL_Reg boxmt[] = {  /* box metamethods */
-  {"__gc", boxgc},
-  {"__close", boxgc},
+  {"__gc", boxdg},
+  {"__close", boxdg},
   {NULL, NULL}
 };
 

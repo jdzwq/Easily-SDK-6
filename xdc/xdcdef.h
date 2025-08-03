@@ -178,7 +178,7 @@ typedef struct _splitor_t{
 
 #define SUBPROC_BEGIN_DISPATH(pv)			{if_subproc_t* pev = pv;
 #define SUBPROC_ON_SUBBING(proc)			pev->sub_on_subbing = proc;
-#define SUBPROC_ON_UNSUBBING(proc)			pev->sub_on_unsubbing = proc;
+#define SUBPROC_ON_UNSUBBING(proc)			pev->sub_on_unsubbed = proc;
 #define SUBPROC_ON_CLOSE(proc)				pev->sub_on_close = proc;
 #define SUBPROC_ON_LBUTTON_DOWN(proc)		pev->sub_on_lbutton_down = proc;
 #define SUBPROC_ON_LBUTTON_UP(proc)			pev->sub_on_lbutton_up = proc;

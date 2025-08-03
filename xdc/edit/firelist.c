@@ -225,7 +225,7 @@ widget_t firelist_create(widget_t widget, const xrect_t* pxr, link_t_ptr data)
 	ev.sub_on_scroll = sub_editbox_scroll;
 	ev.sub_on_keydown = sub_editbox_keydown;
 	ev.sub_on_self_command = sub_editbox_self_command;
-	ev.sub_on_unsubbing = sub_editbox_unsubbing;
+	ev.sub_on_unsubbed = sub_editbox_unsubbing;
 	ev.sub_on_show = sub_editbox_show;
 
 	editor = editbox_create(widget, WD_STYLE_CONTROL | WD_STYLE_EDITOR, pxr);
@@ -248,7 +248,7 @@ widget_t firelist_create(widget_t widget, const xrect_t* pxr, link_t_ptr data)
 	xmem_zero((void*)&ev, sizeof(if_subproc_t));
 	
 	ev.sub_on_self_command = sub_dropbox_self_command;
-	ev.sub_on_unsubbing = sub_dropbox_unsubbing;
+	ev.sub_on_unsubbed = sub_dropbox_unsubbing;
 
 	widget_set_subproc(dropbox, IDS_DROPBOX, &ev);
 	widget_set_subproc_delta(dropbox, IDS_DROPBOX, (vword_t)editor);

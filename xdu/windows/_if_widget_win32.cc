@@ -785,14 +785,6 @@ LRESULT CALLBACK XdcWidgetProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 			return 0;
 		}
 		break;
-	case WM_ENABLE:
-		pev = GETXDUDISPATCH(hWnd);
-		if (pev && pev->pf_on_enable)
-		{
-			(*pev->pf_on_enable)(widget, (bool_t)wParam);
-			return 0;
-		}
-		break;
 	case WM_SETFOCUS:
 		pev = GETXDUDISPATCH(hWnd);
 		if (pev && pev->pf_on_set_focus)
@@ -1152,13 +1144,6 @@ LRESULT CALLBACK XdcSubclassProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 				return 0;
 		}
 		break;
-	case WM_ENABLE:
-		if (pev && pev->sub_on_enable)
-		{
-			if ((*pev->sub_on_enable)(widget, (bool_t)wParam, (uid_t)uIdSubclass, pev->delta))
-				return 0;
-		}
-		break;
 	case WM_SETFOCUS:
 		if (pev && pev->sub_on_set_focus)
 		{
@@ -1268,9 +1253,9 @@ LRESULT CALLBACK XdcSubclassProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 		}
 		break;
 	case WM_DESTROY:
-		if (pev && pev->sub_on_unsubbing)
+		if (pev && pev->sub_on_unsubbed)
 		{
-			(*pev->sub_on_unsubbing)(widget, (uid_t)uIdSubclass, pev->delta);
+			(*pev->sub_on_unsubbed)(widget, (uid_t)uIdSubclass, pev->delta);
 		}
 		break;
 	}
@@ -1494,7 +1479,7 @@ dword_t _widget_get_style(widget_t wt)
 	return (pws) ? pws->style : 0;
 }
 
-void _widget_set_accel(widget_t wt, const acl_table_t* pact, int n)
+void _widget_set_accel(widget_t wt, const accel_table_t* pact, int n)
 {
 	win32_widget_t* pws = (win32_widget_t*)wt;
 

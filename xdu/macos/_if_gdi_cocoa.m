@@ -115,27 +115,27 @@ static void calc_penmode(const xpen_t* pxp, int* fs, int* ds)
 
 void _gdi_init(int osv)
 {
-
+	NOP;
 }
 
 void _gdi_uninit(void)
 {
-	
+	NOP;
 }
 
 void _gdi_get_point(visual_t rdc, xcolor_t* pxc, const xpoint_t* ppt)
 {
-
+	NOP;
 }
 
 void _gdi_set_point(visual_t rdc, const xcolor_t* pxc, const xpoint_t* ppt)
 {
-
+	NOP;
 }
 
 void _gdi_draw_points(visual_t rdc, const xcolor_t* pxc, const xpoint_t* ppt, int n)
 {
-	cocoa_context_t* ctx = (cocoa_context_t*)rdc;
+	cocoa_context_t* ctx = TypePtrFromHead(cocoa_context_t, rdc);
 
 	CGRect* pRect;
 	int i;
@@ -162,7 +162,7 @@ void _gdi_draw_points(visual_t rdc, const xcolor_t* pxc, const xpoint_t* ppt, in
 
 void _gdi_draw_line(visual_t rdc,const xpen_t* pxp, const xpoint_t* ppt1, const xpoint_t* ppt2)
 {
-    cocoa_context_t* ctx = (cocoa_context_t*)rdc;
+    cocoa_context_t* ctx = TypePtrFromHead(cocoa_context_t, rdc);
 
 	CGPoint point1 = CGPointMake(ppt1->x, ppt1->y);
 	CGPoint point2 = CGPointMake(ppt2->x, ppt2->y);
@@ -186,7 +186,7 @@ void _gdi_draw_line(visual_t rdc,const xpen_t* pxp, const xpoint_t* ppt1, const 
 
 void _gdi_draw_polyline(visual_t rdc,const xpen_t* pxp,const xpoint_t* ppt,int n)
 {
-    cocoa_context_t* ctx = (cocoa_context_t*)rdc;
+    cocoa_context_t* ctx = TypePtrFromHead(cocoa_context_t, rdc);
 
 	CGPoint* points = (CGPoint*)xmem_alloc(n * sizeof(CGPoint));
 	for(int i = 0; i < n; i++)
@@ -217,7 +217,7 @@ void _gdi_draw_polyline(visual_t rdc,const xpen_t* pxp,const xpoint_t* ppt,int n
 
 void _gdi_draw_arc(visual_t rdc, const xpen_t* pxp, const xpoint_t * ppt1, const xpoint_t* ppt2, const xsize_t* pxs, bool_t sflag, bool_t lflag)
 {
-    cocoa_context_t* ctx = (cocoa_context_t*)rdc;
+    cocoa_context_t* ctx = TypePtrFromHead(cocoa_context_t, rdc);
 
 	xpoint_t pt_center = {0};
 	double arcf = 0.0, arct = 0.0;
@@ -249,7 +249,7 @@ void _gdi_draw_arc(visual_t rdc, const xpen_t* pxp, const xpoint_t * ppt1, const
 
 void _gdi_draw_bezier(visual_t rdc, const xpen_t* pxp, const xpoint_t* ppt1, const xpoint_t* ppt2, const xpoint_t* ppt3, const xpoint_t* ppt4)
 {
-	cocoa_context_t* ctx = (cocoa_context_t*)rdc;
+	cocoa_context_t* ctx = TypePtrFromHead(cocoa_context_t, rdc);
 
 	CGPoint points[4] = {0};
 	points[0].x = ppt1->x;
@@ -280,7 +280,7 @@ void _gdi_draw_bezier(visual_t rdc, const xpen_t* pxp, const xpoint_t* ppt1, con
 
 void _gdi_draw_curve(visual_t rdc, const xpen_t* pxp, const xpoint_t* ppt, int pn)
 {
-	cocoa_context_t* ctx = (cocoa_context_t*)rdc;
+	cocoa_context_t* ctx = TypePtrFromHead(cocoa_context_t, rdc);
 
 	CGPoint* points = (CGPoint*)xmem_alloc(pn * sizeof(CGPoint));
 	for(int i = 0; i < pn; i++)
@@ -312,7 +312,7 @@ void _gdi_draw_curve(visual_t rdc, const xpen_t* pxp, const xpoint_t* ppt, int p
 
 void _gdi_draw_path(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const tchar_t* aa, const xpoint_t* pa)
 {
-	cocoa_context_t* ctx = (cocoa_context_t*)rdc;
+	cocoa_context_t* ctx = TypePtrFromHead(cocoa_context_t, rdc);
 
 	xpoint_t pt_m = { 0 };
 	xpoint_t pt_p = { 0 };
@@ -529,12 +529,12 @@ void _gdi_draw_path(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const 
 
 void _gdi_draw_rect(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const xrect_t* pxr)
 {
-	cocoa_context_t* ctx = (cocoa_context_t*)rdc;
+	cocoa_context_t* ctx = TypePtrFromHead(cocoa_context_t, rdc);
 
 	CGPoint point = {pxr->x, pxr->y + pxr->h};
 	DPtoLP(rdc,(CGPoint*)&point,1);
+
 	CGRect rect = CGRectMake(point.x, point.y, pxr->w, pxr->h);
-	
 	CGContextAddRect(ctx->context, rect);
 
 	if(pxp)
@@ -560,12 +560,12 @@ void _gdi_draw_rect(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const 
 
 void _gdi_draw_ellipse(visual_t rdc,const xpen_t* pxp,const xbrush_t* pxb,const xrect_t* pxr)
 {
-	cocoa_context_t* ctx = (cocoa_context_t*)rdc;
+	cocoa_context_t* ctx = TypePtrFromHead(cocoa_context_t, rdc);
 
 	CGPoint point = {pxr->x, pxr->y + pxr->h};
 	DPtoLP(rdc,(CGPoint*)&point,1);
-	CGRect rect = CGRectMake(point.x, point.y, pxr->w, pxr->h);
 
+	CGRect rect = CGRectMake(point.x, point.y, pxr->w, pxr->h);
     CGContextAddEllipseInRect(ctx->context, rect);
 
 	if(pxp)
@@ -591,7 +591,7 @@ void _gdi_draw_ellipse(visual_t rdc,const xpen_t* pxp,const xbrush_t* pxb,const 
 
 void _gdi_draw_round(visual_t rdc,const xpen_t* pxp,const xbrush_t* pxb,const xrect_t* prt,const xsize_t* pxs)
 {
-	cocoa_context_t* ctx = (cocoa_context_t*)rdc;
+	cocoa_context_t* ctx = TypePtrFromHead(cocoa_context_t, rdc);
 
 	CGPoint* points = (CGPoint*)xmem_alloc(8 * sizeof(CGPoint));
 
@@ -650,7 +650,7 @@ void _gdi_draw_round(visual_t rdc,const xpen_t* pxp,const xbrush_t* pxb,const xr
 
 void _gdi_draw_pie(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const xrect_t* pxr,  double arcf, double arct)
 {
-    cocoa_context_t* ctx = (cocoa_context_t*)rdc;
+    cocoa_context_t* ctx = TypePtrFromHead(cocoa_context_t, rdc);
 
 	NSPoint point = NSMakePoint(pxr->x + pxr->w / 2, pxr->y + pxr->h / 2);
 	DPtoLP(rdc, &point, 1);
@@ -683,7 +683,7 @@ void _gdi_draw_pie(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const x
 
 void _gdi_draw_polygon(visual_t rdc, const xpen_t* pxp, const xbrush_t*pxb, const xpoint_t* ppt, int n)
 {
-    cocoa_context_t* ctx = (cocoa_context_t*)rdc;
+    cocoa_context_t* ctx = TypePtrFromHead(cocoa_context_t, rdc);
 
 	CGPoint* points = (CGPoint*)xmem_alloc(n * sizeof(CGPoint));
 	for(int i = 0; i < n; i++)
@@ -726,117 +726,123 @@ void _gdi_draw_polygon(visual_t rdc, const xpen_t* pxp, const xbrush_t*pxb, cons
 
 void _gdi_draw_text(visual_t rdc,const xfont_t* pxf,const xface_t* pxa,const xrect_t* pxr,const tchar_t* txt,int len)
 {
-	cocoa_context_t* ctx = (cocoa_context_t*)rdc;
+	cocoa_context_t* ctx = TypePtrFromHead(cocoa_context_t, rdc);
 	
-	CGPoint points[2];
-	points[0].x = pxr->x, points[0].y = pxr->y;
-	points[1].x = pxr->x + pxr->w, points[1].y = pxr->y + pxr->h;
-	DPtoLP(rdc, points, 2);
-
-	CFStringRef family = CFStringCreateWithCString(NULL, pxf->family, kCFStringEncodingUTF8);
-    float px = 0.0f;
-	font_metric_by_pt(xstof(pxf->size), NULL, &px); 
-    CTFontRef font = CTFontCreateWithName(family, px, NULL);
-	CFRelease(family);
-
 	if(len < 0) len = xslen(txt);
+	if(!len) return;
+
+	CGPoint nsPoints[2];
+	nsPoints[0].x = pxr->x, nsPoints[0].y = pxr->y;
+	nsPoints[1].x = pxr->x + pxr->w, nsPoints[1].y = pxr->y + pxr->h;
+	DPtoLP(rdc, nsPoints, 2);
+
 	tchar_t* new_txt = xsnclone(txt, len);
-    CFStringRef string = CFStringCreateWithCString(NULL, new_txt, kCFStringEncodingUTF8);
+    CFStringRef cfString = CFStringCreateWithCString(NULL, new_txt, kCFStringEncodingUTF8);
 	xsfree(new_txt);
 
+	float px = 0.0f;
+	font_metric_by_pt(xstof(pxf->size), NULL, &px); 
+	CFStringRef cfFamily = CFStringCreateWithCString(NULL, pxf->family, kCFStringEncodingUTF8);
+    CTFontRef cfFont = CTFontCreateWithName(cfFamily, px, NULL);
+	CFRelease(cfFamily);
+
     CFMutableAttributedStringRef attrString = CFAttributedStringCreateMutable(kCFAllocatorDefault, 0);
-    CFAttributedStringReplaceString(attrString, CFRangeMake(0, 0), string);
-    CFAttributedStringSetAttribute(attrString, CFRangeMake(0, CFStringGetLength(string)), kCTFontAttributeName, font);
+    CFAttributedStringReplaceString(attrString, CFRangeMake(0, 0), cfString);
+    CFAttributedStringSetAttribute(attrString, CFRangeMake(0, CFStringGetLength(cfString)), kCTFontAttributeName, cfFont);
 
 	xcolor_t xc = {0};
 	parse_xcolor(&xc, pxf->color);
-	CGColorRef color = CGColorCreateGenericRGB((float)(xc.r) / 255.0f, (float)(xc.g) / 255.0f, (float)(xc.b) / 255.0f, 1.0);
-	CFAttributedStringSetAttribute(attrString, CFRangeMake(0, CFStringGetLength(string)), kCTForegroundColorAttributeName, color);
-	CGColorRelease(color);
+	CGColorRef cfColor = CGColorCreateGenericRGB((float)(xc.r) / 255.0f, (float)(xc.g) / 255.0f, (float)(xc.b) / 255.0f, 1.0);
+	CFAttributedStringSetAttribute(attrString, CFRangeMake(0, CFStringGetLength(cfString)), kCTForegroundColorAttributeName, cfColor);
+	CGColorRelease(cfColor);
 
-    CTLineRef line = CTLineCreateWithAttributedString(attrString);
+    CTLineRef cfLine = CTLineCreateWithAttributedString(attrString);
 
-    CGContextSetTextPosition(ctx->context, points[0].x, points[1].y);
-    CTLineDraw(line, ctx->context);
+    CGContextSetTextPosition(ctx->context, nsPoints[0].x, nsPoints[1].y);
+    CTLineDraw(cfLine, ctx->context);
 
-	CFRelease(string);
-    CFRelease(line);
+	CFRelease(cfString);
+    CFRelease(cfLine);
     CFRelease(attrString);
-    CFRelease(font);
+    CFRelease(cfFont);
 }
 
 void _gdi_text_out(visual_t rdc, const xfont_t* pxf, const xpoint_t* ppt, const tchar_t* txt, int len)
 {
-	cocoa_context_t* ctx = (cocoa_context_t*)rdc;
+	cocoa_context_t* ctx = TypePtrFromHead(cocoa_context_t, rdc);
 	
-	CGPoint point = { ppt->x, ppt->y }; 
-	DPtoLP(rdc, &point, 1);
-
-    CFStringRef family = CFStringCreateWithCString(NULL, pxf->family, kCFStringEncodingUTF8);
-    float px = 0.0f;
-	font_metric_by_pt(xstof(pxf->size), NULL, &px); 
-    CTFontRef font = CTFontCreateWithName(family, px, NULL);
-	CFRelease(family);
-
 	if(len < 0) len = xslen(txt);
+	if(!len) return;
+
+	CGPoint cgPoint = { ppt->x, ppt->y }; 
+	DPtoLP(rdc, &cgPoint, 1);
+
     tchar_t* new_txt = xsnclone(txt, len);
-    CFStringRef string = CFStringCreateWithCString(NULL, new_txt, kCFStringEncodingUTF8);
+    CFStringRef cfString = CFStringCreateWithCString(NULL, new_txt, kCFStringEncodingUTF8);
 	xsfree(new_txt);
 
+	float px = 0.0f;
+	font_metric_by_pt(xstof(pxf->size), NULL, &px);
+    CFStringRef cfFamily = CFStringCreateWithCString(NULL, pxf->family, kCFStringEncodingUTF8); 
+    CTFontRef cfFont = CTFontCreateWithName(cfFamily, px, NULL);
+	CFRelease(cfFamily);
+	cgPoint.y -= px;
+
     CFMutableAttributedStringRef attrString = CFAttributedStringCreateMutable(kCFAllocatorDefault, 0);
-    CFAttributedStringReplaceString(attrString, CFRangeMake(0, 0), string);
-    CFAttributedStringSetAttribute(attrString, CFRangeMake(0, CFStringGetLength(string)), kCTFontAttributeName, font);
+    CFAttributedStringReplaceString(attrString, CFRangeMake(0, 0), cfString);
+    CFAttributedStringSetAttribute(attrString, CFRangeMake(0, CFStringGetLength(cfString)), kCTFontAttributeName, cfFont);
 
 	xcolor_t xc = {0};
 	parse_xcolor(&xc, pxf->color);
-	CGColorRef color = CGColorCreateGenericRGB((float)(xc.r) / 255.0f, (float)(xc.g) / 255.0f, (float)(xc.b) / 255.0f, 1.0);
-	CFAttributedStringSetAttribute(attrString, CFRangeMake(0, CFStringGetLength(string)), kCTForegroundColorAttributeName, color);
-	CGColorRelease(color);
+	CGColorRef cfColor = CGColorCreateGenericRGB((float)(xc.r) / 255.0f, (float)(xc.g) / 255.0f, (float)(xc.b) / 255.0f, 1.0);
+	CFAttributedStringSetAttribute(attrString, CFRangeMake(0, CFStringGetLength(cfString)), kCTForegroundColorAttributeName, cfColor);
+	CGColorRelease(cfColor);
 
-    CTLineRef line = CTLineCreateWithAttributedString(attrString);
+    CTLineRef cfLine = CTLineCreateWithAttributedString(attrString);
 
-    CGContextSetTextPosition(ctx->context, point.x, point.y);
-    CTLineDraw(line, ctx->context);
+    CGContextSetTextPosition(ctx->context, cgPoint.x, cgPoint.y);
+    CTLineDraw(cfLine, ctx->context);
 
-	CFRelease(string);
-    CFRelease(line);
+	CFRelease(cfString);
+    CFRelease(cfLine);
     CFRelease(attrString);
-    CFRelease(font);
+    CFRelease(cfFont);
 }
 
 void _gdi_text_rect(visual_t rdc, const xfont_t* pxf, const xface_t* pxa, const tchar_t* txt, int len, xrect_t* pxr)
 {
-	cocoa_context_t* ctx = (cocoa_context_t*)rdc;
-
-    CFStringRef family = CFStringCreateWithCString(NULL, pxf->family, kCFStringEncodingUTF8);
-	float px = 0.0f;
-	font_metric_by_pt(xstof(pxf->size), NULL, &px); 
-    CTFontRef font = CTFontCreateWithName(family, px, NULL);
-	CFRelease(family);
+	cocoa_context_t* ctx = TypePtrFromHead(cocoa_context_t, rdc);
 
 	if(len < 0) len = xslen(txt);
 	if(!len) {
 		pxr->w = 0;
 		return;
 	}
+
 	tchar_t* new_txt = xsnclone(txt, len);
-	CFStringRef string = CFStringCreateWithCString(NULL, new_txt, kCFStringEncodingUTF8);
+	CFStringRef cfString = CFStringCreateWithCString(NULL, new_txt, kCFStringEncodingUTF8);
 	xsfree(new_txt);
  
-    CFMutableAttributedStringRef attrString = CFAttributedStringCreateMutable(kCFAllocatorDefault, 0);
-    CFAttributedStringReplaceString(attrString, CFRangeMake(0, 0), string);
-    CFAttributedStringSetAttribute(attrString, CFRangeMake(0, CFStringGetLength(string)), kCTFontAttributeName, font);
+ 	float px = 0.0f;
+	font_metric_by_pt(xstof(pxf->size), NULL, &px); 
+    CFStringRef cfFamily = CFStringCreateWithCString(NULL, pxf->family, kCFStringEncodingUTF8);
+    CTFontRef cfFont = CTFontCreateWithName(cfFamily, px, NULL);
+	CFRelease(cfFamily);
 
-    CTLineRef line = CTLineCreateWithAttributedString(attrString);
+    CFMutableAttributedStringRef attrString = CFAttributedStringCreateMutable(kCFAllocatorDefault, 0);
+    CFAttributedStringReplaceString(attrString, CFRangeMake(0, 0), cfString);
+    CFAttributedStringSetAttribute(attrString, CFRangeMake(0, CFStringGetLength(cfString)), kCTFontAttributeName, cfFont);
+
+    CTLineRef cfLine = CTLineCreateWithAttributedString(attrString);
 
     CGFloat ascent = 0.0, descent = 0.0, leading = 0.0;
-    CGFloat width = CTLineGetTypographicBounds(line, &ascent, &descent, &leading);
+    CGFloat width = CTLineGetTypographicBounds(cfLine, &ascent, &descent, &leading);
     CGFloat height = ascent + descent + leading;
 
-	CFRelease(string);
-    CFRelease(line);
+	CFRelease(cfString);
+    CFRelease(cfLine);
     CFRelease(attrString);
-    CFRelease(font);
+    CFRelease(cfFont);
 
     if(pxr->w < (int)width) pxr->w = (int)width;
 	if(pxr->h < (int)height) pxr->h = (int)height;
@@ -844,37 +850,38 @@ void _gdi_text_rect(visual_t rdc, const xfont_t* pxf, const xface_t* pxa, const 
 
 void _gdi_text_size(visual_t rdc, const xfont_t* pxf, const tchar_t* txt, int len, xsize_t* pxs)
 {
-	cocoa_context_t* ctx = (cocoa_context_t*)rdc;
-
-    CFStringRef family = CFStringCreateWithCString(NULL, pxf->family, kCFStringEncodingUTF8);
-    float px = 0.0f;
-	font_metric_by_pt(xstof(pxf->size), NULL, &px); 
-    CTFontRef font = CTFontCreateWithName(family, px, NULL);
-	CFRelease(family);
+	cocoa_context_t* ctx = TypePtrFromHead(cocoa_context_t, rdc);
 
 	if(len < 0) len = xslen(txt);
 	if(!len) {
 		pxs->w = 0;
 		return;
 	}
+
 	tchar_t* new_txt = xsnclone(txt, len);
-	CFStringRef string = CFStringCreateWithCString(NULL, new_txt, kCFStringEncodingUTF8);
+	CFStringRef cfString = CFStringCreateWithCString(NULL, new_txt, kCFStringEncodingUTF8);
 	xsfree(new_txt);
 
-    CFMutableAttributedStringRef attrString = CFAttributedStringCreateMutable(kCFAllocatorDefault, 0);
-    CFAttributedStringReplaceString(attrString, CFRangeMake(0, 0), string);
-    CFAttributedStringSetAttribute(attrString, CFRangeMake(0, CFStringGetLength(string)), kCTFontAttributeName, font);
+    float px = 0.0f;
+	font_metric_by_pt(xstof(pxf->size), NULL, &px); 
+    CFStringRef cfFamily = CFStringCreateWithCString(NULL, pxf->family, kCFStringEncodingUTF8);
+    CTFontRef cfFont = CTFontCreateWithName(cfFamily, px, NULL);
+	CFRelease(cfFamily);
 
-    CTLineRef line = CTLineCreateWithAttributedString(attrString);
+    CFMutableAttributedStringRef attrString = CFAttributedStringCreateMutable(kCFAllocatorDefault, 0);
+    CFAttributedStringReplaceString(attrString, CFRangeMake(0, 0), cfString);
+    CFAttributedStringSetAttribute(attrString, CFRangeMake(0, CFStringGetLength(cfString)), kCTFontAttributeName, cfFont);
+
+    CTLineRef cfLine = CTLineCreateWithAttributedString(attrString);
 
     CGFloat ascent = 0.0, descent = 0.0, leading = 0.0;
-    CGFloat width = CTLineGetTypographicBounds(line, &ascent, &descent, &leading);
+    CGFloat width = CTLineGetTypographicBounds(cfLine, &ascent, &descent, &leading);
     CGFloat height = ascent + descent;
 
-	CFRelease(string);
-    CFRelease(line);
+	CFRelease(cfString);
+    CFRelease(cfLine);
     CFRelease(attrString);
-    CFRelease(font);
+    CFRelease(cfFont);
 
     if(pxs->w < (int)width) pxs->w = (int)width;
 	if(pxs->h < (int)height) pxs->h = (int)height;
@@ -882,31 +889,27 @@ void _gdi_text_size(visual_t rdc, const xfont_t* pxf, const tchar_t* txt, int le
 
 void _gdi_font_size(visual_t rdc, const xfont_t* pxf, xsize_t* pxs)
 {
-	cocoa_context_t* ctx = (cocoa_context_t*)rdc;
+	cocoa_context_t* ctx = TypePtrFromHead(cocoa_context_t, rdc);
 
-	CFStringRef family = CFStringCreateWithCString(NULL, pxf->family, kCFStringEncodingUTF8);
 	float px = 0.0f;
-
 	font_metric_by_pt(xstof(pxf->size), NULL, &px); 
+	CFStringRef cfFamily = CFStringCreateWithCString(NULL, pxf->family, kCFStringEncodingUTF8);
 	
-    CTFontRef font = CTFontCreateWithName(family, px, NULL);
-	CFRelease(family);
+    CTFontRef cfFont = CTFontCreateWithName(cfFamily, px, NULL);
+	CFRelease(cfFamily);
 
-    CGFloat ascent = CTFontGetAscent(font);
-    CGFloat descent = CTFontGetDescent(font);
-    CGFloat leading = CTFontGetLeading(font);
-    CGFloat capHeight = CTFontGetCapHeight(font);
+    CGFloat ascent = CTFontGetAscent(cfFont);
+    CGFloat descent = CTFontGetDescent(cfFont);
+    CGFloat leading = CTFontGetLeading(cfFont);
+    CGFloat capHeight = CTFontGetCapHeight(cfFont);
+	CFRelease(cfFont);
 
-    CGFloat totalHeight = ascent + descent + leading;
-
-	pxs->h = (int)totalHeight;
-
-	CFRelease(font);
+	pxs->h = (int)(ascent + descent + leading);
 }
 
 void _gdi_gradient_rect(visual_t rdc, const xcolor_t* clr_brim, const xcolor_t* clr_core, const tchar_t* gradient, const xrect_t* prt)
 {
-    cocoa_context_t* ctx = (cocoa_context_t*)rdc;
+    cocoa_context_t* ctx = TypePtrFromHead(cocoa_context_t, rdc);
 
 	CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
 
@@ -999,7 +1002,7 @@ void _gdi_gradient_rect(visual_t rdc, const xcolor_t* clr_brim, const xcolor_t* 
 
 void _gdi_alphablend_rect(visual_t rdc, const xcolor_t* pxc, const xrect_t* pxr, int opacity)
 {
-	cocoa_context_t* ctx = (cocoa_context_t*)rdc;
+	cocoa_context_t* ctx = TypePtrFromHead(cocoa_context_t, rdc);
 
     CGRect rect = CGRectMake(pxr->x, pxr->y + pxr->h, pxr->w, pxr->h);
 	DPtoLP(rdc,(CGPoint*)&rect,1);
@@ -1013,7 +1016,7 @@ void _gdi_alphablend_rect(visual_t rdc, const xcolor_t* pxc, const xrect_t* pxr,
 
 void _gdi_invert_rect(visual_t rdc, const xrect_t* pxr)
 {
-	cocoa_context_t* ctx = (cocoa_context_t*)rdc;
+	cocoa_context_t* ctx = TypePtrFromHead(cocoa_context_t, rdc);
 
     CGRect rect = CGRectMake(pxr->x, pxr->y + pxr->h, pxr->w, pxr->h);
 	DPtoLP(rdc,(CGPoint*)&rect,1);
@@ -1026,7 +1029,7 @@ void _gdi_invert_rect(visual_t rdc, const xrect_t* pxr)
 
 void _gdi_exclude_rect(visual_t rdc, const xrect_t* pxr)
 {
-	cocoa_context_t* ctx = (cocoa_context_t*)rdc;
+	cocoa_context_t* ctx = TypePtrFromHead(cocoa_context_t, rdc);
 
 	CGRect rect = CGRectMake(pxr->x, pxr->y + pxr->h, pxr->w, pxr->h);
 	DPtoLP(rdc,(CGPoint*)&rect,1);
@@ -1037,7 +1040,7 @@ void _gdi_exclude_rect(visual_t rdc, const xrect_t* pxr)
 
 void _gdi_inclip_rect(visual_t rdc, const xrect_t* pxr)
 {
-   	cocoa_context_t* ctx = (cocoa_context_t*)rdc;
+   	cocoa_context_t* ctx = TypePtrFromHead(cocoa_context_t, rdc);
 
     CGRect rect = CGRectMake(pxr->x, pxr->y + pxr->h, pxr->w, pxr->h);
 	DPtoLP(rdc,(CGPoint*)&rect,1);
@@ -1048,8 +1051,8 @@ void _gdi_inclip_rect(visual_t rdc, const xrect_t* pxr)
 #ifdef XDU_SUPPORT_CONTEXT_BITMAP
 void _gdi_draw_image(visual_t rdc,bitmap_t rbm,const xcolor_t* clr,const xrect_t* prt)
 {
-    cocoa_context_t* ctx = (cocoa_context_t*)rdc;
-	cocoa_bitmap_t* bmp = (cocoa_bitmap_t*)rbm;
+    cocoa_context_t* ctx = TypePtrFromHead(cocoa_context_t, rdc);
+	cocoa_bitmap_t* bmp = TypePtrFromHead(cocoa_bitmap_t, rbm);
 
 	CGRect rect = CGRectMake(prt->x, prt->y + prt->h, prt->w, prt->h);
 	DPtoLP(rdc,(CGPoint*)&rect,1);
@@ -1064,8 +1067,8 @@ void _gdi_draw_image(visual_t rdc,bitmap_t rbm,const xcolor_t* clr,const xrect_t
 
 void _gdi_draw_bitmap(visual_t rdc, bitmap_t rbm, const xpoint_t* ppt)
 {
-	cocoa_context_t* ctx = (cocoa_context_t*)rdc;
-	cocoa_bitmap_t* bmp = (cocoa_bitmap_t*)rbm;
+	cocoa_context_t* ctx = TypePtrFromHead(cocoa_context_t, rdc);
+	cocoa_bitmap_t* bmp = TypePtrFromHead(cocoa_bitmap_t, rbm);
 
   	size_t width = CGImageGetWidth(bmp->image);
     size_t height = CGImageGetHeight(bmp->image);
@@ -1077,12 +1080,6 @@ void _gdi_draw_bitmap(visual_t rdc, bitmap_t rbm, const xpoint_t* ppt)
 }
 #endif
 
-#ifdef XDU_SUPPORT_CONTEXT_REGION
-void _gdi_fill_region(visual_t rdc, const xbrush_t* pxb, res_rgn_t rgn)
-{
-
-}
-#endif
 
 #endif //XDU_SUPPORT_CONTEXT_GRAPHIC
 

@@ -5,7 +5,7 @@
 
 
 #include <xdk.h>
-#include <xgc.h>
+#include <xdg.h>
 
 
 glyph_info_t ascii_medium_regular_list[16] = {

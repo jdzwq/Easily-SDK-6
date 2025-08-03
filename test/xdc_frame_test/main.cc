@@ -1,4 +1,6 @@
 #include <xdl.h>
+#include <xdg.h>
+#include <xdu.h>
 #include <xdc.h>
 
 widget_t g_main = NULL;
@@ -14,28 +16,15 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 int main(int argc, const char * argv[])
 #endif
 {
-
 	xdk_process_init(XDK_APARTMENT_PROCESS);
 
-	xdc_process_init();
+	xdu_process_init();
 
 	g_main = MainFrame_Create(_T("Main"));
 
-	msg_t msg;
+	widget_do_main(g_main);
 
-	do{
-		while (message_peek(&msg))
-		{
-			message_fetch(&msg, NULL);
-
-			if (!message_translate(&msg))
-			{
-				message_dispatch(&msg);
-			}
-		}
-	} while (widget_is_valid(g_main));
-
-	xdc_process_uninit();
+	xdu_process_uninit();
 
 	xdk_process_uninit();
 
@@ -78,7 +67,7 @@ int main(int argc, const char * argv[])
 
 #define MAINFRAME_ACCEL_COUNT		1
 
-accel_t	MAINFRAME_ACCEL[MAINFRAME_ACCEL_COUNT] = {
+accel_table_t	MAINFRAME_ACCEL[MAINFRAME_ACCEL_COUNT] = {
 	KEY_CONTROL, _T('O'), IDA_OWNER,
 };
 
@@ -916,9 +905,9 @@ void MainFrame_UserPanel_OnDraw(widget_t win, visual_t rdc)
 	xcolor_t xc;
 
 	xpen_t xp;
-	widget_get_xpen(win, &xp);
+	default_xpen(&xp);
 	xbrush_t xb;
-	widget_get_xbrush(win, &xb);
+	default_xbrush(&xb);
 	lighten_xbrush(&xb, DEF_HARD_DARKEN);
 
 	canvas_t canv;
@@ -1418,9 +1407,7 @@ int MainFrame_OnCreate(widget_t widget, void* data)
 
 	widget_hand_create(widget);
 
-	res_acl_t hac = create_accel_table(MAINFRAME_ACCEL, MAINFRAME_ACCEL_COUNT);
-
-	widget_attach_accel(widget, hac);
+	widget_set_accel(widget, MAINFRAME_ACCEL, MAINFRAME_ACCEL_COUNT);
 
 	xsize_t xs;
 
@@ -1457,10 +1444,6 @@ void MainFrame_OnDestroy(widget_t widget)
 {
 	MainFrameDelta* pdt = GETMAINFRAMEDELTA(widget);
 
-	res_acl_t hac = widget_get_accel(widget);
-	if (hac)
-		destroy_accel_table(hac);
-
 	_MainFrame_DestroyToolBar(widget);
 
 	_MainFrame_DestroyTitleBar(widget);
@@ -1496,10 +1479,9 @@ int MainFrame_OnClose(widget_t widget)
 	if (get_title_item_count(ptrTitle))
 		return 1;
 
-
 	widget_destroy(widget);
 
-	send_quit_message(0);
+	message_quit(0);
 
 	return 0;
 }

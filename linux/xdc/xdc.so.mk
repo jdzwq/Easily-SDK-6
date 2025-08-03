@@ -25,7 +25,7 @@ OBJ_PATH = ../../../Easily-tmp/linux/$(MODULE)/$(ARCH)
 TARGET = lib$(MODULE).so.$(VER)
 LINKIT = lib$(MODULE).so
 
-LIBS = -lxdk -lxgc -lxdu -lxdl
+LIBS = -lxdk -lxdg -lxdu -lxdl
 DIRS = $(wildcard $(SRC_PATH)/*.c \
 	$(SRC_PATH)/bag/*.c \
 	$(SRC_PATH)/box/*.c \

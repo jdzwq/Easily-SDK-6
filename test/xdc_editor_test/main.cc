@@ -1,4 +1,5 @@
 #include <xdl.h>
+#include <xdu.h>
 #include <xdc.h>
 
 widget_t g_main = NULL;
@@ -14,16 +15,15 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 int main(int argc, const char * argv[])
 #endif
 {
-
 	xdk_process_init(XDK_APARTMENT_PROCESS);
 
-	xdc_process_init();
+	xdu_process_init();
 
 	g_main = MainFrame_Create(_T("Main"));
 
 	widget_do_main(g_main);
 
-	xdc_process_uninit();
+	xdu_process_uninit();
 
 	xdk_process_uninit();
 
@@ -38,7 +38,7 @@ int main(int argc, const char * argv[])
 
 #define MAINFRAME_ACCEL_COUNT		2
 
-accel_t	MAINFRAME_ACCEL[MAINFRAME_ACCEL_COUNT] = {
+accel_table_t	MAINFRAME_ACCEL[MAINFRAME_ACCEL_COUNT] = {
 	KS_WITH_CONTROL, _T('O'), IDA_OPEN,
 	KS_WITH_CONTROL, _T('s'), IDA_SAVE,
 };
@@ -58,6 +58,13 @@ void _MainFrame_CreateEditor(widget_t widget)
 {
 	MainFrameDelta* pdt = GETMAINFRAMEDELTA(widget);
 
+	clr_mod_t clrs = {0};
+    parse_xcolor(&clrs.clr_bkg, GDI_ATTR_RGB_HARDBLACK);
+    parse_xcolor(&clrs.clr_frg, GDI_ATTR_RGB_SNOWWHITE);
+    parse_xcolor(&clrs.clr_txt, GDI_ATTR_RGB_LIGHTWHITE);
+    parse_xcolor(&clrs.clr_msk, GDI_ATTR_RGB_BLACK);
+    parse_xcolor(&clrs.clr_ico, GDI_ATTR_RGB_SNOWWHITE);
+
 	xrect_t xr = { 0 };
 
 	widget_get_client_rect(widget, &xr);
@@ -66,6 +73,8 @@ void _MainFrame_CreateEditor(widget_t widget)
 
 	widget_set_user_id(pdt->hEditor, IDC_EDITBOX);
 	widget_set_owner(pdt->hEditor, widget);
+
+	widget_set_color_mode(pdt->hEditor, &clrs);
 
 	widget_show(pdt->hEditor, WS_SHOW_NORMAL);
 }
@@ -84,9 +93,7 @@ int MainFrame_OnCreate(widget_t widget, void* data)
 
 	widget_hand_create(widget);
 
-	res_acl_t hac = create_accel_table(MAINFRAME_ACCEL, MAINFRAME_ACCEL_COUNT);
-
-	widget_attach_accel(widget, hac);
+	widget_set_accel(widget, MAINFRAME_ACCEL, 2);
 
 	pdt = (MainFrameDelta*)xmem_alloc(sizeof(MainFrameDelta));
 	SETMAINFRAMEDELTA(widget, pdt);
@@ -99,10 +106,6 @@ int MainFrame_OnCreate(widget_t widget, void* data)
 void MainFrame_OnDestroy(widget_t widget)
 {
 	MainFrameDelta* pdt = GETMAINFRAMEDELTA(widget);
-
-	res_acl_t hac = widget_get_accel(widget);
-	if (hac)
-		destroy_accel_table(hac);
 
 	_MainFrame_DestroyEditor(widget);
 
@@ -117,7 +120,7 @@ int MainFrame_OnClose(widget_t widget)
 
 	widget_destroy(widget);
 
-	//send_quit_message(0);
+	message_quit(0);
 
 	return 0;
 }

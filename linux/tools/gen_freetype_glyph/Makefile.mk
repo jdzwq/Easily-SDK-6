@@ -18,7 +18,7 @@ $(SRC_PATH)%.o : $(SRC_PATH)/%.cpp
 
 all : $(OBJS)
 	rm -f $@
-	$(CC) -o $(TARGET) $(OBJS) -L $(LIB_PATH) -lxdk -lxgc -lfontconfig -lfreetype
+	$(CC) -o $(TARGET) $(OBJS) -L $(LIB_PATH) -lxdk -lxdg -lfontconfig -lfreetype
 	rm -f $(OBJS)
 
 test:

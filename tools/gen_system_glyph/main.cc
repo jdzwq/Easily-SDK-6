@@ -1,6 +1,6 @@
 
 #include <xdk.h>
-#include <xgc.h>
+#include <xdg.h>
 #include <xdu.h>
 
 

@@ -270,7 +270,7 @@ void xmem_free_handle_dump(xhand_t ph)
 
 	ph = (void*)((byte_t*)ph - sizeof(vword_t) - sizeof(link_t));
 	XDK_ASSERT(((link_t_ptr)ph)->tag == lkDebug);
-
+	
 	delete_link(&pif->if_hand, (link_t_ptr)ph);
 
 	dump = *((vword_t*)((byte_t*)ph + sizeof(link_t)));

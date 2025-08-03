@@ -186,7 +186,7 @@ widget_t firedate_create(widget_t widget, const xrect_t* pxr)
 	if_subproc_t ev = { 0 };
 
 	ev.sub_on_keydown = sub_editbox_keydown;
-	ev.sub_on_unsubbing = sub_editbox_unsubbing;
+	ev.sub_on_unsubbed = sub_editbox_unsubbing;
 	ev.sub_on_self_command = sub_editbox_self_command;
 	ev.sub_on_show = sub_editbox_show;
 
@@ -209,7 +209,7 @@ widget_t firedate_create(widget_t widget, const xrect_t* pxr)
 	xmem_zero((void*)&ev, sizeof(if_subproc_t));
 
 	ev.sub_on_self_command = sub_datebox_self_command;
-	ev.sub_on_unsubbing = sub_datebox_unsubbing;
+	ev.sub_on_unsubbed = sub_datebox_unsubbing;
 
 	widget_set_subproc(datebox, IDS_DATEBOX, &ev);
 	widget_set_subproc_delta(datebox, IDS_DATEBOX, (vword_t)editor);

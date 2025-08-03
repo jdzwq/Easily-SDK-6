@@ -73,7 +73,7 @@ visual_t _create_compatible_context(visual_t rdc, int cx, int cy)
     size_t bytesPerRow = cx * bytesPerPixel;
     size_t bufferSize = cy * bytesPerRow;
 
-	ctx->bitmap = calloc(1, bufferSize);
+	ctx->bitmap = xmem_alloc(bufferSize);
     ctx->colors = CGColorSpaceCreateWithName(kCGColorSpaceSRGB);
     ctx->context = CGBitmapContextCreate(
         ctx->bitmap,
@@ -102,13 +102,13 @@ void _destroy_context(visual_t rdc)
 	case CONTEXT_MEMORY:
 		CGContextRelease(ctx->context);
     	CGColorSpaceRelease(ctx->colors);
-    	free(ctx->bitmap);
+    	xmem_free(ctx->bitmap);
 		break;
 	case CONTEXT_PRINTER:
 		break;
 	}
 
-	xmem_free_handle(ctx);
+	xmem_free_handle((xhand_t)ctx);
 }
 
 void _get_device_caps(visual_t rdc, dev_cap_t* pcap)

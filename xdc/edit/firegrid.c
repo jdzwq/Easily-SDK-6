@@ -234,7 +234,7 @@ widget_t firegrid_create(widget_t widget, const xrect_t* pxr, link_t_ptr data)
 
 	ev.sub_on_scroll = sub_editbox_scroll;
 	ev.sub_on_keydown = sub_editbox_keydown;
-	ev.sub_on_unsubbing = sub_editbox_unsubbing;
+	ev.sub_on_unsubbed = sub_editbox_unsubbing;
 
 	ev.sub_on_self_command = sub_editbox_self_command;
 	ev.sub_on_notice = sub_editbox_notice;

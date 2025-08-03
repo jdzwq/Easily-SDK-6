@@ -127,7 +127,7 @@ widget_t fireedit_create(widget_t widget, const xrect_t* pxr)
 	widget_set_user_id(editor, IDC_EDITBOX);
 
 	ev.sub_on_keydown = sub_editbox_keydown;
-	ev.sub_on_unsubbing = sub_editbox_unsubbing;
+	ev.sub_on_unsubbed = sub_editbox_unsubbing;
 	ev.sub_on_self_command = sub_editbox_self_command;
 	ev.sub_on_show = sub_editbox_show;
 

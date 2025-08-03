@@ -8,7 +8,7 @@
         "name": "(lldb) macos",
         "type": "cppdbg",
         "request": "launch",
-        "program": "/Users/zhangwenquan/工程/Easily-app-6/macos/bin/xdu_win_test",
+        "program": "/Users/zhangwenquan/工程/Easily-app-6/macos/bin/xdc_editor_test",
         "args": [],
         "stopAtEntry": false,
         "cwd": "${fileDirname}",

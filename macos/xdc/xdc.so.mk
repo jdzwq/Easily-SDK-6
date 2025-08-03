@@ -24,8 +24,9 @@ OBJ_PATH = ../../../Easily-tmp/macos/$(MODULE)/$(ARCH)
 TARGET = lib$(MODULE).so.$(VER)
 LINKIT = lib$(MODULE).so
 
-LIBS = -lxdk -lxgc -lxdu -lxdl
+LIBS = -lxdk -lxdg -lxdu -lxdl
 DIRS = $(wildcard $(SRC_PATH)/*.c \
+	$(SRC_PATH)/win/*.c \
 	$(SRC_PATH)/bag/*.c \
 	$(SRC_PATH)/box/*.c \
 	$(SRC_PATH)/ctrl/*.c \
@@ -40,6 +41,9 @@ COBS = $(patsubst %.c, %.o, $(SRCS))
 OBJS = $(addprefix $(OBJ_PATH)/,$(COBS))
 
 $(OBJ_PATH)/%.o : $(SRC_PATH)/%.c
+	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
+
+$(OBJ_PATH)/%.o : $(SRC_PATH)/win/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
 
 $(OBJ_PATH)/%.o : $(SRC_PATH)/bag/%.c

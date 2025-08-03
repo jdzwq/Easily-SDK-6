@@ -26,7 +26,7 @@ OBJ_PATH = ../../../Easily-tmp/macos/$(MODULE)/$(ARCH)
 TARGET = lib$(MODULE).so.$(VER)
 LINKIT = lib$(MODULE).so
 
-LIBS = -lm -ldl -lutil -lxdk -lxgc
+LIBS = -lm -ldl -lutil -lxdk -lxdg
 DIRS = $(wildcard \
 	$(SRC_PATH)/macos/*.m \
 	$(SRC_PATH)/imp/*.c \

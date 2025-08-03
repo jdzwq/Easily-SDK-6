@@ -29,7 +29,7 @@ $(OBJ_PATH)%.o : $(SRC_PATH)/%.cc
 
 all : $(OBJS)
 	rm -f $@
-	$(CC) -o $(OUT_PATH)/$(MODULE) $(OBJS) -L $(LIB_PATH) -lxdk -lxdl -lxdu -lxgc -lxdc
+	$(CC) -o $(OUT_PATH)/$(MODULE) $(OBJS) -L $(LIB_PATH) -lxdk -lxdl -lxdu -lxdg -lxdc
 #	rm -f $(OBJS)
 
 test:

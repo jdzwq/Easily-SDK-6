@@ -650,7 +650,7 @@ EXP_API void	widget_kill_timer(widget_t wt, vword_t tid);
 @INPUT res_acl_t acl: the accelerator resource handle.
 @RETURN void: none.
 */
-EXP_API void	widget_set_accel(widget_t wt, const acl_table_t* pacl, int n);
+EXP_API void	widget_set_accel(widget_t wt, const accel_table_t* pacl, int n);
 
 /*
 @FUNCTION widget_enum_child: enumerate child widgets.
@@ -813,6 +813,9 @@ EXP_API int		widget_do_modal(widget_t wt);
 */
 EXP_API void	widget_do_track(widget_t wt);
 
+EXP_API void 	message_quit(int ret);
+
+EXP_API void 	message_position(xpoint_t* pxp);
 
 EXP_API void	adjust_widget_size(dword_t ws, xsize_t* pxs);
 

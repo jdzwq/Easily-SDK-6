@@ -185,14 +185,13 @@ typedef struct _X11_widget_t{
 	Window parent;
 	Window owner;
 	
+    long evmsk;
     dword_t style;
+    dword_t mask;
 	uid_t uid;
     uid_t sid;
 
 	bool_t disable;
-
-	long evmsk;
-	unsigned int keymsk;
 
     int state;
 	int result;

@@ -411,6 +411,747 @@ void _widget_cleanup()
 	if(g_queue) destroy_timer_queue(g_queue);
 }
 
+/*******************************************************************************************/
+
+static bool_t _message_translate(XEvent* pmsg)
+{
+	X11_widget_t* pxw;
+	accel_table_t* pac;
+	char keystr[5] = {0};
+	KeySym keysys = 0;
+	Status status = 0;
+	unsigned int state;
+	int i, keys = 0;
+	char ch = 0;
+	char* pch = NULL;
+	char kch = 0;
+	wchar_t wc = 0;
+
+	XClientMessageEvent ev = {0};
+
+	if(pmsg->type == KeyPress)
+	{
+		if(XFilterEvent(pmsg, pmsg->xkey.window))
+			return 0;
+
+		pxw = GETXDUSTRUCT(pmsg->xkey.window);
+		if(!pxw) return 0;
+
+		if(pxw->xic)
+			keys = XmbLookupString(pxw->xic, &(pmsg->xkey), keystr, 4, &keysys, &status);
+		else
+			keys = XLookupString(&(pmsg->xkey), keystr, 4, &keysys, &status);
+
+		if(!keys)
+		{
+			return 0;
+		}
+		//if(!IsFunctionKey(keysys) && !IsMiscFunctionKey(keysys) && !IsCursorKey(keysys)
+		
+		//if(pmsg->xkey.state & ShiftMask) state |= KS_WITH_SHIFT;
+		if(pmsg->xkey.state & ControlMask) state |= KS_WITH_CONTROL;
+		if(pmsg->xkey.state & Mod1Mask) state |= KS_WITH_ALT;
+
+		switch(keys)
+		{
+		case 1:
+			ch = keystr[0];
+			keysys = XLookupKeysym(&(pmsg->xkey), 0);
+			break;
+		case 2:
+			ch = keystr[1];
+			keysys = XLookupKeysym(&(pmsg->xkey), 1);
+			break;
+		case 3:
+			ch = keystr[2];
+			keysys = XLookupKeysym(&(pmsg->xkey), 2);
+			break;
+		default:
+			ch = keystr[3];
+			keysys = XLookupKeysym(&(pmsg->xkey), 3);
+			break;
+		}
+
+		if(pxw->acl)
+		{
+			pch = XKeysymToString(keysys);
+			kch = (pch) ? *pch : 0;
+
+			pac = (accel_table_t*)pxw->acl;
+			i = 0;
+			while (pac[i].vir != 0 && pac[i].key != 0)
+			{
+				if (pac[i].vir == state && pac[i].key == kch)
+				{
+					ev.type = ClientMessage;
+					ev.serial = 0;
+					ev.send_event = 1;
+					ev.display = g_display;
+					ev.window = pmsg->xkey.window;
+					ev.message_type = g_atoms.wm_command;
+					ev.format = 32;
+					ev.data.l[0] = pxw->uid;
+					ev.data.l[1] = pac[i].cmd;
+					ev.data.l[2] = 0;
+					ev.data.l[3] = ev.data.l[4] = 0;
+
+					XSendEvent(g_display, pmsg->xkey.window, False, SubstructureNotifyMask, (XEvent *)&ev);
+
+					return 1;
+				}
+
+				i++;
+			}
+		}
+
+		mbtowc(&wc, keystr, 1);
+
+		ev.type = ClientMessage;
+		ev.serial = 0;
+		ev.send_event = 1;
+		ev.display = g_display;
+		ev.window = pmsg->xkey.window;
+		ev.message_type = g_atoms.wm_wchar;
+		ev.format = 32;
+		ev.data.l[0] = (long)wc;
+
+		XSendEvent(g_display, pmsg->xkey.window, False, SubstructureNotifyMask, (XEvent *)&ev);
+	}else if(pmsg->type == KeyRelease)
+	{
+		if(XFilterEvent(pmsg, pmsg->xkey.window))
+			return 0;
+	}
+
+    return 0;
+}
+
+static int _message_dispatch(XEvent* pmsg)
+{
+	X11_widget_t* pxw;
+	widget_t wt;
+	if_dispatch_t* pif;
+	if_subproc_t* psub;
+
+	KeySym key;
+	xpoint_t xp;
+	xsize_t xs;
+	xrect_t xr;
+	dword_t ms;
+	
+	switch(pmsg->type)
+	{
+		case KeymapNotify:
+            XRefreshKeyboardMapping(&pmsg->xmapping);
+            break;
+		case KeyPress:
+			pxw = GETXDUSTRUCT(pmsg->xkey.window);
+			if(!pxw) break;
+			if(pxw->disable) break;
+			wt = &(pxw->head);
+
+			pxw->mask = _key_state(pmsg->xkey.state);
+			key = XLookupKeysym(&(pmsg->xkey), 0);
+
+			psub = GETXDUSUBPROC(pmsg->xkey.window);
+			if(psub && psub->sub_on_keydown)
+			{
+				pxw->result = (*psub->sub_on_keydown)(wt, pxw->mask, (int)(key), psub->sid, psub->delta);
+				if(pxw->result) break;
+			}
+
+			pif = GETXDUDISPATCH(pmsg->xkey.window);
+			if(pif && pif->pf_on_keydown)
+			{
+				(*pif->pf_on_keydown)(wt, pxw->mask, (int)(key));
+			}
+			break;
+		case KeyRelease:
+			pxw = GETXDUSTRUCT(pmsg->xkey.window);
+			if(!pxw) break;
+			if(pxw->disable) break;
+			wt = &(pxw->head);
+
+			pxw->mask = _key_state(pmsg->xkey.state);
+			key = XLookupKeysym(&(pmsg->xkey), 0);
+
+			psub = GETXDUSUBPROC(pmsg->xkey.window);
+			if(psub && psub->sub_on_keyup)
+			{
+				pxw->result = (*psub->sub_on_keyup)(wt, pxw->mask, (int)(key), psub->sid, psub->delta);
+				if(pxw->result) break;
+			}
+
+			pif = GETXDUDISPATCH(pmsg->xkey.window);
+			if(pif && pif->pf_on_keyup)
+			{
+				(*pif->pf_on_keyup)(wt, pxw->mask, (int)(key));
+			}
+			break;
+		case ButtonPress:
+		pxw = GETXDUSTRUCT(pmsg->xbutton.window);
+			if(!pxw) break;
+			if(pxw->disable) break;
+			wt = &(pxw->head);
+		
+			xp.x = pmsg->xbutton.x;
+			xp.y = pmsg->xbutton.y;
+			_widget_window_to_client(wt, &xp);
+
+			psub = GETXDUSUBPROC(pmsg->xbutton.window);
+			if(pmsg->xbutton.button == Button1)
+			{
+				if(psub && psub->sub_on_lbutton_down)
+				{
+					pxw->result = (*psub->sub_on_lbutton_down)(wt, &xp, psub->sid, psub->delta);
+					if(pxw->result) break;
+				}
+			}else if(pmsg->xbutton.button == Button3)
+			{
+				if(psub && psub->sub_on_rbutton_down)
+				{
+					pxw->result = (*psub->sub_on_rbutton_down)(wt, &xp, psub->sid, psub->delta);
+					if(pxw->result) break;
+				}
+			}
+
+			pif = GETXDUDISPATCH(pmsg->xbutton.window);
+			if(pmsg->xbutton.button == Button1)
+			{
+				if (pif && pif->pf_on_lbutton_down)
+				{
+					(*pif->pf_on_lbutton_down)(wt, &xp);
+				}
+			}else if(pmsg->xbutton.button == Button3)
+			{
+				if (pif && pif->pf_on_rbutton_down)
+				{
+					(*pif->pf_on_rbutton_down)(wt, &xp);
+				}
+			}
+			break;
+		case ButtonRelease:
+			pxw = GETXDUSTRUCT(pmsg->xbutton.window);
+			if(!pxw) break;
+			if(pxw->disable) break;
+			wt = &(pxw->head);
+		
+			xp.x = pmsg->xbutton.x;
+			xp.y = pmsg->xbutton.y;
+			_widget_window_to_client(wt, &xp);
+
+			psub = GETXDUSUBPROC(pmsg->xbutton.window);
+			if(pmsg->xbutton.button == Button1)
+			{
+				if(psub && psub->sub_on_lbutton_up)
+				{
+					pxw->result = (*psub->sub_on_lbutton_up)(wt, &xp, psub->sid, psub->delta);
+					if(pxw->result) break;
+				}
+			}else if(pmsg->xbutton.button == Button3)
+			{
+				if(psub && psub->sub_on_rbutton_down)
+				{
+					pxw->result = (*psub->sub_on_rbutton_up)(wt, &xp, psub->sid, psub->delta);
+					if(pxw->result) break;
+				}
+			}else if(pmsg->xbutton.button == Button4)
+			{
+				if(psub && psub->sub_on_scroll)
+				{
+					pxw->result = (*psub->sub_on_scroll)(wt, 0, DEFAULT_SCROLL_DELTA, psub->sid, psub->delta);
+					if(pxw->result) break;
+				}
+			}else if(pmsg->xbutton.button == Button5)
+			{
+				if(psub && psub->sub_on_scroll)
+				{
+					pxw->result = (*psub->sub_on_scroll)(wt, 0, -DEFAULT_SCROLL_DELTA, psub->sid, psub->delta);
+					if(pxw->result) break;
+				}
+			}
+
+			pif = GETXDUDISPATCH(pmsg->xbutton.window);
+			if(pmsg->xbutton.button == Button1)
+			{
+				if (pif && pif->pf_on_lbutton_up)
+				{
+					(*pif->pf_on_lbutton_up)(wt, &xp);
+				}
+			}else if(pmsg->xbutton.button == Button3)
+			{
+				if (pif && pif->pf_on_rbutton_up)
+				{
+					(*pif->pf_on_rbutton_up)(wt, &xp);
+				}
+			}else if(pmsg->xbutton.button == Button4)
+			{
+				if (pif && pif->pf_on_wheel)
+				{
+					wt = &(pxw->head);
+					(*pif->pf_on_wheel)(wt, 0, DEFAULT_SCROLL_DELTA);
+				}
+			}else if(pmsg->xbutton.button == Button5)
+			{
+				if (pif && pif->pf_on_wheel)
+				{
+					wt = &(pxw->head);
+					(*pif->pf_on_wheel)(wt, 0, -DEFAULT_SCROLL_DELTA);
+				}
+			}
+			break;
+		case MotionNotify:
+			pxw = GETXDUSTRUCT(pmsg->xmotion.window);
+			if(!pxw) break;
+			if(pxw->disable) break;
+			wt = &(pxw->head);
+
+			xp.x = pmsg->xmotion.x;
+			xp.y = pmsg->xmotion.y;
+			_widget_window_to_client(wt, &xp);
+
+			pxw->mask = _mouse_state(pmsg->xmotion.state) | _key_state(pmsg->xmotion.state);
+
+			psub = GETXDUSUBPROC(pmsg->xmotion.window);
+			if(psub && psub->sub_on_mouse_move)
+			{
+				pxw->result = (*psub->sub_on_mouse_move)(wt, pxw->mask, &xp, psub->sid, psub->delta);
+				if(pxw->result) break;
+			}
+
+			pif = GETXDUDISPATCH(pmsg->xmotion.window);
+			if (pif && pif->pf_on_mouse_move)
+			{			
+				(*pif->pf_on_mouse_move)(wt, pxw->mask, &xp);
+			}
+			break;
+		case EnterNotify:
+			pxw = GETXDUSTRUCT(pmsg->xcrossing.window);
+			if(!pxw) break;
+			if(pxw->disable) break;
+			wt = &(pxw->head);
+
+			xp.x = pmsg->xcrossing.x;
+			xp.y = pmsg->xcrossing.y;
+			_widget_window_to_client(wt, &xp);
+
+			pxw->mask = _mouse_state(pmsg->xcrossing.state) | _key_state(pmsg->xcrossing.state);
+
+			psub = GETXDUSUBPROC(pmsg->xcrossing.window);
+			if(psub && psub->sub_on_mouse_enter)
+			{
+				pxw->result = (*psub->sub_on_mouse_enter)(wt, pxw->mask, &xp, psub->sid, psub->delta);
+				if(pxw->result) break;
+			}
+
+			pif = GETXDUDISPATCH(pmsg->xcrossing.window);
+			if (pif && pif->pf_on_mouse_enter)
+			{
+				(*pif->pf_on_mouse_enter)(wt, pxw->mask, &xp);
+			}
+			break;
+		case LeaveNotify:
+			pxw = GETXDUSTRUCT(pmsg->xcrossing.window);
+			if(!pxw) break;
+			if(pxw->disable) break;
+			wt = &(pxw->head);
+
+			xp.x = pmsg->xcrossing.x;
+			xp.y = pmsg->xcrossing.y;
+			_widget_window_to_client(wt, &xp);
+
+			pxw->mask = _mouse_state(pmsg->xcrossing.state) | _key_state(pmsg->xcrossing.state);
+
+			psub = GETXDUSUBPROC(pmsg->xcrossing.window);
+			if(psub && psub->sub_on_mouse_leave)
+			{
+				pxw->result = (*psub->sub_on_mouse_leave)(wt, pxw->mask, &xp, psub->sid, psub->delta);
+				if(pxw->result) break;
+			}
+
+			pif = GETXDUDISPATCH(pmsg->xcrossing.window);
+			if (pif && pif->pf_on_mouse_leave)
+			{
+				(*pif->pf_on_mouse_leave)(wt, pxw->mask, &xp);
+			}
+			break;
+		case Expose:
+			pxw = GETXDUSTRUCT(pmsg->xexpose.window);
+			if(!pxw) break;
+			wt = &(pxw->head);
+
+			xr.x = pmsg->xexpose.x;
+			xr.y = pmsg->xexpose.y;
+			xr.w = pmsg->xexpose.width;
+			xr.h = pmsg->xexpose.height;
+
+			psub = GETXDUSUBPROC(pmsg->xexpose.window);
+			if(psub && psub->sub_on_paint)
+			{
+				visual_t rdc;
+				rdc = _create_display_context(wt);
+				pxw->result = (*psub->sub_on_paint)(wt, rdc, &xr, psub->sid, psub->delta);
+				_destroy_context(rdc);
+				if(pxw->result) break;
+			}
+
+			pif = GETXDUDISPATCH(pmsg->xexpose.window);
+			if(pif && pif->pf_on_paint)
+			{
+				visual_t rdc;
+				rdc = _create_display_context(wt);
+				(*pif->pf_on_paint)(wt, rdc, &xr);
+				_destroy_context(rdc);
+			}
+			break;
+		case FocusIn:
+			pxw = GETXDUSTRUCT(pmsg->xfocus.window);
+			if(!pxw) break;
+			if(pxw->disable) break;
+			wt = &(pxw->head);
+
+			psub = GETXDUSUBPROC(pmsg->xfocus.window);
+			if(psub && psub->sub_on_set_focus)
+			{
+				pxw->result = (*psub->sub_on_set_focus)(wt, pmsg->xfocus.window, psub->sid, psub->delta);
+				if(pxw->result) break;
+			}
+
+			pif = GETXDUDISPATCH(pmsg->xfocus.window);
+			if (pif && pif->pf_on_set_focus)
+			{
+				(*pif->pf_on_set_focus)(wt, pmsg->xfocus.window);
+			}
+			break;
+		case FocusOut:
+			pxw = GETXDUSTRUCT(pmsg->xfocus.window);
+			if(!pxw) break;
+			if(pxw->disable) break;
+			wt = &(pxw->head);
+
+			psub = GETXDUSUBPROC(pmsg->xfocus.window);
+			if(psub && psub->sub_on_kill_focus)
+			{
+				pxw->result = (*psub->sub_on_kill_focus)(wt, pmsg->xfocus.window, psub->sid, psub->delta);
+				if(pxw->result) break;
+			}
+
+			pif = GETXDUDISPATCH(pmsg->xfocus.window);
+			if (pif && pif->pf_on_kill_focus)
+			{
+				(*pif->pf_on_kill_focus)(wt, pmsg->xfocus.window);
+			}
+			break;
+		case ResizeRequest:
+			pxw = GETXDUSTRUCT(pmsg->xresizerequest.window);
+			if(!pxw) break;
+			wt = &(pxw->head);
+
+			xs.w = pmsg->xresizerequest.width;
+			xs.h = pmsg->xresizerequest.height;
+
+			psub = GETXDUSUBPROC(pmsg->xresizerequest.window);
+			if(psub && psub->sub_on_size)
+			{
+				pxw->result = (*psub->sub_on_size)(wt, WS_SIZE_RESTORE, &xs, psub->sid, psub->delta);
+				if(pxw->result) break;
+			}
+
+			pif = GETXDUDISPATCH(pmsg->xresizerequest.window);
+			if(pif && pif->pf_on_size)
+			{
+				(*pif->pf_on_size)(wt, WS_SIZE_RESTORE, &xs);
+			}
+			break;
+		case ConfigureNotify:
+			pxw = GETXDUSTRUCT(pmsg->xconfigure.window);
+			if(!pxw) break;
+			wt = &(pxw->head);
+
+			xp.x = pmsg->xconfigure.x;
+			xp.y = pmsg->xconfigure.y;
+
+			psub = GETXDUSUBPROC(pmsg->xconfigure.window);
+			if(pxw->pt.x != pmsg->xconfigure.x || pxw->pt.y != pmsg->xconfigure.y)
+			{
+				if(psub && psub->sub_on_move)
+				{
+					pxw->result = (*psub->sub_on_move)(wt, &xp, psub->sid, psub->delta);
+					pxw->pt.x = xp.x;
+					pxw->pt.y = xp.y;
+					if(pxw->result) break;
+				}
+			}
+
+			pif = GETXDUDISPATCH(pmsg->xconfigure.window);
+			if(pxw->pt.x != pmsg->xconfigure.x || pxw->pt.y != pmsg->xconfigure.y)
+			{
+				if(pif && pif->pf_on_move)
+				{
+					(*pif->pf_on_move)(wt, &xp);
+				}
+				pxw->pt.x = xp.x;
+				pxw->pt.y = xp.y;
+			}
+
+			xs.w = pmsg->xconfigure.width;
+			xs.h = pmsg->xconfigure.height;
+
+			if(pxw->st.w != pmsg->xconfigure.width || pxw->st.h != pmsg->xconfigure.height)
+			{
+				if(psub && psub->sub_on_size)
+				{
+					pxw->result = (*psub->sub_on_size)(wt, WS_SIZE_LAYOUT, &xs, psub->sid, psub->delta);
+					pxw->st.w = pmsg->xconfigure.width;
+					pxw->st.h = pmsg->xconfigure.height;
+					if(pxw->result) break;
+				}
+			}
+
+			if(pxw->st.w != pmsg->xconfigure.width || pxw->st.h != pmsg->xconfigure.height)
+			{
+				if(pif && pif->pf_on_size)
+				{
+					(*pif->pf_on_size)(wt, WS_SIZE_LAYOUT, &xs);
+				}
+				pxw->st.w = pmsg->xconfigure.width;
+				pxw->st.h = pmsg->xconfigure.height;
+			}
+			break;
+		case MapNotify:
+			pxw = GETXDUSTRUCT(pmsg->xmap.window);
+			if(!pxw) break;
+			wt = &(pxw->head);
+
+			psub = GETXDUSUBPROC(pmsg->xmap.window);
+			if(psub && psub->sub_on_show)
+			{
+				pxw->result = (*psub->sub_on_show)(wt, 1, psub->sid, psub->delta);
+				if(pxw->result) break;
+			}
+
+			pif = GETXDUDISPATCH(pmsg->xmap.window);
+			if(pif && pif->pf_on_show)
+			{
+				(*pif->pf_on_show)(wt, 1);
+			}
+			break;
+		case UnmapNotify:
+			pxw = GETXDUSTRUCT(pmsg->xunmap.window);
+			if(!pxw) break;
+			wt = &(pxw->head);
+
+			psub = GETXDUSUBPROC(pmsg->xunmap.window);
+			if(psub && psub->sub_on_show)
+			{
+				pxw->result = (*psub->sub_on_show)(wt, 0, psub->sid, psub->delta);
+				if(pxw->result) break;
+			}
+
+			pif = GETXDUDISPATCH(pmsg->xunmap.window);
+			if(pif && pif->pf_on_show)
+			{
+				(*pif->pf_on_show)(wt, 0);
+			}
+			break;
+		case CreateNotify:
+			break;
+		case DestroyNotify:
+			break;
+		case ClientMessage:
+			pxw = GETXDUSTRUCT(pmsg->xclient.window);
+			if(!pxw) break;
+			if(pxw->disable) break;
+			wt = &(pxw->head);
+
+			if(pmsg->xclient.message_type == g_atoms.wm_command)
+			{
+				psub = GETXDUSUBPROC(pmsg->xclient.window);
+				pif = GETXDUDISPATCH(pmsg->xclient.window);
+
+				if(pmsg->xclient.data.l[0] == IDC_PARENT)
+				{
+					if(psub && psub->sub_on_parent_command)
+					{
+						pxw->result = (*psub->sub_on_parent_command)(wt, (int)(pmsg->xclient.data.l[1]), (vword_t)(pmsg->xclient.data.l[2]), psub->sid, psub->delta);
+						if(pxw->result) break;
+					}
+
+					if(pif && pif->pf_on_parent_command)
+					{
+						(*pif->pf_on_parent_command)(wt, (int)(pmsg->xclient.data.l[1]), (vword_t)(pmsg->xclient.data.l[2]));
+					}
+				}else if(pmsg->xclient.data.l[0] == IDC_CHILD)
+				{
+					if(psub && psub->sub_on_child_command)
+					{
+						pxw->result = (*psub->sub_on_child_command)(wt, (int)(pmsg->xclient.data.l[1]), (vword_t)(pmsg->xclient.data.l[2]), psub->sid, psub->delta);
+						if(pxw->result) break;
+					}
+
+					if(pif && pif->pf_on_child_command)
+					{
+						(*pif->pf_on_child_command)(wt, (int)(pmsg->xclient.data.l[1]), (vword_t)(pmsg->xclient.data.l[2]));
+					}
+				}else if(pmsg->xclient.data.l[0] == IDC_SELF)
+				{
+					if(psub && psub->sub_on_self_command)
+					{
+						pxw->result = (*psub->sub_on_self_command)(wt, (int)(pmsg->xclient.data.l[1]), (vword_t)(pmsg->xclient.data.l[2]), psub->sid, psub->delta);
+						if(pxw->result) break;
+					}
+
+					if(pif && pif->pf_on_self_command)
+					{
+						(*pif->pf_on_self_command)(wt, (int)(pmsg->xclient.data.l[1]), (vword_t)(pmsg->xclient.data.l[2]));
+					}
+				}else
+				{
+					if(psub && psub->sub_on_menu_command)
+					{
+						pxw->result = (*psub->sub_on_menu_command)(wt, (int)(pmsg->xclient.data.l[1]), (int)(pmsg->xclient.data.l[0]), (vword_t)(pmsg->xclient.data.l[2]), psub->sid, psub->delta);
+						if(pxw->result) break;
+					}
+
+					if(pif && pif->pf_on_menu_command)
+					{
+						(*pif->pf_on_menu_command)(wt, (int)(pmsg->xclient.data.l[1]), (int)(pmsg->xclient.data.l[0]), (vword_t)(pmsg->xclient.data.l[2]));
+					}
+				}
+				break;
+			}
+
+			if(pmsg->xclient.message_type == g_atoms.wm_notice)
+			{
+				psub = GETXDUSUBPROC(pmsg->xclient.window);
+				if(psub && psub->sub_on_notice)
+				{
+					pxw->result = (*psub->sub_on_notice)(wt, (NOTICE *)(pmsg->xclient.data.l[2]), psub->sid, psub->delta);
+					if(pxw->result) break;
+				}
+
+				pif = GETXDUDISPATCH(pmsg->xclient.window);
+				if (pif && pif->pf_on_notice)
+				{
+					(*pif->pf_on_notice)(wt, (NOTICE *)(pmsg->xclient.data.l[2]));
+				}
+				break;
+			}
+
+			if(pmsg->xclient.message_type == g_atoms.wm_scroll)
+			{
+				psub = GETXDUSUBPROC(pmsg->xclient.window);
+				pif = GETXDUDISPATCH(pmsg->xclient.window);
+
+				if(pmsg->xclient.data.l[0] == 1)
+				{
+					if(psub && psub->sub_on_scroll)
+					{
+						pxw->result = (*psub->sub_on_scroll)(wt, (bool_t)1, (int)(pmsg->xclient.data.l[1]), psub->sid, psub->delta);
+						if(pxw->result) break;
+					}
+
+					if(pif && pif->pf_on_scroll)
+					{
+						(*pif->pf_on_scroll)(wt, (bool_t)1, (int)(pmsg->xclient.data.l[1]));
+					}
+				}else
+				{
+					if(psub && psub->sub_on_scroll)
+					{
+						pxw->result = (*psub->sub_on_scroll)(wt, (bool_t)0, (int)(pmsg->xclient.data.l[1]), psub->sid, psub->delta);
+						if(pxw->result) break;
+					}
+
+					if(pif && pif->pf_on_scroll)
+					{
+						(*pif->pf_on_scroll)(wt, (bool_t)0, (int)(pmsg->xclient.data.l[1]));
+					}
+				}
+				break;
+			}
+
+			if(pmsg->xclient.message_type == g_atoms.net_active_window)
+			{
+				psub = GETXDUSUBPROC(pmsg->xclient.window);
+				if(psub && psub->sub_on_activate)
+				{
+					pxw->result = (*psub->sub_on_activate)(wt, 1, psub->sid, psub->delta);
+					if(pxw->result) break;
+				}
+
+				pif = GETXDUDISPATCH(pmsg->xclient.window);
+				if(pif && pif->pf_on_activate)
+				{
+					(*pif->pf_on_activate)(wt, 1);
+				}
+				break;
+			}
+
+			if(pmsg->xclient.message_type == g_atoms.wm_protocols && pmsg->xclient.data.l[0] == g_atoms.wm_take_focus)
+			{
+				wt = &(pxw->head);
+				_widget_set_focus(wt);
+				break;
+			}
+
+			if(pmsg->xclient.message_type == g_atoms.wm_protocols && pmsg->xclient.data.l[0] == g_atoms.wm_delete_window)
+			{
+				wt = &(pxw->head);
+				_widget_close(wt, 0);
+				break;
+			}
+
+			if(pmsg->xclient.message_type == g_atoms.wm_wchar)
+			{
+				psub = GETXDUSUBPROC(pmsg->xclient.window);
+				if(psub && psub->sub_on_wchar)
+				{
+					pxw->result = (*psub->sub_on_wchar)(wt, (wchar_t)(pmsg->xclient.data.l[0]), psub->sid, psub->delta);
+					if(pxw->result) break;
+				}
+
+				if(pif && pif->pf_on_wchar)
+				{
+					wt = &(pxw->head);
+					(*pif->pf_on_wchar)(wt, (wchar_t)(pmsg->xclient.data.l[0]));
+				}
+				break;
+			}
+
+			break;
+	}
+
+	return 0;
+}
+
+static void _message_fetch(XEvent* pmsg, Window win)
+{
+	XWindowAttributes attr = {0};
+	Bool rt;
+	int x, y;
+	Window cld;
+
+    if(win)
+	{
+		XGetWindowAttributes(g_display, win, &attr);
+		XWindowEvent(g_display, win, attr.your_event_mask, pmsg);
+
+		return;
+	}
+
+    XNextEvent(g_display, pmsg);
+}
+
+static bool_t _message_peek(XEvent* pmsg)
+{
+	if(!XPending(g_display))
+		return 0;
+
+    XPeekEvent(g_display, pmsg);
+	
+	return 1;
+}
+
 widget_t _widget_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, widget_t wparent, const if_dispatch_t* pev)
 {
 	X11_widget_t* pxw_par = (wparent)? TypePtrFromHead(X11_widget_t, wparent) : NULL;
@@ -718,15 +1459,15 @@ dword_t _widget_get_style(widget_t wt)
 	return (pxw)? pxw->style : 0;
 }
 
-void _widget_set_accel(widget_t wt, const acl_table_t* pacl, int n)
+void _widget_set_accel(widget_t wt, const accel_table_t* pacl, int n)
 {
 	X11_widget_t* pxw = TypePtrFromHead(X11_widget_t, wt);
-	acl_table_t* pa;
+	accel_table_t* pa;
 
 	if(pxw->acl) xmem_free(pxw->acl);
 
-	pa = (acl_table_t*)xmem_alloc((n + 1) * sizeof(acl_table_t));
-	xmem_copy((void*)pa, (void*)pacl, n * sizeof(acl_table_t));
+	pa = (accel_table_t*)xmem_alloc((n + 1) * sizeof(accel_table_t));
+	xmem_copy((void*)pa, (void*)pacl, n * sizeof(accel_table_t));
 
 	pa[n].vir = 0, pa[n].key = 0, pa[n].cmd = 0;
 	pxw->acl = pa;
@@ -1268,13 +2009,13 @@ bool_t _widget_key_state(widget_t wt, int ks)
 	switch (ks)
 	{
 	case KS_WITH_SHIFT:
-		if(pxw->keymsk & ShiftMask) return 1;
+		if(pxw->mask & ShiftMask) return 1;
 		break;
 	case KS_WITH_CONTROL:
-		if(pxw->keymsk & ControlMask) return 1;
+		if(pxw->mask & ControlMask) return 1;
 		break;
 	case KS_WITH_ALT:
-		if(pxw->keymsk & Mod1Mask) return 1;
+		if(pxw->mask & Mod1Mask) return 1;
 		break;
 	}
 
@@ -1926,619 +2667,6 @@ void _widget_noti_xpen(widget_t wt, const xpen_t* pxp)
 	{
 		(*pif->pf_on_xpen)(wt, pxp);
 	}
-}
-/*******************************************************************************************/
-
-static bool_t _message_translate(XEvent* pmsg)
-{
-	X11_widget_t* pxw;
-	acl_table_t* pac;
-	char keystr[5] = {0};
-	KeySym keysys = 0;
-	Status status = 0;
-	unsigned int state;
-	int i, keys = 0;
-	char ch = 0;
-	char* pch = NULL;
-	char kch = 0;
-	wchar_t wc = 0;
-
-	XClientMessageEvent ev = {0};
-
-	if(pmsg->type == KeyPress)
-	{
-		if(XFilterEvent(pmsg, pmsg->xkey.window))
-			return 0;
-
-		pxw = GETXDUSTRUCT(pmsg->xkey.window);
-		if(!pxw) return 0;
-
-		if(pxw->xic)
-			keys = XmbLookupString(pxw->xic, &(pmsg->xkey), keystr, 4, &keysys, &status);
-		else
-			keys = XLookupString(&(pmsg->xkey), keystr, 4, &keysys, &status);
-
-		if(!keys)
-		{
-			return 0;
-		}
-		//if(!IsFunctionKey(keysys) && !IsMiscFunctionKey(keysys) && !IsCursorKey(keysys)
-		
-		//if(pmsg->xkey.state & ShiftMask) state |= KS_WITH_SHIFT;
-		if(pmsg->xkey.state & ControlMask) state |= KS_WITH_CONTROL;
-		if(pmsg->xkey.state & Mod1Mask) state |= KS_WITH_ALT;
-
-		switch(keys)
-		{
-		case 1:
-			ch = keystr[0];
-			keysys = XLookupKeysym(&(pmsg->xkey), 0);
-			break;
-		case 2:
-			ch = keystr[1];
-			keysys = XLookupKeysym(&(pmsg->xkey), 1);
-			break;
-		case 3:
-			ch = keystr[2];
-			keysys = XLookupKeysym(&(pmsg->xkey), 2);
-			break;
-		default:
-			ch = keystr[3];
-			keysys = XLookupKeysym(&(pmsg->xkey), 3);
-			break;
-		}
-
-		if(pxw->acl)
-		{
-			pch = XKeysymToString(keysys);
-			kch = (pch) ? *pch : 0;
-
-			pac = (acl_table_t*)pxw->acl;
-			i = 0;
-			while (pac[i].vir != 0 && pac[i].key != 0)
-			{
-				if (pac[i].vir == state && pac[i].key == kch)
-				{
-					ev.type = ClientMessage;
-					ev.serial = 0;
-					ev.send_event = 1;
-					ev.display = g_display;
-					ev.window = pmsg->xkey.window;
-					ev.message_type = g_atoms.wm_command;
-					ev.format = 32;
-					ev.data.l[0] = pxw->uid;
-					ev.data.l[1] = pac[i].cmd;
-					ev.data.l[2] = 0;
-					ev.data.l[3] = ev.data.l[4] = 0;
-
-					XSendEvent(g_display, pmsg->xkey.window, False, SubstructureNotifyMask, (XEvent *)&ev);
-
-					return 1;
-				}
-
-				i++;
-			}
-		}
-
-		mbtowc(&wc, keystr, 1);
-
-		ev.type = ClientMessage;
-		ev.serial = 0;
-		ev.send_event = 1;
-		ev.display = g_display;
-		ev.window = pmsg->xkey.window;
-		ev.message_type = g_atoms.wm_wchar;
-		ev.format = 32;
-		ev.data.l[0] = (long)wc;
-
-		XSendEvent(g_display, pmsg->xkey.window, False, SubstructureNotifyMask, (XEvent *)&ev);
-	}else if(pmsg->type == KeyRelease)
-	{
-		if(XFilterEvent(pmsg, pmsg->xkey.window))
-			return 0;
-	}
-
-    return 0;
-}
-
-static int _message_dispatch(XEvent* pmsg)
-{
-	X11_widget_t* pxw;
-	widget_t wt;
-	if_dispatch_t* pif;
-	
-	switch(pmsg->type)
-	{
-		case KeymapNotify:
-            XRefreshKeyboardMapping(&pmsg->xmapping);
-            break;
-		case KeyPress:
-			pxw = GETXDUSTRUCT(pmsg->xkey.window);
-			if(!pxw) break;
-			if(pxw->disable) break;
-
-			pif = GETXDUDISPATCH(pmsg->xkey.window);
-			if(pif && pif->pf_on_keydown)
-			{
-				pxw->keymsk = 0;
-				if(pmsg->xkey.state & ShiftMask) pxw->keymsk |= KS_WITH_SHIFT;
-				if(pmsg->xkey.state & ControlMask) pxw->keymsk |= KS_WITH_CONTROL;
-				if(pmsg->xkey.state & Mod1Mask) pxw->keymsk |= KS_WITH_ALT;
-				
-				KeySym key;
-				key = XLookupKeysym(&(pmsg->xkey), 0);
-				wt = &(pxw->head);
-				(*pif->pf_on_keydown)(wt, pxw->keymsk, (int)(key));
-			}
-			break;
-		case KeyRelease:
-			pxw = GETXDUSTRUCT(pmsg->xkey.window);
-			if(!pxw) break;
-			if(pxw->disable) break;
-
-			pif = GETXDUDISPATCH(pmsg->xkey.window);
-			if(pif && pif->pf_on_keyup)
-			{
-				pxw->keymsk = 0;
-				//if(pmsg->xkey.state & ShiftMask) pxw->keymsk |= KS_WITH_SHIFT;
-				if(pmsg->xkey.state & ControlMask) pxw->keymsk |= KS_WITH_CONTROL;
-				if(pmsg->xkey.state & Mod1Mask) pxw->keymsk |= KS_WITH_ALT;
-
-				KeySym key;
-				key = XLookupKeysym(&(pmsg->xkey), 0);
-				wt = &(pxw->head);
-				(*pif->pf_on_keyup)(wt, pxw->keymsk, (int)(key));
-			}
-			break;
-		case ButtonPress:
-		pxw = GETXDUSTRUCT(pmsg->xbutton.window);
-			if(!pxw) break;
-			if(pxw->disable) break;
-
-			pif = GETXDUDISPATCH(pmsg->xbutton.window);
-			if(pmsg->xbutton.button == Button1)
-			{
-				if (pif && pif->pf_on_lbutton_down)
-				{
-					xpoint_t xp;
-					xp.x = pmsg->xbutton.x;
-					xp.y = pmsg->xbutton.y;
-
-					wt = &(pxw->head);
-					_widget_window_to_client(wt, &xp);
-
-					(*pif->pf_on_lbutton_down)(wt, &xp);
-				}
-			}else if(pmsg->xbutton.button == Button3)
-			{
-				if (pif && pif->pf_on_rbutton_down)
-				{
-					xpoint_t xp;
-					xp.x = pmsg->xbutton.x;
-					xp.y = pmsg->xbutton.y;
-
-					wt = &(pxw->head);
-					_widget_window_to_client(wt, &xp);
-
-					(*pif->pf_on_rbutton_down)(wt, &xp);
-				}
-			}
-			break;
-		case ButtonRelease:
-			pxw = GETXDUSTRUCT(pmsg->xbutton.window);
-			if(!pxw) break;
-			if(pxw->disable) break;
-
-			pif = GETXDUDISPATCH(pmsg->xbutton.window);
-			if(pmsg->xbutton.button == Button1)
-			{
-				if (pif && pif->pf_on_lbutton_up)
-				{
-					xpoint_t xp;
-					xp.x = pmsg->xbutton.x;
-					xp.y = pmsg->xbutton.y;
-
-					wt = &(pxw->head);
-					_widget_window_to_client(wt, &xp);
-
-					(*pif->pf_on_lbutton_up)(wt, &xp);
-				}
-			}else if(pmsg->xbutton.button == Button3)
-			{
-				if (pif && pif->pf_on_rbutton_up)
-				{
-					xpoint_t xp;
-					xp.x = pmsg->xbutton.x;
-					xp.y = pmsg->xbutton.y;
-
-					wt = &(pxw->head);
-					_widget_window_to_client(wt, &xp);
-
-					(*pif->pf_on_rbutton_up)(wt, &xp);
-				}
-			}else if(pmsg->xbutton.button == Button4)
-			{
-				if (pif && pif->pf_on_wheel)
-				{
-					wt = &(pxw->head);
-					(*pif->pf_on_wheel)(wt, 0, DEFAULT_SCROLL_DELTA);
-				}
-			}else if(pmsg->xbutton.button == Button5)
-			{
-				if (pif && pif->pf_on_wheel)
-				{
-					wt = &(pxw->head);
-					(*pif->pf_on_wheel)(wt, 0, -DEFAULT_SCROLL_DELTA);
-				}
-			}
-			break;
-		case MotionNotify:
-			pxw = GETXDUSTRUCT(pmsg->xmotion.window);
-			if(!pxw) break;
-			if(pxw->disable) break;
-
-			pif = GETXDUDISPATCH(pmsg->xmotion.window);
-			if (pif && pif->pf_on_mouse_move)
-			{
-				pxw->keymsk = 0;
-				if(pmsg->xmotion.state & ShiftMask) pxw->keymsk |= KS_WITH_SHIFT;
-				if(pmsg->xmotion.state & ControlMask) pxw->keymsk |= KS_WITH_CONTROL;
-				if(pmsg->xmotion.state & Button1Mask) pxw->keymsk |= MS_WITH_LBUTTON;
-				if(pmsg->xmotion.state & Button3Mask) pxw->keymsk |= MS_WITH_RBUTTON;
-
-				xpoint_t xp;
-				xp.x = pmsg->xmotion.x;
-				xp.y = pmsg->xmotion.y;
-
-				wt = &(pxw->head);
-				_widget_window_to_client(wt, &xp);
-
-				(*pif->pf_on_mouse_move)(wt, pxw->keymsk, &xp);
-			}
-			break;
-		case EnterNotify:
-			pxw = GETXDUSTRUCT(pmsg->xcrossing.window);
-			if(!pxw) break;
-			if(pxw->disable) break;
-
-			pif = GETXDUDISPATCH(pmsg->xcrossing.window);
-			if (pif && pif->pf_on_mouse_move)
-			{
-				pxw->keymsk = 0;
-				if(pmsg->xcrossing.state & ShiftMask) pxw->keymsk |= KS_WITH_SHIFT;
-				if(pmsg->xcrossing.state & ControlMask) pxw->keymsk |= KS_WITH_CONTROL;
-				if(pmsg->xcrossing.state & Button1Mask) pxw->keymsk |= MS_WITH_LBUTTON;
-				if(pmsg->xcrossing.state & Button3Mask) pxw->keymsk |= MS_WITH_RBUTTON;
-
-				xpoint_t xp;
-				xp.x = pmsg->xcrossing.x;
-				xp.y = pmsg->xcrossing.y;
-
-				wt = &(pxw->head);
-				_widget_window_to_client(wt, &xp);
-
-				(*pif->pf_on_mouse_move)(wt, pxw->keymsk, &xp);
-			}
-
-			if (pif && pif->pf_on_mouse_hover)
-			{
-				pxw->keymsk = 0;
-				if(pmsg->xcrossing.state & ShiftMask) pxw->keymsk |= KS_WITH_SHIFT;
-				if(pmsg->xcrossing.state & ControlMask) pxw->keymsk |= KS_WITH_CONTROL;
-				if(pmsg->xcrossing.state & Button1Mask) pxw->keymsk |= MS_WITH_LBUTTON;
-				if(pmsg->xcrossing.state & Button3Mask) pxw->keymsk |= MS_WITH_RBUTTON;
-
-				xpoint_t xp;
-				xp.x = pmsg->xcrossing.x;
-				xp.y = pmsg->xcrossing.y;
-
-				wt = &(pxw->head);
-				_widget_window_to_client(wt, &xp);
-
-				(*pif->pf_on_mouse_hover)(wt, pxw->keymsk, &xp);
-			}
-			break;
-		case LeaveNotify:
-			pxw = GETXDUSTRUCT(pmsg->xcrossing.window);
-			if(!pxw) break;
-			if(pxw->disable) break;
-
-			pif = GETXDUDISPATCH(pmsg->xcrossing.window);
-			if (pif && pif->pf_on_mouse_move)
-			{
-				pxw->keymsk = 0;
-				if(pmsg->xcrossing.state & ShiftMask) pxw->keymsk |= KS_WITH_SHIFT;
-				if(pmsg->xcrossing.state & ControlMask) pxw->keymsk |= KS_WITH_CONTROL;
-				if(pmsg->xcrossing.state & Button1Mask) pxw->keymsk |= MS_WITH_LBUTTON;
-				if(pmsg->xcrossing.state & Button3Mask) pxw->keymsk |= MS_WITH_RBUTTON;
-
-				xpoint_t xp;
-				xp.x = pmsg->xcrossing.x;
-				xp.y = pmsg->xcrossing.y;
-
-				wt = &(pxw->head);
-				_widget_window_to_client(wt, &xp);
-
-				(*pif->pf_on_mouse_move)(wt, pxw->keymsk, &xp);
-			}
-
-			if (pif && pif->pf_on_mouse_leave)
-			{
-				pxw->keymsk = 0;
-				if(pmsg->xcrossing.state & ShiftMask) pxw->keymsk |= KS_WITH_SHIFT;
-				if(pmsg->xcrossing.state & ControlMask) pxw->keymsk |= KS_WITH_CONTROL;
-				if(pmsg->xcrossing.state & Mod1Mask) pxw->keymsk |= MS_WITH_LBUTTON;
-				if(pmsg->xcrossing.state & Mod2Mask) pxw->keymsk |= MS_WITH_RBUTTON;
-
-				xpoint_t xp;
-				xp.x = pmsg->xcrossing.x;
-				xp.y = pmsg->xcrossing.y;
-
-				wt = &(pxw->head);
-				_widget_window_to_client(wt, &xp);
-
-				(*pif->pf_on_mouse_leave)(wt, pxw->keymsk, &xp);
-			}
-			break;
-		case Expose:
-			pxw = GETXDUSTRUCT(pmsg->xexpose.window);
-			if(!pxw) break;
-
-			pif = GETXDUDISPATCH(pmsg->xexpose.window);
-			if(pif && pif->pf_on_paint)
-			{
-				wt = &(pxw->head);
-
-				visual_t rdc;
-				rdc = _create_display_context(wt);
-
-				xrect_t xr = {0};
-				xr.x = pmsg->xexpose.x;
-				xr.y = pmsg->xexpose.y;
-				xr.w = pmsg->xexpose.width;
-				xr.h = pmsg->xexpose.height;
-
-				(*pif->pf_on_paint)(wt, rdc, &xr);
-				
-				_destroy_context(rdc);
-			}
-			break;
-		case FocusIn:
-			pxw = GETXDUSTRUCT(pmsg->xfocus.window);
-			if(!pxw) break;
-			if(pxw->disable) break;
-
-			pif = GETXDUDISPATCH(pmsg->xfocus.window);
-			if (pif && pif->pf_on_set_focus)
-			{
-				wt = &(pxw->head);
-				(*pif->pf_on_set_focus)(wt, pmsg->xfocus.window);
-			}
-			break;
-		case FocusOut:
-			pxw = GETXDUSTRUCT(pmsg->xfocus.window);
-			if(!pxw) break;
-			if(pxw->disable) break;
-
-			pif = GETXDUDISPATCH(pmsg->xfocus.window);
-			if (pif && pif->pf_on_kill_focus)
-			{
-				wt = &(pxw->head);
-				(*pif->pf_on_kill_focus)(wt, pmsg->xfocus.window);
-			}
-			break;
-		case ResizeRequest:
-			pxw = GETXDUSTRUCT(pmsg->xresizerequest.window);
-			if(!pxw) break;
-
-			pif = GETXDUDISPATCH(pmsg->xresizerequest.window);
-			if(pif && pif->pf_on_size)
-			{
-				xsize_t st;
-				st.w = pmsg->xresizerequest.width;
-				st.h = pmsg->xresizerequest.height;
-
-				wt = &(pxw->head);
-				(*pif->pf_on_size)(wt, WS_SIZE_LAYOUT, &st);
-			}
-			break;
-		case ConfigureNotify:
-			pxw = GETXDUSTRUCT(pmsg->xconfigure.window);
-			if(!pxw) break;
-
-			pif = GETXDUDISPATCH(pmsg->xconfigure.window);
-			if(pxw->pt.x != pmsg->xconfigure.x || pxw->pt.y != pmsg->xconfigure.y)
-			{
-				if(pif && pif->pf_on_move)
-				{
-					xpoint_t xp;
-					xp.x = pmsg->xconfigure.x;
-					xp.y = pmsg->xconfigure.y;
-					
-					wt = &(pxw->head);
-					(*pif->pf_on_move)(wt, &xp);
-				}
-				pxw->pt.x = pmsg->xconfigure.x;
-				pxw->pt.y = pmsg->xconfigure.y;
-			}
-
-			if(pxw->st.w != pmsg->xconfigure.width || pxw->st.h != pmsg->xconfigure.height)
-			{
-				if(pif && pif->pf_on_size)
-				{
-					xsize_t st;
-					st.w = pmsg->xconfigure.width;
-					st.h = pmsg->xconfigure.height;
-
-					wt = &(pxw->head);
-					(*pif->pf_on_size)(wt, WS_SIZE_RESTORE, &st);
-				}
-				pxw->st.w = pmsg->xconfigure.width;
-				pxw->st.h = pmsg->xconfigure.height;
-			}
-			break;
-		case MapNotify:
-			pxw = GETXDUSTRUCT(pmsg->xmap.window);
-			if(!pxw) break;
-
-			pif = GETXDUDISPATCH(pmsg->xmap.window);
-			if(pif && pif->pf_on_show)
-			{
-				wt = &(pxw->head);
-				(*pif->pf_on_show)(wt, 1);
-			}
-			break;
-		case UnmapNotify:
-			pxw = GETXDUSTRUCT(pmsg->xunmap.window);
-			if(!pxw) break;
-
-			pif = GETXDUDISPATCH(pmsg->xunmap.window);
-			if(pif && pif->pf_on_show)
-			{
-				wt = &(pxw->head);
-				(*pif->pf_on_show)(wt, 0);
-			}
-			break;
-		case CreateNotify:
-			break;
-		case DestroyNotify:
-			break;
-		case ClientMessage:
-			pxw = GETXDUSTRUCT(pmsg->xclient.window);
-			if(!pxw) break;
-			if(pxw->disable) break;
-
-			pif = GETXDUDISPATCH(pmsg->xclient.window);
-			if(pmsg->xclient.message_type == g_atoms.wm_command)
-			{
-				if(pmsg->xclient.data.l[0] == IDC_PARENT)
-				{
-					if(pif && pif->pf_on_parent_command)
-					{
-						wt = &(pxw->head);
-						(*pif->pf_on_parent_command)(wt, (int)(pmsg->xclient.data.l[1]), (vword_t)(pmsg->xclient.data.l[2]));
-					}
-				}else if(pmsg->xclient.data.l[0] == IDC_CHILD)
-				{
-					if(pif && pif->pf_on_child_command)
-					{
-						wt = &(pxw->head);
-						(*pif->pf_on_child_command)(wt, (int)(pmsg->xclient.data.l[1]), (vword_t)(pmsg->xclient.data.l[2]));
-					}
-				}else if(pmsg->xclient.data.l[0] == IDC_SELF)
-				{
-					if(pif && pif->pf_on_self_command)
-					{
-						wt = &(pxw->head);
-						(*pif->pf_on_self_command)(wt, (int)(pmsg->xclient.data.l[1]), (vword_t)(pmsg->xclient.data.l[2]));
-					}
-				}else
-				{
-					if(pif && pif->pf_on_menu_command)
-					{
-						wt = &(pxw->head);
-						(*pif->pf_on_menu_command)(wt, (int)(pmsg->xclient.data.l[1]), (int)(pmsg->xclient.data.l[0]), (vword_t)(pmsg->xclient.data.l[2]));
-					}
-				}
-				break;
-			}
-
-			if(pmsg->xclient.message_type == g_atoms.wm_notice)
-			{
-				if (pif && pif->pf_on_notice)
-				{
-					wt = &(pxw->head);
-					(*pif->pf_on_notice)(wt, (NOTICE *)(pmsg->xclient.data.l[2]));
-				}
-				break;
-			}
-
-			if(pmsg->xclient.message_type == g_atoms.wm_scroll)
-			{
-				if(pmsg->xclient.data.l[0] == 1)
-				{
-					if(pif && pif->pf_on_scroll)
-					{
-						wt = &(pxw->head);
-						(*pif->pf_on_scroll)(wt, (bool_t)1, (int)(pmsg->xclient.data.l[1]));
-					}
-				}else
-				{
-					if(pif && pif->pf_on_scroll)
-					{
-						wt = &(pxw->head);
-						(*pif->pf_on_scroll)(wt, (bool_t)0, (int)(pmsg->xclient.data.l[1]));
-					}
-				}
-				break;
-			}
-
-			if(pmsg->xclient.message_type == g_atoms.net_active_window)
-			{
-				if(pif && pif->pf_on_activate)
-				{
-					wt = &(pxw->head);
-					(*pif->pf_on_activate)(wt, 1);
-				}
-				break;
-			}
-
-			if(pmsg->xclient.message_type == g_atoms.wm_protocols && pmsg->xclient.data.l[0] == g_atoms.wm_take_focus)
-			{
-				wt = &(pxw->head);
-				_widget_set_focus(wt);
-				break;
-			}
-
-			if(pmsg->xclient.message_type == g_atoms.wm_protocols && pmsg->xclient.data.l[0] == g_atoms.wm_delete_window)
-			{
-				wt = &(pxw->head);
-				_widget_close(wt, 0);
-				break;
-			}
-
-			if(pmsg->xclient.message_type == g_atoms.wm_wchar)
-			{
-				if(pif && pif->pf_on_wchar)
-				{
-					wt = &(pxw->head);
-					(*pif->pf_on_wchar)(wt, (wchar_t)(pmsg->xclient.data.l[0]));
-				}
-				break;
-			}
-
-			break;
-	}
-
-	return 0;
-}
-
-static void _message_fetch(XEvent* pmsg, Window win)
-{
-	XWindowAttributes attr = {0};
-	Bool rt;
-	int x, y;
-	Window cld;
-
-    if(win)
-	{
-		XGetWindowAttributes(g_display, win, &attr);
-		XWindowEvent(g_display, win, attr.your_event_mask, pmsg);
-
-		return;
-	}
-
-    XNextEvent(g_display, pmsg);
-}
-
-static bool_t _message_peek(XEvent* pmsg)
-{
-	if(!XPending(g_display))
-		return 0;
-
-    XPeekEvent(g_display, pmsg);
-	
-	return 1;
 }
 
 int	_widget_do_main(widget_t wt)

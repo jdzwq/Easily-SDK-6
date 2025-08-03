@@ -1,6 +1,6 @@
 ﻿
 #include <xdk.h>
-#include <xgc.h>
+#include <xdg.h>
 
 #ifdef _OS_WINDOWS
 #include <conio.h>

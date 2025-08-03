@@ -182,7 +182,7 @@ widget_t firetime_create(widget_t widget, const xrect_t* pxr)
 
 	ev.sub_on_keydown = sub_editbox_keydown;
 	ev.sub_on_self_command = sub_editbox_self_command;
-	ev.sub_on_unsubbing = sub_editbox_unsubbing;
+	ev.sub_on_unsubbed = sub_editbox_unsubbing;
 	ev.sub_on_show = sub_editbox_show;
 
 	editor = editbox_create(widget, WD_STYLE_CONTROL | WD_STYLE_EDITOR, pxr);
@@ -205,7 +205,7 @@ widget_t firetime_create(widget_t widget, const xrect_t* pxr)
 	xmem_zero((void*)&ev, sizeof(if_subproc_t));
 
 	ev.sub_on_self_command = sub_timebox_self_command;
-	ev.sub_on_unsubbing = sub_timebox_unsubbing;
+	ev.sub_on_unsubbed = sub_timebox_unsubbing;
 
 	widget_set_subproc(timebox, IDS_TIMEBOX, &ev);
 	widget_set_subproc_delta(timebox, IDS_TIMEBOX, (vword_t)editor);

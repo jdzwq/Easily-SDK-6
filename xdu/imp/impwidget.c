@@ -400,13 +400,13 @@ void widget_destroy_caret(widget_t wt)
 	(pif->pf_widget_destroy_caret)(wt);
 }
 
-void widget_show_caret(widget_t wt, int x, int y, bool_t b)
+void widget_show_caret(widget_t wt, int x, int y)
 {
 	if_widget_t* pif;
 
 	pif = PROCESS_WIDGET_INTERFACE;
 
-	(pif->pf_widget_show_caret)(wt, x, y, b);
+	(pif->pf_widget_show_caret)(wt, x, y);
 }
 
 void widget_set_focus(widget_t wt)
@@ -839,7 +839,7 @@ void  widget_get_point(widget_t wt, xpoint_t* ppt)
 	(pif->pf_widget_get_point)(wt, ppt);
 }
 
-void widget_set_color_mode(widget_t wt, const clr_mod_t* pclr)
+void widget_set_color_mode(widget_t wt, const color_mod_t* pclr)
 {
 	if_widget_t* pif;
 
@@ -848,7 +848,7 @@ void widget_set_color_mode(widget_t wt, const clr_mod_t* pclr)
 	(pif->pf_widget_set_color_mode)(wt, pclr);
 }
 
-void widget_get_color_mode(widget_t wt, clr_mod_t* pclr)
+void widget_get_color_mode(widget_t wt, color_mod_t* pclr)
 {
 	if_widget_t* pif;
 

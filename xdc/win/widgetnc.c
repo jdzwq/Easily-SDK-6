@@ -102,7 +102,7 @@ static void _WidgetDrawEdge(widget_t wt, visual_t rdc)
 	border_t bd = { 0 };
 	dword_t ws;
 	xbrush_t xb;
-	clr_mod_t clrs;
+	color_mod_t clrs;
 	xrect_t rtWnd, rtScr;
 
 	drawing_interface ifv = {0};
@@ -140,7 +140,7 @@ static void _WidgetDrawHScroll(widget_t wt, visual_t rdc)
 
 	xbrush_t xb = { 0 };
 	xpen_t xp = { 0 };
-	clr_mod_t clrs;
+	color_mod_t clrs;
 
 	drawing_interface ifv = {0};
 
@@ -233,7 +233,7 @@ static void _WidgetDrawVScroll(widget_t wt, visual_t rdc)
 
 	xbrush_t xb = { 0 };
 	xpen_t xp = { 0 };
-	clr_mod_t clrs;
+	color_mod_t clrs;
 
 	drawing_interface ifv = {0};
 
@@ -356,7 +356,7 @@ static void _WidgetDrawTitleBar(widget_t wt, visual_t rdc)
 	tchar_t txt[RES_LEN + 1] = { 0 };
 	int len;
 
-	clr_mod_t clrs;
+	color_mod_t clrs;
 	xbrush_t xb_shadow = { 0 };
 	xpen_t xp_shadow = { 0 };
 	tchar_t aa[8] = { 0 };
@@ -568,7 +568,7 @@ static void _WidgetDrawMenuBar(widget_t wt, visual_t rdc)
 	xfont_t xf = { 0 };
 	xface_t xa = { 0 };
 	xcolor_t xc = { 0 };
-	clr_mod_t clrs;
+	color_mod_t clrs;
 
 	link_t_ptr ptr, ilk;
 	const tchar_t* text;

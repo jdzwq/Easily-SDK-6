@@ -46,49 +46,47 @@ static void _adjust_rect(CGRect* prt, int src_width, int src_height, const tchar
 {
 	if (xscmp(horz_align, GDI_ATTR_TEXT_ALIGN_NEAR) == 0 && xscmp(vert_align, GDI_ATTR_TEXT_ALIGN_NEAR) == 0)
 	{
-		prt->size.width = (prt->size.width < src_width) ? prt->size.width : src_width;
-		prt->size.height = (prt->size.height < src_height) ? prt->size.height : src_height;
-	}
-	else if (xscmp(horz_align, GDI_ATTR_TEXT_ALIGN_FAR) == 0 && xscmp(vert_align,GDI_ATTR_TEXT_ALIGN_FAR) == 0)
-	{
-		prt->origin.x = (prt->size.width < src_width) ? prt->origin.x : (prt->origin.x + prt->size.width - src_width);
-		prt->size.height = (prt->size.height < src_height) ? prt->size.height : src_height;
+		prt->origin.y += (prt->size.height - src_height);
 	}
 	else if (xscmp(horz_align,GDI_ATTR_TEXT_ALIGN_NEAR) == 0 && xscmp(vert_align,GDI_ATTR_TEXT_ALIGN_FAR) == 0)
 	{
-		prt->size.width = (prt->size.width < src_width) ? prt->size.width : src_width;
-		prt->origin.y = (prt->size.height < src_height) ? prt->origin.y : (prt->origin.y - prt->size.height + src_height);
+		NOP;
 	}
-	else if (xscmp(horz_align,GDI_ATTR_TEXT_ALIGN_FAR) == 0 && xscmp(vert_align,GDI_ATTR_TEXT_ALIGN_FAR) == 0)
+	else if (xscmp(horz_align,GDI_ATTR_TEXT_ALIGN_FAR) == 0 && xscmp(vert_align,GDI_ATTR_TEXT_ALIGN_NEAR) == 0)
 	{
-		prt->origin.x = (prt->size.width < src_width) ? prt->origin.x : (prt->origin.x + prt->size.width - src_width);
-		prt->origin.y = (prt->size.height < src_height) ? prt->origin.y : (prt->origin.y - prt->size.height + src_height);
+		prt->origin.x += (prt->size.width - src_width);
+		prt->origin.y += (prt->size.height - src_height);
 	}
-	else if (xscmp(horz_align,GDI_ATTR_TEXT_ALIGN_CENTER) == 0 && xscmp(vert_align,GDI_ATTR_TEXT_ALIGN_CENTER) == 0)
+	else if (xscmp(horz_align, GDI_ATTR_TEXT_ALIGN_FAR) == 0 && xscmp(vert_align,GDI_ATTR_TEXT_ALIGN_FAR) == 0)
 	{
-		if (prt->size.width > src_width)
-		{
-			prt->origin.x = prt->origin.x + (prt->size.width - src_width) / 2;
-			prt->size.width = src_width;
-		}
-		if (prt->size.height > src_height)
-		{
-			prt->origin.y = prt->origin.y - (prt->size.height - src_height) / 2;
-			prt->size.height = src_height;
-		}
+		prt->origin.x += (prt->size.width - src_width);
 	}
 	else if (xscmp(horz_align,GDI_ATTR_TEXT_ALIGN_NEAR) == 0 && xscmp(vert_align,GDI_ATTR_TEXT_ALIGN_CENTER) == 0)
 	{
-		prt->size.width = (prt->size.width < src_width) ? prt->size.width : src_width;
-		prt->origin.y = (prt->size.height < src_height) ? prt->origin.y : (prt->origin.y - (prt->size.height - src_height) / 2);
-		prt->size.height = (prt->size.height < src_height) ? prt->size.height : src_height;
+		prt->origin.y += (prt->size.height - src_height) / 2;
 	}
 	else if (xscmp(horz_align,GDI_ATTR_TEXT_ALIGN_FAR) == 0 && xscmp(vert_align,GDI_ATTR_TEXT_ALIGN_CENTER) == 0)
 	{
-		prt->origin.x = (prt->size.width < src_width) ? prt->origin.x : (prt->origin.x + prt->size.width - src_width);
-		prt->origin.y = (prt->size.height < src_height) ? prt->origin.y : (prt->origin.y - (prt->size.height - src_height) / 2);
-		prt->size.height = (prt->size.height < src_height) ? prt->size.height : src_height;
+		prt->origin.x += (prt->size.width - src_width);
+		prt->origin.y += (prt->size.height - src_height) / 2;
 	}
+	else if (xscmp(horz_align,GDI_ATTR_TEXT_ALIGN_CENTER) == 0 && xscmp(vert_align,GDI_ATTR_TEXT_ALIGN_NEAR) == 0)
+	{
+		prt->origin.x += (prt->size.width - src_width) / 2;
+		prt->origin.y += (prt->size.height - src_height);
+	}
+	else if (xscmp(horz_align,GDI_ATTR_TEXT_ALIGN_CENTER) == 0 && xscmp(vert_align,GDI_ATTR_TEXT_ALIGN_FAR) == 0)
+	{
+		prt->origin.x += (prt->size.width - src_width) / 2;
+	}
+	else if (xscmp(horz_align,GDI_ATTR_TEXT_ALIGN_CENTER) == 0 && xscmp(vert_align,GDI_ATTR_TEXT_ALIGN_CENTER) == 0)
+	{
+		prt->origin.x += (prt->size.width - src_width) / 2;
+		prt->origin.y += (prt->size.height - src_height) / 2;
+	}
+
+	prt->size.width = (prt->size.width < src_width) ? prt->size.width : src_width;
+	prt->size.height = (prt->size.height < src_height) ? prt->size.height : src_height;
 }
 
 static void _calc_point(const xpoint_t* pt, int r, double a, xpoint_t* pp)
@@ -215,14 +213,14 @@ void _gdi_draw_polyline(visual_t rdc,const xpen_t* pxp,const xpoint_t* ppt,int n
 	xmem_free(points);
 }
 
-void _gdi_draw_arc(visual_t rdc, const xpen_t* pxp, const xpoint_t * ppt1, const xpoint_t* ppt2, const xsize_t* pxs, bool_t sflag, bool_t lflag)
+void _gdi_draw_arc(visual_t rdc, const xpen_t* pxp, const xpoint_t * ppt1, const xpoint_t* ppt2, const xsize_t* pxs, bool_t clockwise, bool_t largearc)
 {
     cocoa_context_t* ctx = TypePtrFromHead(cocoa_context_t, rdc);
 
 	xpoint_t pt_center = {0};
 	double arcf = 0.0, arct = 0.0;
 
-	pt_calc_radian(sflag, lflag, pxs->w, pxs->h, ppt1, ppt2, &pt_center, &arcf, &arct);
+	bool_t cw = pt_calc_radian(clockwise, largearc, pxs->w, pxs->h, ppt1, ppt2, &pt_center, &arcf, &arct);
 
 	CGPoint points[3] = {0};
 	points[0].x = ppt1->x;
@@ -234,7 +232,7 @@ void _gdi_draw_arc(visual_t rdc, const xpen_t* pxp, const xpoint_t * ppt1, const
 
 	DPtoLP(rdc, points, 3);
 
-	CGContextAddArc(ctx->context, points[2].x, points[2].y, pxs->w, arcf, arct, sflag);
+	CGContextAddArc(ctx->context, points[2].x, points[2].y, pxs->w, arcf, arct, cw);
 
 	if(pxp)
 	{
@@ -310,7 +308,7 @@ void _gdi_draw_curve(visual_t rdc, const xpen_t* pxp, const xpoint_t* ppt, int p
 	xmem_free(points);
 }
 
-void _gdi_draw_path(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const tchar_t* aa, const xpoint_t* pa)
+void _gdi_draw_path(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const tchar_t* aa, const xpoint_t* pa, int pn)
 {
 	cocoa_context_t* ctx = TypePtrFromHead(cocoa_context_t, rdc);
 
@@ -319,7 +317,7 @@ void _gdi_draw_path(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const 
 	xpoint_t pt_i = { 0 };
 	xpoint_t pt[4] = { 0 };
 
-	int sflag, lflag;
+	int sflag, lflag, nflag;
 	double arcf, arct;
 	int n = 0;
 	xpoint_t cp;
@@ -327,7 +325,7 @@ void _gdi_draw_path(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const 
 
 	if (!aa) return;
 
-	while (*aa)
+	while (*aa && pn)
 	{
 		if (*aa == _T('M') || *aa == _T('m'))
 		{
@@ -339,7 +337,7 @@ void _gdi_draw_path(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const 
 
 			n = 1;
 
-			NSPoint point = NSMakePoint(pt_p.x, pt_p.y);
+			CGPoint point = CGPointMake(pt_m.x, pt_m.y);
 			DPtoLP(rdc, &point, 1);
 			CGContextMoveToPoint(ctx->context, point.x, point.y);
 		}
@@ -357,7 +355,7 @@ void _gdi_draw_path(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const 
 
 			n = 1;
 
-			NSPoint point = NSMakePoint(pt[1].x, pt[1].y);
+			CGPoint point = CGPointMake(pt[1].x, pt[1].y);
 			DPtoLP(rdc, &point, 1);
 			CGContextAddLineToPoint(ctx->context, point.x, point.y); 
 		}
@@ -377,9 +375,9 @@ void _gdi_draw_path(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const 
 
 			n = 2;
 
-			NSPoint points[2];
-			points[0] = NSMakePoint(pt[1].x, pt[1].y);
-			points[1] = NSMakePoint(pt[2].x, pt[2].y);
+			CGPoint points[2];
+			points[0] = CGPointMake(pt[1].x, pt[1].y);
+			points[1] = CGPointMake(pt[2].x, pt[2].y);
 			DPtoLP(rdc, points, 2);
 			CGContextAddQuadCurveToPoint(ctx->context, points[0].x, points[0].y, points[1].x, points[1].y);
 		}
@@ -399,9 +397,9 @@ void _gdi_draw_path(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const 
 
 			n = 1;
 
-			NSPoint points[2];
-			points[0] = NSMakePoint(pt[1].x, pt[1].y);
-			points[1] = NSMakePoint(pt[2].x, pt[2].y);
+			CGPoint points[2];
+			points[0] = CGPointMake(pt[1].x, pt[1].y);
+			points[1] = CGPointMake(pt[2].x, pt[2].y);
 			DPtoLP(rdc, points, 2);
 			CGContextAddQuadCurveToPoint(ctx->context, points[0].x, points[0].y, points[1].x, points[1].y);
 		}
@@ -423,10 +421,10 @@ void _gdi_draw_path(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const 
 
 			n = 3;
 
-			NSPoint points[3];
-			points[0] = NSMakePoint(pt[1].x, pt[1].y);
-			points[1] = NSMakePoint(pt[2].x, pt[2].y);
-			points[2] = NSMakePoint(pt[3].x, pt[3].y);
+			CGPoint points[3];
+			points[0] = CGPointMake(pt[1].x, pt[1].y);
+			points[1] = CGPointMake(pt[2].x, pt[2].y);
+			points[2] = CGPointMake(pt[3].x, pt[3].y);
 			DPtoLP(rdc, points, 3);
 			CGContextAddCurveToPoint(ctx->context, points[0].x, points[0].y, points[1].x, points[1].y, points[2].x, points[2].y); 
 		}
@@ -448,10 +446,10 @@ void _gdi_draw_path(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const 
 
 			n = 2;
 
-			NSPoint points[3];
-			points[0] = NSMakePoint(pt[1].x, pt[1].y);
-			points[1] = NSMakePoint(pt[2].x, pt[2].y);
-			points[2] = NSMakePoint(pt[3].x, pt[3].y);
+			CGPoint points[3];
+			points[0] = CGPointMake(pt[1].x, pt[1].y);
+			points[1] = CGPointMake(pt[2].x, pt[2].y);
+			points[2] = CGPointMake(pt[3].x, pt[3].y);
 			DPtoLP(rdc, points, 3);
 			CGContextAddCurveToPoint(ctx->context, points[0].x, points[0].y, points[1].x, points[1].y, points[2].x, points[2].y); 
 		}
@@ -472,11 +470,10 @@ void _gdi_draw_path(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const 
 			pt_i.x = 2 * pt[1].x - pt[0].x;
 			pt_i.y = 2 * pt[1].y - pt[0].y;
 
-			_gdi_draw_arc(rdc, pxp, &pt[0], &pt[1], &xs, sflag, lflag);
 			n = 3;
 
-			pt_calc_radian(sflag, lflag, xs.w, xs.h, &pt[0], &pt[1], &cp, &arcf, &arct);
-
+			nflag = pt_calc_radian(sflag, lflag, xs.w, xs.h, &pt[0], &pt[1], &cp, &arcf, &arct);
+			
 			CGPoint points[3] = {0};
 			points[0].x = pt[0].x;
 			points[0].y = pt[0].y;
@@ -485,7 +482,10 @@ void _gdi_draw_path(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const 
 			points[2].x = cp.x;
 			points[2].y = cp.y;
 			DPtoLP(rdc, points, 3);
-			CGContextAddArc(ctx->context, points[2].x, points[2].y, xs.w, arcf, arct, sflag);
+			if(nflag == sflag)
+				CGContextAddArc(ctx->context, points[2].x, points[2].y, xs.w, arcf, arct, sflag);
+			else
+				CGContextAddArc(ctx->context, points[2].x, points[2].y, xs.w, arct, arcf, sflag);
 		}
 		else if (*aa == _T('Z') || *aa == _T('z'))
 		{
@@ -494,16 +494,22 @@ void _gdi_draw_path(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const 
 			pt[1].x = pt_m.x;
 			pt[1].y = pt_m.y;
 
-			NSPoint point = NSMakePoint(pt[1].x, pt[1].y);
+			pt_p.x = pt[1].x;
+			pt_p.y = pt[1].y;
+			pt_i.x = 2 * pt[1].x - pt[0].x;
+			pt_i.y = 2 * pt[1].y - pt[0].y;
+
+			n = 1;
+
+			CGPoint point = CGPointMake(pt[1].x, pt[1].y);
 			DPtoLP(rdc, &point, 1);
 			CGContextAddLineToPoint(ctx->context, point.x, point.y);
-
-			CGContextClosePath(ctx->context);
 			break;
 		}
 
 		aa++;
 		pa += n;
+		pn -= n;
 	}
 
 	if(pxp)
@@ -519,6 +525,8 @@ void _gdi_draw_path(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const 
 		xcolor_t xc = {0};
 		parse_xcolor(&xc, pxb->color);
 		CGContextSetRGBFillColor(ctx->context, (float)(xc.r) / 255.0f, (float)(xc.g) / 255.0f, (float)(xc.b) / 255.0f, 1.0); 
+
+		CGContextClosePath(ctx->context);
 	}
 
 	if(pxb)
@@ -593,36 +601,57 @@ void _gdi_draw_round(visual_t rdc,const xpen_t* pxp,const xbrush_t* pxb,const xr
 {
 	cocoa_context_t* ctx = TypePtrFromHead(cocoa_context_t, rdc);
 
+	int rx, ry;
+	if (pxs)
+	{
+		rx = pxs->w;
+		ry = pxs->h;
+	}
+	else
+	{
+		rx = (prt->w) / 10;
+		if (rx < 1)
+			rx = 1;
+		else if (rx > 6)
+			rx = 6;
+
+		ry = (prt->h) / 10;
+		if (ry < 1)
+			ry = 1;
+		else if (ry > 6)
+			ry = 6;
+	}
+
 	CGPoint* points = (CGPoint*)xmem_alloc(8 * sizeof(CGPoint));
 
 	//the line segments
-	points[0].x = prt->x + pxs->w, points[0].y = prt->y;
-	points[1].x = prt->x + prt->w - pxs->w, points[1].y = prt->y;
+	points[0].x = prt->x + rx, points[0].y = prt->y;
+	points[1].x = prt->x + prt->w - rx, points[1].y = prt->y;
 
-	points[2].x = prt->x + prt->w, points[2].y = prt->y + pxs->h;
-	points[3].x = prt->x + prt->w, points[3].y = prt->y + prt->h - pxs->h;
+	points[2].x = prt->x + prt->w, points[2].y = prt->y + ry;
+	points[3].x = prt->x + prt->w, points[3].y = prt->y + prt->h - ry;
 
-	points[4].x = prt->x + prt->w - pxs->w, points[4].y = prt->y + prt->h;
-	points[5].x = prt->x + pxs->w, points[5].y = prt->y + prt->h;
+	points[4].x = prt->x + prt->w - rx, points[4].y = prt->y + prt->h;
+	points[5].x = prt->x + rx, points[5].y = prt->y + prt->h;
 
-	points[6].x = prt->x, points[6].y = prt->y + prt->h - pxs->h;
-	points[7].x = prt->x, points[7].y = prt->y + pxs->h;
+	points[6].x = prt->x, points[6].y = prt->y + prt->h - ry;
+	points[7].x = prt->x, points[7].y = prt->y + ry;
 
 	DPtoLP(rdc, points, 8);
 
     CGContextBeginPath(ctx->context);
     CGContextMoveToPoint(ctx->context, points[0].x, points[0].y);
    	CGContextAddLineToPoint(ctx->context, points[1].x, points[1].y);
-    CGContextAddArcToPoint(ctx->context, points[2].x, points[1].y, points[2].x, points[2].y, pxs->w);
+    CGContextAddArcToPoint(ctx->context, points[2].x, points[1].y, points[2].x, points[2].y, rx);
 	
 	CGContextAddLineToPoint(ctx->context, points[3].x, points[3].y);
-	CGContextAddArcToPoint(ctx->context, points[3].x, points[4].y, points[4].x, points[4].y, pxs->w);
+	CGContextAddArcToPoint(ctx->context, points[3].x, points[4].y, points[4].x, points[4].y, rx);
 	
 	CGContextAddLineToPoint(ctx->context, points[5].x, points[5].y);
-	CGContextAddArcToPoint(ctx->context, points[6].x, points[5].y, points[6].x, points[6].y, pxs->w);
+	CGContextAddArcToPoint(ctx->context, points[6].x, points[5].y, points[6].x, points[6].y, rx);
 	
 	CGContextAddLineToPoint(ctx->context, points[7].x, points[7].y);
-	CGContextAddArcToPoint(ctx->context, points[7].x, points[0].y, points[0].x, points[0].y, pxs->w);
+	CGContextAddArcToPoint(ctx->context, points[7].x, points[0].y, points[0].x, points[0].y, rx);
     CGContextClosePath(ctx->context);
 
 	if(pxp)
@@ -652,7 +681,7 @@ void _gdi_draw_pie(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const x
 {
     cocoa_context_t* ctx = TypePtrFromHead(cocoa_context_t, rdc);
 
-	NSPoint point = NSMakePoint(pxr->x + pxr->w / 2, pxr->y + pxr->h / 2);
+	CGPoint point = CGPointMake(pxr->x + pxr->w / 2, pxr->y + pxr->h / 2);
 	DPtoLP(rdc, &point, 1);
 
 	CGContextBeginPath(ctx->context);
@@ -731,10 +760,9 @@ void _gdi_draw_text(visual_t rdc,const xfont_t* pxf,const xface_t* pxa,const xre
 	if(len < 0) len = xslen(txt);
 	if(!len) return;
 
-	CGPoint nsPoints[2];
-	nsPoints[0].x = pxr->x, nsPoints[0].y = pxr->y;
-	nsPoints[1].x = pxr->x + pxr->w, nsPoints[1].y = pxr->y + pxr->h;
-	DPtoLP(rdc, nsPoints, 2);
+	CGPoint cgPoints = {pxr->x, pxr->y + pxr->h};
+	DPtoLP(rdc, &cgPoints, 1);
+	CGRect cgRect = {cgPoints.x, cgPoints.y, pxr->w, pxr->h};
 
 	tchar_t* new_txt = xsnclone(txt, len);
     CFStringRef cfString = CFStringCreateWithCString(NULL, new_txt, kCFStringEncodingUTF8);
@@ -758,7 +786,12 @@ void _gdi_draw_text(visual_t rdc,const xfont_t* pxf,const xface_t* pxa,const xre
 
     CTLineRef cfLine = CTLineCreateWithAttributedString(attrString);
 
-    CGContextSetTextPosition(ctx->context, nsPoints[0].x, nsPoints[1].y);
+	CGFloat ascent = 0.0, descent = 0.0, leading = 0.0;
+    CGFloat width = CTLineGetTypographicBounds(cfLine, &ascent, &descent, &leading);
+    CGFloat height = ascent + descent + leading;
+	_adjust_rect(&cgRect, width, height, pxa->text_align, pxa->line_align);
+
+    CGContextSetTextPosition(ctx->context,cgRect.origin.x, cgRect.origin.y);
     CTLineDraw(cfLine, ctx->context);
 
 	CFRelease(cfString);
@@ -814,10 +847,7 @@ void _gdi_text_rect(visual_t rdc, const xfont_t* pxf, const xface_t* pxa, const 
 	cocoa_context_t* ctx = TypePtrFromHead(cocoa_context_t, rdc);
 
 	if(len < 0) len = xslen(txt);
-	if(!len) {
-		pxr->w = 0;
-		return;
-	}
+	if(!len) return;
 
 	tchar_t* new_txt = xsnclone(txt, len);
 	CFStringRef cfString = CFStringCreateWithCString(NULL, new_txt, kCFStringEncodingUTF8);
@@ -855,6 +885,7 @@ void _gdi_text_size(visual_t rdc, const xfont_t* pxf, const tchar_t* txt, int le
 	if(len < 0) len = xslen(txt);
 	if(!len) {
 		pxs->w = 0;
+		pxs->h = 0;
 		return;
 	}
 
@@ -883,8 +914,8 @@ void _gdi_text_size(visual_t rdc, const xfont_t* pxf, const tchar_t* txt, int le
     CFRelease(attrString);
     CFRelease(cfFont);
 
-    if(pxs->w < (int)width) pxs->w = (int)width;
-	if(pxs->h < (int)height) pxs->h = (int)height;
+    pxs->w = (int)width;
+	pxs->h = (int)height;
 }
 
 void _gdi_font_size(visual_t rdc, const xfont_t* pxf, xsize_t* pxs)
@@ -904,7 +935,7 @@ void _gdi_font_size(visual_t rdc, const xfont_t* pxf, xsize_t* pxs)
     CGFloat capHeight = CTFontGetCapHeight(cfFont);
 	CFRelease(cfFont);
 
-	pxs->h = (int)(ascent + descent + leading);
+	pxs->w = pxs->h = (int)(ascent + descent + leading);
 }
 
 void _gdi_gradient_rect(visual_t rdc, const xcolor_t* clr_brim, const xcolor_t* clr_core, const tchar_t* gradient, const xrect_t* prt)
@@ -1034,6 +1065,7 @@ void _gdi_exclude_rect(visual_t rdc, const xrect_t* pxr)
 	CGRect rect = CGRectMake(pxr->x, pxr->y + pxr->h, pxr->w, pxr->h);
 	DPtoLP(rdc,(CGPoint*)&rect,1);
 
+	CGContextAddRect(ctx->context, CGContextGetClipBoundingBox(ctx->context));
 	CGContextAddRect(ctx->context, rect); 
     CGContextEOClip(ctx->context);
 }

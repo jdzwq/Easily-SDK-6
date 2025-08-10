@@ -387,7 +387,7 @@ void hand_status_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	const drawing_interface* pif = NULL;
 	drawing_interface ifv = {0};
 
-	clr_mod_t clrs;
+	color_mod_t clrs;
 	xbrush_t xb = { 0 };
 	xpen_t xp = { 0 };
 	xcolor_t xc = { 0 };

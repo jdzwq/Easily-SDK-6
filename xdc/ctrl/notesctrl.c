@@ -749,7 +749,7 @@ void hand_notes_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	xdate_t dt,td;
 	tchar_t token[DATE_LEN + 1];
 
-	clr_mod_t clrs;
+	color_mod_t clrs;
 	xfont_t xf_top = { 0 };
 	xface_t xa_top = { 0 };
 	xbrush_t xb_bar, xb = { 0 };

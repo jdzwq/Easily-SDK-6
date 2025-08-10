@@ -46,6 +46,8 @@ typedef struct _memo_context_t
 	int rop; /*raster operation mode*/
 
 	mem_font_ptr font_inf;
+	font_t ft;
+	xfont_t xf;
 } memo_context_t;
 
 static const mem_device_ptr select_device(const tchar_t *devName)
@@ -81,11 +83,32 @@ static void calc_penmode(const xpen_t* pxp, int* fs, int* ds)
 		*ds = DOT_SOLID;
 }
 
+static void alloc_font_cache(memo_context_t *pmgc, const xfont_t* pxf)
+{
+	mem_font_ptr pmf;
+
+	pmf = pmgc->font_inf;
+	if (!pmf) return;
+
+	if(!pxf) return;
+	if(compare_xfont(&(pmgc->xf), pxf) == 0) return;
+
+	xmem_copy((void *)&(pmgc->xf), (void*)pxf, sizeof(xfont_t));
+
+	if(pmgc->ft)
+	{
+		(*pmf->destroyFont)(pmgc->ft);
+	}
+
+	pmgc->ft = (*pmf->createFont)(&(pmgc->xf));
+}
+
 visual_t create_mgc_visual(const tchar_t *devName, const tchar_t *formName, int width, int height, int dpi)
 {
 	memo_context_t *pmgc;
 	dev_prn_t prn = {0};
 	dword_t total, pixels;
+	xfont_t xf;
 
 	TRY_CATCH;
 
@@ -120,6 +143,9 @@ visual_t create_mgc_visual(const tchar_t *devName, const tchar_t *formName, int 
 
 	pmgc->font_inf = &font_Internal;
 
+	default_xfont(&xf);
+	alloc_font_cache(pmgc, &xf);
+
 	END_CATCH;
 
 	return &(pmgc->head);
@@ -140,6 +166,11 @@ void destroy_mgc_visual(visual_t mgc)
 	memo_context_t *pmgc = TypePtrFromHead(memo_context_t, mgc);
 
 	XDK_ASSERT(mgc && mgc->tag == _VISUAL_MEMORY);
+
+	if(pmgc->font_inf && pmgc->ft)
+	{
+		(*(pmgc->font_inf->destroyFont))(pmgc->ft);
+	}
 
 	if (pmgc->device)
 	{
@@ -598,7 +629,7 @@ void mgc_draw_arc_raw(visual_t mgc, const xpen_t *pxp, const xpoint_t *ppt1, con
 	xmem_free(ppt);
 }
 
-void mgc_draw_arc(canvas_t canv, const xpen_t *pxp, const xpoint_t *ppt1, const xpoint_t *ppt2, const xsize_t *pxs, bool_t sflag, bool_t lflag)
+void mgc_draw_arc(canvas_t canv, const xpen_t *pxp, const xpoint_t *ppt1, const xpoint_t *ppt2, const xsize_t *pxs, bool_t clockwise, bool_t largearc)
 {
 	visual_t view;
 	xpoint_t pt1, pt2;
@@ -618,7 +649,7 @@ void mgc_draw_arc(canvas_t canv, const xpen_t *pxp, const xpoint_t *ppt1, const 
 	xs.fh = pxs->fh;
 	mgc_size_mm_to_pt(canv, &xs);
 
-	mgc_draw_arc_raw(view, pxp, &pt1, &pt2, &xs, sflag, lflag);
+	mgc_draw_arc_raw(view, pxp, &pt1, &pt2, &xs, clockwise, largearc);
 }
 
 void mgc_flood_fill_raw(visual_t mgc, const xbrush_t* pxb, const xrect_t* pxr, const xpoint_t* ppt)
@@ -1840,7 +1871,6 @@ void mgc_text_out_raw(visual_t mgc, const xfont_t *pxf, const xpoint_t *ppt, con
 
 	dword_t total = 0;
 	mem_font_ptr pmf;
-	font_t fnt = NULL;
 	font_metrix_t fm = {0};
 	mem_pixmap_ptr pix = NULL;
 	xcolor_t xc;
@@ -1856,18 +1886,18 @@ void mgc_text_out_raw(visual_t mgc, const xfont_t *pxf, const xpoint_t *ppt, con
 		len = xslen(txt);
 
 	pmf = pgc->font_inf;
-	if (!pmf)
+	if(!pmf)
 	{
-		raise_user_error(_T("mgc_text_out"), _T("select_font"));
+		raise_user_error(_T("mgc_text_out"), _T("font interface"));
 	}
 
-	fnt = (*pmf->createFont)(pxf);
-	if (!fnt)
+	alloc_font_cache(pgc, pxf);
+	if(!pgc->ft)
 	{
-		raise_user_error(_T("mgc_text_out"), _T("createFont"));
+		raise_user_error(_T("mgc_text_out"), _T("unknown font"));
 	}
 
-	(*pmf->getFontMetrix)(fnt, NULL, &fm);
+	(*pmf->getFontMetrix)(pgc->ft, NULL, &fm);
 
 	pix = alloc_pixmap(fm.width, fm.height);
 	if (!pix)
@@ -1883,7 +1913,7 @@ void mgc_text_out_raw(visual_t mgc, const xfont_t *pxf, const xpoint_t *ppt, con
 	while (len)
 	{
 		clean_pixmap(pix);
-		w = (*pmf->getCharPixmap)(fnt, txt, pix);
+		w = (*pmf->getCharPixmap)(pgc->ft, txt, pix);
 		pix->fg_color = PUT_PIXVAL(0, xc.r, xc.g, xc.b);
 		pix->bg_used = 0;
 
@@ -1904,9 +1934,6 @@ void mgc_text_out_raw(visual_t mgc, const xfont_t *pxf, const xpoint_t *ppt, con
 	free_pixmap(pix);
 	pix = NULL;
 
-	(*pmf->destroyFont)(fnt);
-	fnt = NULL;
-
 	END_CATCH;
 
 	return;
@@ -1914,8 +1941,6 @@ ONERROR:
 
 	if (pix)
 		free_pixmap(pix);
-	if (fnt)
-		(*pmf->destroyFont)(fnt);
 
 	return;
 }
@@ -1940,7 +1965,6 @@ void mgc_draw_text_raw(visual_t mgc, const xfont_t *pxf, const xface_t *pxa, con
 	memo_context_t *pgc = (memo_context_t *)mgc;
 
 	mem_font_ptr pmf;
-	font_t fnt = NULL;
 	font_metrix_t fm = { 0 };
 	mem_pixmap_ptr pix = NULL;
 	xcolor_t xc;
@@ -1961,18 +1985,18 @@ void mgc_draw_text_raw(visual_t mgc, const xfont_t *pxf, const xface_t *pxa, con
 	}
 
 	pmf = pgc->font_inf;
-	if (!pmf)
+	if(!pmf)
 	{
-		raise_user_error(_T("mgc_draw_text"), _T("select_font"));
+		raise_user_error(_T("mgc_draw_text"), _T("font interface"));
 	}
 
-	fnt = (*pmf->createFont)(pxf);
-	if (!fnt)
+	alloc_font_cache(pgc, pxf);
+	if(!pgc->ft)
 	{
-		raise_user_error(_T("mgc_draw_text"), _T("createFont"));
+		raise_user_error(_T("mgc_draw_text"), _T("unknown font"));
 	}
 
-	(*pmf->getFontMetrix)(fnt, NULL, &fm);
+	(*pmf->getFontMetrix)(pgc->ft, NULL, &fm);
 
 	pix = alloc_pixmap(fm.width, fm.height);
 	if (!pix)
@@ -1995,7 +2019,7 @@ void mgc_draw_text_raw(visual_t mgc, const xfont_t *pxf, const xface_t *pxa, con
 		total += peek_word((txt + total), pch);
 
 		clean_pixmap(pix);
-		(*pmf->getCharPixmap)(fnt, pch, pix);
+		(*pmf->getCharPixmap)(pgc->ft, pch, pix);
 		pix->fg_color = PUT_PIXVAL(0, xc.r, xc.g, xc.b);
 		pix->bg_used = 0;
 
@@ -2012,9 +2036,6 @@ void mgc_draw_text_raw(visual_t mgc, const xfont_t *pxf, const xface_t *pxa, con
 	free_pixmap(pix);
 	pix = NULL;
 
-	(*pmf->destroyFont)(fnt);
-	fnt = NULL;
-
 	END_CATCH;
 
 	return;
@@ -2024,8 +2045,6 @@ ONERROR:
 		xmem_free(pa);
 	if (pix)
 		free_pixmap(pix);
-	if (fnt)
-		(*pmf->destroyFont)(fnt);
 
 	return;
 }
@@ -2052,7 +2071,6 @@ void mgc_text_rect_raw(visual_t mgc, const xfont_t *pxf, const xface_t *pxa, con
 	memo_context_t *pgc = (memo_context_t *)mgc;
 
 	mem_font_ptr pmf;
-	font_t fnt = NULL;
 	int n = 0, total = 0;
 	tchar_t pch[CHS_LEN + 1] = {0};
 	xsize_t se;
@@ -2066,15 +2084,15 @@ void mgc_text_rect_raw(visual_t mgc, const xfont_t *pxf, const xface_t *pxa, con
 	len = words_count(txt, len);
 
 	pmf = pgc->font_inf;
-	if (!pmf)
+	if(!pmf)
 	{
-		raise_user_error(_T("mgc_text_rect"), _T("select_font"));
+		raise_user_error(_T("mgc_text_rect"), _T("font interface"));
 	}
 
-	fnt = (*pmf->createFont)(pxf);
-	if (!fnt)
+	alloc_font_cache(pgc, pxf);
+	if(!pgc->ft)
 	{
-		raise_user_error(_T("mgc_text_rect"), _T("createFont"));
+		raise_user_error(_T("mgc_text_rect"), _T("unknown font"));
 	}
 
 	w = 0;
@@ -2084,7 +2102,7 @@ void mgc_text_rect_raw(visual_t mgc, const xfont_t *pxf, const xface_t *pxa, con
 	{
 		total += peek_word((txt + total), pch);
 
-		(*pmf->getCharSize)(fnt, pch, &se);
+		(*pmf->getCharSize)(pgc->ft, pch, &se);
 
 		if (!h)
 		{
@@ -2147,9 +2165,6 @@ void mgc_text_rect_raw(visual_t mgc, const xfont_t *pxf, const xface_t *pxa, con
 		if (maxw < w) maxw = w;
 	}
 
-	(*pmf->destroyFont)(fnt);
-	fnt = NULL;
-
 	pxr->h = h;
 	if (!pxr->w) pxr->w = maxw;
 
@@ -2157,8 +2172,6 @@ void mgc_text_rect_raw(visual_t mgc, const xfont_t *pxf, const xface_t *pxa, con
 
 	return;
 ONERROR:
-	if (fnt)
-		(*pmf->destroyFont)(fnt);
 
 	return;
 }
@@ -2203,7 +2216,6 @@ void mgc_text_size_raw(visual_t mgc, const xfont_t *pxf, const tchar_t *txt, int
 	memo_context_t *pgc = (memo_context_t *)mgc;
 
 	mem_font_ptr pmf;
-	font_t fnt = NULL;
 	int n;
 	xsize_t se;
 
@@ -2216,15 +2228,15 @@ void mgc_text_size_raw(visual_t mgc, const xfont_t *pxf, const tchar_t *txt, int
 		len = xslen(txt);
 
 	pmf = pgc->font_inf;
-	if (!pmf)
+	if(!pmf)
 	{
-		raise_user_error(_T("mgc_text_size"), _T("select_font"));
+		raise_user_error(_T("mgc_text_size"), _T("font interface"));
 	}
 
-	fnt = (*pmf->createFont)(pxf);
-	if (!fnt)
+	alloc_font_cache(pgc, pxf);
+	if(!pgc->ft)
 	{
-		raise_user_error(_T("mgc_text_size"), _T("createFont"));
+		raise_user_error(_T("mgc_text_size"), _T("unknown font"));
 	}
 
 	pxs->w = 0;
@@ -2233,7 +2245,7 @@ void mgc_text_size_raw(visual_t mgc, const xfont_t *pxf, const tchar_t *txt, int
 	n = 0;
 	while (n < len)
 	{
-		(*pmf->getCharSize)(fnt, (txt + n), &se);
+		(*pmf->getCharSize)(pgc->ft, (txt + n), &se);
 
 		pxs->w += se.w;
 		if (pxs->h < se.h)
@@ -2246,15 +2258,10 @@ void mgc_text_size_raw(visual_t mgc, const xfont_t *pxf, const tchar_t *txt, int
 #endif
 	}
 
-	(*pmf->destroyFont)(fnt);
-	fnt = NULL;
-
 	END_CATCH;
 
 	return;
 ONERROR:
-	if (fnt)
-		(*pmf->destroyFont)(fnt);
 
 	return;
 }
@@ -2318,7 +2325,7 @@ void mgc_font_size_raw(visual_t mgc, const xfont_t *pxf, xsize_t *pxs)
 	pmf = pgc->font_inf;
 	if (!pmf)
 	{
-		raise_user_error(_T("mgc_text_size"), _T("select_font"));
+		raise_user_error(_T("mgc_text_size"), _T("font interface"));
 	}
 
 	fnt = (*pmf->createFont)(pxf);
@@ -2371,7 +2378,6 @@ void mgc_text_indicate_raw(visual_t mgc, const xfont_t *pxf, const xface_t *pxa,
 	memo_context_t *pgc = (memo_context_t *)mgc;
 
 	mem_font_ptr pmf;
-	font_t fnt = NULL;
 	int n = 0, total = 0;
 	tchar_t pch[CHS_LEN + 1] = { 0 };
 	xsize_t se;
@@ -2387,15 +2393,15 @@ void mgc_text_indicate_raw(visual_t mgc, const xfont_t *pxf, const xface_t *pxa,
 	len = (len < pn) ? len : pn;
 
 	pmf = pgc->font_inf;
-	if (!pmf)
+	if(!pmf)
 	{
-		raise_user_error(_T("mgc_text_rect"), _T("select_font"));
+		raise_user_error(_T("mgc_text_indicate"), _T("font interface"));
 	}
 
-	fnt = (*pmf->createFont)(pxf);
-	if (!fnt)
+	alloc_font_cache(pgc, pxf);
+	if(!pgc->ft)
 	{
-		raise_user_error(_T("mgc_text_rect"), _T("createFont"));
+		raise_user_error(_T("mgc_text_indicate"), _T("unknown font"));
 	}
 
 	w = 0, maxw = 0;
@@ -2405,7 +2411,7 @@ void mgc_text_indicate_raw(visual_t mgc, const xfont_t *pxf, const xface_t *pxa,
 	{
 		total += peek_word((txt + total), pch);
 
-		(*pmf->getCharSize)(fnt, pch, &se);
+		(*pmf->getCharSize)(pgc->ft, pch, &se);
 
 		if (!h)
 		{
@@ -2515,15 +2521,10 @@ void mgc_text_indicate_raw(visual_t mgc, const xfont_t *pxf, const xface_t *pxa,
 		pr[n].y += xr.y;
 	}
 
-	(*pmf->destroyFont)(fnt);
-	fnt = NULL;
-
 	END_CATCH;
 
 	return;
 ONERROR:
-	if (fnt)
-		(*pmf->destroyFont)(fnt);
 
 	return;
 }

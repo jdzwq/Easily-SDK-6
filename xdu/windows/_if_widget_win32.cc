@@ -2012,6 +2012,7 @@ void _widget_create_caret(widget_t wt, int w, int h)
 	if (!IsWindow(pws->self)) return;
 
 	CreateCaret(pws->self, NULL, w, h);
+	HideCaret(pws->self);
 }
 
 void _widget_destroy_caret(widget_t wt)
@@ -2019,7 +2020,7 @@ void _widget_destroy_caret(widget_t wt)
 	DestroyCaret();
 }
 
-void _widget_show_caret(widget_t wt, int x, int y, bool_t b)
+void _widget_show_caret(widget_t wt, int x, int y)
 {
 	win32_widget_t* pws = (win32_widget_t*)wt;
 
@@ -2027,14 +2028,7 @@ void _widget_show_caret(widget_t wt, int x, int y, bool_t b)
 
 	if (!IsWindow(pws->self)) return;
 
-	if (b)
-	{
-		ShowCaret(pws->self);
-	}
-	else
-	{
-		HideCaret(pws->self);
-	}
+	ShowCaret(pws->self);
 }
 
 void _widget_set_focus(widget_t wt)
@@ -2069,6 +2063,8 @@ bool_t _widget_is_valid(widget_t wt)
 {
 	win32_widget_t* pws = (win32_widget_t*)wt;
 
+	if(!wt) return 0;
+	
 	return (IsWindow(pws->self)) ? 1 : 0;
 }
 
@@ -2606,12 +2602,12 @@ static int CALLBACK _widget_set_child_color_mode(widget_t wt, vword_t pv)
 	if (dw & WD_STYLE_NOCHANGE)
 		return 1;
 
-	_widget_set_color_mode(wt, (const clr_mod_t*)pv);
+	_widget_set_color_mode(wt, (const color_mod_t*)pv);
 
 	return 1;
 }
 
-void _widget_set_color_mode(widget_t wt, const clr_mod_t* pclr)
+void _widget_set_color_mode(widget_t wt, const color_mod_t* pclr)
 {
 	win32_widget_t* pws = (win32_widget_t*)wt;
 	dword_t dw = (pws)? pws->style : 0;
@@ -2630,7 +2626,7 @@ void _widget_set_color_mode(widget_t wt, const clr_mod_t* pclr)
 	_widget_enum_child(wt, (PF_ENUM_WINDOW_PROC)_widget_set_child_color_mode, (vword_t)pclr);
 }
 
-void _widget_get_color_mode(widget_t wt, clr_mod_t* pclr)
+void _widget_get_color_mode(widget_t wt, color_mod_t* pclr)
 {
 	win32_widget_t* pws = (win32_widget_t*)wt;
 

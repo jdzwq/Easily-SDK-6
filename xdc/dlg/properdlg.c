@@ -192,7 +192,7 @@ void hand_properdlg_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	canvas_t canv;
 	drawing_interface ifv = {0};
 
-	clr_mod_t clrs;
+	color_mod_t clrs;
 	xbrush_t xb = { 0 };
 	xcolor_t xc_brim, xc_core;
 
@@ -234,7 +234,7 @@ widget_t properdlg_create(const tchar_t* title, link_t_ptr ptr, widget_t owner)
 	if_dispatch_t ev = { 0 };
 	widget_t dlg;
 	xrect_t xr = { 0 };
-	clr_mod_t clr;
+	color_mod_t clr;
 
 	ev.param = (void*)ptr;
 

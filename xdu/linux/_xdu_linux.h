@@ -144,6 +144,7 @@ typedef Font		res_font_t;
 typedef struct _x11_bitmap_t{
 	handle_head head;
 
+    bool_t ref;
 	XImage* image;
 }X11_bitmap_t;
 #endif

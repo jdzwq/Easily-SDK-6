@@ -294,7 +294,7 @@ static bitmap_t _photoctrl_merge_anno(widget_t widget)
 	link_t_ptr ilk;
 	drawing_interface ifv = {0};
 
-	clr_mod_t clrs;
+	color_mod_t clrs;
 	xbrush_t xb;
 
 	if (!ptd->bmp && !ptd->anno) return NULL;
@@ -557,7 +557,7 @@ void noti_photo_begin_edit(widget_t widget)
 	photo_delta_t* ptd = GETPHOTODELTA(widget);
 	xrect_t xr = { 0 };
 
-	clr_mod_t ob = { 0 };
+	color_mod_t ob = { 0 };
 
 	XDK_ASSERT(ptd->arti);
 	XDK_ASSERT(!ptd->editor);
@@ -1048,7 +1048,7 @@ void hand_photo_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	const drawing_interface* pif = NULL;
 	drawing_interface ifv = {0};
 
-	clr_mod_t clrs;
+	color_mod_t clrs;
 	xbrush_t xb;
 	xcolor_t xc;
 

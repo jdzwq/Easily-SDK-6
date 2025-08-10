@@ -97,13 +97,13 @@ typedef struct _xcolor_t{
 	unsigned char r, g, b, a;
 }xcolor_t;
 
-typedef struct _clr_mod_t{
+typedef struct _color_mod_t{
 	xcolor_t clr_bkg;
 	xcolor_t clr_frg;
 	xcolor_t clr_txt;
 	xcolor_t clr_msk;
 	xcolor_t clr_ico;
-}clr_mod_t;
+}color_mod_t;
 
 
 typedef struct _xrect_t{

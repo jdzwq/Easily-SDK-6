@@ -354,7 +354,7 @@ void hand_timebox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	const drawing_interface* pif = NULL;
 	drawing_interface ifv = {0};
 
-	clr_mod_t clrs;
+	color_mod_t clrs;
 	xbrush_t xb;
 
 	widget_get_color_mode(widget, &clrs);

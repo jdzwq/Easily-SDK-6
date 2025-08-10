@@ -220,8 +220,8 @@ float _pixel_metric(visual_t rdc)
 	HDC hDC = (rdc)? (HDC)(ctx->context) : GetDC(NULL);
 	float fp;
 
-	fp = (float)((float)GetDeviceCaps(hDC, HORZSIZE) / (float)GetDeviceCaps(hDC, HORZRES));
-	
+	fp = MMPERINCH / (float)GetDeviceCaps(hDC, LOGPIXELSX);
+
 	if (!rdc)
 		ReleaseDC(NULL, hDC);
 

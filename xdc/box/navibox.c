@@ -80,7 +80,7 @@ void navibox_on_keyboard(widget_t widget)
 {
 	navibox_delta_t* ptd = GETNAVIBOXDELTA(widget);
 	xrect_t xr_owner, xr = { 0 };
-	clr_mod_t clr;
+	color_mod_t clr;
 	widget_t owner;
 
 	if (widget_is_valid(ptd->keybox))
@@ -223,7 +223,7 @@ void hand_navibox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	NAVISTATE ns = { 0 };
 	
 	xcolor_t xc_brim, xc_core;
-	clr_mod_t clrs;
+	color_mod_t clrs;
 
 	widget_get_color_mode(widget, &clrs);
 	xmem_copy((void*)&xc_brim, (void*)&clrs.clr_bkg, sizeof(xcolor_t));

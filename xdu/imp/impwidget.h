@@ -390,7 +390,7 @@ EXP_API void	widget_destroy_caret(widget_t wt);
 @INPUT bool_t b: nonzero for showing, zero for hiding.
 @RETURN void: none.
 */
-EXP_API void	widget_show_caret(widget_t wt, int x, int y, bool_t b);
+EXP_API void	widget_show_caret(widget_t wt, int x, int y);
 
 /*
 @FUNCTION widget_set_focus: let the widget get focus.
@@ -732,18 +732,18 @@ EXP_API void	widget_get_border(widget_t wt, border_t* pbd);
 /*
 @FUNCTION widget_set_color_mode: set the widget color mode.
 @INPUT widget_t wt: windowd resource handle.
-@INPUT const clr_mod_t* pclr: the color mode struct.
+@INPUT const color_mod_t* pclr: the color mode struct.
 @RETURN void: none.
 */
-EXP_API void	widget_set_color_mode(widget_t wt, const clr_mod_t* pclr);
+EXP_API void	widget_set_color_mode(widget_t wt, const color_mod_t* pclr);
 
 /*
 @FUNCTION widget_get_color_mode: copy the widget color mode.
 @INPUT widget_t wt: windowd resource handle.
-@OUTPUT clr_mod_t* pclr: the color mode struct.
+@OUTPUT color_mod_t* pclr: the color mode struct.
 @RETURN void: none.
 */
-EXP_API void	widget_get_color_mode(widget_t wt, clr_mod_t* pclr);
+EXP_API void	widget_get_color_mode(widget_t wt, color_mod_t* pclr);
 
 /*
 @FUNCTION widget_set_diaph: set widget alphablend level.

@@ -96,320 +96,120 @@ int ft_quadrant(const xpoint_t* ppo, const xpoint_t* ppt, bool_t sflag)
 		return (sflag) ? 4 : 1;
 }
 
-bool_t pt_calc_radian(bool_t clockwise, bool_t largearc, int rx, int ry, const xpoint_t* ppt1, const xpoint_t* ppt2, xpoint_t* ppt_center, double* arc_from, double* arc_to)
+static void _calc_radian(bool_t clockwise, bool_t largearc, float rx, float ry, float fx, float fy, float* px_center, float* py_center, double* arc_from, double* arc_to)
 {
 	xpoint_t pt[3] = { 0 };
-	double k, len, fx, fy, arc, arc1, arc2;
+	float k, half_arc;
+	double center_sweep, origin_sweep, origin_angle;
+	double arcf, arct, arc;
+	float center_x, center_y;
+	float from_x, from_y, to_x, to_y;
 	bool_t cw;
 
-	if (ppt1->x <= ppt2->x)
-	{
-		pt[0].x = ppt1->x;
-		pt[0].y = ppt1->y;
-		pt[1].x = ppt2->x;
-		pt[1].y = ppt2->y;
-	}
-	else
-	{
-		pt[0].x = ppt2->x;
-		pt[0].y = ppt2->y;
-		pt[1].x = ppt1->x;
-		pt[1].y = ppt1->y;
-		clockwise = (clockwise) ? 0 : 1;
-	}
-	cw = clockwise;
-
-	if (ppt1->x <= ppt2->x)
-		pt_screen_to_world(*ppt1, pt, 2);
-	else
-		pt_screen_to_world(*ppt2, pt, 2);
-
-	k = (double)ry / (double)rx;
-
 	//ellipse to circle
-	pt[0].fx = (float)pt[0].x;
-	pt[0].fy = (float)(pt[0].y / k);
-	pt[1].fx = (float)pt[1].x;
-	pt[1].fy = (float)(pt[1].y / k);
+	k = (float)abs(ry / rx);
+	fy /= k;
 
-	fx = pt[1].fx - pt[0].fx;
-	fy = pt[1].fy - pt[0].fy;
+	//the half arc line length
+	half_arc = (float)sqrt(pow(fx, 2) + pow(fy, 2)) / 2;
 
-	//the half line length (ppt1 to ppt2)
-	len = sqrt(pow(fx, 2) + pow(fy, 2)) / 2;
+	//the sweep angle at center point included by remote and origin point
+	center_sweep = asin(half_arc / rx) * 2;
+	//the sweep angle at origin point included by remote and center point
+	if ((clockwise && largearc) || (!clockwise && !largearc))
+		origin_sweep = acos(half_arc / rx);
+	else
+		origin_sweep = - acos(half_arc / rx);
+	//the angle at origin point belong to remote point
+	origin_angle = atan(fy / fx);
 
-	//the included angle from point1 to point2
-	arc = asin(len / rx) * 2;
-	arc1 = acos(len / rx);
-	arc2 = XPI / 2 + atan(fy / fx);
-
+	arcf = XPI + origin_sweep + origin_angle;
 	if (clockwise && largearc)
 	{
-		*arc_from = arc2 + XPI / 2 + arc1;
-		*arc_to = -2 * XPI + *arc_from + arc;
+		arct = arcf - (2 * XPI - center_sweep);
 	}
 	else if (!clockwise && !largearc)
 	{
-		*arc_from = -2 * XPI + arc2 + XPI / 2 + arc1;
-		*arc_to = *arc_from + arc;
+		arct = arcf + center_sweep;
 	}
 	else if (clockwise && !largearc)
 	{
-		*arc_from = arc2 + XPI / 2 - arc1;
-		*arc_to = *arc_from - arc;
+		arct = arcf - center_sweep;
 	}
 	else //(!clockwise && largearc)
 	{
-		*arc_from = -2 * XPI + arc2 + XPI / 2 - arc1;
-		*arc_to = 2 * XPI + *arc_from - arc;
+		arct = arcf + (2 * XPI - center_sweep);
+	}
+	center_x = rx * cos(origin_sweep + origin_angle);
+	center_y = rx * sin(origin_sweep + origin_angle);
+
+	//move world origin to center point
+	from_x = 0 - center_x;
+	from_y = 0 - center_y;
+	to_x = fx - center_x;
+	to_y = fy - center_y;
+
+	//restore ellipse
+	arc = atan(from_y * k / from_x) - atan(from_y / from_x);
+	*arc_from = arcf + arc;
+
+	arc = atan(to_y * k / to_x) - atan(to_y / to_x);
+	*arc_to = arct + arc;
+
+	*px_center = center_x;
+	*py_center = center_y;
+}
+
+bool_t pt_calc_radian(bool_t clockwise, bool_t largearc, int rx, int ry, const xpoint_t* ppt1, const xpoint_t* ppt2, xpoint_t* ppt_center, double* arc_from, double* arc_to)
+{
+	xpoint_t pt;
+	float fx, fy;
+	
+	if(ppt1->x < ppt2->x)
+	{
+		pt.x = ppt2->x, pt.y = ppt2->y;
+		pt_screen_to_world(*ppt1, &pt, 1);
+	}else{
+		pt.x = ppt1->x, pt.y = ppt1->y;
+		pt_screen_to_world(*ppt2, &pt, 1);
+
+		clockwise = (clockwise) ? 0 : 1;
 	}
 
-	//the center point
-	pt[2].fx = (float)(pt[0].fx - rx * cos(*arc_from));
-	pt[2].fy = (float)(pt[0].fy - rx * sin(*arc_from));
+	_calc_radian(clockwise, largearc, (float)rx, (float)ry, (float)pt.x, (float)pt.y, &fx, &fy, arc_from, arc_to);
 
-	pt[2].fx = (float)(pt[1].fx - rx * cos(*arc_to));
-	pt[2].fy = (float)(pt[1].fy - rx * sin(*arc_to));
+	ppt_center->x = (int)fx, ppt_center->y = (int)fy;
 
-	//restore ellipse from circle
-	pt[0].fy = (float)(pt[0].fy * k);
-	pt[1].fy = (float)(pt[1].fy * k);
-	pt[2].fy = (float)(pt[2].fy * k);
-
-	//recalc ellipse arc from
-	fx = pt[0].fx - pt[2].fx;
-	fy = pt[0].fy - pt[2].fy;
-	arc = atan(fy / fx);
-
-	if (arc_quadrant(*arc_from) == 1)
-	{
-		if (compare_double(arc, 0.0, DEF_DOUBLE_DIGI) > 0 && compare_double(arc, XPI / 2, DEF_DOUBLE_DIGI) < 0)
-			*arc_from = arc;
-	}
-	else if (arc_quadrant(*arc_from) == 2)
-	{
-		if (compare_double(arc, 0.0, DEF_DOUBLE_DIGI) < 0 && compare_double(arc, -XPI/2, DEF_DOUBLE_DIGI) > 0)
-			*arc_from = XPI + arc;
-	}
-	else if (arc_quadrant(*arc_from) == 3)
-	{
-		if (compare_double(arc, 0.0, DEF_DOUBLE_DIGI) > 0 && compare_double(arc, XPI/2, DEF_DOUBLE_DIGI) < 0)
-			*arc_from = XPI + arc;
-	}
-	else
-	{
-		if (compare_double(arc, 0.0, DEF_DOUBLE_DIGI) < 0 && compare_double(arc, -XPI/2, DEF_DOUBLE_DIGI) > 0)
-			*arc_from = 2 * XPI + arc;
-	}
-
-	//recalc ellipse arc to
-	fx = pt[1].fx - pt[2].fx;
-	fy = pt[1].fy - pt[2].fy;
-	arc = atan(fy / fx);
-
-	if (arc_quadrant(*arc_to) == 1)
-	{
-		if (compare_double(arc, 0.0, DEF_DOUBLE_DIGI) > 0 && compare_double(arc, XPI / 2, DEF_DOUBLE_DIGI) < 0)
-			*arc_to = arc;
-	}
-	else if (arc_quadrant(*arc_to) == 2)
-	{
-		if (compare_double(arc, 0.0, DEF_DOUBLE_DIGI) < 0 && compare_double(arc, -XPI / 2, DEF_DOUBLE_DIGI) > 0)
-			*arc_to = XPI + arc;
-	}
-	else  if (arc_quadrant(*arc_to) == 3)
-	{
-		if (compare_double(arc, 0.0, DEF_DOUBLE_DIGI) > 0 && compare_double(arc, XPI / 2, DEF_DOUBLE_DIGI) < 0)
-			*arc_to = XPI + arc;
-	}
-	else 
-	{
-		if (compare_double(arc, 0.0, DEF_DOUBLE_DIGI) < 0 && compare_double(arc, -XPI / 2, DEF_DOUBLE_DIGI) > 0)
-			*arc_to = 2 * XPI + arc;
-	}
-
-	if (clockwise && compare_double(*arc_from, *arc_to, DEF_DOUBLE_DIGI) < 0)
-	{
-		if (*arc_from < 0)
-			*arc_from += 2 * XPI;
-		else
-			*arc_to += -2 * XPI;
-	}
-	else if (!clockwise && compare_double(*arc_from, *arc_to, DEF_DOUBLE_DIGI) > 0)
-	{
-		if (*arc_from > 0)
-			*arc_from += -2 * XPI;
-		else
-			*arc_to += 2 * XPI;
-	}
-
-	ppt_center->x = ROUNDINT(pt[2].fx);
-	ppt_center->y = ROUNDINT(pt[2].fy);
-
-	if (ppt1->x <= ppt2->x)
+	if(ppt1->x < ppt2->x)
 		pt_world_to_screen(*ppt1, ppt_center, 1);
 	else
 		pt_world_to_screen(*ppt2, ppt_center, 1);
 
-	return cw;
+	return clockwise;
 }
 
 bool_t ft_calc_radian(bool_t clockwise, bool_t largearc, float rx, float ry, const xpoint_t* ppt1, const xpoint_t* ppt2, xpoint_t* ppt_center, double* arc_from, double* arc_to)
 {
-	xpoint_t pt[3] = { 0 };
-	double k, len, fx, fy, arc, arc1, arc2;
-	bool_t cw;
+	xpoint_t pt;
 
-	if (compare_float(ppt1->fx, ppt2->fx, DEF_FLOAT_DIGI) <= 0)
+	if(ppt1->fx < ppt2->fx)
 	{
-		pt[0].fx = ppt1->fx;
-		pt[0].fy = ppt1->fy;
-		pt[1].fx = ppt2->fx;
-		pt[1].fy = ppt2->fy;
-	}
-	else
-	{
-		pt[0].fx = ppt2->fx;
-		pt[0].fy = ppt2->fy;
-		pt[1].fx = ppt1->fx;
-		pt[1].fy = ppt1->fy;
+		pt.fx = ppt2->fx, pt.fy = ppt2->fy;
+		ft_screen_to_world(*ppt1, &pt, 1);
+	}else{
+		pt.fx = ppt1->fx, pt.fy = ppt1->fy;
+		ft_screen_to_world(*ppt2, &pt, 1);
 		clockwise = (clockwise) ? 0 : 1;
 	}
-	cw = clockwise;
 
-	if (compare_float(ppt1->fx, ppt2->fx, DEF_FLOAT_DIGI) <= 0)
-		ft_screen_to_world(*ppt1, pt, 2);
-	else
-		ft_screen_to_world(*ppt2, pt, 2);
+	_calc_radian(clockwise, largearc, rx, ry, pt.fx, pt.fy, &(ppt2->fx), &(ppt2->fy), arc_from, arc_to);
 
-	k = (double)ry / (double)rx;
-
-	//ellipse to circle
-	pt[0].fx = (float)pt[0].fx;
-	pt[0].fy = (float)(pt[0].fy / k);
-	pt[1].fx = (float)pt[1].fx;
-	pt[1].fy = (float)(pt[1].fy / k);
-
-	fx = pt[1].fx - pt[0].fx;
-	fy = pt[1].fy - pt[0].fy;
-
-	//the half line length (ppt1 to ppt2)
-	len = sqrt(pow(fx, 2) + pow(fy, 2)) / 2;
-
-	//the included angle from point1 to point2
-	arc = asin(len / rx) * 2;
-	arc1 = acos(len / rx);
-	arc2 = XPI / 2 + atan(fy / fx);
-
-	if (clockwise && largearc)
-	{
-		*arc_from = arc2 + XPI / 2 + arc1;
-		*arc_to = -2 * XPI + *arc_from + arc;
-	}
-	else if (!clockwise && !largearc)
-	{
-		*arc_from = -2 * XPI + arc2 + XPI / 2 + arc1;
-		*arc_to = *arc_from + arc;
-	}
-	else if (clockwise && !largearc)
-	{
-		*arc_from = arc2 + XPI / 2 - arc1;
-		*arc_to = *arc_from - arc;
-	}
-	else //(!clockwise && largearc)
-	{
-		*arc_from = -2 * XPI + arc2 + XPI / 2 - arc1;
-		*arc_to = 2 * XPI + *arc_from - arc;
-	}
-
-	//the center point
-	pt[2].fx = (float)(pt[0].fx - rx * cos(*arc_from));
-	pt[2].fy = (float)(pt[0].fy - rx * sin(*arc_from));
-
-	pt[2].fx = (float)(pt[1].fx - rx * cos(*arc_to));
-	pt[2].fy = (float)(pt[1].fy - rx * sin(*arc_to));
-
-	//restore ellipse from circle
-	pt[0].fy = (float)(pt[0].fy * k);
-	pt[1].fy = (float)(pt[1].fy * k);
-	pt[2].fy = (float)(pt[2].fy * k);
-
-	//recalc ellipse arc from
-	fx = pt[0].fx - pt[2].fx;
-	fy = pt[0].fy - pt[2].fy;
-	arc = atan(fy / fx);
-
-	if (arc_quadrant(*arc_from) == 1)
-	{
-		if (compare_double(arc, 0.0, DEF_DOUBLE_DIGI) > 0 && compare_double(arc, XPI / 2, DEF_DOUBLE_DIGI) < 0)
-			*arc_from = arc;
-	}
-	else if (arc_quadrant(*arc_from) == 2)
-	{
-		if (compare_double(arc, 0.0, DEF_DOUBLE_DIGI) < 0 && compare_double(arc, -XPI / 2, DEF_DOUBLE_DIGI) > 0)
-			*arc_from = XPI + arc;
-	}
-	else if (arc_quadrant(*arc_from) == 3)
-	{
-		if (compare_double(arc, 0.0, DEF_DOUBLE_DIGI) > 0 && compare_double(arc, XPI / 2, DEF_DOUBLE_DIGI) < 0)
-			*arc_from = XPI + arc;
-	}
-	else
-	{
-		if (compare_double(arc, 0.0, DEF_DOUBLE_DIGI) < 0 && compare_double(arc, -XPI / 2, DEF_DOUBLE_DIGI) > 0)
-			*arc_from = 2 * XPI + arc;
-	}
-
-	//recalc ellipse arc to
-	fx = pt[1].fx - pt[2].fx;
-	fy = pt[1].fy - pt[2].fy;
-	arc = atan(fy / fx);
-
-	if (arc_quadrant(*arc_to) == 1)
-	{
-		if (compare_double(arc, 0.0, DEF_DOUBLE_DIGI) > 0 && compare_double(arc, XPI / 2, DEF_DOUBLE_DIGI) < 0)
-			*arc_to = arc;
-	}
-	else if (arc_quadrant(*arc_to) == 2)
-	{
-		if (compare_double(arc, 0.0, DEF_DOUBLE_DIGI) < 0 && compare_double(arc, -XPI / 2, DEF_DOUBLE_DIGI) > 0)
-			*arc_to = XPI + arc;
-	}
-	else  if (arc_quadrant(*arc_to) == 3)
-	{
-		if (compare_double(arc, 0.0, DEF_DOUBLE_DIGI) > 0 && compare_double(arc, XPI / 2, DEF_DOUBLE_DIGI) < 0)
-			*arc_to = XPI + arc;
-	}
-	else
-	{
-		if (compare_double(arc, 0.0, DEF_DOUBLE_DIGI) < 0 && compare_double(arc, -XPI / 2, DEF_DOUBLE_DIGI) > 0)
-			*arc_to = 2 * XPI + arc;
-	}
-
-	if (clockwise && compare_double(*arc_from, *arc_to, DEF_DOUBLE_DIGI) < 0)
-	{
-		if (*arc_from < 0)
-			*arc_from += 2 * XPI;
-		else
-			*arc_to += -2 * XPI;
-	}
-	else if (!clockwise && compare_double(*arc_from, *arc_to, DEF_DOUBLE_DIGI) > 0)
-	{
-		if (*arc_from > 0)
-			*arc_from += -2 * XPI;
-		else
-			*arc_to += 2 * XPI;
-	}
-
-	ppt_center->fx = (pt[2].fx);
-	ppt_center->fy = (pt[2].fy);
-
-	if (compare_float(ppt1->fx, ppt2->fx, DEF_FLOAT_DIGI) <= 0)
+	if(ppt1->fx < ppt2->fx)
 		ft_world_to_screen(*ppt1, ppt_center, 1);
 	else
 		ft_world_to_screen(*ppt2, ppt_center, 1);
 
-	return cw;
+	return clockwise;
 }
 
 void pt_calc_points(const xpoint_t* ppt_center, int rx, int ry, double arc_from, double arc_to, bool_t* clockwise, bool_t* largearc, xpoint_t* ppt1, xpoint_t* ppt2)

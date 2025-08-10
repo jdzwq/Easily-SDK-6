@@ -496,6 +496,8 @@ void hand_editbox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	xcolor_t xc;
 	drawing_interface ifv = {0};
 
+	widget_hand_paint(widget, dc);
+	
 	hand_textor_paint(&ptd->textor, dc, pxr);
 
 	if (ptd->b_auto)

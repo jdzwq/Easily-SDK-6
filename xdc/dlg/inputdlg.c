@@ -79,7 +79,7 @@ int hand_inputdlg_create(widget_t widget, void* data)
 
 	xrect_t xr;
 	xfont_t xf = { 0 };
-	clr_mod_t ob = { 0 };
+	color_mod_t ob = { 0 };
 	INPUTPARAM* pim = (INPUTPARAM*)data;
 
 	widget_hand_create(widget);
@@ -215,7 +215,7 @@ void hand_inputdlg_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	canvas_t canv;
 	drawing_interface ifv = {0};
 
-	clr_mod_t clrs;
+	color_mod_t clrs;
 	xbrush_t xb = { 0 };
 	xcolor_t xc_brim, xc_core;
 
@@ -240,7 +240,7 @@ widget_t inputdlg_create(const tchar_t* title, tchar_t* buf, int max, widget_t o
 {
 	if_dispatch_t ev = { 0 };
 	INPUTPARAM pm = { 0 };
-	clr_mod_t clr = { 0 };
+	color_mod_t clr = { 0 };
 	xrect_t xr = { 0 };
 	widget_t dlg;
 

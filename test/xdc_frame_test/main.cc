@@ -148,6 +148,15 @@ void _MainFrame_CreateToolBar(widget_t widget)
 	widget_set_user_id(pdt->hToolBar, IDC_MAINFRAME_TOOLBAR);
 	widget_set_owner(pdt->hToolBar, widget);
 
+	color_mod_t clrs = {0};
+    parse_xcolor(&clrs.clr_bkg, GDI_ATTR_RGB_SOFTAZURE);
+    parse_xcolor(&clrs.clr_frg, GDI_ATTR_RGB_SNOWWHITE);
+    parse_xcolor(&clrs.clr_txt, GDI_ATTR_RGB_LIGHTWHITE);
+    parse_xcolor(&clrs.clr_msk, GDI_ATTR_RGB_BLACK);
+    parse_xcolor(&clrs.clr_ico, GDI_ATTR_RGB_SNOWWHITE);
+
+	widget_set_color_mode(pdt->hToolBar, &clrs);
+
 	LINKPTR ptrTool = create_tool_doc();
 
 	LINKPTR glk = insert_tool_group(ptrTool, LINK_LAST);
@@ -241,6 +250,15 @@ void _MainFrame_CreateTitleBar(widget_t widget)
 	widget_set_user_id(pdt->hTitleBar, IDC_MAINFRAME_TITLEBAR);
 	widget_set_owner(pdt->hTitleBar, widget);
 
+	color_mod_t clrs = {0};
+    parse_xcolor(&clrs.clr_bkg, GDI_ATTR_RGB_SOFTCYAN);
+    parse_xcolor(&clrs.clr_frg, GDI_ATTR_RGB_SNOWWHITE);
+    parse_xcolor(&clrs.clr_txt, GDI_ATTR_RGB_LIGHTWHITE);
+    parse_xcolor(&clrs.clr_msk, GDI_ATTR_RGB_BLACK);
+    parse_xcolor(&clrs.clr_ico, GDI_ATTR_RGB_SNOWWHITE);
+
+	widget_set_color_mode(pdt->hTitleBar, &clrs);
+
 	LINKPTR ptrTitle = create_title_doc();
 
 	set_title_oritation(ptrTitle, ATTR_ORITATION_BOTTOM);
@@ -261,6 +279,15 @@ void _MainFrame_CreateTreeBar(widget_t widget)
 	pdt->hTreeBar = treectrl_create(_T("TreeBar"), WD_STYLE_CONTROL, &xr, widget);
 	widget_set_user_id(pdt->hTreeBar, IDC_MAINFRAME_TREEBAR);
 	widget_set_owner(pdt->hTreeBar, widget);
+
+	color_mod_t clrs = {0};
+    parse_xcolor(&clrs.clr_bkg, GDI_ATTR_RGB_SOFTSLATE);
+    parse_xcolor(&clrs.clr_frg, GDI_ATTR_RGB_SNOWWHITE);
+    parse_xcolor(&clrs.clr_txt, GDI_ATTR_RGB_LIGHTWHITE);
+    parse_xcolor(&clrs.clr_msk, GDI_ATTR_RGB_BLACK);
+    parse_xcolor(&clrs.clr_ico, GDI_ATTR_RGB_SNOWWHITE);
+
+	widget_set_color_mode(pdt->hTreeBar, &clrs);
 
 	LINKPTR ptrTree = create_tree_doc();
 
@@ -284,6 +311,15 @@ void _MainFrame_CreateStatusBar(widget_t widget)
 	widget_set_user_id(pdt->hStatusBar, IDC_MAINFRAME_STATUSBAR);
 	widget_set_owner(pdt->hStatusBar, widget);
 
+	color_mod_t clrs = {0};
+    parse_xcolor(&clrs.clr_bkg, GDI_ATTR_RGB_SOFTPURPLE);
+    parse_xcolor(&clrs.clr_frg, GDI_ATTR_RGB_SNOWWHITE);
+    parse_xcolor(&clrs.clr_txt, GDI_ATTR_RGB_LIGHTWHITE);
+    parse_xcolor(&clrs.clr_msk, GDI_ATTR_RGB_BLACK);
+    parse_xcolor(&clrs.clr_ico, GDI_ATTR_RGB_SNOWWHITE);
+
+	widget_set_color_mode(pdt->hStatusBar, &clrs);
+
 	LINKPTR ptrStatus = create_status_doc();
 
 	set_status_alignment(ptrStatus, ATTR_ALIGNMENT_FAR);
@@ -302,18 +338,20 @@ void _MainFrame_CreateStatusBar(widget_t widget)
 	ilk = get_status_item(ptrStatus, _T("navibox"));
 	statusctrl_get_item_rect(pdt->hStatusBar, ilk, &xr);
 
-	pdt->hNaviBox = navibox_create(pdt->hStatusBar, WD_STYLE_CONTROL, &xr);
-	widget_set_owner(pdt->hNaviBox, pdt->hStatusBar);
-	widget_show(pdt->hNaviBox, WS_SHOW_NORMAL);
+	//pdt->hNaviBox = navibox_create(pdt->hStatusBar, WD_STYLE_CONTROL, &xr);
+	//widget_set_owner(pdt->hNaviBox, pdt->hStatusBar);
+	//widget_show(pdt->hNaviBox, WS_SHOW_NORMAL);
 }
 
 void _MainFrame_DestroyToolBar(widget_t widget)
 {
 	MainFrameDelta* pdt = GETMAINFRAMEDELTA(widget);
 
+	if(!widget_is_valid(pdt->hToolBar)) return;
+
 	LINKPTR ptrTool = toolctrl_detach(pdt->hToolBar);
-	if (ptrTool)
-		destroy_tool_doc(ptrTool);
+	if (ptrTool) destroy_tool_doc(ptrTool);
+
 	widget_destroy(pdt->hToolBar);
 }
 
@@ -321,9 +359,11 @@ void _MainFrame_DestroyTitleBar(widget_t widget)
 {
 	MainFrameDelta* pdt = GETMAINFRAMEDELTA(widget);
 
+	if(!widget_is_valid(pdt->hTitleBar)) return;
+
 	LINKPTR ptrTitle = titlectrl_detach(pdt->hTitleBar);
-	if (ptrTitle)
-		destroy_title_doc(ptrTitle);
+	if (ptrTitle) destroy_title_doc(ptrTitle);
+
 	widget_destroy(pdt->hTitleBar);
 }
 
@@ -331,9 +371,11 @@ void _MainFrame_DestroyTreeBar(widget_t widget)
 {
 	MainFrameDelta* pdt = GETMAINFRAMEDELTA(widget);
 
+	if(!widget_is_valid(pdt->hTreeBar)) return;
+
 	LINKPTR ptrTree = treectrl_detach(pdt->hTreeBar);
-	if (ptrTree)
-		destroy_tree_doc(ptrTree);
+	if (ptrTree) destroy_tree_doc(ptrTree);
+
 	widget_destroy(pdt->hTreeBar);
 }
 
@@ -341,9 +383,11 @@ void _MainFrame_DestroyStatusBar(widget_t widget)
 {
 	MainFrameDelta* pdt = GETMAINFRAMEDELTA(widget);
 
+	if(!widget_is_valid(pdt->hStatusBar)) return;
+
 	LINKPTR ptrStatus = statusctrl_detach(pdt->hStatusBar);
-	if (ptrStatus)
-		destroy_status_doc(ptrStatus);
+	if (ptrStatus) destroy_status_doc(ptrStatus);
+
 	widget_destroy(pdt->hStatusBar);
 }
 
@@ -491,7 +535,7 @@ widget_t _MainFrame_CreatePanel(widget_t widget, const tchar_t* wclass)
 		/*set_plot_type(ptr_plot, ATTR_PLOT_TYPE_INDICATOR, -1);
 		set_plot_width(ptr_plot, 100);
 		set_plot_height(ptr_plot, 50);
-		set_plot_style(ptr_plot, _T("font-size:10;stroke-width:1;fill-color:Gray;stroke-color:LightSlateGray;fill-style:gradient;gradient:radial;"), -1);
+		set_plot_style(ptr_plot, _T("font-size:10;text-color:Orange;stroke-width:1;fill-color:Gray;stroke-color:LightSlateGray;fill-style:gradient;gradient:horz;"), -1);
 		set_plot_matrix_rows(ptr_plot, 5);
 		set_plot_matrix_cols(ptr_plot, 3);
 		set_plot_matrix_data(ptr_plot, _T(" {[2, 1, 3, 5] [2, 1,3, 4][4, 3, 5, 7] [6, 5, 7, 8] [8, 5, 8, 10]}"), -1);
@@ -615,7 +659,6 @@ widget_t _MainFrame_CreatePanel(widget_t widget, const tchar_t* wclass)
 		set_plot_matrix_cols(ptr_plot, 4);
 		set_plot_matrix_data(ptr_plot, _T(" {[2, 1, 3, 5] [2, 1,3, 4][4, 3, 5, 7] [6, 5, 7, 8] [8, 5, 8, 10]}"), -1);
 		*/
-
 		/*set_plot_type(ptr_plot, ATTR_PLOT_TYPE_HISTOGRAM, -1);
 		set_plot_width(ptr_plot, 100);
 		set_plot_height(ptr_plot, 50);
@@ -732,8 +775,7 @@ widget_t _MainFrame_GetActivePanel(widget_t widget)
 	XDK_ASSERT(pdt != NULL);
 
 	LINKPTR nlk = titlectrl_get_focus_item(pdt->hTitleBar);
-	if (!nlk)
-		return NULL;
+	if (!nlk) return NULL;
 
 	return (widget_t)get_title_item_delta(nlk);
 }
@@ -813,14 +855,15 @@ void MainFrame_TitleBar_OnItemDelete(widget_t widget, NOTICE_TITLE* pnt)
 	{
 		ptrDoc = plotctrl_fetch(hPanel);
 	}
+ 
+	//widget_close(hPanel, 0);
+	widget_destroy(hPanel);
 
-	widget_close(hPanel, 0);
-
-	if (widget_is_valid(hPanel))
+	/*if (widget_is_valid(hPanel))
 	{
 		pnt->ret = 1;
 		return;
-	}
+	}*/
 
 	if (compare_text(wclass, -1, PANEL_CLASS_CALENDAR, -1, 0) == 0)
 	{
@@ -864,7 +907,7 @@ void MainFrame_TitleBar_OnItemChanged(widget_t widget, NOTICE_TITLE* pnt)
 
 	if (widget_is_valid(hPanel))
 	{
-		clr_mod_t clr;
+		color_mod_t clr;
 		widget_get_color_mode(widget, &clr);
 
 		widget_set_color_mode(hPanel, &clr);
@@ -921,481 +964,9 @@ void MainFrame_UserPanel_OnDraw(widget_t win, visual_t rdc)
 	
 	parse_xcolor(&xc, GDI_ATTR_RGB_LIGHTRED);
 
-	//test_gizmo(&ifc, &xc, (xrect_t*)&cb);
+	test_gizmo(&ifc, &xc, (xrect_t*)&cb);
 
 	//test_color(&ifc, (xrect_t*)&cb);
-
-	/*xscpy(xp.size, _T("2"));
-
-	xpoint_t pt1, pt2;
-
-	pt1.fx = 10.0f;
-	pt1.fy = 10.0f;
-	pt2.fx = 20.0f;
-	pt2.fy = 25.0f;
-
-	(*ifc.pf_draw_line)(ifc.ctx, &xp, &pt1, &pt2);
-
-	draw_linecap(&ifc, &xp, &pt1, &pt2, XPI / 4, GDI_ATTR_STROKE_LINECAP_SQUARE);
-
-	draw_linecap(&ifc, &xp, &pt2, &pt1, XPI / 4, GDI_ATTR_STROKE_LINECAP_ARROW);
-
-	pt1.fx = 35.0f;
-	pt1.fy = 25.0f;
-	pt2.fx = 45.0f;
-	pt2.fy = 10.0f;
-
-	(*ifc.pf_draw_line)(ifc.ctx, &xp, &pt1, &pt2);
-
-	draw_linecap(&ifc, &xp, &pt1, &pt2, XPI / 4, GDI_ATTR_STROKE_LINECAP_ARROW);
-
-	draw_linecap(&ifc, &xp, &pt2, &pt1, XPI / 4, GDI_ATTR_STROKE_LINECAP_SQUARE);
-
-	pt1.fx = 50.0f;
-	pt1.fy = 20.0f;
-	pt2.fx = 60.0f;
-	pt2.fy = 20.0f;
-
-	(*ifc.pf_draw_line)(ifc.ctx, &xp, &pt1, &pt2);
-
-	draw_linecap(&ifc, &xp, &pt1, &pt2, XPI / 4, GDI_ATTR_STROKE_LINECAP_ROUND);
-
-	draw_linecap(&ifc, &xp, &pt2, &pt1, XPI / 4, GDI_ATTR_STROKE_LINECAP_ARROW);
-
-	pt1.fx = 70.0f;
-	pt1.fy = 10.0f;
-	pt2.fx = 70.0f;
-	pt2.fy = 20.0f;
-
-	(*ifc.pf_draw_line)(ifc.ctx, &xp, &pt1, &pt2);
-
-	draw_linecap(&ifc, &xp, &pt1, &pt2, XPI / 4, GDI_ATTR_STROKE_LINECAP_ARROW);
-
-	draw_linecap(&ifc, &xp, &pt2, &pt1, XPI / 4, GDI_ATTR_STROKE_LINECAP_ROUND);*/
-
-	/*drawing_interface ifv = { 0 };
-
-	get_visual_interface(rdc, &ifv);
-
-	tchar_t aa[10] = { 0 };
-	xpoint_t pa[20] = { 0 };
-
-	int i = 0;
-	int n = 0;
-	int feed = 10;
-
-
-	xrect_t xr;
-	widget_get_client_rect(win, &xr);
-
-	xr.w -= 10;
-	xr.h = 50;
-
-	aa[i] = _T('M');
-	pa[n].x = xr.x;
-	pa[n].y = xr.y + feed;
-	i++;
-	n++;
-
-	aa[i] = _T('A');
-	pa[n].x = 1;
-	pa[n].y = 0;
-	pa[n+1].x = feed;
-	pa[n+1].y = feed;
-	pa[n+2].x = xr.x + feed;
-	pa[n+2].y = xr.y;
-	i++;
-	n+=3;
-
-	aa[i] = _T('L');
-	pa[n].x = xr.x + xr.w - feed;
-	pa[n].y = xr.y;
-	i++;
-	n++;
-
-	aa[i] = _T('A');
-	pa[n].x = 1;
-	pa[n].y = 0;
-	pa[n + 1].x = feed;
-	pa[n + 1].y = feed;
-	pa[n + 2].x = xr.x + xr.w;
-	pa[n + 2].y = xr.y + feed;
-	i++;
-	n += 3;
-
-	aa[i] = _T('L');
-	pa[n].x = xr.x + xr.w;
-	pa[n].y = xr.y + xr.h - feed;
-	i++;
-	n++;
-
-	aa[i] = _T('A');
-	pa[n].x = 1;
-	pa[n].y = 0;
-	pa[n + 1].x = feed;
-	pa[n + 1].y = feed;
-	pa[n + 2].x = xr.x + xr.w - feed;
-	pa[n + 2].y = xr.y + xr.h;
-	i++;
-	n += 3;
-
-	aa[i] = _T('C');
-	pa[n].x = xr.x + xr.w / 8 * 7;
-	pa[n].y = xr.y + xr.h - 10;
-	pa[n + 1].x = xr.x + xr.w / 4 * 3;
-	pa[n + 1].y = xr.y + xr.h - 10;
-	pa[n + 2].x = xr.x + xr.w / 2;
-	pa[n + 2].y = xr.y + xr.h;
-	i++;
-	n += 3;
-
-	aa[i] = _T('S');
-	pa[n].x = xr.x + xr.w / 4;
-	pa[n].y = xr.y + xr.h;
-	pa[n + 1].x = xr.x + feed;
-	pa[n + 1].y = xr.y + xr.h;
-	i++;
-	n += 2;
-	
-	aa[i] = _T('A');
-	pa[n].x = 1;
-	pa[n].y = 0;
-	pa[n + 1].x = feed;
-	pa[n + 1].y = feed;
-	pa[n + 2].x = xr.x;
-	pa[n + 2].y = xr.y + xr.h - feed;
-	i++;
-	n += 3;
-
-	aa[i] = _T('Z');
-	i++;
-
-	xp.adorn.feed = 0;
-	xp.adorn.size = 0;
-	xb.shadow.offx = 10;
-	xb.shadow.offy = 10;
-
-	(*ifv.pf_draw_path)(ifv.ctx, &xp, &xb, aa, pa, n);
-
-	xr.y = 60;
-	xr.x = 10;
-	xr.w = 50;
-	xr.h = 50;
-
-	xp.adorn.feed = 0;
-	xp.adorn.size = 0;
-	xb.shadow.offx = 5;
-	xb.shadow.offy = 5;
-	(*ifv.pf_draw_rect)(ifv.ctx, &xp, &xb, &xr);
-
-	xr.y = 60;
-	xr.x = 80;
-	xr.w = 50;
-	xr.h = 50;
-
-	xp.adorn.feed = 0;
-	xp.adorn.size = 0;
-	xb.shadow.offx = 5;
-	xb.shadow.offy = 5;
-	(*ifv.pf_draw_round)(ifv.ctx, &xp, &xb, &xr, NULL);
-
-	xr.y = 60;
-	xr.x = 150;
-	xr.w = 50;
-	xr.h = 50;
-
-	xp.adorn.feed = 0;
-	xp.adorn.size = 0;
-	xb.shadow.offx = 5;
-	xb.shadow.offy = 5;
-	(*ifv.pf_draw_ellipse)(ifv.ctx, &xp, &xb, &xr);
-
-	xr.y = 60;
-	xr.x = 220;
-	xr.w = 50;
-	xr.h = 50;
-
-	xpoint_t pt;
-
-	xsize_t xs;
-
-	xp.adorn.feed = 0;
-	xp.adorn.size = 0;
-	xb.shadow.offx = 5;
-	xb.shadow.offy = 5;
-	(*ifv.pf_draw_pie)(ifv.ctx, &xp, &xb, &xr, 0, XPI / 2);
-
-	(*ifv.pf_draw_pie)(ifv.ctx, &xp, &xb, &xr, XPI, XPI * 3 / 2);
-
-	xr.y = 60;
-	xr.x = 280;
-	xr.w = 50;
-	xr.h = 50;
-
-	xpoint_t pk;
-
-	pt.x = xr.x;
-	pt.y = xr.y + xr.h / 2;
-	pk.x = xr.x + xr.w;
-	pk.y = xr.y + xr.h / 2;
-
-	xs.w = xr.w / 2;
-	xs.h = xr.h / 2;
-
-	xp.adorn.feed = 1;
-	xp.adorn.size = 1;
-	xb.shadow.offx = 0;
-	xb.shadow.offy = 0;
-	(*ifv.pf_draw_arc)(ifv.ctx, &xp, &pt, &pk, &xs, 0, 0);
-
-	xr.y += 50;
-	pt.x = xr.x;
-	pt.y = xr.y + xr.h / 2;
-	pk.x = xr.x + xr.w;
-	pk.y = xr.y + xr.h / 2;
-	xs.w = xr.w / 2;
-	xs.h = xr.h / 2;
-
-	xp.adorn.feed = 1;
-	xp.adorn.size = 1;
-	xb.shadow.offx = 0;
-	xb.shadow.offy = 0;
-	(*ifv.pf_draw_arc)(ifv.ctx, &xp, &pt, &pk, &xs, 1, 1);
-
-	xr.x += 50;
-	pt.x = xr.x;
-	pt.y = xr.y;
-	pk.x = xr.x;
-	pk.y = xr.y + xr.h;
-
-	xs.w = xr.w / 2;
-	xs.h = xr.h / 2;
-
-	xp.adorn.feed = 1;
-	xp.adorn.size = 1;
-	xb.shadow.offx = 0;
-	xb.shadow.offy = 0;
-	(*ifv.pf_draw_arc)(ifv.ctx, &xp, &pt, &pk, &xs, 1, 0);
-
-	xr.x += 50;
-	pt.x = xr.x;
-	pt.y = xr.y;
-	pk.x = xr.x;
-	pk.y = xr.y + xr.h;
-
-	xs.w = xr.w / 2;
-	xs.h = xr.h / 2;
-
-	xp.adorn.feed = 1;
-	xp.adorn.size = 1;
-	xb.shadow.offx = 0;
-	xb.shadow.offy = 0;
-	(*ifv.pf_draw_arc)(ifv.ctx, &xp, &pt, &pk, &xs, 0, 0);
-
-	xr.y += 20;
-	pt.x = xr.x;
-	pt.y = xr.y + xr.h / 2;
-	pk.x = xr.x + xr.w / 2;
-	pk.y = xr.y + xr.h;
-	xs.w = xr.w / 2;
-	xs.h = xr.h / 2;
-
-	xp.adorn.feed = 1;
-	xp.adorn.size = 1;
-	xb.shadow.offx = 0;
-	xb.shadow.offy = 0;
-	(*ifv.pf_draw_arc)(ifv.ctx, &xp, &pt, &pk, &xs, 1, 0);
-
-	xp.adorn.feed = 1;
-	xp.adorn.size = 1;
-	xb.shadow.offx = 0;
-	xb.shadow.offy = 0;
-	(*ifv.pf_draw_arc)(ifv.ctx, &xp, &pt, &pk, &xs, 1, 1);
-
-	xr.x += 100;
-	pt.x = xr.x;
-	pt.y = xr.y + xr.h / 2;
-	pk.x = xr.x + xr.w / 2;
-	pk.y = xr.y + xr.h;
-	xs.w = xr.w / 2;
-	xs.h = xr.h / 2;
-	(*ifv.pf_draw_rect)(ifv.ctx, &xp, NULL, &xr);
-
-	xp.adorn.feed = 1;
-	xp.adorn.size = 1;
-	xb.shadow.offx = 0;
-	xb.shadow.offy = 0;
-	(*ifv.pf_draw_arc)(ifv.ctx, &xp, &pt, &pk, &xs, 0, 0);
-
-	xp.adorn.feed = 1;
-	xp.adorn.size = 1;
-	xb.shadow.offx = 0;
-	xb.shadow.offy = 0;
-	(*ifv.pf_draw_arc)(ifv.ctx, &xp, &pt, &pk, &xs, 0, 1);
-
-	xr.y = 60;
-	xr.x = 340;
-	xr.w = 50;
-	xr.h = 50;
-
-	xspan_t xn;
-	xn.s = 20;
-
-	xr.y = 100;
-	xr.x = 450;
-	xr.w = 50;
-	xr.h = 50;
-	xn.s = 20;
-	(*ifv.pf_draw_equilagon)(ifv.ctx, &xp, &xb, RECTPOINT(&xr), &xn, 6);
-
-	widget_get_client_rect(win, &xr);
-
-	xr.y += 200;
-	xr.w -= 10;
-	xr.h = 50;
-
-	i = 0;
-	n = 0;
-
-	aa[i] = _T('M');
-	pa[n].x = xr.x + xr.w - feed;
-	pa[n].y = xr.y + xr.h;
-	i++;
-	n++;
-
-	aa[i] = _T('A');
-	pa[n].x = 0;
-	pa[n].y = 0;
-	pa[n + 1].x = feed;
-	pa[n + 1].y = feed;
-	pa[n + 2].x = xr.x + xr.w;
-	pa[n + 2].y = xr.y + xr.h - feed;
-	i++;
-	n += 3;
-
-	aa[i] = _T('L');
-	pa[n].x = xr.x + xr.w;
-	pa[n].y = xr.y + feed;
-	i++;
-	n++;
-
-	aa[i] = _T('A');
-	pa[n].x = 0;
-	pa[n].y = 0;
-	pa[n + 1].x = feed;
-	pa[n + 1].y = feed;
-	pa[n + 2].x = xr.x + xr.w - feed;
-	pa[n + 2].y = xr.y;
-	i++;
-	n += 3;
-
-	aa[i] = _T('L');
-	pa[n].x = xr.x + feed;
-	pa[n].y = xr.y;
-	i++;
-	n++;
-
-	aa[i] = _T('A');
-	pa[n].x = 0;
-	pa[n].y = 0;
-	pa[n + 1].x = feed;
-	pa[n + 1].y = feed;
-	pa[n + 2].x = xr.x;
-	pa[n + 2].y = xr.y + feed;
-	i++;
-	n += 3;
-
-	aa[i] = _T('L');
-	pa[n].x = xr.x;
-	pa[n].y = xr.y + xr.h - feed;
-	i++;
-	n++;
-
-	aa[i] = _T('A');
-	pa[n].x = 0;
-	pa[n].y = 0;
-	pa[n + 1].x = feed;
-	pa[n + 1].y = feed;
-	pa[n + 2].x = xr.x + feed;
-	pa[n + 2].y = xr.y + xr.h;
-	i++;
-	n += 3;
-
-	aa[i] = _T('Z');
-	i++;
-
-	xp.adorn.feed = 0;
-	xp.adorn.size = 0;
-	xb.shadow.offx = 10;
-	xb.shadow.offy = 10;
-
-	(*ifv.pf_draw_path)(ifv.ctx, &xp, &xb, aa, pa, n);
-
-	xr.x = 100;
-	xr.y += 100;
-	xr.w = 50;
-	xr.h = 50;
-	feed = xr.w / 2;
-
-	i = 0;
-	n = 0;
-
-	aa[i] = _T('M');
-	pa[n].x = xr.x;
-	pa[n].y = xr.y;
-	i++;
-	n++;
-
-	aa[i] = _T('A');
-	pa[n].x = 1;
-	pa[n].y = 0;
-	pa[n + 1].x = feed;
-	pa[n + 1].y = feed;
-	pa[n + 2].x = xr.x + xr.w;
-	pa[n + 2].y = xr.y;
-	i++;
-	n += 3;
-
-	aa[i] = _T('A');
-	pa[n].x = 1;
-	pa[n].y = 0;
-	pa[n + 1].x = feed;
-	pa[n + 1].y = feed;
-	pa[n + 2].x = xr.x + xr.w;
-	pa[n + 2].y = xr.y + xr.h;
-	i++;
-	n += 3;
-
-	aa[i] = _T('A');
-	pa[n].x = 1;
-	pa[n].y = 0;
-	pa[n + 1].x = feed;
-	pa[n + 1].y = feed;
-	pa[n + 2].x = xr.x;
-	pa[n + 2].y = xr.y + xr.h;
-	i++;
-	n += 3;
-
-	aa[i] = _T('A');
-	pa[n].x = 1;
-	pa[n].y = 0;
-	pa[n + 1].x = feed;
-	pa[n + 1].y = feed;
-	pa[n + 2].x = xr.x;
-	pa[n + 2].y = xr.y;
-	i++;
-	n += 3;
-
-	aa[i] = _T('Z');
-	i++;
-
-	xp.adorn.feed = 0;
-	xp.adorn.size = 0;
-	xb.shadow.offx = 10;
-	xb.shadow.offy = 10;
-
-	(*ifv.pf_draw_path)(ifv.ctx, &xp, &xb, aa, pa, n);
-	*/
 	
 }
 
@@ -1408,6 +979,18 @@ int MainFrame_OnCreate(widget_t widget, void* data)
 	widget_hand_create(widget);
 
 	widget_set_accel(widget, MAINFRAME_ACCEL, MAINFRAME_ACCEL_COUNT);
+
+	color_mod_t clrs = {0};
+    parse_xcolor(&clrs.clr_bkg, GDI_ATTR_RGB_HARDBLACK);
+    parse_xcolor(&clrs.clr_frg, GDI_ATTR_RGB_SNOWWHITE);
+    parse_xcolor(&clrs.clr_txt, GDI_ATTR_RGB_LIGHTWHITE);
+    parse_xcolor(&clrs.clr_msk, GDI_ATTR_RGB_BLACK);
+    parse_xcolor(&clrs.clr_ico, GDI_ATTR_RGB_SNOWWHITE);
+	
+	widget_set_color_mode(widget, &clrs);
+
+	pdt = (MainFrameDelta*)xmem_alloc(sizeof(MainFrameDelta));
+	SETMAINFRAMEDELTA(widget, pdt);
 
 	xsize_t xs;
 
@@ -1425,9 +1008,6 @@ int MainFrame_OnCreate(widget_t widget, void* data)
 	xs.fh = 0;
 	widget_size_to_pt(widget, &xs);
 	widget_dock(widget, WS_DOCK_LEFT | WS_DOCK_DYNA, xs.w, 0);
-
-	pdt = (MainFrameDelta*)xmem_alloc(sizeof(MainFrameDelta));
-	SETMAINFRAMEDELTA(widget, pdt);
 
 	_MainFrame_CreateToolBar(widget);
 
@@ -1467,17 +1047,20 @@ int MainFrame_OnClose(widget_t widget)
 {
 	MainFrameDelta* pdt = GETMAINFRAMEDELTA(widget);
 
-	LINKPTR ptrTitle = titlectrl_fetch(pdt->hTitleBar);
-	LINKPTR plk;
-
-	while (plk = titlectrl_get_focus_item(pdt->hTitleBar))
+	if(widget_is_valid(pdt->hTitleBar))
 	{
-		if (!titlectrl_delete_item(pdt->hTitleBar, plk))
-			break;
-	}
+		LINKPTR ptrTitle = titlectrl_fetch(pdt->hTitleBar);
+		LINKPTR plk;
 
-	if (get_title_item_count(ptrTitle))
-		return 1;
+		while (plk = titlectrl_get_focus_item(pdt->hTitleBar))
+		{
+			if (!titlectrl_delete_item(pdt->hTitleBar, plk))
+				break;
+		}
+
+		if (get_title_item_count(ptrTitle))
+			return 1;
+	}
 
 	widget_destroy(widget);
 
@@ -1703,12 +1286,11 @@ widget_t MainFrame_Create(const tchar_t* mname)
 	xr.h = 600;
 
 	widget = widget_create(_T("TEST"), WD_STYLE_FRAME | WD_STYLE_DOCKER | WD_STYLE_MENUBAR | WD_STYLE_OWNERNC, &xr, NULL, &ev);
-
 	if (!widget)
 	{
 		return 0;
 	}
-	
+
 	widget_show(widget, WS_SHOW_NORMAL);
 	widget_paint(widget);
 

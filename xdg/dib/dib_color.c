@@ -144,7 +144,7 @@ dword_t fill_color_dibbits(const xcolor_t* pxc, const bitmap_info_head_t* pbi, c
 				buf[total + ind] = pxc->b;
 				buf[total + ind + 1] = pxc->g;
 				buf[total + ind + 2] = pxc->r;
-				buf[total + ind + 3] = 0;
+				buf[total + ind + 3] = 255;
 				break;
 			}
 		}
@@ -295,7 +295,7 @@ dword_t fill_pattern_dibbits(const xcolor_t* pxc_front, const xcolor_t* pxc_back
 					buf[total + ind] = pxc_back->b;
 					buf[total + ind + 1] = pxc_back->g;
 					buf[total + ind + 2] = pxc_back->r;
-					buf[total + ind + 3] = 0;
+					buf[total + ind + 3] = 255;
 				}
 				break;
 			}
@@ -371,7 +371,7 @@ dword_t fill_gradient_dibbits(const xcolor_t* pxc_brim, const xcolor_t* pxc_core
 
 	if (compare_text(lay, -1, GDI_ATTR_GRADIENT_HORZ, -1, 1) == 0)
 	{
-		xc.r = pxc_brim->r, xc.g = pxc_brim->g, xc.b = pxc_brim->b;
+		xc.r = pxc_brim->r, xc.g = pxc_brim->g, xc.b = pxc_brim->b, xc.a = pxc_brim->a;
 		for (col = 0; col < (int)pbi->width / 2; col++)
 		{
 			for (row = 0; row < (int)pbi->height; row++)
@@ -384,7 +384,7 @@ dword_t fill_gradient_dibbits(const xcolor_t* pxc_brim, const xcolor_t* pxc_core
 			xc.b = pxc_brim->b + (unsigned char)(f * (pxc_core->b - pxc_brim->b));
 		}
 
-		xc.r = pxc_core->r, xc.g = pxc_core->g, xc.b = pxc_core->b;
+		xc.r = pxc_core->r, xc.g = pxc_core->g, xc.b = pxc_core->b, xc.a = pxc_core->a;
 		f = 1.0 / (pbi->width / 2);
 		for (col = (int)pbi->width / 2; col < (int)pbi->width; col++)
 		{
@@ -400,7 +400,7 @@ dword_t fill_gradient_dibbits(const xcolor_t* pxc_brim, const xcolor_t* pxc_core
 	}
 	else if (compare_text(lay, -1, GDI_ATTR_GRADIENT_VERT, -1, 1) == 0)
 	{
-		xc.r = pxc_brim->r, xc.g = pxc_brim->g, xc.b = pxc_brim->b;
+		xc.r = pxc_brim->r, xc.g = pxc_brim->g, xc.b = pxc_brim->b, xc.a = pxc_brim->a;
 		for (row = 0; row < (int)pbi->height / 2; row++)
 		{
 			for (col = 0; col < (int)pbi->width; col++)
@@ -413,7 +413,7 @@ dword_t fill_gradient_dibbits(const xcolor_t* pxc_brim, const xcolor_t* pxc_core
 			xc.b = pxc_brim->b + (unsigned char)(f * (pxc_core->b - pxc_brim->b));
 		}
 
-		xc.r = pxc_core->r, xc.g = pxc_core->g, xc.b = pxc_core->b;
+		xc.r = pxc_core->r, xc.g = pxc_core->g, xc.b = pxc_core->b, xc.a = pxc_core->a;
 		for (row = (int)pbi->height / 2; row < (int)pbi->height; row++)
 		{
 			for (col = 0; col < (int)pbi->width; col++)

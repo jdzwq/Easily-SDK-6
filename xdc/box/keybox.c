@@ -397,7 +397,7 @@ void hand_keybox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	visual_t rdc;
 	drawing_interface ifv = {0};
 
-	clr_mod_t clrs;
+	color_mod_t clrs;
 	xbrush_t xb_focus, xb_bark;
 	xface_t xa;
 

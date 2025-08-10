@@ -241,6 +241,7 @@ void gen_glyph(visual_t vc, glyph_info_t* pgi)
  
 	xfont_t xf;
 	default_xfont(&xf);
+	xscpy(xf.color, GDI_ATTR_RGB_WHITE);
 
 	tchar_t ch;
 	dword_t dw;
@@ -369,7 +370,7 @@ void gen_glyph(visual_t vc, glyph_info_t* pgi)
 						bmp_buf[j] |= ~bitmask[n];
 					else
 						bmp_buf[j] &= bitmask[n];
-
+		
 					pt.x++;
 				}
 				k++;
@@ -385,7 +386,7 @@ void gen_glyph(visual_t vc, glyph_info_t* pgi)
 
 				for (j = 0; j < n; j++)
 				{
-					a_xsappend((schar_t*)utf_buf, "0x%02X", bmp_buf[k * n + j]);
+					a_xsappend((schar_t*)utf_buf, "%#02X", bmp_buf[k * n + j]);
 
 					if (j == n - 1)
 						a_xscat((schar_t*)utf_buf, "\n");
@@ -432,7 +433,7 @@ int main(int argc, const char * argv[]) {
 
 	visual_t vc;
 
-	/*vc = (*if_context.pf_create_display_context)(NULL);
+	vc = (*if_context.pf_create_display_context)(NULL);
 	gen_glyph(vc, ascii_medium_regular_list);
 	(*if_context.pf_destroy_context)(vc);
 
@@ -446,9 +447,9 @@ int main(int argc, const char * argv[]) {
 
 	vc = (*if_context.pf_create_display_context)(NULL);
 	gen_glyph(vc, ascii_bold_italic_list);
-	(*if_context.pf_destroy_context)(vc);*/
+	(*if_context.pf_destroy_context)(vc);
 
-	/*vc = (*if_context.pf_create_display_context)(NULL);
+	vc = (*if_context.pf_create_display_context)(NULL);
 	gen_glyph(vc, gb2312_medium_regular_list);
 	(*if_context.pf_destroy_context)(vc);
 
@@ -462,9 +463,9 @@ int main(int argc, const char * argv[]) {
 
 	vc = (*if_context.pf_create_display_context)(NULL);
 	gen_glyph(vc, gb2312_bold_italic_list);
-	(*if_context.pf_destroy_context)(vc);*/
+	(*if_context.pf_destroy_context)(vc);
 
-	vc = (*if_context.pf_create_display_context)(NULL);
+	/*vc = (*if_context.pf_create_display_context)(NULL);
 	gen_glyph(vc, unicode_medium_regular_list);
 	(*if_context.pf_destroy_context)(vc);
 
@@ -478,7 +479,7 @@ int main(int argc, const char * argv[]) {
 
 	vc = (*if_context.pf_create_display_context)(NULL);
 	gen_glyph(vc, unicode_bold_italic_list);
-	(*if_context.pf_destroy_context)(vc);
+	(*if_context.pf_destroy_context)(vc);*/
 	
 	(*if_context.pf_context_cleanup)();
 

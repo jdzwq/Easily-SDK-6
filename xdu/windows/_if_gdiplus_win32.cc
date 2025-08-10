@@ -237,7 +237,7 @@ static StringFormat* create_face(const xface_t* pxa)
 	return psf;
 }
 
-static GraphicsPath* create_path(HDC hDC, const tchar_t* aa, const xpoint_t* pa)
+static GraphicsPath* create_path(HDC hDC, const tchar_t* aa, const xpoint_t* pa, int pn)
 {
 	POINT pt_m = { 0 };
 	POINT pt_p = { 0 };
@@ -258,7 +258,7 @@ static GraphicsPath* create_path(HDC hDC, const tchar_t* aa, const xpoint_t* pa)
 
 	GraphicsPath* path = new GraphicsPath;
 
-	while (*aa)
+	while (*aa && pn)
 	{
 		if (*aa == _T('M') || *aa == _T('m'))
 		{
@@ -517,6 +517,7 @@ static GraphicsPath* create_path(HDC hDC, const tchar_t* aa, const xpoint_t* pa)
 
 		aa++;
 		pa += n;
+		pn -= n;
 	}
 
 	return path;
@@ -672,7 +673,7 @@ void _gdi_draw_polyline(visual_t rdc, const xpen_t* pxp, const xpoint_t* ppt, in
 	delete pp;
 }
 
-void _gdi_draw_arc(visual_t rdc, const xpen_t* pxp, const xpoint_t * ppt1, const xpoint_t* ppt2, const xsize_t* pxs, bool_t sflag, bool_t lflag)
+void _gdi_draw_arc(visual_t rdc, const xpen_t* pxp, const xpoint_t * ppt1, const xpoint_t* ppt2, const xsize_t* pxs, bool_t clockwise, bool_t largearc)
 {
 	win32_context_t* ctx = (win32_context_t*)rdc;
 	HDC hDC = (HDC)(ctx->context);
@@ -699,7 +700,7 @@ void _gdi_draw_arc(visual_t rdc, const xpen_t* pxp, const xpoint_t * ppt1, const
 	rx = pt[2].x;
 	ry = pt[2].y;
 
-	pt_calc_radian(sflag, lflag, rx, ry, &xp[0], &xp[1], &xp[2], &fang, &tang);
+	pt_calc_radian(clockwise, largearc, rx, ry, &xp[0], &xp[1], &xp[2], &fang, &tang);
 
 	float fdeg, sdeg;
 
@@ -1253,12 +1254,12 @@ void _gdi_draw_polygon(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, con
 	}
 }
 
-void _gdi_draw_path(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const tchar_t* aa, const xpoint_t* pa)
+void _gdi_draw_path(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const tchar_t* aa, const xpoint_t* pa, int pn)
 {
 	win32_context_t* ctx = (win32_context_t*)rdc;
 	HDC hDC = (HDC)(ctx->context);
 
-	GraphicsPath* path = create_path(hDC, aa, pa);
+	GraphicsPath* path = create_path(hDC, aa, pa, pn);
 
 	if (!path)
 		return;
@@ -1440,6 +1441,9 @@ void _gdi_text_rect(visual_t rdc, const xfont_t* pxf, const xface_t* pxa, const 
 {
 	win32_context_t* ctx = (win32_context_t*)rdc;
 
+	if (len < 0) len = (txt) ? xslen(txt) : 0;
+	if(!len) return;
+
 	BOOL bRef = 0;
 	HDC hDC;
 
@@ -1490,21 +1494,29 @@ void _gdi_text_rect(visual_t rdc, const xfont_t* pxf, const xface_t* pxa, const 
 
 	LPtoDP(hDC, pt, 2);
 
-	pxr->x = pt[0].x;
-	pxr->y = pt[0].y;
-	pxr->w = pt[1].x - pt[0].x;
-	pxr->h = pt[1].y - pt[0].y;
+	int width = pt[1].x - pt[0].x;
+	int height = pt[1].y - pt[0].y;
 
 	delete pf;
 	delete ps;
 
 	if (bRef)
 		ReleaseDC(NULL, hDC);
+
+	if(pxr->w < width) pxr->w = width;
+	if(pxr->h < height) pxr->h = height;
 }
 
 void _gdi_text_size(visual_t rdc, const xfont_t* pxf, const tchar_t* txt, int len, xsize_t* pxs)
 {
 	win32_context_t* ctx = (win32_context_t*)rdc;
+
+	if (len < 0) len = (txt) ? xslen(txt) : 0;
+	if(!len)
+	{
+		pxs->w = pxs->h = 0;
+		return;
+	}
 
 	BOOL bRef = 0;
 	HDC hDC;
@@ -1551,12 +1563,7 @@ void _gdi_text_size(visual_t rdc, const xfont_t* pxf, const tchar_t* txt, int le
 	}
 
 	hFont = CreateFontIndirect(&lf);
-
 	orgFont = (HFONT)SelectObject(hDC, hFont);
-
-	if (len < 0)
-		len = (txt) ? xslen(txt) : 0;
-
 	GetTextExtentPoint32(hDC, txt, len, &si);
 
 	hFont = (HFONT)SelectObject(hDC, orgFont);

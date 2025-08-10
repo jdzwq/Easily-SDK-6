@@ -1471,7 +1471,7 @@ void _textor_reset_caret(textor_context* ptd)
 
 	_textor_calc_point(ptd, ptd->vb.px, ptd->vb.py, ptd->vb.pw, ptd->vb.ph, ptd->paged, ptd->cur_row, ptd->cur_col, &pt1, &pt2);
 
-	widget_show_caret(ptd->widget, pt1.x, pt1.y, 1);
+	widget_show_caret(ptd->widget, pt1.x, pt1.y);
 }
 
 void _textor_reset_page(textor_context* ptd, bool_t repage)

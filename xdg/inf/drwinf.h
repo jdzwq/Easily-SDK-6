@@ -149,7 +149,7 @@ typedef struct _drawing_interface{
 	PF_GET_INTERFACE	pf_get_visual_interface;
 	PF_GET_VISUAL		pf_get_visual_handle;
 
-	clr_mod_t mode;
+	color_mod_t mode;
 
 	xrect_t rect;
 }drawing_interface;

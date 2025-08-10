@@ -36,7 +36,9 @@ static tchar_t *x11_font_size[] = {_T("9"),_T("10"),_T("12"),_T("13"),_T("14"),_
 static tchar_t x11_pattern[] = {_T("-*-%s-%s-%s-*--%s-*-*-*-*-*-*")};
 //font pattern eg: -misc-fixed-medium-r-normal--10-100-75-75-c-60-iso8859-1
 //font pattern eg: -*-helvetica-*-*-*-*-12-*-*-*-*-*-*
- 
+
+#define default_fixed_pattern	_T("fixed")
+
 static int format_font_pattern(const xfont_t* pxf, tchar_t* buf)
 {
     const tchar_t* fs_name = NULL;
@@ -90,49 +92,47 @@ static void _adjust_rect(XRectangle* prt, int src_width, int src_height, const t
 {
 	if (xscmp(horz_align, GDI_ATTR_TEXT_ALIGN_NEAR) == 0 && xscmp(vert_align, GDI_ATTR_TEXT_ALIGN_NEAR) == 0)
 	{
-		prt->width = (prt->width < src_width) ? prt->width : src_width;
-		prt->height = (prt->height < src_height) ? prt->height : src_height;
-	}
-	else if (xscmp(horz_align, GDI_ATTR_TEXT_ALIGN_FAR) == 0 && xscmp(vert_align,GDI_ATTR_TEXT_ALIGN_FAR) == 0)
-	{
-		prt->x = (prt->width < src_width) ? prt->x : (prt->x + prt->width - src_width);
-		prt->height = (prt->height < src_height) ? prt->height : src_height;
+		NOP;
 	}
 	else if (xscmp(horz_align,GDI_ATTR_TEXT_ALIGN_NEAR) == 0 && xscmp(vert_align,GDI_ATTR_TEXT_ALIGN_FAR) == 0)
 	{
-		prt->width = (prt->width < src_width) ? prt->width : src_width;
-		prt->y = (prt->height < src_height) ? prt->y : (prt->y + prt->height - src_height);
+		prt->y += (prt->height - src_height);
 	}
-	else if (xscmp(horz_align,GDI_ATTR_TEXT_ALIGN_FAR) == 0 && xscmp(vert_align,GDI_ATTR_TEXT_ALIGN_FAR) == 0)
+	else if (xscmp(horz_align,GDI_ATTR_TEXT_ALIGN_FAR) == 0 && xscmp(vert_align,GDI_ATTR_TEXT_ALIGN_NEAR) == 0)
 	{
-		prt->x = (prt->width < src_width) ? prt->x : (prt->x + prt->width - src_width);
-		prt->y = (prt->height < src_height) ? prt->y : (prt->y + prt->height - src_height);
+		prt->x += (prt->width - src_width);
 	}
-	else if (xscmp(horz_align,GDI_ATTR_TEXT_ALIGN_CENTER) == 0 && xscmp(vert_align,GDI_ATTR_TEXT_ALIGN_CENTER) == 0)
+	else if (xscmp(horz_align, GDI_ATTR_TEXT_ALIGN_FAR) == 0 && xscmp(vert_align,GDI_ATTR_TEXT_ALIGN_FAR) == 0)
 	{
-		if (prt->width > src_width)
-		{
-			prt->x = prt->x + (prt->width - src_width) / 2;
-			prt->width = src_width;
-		}
-		if (prt->height > src_height)
-		{
-			prt->y = prt->y + (prt->height - src_height) / 2;
-			prt->height = src_height;
-		}
+		prt->x += (prt->width - src_width);
+		prt->y += (prt->height - src_height);
 	}
 	else if (xscmp(horz_align,GDI_ATTR_TEXT_ALIGN_NEAR) == 0 && xscmp(vert_align,GDI_ATTR_TEXT_ALIGN_CENTER) == 0)
 	{
-		prt->width = (prt->width < src_width) ? prt->width : src_width;
-		prt->y = (prt->height < src_height) ? prt->y : (prt->y + (prt->height - src_height) / 2);
-		prt->height = (prt->height < src_height) ? prt->height : src_height;
+		prt->y += (prt->height - src_height) / 2;
 	}
 	else if (xscmp(horz_align,GDI_ATTR_TEXT_ALIGN_FAR) == 0 && xscmp(vert_align,GDI_ATTR_TEXT_ALIGN_CENTER) == 0)
 	{
-		prt->x = (prt->width < src_width) ? prt->x : (prt->x + prt->width - src_width);
-		prt->y = (prt->height < src_height) ? prt->y : (prt->y + (prt->height - src_height) / 2);
-		prt->height = (prt->height < src_height) ? prt->height : src_height;
+		prt->x += (prt->width - src_width);
+		prt->y += (prt->height - src_height) / 2;
 	}
+	else if (xscmp(horz_align,GDI_ATTR_TEXT_ALIGN_CENTER) == 0 && xscmp(vert_align,GDI_ATTR_TEXT_ALIGN_NEAR) == 0)
+	{
+		prt->x += (prt->width - src_width) / 2;
+	}
+	else if (xscmp(horz_align,GDI_ATTR_TEXT_ALIGN_CENTER) == 0 && xscmp(vert_align,GDI_ATTR_TEXT_ALIGN_FAR) == 0)
+	{
+		prt->x += (prt->width - src_width) / 2;
+		prt->y += (prt->height - src_height);
+	}
+	else if (xscmp(horz_align,GDI_ATTR_TEXT_ALIGN_CENTER) == 0 && xscmp(vert_align,GDI_ATTR_TEXT_ALIGN_CENTER) == 0)
+	{
+		prt->x += (prt->width - src_width) / 2;
+		prt->y += (prt->height - src_height) / 2;
+	}
+
+	prt->width = (prt->width < src_width) ? prt->width : src_width;
+	prt->height = (prt->height < src_height) ? prt->height : src_height;
 }
 
 static void _calc_point(const xpoint_t* pt, int r, double a, xpoint_t* pp)
@@ -145,7 +145,10 @@ static XFontStruct* _create_font(const xfont_t* pxf)
 {
 	char font_token[1024] = {0};
 	
-	format_font_pattern(pxf, font_token);
+	if(pxf)
+		format_font_pattern(pxf, font_token);
+	else
+		xscpy(font_token, default_fixed_pattern);
 
 	return XLoadQueryFont(g_display, font_token);
 }
@@ -321,7 +324,7 @@ void _gdi_draw_polyline(visual_t rdc,const xpen_t* pxp,const xpoint_t* ppt,int n
 	xmem_free(pa);
 }
 
-void _gdi_draw_arc(visual_t rdc, const xpen_t* pxp, const xpoint_t * ppt1, const xpoint_t* ppt2, const xsize_t* pxs, bool_t sflag, bool_t lflag)
+void _gdi_draw_arc(visual_t rdc, const xpen_t* pxp, const xpoint_t * ppt1, const xpoint_t* ppt2, const xsize_t* pxs, bool_t closewise, bool_t largearc)
 {
     X11_context_t* ctx = (X11_context_t*)rdc;
 
@@ -354,7 +357,7 @@ void _gdi_draw_arc(visual_t rdc, const xpen_t* pxp, const xpoint_t * ppt1, const
 	rx = pt[2].x;
 	ry = pt[2].y;
 
-	pt_calc_radian(sflag, lflag, rx, ry, &xp[0], &xp[1], &xp[2], &arcf, &arct);
+	pt_calc_radian(closewise, largearc, rx, ry, &xp[0], &xp[1], &xp[2], &arcf, &arct);
 
 	x = xp[2].x - rx;
 	y = xp[2].y - ry;
@@ -466,7 +469,7 @@ void _gdi_draw_curve(visual_t rdc, const xpen_t* pxp, const xpoint_t* ppt, int p
 	xmem_free(ppt_buf); 
 }
 
-void _gdi_draw_path(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const tchar_t* aa, const xpoint_t* pa)
+void _gdi_draw_path(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const tchar_t* aa, const xpoint_t* pa, int pn)
 {
 	xpoint_t pt_m = { 0 };
 	xpoint_t pt_p = { 0 };
@@ -481,7 +484,7 @@ void _gdi_draw_path(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const 
 	if (!aa)
 		return;
 
-	while (*aa)
+	while (*aa && pn)
 	{
 		if (*aa == _T('M') || *aa == _T('m'))
 		{
@@ -701,6 +704,7 @@ void _gdi_draw_path(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const 
 
 		aa++;
 		pa += n;
+		pn -= n;
 	}
 }
 
@@ -863,7 +867,7 @@ void _gdi_draw_round(visual_t rdc,const xpen_t* pxp,const xbrush_t* pxb,const xr
 
 	ta[8] = _T('Z');
 
-	_gdi_draw_path(rdc, pxp, pxb, ta, pa);
+	_gdi_draw_path(rdc, pxp, pxb, ta, pa, 16);
 }
 
 void _gdi_draw_ellipse(visual_t rdc,const xpen_t* pxp,const xbrush_t* pxb,const xrect_t* prt)
@@ -1099,7 +1103,7 @@ void _gdi_draw_sector(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, cons
 
 	ta[4] = _T('Z');
 
-	_gdi_draw_path(rdc, pxp, pxb, ta, pa);
+	_gdi_draw_path(rdc, pxp, pxb, ta, pa, 8);
 }
 
 void _gdi_draw_text(visual_t rdc,const xfont_t* pxf,const xface_t* pxa,const xrect_t* prt,const tchar_t* txt,int len)
@@ -1119,15 +1123,17 @@ void _gdi_draw_text(visual_t rdc,const xfont_t* pxf,const xface_t* pxa,const xre
 
 	DPtoLP(rdc,pt,2);
 
-	cid = XGContextFromGC(ctx->context);
-
-	if(pxf)
-		pfs = _create_font(pxf);
-	else
-		pfs = XQueryFont(g_display, cid);
-
+	pfs = _create_font(pxf);
 	if(!pfs)
-		return;
+	{
+		pfs = _create_font(NULL);
+	}
+	if(!pfs)
+	{
+		cid = XGContextFromGC(ctx->context);
+		pfs = XQueryFont(g_display, cid);
+	}
+	if(!pfs) return;
 
 	XSetFont(g_display, ctx->context, pfs->fid);
 
@@ -1191,15 +1197,17 @@ void _gdi_text_out(visual_t rdc, const xfont_t* pxf, const xpoint_t* ppt, const 
 
 	DPtoLP(rdc,pt,2);
 
-	cid = XGContextFromGC(ctx->context);
-
-	if(pxf)
-		pfs = _create_font(pxf);
-	else
-		pfs = XQueryFont(g_display, cid);
-
+	pfs = _create_font(pxf);
 	if(!pfs)
-		return;
+	{
+		pfs = _create_font(NULL);
+	}
+	if(!pfs)
+	{
+		cid = XGContextFromGC(ctx->context);
+		pfs = XQueryFont(g_display, cid);
+	}
+	if(!pfs) return;
 
 	XSetFont(g_display, ctx->context, pfs->fid);
 
@@ -1238,13 +1246,16 @@ void _gdi_text_rect(visual_t rdc, const xfont_t* pxf, const xface_t* pxa, const 
 	XCharStruct chs = {0};
 	int direct = 0, ascent = 0, descent = 0;
 
-	cid = XGContextFromGC(ctx->context);
-
-	if(pxf)
-		pfs = _create_font(pxf);
-	else
+	pfs = _create_font(pxf);
+	if(!pfs)
+	{
+		pfs = _create_font(NULL);
+	}
+	if(!pfs)
+	{
+		cid = XGContextFromGC(ctx->context);
 		pfs = XQueryFont(g_display, cid);
-
+	}
 	if(!pfs) return;
 	
 	if(len < 0) len = xslen(txt);
@@ -1265,13 +1276,16 @@ void _gdi_text_size(visual_t rdc, const xfont_t* pxf, const tchar_t* txt, int le
 	XCharStruct chs = {0};
 	int direct = 0, ascent = 0, descent = 0;
 
-	cid = XGContextFromGC(ctx->context);
-
-	if(pxf)
-		pfs = _create_font(pxf);
-	else
+	pfs = _create_font(pxf);
+	if(!pfs)
+	{
+		pfs = _create_font(NULL);
+	}
+	if(!pfs)
+	{
+		cid = XGContextFromGC(ctx->context);
 		pfs = XQueryFont(g_display, cid);
-
+	}
 	if(!pfs) return;
 	
 	if(len < 0) len = xslen(txt);
@@ -1296,15 +1310,17 @@ void _gdi_font_size(visual_t rdc, const xfont_t* pxf, xsize_t* pxs)
 	unsigned long val = 0;
 	bool_t b_free = 1;
 
-	if(pxf) pfs = _create_font(pxf);
-
+	pfs = _create_font(pxf);
+	if(!pfs)
+	{
+		pfs = _create_font(NULL);
+	}
 	if(!pfs)
 	{
 		cid = XGContextFromGC(ctx->context);
 		pfs = XQueryFont(g_display, cid);
 		b_free = 0;
 	} 
-
 	if(!pfs) return;
 	
 	am_size = XInternAtom(g_display, "PIXEL_SIZE", True);

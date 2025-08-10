@@ -890,6 +890,98 @@ long long w_xstoll(const wchar_t* sz)
 	return w_xsntoll(sz, w_xslen(sz));
 }
 
+unsigned char a_binntouc(const schar_t* token, int n)
+{
+	unsigned char k = 0;
+	int c = 0;
+	int pos = 0;
+
+	if (!n)
+		return 0;
+
+	if (n > 1 && token[0] == '0' && (token[1] == 'b' || token[1] == 'B'))
+		pos += 2;
+
+	while (pos < n)
+	{
+		k <<= 1;
+
+		if (token[pos] == '1')
+			k |= 1;
+
+		pos++;
+	}
+
+	return k;
+}
+
+unsigned char a_bintouc(const schar_t* token)
+{
+	return a_binntouc(token, a_xslen(token));
+}
+
+unsigned char w_binntouc(const wchar_t* token, int n)
+{
+	unsigned char k = 0;
+	int c = 0;
+	int pos = 0;
+
+	if (!n)
+		return 0;
+
+	if (n > 1 && token[0] == L'0' && (token[1] == L'b' || token[1] == L'B'))
+		pos += 2;
+
+	while (pos < n)
+	{
+		k <<= 1;
+
+		if (token[pos] == L'1')
+			k |= 1;
+
+		pos++;
+	}
+
+	return k;
+}
+
+unsigned char w_bintouc(const wchar_t* token)
+{
+	return a_binntouc(token, w_xslen(token));
+}
+
+int a_uctobin(unsigned char c, schar_t* buf, int n)
+{
+	int len = 8;
+	unsigned char m = 1;
+
+	while (len--)
+	{
+		if(len < n)
+			buf[len] = (m & c) ? '1' : '0';
+
+		m <<= 1;
+	}
+
+	return len;
+}
+
+int w_uctobin(unsigned char c, wchar_t* buf, int n)
+{
+	int len = 8;
+	unsigned char m = 1;
+
+	while (len--)
+	{
+		if(len < n)
+			buf[len] = (m & c) ? L'1' : L'0';
+
+		m <<= 1;
+	}
+
+	return len;
+}
+
 unsigned short a_hexntos(const schar_t* token, int n)
 {
 	unsigned short k = 0;

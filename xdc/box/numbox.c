@@ -197,7 +197,7 @@ void hand_numbox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	tchar_t tk[2] = { 0 };
 	drawing_interface ifv = {0};
 
-	clr_mod_t clrs;
+	color_mod_t clrs;
 	xface_t xa;
 	xbrush_t xb_bark, xb_focus;
 

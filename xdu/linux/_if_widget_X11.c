@@ -29,6 +29,8 @@ LICENSE.GPL3 for more details.
 
 #ifdef XDU_SUPPORT_WIDGET
 
+XIM     g_xim = (XIM)0;
+
 #define WIDGET_EVENTS   (KeyPressMask | KeyReleaseMask \
                         | ButtonPressMask | ButtonReleaseMask | Button1MotionMask | Button2MotionMask | Button3MotionMask | Button4MotionMask | Button5MotionMask | ButtonMotionMask \
                         | EnterWindowMask |	LeaveWindowMask | PointerMotionMask| PointerMotionHintMask \
@@ -404,11 +406,20 @@ void _widget_startup(int ver)
     g_atoms.xdu_core_delta = XInternAtom (g_display, "XDUCOREDELTA", False);
 
 	g_queue = create_timer_queue();
+
+	setlocale(LC_ALL, "");
+    XSetLocaleModifiers("");
+
+    g_xim = XOpenIM(g_display, NULL, NULL, NULL);
 }
 
 void _widget_cleanup()
 {
 	if(g_queue) destroy_timer_queue(g_queue);
+	g_queue = 0;
+
+	if(g_xim) XCloseIM(g_xim);
+    g_xim = 0;
 }
 
 /*******************************************************************************************/
@@ -432,7 +443,7 @@ static bool_t _message_translate(XEvent* pmsg)
 	if(pmsg->type == KeyPress)
 	{
 		if(XFilterEvent(pmsg, pmsg->xkey.window))
-			return 0;
+			return 1;
 
 		pxw = GETXDUSTRUCT(pmsg->xkey.window);
 		if(!pxw) return 0;
@@ -504,7 +515,7 @@ static bool_t _message_translate(XEvent* pmsg)
 			}
 		}
 
-		mbtowc(&wc, keystr, 1);
+		mbtowc(&wc, keystr, keys);
 
 		ev.type = ClientMessage;
 		ev.serial = 0;
@@ -519,7 +530,7 @@ static bool_t _message_translate(XEvent* pmsg)
 	}else if(pmsg->type == KeyRelease)
 	{
 		if(XFilterEvent(pmsg, pmsg->xkey.window))
-			return 0;
+			return 1;
 	}
 
     return 0;
@@ -551,6 +562,8 @@ static int _message_dispatch(XEvent* pmsg)
 
 			pxw->mask = _key_state(pmsg->xkey.state);
 			key = XLookupKeysym(&(pmsg->xkey), 0);
+
+			if(pxw->xic && key == 0) break;
 
 			psub = GETXDUSUBPROC(pmsg->xkey.window);
 			if(psub && psub->sub_on_keydown)
@@ -809,6 +822,11 @@ static int _message_dispatch(XEvent* pmsg)
 			if(pxw->disable) break;
 			wt = &(pxw->head);
 
+			if((pxw->style & WD_STYLE_EDITOR) && pxw->xic)
+			{
+				XSetICFocus(pxw->xic);
+			}
+
 			psub = GETXDUSUBPROC(pmsg->xfocus.window);
 			if(psub && psub->sub_on_set_focus)
 			{
@@ -827,6 +845,11 @@ static int _message_dispatch(XEvent* pmsg)
 			if(!pxw) break;
 			if(pxw->disable) break;
 			wt = &(pxw->head);
+
+			if(pxw->xic)
+			{
+				XUnsetICFocus(pxw->xic);
+			}
 
 			psub = GETXDUSUBPROC(pmsg->xfocus.window);
 			if(psub && psub->sub_on_kill_focus)
@@ -1110,6 +1133,7 @@ static int _message_dispatch(XEvent* pmsg)
 					if(pxw->result) break;
 				}
 
+				pif = GETXDUDISPATCH(pmsg->xclient.window);
 				if(pif && pif->pf_on_wchar)
 				{
 					wt = &(pxw->head);
@@ -1282,7 +1306,10 @@ widget_t _widget_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr
 	parse_xcolor(&pxw->msk, GDI_ATTR_RGB_WHITE);
 	parse_xcolor(&pxw->ico, GDI_ATTR_RGB_GRAY);
 
-	pxw->xic = XCreateIC(g_xim, XNInputStyle, XIMPreeditNothing | XIMStatusNothing, XNClientWindow, win, NULL);
+	if(wstyle & WD_STYLE_EDITOR)
+	{
+		pxw->xic = XCreateIC(g_xim, XNInputStyle, XIMPreeditNothing | XIMStatusNothing, XNClientWindow, win, NULL);
+	}
 
 	SETXDUSTRUCT(win, pxw);
 	if(pev)
@@ -1973,18 +2000,15 @@ void _widget_destroy_caret(widget_t wt)
 	}
 }
 
-void _widget_show_caret(widget_t wt, int x, int y, bool_t b)
+void _widget_show_caret(widget_t wt, int x, int y)
 {
 	X11_widget_t* pxw = TypePtrFromHead(X11_widget_t, wt);
 
-	if(!b || pxw->car.x != x || pxw->car.y != y)
-	{
-		XClearArea(g_display, pxw->self, pxw->car.x, pxw->car.y, pxw->car.w, pxw->car.h, True);
-	}
+	XClearArea(g_display, pxw->self, pxw->car.x, pxw->car.y, pxw->car.w, pxw->car.h, True);
 
 	pxw->car.x = x;
 	pxw->car.y = y;
-	pxw->car.blink = (b)? DEFAULT_CARET_BLINK : 0;
+	pxw->car.blink = DEFAULT_CARET_BLINK;
 }
 
 void _widget_set_focus(widget_t wt)
@@ -2537,12 +2561,12 @@ static int CALLBACK _widget_set_child_color_mode(widget_t wt, vword_t pv)
 	
 	if (dw & WD_STYLE_NOCHANGE) return 1;
 
-	_widget_set_color_mode(wt, (const clr_mod_t*)pv);
+	_widget_set_color_mode(wt, (const color_mod_t*)pv);
 
 	return 1;
 }
 
-void _widget_set_color_mode(widget_t wt, const clr_mod_t* pclr)
+void _widget_set_color_mode(widget_t wt, const color_mod_t* pclr)
 {
 	X11_widget_t* pxw = TypePtrFromHead(X11_widget_t, wt);
 	XSetWindowAttributes attr = {0};
@@ -2582,7 +2606,7 @@ void _widget_set_color_mode(widget_t wt, const clr_mod_t* pclr)
 	_widget_enum_child(wt, _widget_set_child_color_mode, (vword_t)pclr);
 }
 
-void _widget_get_color_mode(widget_t wt, clr_mod_t* pclr)
+void _widget_get_color_mode(widget_t wt, color_mod_t* pclr)
 {
 	X11_widget_t* pxw = TypePtrFromHead(X11_widget_t, wt);
 
@@ -2680,6 +2704,9 @@ int	_widget_do_main(widget_t wt)
 			//_widget_idle(wt, bool_false);
 
 			_message_fetch(&msg, (widget_t)0);
+
+			if (XFilterEvent(&msg, None))
+				continue;
 
 			if (_message_translate(&msg))
 				continue;

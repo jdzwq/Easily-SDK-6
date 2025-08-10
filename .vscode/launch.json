@@ -8,7 +8,7 @@
         "name": "(lldb) macos",
         "type": "cppdbg",
         "request": "launch",
-        "program": "/Users/zhangwenquan/工程/Easily-app-6/macos/bin/xdc_editor_test",
+        "program": "/Users/zhangwenquan/工程/Easily-app-6/macos/bin/xdu_win_test",
         "args": [],
         "stopAtEntry": false,
         "cwd": "${fileDirname}",
@@ -20,31 +20,7 @@
         "name": "(gdb) linux",
         "type": "cppdbg",
         "request": "launch",
-        "program": "/home/zwq/Easily-app-6/linux/bin/xdu_win_test",
-        "args": [],
-        "stopAtEntry": false,
-        "cwd": "${fileDirname}",
-        "environment": [],
-        "externalConsole": false,
-        "MIMode": "gdb",
-        "setupCommands": [
-            {
-                "description": "Enable pretty-printing for gdb",
-                "text": "-enable-pretty-printing",
-                "ignoreFailures": true
-            },
-            {
-                "description": "Set Disassembly Flavor to Intel",
-                "text": "-gdb-set disassembly-flavor intel",
-                "ignoreFailures": true
-            }
-        ]
-    },
-    {
-        "name": "(gdb) mingw",
-        "type": "cppdbg",
-        "request": "launch",
-        "program": "Z:/Easily-app-6/windows/bin64/xdk_enc_test.exe",
+        "program": "/home/zwq/Easily-app-6/linux/bin/xdc_editor_test",
         "args": [],
         "stopAtEntry": false,
         "cwd": "${fileDirname}",
@@ -68,12 +44,36 @@
         "name": "(msvc) windows",
         "type": "cppvsdbg",
         "request": "launch",
-        "program": "Z:/Easily-app-6/windows/bin64/xdu_win_test.exe",
+        "program": "Z:/Easily-app-6/windows/bin64/gen_system_glyph.exe",
         "args": [],
         "stopAtEntry": false,
         "cwd": "${fileDirname}",
         "environment": [],
         "console": "externalTerminal"
+    },
+    {
+        "name": "(gdb) mingw",
+        "type": "cppdbg",
+        "request": "launch",
+        "program": "Z:/Easily-app-6/windows/bin64/gen_system_glyph.exe",
+        "args": [],
+        "stopAtEntry": false,
+        "cwd": "${fileDirname}",
+        "environment": [],
+        "externalConsole": false,
+        "MIMode": "gdb",
+        "setupCommands": [
+            {
+                "description": "Enable pretty-printing for gdb",
+                "text": "-enable-pretty-printing",
+                "ignoreFailures": true
+            },
+            {
+                "description": "Set Disassembly Flavor to Intel",
+                "text": "-gdb-set disassembly-flavor intel",
+                "ignoreFailures": true
+            }
+        ]
     },
     ]
 }

@@ -30,7 +30,7 @@ void default_widget_xfont(xfont_t* pxf)
 {
 	default_xfont(pxf);
 	
-	xscpy(pxf->color, GDI_ATTR_RGB_SNOWWHITE);
+	xscpy(pxf->color, GDI_ATTR_RGB_DARKBLACK);
 	xscpy(pxf->size, GDI_ATTR_FONT_SIZE_SYSTEM);
 	xscpy(pxf->family, SYSTEM_FONTNAME);
 }
@@ -47,7 +47,7 @@ void default_textor_xfont(xfont_t* pxf)
 {
 	default_xfont(pxf);
 	
-	xscpy(pxf->color, GDI_ATTR_RGB_SNOWWHITE);
+	xscpy(pxf->color, GDI_ATTR_RGB_BLACK);
 	xscpy(pxf->size,GDI_ATTR_FONT_SIZE_TEXT);
 	xscpy(pxf->family, SYSTEM_FONTNAME);
 }

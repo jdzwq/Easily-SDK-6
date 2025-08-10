@@ -118,7 +118,7 @@ void hand_staticbox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	canvas_t canv;
 	drawing_interface ifv = {0};
 
-	clr_mod_t clrs;
+	color_mod_t clrs;
 	xbrush_t xb;
 	xface_t xa;
 	

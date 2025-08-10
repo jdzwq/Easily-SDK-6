@@ -829,7 +829,7 @@ void noti_form_begin_edit(widget_t widget)
 
 	EDITDELTA fd = { 0 };
 
-	clr_mod_t ob = { 0 };
+	color_mod_t ob = { 0 };
 	xfont_t xf = { 0 };
 	xface_t xa = { 0 };
 
@@ -2513,7 +2513,7 @@ void hand_form_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	const drawing_interface* pif = NULL;
 	drawing_interface ifv = {0};
 
-	clr_mod_t clrs;
+	color_mod_t clrs;
 	xbrush_t xb;
 	xpen_t xp;
 	xcolor_t xc;

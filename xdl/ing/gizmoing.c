@@ -9210,6 +9210,7 @@ void test_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t
 	k = sizeof(g_gizmo_table) / sizeof(GIZMO_DRAW_TABLE);
 
 	default_xfont(&xf);
+	format_xcolor(pxc, xf.color);
 
 	j = 0;
 	for (i = 0; k--; i++)

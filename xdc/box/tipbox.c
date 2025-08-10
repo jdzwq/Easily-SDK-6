@@ -140,7 +140,7 @@ void hand_tipbox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	const drawing_interface* pif = NULL;
 	drawing_interface ifv = {0};
 
-	clr_mod_t clrs;
+	color_mod_t clrs;
 	xbrush_t xb;
 
 	widget_get_color_mode(widget, &clrs);
@@ -238,7 +238,7 @@ widget_t show_toolbox(const xpoint_t* ppt, const tchar_t* sz_text)
 	widget_t wt;
 	xrect_t xr = { 0 };
 	xsize_t xs = { 0 };
-	clr_mod_t clr;
+	color_mod_t clr;
 
 	wt = tipbox_create((widget_t)0, WD_STYLE_POPUP | WD_STYLE_NOACTIVE, &xr, 1, sz_text);
 	if (!wt) return (widget_t)0;

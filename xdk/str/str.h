@@ -107,6 +107,15 @@ EXP_API float w_xsntof(const wchar_t* sz, int n);
 EXP_API float a_xstof(const schar_t* sz);
 EXP_API float w_xstof(const wchar_t* sz);
 
+EXP_API unsigned char a_binntouc(const schar_t* sz, int n);
+EXP_API unsigned char w_binntouc(const wchar_t* sz, int n);
+
+EXP_API unsigned char a_bintouc(const schar_t* sz);
+EXP_API unsigned char w_bintouc(const wchar_t* sz);
+
+EXP_API int a_uctobin(unsigned char s, schar_t* buf, int n);
+EXP_API int w_uctobin(unsigned char s, wchar_t* buf, int n);
+
 EXP_API unsigned short a_hexntos(const schar_t* sz, int n);
 EXP_API unsigned short w_hexntos(const wchar_t* sz, int n);
 
@@ -311,6 +320,9 @@ EXP_API bool_t w_is_suffix(const wchar_t* str, const wchar_t* sub);
 #define xstonum				w_xstonum
 #define xsntoll				w_xsntoll
 #define xstoll				w_xstoll
+#define binntouc			w_binntouc
+#define bintouc				w_bintouc
+#define uctobin				w_uctobin
 #define hexntos				w_hexntos
 #define hextos				w_hextos
 #define hexntol				w_hexntol
@@ -394,6 +406,9 @@ EXP_API bool_t w_is_suffix(const wchar_t* str, const wchar_t* sub);
 #define xsntonum			a_xsntonum
 #define xstoll				a_xstoll
 #define xsntoll				a_xsntoll
+#define binntouc			a_binntouc
+#define bintouc				a_bintouc
+#define uctobin				a_uctobin
 #define hexntos				a_hexntos
 #define hextos				a_hextos
 #define hexntol				a_hexntol

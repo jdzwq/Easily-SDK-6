@@ -33,7 +33,7 @@ LICENSE.GPL3 for more details.
 //flags: -,+,' ',#,0
 //width:
 //precision
-//type:c,C,d,i,o,u,x,X,e,E,f,g,s,S,T,t
+//type:c,C,d,i,o,u,b,B,x,X,e,E,f,g,s,S,T,t
 
 typedef enum{
 	XS_SKIP = 0,
@@ -68,6 +68,10 @@ int a_tk_printf(schar_t* buf,schar_t flag,int width,int prec,schar_t size,schar_
 {
 	schar_t ch;
 	int len,pos;
+	schar_t* sz;
+	wchar_t* wz;
+
+	unsigned uc;
 	short s;
 	unsigned short us;
 	int i;
@@ -75,8 +79,6 @@ int a_tk_printf(schar_t* buf,schar_t flag,int width,int prec,schar_t size,schar_
 	long long l;
 	unsigned long long ul;
 	double dbl;
-	schar_t* sz;
-	wchar_t* wz;
 
 	switch(type)
 	{
@@ -250,7 +252,6 @@ int a_tk_printf(schar_t* buf,schar_t flag,int width,int prec,schar_t size,schar_
 			}
 			return pos + a_ltoxs(i, ((buf) ? buf + pos : NULL),width);
 		}
-		break;
 	case 'u':
 		if (size == 'h')
 		{
@@ -321,6 +322,37 @@ int a_tk_printf(schar_t* buf,schar_t flag,int width,int prec,schar_t size,schar_
 			}
 			return pos + a_ultoxs(ui, ((buf) ? buf + pos : NULL),width);
 		}
+	case 'b':
+	case 'B':
+		uc = (unsigned char)va_arg(*parg, unsigned char);
+		pos = 0;
+		if (flag == '#')
+		{
+			if (buf)
+			{
+				buf[0] = '0';
+				buf[1] = 'B';
+			}
+			pos += 2;
+		}
+		if (width)
+		{
+			len = width - a_uctobin(ui, NULL, width);
+			while (len > 0)
+			{
+				if (buf)
+				{
+					buf[pos] = '0';
+				}
+				pos++;
+				len--;
+			}
+		}
+		else
+		{
+			width = BIT_LEN;
+		}
+		return pos + a_uctobin(uc, ((buf) ? (buf + pos) : NULL), width);
 	case 'x':
 	case 'X':
 		if (size == 'h')
@@ -472,6 +504,10 @@ int w_tk_printf(wchar_t* buf,wchar_t flag,int width,int prec,wchar_t size,wchar_
 {
 	wchar_t ch;
 	int len, pos;
+	wchar_t* sz;
+	schar_t* az;
+
+	unsigned char uc;
 	short s;
 	unsigned short us;
 	int i;
@@ -479,8 +515,6 @@ int w_tk_printf(wchar_t* buf,wchar_t flag,int width,int prec,wchar_t size,wchar_
 	long long l;
 	unsigned long long ul;
 	double dbl;
-	wchar_t* sz;
-	schar_t* az;
 
 	switch (type)
 	{
@@ -726,6 +760,37 @@ int w_tk_printf(wchar_t* buf,wchar_t flag,int width,int prec,wchar_t size,wchar_
 			}
 			return pos + w_ultoxs(ui, ((buf) ? buf + pos : NULL), width);
 		}
+		case 'b':
+		case 'B':
+		uc = (unsigned char)va_arg(*parg, unsigned char);
+		pos = 0;
+		if (flag == L'#')
+		{
+			if (buf)
+			{
+				buf[0] = L'0';
+				buf[1] = L'B';
+			}
+			pos += 2;
+		}
+		if (width)
+		{
+			len = width - w_uctobin(ui, NULL, width);
+			while (len > 0)
+			{
+				if (buf)
+				{
+					buf[pos] = L'0';
+				}
+				pos++;
+				len--;
+			}
+		}
+		else
+		{
+			width = BIT_LEN;
+		}
+		return pos + w_uctobin(uc, ((buf) ? (buf + pos) : NULL), width);
 	case L'x':
 	case L'X':
 		if (size == L'h')
@@ -1262,6 +1327,52 @@ static int w_test_numeric(const wchar_t* token, int len)
 	return pos;
 }
 
+static int a_test_bin(const schar_t* token, int len)
+{
+	int pos = 0;
+
+	if (!token)
+		return 0;
+
+	if (len < 0)
+		len = a_xslen(token);
+
+	while (pos < len)
+	{
+		if(*token == 'b' || *token == 'B' || *token == '0' || *token == '1')
+		{
+			token++;
+			pos++;
+		}else
+			break;
+	}
+
+	return pos;
+}
+
+static int w_test_bin(const wchar_t* token, int len)
+{
+	int pos = 0;
+
+	if (!token)
+		return 0;
+
+	if (len < 0)
+		len = w_xslen(token);
+
+	while (pos < len)
+	{
+		if(*token == L'b' || *token == L'B' || *token == L'0' || *token == L'1')
+		{
+			token++;
+			pos++;
+		}else
+			break;
+	}
+
+	return pos;
+}
+
 static int a_test_hex(const schar_t* token, int len)
 {
 	int pos = 0;
@@ -1313,6 +1424,7 @@ const schar_t* a_tk_scanf(const schar_t* token, schar_t size, schar_t type, va_l
 {
 	int pos;
 	schar_t* pch;
+	unsigned char *puc;
 	short *ps;
 	unsigned short *pus;
 	int *pi;
@@ -1384,6 +1496,14 @@ const schar_t* a_tk_scanf(const schar_t* token, schar_t size, schar_t type, va_l
 			return token + pos;
 		}
 		break;
+	case 'b':
+	case 'B':
+		pos = 0;
+		puc = va_arg(*parg, unsigned char *);
+
+		pos = a_test_bin(token, -1);
+		*puc = a_binntouc(token, pos);
+		return token + pos;
 	case 'x':
 	case 'X':
 		if (size == 'h')
@@ -1429,6 +1549,7 @@ const wchar_t* w_tk_scanf(const wchar_t* token, wchar_t size, wchar_t type, va_l
 {
 	int pos;
 	wchar_t* pch;
+	unsigned char *puc;
 	short *ps; 
 	unsigned short *pus;
 	int *pi;
@@ -1500,6 +1621,14 @@ const wchar_t* w_tk_scanf(const wchar_t* token, wchar_t size, wchar_t type, va_l
 			return token + pos;
 		}
 		break;
+	case L'b':
+	case L'B':
+		pos = 0;
+		puc = va_arg(*parg, unsigned char *);
+
+		pos = w_test_bin(token, -1);
+		*puc = w_binntouc(token, pos);
+		return token + pos;
 	case L'x':
 	case L'X':
 		if (size == L'h')

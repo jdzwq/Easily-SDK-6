@@ -263,6 +263,8 @@ EXP_API void	widget_hand_create(widget_t wt);
 
 EXP_API void	widget_hand_destroy(widget_t wt);
 
+EXP_API void	widget_hand_paint(widget_t wt, visual_t rdc);
+
 EXP_API bool_t	widget_hand_scroll(widget_t wt, bool_t b_horz, int pos);
 
 /******************************widget splitor implement*****************************************************/

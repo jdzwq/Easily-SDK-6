@@ -235,7 +235,7 @@ void hand_splitor_paint(splitor_t* ptd, visual_t rdc)
 	xrect_t xr;
 	drawing_interface ifv = {0};
 
-	clr_mod_t clrs;
+	color_mod_t clrs;
 	xpen_t xp;
 	xcolor_t xc_brim, xc_core;
 

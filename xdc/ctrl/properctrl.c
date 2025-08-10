@@ -300,7 +300,7 @@ void noti_proper_begin_edit(widget_t widget)
 	link_t_ptr data;
 	EDITDELTA fd = { 0 };
 
-	clr_mod_t ob = { 0 };
+	color_mod_t ob = { 0 };
 
 	XDK_ASSERT(ptd->entity);
 
@@ -982,7 +982,7 @@ void hand_proper_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	const drawing_interface* pif = NULL;
 	drawing_interface ifv = {0};
 
-	clr_mod_t clrs = { 0 };
+	color_mod_t clrs = { 0 };
 	xbrush_t xb = { 0 };
 	xcolor_t xc = { 0 };
 

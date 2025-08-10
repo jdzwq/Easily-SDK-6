@@ -40,14 +40,14 @@ flag: [+|#]
 width: [0-9]
 prec: [0-9]
 size: [h|l]
-type: [c|d|u|x|X|f|s|S]
+type: [c|d|u|b|B|x|X|f|s|S]
 **********************************************/
 
 /**********************************************
 xscanf usage:
 pattern: %[size][type]
 size: [h|l]
-type: [c|d|u|x|X|f|s|S]
+type: [c|d|u|b|B|x|X|f|s|S]
 **********************************************/
 
 EXP_API int a_xsprintf_arg(schar_t* buf,const schar_t* fmt,va_list* parg);

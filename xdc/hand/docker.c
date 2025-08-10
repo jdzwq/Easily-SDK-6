@@ -218,8 +218,9 @@ void hand_docker_mouse_move(docker_t* ptd, dword_t dw, const xpoint_t* pxp)
 {
 	int hint;
 
-	if (ptd->drag)
-		return;
+	if (ptd->drag) return;
+
+	if(!(dw & MS_WITH_LBUTTON)) return;
 
 	hint = _docker_calc_hint(ptd, pxp);
 
@@ -312,7 +313,7 @@ void hand_docker_paint(docker_t* ptd, visual_t dc, const xrect_t* pxr)
 	canvas_t canv;
 	drawing_interface ifv = {0};
 
-	clr_mod_t clrs;
+	color_mod_t clrs;
 	xbrush_t xb;
 	xcolor_t xc_brim, xc_core;
 
@@ -322,7 +323,10 @@ void hand_docker_paint(docker_t* ptd, visual_t dc, const xrect_t* pxr)
 	xmem_copy((void*)&xc_brim, (void*)&clrs.clr_bkg, sizeof(xcolor_t));
 	xmem_copy((void*)&xc_core, (void*)&clrs.clr_bkg, sizeof(xcolor_t));
 
-	lighten_xcolor(&xc_core, DEF_SOFT_DARKEN);
+	if (ptd->drag)
+		lighten_xcolor(&xc_core, DEF_SOFT_LIGHTEN);
+	else
+		lighten_xcolor(&xc_core, DEF_SOFT_DARKEN);
 
 	widget_get_client_rect(ptd->widget, &xr_cli);
 
@@ -430,8 +434,6 @@ void hand_docker_paint(docker_t* ptd, visual_t dc, const xrect_t* pxr)
 				bottom += ptd->dock[i].cy;
 		}
 	}
-
-	
 
 	end_canvas_paint(canv, dc, pxr);
 }

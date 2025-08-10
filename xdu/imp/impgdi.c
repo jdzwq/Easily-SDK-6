@@ -252,7 +252,7 @@ void draw_path_raw(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const t
 
 	pif = PROCESS_CONTEXT_INTERFACE;
 
-	(*pif->pf_gdi_draw_path)(rdc, pxp, pxb, aa, pa);
+	(*pif->pf_gdi_draw_path)(rdc, pxp, pxb, aa, pa, n);
 }
 
 void draw_path(canvas_t canv, const xpen_t* pxp, const xbrush_t* pxb, const tchar_t* aa, const xpoint_t* pa, int n)
@@ -272,7 +272,7 @@ void draw_path(canvas_t canv, const xpen_t* pxp, const xbrush_t* pxb, const tcha
 	xmem_copy((void*)ppt, (void*)pa, n * sizeof(xpoint_t));
 
 	i = j = 0;
-	while (*(aa + j))
+	while (*(aa + j) && i < n)
 	{
 		if (*(aa + j) == _T('M') || *(aa + j) == _T('m'))
 		{
@@ -323,7 +323,7 @@ void draw_path(canvas_t canv, const xpen_t* pxp, const xbrush_t* pxb, const tcha
 		j++;
 	}
 
-	(*pif->pf_gdi_draw_path)(rdc, pxp, pxb, aa, ppt);
+	(*pif->pf_gdi_draw_path)(rdc, pxp, pxb, aa, ppt, n);
 
 	xmem_free(ppt);
 }

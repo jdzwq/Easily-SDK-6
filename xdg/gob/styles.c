@@ -154,6 +154,8 @@ void parse_xcolor(xcolor_t* pxc, const tchar_t* color)
 		val[len] = _T('\0');
 		pxc->b = (unsigned char)xstol(val);
 	}
+
+	pxc->a = 255;
 }
 
 void format_xcolor(const xcolor_t* pxc, tchar_t* buf)
@@ -208,7 +210,7 @@ void default_xbrush(xbrush_t* pxb)
 	a_xszero((schar_t*)pxb, sizeof(xbrush_t));
 
 	xscpy(pxb->style, GDI_ATTR_FILL_STYLE_SOLID);
-	xscpy(pxb->color, GDI_ATTR_RGB_WHITE);
+	xscpy(pxb->color, GDI_ATTR_RGB_SNOWWHITE);
 	xscpy(pxb->opacity, GDI_ATTR_OPACITY_SOFT);
 }
 
@@ -283,6 +285,30 @@ void merge_xface(xface_t* pxa_dst, const xface_t* pxa_src)
 		xscpy(pxa_dst->line_height, pxa_src->line_height);
 	if (is_null(pxa_dst->text_wrap))
 		xscpy(pxa_dst->text_wrap, pxa_src->text_wrap);
+}
+
+int compare_xfont(xfont_t* pxf1, const xfont_t* pxf2)
+{
+	float f1, f2;
+	int i;
+
+	f1 = xstof(pxf1->size);
+	f2 = xstof(pxf2->size);
+
+	if(f1 > f2) return 1;
+	if(f1 < f2) return -1;
+	
+	f1 = xstof(pxf1->weight);
+	f2 = xstof(pxf2->weight);
+
+	if(f1 > f2) return 1;
+	if(f1 < f2) return -1;
+
+	i = xsicmp(pxf1->style, pxf2->style);
+	if(i) return i;
+
+	i = xsicmp(pxf1->family, pxf2->family);
+	return i;
 }
 
 void lighten_xpen(xpen_t* pxp, int n)

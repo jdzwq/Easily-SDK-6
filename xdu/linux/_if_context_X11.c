@@ -29,7 +29,6 @@ LICENSE.GPL3 for more details.
 
 #ifdef XDU_SUPPORT_CONTEXT
 Display*     g_display = NULL;
-XIM          g_xim = (XIM)0;
 
 int _context_startup(void)
 {
@@ -44,22 +43,14 @@ int _context_startup(void)
 
     if(!g_display) return (-1);
 
-    g_xim = XOpenIM(g_display, NULL, NULL, NULL);
-
-    setlocale(LC_ALL, "");
-
 	return nVer;
 }
 
 void _context_cleanup(void)
 {
-    if(g_xim)
-        XCloseIM(g_xim);
-
     if(g_display)
         XCloseDisplay(g_display);
     
-    g_xim = 0;
     g_display = 0;
 }
 

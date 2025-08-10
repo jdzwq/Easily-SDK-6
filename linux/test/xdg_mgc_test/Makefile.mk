@@ -9,13 +9,13 @@
 CC = gcc
 CFLAGS = -g -Wall -D _DEBUG
 
-MODULE = xdk_mgc_test
+MODULE = xdg_mgc_test
 ARCH = aarch64
 
 LIB_PATH = /usr/local/lib
 
 INC_PATH = ~/Easily-sdk-6/include
-SRC_PATH = ~/Easily-sdk-6/test/xdk_mgc_test
+SRC_PATH = ~/Easily-sdk-6/test/xdg_mgc_test
 OBJ_PATH = ~/Easily-tmp/linux/$(MODULE)/$(ARCH)
 OUT_PATH = ~/Easily-app-6/linux/bin
 

@@ -907,7 +907,7 @@ void noti_grid_begin_edit(widget_t widget)
 
 	EDITDELTA fd = { 0 };
 
-	clr_mod_t ob = { 0 };
+	color_mod_t ob = { 0 };
 	xfont_t xf = { 0 };
 
 	XDK_ASSERT(ptd->row && ptd->col);
@@ -1925,7 +1925,7 @@ void hand_grid_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	const drawing_interface* pif = NULL;
 	drawing_interface ifv = {0};
 
-	clr_mod_t clrs;
+	color_mod_t clrs;
 	xbrush_t xb;
 	xcolor_t xc;
 

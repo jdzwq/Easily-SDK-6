@@ -673,6 +673,9 @@ void widget_hand_create(widget_t wt)
 {
 	widget_exten_t* pwt;
 	visual_t rdc;
+	color_mod_t clrs;
+
+	widget_get_color_mode(wt, &clrs);
 
 	pwt = (widget_exten_t*)xmem_alloc(sizeof(widget_exten_t));
 
@@ -684,13 +687,27 @@ void widget_hand_create(widget_t wt)
 
 	get_canvas_interface(pwt->canv, pwt->pif);
 
-	parse_xcolor(&(pwt->pif->mode.clr_bkg), GDI_ATTR_RGB_WHITE);
-	parse_xcolor(&(pwt->pif->mode.clr_frg), GDI_ATTR_RGB_GRAY);
-	parse_xcolor(&(pwt->pif->mode.clr_txt), GDI_ATTR_RGB_BLACK);
-	parse_xcolor(&(pwt->pif->mode.clr_msk), GDI_ATTR_RGB_WHITE);
-	parse_xcolor(&(pwt->pif->mode.clr_ico), GDI_ATTR_RGB_BLACK);
+	xmem_copy((void*)&(pwt->pif->mode), (void*)&clrs, sizeof(color_mod_t));
 
 	SETEXTENSTRUCT(wt, pwt);
+}
+
+void widget_hand_paint(widget_t wt, visual_t rdc)
+{
+	drawing_interface ifv = {0};
+	color_mod_t clrs;
+	xrect_t xr;
+	xbrush_t xb;
+
+	widget_get_color_mode(wt, &clrs);
+	widget_get_client_rect(wt, &xr);
+
+	default_xbrush(&xb);
+	format_xcolor(xb.color, &clrs.clr_bkg);
+
+	get_visual_interface(rdc, &ifv);
+
+	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
 }
 
 void widget_hand_destroy(widget_t wt)

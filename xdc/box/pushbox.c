@@ -157,7 +157,7 @@ void hand_pushbox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	dword_t ws;
 	xrect_t xr,xr_box;
 
-	clr_mod_t clrs;
+	color_mod_t clrs;
 	xcolor_t xc;
 	xface_t xa;
 	xbrush_t xb;

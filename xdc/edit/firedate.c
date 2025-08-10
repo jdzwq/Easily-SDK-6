@@ -83,7 +83,7 @@ static int sub_editbox_self_command(widget_t widget, int code, vword_t data, uid
 	case COMMAND_COLOR:
 		if (widget_is_valid(datebox))
 		{
-			widget_set_color_mode(datebox, (clr_mod_t*)data);
+			widget_set_color_mode(datebox, (color_mod_t*)data);
 			widget_paint(datebox);
 		}
 		return 1;

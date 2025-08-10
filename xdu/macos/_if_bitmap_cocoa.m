@@ -43,30 +43,30 @@ static void _CenterRect(CGRect* pRect, int src_width, int src_height)
 	}
 }
 
-void _destroy_bitmap(bitmap_t rbm)
-{
-    cocoa_bitmap_t* bmp = (cocoa_bitmap_t*)rbm;
-    
-	CGImageRelease(bmp->image);
-
-	free(bmp);
-}
-
 void _get_bitmap_size(bitmap_t rbm, int* pw, int* ph)
 {
-   cocoa_bitmap_t* bmp = (cocoa_bitmap_t*)rbm;
+   cocoa_bitmap_t* bmp = TypePtrFromHead(cocoa_bitmap_t, rbm);
 
     if(pw) *pw = CGImageGetWidth(bmp->image);
     
     if(ph) *ph = CGImageGetHeight(bmp->image);
 }
 
+void _destroy_bitmap(bitmap_t rbm)
+{
+    cocoa_bitmap_t* bmp = TypePtrFromHead(cocoa_bitmap_t, rbm);
+    
+	CGImageRelease(bmp->image);
+
+	xmem_free_handle(bmp);
+}
+
 bitmap_t _create_context_bitmap(visual_t rdc)
 {
-	cocoa_context_t* ctx = (cocoa_context_t*)rdc;
+	cocoa_context_t* ctx = TypePtrFromHead(cocoa_context_t, rdc);
 	cocoa_bitmap_t* bmp;
 
-	bmp = (cocoa_bitmap_t*)xmem_alloc(sizeof(cocoa_bitmap_t));
+	bmp = (cocoa_bitmap_t*)xmem_alloc_handle(sizeof(cocoa_bitmap_t));
 	
 	bmp->image = CGBitmapContextCreateImage(ctx->context);
 
@@ -75,7 +75,7 @@ bitmap_t _create_context_bitmap(visual_t rdc)
 
 bitmap_t _create_color_bitmap(visual_t rdc, const xcolor_t* pxc, int w, int h)
 {
-	cocoa_context_t* ctx = (cocoa_context_t*)rdc;
+	cocoa_context_t* ctx = TypePtrFromHead(cocoa_context_t, rdc);
     cocoa_bitmap_t* bmp;
 
 	int bytes_per_line;
@@ -109,21 +109,23 @@ bitmap_t _create_color_bitmap(visual_t rdc, const xcolor_t* pxc, int w, int h)
         8,
         bytes_per_line,
         colorSpace,
-        kCGImageAlphaPremultipliedLast
+         kCGImageAlphaPremultipliedFirst | kCGBitmapByteOrder32Little
     );
 
-	bmp = (cocoa_bitmap_t*)xmem_alloc(sizeof(cocoa_bitmap_t));
+	bmp = (cocoa_bitmap_t*)xmem_alloc_handle(sizeof(cocoa_bitmap_t));
 	bmp->image = CGBitmapContextCreateImage(context);
     
 	CGColorSpaceRelease(colorSpace);
 	CGContextRelease(context);
+
+	xmem_free(pbb);
 
     return &(bmp->head);
 }
 
 bitmap_t _create_pattern_bitmap(visual_t rdc, const xcolor_t* pxc_front, const xcolor_t* pxc_back, int w, int h)
 {
-	cocoa_context_t* ctx = (cocoa_context_t*)rdc;
+	cocoa_context_t* ctx = TypePtrFromHead(cocoa_context_t, rdc);
     cocoa_bitmap_t* bmp;
 
 	int bytes_per_line;
@@ -157,21 +159,23 @@ bitmap_t _create_pattern_bitmap(visual_t rdc, const xcolor_t* pxc_front, const x
         8,
         bytes_per_line,
         colorSpace,
-        kCGImageAlphaPremultipliedLast
+        kCGImageAlphaPremultipliedFirst | kCGBitmapByteOrder32Little
     );
 
-	bmp = (cocoa_bitmap_t*)xmem_alloc(sizeof(cocoa_bitmap_t));
+	bmp = (cocoa_bitmap_t*)xmem_alloc_handle(sizeof(cocoa_bitmap_t));
 	bmp->image = CGBitmapContextCreateImage(context);
     
 	CGColorSpaceRelease(colorSpace);
 	CGContextRelease(context);
+
+	xmem_free(pbb);
 
     return &(bmp->head);
 }
 
 bitmap_t _create_gradient_bitmap(visual_t rdc, const xcolor_t* pxc_brim, const xcolor_t* pxc_core, int w, int h, const tchar_t* type)
 {
-	cocoa_context_t* ctx = (cocoa_context_t*)rdc;
+	cocoa_context_t* ctx = TypePtrFromHead(cocoa_context_t, rdc);
     cocoa_bitmap_t* bmp;
 
 	int bytes_per_line;
@@ -205,21 +209,23 @@ bitmap_t _create_gradient_bitmap(visual_t rdc, const xcolor_t* pxc_brim, const x
         8,
         bytes_per_line,
         colorSpace,
-        kCGImageAlphaPremultipliedLast
+         kCGImageAlphaPremultipliedFirst | kCGBitmapByteOrder32Little
     );
 
-	bmp = (cocoa_bitmap_t*)xmem_alloc(sizeof(cocoa_bitmap_t));
+	bmp = (cocoa_bitmap_t*)xmem_alloc_handle(sizeof(cocoa_bitmap_t));
 	bmp->image = CGBitmapContextCreateImage(context);
     
 	CGColorSpaceRelease(colorSpace);
 	CGContextRelease(context);
+
+	xmem_free(pbb);
     
     return &(bmp->head);
 }
 
 bitmap_t _create_code128_bitmap(visual_t rdc, const xcolor_t* pxc_front, const xcolor_t* pxc_back, const byte_t* bar_buf, int bar_cols)
 {
-	cocoa_context_t* ctx = (cocoa_context_t*)rdc;
+	cocoa_context_t* ctx = TypePtrFromHead(cocoa_context_t, rdc);
     cocoa_bitmap_t* bmp;
 
 	int bytes_per_line;
@@ -257,21 +263,23 @@ bitmap_t _create_code128_bitmap(visual_t rdc, const xcolor_t* pxc_front, const x
         8,
         bytes_per_line,
         colorSpace,
-        kCGImageAlphaPremultipliedLast
+        kCGImageAlphaPremultipliedFirst | kCGBitmapByteOrder32Little
     );
 
-	bmp = (cocoa_bitmap_t*)xmem_alloc(sizeof(cocoa_bitmap_t));
+	bmp = (cocoa_bitmap_t*)xmem_alloc_handle(sizeof(cocoa_bitmap_t));
 	bmp->image = CGBitmapContextCreateImage(context);
     
 	CGColorSpaceRelease(colorSpace);
 	CGContextRelease(context);
+
+	xmem_free(pbb);
     
     return &(bmp->head);
 }
 
 bitmap_t _create_pdf417_bitmap(visual_t rdc, const xcolor_t* pxc_front, const xcolor_t* pxc_back, const byte_t* bar_buf, int bar_rows, int bar_cols)
 {
-	cocoa_context_t* ctx = (cocoa_context_t*)rdc;
+	cocoa_context_t* ctx = TypePtrFromHead(cocoa_context_t, rdc);
     cocoa_bitmap_t* bmp;
 
 	int bytes_per_line;
@@ -309,21 +317,23 @@ bitmap_t _create_pdf417_bitmap(visual_t rdc, const xcolor_t* pxc_front, const xc
         8,
         bytes_per_line,
         colorSpace,
-        kCGImageAlphaPremultipliedLast
+        kCGImageAlphaPremultipliedFirst | kCGBitmapByteOrder32Little
     );
 
-	bmp = (cocoa_bitmap_t*)xmem_alloc(sizeof(cocoa_bitmap_t));
+	bmp = (cocoa_bitmap_t*)xmem_alloc_handle(sizeof(cocoa_bitmap_t));
 	bmp->image = CGBitmapContextCreateImage(context);
     
 	CGColorSpaceRelease(colorSpace);
 	CGContextRelease(context);
+
+	xmem_free(pbb);
 
     return &(bmp->head);
 }
 
 bitmap_t _create_qrcode_bitmap(visual_t rdc, const xcolor_t* pxc_front, const xcolor_t* pxc_back, const byte_t* bar_buf, int bar_rows, int bar_cols)
 {
-	cocoa_context_t* ctx = (cocoa_context_t*)rdc;
+	cocoa_context_t* ctx = TypePtrFromHead(cocoa_context_t, rdc);
     cocoa_bitmap_t* bmp;
 
 	int bytes_per_line;
@@ -361,21 +371,23 @@ bitmap_t _create_qrcode_bitmap(visual_t rdc, const xcolor_t* pxc_front, const xc
         8,
         bytes_per_line,
         colorSpace,
-        kCGImageAlphaPremultipliedLast
+        kCGImageAlphaPremultipliedFirst | kCGBitmapByteOrder32Little
     );
 
-	bmp = (cocoa_bitmap_t*)xmem_alloc(sizeof(cocoa_bitmap_t));
+	bmp = (cocoa_bitmap_t*)xmem_alloc_handle(sizeof(cocoa_bitmap_t));
 	bmp->image = CGBitmapContextCreateImage(context);
     
 	CGColorSpaceRelease(colorSpace);
 	CGContextRelease(context);
+
+	xmem_free(pbb);
 
     return &(bmp->head);
 } 
 
 bitmap_t _create_storage_bitmap(visual_t rdc, const tchar_t* fname)
 {
-	cocoa_context_t* ctx = (cocoa_context_t*)rdc;
+	cocoa_context_t* ctx = TypePtrFromHead(cocoa_context_t, rdc);
     cocoa_bitmap_t* bmp;
 	tchar_t fpath[PATH_LEN * 2] = { 0 };
 
@@ -403,7 +415,7 @@ bitmap_t _create_storage_bitmap(visual_t rdc, const tchar_t* fname)
 
     if (!source) return NULL;
 
-	bmp = (cocoa_bitmap_t*)xmem_alloc(sizeof(cocoa_bitmap_t));
+	bmp = (cocoa_bitmap_t*)xmem_alloc_handle(sizeof(cocoa_bitmap_t));
     bmp->image = CGImageSourceCreateImageAtIndex(source, 0, NULL);
     CFRelease(source);
 
@@ -447,9 +459,9 @@ typedef struct _bitmap_rgbquad_t{
 }bitmap_rgbquad_t;
 
 
-dword_t _get_bitmap_bytes(bitmap_t rb)
+dword_t _get_bitmap_bytes(bitmap_t rbm)
 {
-    cocoa_bitmap_t* bmp = (cocoa_bitmap_t*)rb;
+    cocoa_bitmap_t* bmp = TypePtrFromHead(cocoa_bitmap_t, rbm);
     
 	size_t width = CGImageGetWidth(bmp->image);
     size_t height = CGImageGetHeight(bmp->image);
@@ -470,7 +482,7 @@ dword_t _get_bitmap_bytes(bitmap_t rb)
 
 bitmap_t _load_bitmap_from_bytes(visual_t rdc, const unsigned char* pb, dword_t bytes)
 {
-	cocoa_context_t* ctx = (cocoa_context_t*)rdc;
+	cocoa_context_t* ctx = TypePtrFromHead(cocoa_context_t, rdc);
 
 	bitmap_infohead_t* pbmi;
 	bitmap_filehead_t bfh;
@@ -517,10 +529,10 @@ bitmap_t _load_bitmap_from_bytes(visual_t rdc, const unsigned char* pb, dword_t 
     return &(bmp->head);
 }
 
-dword_t _save_bitmap_to_bytes(visual_t rdc, bitmap_t rb, unsigned char* buf, dword_t max)
+dword_t _save_bitmap_to_bytes(visual_t rdc, bitmap_t rbm, unsigned char* buf, dword_t max)
 {
-	cocoa_context_t* ctx = (cocoa_context_t*)rdc;
-	cocoa_bitmap_t* bmp = (cocoa_bitmap_t*)rb;
+	cocoa_context_t* ctx = TypePtrFromHead(cocoa_context_t, rdc);
+	cocoa_bitmap_t* bmp = TypePtrFromHead(cocoa_bitmap_t, rbm);
     
 	bitmap_infohead_t* pbmi;
 	unsigned short    cClrBits;
@@ -536,8 +548,8 @@ dword_t _save_bitmap_to_bytes(visual_t rdc, bitmap_t rb, unsigned char* buf, dwo
 	CGColorSpaceRef colorSpace = CGImageGetColorSpace(bmp->image);
     CGBitmapInfo bitmapInfo = CGImageGetBitmapInfo(bmp->image);
 
-	unsigned char *data = (unsigned char*)calloc(height, bytesPerRow);
-   CGContextRef context = CGBitmapContextCreate(
+	unsigned char *data = (unsigned char*)xmem_alloc(height * bytesPerRow);
+   	CGContextRef context = CGBitmapContextCreate(
         data,                   // Memory buffer
         width,                  // Width of the bitmap
         height,                 // Height of the bitmap
@@ -552,9 +564,9 @@ dword_t _save_bitmap_to_bytes(visual_t rdc, bitmap_t rb, unsigned char* buf, dwo
 	data = (unsigned char *)CGBitmapContextGetData(context);
 
 	if (bitsPerPixel < 24)
-		pbmi = (bitmap_infohead_t*)calloc(1, sizeof(bitmap_infohead_t) + sizeof(bitmap_rgbquad_t) * (unsigned int)(1 << bitsPerPixel));
+		pbmi = (bitmap_infohead_t*)xmem_alloc(sizeof(bitmap_infohead_t) + sizeof(bitmap_rgbquad_t) * (unsigned int)(1 << bitsPerPixel));
 	else
-		pbmi = (bitmap_infohead_t*)calloc(1, sizeof(bitmap_infohead_t));
+		pbmi = (bitmap_infohead_t*)xmem_alloc(sizeof(bitmap_infohead_t));
 
 	pbmi->size = sizeof(bitmap_infohead_t);
 	pbmi->width = width;
@@ -605,7 +617,8 @@ dword_t _save_bitmap_to_bytes(visual_t rdc, bitmap_t rb, unsigned char* buf, dwo
 
 	CGContextRelease(context);
 
-	free(pbmi);
+	xmem_free(pbmi);
+	xmem_free(data);
 
 	return dwTotal;
 }

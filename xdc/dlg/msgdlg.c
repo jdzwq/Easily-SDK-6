@@ -489,7 +489,7 @@ void hand_msgdlg_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	canvas_t canv;
 	drawing_interface ifv = {0};
 
-	clr_mod_t clrs;
+	color_mod_t clrs;
 	xbrush_t xb;
 	xpen_t xp;
 
@@ -546,7 +546,7 @@ widget_t msgdlg_create(const tchar_t* text, dword_t button, widget_t owner)
 	MSGDLGDATA md = { 0 };
 	if_dispatch_t ev = { 0 };
 	xrect_t xr = { 0 };
-	clr_mod_t clr = { 0 };
+	color_mod_t clr = { 0 };
 	widget_t dlg;
 
 	md.btn = button;

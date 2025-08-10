@@ -58,12 +58,12 @@ void _MainFrame_CreateEditor(widget_t widget)
 {
 	MainFrameDelta* pdt = GETMAINFRAMEDELTA(widget);
 
-	clr_mod_t clrs = {0};
-    parse_xcolor(&clrs.clr_bkg, GDI_ATTR_RGB_HARDBLACK);
-    parse_xcolor(&clrs.clr_frg, GDI_ATTR_RGB_SNOWWHITE);
-    parse_xcolor(&clrs.clr_txt, GDI_ATTR_RGB_LIGHTWHITE);
+	color_mod_t clrs = {0};
+    parse_xcolor(&clrs.clr_bkg, GDI_ATTR_RGB_SNOWWHITE);
+    parse_xcolor(&clrs.clr_frg, GDI_ATTR_RGB_SOFTBLACK);
+    parse_xcolor(&clrs.clr_txt, GDI_ATTR_RGB_HARDBLACK);
     parse_xcolor(&clrs.clr_msk, GDI_ATTR_RGB_BLACK);
-    parse_xcolor(&clrs.clr_ico, GDI_ATTR_RGB_SNOWWHITE);
+    parse_xcolor(&clrs.clr_ico, GDI_ATTR_RGB_SLATE);
 
 	xrect_t xr = { 0 };
 
@@ -77,6 +77,8 @@ void _MainFrame_CreateEditor(widget_t widget)
 	widget_set_color_mode(pdt->hEditor, &clrs);
 
 	widget_show(pdt->hEditor, WS_SHOW_NORMAL);
+
+	editbox_set_text(pdt->hEditor, _T("Hello World!"));
 }
 
 void _MainFrame_DestroyEditor(widget_t widget)

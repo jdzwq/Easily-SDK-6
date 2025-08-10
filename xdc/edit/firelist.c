@@ -101,14 +101,14 @@ static int sub_editbox_self_command(widget_t widget, int code, vword_t data, uid
 	case COMMAND_COLOR:
 		if (widget_is_valid(dropbox))
 		{
-			widget_set_color_mode(dropbox, (clr_mod_t*)data);
+			widget_set_color_mode(dropbox, (color_mod_t*)data);
 			widget_paint(dropbox);
 		}
 
 		/*keybox = editbox_get_keybox(widget);
 		if (widget_is_valid(keybox))
 		{
-			widget_set_color_mode(keybox, (clr_mod_t*)data);
+			widget_set_color_mode(keybox, (color_mod_t*)data);
 			widget_paint(keybox);
 		}*/
 		return 1;

@@ -2,6 +2,7 @@
 #include <xdk.h>
 #include <xdg.h>
 
+
 void test_mgc_font(visual_t mgc)
 {
 	xcolor_t xc;
@@ -97,7 +98,8 @@ void test_draw_text(visual_t mgc)
 	xscpy(xa.line_align, GDI_ATTR_TEXT_ALIGN_NEAR);
 	xscpy(xa.text_wrap, GDI_ATTR_TEXT_WRAP_LINEBREAK);
 
-	const tchar_t* str = _T("abcd,中文汉字，\n$￥");
+	//const tchar_t* str = _T("abcd,中文汉字，\n$￥");
+	const tchar_t* str = _T("abcd,中文汉字\n$");
 	xsize_t xs = { 0 };
 	xspan_t s, l;
 
@@ -395,7 +397,7 @@ void test_draw_arc(visual_t mgc)
 	xs.h = 50;
 
 	mgc_draw_line_raw(mgc, &xp, &pt[0], &pt[1]);
-	mgc_draw_arc_raw(mgc, &xp, &pt[0], &pt[1], &xs, 1, 1);
+	mgc_draw_arc_raw(mgc, &xp, &pt[0], &pt[1], &xs, 0, 0);
 }
 
 void test_draw_curve(visual_t mgc)

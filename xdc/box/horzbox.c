@@ -224,7 +224,7 @@ void hand_horzbox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 
 	xrect_t xr;
 
-	clr_mod_t clrs;
+	color_mod_t clrs;
 	xbrush_t xb;
 	xcolor_t xc_brim, xc_core;
 
@@ -314,7 +314,7 @@ widget_t show_horzbox(widget_t owner)
 	widget_t wt;
 	xrect_t xr = { 0 };
 	xsize_t xs = { 0 };
-	clr_mod_t clr = { 0 };
+	color_mod_t clr = { 0 };
 
 	wt = horzbox_create(owner, WD_STYLE_POPUP | WD_STYLE_NOACTIVE, &xr);
 

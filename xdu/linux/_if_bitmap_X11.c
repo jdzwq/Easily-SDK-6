@@ -47,8 +47,12 @@ void _destroy_bitmap(bitmap_t rbm)
 {
     X11_bitmap_t* bmp = (X11_bitmap_t*)rbm;
     
-	XDestroyImage(bmp->image);
-	free(bmp);
+	if(bmp->image && bmp->ref)
+	{
+		XDestroyImage(bmp->image);
+	}
+
+	xmem_free_handle(bmp);
 }
 
 void _get_bitmap_size(bitmap_t rbm, int* pw, int* ph)
@@ -65,9 +69,10 @@ bitmap_t _create_context_bitmap(visual_t rdc)
 	X11_context_t* ctx = (X11_context_t*)rdc;
 	X11_bitmap_t* bmp;
 
-	bmp = (X11_bitmap_t*)xmem_alloc(sizeof(X11_bitmap_t));
+	bmp = (X11_bitmap_t*)xmem_alloc_handle(sizeof(X11_bitmap_t));
 	
 	bmp->image = XGetImage(g_display, ctx->device, 0, 0, ctx->width, ctx->height, AllPlanes, ZPixmap);
+	bmp->ref = 1;
 
 	return &(bmp->head);
 }
@@ -102,8 +107,8 @@ bitmap_t _create_color_bitmap(visual_t rdc, const xcolor_t* pxc, int w, int h)
 
 	fill_color_dibbits(pxc, &bih, NULL, pbb, bih.bytes);
 
-	bmp = (X11_bitmap_t*)xmem_alloc(sizeof(X11_bitmap_t));
-
+	bmp = (X11_bitmap_t*)xmem_alloc_handle(sizeof(X11_bitmap_t));
+	bmp->ref = 0;
 	bmp->image = XCreateImage(g_display, 
 		DefaultVisual(g_display, screen), 
 		DefaultDepth(g_display, screen), 
@@ -117,6 +122,8 @@ bitmap_t _create_color_bitmap(visual_t rdc, const xcolor_t* pxc, int w, int h)
 		return NULL;
 	}
     
+	xmem_free(pbb);
+	
     return &(bmp->head);
 }
 
@@ -150,8 +157,8 @@ bitmap_t _create_pattern_bitmap(visual_t rdc, const xcolor_t* pxc_front, const x
 
 	fill_pattern_dibbits(pxc_front, pxc_back, &bih, NULL, pbb, bih.bytes);
 
-	bmp = (X11_bitmap_t*)xmem_alloc(sizeof(X11_bitmap_t));
-
+	bmp = (X11_bitmap_t*)xmem_alloc_handle(sizeof(X11_bitmap_t));
+	bmp->ref = 0;
 	bmp->image = XCreateImage(g_display, 
 		DefaultVisual(g_display, screen), 
 		DefaultDepth(g_display, screen), 
@@ -164,6 +171,8 @@ bitmap_t _create_pattern_bitmap(visual_t rdc, const xcolor_t* pxc_front, const x
 		xmem_free(bmp);
 		return NULL;
 	}
+
+	xmem_free(pbb);
 
     return &(bmp->head);
 }
@@ -198,8 +207,8 @@ bitmap_t _create_gradient_bitmap(visual_t rdc, const xcolor_t* pxc_brim, const x
 
 	fill_gradient_dibbits(pxc_brim, pxc_core, type, &bih, pbb, bih.bytes);
 
-	bmp = (X11_bitmap_t*)xmem_alloc(sizeof(X11_bitmap_t));
-
+	bmp = (X11_bitmap_t*)xmem_alloc_handle(sizeof(X11_bitmap_t));
+	bmp->ref = 0;
 	bmp->image = XCreateImage(g_display, 
 		DefaultVisual(g_display, screen), 
 		DefaultDepth(g_display, screen), 
@@ -213,6 +222,8 @@ bitmap_t _create_gradient_bitmap(visual_t rdc, const xcolor_t* pxc_brim, const x
 		return NULL;
 	}
     
+	xmem_free(pbb);
+
     return &(bmp->head);
 }
 
@@ -250,8 +261,8 @@ bitmap_t _create_code128_bitmap(visual_t rdc, const xcolor_t* pxc_front, const x
 
 	fill_code128_dibbits(pxc_front, pxc_back, bar_buf, bar_cols, unit, &bih, NULL, pbb, bih.bytes);
 
-	bmp = (X11_bitmap_t*)xmem_alloc(sizeof(X11_bitmap_t));
-
+	bmp = (X11_bitmap_t*)xmem_alloc_handle(sizeof(X11_bitmap_t));
+	bmp->ref = 0;
 	bmp->image = XCreateImage(g_display, 
 		DefaultVisual(g_display, screen), 
 		DefaultDepth(g_display, screen), 
@@ -265,6 +276,8 @@ bitmap_t _create_code128_bitmap(visual_t rdc, const xcolor_t* pxc_front, const x
 		return NULL;
 	}
     
+	xmem_free(pbb);
+
     return &(bmp->head);
 }
 
@@ -302,8 +315,8 @@ bitmap_t _create_pdf417_bitmap(visual_t rdc, const xcolor_t* pxc_front, const xc
 
 	fill_pdf417_dibbits(pxc_front, pxc_back, bar_buf, bar_rows, bar_cols, unit, &bih, NULL, pbb, bih.bytes);
 
-	bmp = (X11_bitmap_t*)xmem_alloc(sizeof(X11_bitmap_t));
-
+	bmp = (X11_bitmap_t*)xmem_alloc_handle(sizeof(X11_bitmap_t));
+	bmp->ref = 0;
 	bmp->image = XCreateImage(g_display, 
 		DefaultVisual(g_display, screen), 
 		DefaultDepth(g_display, screen), 
@@ -316,6 +329,8 @@ bitmap_t _create_pdf417_bitmap(visual_t rdc, const xcolor_t* pxc_front, const xc
 		xmem_free(bmp);
 		return NULL;
 	}
+
+	xmem_free(pbb);
 
     return &(bmp->head);
 }
@@ -354,8 +369,8 @@ bitmap_t _create_qrcode_bitmap(visual_t rdc, const xcolor_t* pxc_front, const xc
 
 	fill_qrcode_dibbits(pxc_front, pxc_back, bar_buf, bar_rows, bar_cols, unit, &bih, NULL, pbb, bih.bytes);
 
-	bmp = (X11_bitmap_t*)xmem_alloc(sizeof(X11_bitmap_t));
-
+	bmp = (X11_bitmap_t*)xmem_alloc_handle(sizeof(X11_bitmap_t));
+	bmp->ref = 0;
 	bmp->image = XCreateImage(g_display, 
 		DefaultVisual(g_display, screen), 
 		DefaultDepth(g_display, screen), 
@@ -369,6 +384,8 @@ bitmap_t _create_qrcode_bitmap(visual_t rdc, const xcolor_t* pxc_front, const xc
 		return NULL;
 	}
 
+	xmem_free(pbb);
+
     return &(bmp->head);
 } 
 
@@ -380,7 +397,7 @@ bitmap_t _create_storage_bitmap(visual_t rdc, const tchar_t* fname)
 	struct stat st = {0};
 	int fd = 0;
 
-	tchar_t itype[10] = {0};
+	tchar_t itype[META_LEN] = {0};
 	int len;
 	byte_t* file_buf;
 	dword_t file_len;
@@ -396,8 +413,7 @@ bitmap_t _create_storage_bitmap(visual_t rdc, const tchar_t* fname)
 	byte_t* pbb;
 	xcolor_t* pxc;
 
-    if(stat(fname, &st) < 0)
-        return 0;
+	tchar_t fpath[PATH_LEN * 2] = { 0 };
 
 	len = xslen(fname);
 	if(len < 4) return (bitmap_t)0;
@@ -415,12 +431,26 @@ bitmap_t _create_storage_bitmap(visual_t rdc, const tchar_t* fname)
 		xscpy(itype, GDI_ATTR_IMAGE_TYPE_BMP);
 	}
 	else
-		return 0;
+		return (bitmap_t)0;
 
-	if(stat(fname, &st) != 0)
-		return 0;
+	if(*fname == _T('.') && *(fname + 1) == _T('/'))
+	{
+		get_runpath(NULL, fpath, PATH_LEN);
+		xscat(fpath, fname + 1);
+	}else if(*fname != _T('/'))
+	{
+		get_runpath(NULL, fpath, PATH_LEN);
+		xsncat(fpath, _T("/"), 1);
+		xscat(fpath, fname);
+	}else
+	{
+		xscpy(fpath, fname);
+	}
 
-	fd = open(fname, O_RDONLY, S_IRWXU | S_IXGRP | S_IROTH | S_IXOTH);
+    if(stat(fpath, &st) < 0)
+        return 0;
+
+	fd = open(fpath, O_RDONLY, S_IRWXU | S_IXGRP | S_IROTH | S_IXOTH);
     if(fd < 0)
         return 0;
 
@@ -483,8 +513,8 @@ bitmap_t _create_storage_bitmap(visual_t rdc, const tchar_t* fname)
 
 	pbb = (byte_t*)xmem_alloc(4 * xs.w * xs.h);
 
-	bmp = (X11_bitmap_t*)xmem_alloc(sizeof(X11_bitmap_t));
-
+	bmp = (X11_bitmap_t*)xmem_alloc_handle(sizeof(X11_bitmap_t));
+	bmp->ref = 0;
 	bmp->image = XCreateImage(g_display, 
 		DefaultVisual(g_display, screen), 
 		DefaultDepth(g_display, screen), 
@@ -496,7 +526,7 @@ bitmap_t _create_storage_bitmap(visual_t rdc, const tchar_t* fname)
 		xmem_free(bmp_buf);
 
 		xmem_free(pbb);
-		xmem_free(bmp);
+		xmem_free_handle(bmp);
 		return NULL;
 	}
 	
@@ -518,7 +548,7 @@ bitmap_t _create_storage_bitmap(visual_t rdc, const tchar_t* fname)
 	}
 
 	xmem_free(pxc);
-
+	xmem_free(pbb);
 	xmem_free(bmp_buf);
 
 	return (bitmap_t)&(bmp->head);
@@ -660,9 +690,9 @@ dword_t _save_bitmap_to_bytes(visual_t rdc, bitmap_t rb, unsigned char* buf, dwo
 		cClrBits = 32;
 
 	if (cClrBits < 24)
-		pbmi = (bitmap_infohead_t*)calloc(1, sizeof(bitmap_infohead_t) + sizeof(bitmap_rgbquad_t) * (unsigned int)(1 << cClrBits));
+		pbmi = (bitmap_infohead_t*)xmem_alloc(sizeof(bitmap_infohead_t) + sizeof(bitmap_rgbquad_t) * (unsigned int)(1 << cClrBits));
 	else
-		pbmi = (bitmap_infohead_t*)calloc(1, sizeof(bitmap_infohead_t));
+		pbmi = (bitmap_infohead_t*)xmem_alloc(sizeof(bitmap_infohead_t));
 
 	pbmi->size = sizeof(bitmap_infohead_t);
 	pbmi->width = bmp->image->width;
@@ -685,7 +715,7 @@ dword_t _save_bitmap_to_bytes(visual_t rdc, bitmap_t rb, unsigned char* buf, dwo
 
 	if (pbmi->imagesize > (unsigned int)max)
 	{
-		free(pbmi);
+		xmem_free(pbmi);
 		return 0;
 	}
 
@@ -717,7 +747,7 @@ dword_t _save_bitmap_to_bytes(visual_t rdc, bitmap_t rb, unsigned char* buf, dwo
         memcpy(lpBits, bmp->image->data, pbmi->imagesize);
 	}
 
-	free(pbmi);
+	xmem_free(pbmi);
 
 	return dwTotal;
 }

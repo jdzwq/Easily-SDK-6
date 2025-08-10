@@ -130,7 +130,7 @@ typedef struct _cocoa_widget_t{
 	scroll_t vs;
 
 	float diaph;
-	clr_mod_t clrs;
+	color_mod_t clrs;
 }cocoa_widget_t;
 
 #ifdef XDU_SUPPORT_WIDGET_NC

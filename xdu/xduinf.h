@@ -96,7 +96,7 @@ typedef void(*PF_GDI_DRAW_POLYLINE)(visual_t, const xpen_t*, const xpoint_t*, in
 typedef void(*PF_GDI_DRAW_BEZIER)(visual_t, const xpen_t*, const xpoint_t*, const xpoint_t*, const xpoint_t*, const xpoint_t*);
 typedef void(*PF_GDI_DRAW_CURVE)(visual_t, const xpen_t*, const xpoint_t*, int);
 typedef void(*PF_GDI_DRAW_RECT)(visual_t, const xpen_t*, const xbrush_t*, const xrect_t*);
-typedef void(*PF_GDI_DRAW_PATH)(visual_t, const xpen_t*, const xbrush_t*, const tchar_t*, const xpoint_t*);
+typedef void(*PF_GDI_DRAW_PATH)(visual_t, const xpen_t*, const xbrush_t*, const tchar_t*, const xpoint_t*, int);
 typedef void(*PF_GDI_DRAW_POLYGON)(visual_t, const xpen_t*, const xbrush_t*, const xpoint_t*, int);
 typedef void(*PF_GDI_DRAW_ROUND)(visual_t, const xpen_t*, const xbrush_t*, const xrect_t*, const xsize_t*);
 typedef void(*PF_GDI_DRAW_ELLIPSE)(visual_t, const xpen_t*, const xbrush_t*, const xrect_t*);
@@ -285,7 +285,7 @@ typedef void(*PF_WIDGET_ENABLE)(widget_t, bool_t);
 typedef void(*PF_WIDGET_ACTIVE)(widget_t);
 typedef void(*PF_WIDGET_CREATE_CARET)(widget_t, int, int);
 typedef void(*PF_WIDGET_DESTROY_CARET)(widget_t);
-typedef void(*PF_WIDGET_SHOW_CARET)(widget_t, int, int, bool_t);
+typedef void(*PF_WIDGET_SHOW_CARET)(widget_t, int, int);
 
 typedef void(*PF_WIDGET_SET_TITLE)(widget_t, const tchar_t*);
 typedef int(*PF_WIDGET_GET_TITLE)(widget_t, tchar_t*, int);
@@ -320,8 +320,8 @@ typedef void(*PF_WIDGET_NOTI_XFONT)(widget_t,const xfont_t*);
 typedef void(*PF_WIDGET_NOTI_XFACE)(widget_t, const xface_t*);
 typedef void(*PF_WIDGET_NOTI_XBRUSH)(widget_t, const xbrush_t*);
 typedef void(*PF_WIDGET_NOTI_XPEN)(widget_t, const xpen_t*);
-typedef void(*PF_WIDGET_SET_COLOR_MODE)(widget_t, const clr_mod_t*);
-typedef void(*PF_WIDGET_GET_COLOR_MODE)(widget_t, clr_mod_t*);
+typedef void(*PF_WIDGET_SET_COLOR_MODE)(widget_t, const color_mod_t*);
+typedef void(*PF_WIDGET_GET_COLOR_MODE)(widget_t, color_mod_t*);
 typedef void(*PF_WIDGET_SET_DIAPH)(widget_t, float);
 typedef float(*PF_WIDGET_GET_DIAPH)(widget_t);
 typedef void(*PF_WIDGET_SET_POINT)(widget_t, const xpoint_t*);

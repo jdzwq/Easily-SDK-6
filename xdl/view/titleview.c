@@ -598,8 +598,6 @@ void draw_title(const drawing_interface* pif, link_t_ptr ptr, link_t_ptr plk_foc
 				pa[13].fx = pw +0.5f;
 				pa[13].fy = xr.fy + xr.fh;
 
-				ta[10] = _T('Z');
-
 				(*pif->pf_draw_path)(pif->ctx, &xp, &xb, ta, pa, 14);
 
 				xr_image.fx = xr.fx;

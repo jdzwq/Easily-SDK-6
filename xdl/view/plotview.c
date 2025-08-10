@@ -100,7 +100,7 @@ static void _plot_calendar(const drawing_interface* pif, const plot_t* plt, matr
 	xmem_copy((void*)&xf_dot, (void*)&xf, sizeof(xfont_t));
 
 	dx = pbox->fw / 10;
-	dy = pbox->fh / 8;
+	dy = dx;//pbox->fh / 8;
 	dd = (dx > dy) ? dx : dy;
 
 	xr.fx = pbox->fx;
@@ -135,7 +135,7 @@ static void _plot_calendar(const drawing_interface* pif, const plot_t* plt, matr
 
 	sa[4] = _T('Z');
 
-	(*pif->pf_draw_path)(pif->ctx, &xp, &xb, sa, pa, 8);
+	(*pif->pf_draw_path)(pif->ctx, &xp, &xb, sa, pa, 9);
 
 	//the outer frame
 	lighten_xbrush(&xb, DEF_HARD_LIGHTEN);
@@ -174,7 +174,7 @@ static void _plot_calendar(const drawing_interface* pif, const plot_t* plt, matr
 
 	sa[6] = _T('Z');
 
-	(*pif->pf_draw_path)(pif->ctx, &xp, &xb, sa, pa, 10);
+	(*pif->pf_draw_path)(pif->ctx, &xp, &xb, sa, pa, 11);
 
 	//the inner frame
 	color = get_string_ptr(plt->y_colors, 0);
@@ -201,31 +201,15 @@ static void _plot_calendar(const drawing_interface* pif, const plot_t* plt, matr
 
 	sa[2] = _T('L');
 	pa[2].fx = xr.fx + xr.fw - dx / 2;
-	pa[2].fy = xr.fy + xr.fh - dx;
+	pa[2].fy = xr.fy + xr.fh - dx / 2;
 
-	sa[3] = _T('A');
-	pa[3].fx = 1;
-	pa[3].fy = 0;
-	pa[4].fx = dx / 2;
-	pa[4].fy = dx / 2;
-	pa[5].fx = xr.fx + xr.fw - dx;
-	pa[5].fy = xr.fy + xr.fh - dx / 2;
+	sa[3] = _T('L');
+	pa[3].fx = xr.fx + dx / 2;
+	pa[3].fy = xr.fy + xr.fh - dx / 2;
 
-	sa[4] = _T('L');
-	pa[6].fx = xr.fx + dx;
-	pa[6].fy = xr.fy + xr.fh - dx / 2;
+	sa[4] = _T('Z');
 
-	sa[5] = _T('A');
-	pa[7].fx = 1;
-	pa[7].fy = 0;
-	pa[8].fx = dx / 2;
-	pa[8].fy = dx / 2;
-	pa[9].fx = xr.fx + dx / 2;
-	pa[9].fy = xr.fy + xr.fh - dx;
-
-	sa[6] = _T('Z');
-
-	(*pif->pf_draw_path)(pif->ctx, &xp_dot, &xb_dot, sa, pa, 10);
+	(*pif->pf_draw_path)(pif->ctx, &xp_dot, &xb_dot, sa, pa, 5);
 
 	label = get_string_ptr(plt->x_labels, 0);
 	if (is_null(label))
@@ -524,7 +508,7 @@ static void _plot_thermometer(const drawing_interface* pif, const plot_t* plt, m
 
 		sa[5] = _T('Z');
 
-		(*pif->pf_draw_path)(pif->ctx, &xp, &xb, sa, pa, 9);
+		(*pif->pf_draw_path)(pif->ctx, &xp, &xb, sa, pa, 10);
 
 		color = get_string_ptr(plt->x_colors, i);
 		if (!is_null(color))

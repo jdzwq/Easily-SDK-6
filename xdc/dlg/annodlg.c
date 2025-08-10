@@ -631,7 +631,7 @@ void hand_annodlg_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	canvas_t canv;
 	drawing_interface ifv = {0};
 
-	clr_mod_t clrs;
+	color_mod_t clrs;
 	xbrush_t xb = { 0 };
 	xcolor_t xc_brim, xc_core;
 
@@ -674,7 +674,7 @@ void hand_annodlg_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 widget_t annodlg_create(const tchar_t* title, string_t var, widget_t owner)
 {
 	if_dispatch_t ev = { 0 };
-	clr_mod_t clr = { 0 };
+	color_mod_t clr = { 0 };
 	xrect_t xr = { 0 };
 	xsize_t xs = { 0 };
 	widget_t dlg;

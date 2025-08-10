@@ -395,7 +395,7 @@ void noti_list_begin_edit(widget_t widget)
 	const tchar_t* text;
 	xrect_t xr = { 0 };
 
-	clr_mod_t ob = { 0 };
+	color_mod_t ob = { 0 };
 
 	XDK_ASSERT(ptd->item);
 	
@@ -930,7 +930,7 @@ void hand_list_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	const drawing_interface* pif = NULL;
 	drawing_interface ifv = {0};
 
-	clr_mod_t clrs;
+	color_mod_t clrs;
 	xbrush_t xb;
 	xcolor_t xc;
 

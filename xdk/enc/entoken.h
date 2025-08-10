@@ -56,6 +56,7 @@ LICENSE.GPL3 for more details.
 
 
 /*define some characters length*/
+#define BIT_LEN			8
 #define INT_LEN			16
 #define NUM_LEN			48 
 #define DATE_LEN		48

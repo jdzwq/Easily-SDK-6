@@ -37,7 +37,7 @@ void textor_menu(widget_t widget, const xpoint_t* ppt, int lay)
 
 	xrect_t xr = { 0 };
 
-	clr_mod_t clr;
+	color_mod_t clr;
 
 	widget_get_color_mode(widget, &clr);
 
@@ -88,7 +88,7 @@ void fontname_menu(widget_t widget, dword_t idc, const xpoint_t* ppt, int lay)
 	link_t_ptr ilk, ptr_menu;
 
 	int iid = 0;
-	clr_mod_t clr;
+	color_mod_t clr;
 
 	widget_get_color_mode(widget, &clr);
 
@@ -159,7 +159,7 @@ void fontsize_menu(widget_t widget, dword_t idc, const xpoint_t* ppt, int lay)
 	link_t_ptr ent, ptr_string;
 	link_t_ptr ilk, ptr_menu;
 	int iid = 0;
-	clr_mod_t clr;
+	color_mod_t clr;
 
 	widget_get_color_mode(widget, &clr);
 
@@ -230,7 +230,7 @@ void fontstyle_menu(widget_t widget, dword_t idc, const xpoint_t* ppt, int lay)
 	link_t_ptr ent, ptr_string;
 	link_t_ptr ilk, ptr_menu;
 	int iid = 0;
-	clr_mod_t clr;
+	color_mod_t clr;
 
 	widget_get_color_mode(widget, &clr);
 
@@ -301,7 +301,7 @@ void fontweight_menu(widget_t widget, dword_t idc, const xpoint_t* ppt, int lay)
 	link_t_ptr ent, ptr_string;
 	link_t_ptr ilk, ptr_menu;
 	int iid = 0;
-	clr_mod_t clr;
+	color_mod_t clr;
 
 	widget_get_color_mode(widget, &clr);
 
@@ -372,7 +372,7 @@ void color_menu(widget_t widget, dword_t idc, const xpoint_t* ppt, int lay)
 	link_t_ptr ent, ptr_string;
 	link_t_ptr ilk, ptr_menu;
 	int iid = 0;
-	clr_mod_t clr;
+	color_mod_t clr;
 
 	widget_get_color_mode(widget, &clr);
 
@@ -443,7 +443,7 @@ void shape_menu(widget_t widget, dword_t idc, const xpoint_t* ppt, int lay)
 	link_t_ptr ent, ptr_string;
 	link_t_ptr ilk, ptr_menu;
 	int iid = 0;
-	clr_mod_t clr;
+	color_mod_t clr;
 
 	widget_get_color_mode(widget, &clr);
 
@@ -534,7 +534,7 @@ void track_popup_menu(widget_t widget, dword_t idc, link_t_ptr menu, const xpoin
 	pt.y = ppt->y;
 	menubox_layout(hMenu, &pt, WS_LAYOUT_RIGHTBOTTOM);
 
-	clr_mod_t clr;
+	color_mod_t clr;
 	widget_get_color_mode(widget, &clr);
 	widget_set_color_mode(hMenu, &clr);
 	widget_paint(hMenu);

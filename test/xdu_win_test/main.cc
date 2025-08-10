@@ -127,7 +127,7 @@ void child_on_lbutton_down(widget_t wt, const xpoint_t* ppt)
 
    (*if_widget.pf_widget_set_cursor)(wt, CURSOR_HAND);
 
-   (*if_widget.pf_widget_show_caret)(wt, ppt->x, ppt->y, 1);
+   (*if_widget.pf_widget_show_caret)(wt, ppt->x, ppt->y);
 }
 
 void child_on_lbutton_up(widget_t wt, const xpoint_t* ppt)
@@ -253,14 +253,12 @@ void child_on_set_focus(widget_t wt, widget_t from)
 
     (*if_widget.pf_widget_create_caret)(wt, 2, 20);
 
-    (*if_widget.pf_widget_show_caret)(wt, 10, 10, 1);
+    (*if_widget.pf_widget_show_caret)(wt, 10, 10);
 }
 
 void child_on_kill_focus(widget_t wt, widget_t to)
 {
     printf("child on_kill_focus \n");
-
-    (*if_widget.pf_widget_show_caret)(wt, 0, 0, 0);
 
     (*if_widget.pf_widget_destroy_caret)(wt);
 }
@@ -280,7 +278,7 @@ void child_on_paint(widget_t wt, visual_t rdc, const xrect_t* prt)
     printf("child on_paint the rect is x:%d y:%d w:%d h:%d \n", prt->x, prt->y, prt->w, prt->h);
 
     xrect_t rt;
-     (*if_widget.pf_widget_get_client_rect)(wt, &rt);
+    (*if_widget.pf_widget_get_client_rect)(wt, &rt);
     visual_t ctx = (*if_context.pf_create_compatible_context)(rdc, rt.w, rt.h);
 
 	xpen_t xp = { 0 };
@@ -352,13 +350,13 @@ void child_on_paint(widget_t wt, visual_t rdc, const xrect_t* prt)
     xp1.x = 100;
     xp1.y = 100;
     xp2.x = 50;
-    xp2.y = 50;
+    xp2.y = 150;
 
     xs1.w = 50;
     xs1.h = 50;
     xscpy(xp.size,_T("1"));
     xscpy(xp.color, GDI_ATTR_RGB_YELLOW);
-   //(*if_context.pf_gdi_draw_arc)(ctx, &xp, &xp1, &xp2, &xs1, 1, 1);
+   //(*if_context.pf_gdi_draw_arc)(ctx, &xp, &xp1, &xp2, &xs1, 1, 0);
    //(*if_context.pf_gdi_draw_line)(ctx, &xp, &xp1, &xp2);
 
    xr.x = 100;
@@ -391,17 +389,17 @@ void child_on_paint(widget_t wt, visual_t rdc, const xrect_t* prt)
 	//(*if_context.pf_gdi_draw_polyline)(ctx, &xp, pt, 4);
 	//(*if_context.pf_gdi_draw_bezier)(ctx, &xp, &pt[0], &pt[1], &pt[2], &pt[3]);
 
-	tchar_t aa[10] = { 0 };
-	xpoint_t pa[20] = { 0 };
+	tchar_t aa[20] = { 0 };
+	xpoint_t pa[50] = { 0 };
 
 	int i = 0;
 	int n = 0;
-	int feed = 3;
+	int feed = 12;
 
-	xr.x = 2;
-	xr.y = 2;
+	xr.x = 10;
+	xr.y = 10;
 	xr.w = 96;
-	xr.h = 20;
+	xr.h = 30;
 
 	aa[i] = _T('M');
 	pa[n].x = xr.x;
@@ -479,11 +477,17 @@ void child_on_paint(widget_t wt, visual_t rdc, const xrect_t* prt)
 	i++;
 	n += 3;
 
+    aa[i] = _T('L');
+	pa[n].x = xr.x;
+	pa[n].y = xr.y + feed;
+	i++;
+	n++;
+
 	aa[i] = _T('Z');
 	i++;
 
 	xscpy(xp.color, GDI_ATTR_RGB_SLATE);
-	//(*if_context.pf_gdi_draw_path)(ctx, &xp, &xb, aa, pa);
+	//(*if_context.pf_gdi_draw_path)(ctx, &xp, NULL, aa, pa, n);
 
 	xcolor_t brim_color, core_color;
 	parse_xcolor(&brim_color, GDI_ATTR_RGB_GRAY);
@@ -506,12 +510,12 @@ void child_on_paint(widget_t wt, visual_t rdc, const xrect_t* prt)
     xr.w += 2;
     xr.h += 2;
     xscpy(xp.color, GDI_ATTR_RGB_SOFTWHITE);
-    xscpy(xb.color, GDI_ATTR_RGB_SOFTBLACK);
     //(*if_context.pf_gdi_draw_rect)(ctx, &xp, NULL, &xr);
     xr.x = 30;
 	xr.y = 30;
 	xr.w = 50;
 	xr.h = 50;
+    xscpy(xb.color, GDI_ATTR_RGB_SOFTBLACK);
     //(*if_context.pf_gdi_draw_rect)(ctx, &xp, &xb, &xr);
 
     xr.x = 40;
@@ -519,10 +523,10 @@ void child_on_paint(widget_t wt, visual_t rdc, const xrect_t* prt)
 	xr.w = 50;
 	xr.h = 50;
     //(*if_context.pf_gdi_inclip_rect)(ctx, &xr);
-    xr.x -= 1;
-    xr.y -= 1;
-    xr.w += 2;
-    xr.h += 2;
+    xr.x += 1;
+    xr.y += 1;
+    xr.w -= 2;
+    xr.h -= 2;
     xscpy(xp.color, GDI_ATTR_RGB_SOFTWHITE);
     xscpy(xb.color, GDI_ATTR_RGB_SOFTBLACK);
     //(*if_context.pf_gdi_draw_rect)(ctx, &xp, NULL, &xr);
@@ -549,7 +553,7 @@ void child_on_paint(widget_t wt, visual_t rdc, const xrect_t* prt)
     xfont_t xf = {0};
     default_textor_xfont(&xf);
     xscpy(xf.size, _T("13"));
-    xscpy(xf.color, GDI_ATTR_RGB_GREEN);
+    xscpy(xf.color, GDI_ATTR_RGB_LIGHTCYAN);
     xface_t xa = {0};
     default_xface(&xa);
 
@@ -561,20 +565,30 @@ void child_on_paint(widget_t wt, visual_t rdc, const xrect_t* prt)
 	xp2.x = xp1.x + xs.w;
 	xp2.y = 30;
 
-	(*if_context.pf_gdi_draw_line)(ctx, &xp, &xp1, &xp2);
-	(*if_context.pf_gdi_text_out)(ctx, &xf, &xp1, _T("Hello World!"), -1);
+	//(*if_context.pf_gdi_draw_line)(ctx, &xp, &xp1, &xp2);
+	//(*if_context.pf_gdi_text_out)(ctx, &xf, &xp1, _T("Hello World!"), -1);
 
-    //(*if_context.pf_gdi_text_rect)(ctx, &xf, &xa, _T("Hello World!"), -1, &xr);
+
     xr.x = 10;
     xr.y = 20;
+    //(*if_context.pf_gdi_text_size)(ctx, &xf, _T("Hello World!"), -1, RECTSIZE(&xr));
     //(*if_context.pf_gdi_draw_rect)(ctx, &xp, &xb, &xr);
+    //(*if_context.pf_gdi_draw_text)(ctx, &xf, &xa, &xr, _T("Hello World!"), -1);
+
+    xr.x = 10;
+    xr.y = 10;
+    xr.w = 150;
+    xr.h = 100;
+    //(*if_context.pf_gdi_draw_rect)(ctx, &xp, &xb, &xr);
+    xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_CENTER);
+    xscpy(xa.line_align, GDI_ATTR_TEXT_ALIGN_CENTER);
     //(*if_context.pf_gdi_draw_text)(ctx, &xf, &xa, &xr, _T("Hello World!"), -1);
 
     parse_xcolor(&xc, GDI_ATTR_RGB_RED);
 	xcolor_t xc_back;
 	parse_xcolor(&xc_back, GDI_ATTR_RGB_YELLOW);
     bitmap_t bmp = NULL;
-	//bmp = (*if_context.pf_create_color_bitmap)(ctx, &xc, 32, 32);
+	bmp = (*if_context.pf_create_color_bitmap)(ctx, &xc, 32, 32);
 	//bmp = (*if_context.pf_create_pattern_bitmap)(ctx, &xc, &xc_back, 5, 5);
 	//bmp = (*if_context.pf_create_gradient_bitmap)(ctx, &xc, &xc_back, 50, 50, GDI_ATTR_GRADIENT_VERT);
 
@@ -596,9 +610,9 @@ void child_on_paint(widget_t wt, visual_t rdc, const xrect_t* prt)
         xr.w = w;
         xr.h = h;
 
-       //(*if_context.pf_gdi_draw_rect)(ctx, &xp, NULL, &xr);
+       (*if_context.pf_gdi_draw_rect)(ctx, &xp, NULL, &xr);
 
-       //(*if_context.pf_gdi_draw_bitmap)(ctx, bmp, RECTPOINT(&xr));
+       (*if_context.pf_gdi_draw_bitmap)(ctx, bmp, RECTPOINT(&xr));
     
         (*if_context.pf_destroy_bitmap)(bmp);
         bmp = NULL;
@@ -610,11 +624,13 @@ void child_on_paint(widget_t wt, visual_t rdc, const xrect_t* prt)
     {
         xr.x = 10;
         xr.y = 10;
-        xr.w = 50;
-        xr.h = 50;
+        xr.w = 200;
+        xr.h = 200;
 
        //(*if_context.pf_gdi_draw_bitmap)(ctx, bmp, RECTPOINT(&xr));
-       //(*if_context.pf_gdi_draw_image)(ctx, bmp, GDI_ATTR_RGB_AZURE, &xr);
+
+       parse_xcolor(&xc, GDI_ATTR_RGB_BLACK);
+       (*if_context.pf_gdi_draw_image)(ctx, bmp, &xc, &xr);
 
         (*if_context.pf_destroy_bitmap)(bmp);
         bmp = NULL;
@@ -650,7 +666,7 @@ int main_on_create(widget_t wt, void* param)
 {
     printf("on_create: main\n");
 
-    clr_mod_t clrs = {0};
+    color_mod_t clrs = {0};
     parse_xcolor(&clrs.clr_bkg, GDI_ATTR_RGB_HARDBLACK);
     parse_xcolor(&clrs.clr_frg, GDI_ATTR_RGB_SNOWWHITE);
     parse_xcolor(&clrs.clr_txt, GDI_ATTR_RGB_LIGHTWHITE);
@@ -1047,7 +1063,7 @@ void init_instance()
         {KS_WITH_SHIFT, '\t', 30}
     };
 
-    clr_mod_t clrs = {0};
+    color_mod_t clrs = {0};
     parse_xcolor(&clrs.clr_bkg, GDI_ATTR_RGB_DARKBLACK);
     parse_xcolor(&clrs.clr_frg, GDI_ATTR_RGB_SNOWWHITE);
     parse_xcolor(&clrs.clr_txt, GDI_ATTR_RGB_LIGHTWHITE);
@@ -1055,7 +1071,6 @@ void init_instance()
     parse_xcolor(&clrs.clr_ico, GDI_ATTR_RGB_SNOWWHITE);
 
     if_dispatch_t ev = {0};
-
     ev.pf_on_create = main_on_create;
 	ev.pf_on_close = main_on_close;
 	ev.pf_on_destroy = main_on_destroy;

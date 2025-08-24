@@ -77,7 +77,6 @@ bool_t shell_get_apppath(tchar_t* pathbuf, int pathlen)
 	return (pif->pf_shell_get_apppath)(pathbuf, pathlen);
 }
 
-#ifdef XDU_SUPPORT_SHELL_DIALOG
 bool_t shell_get_filename(widget_t owner, const tchar_t* defpath, const tchar_t* filter, const tchar_t* defext, bool_t saveit, tchar_t* pathbuf, int pathlen, tchar_t* filebuf, int filelen)
 {
 	if_shell_t* pif;
@@ -95,6 +94,5 @@ bool_t shell_get_pathname(widget_t owner, const tchar_t* defpath, bool_t createi
 
 	return (pif->pf_shell_get_pathname)(owner, defpath, createit, pathbuf, pathlen);
 }
-#endif
 
 #endif //XDU_SUPPORT_SHELL

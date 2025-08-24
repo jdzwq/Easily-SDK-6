@@ -63,7 +63,7 @@ static void _statusctrl_item_rect(widget_t widget, link_t_ptr ilk, xrect_t* pxr)
 	widget_rect_to_pt(widget, pxr);
 }
 
-void _statusctrl_reset_page(widget_t widget)
+static void _statusctrl_reset_page(widget_t widget)
 {
 	status_delta_t* ptd = GETSTATUSDELTA(widget);
 	int pw, ph;
@@ -72,6 +72,13 @@ void _statusctrl_reset_page(widget_t widget)
 	widget_get_client_rect(widget, &xr);
 	pw = xr.w;
 	ph = xr.h;
+
+	if (ptd->status)
+	{
+		widget_rect_to_mm(widget, &xr);
+		set_status_width(ptd->status, xr.fw);
+		set_status_height(ptd->status, xr.fh);
+	}
 
 	widget_reset_paging(widget, pw, ph, pw, ph, 0, 0);
 }
@@ -204,18 +211,21 @@ void hand_status_destroy(widget_t widget)
 void hand_status_size(widget_t widget, int code, const xsize_t* prs)
 {
 	status_delta_t* ptd = GETSTATUSDELTA(widget);
-	xrect_t xr;
 
-	if (!ptd->status)
-		return;
+	XDK_ASSERT(ptd != NULL);
 
-	widget_get_client_rect(widget, &xr);
-	widget_rect_to_tm(widget, &xr);
-
-	set_status_width(ptd->status, xr.fw);
-	set_status_height(ptd->status, xr.fh);
-
-	statusctrl_redraw(widget);
+	switch(code)
+	{
+	case WS_SIZE_FULLSCREEN:
+		break;
+	case WS_SIZE_MAXIMIZED:
+		break;
+	case WS_SIZE_MINIMIZED:
+		break;
+	case WS_SIZE_LAYOUT:
+		_statusctrl_reset_page(widget);
+		break;
+	}
 }
 
 void hand_status_mouse_move(widget_t widget, dword_t dw, const xpoint_t* pxp)
@@ -230,7 +240,7 @@ void hand_status_mouse_move(widget_t widget, dword_t dw, const xpoint_t* pxp)
 
 	pt.x = pxp->x;
 	pt.y = pxp->y;
-	widget_point_to_tm(widget, &pt);
+	widget_point_to_mm(widget, &pt);
 
 	plk = NULL;
 	nHint = calc_status_hint(&pt, ptd->status, &plk);
@@ -294,7 +304,7 @@ void hand_status_lbutton_down(widget_t widget, const xpoint_t* pxp)
 
 	pt.x = pxp->x;
 	pt.y = pxp->y;
-	widget_point_to_tm(widget, &pt);
+	widget_point_to_mm(widget, &pt);
 
 	plk = NULL;
 	nHint = calc_status_hint(&pt, ptd->status, &plk);
@@ -470,7 +480,7 @@ widget_t statusctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* 
 		EVENT_ON_XFONT(hand_status_xfont)
 		EVENT_ON_XFACE(hand_status_xface)
 
-		EVENT_ON_NC_IMPLEMENT
+		
 
 	EVENT_END_DISPATH
 
@@ -490,7 +500,7 @@ void statusctrl_attach(widget_t widget, link_t_ptr ptr)
 	ptd->status = ptr;
 	
 	widget_get_client_rect(widget, &xr);
-	widget_rect_to_tm(widget, &xr);
+	widget_rect_to_mm(widget, &xr);
 
 	set_status_width(ptd->status, xr.fw);
 	set_status_height(ptd->status, xr.fh);
@@ -721,7 +731,6 @@ void statusctrl_show_step(widget_t widget, bool_t b_show)
 	set_status_title(ptd->status, NULL);
 	
 	widget_erase(widget, NULL);
-	widget_paint(widget);
 }
 
 void statusctrl_step_it(widget_t widget, int steps, const tchar_t* sz_step)
@@ -740,5 +749,4 @@ void statusctrl_step_it(widget_t widget, int steps, const tchar_t* sz_step)
 	set_status_title(ptd->status, sz_step);
 
 	widget_erase(widget, NULL);
-	widget_paint(widget);
 }

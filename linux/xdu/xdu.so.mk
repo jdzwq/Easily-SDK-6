@@ -17,6 +17,7 @@ VER = 6.0
 SRV_PATH = /usr/local/xService
 LNK_PATH = /usr/local/lib
 SYS_PATH = /usr/include
+XFT_PATH = /usr/include/freetype2
 
 INC_PATH = ../../include
 SRC_PATH = ../../xdu
@@ -26,20 +27,20 @@ OBJ_PATH = ../../../Easily-tmp/linux/$(MODULE)/$(ARCH)
 TARGET = lib$(MODULE).so.$(VER)
 LINKIT = lib$(MODULE).so
 
-LIBS = -lm -ldl -lutil -lrt -lX11 -lXrender -L $(LNK_PATH) -lxdk -lxdg
+LIBS = -lm -ldl -lutil -lrt -lX11 -lXft -lXrender -L $(LNK_PATH) -lxdk -lxdg
 DIRS = $(wildcard $(SRC_PATH)/*.c $(SRC_PATH)/linux/*.c $(SRC_PATH)/imp/*.c)
 SRCS = $(notdir $(DIRS))
 COBS = $(patsubst %.c, %.o, $(SRCS))
 OBJS = $(addprefix $(OBJ_PATH)/,$(COBS))
 
 $(OBJ_PATH)/%.o : $(SRC_PATH)/linux/%.c
-	$(CC) $(CFLAGS) -c $< -o $@ -I $(SYS_PATH) -I $(INC_PATH) -I $(SRC_PATH)
+	$(CC) $(CFLAGS) -c $< -o $@ -I $(SYS_PATH) -I $(XFT_PATH) -I $(INC_PATH) -I $(SRC_PATH)
 
 $(OBJ_PATH)/%.o : $(SRC_PATH)/imp/%.c
-	$(CC) $(CFLAGS) -c $< -o $@ -I $(SYS_PATH) -I $(INC_PATH) -I $(SRC_PATH)
+	$(CC) $(CFLAGS) -c $< -o $@ -I $(SYS_PATH) -I $(XFT_PATH) -I $(INC_PATH) -I $(SRC_PATH)
 
 $(OBJ_PATH)/%.o : $(SRC_PATH)/%.c
-	$(CC) $(CFLAGS) -c $< -o $@ -I $(SYS_PATH) -I $(INC_PATH) -I $(SRC_PATH)
+	$(CC) $(CFLAGS) -c $< -o $@ -I $(SYS_PATH) -I $(XFT_PATH) -I $(INC_PATH) -I $(SRC_PATH)
 
 all : $(OBJS)
 	rm -f $@

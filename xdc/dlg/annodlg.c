@@ -222,7 +222,7 @@ void annodlg_on_append_item(widget_t widget, const tchar_t* mid)
 	pt[0].x = 0;
 	pt[0].y = 0;
 	pt[1].x = 20;
-	pt[2].y = 20;
+	pt[1].y = 20;
 
 	ptr = photoctrl_fetch(ptd->photo);
 	ilk = insert_anno_arti(ptr, LINK_LAST);
@@ -454,7 +454,6 @@ void hand_annodlg_size(widget_t widget, int code, const xsize_t* prs)
 	{
 		widget_move(ctrl, RECTPOINT(&xr));
 		widget_size(ctrl, RECTSIZE(&xr));
-		widget_paint(ctrl);
 	}
 
 	xs.fw = ANNODLG_BUTTON_WIDTH;
@@ -470,7 +469,6 @@ void hand_annodlg_size(widget_t widget, int code, const xsize_t* prs)
 	{
 		widget_move(ctrl, RECTPOINT(&xr));
 		widget_size(ctrl, RECTSIZE(&xr));
-		widget_paint(ctrl);
 	}
 
 	widget_get_client_rect(widget, &xr);
@@ -491,7 +489,6 @@ void hand_annodlg_size(widget_t widget, int code, const xsize_t* prs)
 	{
 		widget_move(ctrl, RECTPOINT(&xr));
 		widget_size(ctrl, RECTSIZE(&xr));
-		widget_paint(ctrl);
 	}
 
 	xr.x -= (xr.w + nSplit);
@@ -501,7 +498,6 @@ void hand_annodlg_size(widget_t widget, int code, const xsize_t* prs)
 	{
 		widget_move(ctrl, RECTPOINT(&xr));
 		widget_size(ctrl, RECTSIZE(&xr));
-		widget_paint(ctrl);
 	}
 
 	xs.fw = ANNODLG_BUTTON_WIDTH;
@@ -520,7 +516,6 @@ void hand_annodlg_size(widget_t widget, int code, const xsize_t* prs)
 	{
 		widget_move(ctrl, RECTPOINT(&xr));
 		widget_size(ctrl, RECTSIZE(&xr));
-		widget_paint(ctrl);
 	}
 
 	xr.x += (xr.w + nSplit);
@@ -530,7 +525,6 @@ void hand_annodlg_size(widget_t widget, int code, const xsize_t* prs)
 	{
 		widget_move(ctrl, RECTPOINT(&xr));
 		widget_size(ctrl, RECTSIZE(&xr));
-		widget_paint(ctrl);
 	}
 
 	widget_erase(widget, NULL);
@@ -693,7 +687,7 @@ widget_t annodlg_create(const tchar_t* title, string_t var, widget_t owner)
 		EVENT_ON_NOTICE(hand_annodlg_notice)
 		EVENT_ON_MENU_COMMAND(hand_annodlg_menu_command)
 
-		EVENT_ON_NC_IMPLEMENT
+		
 
 	EVENT_END_DISPATH
 
@@ -704,14 +698,13 @@ widget_t annodlg_create(const tchar_t* title, string_t var, widget_t owner)
 	widget_set_user_id(dlg, IDC_ANNODLG);
 	widget_set_title(dlg, title);
 
-	get_desktop_size(&xs);
+	get_screen_size(&xs);
 
 	xs.w = xs.w / 3;
 	xs.h = xs.h / 3;
 	adjust_widget_size(WD_STYLE_DIALOG, &xs);
 
 	widget_size(dlg, &xs);
-	widget_paint(dlg);
 
 	widget_center_window(dlg, owner);
 

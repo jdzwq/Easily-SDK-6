@@ -134,23 +134,25 @@ void hand_listdlg_size(widget_t widget, int code, const xsize_t* prs)
 {
 	listdlg_delta_t* ptd = GETLISTDLGDELTA(widget);
 	xsize_t xs;
-	xrect_t xr;
+	xrect_t xr, xr_cli;
 	widget_t ctrl;
 
 	xs.fw = LISTDLG_BUTTON_WIDTH;
 	xs.fh = LISTDLG_BUTTON_HEIGHT;
 	widget_size_to_pt(widget, &xs);
 
-	widget_get_client_rect(widget, &xr);
-	xr.h -= xs.h;
+	widget_get_client_rect(widget, &xr_cli);
+	xr.x = xr_cli.x, xr.y = xr_cli.y, xr.w = xr_cli.w;
+	xr.h = xr_cli.h - xs.h;
 
 	ctrl = widget_get_child(widget, IDC_LISTDLG_LIST);
 	if (widget_is_valid(ctrl))
 	{
 		widget_move(ctrl, RECTPOINT(&xr));
 		widget_size(ctrl, RECTSIZE(&xr));
-		widget_paint(ctrl);
 	}
+
+	pt_clip_rect(&xr_cli, &xr);
 
 	widget_get_client_rect(widget, &xr);
 	xr.y = xr.y + xr.h - xs.h;
@@ -169,10 +171,9 @@ void hand_listdlg_size(widget_t widget, int code, const xsize_t* prs)
 	{
 		widget_move(ctrl, RECTPOINT(&xr));
 		widget_size(ctrl, RECTSIZE(&xr));
-		widget_paint(ctrl);
 	}
 
-	widget_erase(widget, NULL);
+	widget_erase(widget, &xr_cli);
 }
 
 void hand_listdlg_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
@@ -193,8 +194,6 @@ void hand_listdlg_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	widget_get_color_mode(widget, &clrs);
 	default_xbrush(&xb);
 	format_xcolor(&clrs.clr_bkg, xb.color);
-	xmem_copy((void*)&xc_brim, (void*)&clrs.clr_bkg, sizeof(xcolor_t));
-	xmem_copy((void*)&xc_core, (void*)&clrs.clr_bkg, sizeof(xcolor_t));
 
 	widget_get_client_rect(widget, &xr);
 
@@ -271,7 +270,7 @@ widget_t listdlg_create(const tchar_t* title, link_t_ptr ptr, widget_t owner)
 		EVENT_ON_MENU_COMMAND(hand_listdlg_menu_command)
 		EVENT_ON_NOTICE(hand_listdlg_notice)
 
-		EVENT_ON_NC_IMPLEMENT
+		
 
 	EVENT_END_DISPATH
 
@@ -282,7 +281,6 @@ widget_t listdlg_create(const tchar_t* title, link_t_ptr ptr, widget_t owner)
 
 	listdlg_popup_size(dlg, RECTSIZE(&xr));
 	widget_size(dlg, RECTSIZE(&xr));
-	widget_paint(dlg);
 	widget_center_window(dlg, owner);
 
 	if (widget_is_valid(owner))

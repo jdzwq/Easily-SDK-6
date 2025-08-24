@@ -17,9 +17,9 @@
 #undef NEED_SHORT_EXTERNAL_NAMES
 #undef INCOMPLETE_TYPES_BROKEN	/* this assumes you have -w-stu in CFLAGS */
 
-/* Define "boolean" as unsigned char, not int, per Windows custom */
+/* Define "BOOLE" as unsigned char, not int, per Windows custom */
 #ifndef __RPCNDR_H__		/* don't conflict if rpcndr.h already read */
-typedef unsigned char boolean;
+typedef unsigned char BOOLE;
 #endif
 #define HAVE_BOOLEAN		/* prevent jmorecfg.h from redefining it */
 

@@ -46,7 +46,7 @@ typedef struct _memo_context_t
 	int rop; /*raster operation mode*/
 
 	mem_font_ptr font_inf;
-	font_t ft;
+	fontset_t ft;
 	xfont_t xf;
 } memo_context_t;
 
@@ -97,10 +97,10 @@ static void alloc_font_cache(memo_context_t *pmgc, const xfont_t* pxf)
 
 	if(pmgc->ft)
 	{
-		(*pmf->destroyFont)(pmgc->ft);
+		(*pmf->destroyFontSet)(pmgc->ft);
 	}
 
-	pmgc->ft = (*pmf->createFont)(&(pmgc->xf));
+	pmgc->ft = (*pmf->createFontSet)(&(pmgc->xf));
 }
 
 visual_t create_mgc_visual(const tchar_t *devName, const tchar_t *formName, int width, int height, int dpi)
@@ -169,7 +169,7 @@ void destroy_mgc_visual(visual_t mgc)
 
 	if(pmgc->font_inf && pmgc->ft)
 	{
-		(*(pmgc->font_inf->destroyFont))(pmgc->ft);
+		(*(pmgc->font_inf->destroyFontSet))(pmgc->ft);
 	}
 
 	if (pmgc->device)
@@ -2314,7 +2314,7 @@ void mgc_font_size_raw(visual_t mgc, const xfont_t *pxf, xsize_t *pxs)
 	memo_context_t *pgc = (memo_context_t *)mgc;
 
 	mem_font_ptr pmf;
-	font_t fnt = NULL;
+	fontset_t fnt = NULL;
 	font_metrix_t fm = {0};
 
 	XDK_ASSERT(mgc && mgc->tag == _VISUAL_MEMORY);
@@ -2328,7 +2328,7 @@ void mgc_font_size_raw(visual_t mgc, const xfont_t *pxf, xsize_t *pxs)
 		raise_user_error(_T("mgc_text_size"), _T("font interface"));
 	}
 
-	fnt = (*pmf->createFont)(pxf);
+	fnt = (*pmf->createFontSet)(pxf);
 	if (!fnt)
 	{
 		raise_user_error(_T("mgc_text_size"), _T("createFont"));
@@ -2339,7 +2339,7 @@ void mgc_font_size_raw(visual_t mgc, const xfont_t *pxf, xsize_t *pxs)
 	pxs->w = fm.width;
 	pxs->h = fm.height;
 
-	(*pmf->destroyFont)(fnt);
+	(*pmf->destroyFontSet)(fnt);
 	fnt = NULL;
 
 	END_CATCH;
@@ -2347,7 +2347,7 @@ void mgc_font_size_raw(visual_t mgc, const xfont_t *pxf, xsize_t *pxs)
 	return;
 ONERROR:
 	if (fnt)
-		(*pmf->destroyFont)(fnt);
+		(*pmf->destroyFontSet)(fnt);
 
 	return;
 }

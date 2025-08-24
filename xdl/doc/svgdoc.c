@@ -408,7 +408,7 @@ void write_xbrush_to_svg_node(link_t_ptr nlk, const xbrush_t* pxb)
 		}
 	}
 
-	if (pxb->shadow.offx || pxb->shadow.offy)
+	/*if (pxb->shadow.offx || pxb->shadow.offy)
 	{
 		ptr = svg_doc_from_node(nlk);
 		nlk_defs = get_svg_defs_node(ptr, 1, &n);
@@ -445,7 +445,7 @@ void write_xbrush_to_svg_node(link_t_ptr nlk, const xbrush_t* pxb)
 		set_dom_node_attr(nlk_sub, _T("in"), -1, _T("SourceGraphic"), -1);
 		set_dom_node_attr(nlk_sub, _T("in2"), -1, _T("blurOut"), -1);
 		set_dom_node_attr(nlk_sub, _T("mode"), -1, _T("normal"), -1);
-	}
+	}*/
 
 	if (!is_null(pxb->opacity))
 	{

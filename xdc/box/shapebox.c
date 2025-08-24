@@ -83,7 +83,19 @@ void hand_shapebox_size(widget_t widget, int code, const xsize_t* prs)
 {
 	shapebox_delta_t* ptd = GETSHAPEBOXDELTA(widget);
 	
-	widget_erase(widget, NULL);
+	XDK_ASSERT(ptd != NULL);
+
+	switch(code)
+	{
+	case WS_SIZE_FULLSCREEN:
+		break;
+	case WS_SIZE_MAXIMIZED:
+		break;
+	case WS_SIZE_MINIMIZED:
+		break;
+	case WS_SIZE_LAYOUT:
+		break;
+	}
 }
 
 void hand_shapebox_xbrush(widget_t widget, const xbrush_t* pxb)
@@ -147,7 +159,7 @@ widget_t shapebox_create(widget_t widget, dword_t style, const xrect_t* pxr)
 		EVENT_ON_XPEN(hand_shapebox_xpen)
 		EVENT_ON_XBRUSH(hand_shapebox_xbrush)
 
-		EVENT_ON_NC_IMPLEMENT
+		
 
 	EVENT_END_DISPATH
 

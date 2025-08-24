@@ -363,9 +363,6 @@ void draw_tool(const drawing_interface* pif, link_t_ptr ptr)
 			ft_offset_rect(&xrGroup, px, py);
 			ft_expand_rect(&xrGroup, -DEF_SPLIT_FEED, -DEF_SPLIT_FEED);
 
-			xb_group.shadow.offx = DEF_MIN_SHADOW;
-			xb_group.shadow.offy = DEF_MIN_SHADOW;
-
 			(*pif->pf_draw_round)(pif->ctx, &xp, &xb_group, &xrGroup, NULL);
 
 			calc_tool_group_title_rect(ptr, glk, &xrTitle);

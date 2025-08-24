@@ -375,7 +375,19 @@ void hand_keybox_size(widget_t widget, int code, const xsize_t* prs)
 {
 	keybox_delta_t* ptd = GETKEYBOXDELTA(widget);
 	
-	widget_erase(widget, NULL);
+	XDK_ASSERT(ptd != NULL);
+
+	switch(code)
+	{
+	case WS_SIZE_FULLSCREEN:
+		break;
+	case WS_SIZE_MAXIMIZED:
+		break;
+	case WS_SIZE_MINIMIZED:
+		break;
+	case WS_SIZE_LAYOUT:
+		break;
+	}
 }
 
 void hand_keybox_xfont(widget_t widget, const xfont_t* pxf)
@@ -509,7 +521,7 @@ widget_t keybox_create(widget_t widget, dword_t style, const xrect_t* pxr)
 
 		EVENT_ON_XFONT(hand_keybox_xfont)
 
-		EVENT_ON_NC_IMPLEMENT
+		
 
 	EVENT_END_DISPATH
 
@@ -544,7 +556,7 @@ widget_t show_keybox(const xpoint_t* ppt)
 	}
 	else
 	{
-		get_desktop_size(&xs);
+		get_screen_size(&xs);
 		xr.x = xs.w - xr.w - 1;
 		xr.y = xs.h - xr.h;
 	}
@@ -552,7 +564,6 @@ widget_t show_keybox(const xpoint_t* ppt)
 	widget_move(wt, RECTPOINT(&xr));
 	widget_size(wt, RECTSIZE(&xr));
 	widget_take(wt, (int)WS_TAKE_TOPMOST);
-	widget_paint(wt);
 	widget_show(wt, WS_SHOW_NORMAL);
 
 	return wt;

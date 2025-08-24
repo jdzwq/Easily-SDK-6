@@ -28,45 +28,114 @@ LICENSE.GPL3 for more details.
 
 #ifdef XDU_SUPPORT_SHELL
 
-#ifdef XDU_SUPPORT_WIDGET
 bool_t _shell_get_filename(widget_t owner, const tchar_t* defpath, const tchar_t* filter, const tchar_t* defext, bool_t saveit, tchar_t* pathbuf, int pathlen, tchar_t* filebuf, int filelen)
 {
-	return 0;
+	FILE* fp;
+    char cmd[512];
+    char buf[4096];
+	int len;
+
+    if (saveit)
+        snprintf(cmd, sizeof(cmd), "zenity --file-selection --save --confirm-overwrite");
+    else
+        snprintf(cmd, sizeof(cmd), "zenity --file-selection");
+
+    fp = popen(cmd, "r");
+    if (!fp) return 0;
+
+	snprintf(cmd, 512, "/proc/self/fd/%d", fileno(fp));
+    len = readlink(cmd, buf, 4096);
+	split_path(buf, pathbuf, filebuf, NULL);
+
+	pclose(fp);
+	
+    return 1;
 }
 
 bool_t _shell_get_pathname(widget_t owner, const tchar_t* defpath, bool_t createit, tchar_t* pathbuf, int pathlen)
 {
-	return 0;
+	FILE* fp;
+    char buf[4096];
+
+    fp = popen("zenity --file-selection --directory", "r");
+    if (!fp) return 0;
+
+    if (fgets(buf, sizeof(buf), fp)) {
+        buf[strcspn(buf, "\n")] = 0;
+        strncpy(pathbuf, buf, pathlen - 1);
+        pathbuf[pathlen - 1] = 0;
+    }
+
+    pclose(fp);
+
+    return 1;
 }
-#endif
 
 bool_t _shell_get_curpath(tchar_t* pathbuf, int pathlen)
 {
-	return 0;
+	if (getcwd(pathbuf, pathlen)) {
+        return 1;
+    }
+    pathbuf[0] = 0;
+    return 0;
 }
 
 bool_t _shell_get_runpath(tchar_t* pathbuf, int pathlen)
 {
-	
-	return 0;
+	char exe_path[PATH_MAX];
+    ssize_t len = readlink("/proc/self/exe", exe_path, sizeof(exe_path) - 1);
+    if (len <= 0) {
+        pathbuf[0] = 0;
+        return 0;
+    }
+    exe_path[len] = 0;
+    // Remove filename, keep directory
+    char* last_slash = strrchr(exe_path, '/');
+    if (last_slash) {
+        *last_slash = 0;
+        strncpy(pathbuf, exe_path, pathlen - 1);
+        pathbuf[pathlen - 1] = 0;
+        return 1;
+    }
+    pathbuf[0] = 0;
+    return 0;
 }
 
 bool_t _shell_get_apppath(tchar_t* pathbuf, int pathlen)
 {
-	
-	return 0;
+	char exe_path[PATH_MAX];
+    ssize_t len = readlink("/proc/self/exe", exe_path, sizeof(exe_path) - 1);
+    if (len <= 0) {
+        pathbuf[0] = 0;
+        return 0;
+    }
+    exe_path[len] = 0;
+    strncpy(pathbuf, exe_path, pathlen - 1);
+    pathbuf[pathlen - 1] = 0;
+    return 1;
 }
 
 bool_t _shell_get_docpath(tchar_t* pathbuf, int pathlen)
 {
-	
-	return 0;
+	const char* home = getenv("HOME");
+    if (!home) {
+        pathbuf[0] = 0;
+        return 0;
+    }
+    snprintf(pathbuf, pathlen, "%s/Documents", home);
+    pathbuf[pathlen - 1] = 0;
+    return 1;
 }
 
 bool_t _shell_get_tmppath(tchar_t* pathbuf, int pathlen)
 {
-	
-	return 0;
+	const char* tmp = getenv("TMPDIR");
+    if (!tmp || !tmp[0]) {
+        tmp = "/tmp";
+    }
+    strncpy(pathbuf, tmp, pathlen - 1);
+    pathbuf[pathlen - 1] = 0;
+    return 1;
 }
 
 #endif

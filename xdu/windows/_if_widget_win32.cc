@@ -26,6 +26,7 @@ LICENSE.GPL3 for more details.
 
 #include "../xduloc.h"
 #include "../xduutil.h"
+#include "../xdunc.h"
 
 #ifdef XDU_SUPPORT_WIDGET
 
@@ -79,11 +80,11 @@ static DWORD _WindowStyle(dword_t wstyle)
 		if (wstyle & WD_STYLE_BORDER)
 			dw |= WS_BORDER;
 
-		if(~(wstyle & WD_STYLE_OWNERSC) && (wstyle & WD_STYLE_HSCROLL))
-			dw |= WS_HSCROLL;
+		//if(~(wstyle & WD_STYLE_OWNERSC) && (wstyle & WD_STYLE_HSCROLL))
+		//	dw |= WS_HSCROLL;
 
-		if (~(wstyle & WD_STYLE_OWNERSC) && (wstyle & WD_STYLE_VSCROLL))
-			dw |= WS_VSCROLL;
+		//if (~(wstyle & WD_STYLE_OWNERSC) && (wstyle & WD_STYLE_VSCROLL))
+		//	dw |= WS_VSCROLL;
 
 		if (wstyle & WD_STYLE_TITLE)
 		{
@@ -109,6 +110,60 @@ static DWORD _WindowStyle(dword_t wstyle)
 	return dw;
 }
 
+static int _SizeCode(int sc)
+{
+	switch(sc)
+	{
+	case SIZE_MAXIMIZED:
+		return WS_SIZE_MAXIMIZED;
+	case SIZE_MINIMIZED:
+		return WS_SIZE_MINIMIZED;
+	case SIZE_MAXHIDE:
+		return WS_SIZE_MAXHIDE;
+	case SIZE_MAXSHOW:
+		return WS_SIZE_MAXSHOW;
+	case SIZE_RESTORED:
+		return WS_SIZE_LAYOUT;
+	default:
+		return WS_SIZE_LAYOUT;
+	}
+}
+
+#ifdef XDU_SUPPORT_WIDGET_NC
+static int _HintCode(int hit)
+{
+	switch(hit)
+	{
+	case HINT_NOWHERE: return HTNOWHERE;
+	case HINT_CLIENT: return HTCLIENT;
+	case HINT_MINIMIZE: return HTMINBUTTON;
+	case HINT_MAXIMIZE: return HTMAXBUTTON;
+	case HINT_RESTORE: return HTSIZE;
+	case HINT_CLOSE: return HTCLOSE;
+	case HINT_TITLE: return HTCAPTION;
+	case HINT_TOP: return HTTOP;
+	case HINT_TOPLEFT: return HTTOPLEFT;
+	case HINT_TOPRIGHT: return HTTOPRIGHT;
+	case HINT_LEFT: return HTLEFT;
+	case HINT_RIGHT: return HTRIGHT;
+	case HINT_BOTTOM: return HTBOTTOM;
+	case HINT_LEFTBOTTOM: return HTBOTTOMLEFT;
+	case HINT_RIGHTBOTTOM: return HTBOTTOMRIGHT;
+	case HINT_BORDER: return HTBORDER;
+	case HINT_ICON: return HTHELP;
+	case HINT_MENUBAR: return 100;
+	case HINT_HSCROLL: return 101;
+	case HINT_VSCROLL: return 102;
+	case HINT_PAGEUP: return 103;
+	case HINT_PAGEDOWN: return 104;
+	case HINT_LINEUP: return 105;
+	case HINT_LINEDOWN: return 106;
+	case HINT_LINELEFT: return 107;
+	case HINT_LINERIGHT: return 108;
+	default: return 0;
+	}
+}
+#endif
 /*******************************************************************************************/
 
 ATOM RegisterXdcWidgetClass(HINSTANCE hInstance)
@@ -141,209 +196,169 @@ LRESULT CALLBACK XdcWidgetProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 	win32_context_t wct = { 0 };
 	TRACKMOUSEEVENT te = { 0 };
 
+#ifdef XDU_SUPPORT_WIDGET_NC
+	xrect_t xr;
+	xpoint_t xp;
+	border_t bd;
+	HDC hDC;
+	int hit;
+#endif
+
 	switch (message)
 	{
-#ifndef WINCE
+#ifdef XDU_SUPPORT_WIDGET_NC
 	case WM_NCPAINT:
 		if (!(ds & WD_STYLE_OWNERNC))
 			break;
 
-		pev = GETXDUDISPATCH(hWnd);
-		if (pev && pev->pf_on_nc_paint)
-		{
-			HDC hDC;
-			if (wParam == 1)
-				hDC = GetWindowDC(hWnd);
-			else
-				hDC = GetDCEx(hWnd, (HRGN)wParam, DCX_WINDOW | DCX_INTERSECTRGN);
+		if (wParam == 1)
+			hDC = GetWindowDC(hWnd);
+		else
+			hDC = GetDCEx(hWnd, (HRGN)wParam, DCX_WINDOW | DCX_INTERSECTRGN);
 
-			SetBkMode(hDC, TRANSPARENT);
+		SetBkMode(hDC, TRANSPARENT);
 
-			wct.context = hDC;
-			wct.device.window = hWnd;
-			wct.type = CONTEXT_WIDGET;
+		wct.context = hDC;
+		wct.device.window = hWnd;
+		wct.type = CONTEXT_WIDGET;
 
-			(*pev->pf_on_nc_paint)(widget, (visual_t)&(wct.head));
+		_widget_get_window_rect(widget, &xr);
+		xr.x = xr.y = 0;
+		_widget_nc_draw_frame(widget, (visual_t)&(wct.head), &xr);
 
-			ReleaseDC(hWnd, hDC);
-			ZeroMemory((void*)&wct, sizeof(win32_context_t));
+		ReleaseDC(hWnd, hDC);
+		ZeroMemory((void*)&wct, sizeof(win32_context_t));
 
-			return 0;
-		}
-		break;
+		return 0;
 	case WM_NCCALCSIZE:
 		if (!(ds & WD_STYLE_OWNERNC))
 			break;
 
-		pev = GETXDUDISPATCH(hWnd);
-		if (pev && pev->pf_on_nc_calcsize)
+		_calc_widget_border(ds, &bd);
+
+		if ((BOOL)wParam)
 		{
-			if ((BOOL)wParam)
-			{
-				LPNCCALCSIZE_PARAMS lpcp = (LPNCCALCSIZE_PARAMS)lParam;
+			LPNCCALCSIZE_PARAMS lpcp = (LPNCCALCSIZE_PARAMS)lParam;
 
-				(*pev->pf_on_nc_calcsize)(widget, &pws->bd);
+			lpcp->rgrc[2].left = lpcp->rgrc[1].left;
+			lpcp->rgrc[2].top = lpcp->rgrc[1].top;
+			lpcp->rgrc[2].right = lpcp->rgrc[1].right;
+			lpcp->rgrc[2].bottom = lpcp->rgrc[1].bottom;
 
-				lpcp->rgrc[2].left = lpcp->rgrc[1].left;
-				lpcp->rgrc[2].top = lpcp->rgrc[1].top;
-				lpcp->rgrc[2].right = lpcp->rgrc[1].right;
-				lpcp->rgrc[2].bottom = lpcp->rgrc[1].bottom;
+			lpcp->rgrc[1].left = lpcp->rgrc[0].left;
+			lpcp->rgrc[1].top = lpcp->rgrc[0].top;
+			lpcp->rgrc[1].right = lpcp->rgrc[0].right;
+			lpcp->rgrc[1].bottom = lpcp->rgrc[0].bottom;
 
-				lpcp->rgrc[1].left = lpcp->rgrc[0].left;
-				lpcp->rgrc[1].top = lpcp->rgrc[0].top;
-				lpcp->rgrc[1].right = lpcp->rgrc[0].right;
-				lpcp->rgrc[1].bottom = lpcp->rgrc[0].bottom;
-
-				lpcp->rgrc[0].left += (pws->bd.edge);
-				lpcp->rgrc[0].right -= (pws->bd.edge + pws->bd.vscroll);
-				lpcp->rgrc[0].top += (pws->bd.edge + pws->bd.title + pws->bd.menu);
-				lpcp->rgrc[0].bottom -= (pws->bd.edge + pws->bd.hscroll);
-			}
-			else
-			{
-				LPRECT lprt = (LPRECT)lParam;
-
-				(*pev->pf_on_nc_calcsize)(widget, &pws->bd);
-
-				lprt->left += (pws->bd.edge);
-				lprt->right -= (pws->bd.edge + pws->bd.vscroll);
-				lprt->top += (pws->bd.edge + pws->bd.title + pws->bd.menu);
-				lprt->bottom -= (pws->bd.edge + pws->bd.hscroll);
-			}
-
-			return 0;
+			lpcp->rgrc[0].left += (bd.edge);
+			lpcp->rgrc[0].right -= (bd.edge + >bd.scrw);
+			lpcp->rgrc[0].top += (bd.edge + bd.title);
+			lpcp->rgrc[0].bottom -= (bd.edge + bd.scrh);
 		}
-		break;
+		else
+		{
+			LPRECT lprt = (LPRECT)lParam;
+
+			lprt->left += (bd.edge);
+			lprt->right -= (bd.edge + bd.scrw);
+			lprt->top += (bd.edge + bd.title);
+			lprt->bottom -= (bd.edge + bd.scrh);
+		}
+
+		return 0;
 	case WM_NCHITTEST:
 		if (!(ds & WD_STYLE_OWNERNC))
 			break;
 
-		pev = GETXDUDISPATCH(hWnd);
-		if (pev && pev->pf_on_nc_hittest)
-		{
-			xpoint_t xp = { 0 };
-			xp.x = LOWORD(lParam);
-			xp.y = HIWORD(lParam);
+		xp.x = LOWORD(lParam);
+		xp.y = HIWORD(lParam);
+		hit = _widget_nc_hint_test(widget, &xp);
 
-			int hit = (*pev->pf_on_nc_hittest)(widget, &xp);
-
-			return (hit == HINT_MENUBAR || hit == HINT_ICON || hit == HINT_MINIMIZE || hit == HINT_MAXIMIZE || hit == HINT_RESTORE || hit == HINT_CLOSE || hit == HINT_HSCROLL || hit == HINT_VSCROLL || hit == HINT_PAGEUP || hit == HINT_PAGEDOWN) ? HINT_BORDER : hit;
-		}
-		break;
+		if (hit == HINT_MENUBAR || hit == HINT_ICON || hit == HINT_MINIMIZE || hit == HINT_MAXIMIZE || hit == HINT_RESTORE || hit == HINT_CLOSE || hit == HINT_HSCROLL || hit == HINT_VSCROLL || hit == HINT_PAGEUP || hit == HINT_PAGEDOWN)
+			return HINT_BORDER;
+		else
+			return _HintCode(hit);
 	case WM_NCLBUTTONUP:
 		if (!(ds & WD_STYLE_OWNERNC))
 			break;
 
-		pev = GETXDUDISPATCH(hWnd);
-		if (pev && pev->pf_on_nc_hittest)
+		xp.x = LOWORD(lParam);
+		xp.y = HIWORD(lParam);
+		hit = _widget_nc_hint_test(widget, &xp);
+		if(hit == HINT_MINIMIZE)
 		{
-			xpoint_t xp = { 0 };
-			xp.x = LOWORD(lParam);
-			xp.y = HIWORD(lParam);
-			
-			int hit = (*pev->pf_on_nc_hittest)(widget, &xp);
-
+			PostMessage(hWnd, WM_SYSCOMMAND, SC_MINIMIZE, 0);
+		}else if(hit == HINT_MAXIMIZE)
+		{
+			PostMessage(hWnd, WM_SYSCOMMAND, SC_MAXIMIZE, 0);
+		}else if(hit == HINT_RESTORE)
+		{
+			PostMessage(hWnd, WM_SYSCOMMAND, SC_RESTORE, 0);
+		}else if(hit == HINT_CLOSE)
+		{
+			PostMessage(hWnd, WM_SYSCOMMAND, SC_CLOSE, 0);
+		}else if(hit == HINT_ICON)
+		{
+			PostMessage(hWnd, WM_SYSCOMMAND, SC_CONTEXTHELP, MAKELPARAM(xp.x, xp.y));
+		}else if(hit == HINT_LINELEFT)
+		{
+			scroll_t scr = { 0 };
+			_widget_get_scroll_info(widget, 1, &scr);
+			PostMessage(hWnd, WM_SCROLL, (WPARAM)1, (LPARAM)(- scr.min));
+		}else if(hit == HINT_LINERIGHT)
+		{
+			scroll_t scr = { 0 };
+			_widget_get_scroll_info(widget, 1, &scr);
+			PostMessage(hWnd, WM_SCROLL, (WPARAM)1, (LPARAM)(scr.min));
+		}else if(hit == HINT_HSCROLL)
+		{
 			RECT rt;
 			GetWindowRect(hWnd, &rt);
+			xp.x -= rt.left;
+			xp.y -= rt.top;
+			int pos =_widget_nc_calc_scroll(widget, 1, &xp);
 
-			switch (hit)
+			scroll_t scr = { 0 };
+			_widget_get_scroll_info(widget, 1, &scr);
+			if (pos != scr.pos)
 			{
-			case HINT_MINIMIZE:
-				PostMessage(hWnd, WM_SYSCOMMAND, SC_MINIMIZE, 0);
-				break;
-			case HINT_MAXIMIZE:
-				PostMessage(hWnd, WM_SYSCOMMAND, SC_MAXIMIZE, 0);
-				break;
-			case HINT_RESTORE:
-				PostMessage(hWnd, WM_SYSCOMMAND, SC_RESTORE, 0);
-				break;
-			case HINT_CLOSE:
-				PostMessage(hWnd, WM_SYSCOMMAND, SC_CLOSE, 0);
-				break;
-			case HINT_ICON:
-				PostMessage(hWnd, WM_SYSCOMMAND, SC_CONTEXTHELP, MAKELPARAM(xp.x, xp.y));
-				break;
-			case HINT_LINELEFT:
-				if (pev->pf_on_nc_calcscroll)
-				{
-					scroll_t scr = { 0 };
-					_widget_get_scroll_info(widget, 1, &scr);
-
-					PostMessage(hWnd, WM_SCROLL, (WPARAM)1, (LPARAM)(- scr.min));
-				}
-				break;
-			case HINT_LINERIGHT:
-				if (pev->pf_on_nc_calcscroll)
-				{
-					scroll_t scr = { 0 };
-					_widget_get_scroll_info(widget, 1, &scr);
-
-					PostMessage(hWnd, WM_SCROLL, (WPARAM)1, (LPARAM)(scr.min));
-				}
-			break;
-			case HINT_HSCROLL:
-				if (pev->pf_on_nc_calcscroll)
-				{
-					xp.x -= rt.left;
-					xp.y -= rt.top;
-
-					int pos = (*pev->pf_on_nc_calcscroll)(widget, 1, &xp);
-
-					scroll_t scr = { 0 };
-					_widget_get_scroll_info(widget, 1, &scr);
-
-					if (pos != scr.pos)
-					{
-						PostMessage(hWnd, WM_SCROLL, (WPARAM)1, (LPARAM)(pos - scr.pos));
-					}
-				}
-				break;
-			case HINT_LINEUP:
-				if (pev->pf_on_nc_calcscroll)
-				{
-					scroll_t scr = { 0 };
-					_widget_get_scroll_info(widget, 1, &scr);
-
-					PostMessage(hWnd, WM_SCROLL, (WPARAM)0, (LPARAM)(-scr.min));
-				}
-				break;
-			case HINT_LINEDOWN:
-				if (pev->pf_on_nc_calcscroll)
-				{
-					scroll_t scr = { 0 };
-					_widget_get_scroll_info(widget, 1, &scr);
-
-					PostMessage(hWnd, WM_SCROLL, (WPARAM)0, (LPARAM)(scr.min));
-				}
-				break;
-			case HINT_VSCROLL:
-				if (pev->pf_on_nc_calcscroll)
-				{
-					xp.x -= rt.left;
-					xp.y -= rt.top;
-
-					int pos = (*pev->pf_on_nc_calcscroll)(widget, 0, &xp);
-
-					scroll_t scr = { 0 };
-					_widget_get_scroll_info(widget, 0, &scr);
-
-					if (pos != scr.pos)
-					{
-						PostMessage(hWnd, WM_SCROLL, (WPARAM)0, (LPARAM)(pos - scr.pos));
-					}
-				}
-				break;
-			case HINT_PAGEUP:
-				PostMessage(hWnd, WM_KEYDOWN, (WPARAM)KEY_PAGEUP, (LPARAM)1);
-				SendMessage(hWnd, WM_KEYUP, (WPARAM)KEY_PAGEUP, (LPARAM)1);
-				break;
-			case HINT_PAGEDOWN:
-				PostMessage(hWnd, WM_KEYDOWN, (WPARAM)KEY_PAGEDOWN, (LPARAM)1);
-				SendMessage(hWnd, WM_KEYUP, (WPARAM)KEY_PAGEDOWN, (LPARAM)1);
-				break;
+				PostMessage(hWnd, WM_SCROLL, (WPARAM)1, (LPARAM)(pos - scr.pos));
 			}
+		}else if(hit == HINT_LINEUP)
+		{
+			scroll_t scr = { 0 };
+			_widget_get_scroll_info(widget, 1, &scr);
+			PostMessage(hWnd, WM_SCROLL, (WPARAM)0, (LPARAM)(-scr.min));
+		}else if(hit == HINT_LINEDOWN)
+		{
+			scroll_t scr = { 0 };
+			_widget_get_scroll_info(widget, 1, &scr);
+			PostMessage(hWnd, WM_SCROLL, (WPARAM)0, (LPARAM)(scr.min));
+		}else if(hit == HINT_VSCROLL)
+		{
+			RECT rt;
+			GetWindowRect(hWnd, &rt);
+			xp.x -= rt.left;
+			xp.y -= rt.top;
+			int pos =_widget_nc_calc_scroll(widget, 0, &xp);
+
+			scroll_t scr = { 0 };
+			_widget_get_scroll_info(widget, 0, &scr);
+			if (pos != scr.pos)
+			{
+				PostMessage(hWnd, WM_SCROLL, (WPARAM)0, (LPARAM)(pos - scr.pos));
+			}
+		}else if(hit == HINT_PAGEUP)
+		{
+			PostMessage(hWnd, WM_KEYDOWN, (WPARAM)KEY_PAGEUP, (LPARAM)1);
+			SendMessage(hWnd, WM_KEYUP, (WPARAM)KEY_PAGEUP, (LPARAM)1);
+		}else if(hit == HINT_PAGEDOWN)
+		{
+			PostMessage(hWnd, WM_KEYDOWN, (WPARAM)KEY_PAGEDOWN, (LPARAM)1);
+			SendMessage(hWnd, WM_KEYUP, (WPARAM)KEY_PAGEDOWN, (LPARAM)1);
 		}
-		break;
+
+		return 0;
 	case WM_NCRBUTTONUP:
 		if (!(ds & WD_STYLE_OWNERNC))
 			break;
@@ -382,12 +397,9 @@ LRESULT CALLBACK XdcWidgetProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 		pws->head.tag = _HANDLE_WIDGET;
 		pws->self = hWnd;
 		pws->parent = lpcs->hwndParent;
+		pws->accel = NULL;
 
-		parse_xcolor(&pws->bkg, GDI_ATTR_RGB_BLACK);
-		parse_xcolor(&pws->frg, GDI_ATTR_RGB_WHITE);
-		parse_xcolor(&pws->txt, GDI_ATTR_RGB_WHITE);
-		parse_xcolor(&pws->msk, GDI_ATTR_RGB_WHITE);
-		parse_xcolor(&pws->ico, GDI_ATTR_RGB_GRAY);
+		default_widget_color_mode(&(pws->clrs));
 
 		SETXDUSTRUCT(hWnd, pws);
 		widget = &(pws->head);
@@ -414,18 +426,26 @@ LRESULT CALLBACK XdcWidgetProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 
 		if (pws)
 		{
-			if(pws->acl) DestroyAcceleratorTable(pws->acl);
+			if(pws->accel) DestroyAcceleratorTable(pws->accel);
 
 			RemoveProp(hWnd, XDUSTRUCT);
-			xmem_free_handle((xhand_t)pws);
+			xmem_free_handle(&(pws->head));
 		}
 		break;
 	case WM_CLOSE:
 		pev = GETXDUDISPATCH(hWnd);
 		if (pev && pev->pf_on_close)
 		{
-			if ((*pev->pf_on_close)(widget))
+			if (pws->result = (*pev->pf_on_close)(widget))
 				return 0;
+		}else
+		{
+			pws->result = 0;
+		}
+
+		if(!pws->result)
+		{
+			pws->mode = WS_MODE_INVALID;
 		}
 		break;
 	case WM_LBUTTONDBLCLK:
@@ -538,7 +558,9 @@ LRESULT CALLBACK XdcWidgetProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 			xs.w = (int)(short)LOWORD(lParam);
 			xs.h = (int)(short)HIWORD(lParam);
 
-			(*pev->pf_on_size)(widget, (int)wParam, &xs);
+			int sc = _SizeCode((int)wParam);
+
+			(*pev->pf_on_size)(widget, sc, &xs);
 
 			return 0;
 		}
@@ -582,18 +604,6 @@ LRESULT CALLBACK XdcWidgetProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 				(*pev->pf_on_scroll)(widget, (bool_t)1, scr.track - scr.pos);
 				break;
 			case SB_ENDSCROLL:
-				/*if (pev->pf_on_scrollinfo)
-				{
-					scroll_t sc = { 0 };
-					(*pev->pf_on_scrollinfo)(widget, (bool_t)1, &sc);
-
-					scr.fMask = SIF_POS | SIF_RANGE | SIF_PAGE;
-					scr.nPos = sc.pos;
-					scr.nMin = sc.min;
-					scr.nMax = sc.max;
-					scr.nPage = sc.page;
-					SetScrollInfo(hWnd, SB_HORZ, &scr, TRUE);
-				}*/
 				break;
 			}
 			return 0;
@@ -630,18 +640,6 @@ LRESULT CALLBACK XdcWidgetProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 				(*pev->pf_on_scroll)(widget, (bool_t)0, scr.track - scr.pos);
 				break;
 			case SB_ENDSCROLL:
-				/*if (pev->pf_on_scrollinfo)
-				{
-					scroll_t sc = { 0 };
-					(*pev->pf_on_scrollinfo)(widget, (bool_t)0, &sc);
-
-					scr.fMask = SIF_POS | SIF_RANGE | SIF_PAGE;
-					scr.nPos = sc.pos;
-					scr.nMin = sc.min;
-					scr.nMax = sc.max;
-					scr.nPage = sc.page;
-					SetScrollInfo(hWnd, SB_VERT, &scr, TRUE);
-				}*/
 				break;
 			}
 			return 0;
@@ -1004,7 +1002,9 @@ LRESULT CALLBACK XdcSubclassProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 			xs.w = (int)(short)LOWORD(lParam);
 			xs.h = (int)(short)HIWORD(lParam);
 
-			if ((*pev->sub_on_size)(widget, (int)wParam, &xs, (uid_t)uIdSubclass, pev->delta))
+			int sc = _SizeCode((int)wParam);
+
+			if ((*pev->sub_on_size)(widget, sc, &xs, (uid_t)uIdSubclass, pev->delta))
 				return 0;
 		}
 		break;
@@ -1302,11 +1302,11 @@ widget_t _widget_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr
 	}
 
 	pws->style = wstyle;
+	pws->mode = WS_MODE_NORMAL;
 
-	if ((wstyle & WD_STYLE_VSCROLL) || (wstyle & WD_STYLE_VSCROLL) || (wstyle & WD_STYLE_HSCROLL) || (wstyle & WD_STYLE_MENUBAR))
+	if (wstyle & WD_STYLE_OWNERNC)
 	{
 		SetWindowPos(hWnd, NULL, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOCOPYBITS | SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER);
-		PostMessage(hWnd, WM_NCPAINT, 1, 0);
 	}
 
 	return (widget_t)pws;
@@ -1316,7 +1316,7 @@ void _widget_destroy(widget_t wt)
 {
 	win32_widget_t* pws = (win32_widget_t*)wt;
 
-	if (!IsWindow(pws->self)) return;
+	if(!pws) return;
 
 	DestroyWindow(pws->self);
 }
@@ -1324,35 +1324,57 @@ void _widget_destroy(widget_t wt)
 void _widget_close(widget_t wt, int ret)
 {
 	win32_widget_t* pws = (win32_widget_t*)wt;
+	int mode;
+	if_subproc_t* psub;
+	if_dispatch_t* pdisp;
 
+	if(!pws) return;
 	if (!IsWindow(pws->self)) return;
 
-	pws->result = ret;
-
-#ifdef WINCE
-	if (GetWindowLong(wt, GWL_STYLE) & WS_CHILD)
-#else
-	if (GetWindowLongPtr(pws->self, GWL_STYLE) & WS_CHILD)
-#endif
+	psub = GETXDUSUBPROC(pws->self);
+	if (psub && psub->sub_on_close)
 	{
-		if (ret)
-			PostMessage(pws->self, WM_CLOSE, 0, 0);
-		else
-			SendMessage(pws->self, WM_CLOSE, 0, 0);
+		if ((*psub->sub_on_close)(wt, psub->sid, psub->delta))
+			return;
 	}
-	else
+
+	pdisp = GETXDUDISPATCH(pws->self);
+	if (pdisp && pdisp->pf_on_close)
 	{
-		if (ret)
-			PostMessage(pws->self, WM_SYSCOMMAND, SC_CLOSE, 0);
-		else
-			SendMessage(pws->self, WM_SYSCOMMAND, SC_CLOSE, 0);
+		if (pws->result = (*pdisp->pf_on_close)(wt))
+			return;
+	}
+
+	if(pws->style & WD_STYLE_CHILD)
+	{
+		_widget_destroy(wt);
+		return;
+	}
+
+	mode = pws->mode;
+	pws->mode = WS_MODE_INVALID;
+
+	CloseWindow(pws->self);
+
+	switch(mode)
+	{
+	case WS_MODE_MAIN:
+		pws->retcode = ret;
+		PostQuitMessage(ret);
+		break;
+	case WS_MODE_MODAL:
+		pws->retcode = ret;
+		break;
+	case WS_MODE_TRACK:
+		break;
 	}
 }
 
-if_subproc_t* _widget_get_subproc(widget_t wt, uid_t sid)
+const if_subproc_t* _widget_get_subproc(widget_t wt, uid_t sid)
 {
 	win32_widget_t* pws = (win32_widget_t*)wt;
 
+	if(!pws) return NULL;
 	if (!IsWindow(pws->self)) return NULL;
 
 	return GETXDUSUBPROC(pws->self);
@@ -1367,6 +1389,7 @@ bool_t _widget_set_subproc(widget_t wt, uid_t sid, if_subproc_t* sub)
 	if_subproc_t* psub;
 	xrect_t xr = { 0 };
 
+	if(!pws) return 0;
 	if (!IsWindow(pws->self)) return 0;
 
 	if (!sub) return 0;
@@ -1399,13 +1422,6 @@ bool_t _widget_set_subproc(widget_t wt, uid_t sid, if_subproc_t* sub)
 		(*psub->sub_on_subbing)(wt, sid, psub->delta);
 	}
 
-	if (psub->sub_on_size)
-	{
-		_widget_get_client_rect(wt, &xr);
-
-		(*psub->sub_on_size)(wt, 0, RECTSIZE(&xr), sid, psub->delta);
-	}
-
 	return 1;
 }
 
@@ -1414,6 +1430,7 @@ void _widget_del_subproc(widget_t wt, uid_t sid)
 	win32_widget_t* pws = (win32_widget_t*)wt;
 	if_subproc_t* psub;
 
+	if(!pws) return;
 	if (!IsWindow(pws->self)) return;
 
 	psub = GETXDUSUBPROC(pws->self);
@@ -1435,6 +1452,7 @@ bool_t _widget_set_subproc_delta(widget_t wt, uid_t sid, vword_t delta)
 	win32_widget_t* pws = (win32_widget_t*)wt;
 	if_subproc_t* psub;
 
+	if(!pws) return 0;
 	if (!IsWindow(pws->self)) return 0;
 
 	psub = GETXDUSUBPROC(pws->self);
@@ -1448,6 +1466,7 @@ vword_t _widget_get_subproc_delta(widget_t wt, uid_t sid)
 	win32_widget_t* pws = (win32_widget_t*)wt;
 	if_subproc_t* psub;
 
+	if(!pws) return 0;
 	if (!IsWindow(pws->self)) return 0;
 
 	psub = GETXDUSUBPROC(pws->self);
@@ -1460,9 +1479,12 @@ bool_t _widget_has_subproc(widget_t wt)
 	win32_widget_t* pws = (win32_widget_t*)wt;
 	if_subproc_t* psub;
 
+	if(!pws) return 0;
 	if (!IsWindow(pws->self)) return 0;
 
-	return (GETXDUSUBPROC(pws->self) == NULL) ? 0 : 1;
+	psub = GETXDUSUBPROC(pws->self);
+
+	return (psub)? 1 : 0;
 }
 
 void _widget_set_style(widget_t wt, dword_t ws)
@@ -1498,7 +1520,7 @@ void _widget_set_accel(widget_t wt, const accel_table_t* pact, int n)
 	hac = CreateAcceleratorTable(pa, n);
 	xmem_free(pa);
 
-	pws->acl = hac;
+	pws->accel = hac;
 }
 
 void _widget_set_owner(widget_t wt, widget_t owner)
@@ -1524,6 +1546,7 @@ void _widget_set_core_delta(widget_t wt, vword_t pd)
 {
 	win32_widget_t* pws = (win32_widget_t*)wt;
 
+	if(!pws) return;
 	if (!IsWindow(pws->self)) return;
 
 	SETXDUCOREDELTA(pws->self, pd);
@@ -1533,6 +1556,7 @@ vword_t _widget_get_core_delta(widget_t wt)
 {
 	win32_widget_t* pws = (win32_widget_t*)wt;
 
+	if(!pws) return 0;
 	if (!IsWindow(pws->self)) return 0;
 
 	return GETXDUCOREDELTA(pws->self);
@@ -1542,6 +1566,7 @@ void _widget_set_user_delta(widget_t wt, vword_t pd)
 {
 	win32_widget_t* pws = (win32_widget_t*)wt;
 
+	if(!pws) return;
 	if (!IsWindow(pws->self)) return;
 
 	SETXDUUSERDELTA(pws->self, pd);
@@ -1551,6 +1576,7 @@ vword_t _widget_get_user_delta(widget_t wt)
 {
 	win32_widget_t* pws = (win32_widget_t*)wt;
 
+	if(!pws) return 0;
 	if (!IsWindow(pws->self)) return 0;
 
 	return GETXDUUSERDELTA(pws->self);
@@ -1560,6 +1586,7 @@ void _widget_set_user_id(widget_t wt, uid_t uid)
 {
 	win32_widget_t* pws = (win32_widget_t*)wt;
 
+	if(!pws) return;
 	if (!IsWindow(pws->self)) return;
 
 #ifdef WINCE
@@ -1577,6 +1604,7 @@ uid_t _widget_get_user_id(widget_t wt)
 {
 	win32_widget_t* pws = (win32_widget_t*)wt;
 
+	if(!pws) return 0;
 	if (!IsWindow(pws->self)) return 0;
 
 #ifdef WINCE
@@ -1596,6 +1624,7 @@ void _widget_set_user_result(widget_t wt, int rt)
 {
 	win32_widget_t* pws = (win32_widget_t*)wt;
 
+	if(!pws) return;
 	if (!IsWindow(pws->self)) return;
 
 	pws->result = rt;
@@ -1614,6 +1643,7 @@ widget_t _widget_get_child(widget_t wt, uid_t uid)
 	win32_widget_t* pws_child;
 	HWND hChild;
 
+	if(!pws) return NULL;
 	if (!IsWindow(pws->self)) return NULL;
 
 	hChild = GetDlgItem(pws->self, uid);
@@ -1629,6 +1659,7 @@ widget_t _widget_get_parent(widget_t wt)
 	win32_widget_t* pws_parent;
 	HWND hParent;
 
+	if(!pws) return NULL;
 	if (!IsWindow(pws->self)) return NULL;
 
 	hParent = GetParent(pws->self);
@@ -1642,6 +1673,7 @@ void _widget_set_user_prop(widget_t wt, const tchar_t* pname, vword_t pval)
 {
 	win32_widget_t* pws = (win32_widget_t*)wt;
 
+	if(!pws) return;
 	if (!IsWindow(pws->self)) return;
 
 	SetProp(pws->self, pname, (HANDLE)pval);
@@ -1651,6 +1683,7 @@ vword_t _widget_get_user_prop(widget_t wt, const tchar_t* pname)
 {
 	win32_widget_t* pws = (win32_widget_t*)wt;
 
+	if(!pws) return 0;
 	if (!IsWindow(pws->self)) return 0;
 
 	return (vword_t)GetProp(pws->self, pname);
@@ -1660,6 +1693,7 @@ vword_t _widget_del_user_prop(widget_t wt, const tchar_t* pname)
 {
 	win32_widget_t* pws = (win32_widget_t*)wt;
 
+	if(!pws) return 0;
 	if (!IsWindow(pws->self)) return 0;
 
 	return (vword_t)RemoveProp(pws->self, pname);
@@ -1669,40 +1703,17 @@ const if_dispatch_t* _widget_get_dispatch(widget_t wt)
 {
 	win32_widget_t* pws = (win32_widget_t*)wt;
 
+	if(!pws) return NULL;
 	if (!IsWindow(pws->self)) return NULL;
 
 	return GETXDUDISPATCH(pws->self);
-}
-
-void _widget_get_border(widget_t wt, border_t* pbd)
-{
-	win32_widget_t* pws = (win32_widget_t*)wt;
-
-	CopyMemory((void*)pbd, (void*)(&pws->bd), sizeof(border_t));
-}
-
-void _widget_get_menu_rect(widget_t wt, xrect_t* pxr)
-{
-	win32_widget_t* pws = (win32_widget_t*)wt;
-	dword_t ws;
-
-	ws = _widget_get_style(wt);
-
-	if (ws & WD_STYLE_OWNERNC)
-	{
-		_widget_get_window_rect(wt, pxr);
-
-		pxr->x += pws->bd.edge;
-		pxr->w -= (2 * pws->bd.edge);
-		pxr->y += (pws->bd.edge + pws->bd.title);
-		pxr->h = pws->bd.menu;
-	}
 }
 
 bool_t _widget_is_maximized(widget_t wt)
 {
 	win32_widget_t* pws = (win32_widget_t*)wt;
 
+	if(!pws) return 0;
 	if (!IsWindow(pws->self)) return 0;
 
 	return (IsZoomed(pws->self)) ? 1 : 0;
@@ -1712,6 +1723,7 @@ bool_t _widget_is_minimized(widget_t wt)
 {
 	win32_widget_t* pws = (win32_widget_t*)wt;
 
+	if(!pws) return 0;
 	if (!IsWindow(pws->self)) return 0;
 
 	return (IsIconic((HWND)wt)) ? 1 : 0;
@@ -1736,6 +1748,7 @@ bool_t _widget_enum_child(widget_t wt, PF_ENUM_WINDOW_PROC pf, vword_t pv)
 	win32_widget_t* pws = (win32_widget_t*)wt;
 	enum_child_window_param ep;
 
+	if(!pws) return 0;
 	if (!IsWindow(pws->self)) return 0;
 
 #ifdef WINCE
@@ -1757,11 +1770,12 @@ bool_t _widget_enum_child(widget_t wt, PF_ENUM_WINDOW_PROC pf, vword_t pv)
 #endif
 }
 
-visual_t _widget_client_ctx(widget_t wt)
+visual_t _widget_client_context(widget_t wt)
 {
 	win32_widget_t* pws = (win32_widget_t*)wt;
 	win32_context_t* pct;
 
+	if(!pws) return NULL;
 	if (!IsWindow(pws->self)) return NULL;
 
 	pct = (win32_context_t*)xmem_alloc_handle(sizeof(win32_context_t));
@@ -1772,11 +1786,12 @@ visual_t _widget_client_ctx(widget_t wt)
 	return (visual_t)pct;
 }
 
-visual_t _widget_window_ctx(widget_t wt)
+visual_t _widget_window_context(widget_t wt)
 {
 	win32_widget_t* pws = (win32_widget_t*)wt;
 	win32_context_t* pct;
 
+	if(!pws) return NULL;
 	if (!IsWindow(pws->self)) return NULL;
 
 	pct = (win32_context_t*)xmem_alloc_handle(sizeof(win32_context_t));
@@ -1787,7 +1802,7 @@ visual_t _widget_window_ctx(widget_t wt)
 	return (visual_t)pct;
 }
 
-void _widget_release_ctx(widget_t wt, visual_t dc)
+void _widget_release_context(widget_t wt, visual_t dc)
 {
 	win32_context_t* pct = (win32_context_t*)dc;
 
@@ -1803,6 +1818,7 @@ void _widget_get_client_rect(widget_t wt, xrect_t* prt)
 	win32_widget_t* pws = (win32_widget_t*)wt;
 	RECT rt;
 
+	if(!pws) return;
 	if (!IsWindow(pws->self)) return;
 
 	GetClientRect(pws->self, &rt);
@@ -1818,6 +1834,7 @@ void _widget_get_window_rect(widget_t wt, xrect_t* prt)
 	win32_widget_t* pws = (win32_widget_t*)wt;
 	RECT rt;
 
+	if(!pws) return;
 	if (!IsWindow(pws->self)) return;
 
 	GetWindowRect(pws->self, &rt);
@@ -1833,6 +1850,7 @@ void _widget_client_to_screen(widget_t wt, xpoint_t* ppt)
 	win32_widget_t* pws = (win32_widget_t*)wt;
 	POINT pt;
 
+	if(!pws) return;
 	if (!IsWindow(pws->self)) return;
 
 	pt.x = ppt->x;
@@ -1849,6 +1867,7 @@ void _widget_screen_to_client(widget_t wt, xpoint_t* ppt)
 	win32_widget_t* pws = (win32_widget_t*)wt;
 	POINT pt;
 
+	if(!pws) return;
 	if (!IsWindow(pws->self)) return;
 
 	pt.x = ppt->x;
@@ -1867,6 +1886,7 @@ void _widget_client_to_window(widget_t wt, xpoint_t* ppt)
 	POINT pt = { 0 };
 	RECT rt;
 
+	if(!pws) return;
 	if (!IsWindow(pws->self)) return;
 
 	ClientToScreen(pws->self, &pt);
@@ -1885,6 +1905,7 @@ void _widget_window_to_client(widget_t wt, xpoint_t* ppt)
 	POINT pt = { 0 };
 	RECT rt;
 	
+	if(!pws) return;
 	if (!IsWindow(pws->self)) return;
 
 	GetWindowRect(pws->self, &rt);
@@ -1905,6 +1926,7 @@ void _widget_center_window(widget_t wt, widget_t owner)
 	int cx, cy;
 	BOOL bChild;
 
+	if(!pws) return;
 	if (!IsWindow(pws->self)) return;
 
 	hOwner = (pws_owner) ? pws_owner->self : GetDesktopWindow();
@@ -1976,6 +1998,7 @@ void _widget_set_capture(widget_t wt, bool_t b)
 {
 	win32_widget_t* pws = (win32_widget_t*)wt;
 
+	if(!pws) return;
 	if (!IsWindow(pws->self)) return;
 
 	if (b)
@@ -1988,6 +2011,7 @@ vword_t _widget_set_timer(widget_t wt, int ms)
 {
 	win32_widget_t* pws = (win32_widget_t*)wt;
 
+	if(!pws) return 0;
 	if (!IsWindow(pws->self)) return 0;
 
 	return (vword_t)SetTimer(pws->self, IDC_TIMER, ms, NULL);
@@ -1997,6 +2021,7 @@ void _widget_kill_timer(widget_t wt, vword_t tid)
 {
 	win32_widget_t* pws = (win32_widget_t*)wt;
 
+	if(!pws) return;
 	if (!IsWindow(pws->self)) return;
 
 	if (tid)
@@ -2009,6 +2034,7 @@ void _widget_create_caret(widget_t wt, int w, int h)
 {
 	win32_widget_t* pws = (win32_widget_t*)wt;
 
+	if(!pws) return;
 	if (!IsWindow(pws->self)) return;
 
 	CreateCaret(pws->self, NULL, w, h);
@@ -2026,6 +2052,7 @@ void _widget_show_caret(widget_t wt, int x, int y)
 
 	SetCaretPos(x, y);
 
+	if(!pws) return;
 	if (!IsWindow(pws->self)) return;
 
 	ShowCaret(pws->self);
@@ -2035,6 +2062,7 @@ void _widget_set_focus(widget_t wt)
 {
 	win32_widget_t* pws = (win32_widget_t*)wt;
 
+	if(!pws) return;
 	if (!IsWindow(pws->self)) return;
 
 	SetFocus(pws->self);
@@ -2079,6 +2107,7 @@ bool_t _widget_is_child(widget_t wt)
 {
 	win32_widget_t* pws = (win32_widget_t*)wt;
 
+	if(!pws) return 0;
 	if (!IsWindow(pws->self)) return 0;
 
 #ifdef WINCE
@@ -2152,6 +2181,7 @@ void _widget_move(widget_t wt, const xpoint_t* ppt)
 	win32_widget_t* pws = (win32_widget_t*)wt;
 	RECT rt;
 
+	if(!pws) return;
 	if (!IsWindow(pws->self)) return;
 
 	GetWindowRect(pws->self, &rt);
@@ -2170,6 +2200,7 @@ void _widget_size(widget_t wt, const xsize_t* pxs)
 	win32_widget_t* pws = (win32_widget_t*)wt;
 	RECT rt;
 
+	if(!pws) return;
 	if (!IsWindow(pws->self)) return;
 
 	GetWindowRect(pws->self, &rt);
@@ -2188,6 +2219,7 @@ void _widget_take(widget_t wt, int zor)
 	win32_widget_t* pws = (win32_widget_t*)wt;
 	HWND wnd;
 
+	if(!pws) return;
 	if (!IsWindow(pws->self)) return;
 
 	switch (zor)
@@ -2219,6 +2251,7 @@ void _widget_show(widget_t wt, dword_t sw)
 	DWORD dw = (pws) ? pws->style : 0;
 	RECT rt;
 
+	if(!pws) return;
 	if (!IsWindow(pws->self)) return;
 
 	if (sw == WS_SHOW_HIDE)
@@ -2275,6 +2308,7 @@ void _widget_erase(widget_t wt, const xrect_t* prt)
 	win32_widget_t* pws = (win32_widget_t*)wt;
 	RECT rt;
 
+	if(!pws) return;
 	if (!IsWindow(pws->self)) return;
 
 	if (prt)
@@ -2295,25 +2329,22 @@ void _widget_layout(widget_t wt)
 {
 	win32_widget_t* pws = (win32_widget_t*)wt;
 
+	if(!pws) return;
 	if (!IsWindow(pws->self)) return;
+
+	if(pws->style & WD_STYLE_OWNERNC)
+	{
+		SetWindowPos(pws->self, NULL, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOCOPYBITS | SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOREDRAW);
+	}
 
 	PostMessage(pws->self, WM_SIZE, WS_SIZE_LAYOUT, 0);
-}
-
-void _widget_paint(widget_t wt)
-{
-	win32_widget_t* pws = (win32_widget_t*)wt;
-
-	if (!IsWindow(pws->self)) return;
-
-	SetWindowPos(pws->self, NULL, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOCOPYBITS | SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER);
-	PostMessage(pws->self, WM_NCPAINT, 1, 0);
 }
 
 void _widget_enable(widget_t wt, bool_t b)
 {
 	win32_widget_t* pws = (win32_widget_t*)wt;
 
+	if(!pws) return;
 	if (!IsWindow(pws->self)) return;
 
 	if (b)
@@ -2326,6 +2357,7 @@ void _widget_active(widget_t wt)
 {
 	win32_widget_t* pws = (win32_widget_t*)wt;
 
+	if(!pws) return;
 	if (!IsWindow(pws->self)) return;
 
 	SetActiveWindow(pws->self);
@@ -2335,6 +2367,7 @@ void _widget_post_notice(widget_t wt, NOTICE* pnt)
 {
 	win32_widget_t* pws = (win32_widget_t*)wt;
 
+	if(!pws) return;
 	if (!IsWindow(pws->self)) return;
 
 	PostMessage(pws->self, WM_NOTICE, (WPARAM)pnt->user, (LPARAM)pnt);
@@ -2344,6 +2377,7 @@ int _widget_send_notice(widget_t wt, NOTICE* pnt)
 {
 	win32_widget_t* pws = (win32_widget_t*)wt;
 
+	if(!pws) return 0;
 	if (!IsWindow(pws->self)) return 0;
 
 	return (int)SendMessage(pws->self, WM_NOTICE, (WPARAM)pnt->user, (LPARAM)pnt);
@@ -2353,6 +2387,7 @@ void _widget_post_command(widget_t wt, int code, uid_t cid, vword_t data)
 {
 	win32_widget_t* pws = (win32_widget_t*)wt;
 
+	if(!pws) return;
 	if (!IsWindow(pws->self)) return;
 
 	PostMessage(pws->self, WM_COMMAND, MAKEWPARAM(cid,code), (LPARAM)data);
@@ -2362,6 +2397,7 @@ int _widget_send_command(widget_t wt, int code, uid_t cid, vword_t data)
 {
 	win32_widget_t* pws = (win32_widget_t*)wt;
 
+	if(!pws) return 0;
 	if (!IsWindow(pws->self)) return 0;
 
 	return (int)SendMessage(pws->self, WM_COMMAND, MAKEWPARAM(cid, code), (LPARAM)data);
@@ -2371,6 +2407,7 @@ void _widget_set_title(widget_t wt, const tchar_t* token)
 {
 	win32_widget_t* pws = (win32_widget_t*)wt;
 
+	if(!pws) return;
 	if (!IsWindow(pws->self)) return;
 
 	DWORD dw;
@@ -2392,6 +2429,7 @@ int _widget_get_title(widget_t wt, tchar_t* buf, int max)
 	DWORD dw;
 	int len;
 
+	if(!pws) return 0;
 	if (!IsWindow(pws->self)) return 0;
 
 #ifdef WINCE
@@ -2418,6 +2456,7 @@ void _widget_scroll(widget_t wt, bool_t horz, int line)
 {
 	win32_widget_t* pws = (win32_widget_t*)wt;
 
+	if(!pws) return;
 	if (!IsWindow(pws->self)) return;
 
 	PostMessage(pws->self, WM_SCROLL, (vword_t)horz, (vword_t)line);
@@ -2426,26 +2465,51 @@ void _widget_scroll(widget_t wt, bool_t horz, int line)
 void _widget_get_scroll_info(widget_t wt, bool_t horz, scroll_t* psl)
 {
 	win32_widget_t* pws = (win32_widget_t*)wt;
-	SCROLLINFO si = { 0 };
-	int bar;
-
+	
+	if(!pws) return;
 	if (!IsWindow(pws->self)) return;
 
-	si.cbSize = sizeof(si);
-	si.fMask = SIF_ALL;
-
-	if (horz)
-		bar = SB_HORZ;
+	if(horz)
+		xmem_copy((void*)psl, (void*)&(pws->hs), sizeof(scroll_t));
 	else
-		bar = SB_VERT;
+		xmem_copy((void*)psl, (void*)&(pws->vs), sizeof(scroll_t));
+}
 
-	GetScrollInfo(pws->self, bar, &si);
+static int CALLBACK _update_horz_position(widget_t wt, vword_t b)
+{
+	win32_widget_t* pws = (win32_widget_t*)wt;
+	RECT rt;
+	int dst_x = 0, dst_y = 0;
 
-	psl->max = si.nMax;
-	psl->min = si.nMin;
-	psl->page = (int)(si.nPage);
-	psl->pos = si.nPos;
-	psl->track = si.nTrackPos;
+	GetWindowRect(pws->self, &rt);
+
+	if(pws->style & WD_STYLE_CHILD)
+	{
+		ScreenToClient(pws->parent, (LPPOINT)(&rt));
+	}
+
+	rt.left += *(int*)b;
+	SetWindowPos(pws->self, NULL, rt.left, rt.top, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOREDRAW | SWP_NOSENDCHANGING | SWP_DEFERERASE);
+
+	return (0);
+}
+
+static int CALLBACK _update_vert_position(widget_t wt, vword_t b)
+{
+	win32_widget_t* pws = (win32_widget_t*)wt;
+	RECT rt;
+
+	GetWindowRect(pws->self, &rt);
+
+	if(pws->style & WD_STYLE_CHILD)
+	{
+		ScreenToClient(pws->parent, (LPPOINT)(&rt));
+	}
+
+	rt.top += *(int*)b;
+	SetWindowPos(pws->self, NULL, rt.left, rt.top, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOREDRAW | SWP_NOSENDCHANGING | SWP_DEFERERASE);
+
+	return (0);
 }
 
 void _widget_set_scroll_info(widget_t wt, bool_t horz, const scroll_t* psl)
@@ -2454,81 +2518,30 @@ void _widget_set_scroll_info(widget_t wt, bool_t horz, const scroll_t* psl)
 	dword_t ds = (pws) ? pws->style : 0;
 
 	SCROLLINFO si = { 0 };
-	int bar;
 
+	if(!pws) return;
 	if (!IsWindow(pws->self)) return;
 
-	si.cbSize = sizeof(si);
-	si.nMax = psl->max;
-	si.nMin = psl->min;
-	si.nPage = psl->page;
-	si.nPos = psl->pos;
+	int b;
 
-	si.fMask = SIF_PAGE | SIF_POS | SIF_RANGE;
+	if(horz)
+	{
+		b = (psl->pos - pws->hs.pos);
+		xmem_copy((void*)&(pws->hs), (void*)psl, sizeof(scroll_t));
 
-	if (horz)
-		bar = SB_HORZ;
+		if(!b) return;
+
+		_widget_enum_child(wt, (PF_ENUM_WINDOW_PROC)_update_horz_position, (vword_t)&b);
+	}
 	else
-		bar = SB_VERT;
-
-	if (ds & WD_STYLE_OWNERNC)
-		SetScrollInfo(pws->self, bar, &si, FALSE);
-	else
-		SetScrollInfo(pws->self, bar, &si, TRUE);
-}
-
-void _widget_set_mask(widget_t wt, const xcolor_t* pxc)
-{
-	win32_widget_t* pws = (win32_widget_t*)wt;
-
-	if (pws)
 	{
-		CopyMemory((void*)&pws->msk, (void*)pxc, sizeof(xcolor_t));
+		b = (psl->pos - pws->vs.pos);
+		xmem_copy((void*)&(pws->vs), (void*)psl, sizeof(scroll_t));
+
+		if(!b) return;
+
+		_widget_enum_child(wt, (PF_ENUM_WINDOW_PROC)_update_vert_position, (vword_t)&b);
 	}
-}
-
-void _widget_get_mask(widget_t wt, xcolor_t* pxc)
-{
-	win32_widget_t* pws = (win32_widget_t*)wt;
-
-	if (pws)
-	{
-		CopyMemory((void*)pxc, (void*)&pws->msk, sizeof(xcolor_t));
-	}
-}
-
-const xcolor_t* _widget_get_mask_ptr(widget_t wt)
-{
-	win32_widget_t* pws = (win32_widget_t*)wt;
-
-	return (pws)? &pws->msk : NULL;
-}
-
-void _widget_set_iconic(widget_t wt, const xcolor_t* pxc)
-{
-	win32_widget_t* pws = (win32_widget_t*)wt;
-
-	if (pws)
-	{
-		CopyMemory((void*)&pws->ico, (void*)pxc, sizeof(xcolor_t));
-	}
-}
-
-void _widget_get_iconic(widget_t wt, xcolor_t* pxc)
-{
-	win32_widget_t* pws = (win32_widget_t*)wt;
-
-	if (pws)
-	{
-		CopyMemory((void*)pxc, (void*)&pws->ico, sizeof(xcolor_t));
-	}
-}
-
-const xcolor_t* _widget_get_iconic_ptr(widget_t wt)
-{
-	win32_widget_t* pws = (win32_widget_t*)wt;
-
-	return (pws)? &pws->ico : NULL;
 }
 
 void _widget_set_diaph(widget_t wt, float b)
@@ -2536,6 +2549,7 @@ void _widget_set_diaph(widget_t wt, float b)
 	win32_widget_t* pws = (win32_widget_t*)wt;
 	DWORD dw;
 
+	if(!pws) return;
 	if (!IsWindow(pws->self)) return;
 
 	dw = GetWindowLong(pws->self, GWL_EXSTYLE);
@@ -2548,51 +2562,12 @@ float _widget_get_diaph(widget_t wt)
 	win32_widget_t* pws = (win32_widget_t*)wt;
 	BYTE b = 0;
 
+	if(!pws) return 1.0f;
 	if (!IsWindow(pws->self)) return 1.0f;
 
 	GetLayeredWindowAttributes(pws->self, NULL, &b, NULL);
 
-	return (1.0f - (float)b / 255.0);
-}
-
-void _widget_set_point(widget_t wt, const xpoint_t* ppt)
-{
-	win32_widget_t* pws = (win32_widget_t*)wt;
-
-	if (pws)
-	{
-		CopyMemory((void*)&pws->pt, (void*)ppt, sizeof(xpoint_t));
-	}
-}
-
-void _widget_get_point(widget_t wt, xpoint_t* ppt)
-{
-	win32_widget_t* pws = (win32_widget_t*)wt;
-
-	if (pws)
-	{
-		CopyMemory((void*)ppt, (void*)&pws->pt, sizeof(xpoint_t));
-	}
-}
-
-void _widget_set_size(widget_t wt, const xsize_t* pst)
-{
-	win32_widget_t* pws = (win32_widget_t*)wt;
-
-	if (pws)
-	{
-		CopyMemory((void*)&pws->st, (void*)pst, sizeof(xsize_t));
-	}
-}
-
-void _widget_get_size(widget_t wt, xsize_t* pst)
-{
-	win32_widget_t* pws = (win32_widget_t*)wt;
-
-	if (pws)
-	{
-		CopyMemory((void*)pst, (void*)&pws->st, sizeof(xsize_t));
-	}
+	return (float)(1.0f - (float)b / 255.0);
 }
 
 static int CALLBACK _widget_set_child_color_mode(widget_t wt, vword_t pv)
@@ -2615,11 +2590,7 @@ void _widget_set_color_mode(widget_t wt, const color_mod_t* pclr)
 	if (!pws) return;
 	if (dw & WD_STYLE_NOCHANGE) return;
 
-	CopyMemory((void*)&pws->bkg, (void*)&pclr->clr_bkg, sizeof(xcolor_t));
-	CopyMemory((void*)&pws->frg, (void*)&pclr->clr_frg, sizeof(xcolor_t));
-	CopyMemory((void*)&pws->txt, (void*)&pclr->clr_txt, sizeof(xcolor_t));
-	CopyMemory((void*)&pws->msk, (void*)&pclr->clr_msk, sizeof(xcolor_t));
-	CopyMemory((void*)&pws->ico, (void*)&pclr->clr_ico, sizeof(xcolor_t));
+	CopyMemory((void*)&(pws->clrs), (void*)pclr, sizeof(color_mod_t));
 
 	_widget_send_command(wt, COMMAND_COLOR, IDC_SELF, (vword_t)pclr);
 
@@ -2632,11 +2603,7 @@ void _widget_get_color_mode(widget_t wt, color_mod_t* pclr)
 
 	if (!pws) return;
 
-	CopyMemory((void*)&pws->bkg, (void*)&pclr->clr_bkg, sizeof(xcolor_t));
-	CopyMemory((void*)&pws->frg, (void*)&pclr->clr_frg, sizeof(xcolor_t));
-	CopyMemory((void*)&pws->txt, (void*)&pclr->clr_txt, sizeof(xcolor_t));
-	CopyMemory((void*)&pws->msk, (void*)&pclr->clr_msk, sizeof(xcolor_t));
-	CopyMemory((void*)&pws->ico, (void*)&pclr->clr_ico, sizeof(xcolor_t));
+	CopyMemory((void*)pclr, (void*)&(pws->clrs), sizeof(color_mod_t));
 }
 
 void _widget_noti_xfont(widget_t wt, const xfont_t* pxf)
@@ -2644,6 +2611,7 @@ void _widget_noti_xfont(widget_t wt, const xfont_t* pxf)
 	win32_widget_t* pws = (win32_widget_t*)wt;
 	if_dispatch_t* pif;
 
+	if(!pws) return;
 	if (!IsWindow(pws->self)) return;
 
 	pif = GETXDUDISPATCH(pws->self);
@@ -2659,6 +2627,7 @@ void _widget_noti_xface(widget_t wt, const xface_t* pxa)
 	win32_widget_t* pws = (win32_widget_t*)wt;
 	if_dispatch_t* pif;
 
+	if(!pws) return;
 	if (!IsWindow(pws->self)) return;
 
 	pif = GETXDUDISPATCH(pws->self);
@@ -2674,6 +2643,7 @@ void _widget_noti_xbrush(widget_t wt, const xbrush_t* pxb)
 	win32_widget_t* pws = (win32_widget_t*)wt;
 	if_dispatch_t* pif;
 
+	if(!pws) return;
 	if (!IsWindow(pws->self)) return;
 
 	pif = GETXDUDISPATCH(pws->self);
@@ -2689,6 +2659,7 @@ void _widget_noti_xpen(widget_t wt, const xpen_t* pxp)
 	win32_widget_t* pws = (win32_widget_t*)wt;
 	if_dispatch_t* pif;
 
+	if(!pws) return;
 	if (!IsWindow(pws->self)) return;
 
 	pif = GETXDUDISPATCH(pws->self);
@@ -2698,7 +2669,8 @@ void _widget_noti_xpen(widget_t wt, const xpen_t* pxp)
 		(*pif->pf_on_xpen)(wt, pxp);
 	}
 }
-//////////////////////////////////////////////////////////////////////////////////
+
+/*********************************************************************************************************/
 
 int _widget_do_main(widget_t wt)
 {
@@ -2707,10 +2679,13 @@ int _widget_do_main(widget_t wt)
 	MSG msg = { 0 };
 	BOOL bShow = FALSE;
 	BOOL bModal = TRUE;
+	int ret = 0;
 
+	if(!pws) return -1;
 	if (!IsWindow(pws->self)) return -1;
 
 	hMain = pws->self;
+	pws->mode = WS_MODE_MAIN;
 
 #ifdef WINCE
 	bShow = GetWindowLong(hMain, GWL_STYLE) & WS_VISIBLE;
@@ -2734,9 +2709,15 @@ int _widget_do_main(widget_t wt)
 				break;
 			}
 
+			if(msg.message == WM_QUIT)
+			{
+				bModal = FALSE;
+				break;
+			}
+
 			if (msg.hwnd == hMain && msg.message == WM_KEYDOWN)
 			{
-				if (pws->acl && TranslateAccelerator(hMain, pws->acl, &msg))
+				if (pws->accel && TranslateAccelerator(hMain, pws->accel, &msg))
 					continue;
 			}
 
@@ -2748,32 +2729,44 @@ int _widget_do_main(widget_t wt)
 				bModal = FALSE;
 				break;
 			}
+
+			if(pws->mode != WS_MODE_MAIN)
+			{
+				bModal = FALSE;
+				break;
+			}
 		}
 	} while (bModal);
 
-	return 0;
+	if(IsWindow(hMain))
+	{
+		ret = pws->retcode;
+		_widget_destroy(wt);
+	}
+
+	return ret;
 }
 
 int _widget_do_modal(widget_t wt)
 {
 	win32_widget_t* pws = (win32_widget_t*)wt;
-	HWND hDiag;
+	HWND hDiag, hOwner;
 	MSG msg = { 0 };
 	BOOL bShow = FALSE;
 	BOOL bModal = TRUE;
-	int nRet = 0;
+	int ret = 0;
 
+	if(!pws) return -1;
 	if (!IsWindow(pws->self)) return -1;
 
 	hDiag = pws->self;
-	/*HWND hWndParent;
-
-	hWndParent = GetParent(hWnd);
-
-	if (hWndParent && hWndParent != GetDesktopWindow() && IsWindowEnabled(hWndParent))
+	pws->mode = WS_MODE_MODAL;
+	
+	hOwner = (pws->owner)? pws->owner : pws->parent;
+	if (hOwner)
 	{
-		EnableWindow(hWndParent, FALSE);
-	}*/
+		EnableWindow(hOwner, FALSE);
+	}
 
 #ifdef WINCE
 	bShow = GetWindowLong(hDiag, GWL_STYLE) & WS_VISIBLE;
@@ -2790,11 +2783,6 @@ int _widget_do_modal(widget_t wt)
 	do{
 		while (PeekMessage(&msg, NULL, NULL, NULL, PM_NOREMOVE))
 		{
-			if (msg.hwnd == hDiag && msg.message == WM_SYSCOMMAND && (msg.wParam & 0xFFF0) == SC_CLOSE)
-			{
-				nRet = pws->result;
-			}
-
 			if (!GetMessage(&msg, NULL, NULL, NULL))
 			{
 				PostQuitMessage(-1);
@@ -2804,7 +2792,7 @@ int _widget_do_modal(widget_t wt)
 
 			if (msg.hwnd == hDiag && msg.message == WM_KEYDOWN)
 			{
-				if (pws->acl && TranslateAccelerator(hDiag, pws->acl, &msg))
+				if (pws->accel && TranslateAccelerator(hDiag, pws->accel, &msg))
 					continue;
 			}
 
@@ -2816,21 +2804,26 @@ int _widget_do_modal(widget_t wt)
 				bModal = FALSE;
 				break;
 			}
+
+			if(pws->mode != WS_MODE_MODAL)
+			{
+				bModal = FALSE;
+				break;
+			}
 		}
 	} while (bModal);
 
-	/*if (hWndParent)
+	ret = pws->retcode;
+	_widget_destroy(wt);
+
+	if (hOwner)
 	{
-		SetForegroundWindow(hWndParent);
+		EnableWindow(hOwner, TRUE);
+		SetForegroundWindow(hOwner);
+		SetWindowPos(hOwner, NULL, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOREDRAW | SWP_NOSENDCHANGING | SWP_DEFERERASE);
+	}
 
-		if (!IsWindowEnabled(hWndParent))
-		{
-			EnableWindow(hWndParent, TRUE);
-		}
-		//SetWindowPos(hWndParent, NULL, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOREDRAW | SWP_NOSENDCHANGING | SWP_DEFERERASE);
-	}*/
-
-	return nRet;
+	return ret;
 }
 
 void _widget_do_track(widget_t wt)
@@ -2839,11 +2832,13 @@ void _widget_do_track(widget_t wt)
 	HWND hMenu;
 	MSG msg = { 0 };
 	BOOL bShow = FALSE;
-	BOOL bTrace = TRUE;
+	BOOL bTrack = TRUE;
 
+	if(!pws) return;
 	if (!IsWindow(pws->self)) return;
 
 	hMenu = pws->self;
+	pws->mode = WS_MODE_TRACK;
 
 #ifdef WINCE
 	bShow = GetWindowLong(hMenu, GWL_STYLE) & WS_VISIBLE;
@@ -2864,14 +2859,14 @@ void _widget_do_track(widget_t wt)
 			if (msg.hwnd == hMenu && msg.message == WM_KEYDOWN && msg.wParam == KEY_ESC)
 			{
 				GetMessage(&msg, NULL, NULL, NULL);//remove esc
-
-				DestroyWindow(hMenu);
+				bTrack = FALSE;
+				break;
 			}
 
 			if (!GetMessage(&msg, NULL, NULL, NULL))
 			{
 				PostQuitMessage(-1);
-				bTrace = FALSE;
+				bTrack = FALSE;
 				break;
 			}
 
@@ -2880,13 +2875,21 @@ void _widget_do_track(widget_t wt)
 
 			if (!IsWindow(hMenu))
 			{
-				bTrace = FALSE;
+				bTrack = FALSE;
+				break;
+			}
+
+			if(pws->mode != WS_MODE_TRACK)
+			{
+				bTrack = FALSE;
 				break;
 			}
 		}
-	} while (bTrace);
+	} while (bTrack);
 
 	ReleaseCapture();
+
+	_widget_destroy(wt);
 }
 
 void _message_quit(int code)
@@ -2903,6 +2906,7 @@ void _message_position(xpoint_t* ppt)
 }
 
 /*********************************************************************************************************/
+
 void _adjust_widget_size(dword_t ws, xsize_t* pxs)
 {
 #ifdef WINCE
@@ -2929,62 +2933,30 @@ void _adjust_widget_size(dword_t ws, xsize_t* pxs)
 
 void _calc_widget_border(dword_t ws, border_t* pbd)
 {
-	xsize_t xs;
-
-	pbd->edge = pbd->title = pbd->hscroll = pbd->vscroll = pbd->menu = pbd->icon = 0;
+	pbd->edge = pbd->title = pbd->scrh = pbd->scrw = 0;
 
 	if (ws & WD_STYLE_TITLE)
 	{
-		xs.fw = ZERO_WIDTH;
-		xs.fh = WIDGET_TITLE_SPAN;
-		_screen_size_to_pt(&xs);
-
-		pbd->title = xs.h;
+		pbd->title = FRAME_TITLE_DOTS;
 	}
 
 	if (ws & WD_STYLE_BORDER)
 	{
-		xs.fw = ZERO_WIDTH;
 		if (ws & WD_STYLE_CHILD)
-			xs.fh = WIDGET_CHILD_EDGE;
+			pbd->edge = CHILD_EDGE_DOTS;
 		else
-			xs.fh = WIDGET_FRAME_EDGE;
-		_screen_size_to_pt(&xs);
-
-		pbd->edge = xs.h;
+			pbd->edge = FRAME_EDGE_DOTS;
 	}
 
 	if (ws & WD_STYLE_HSCROLL)
 	{
-		xs.fw = ZERO_WIDTH;
-		xs.fh = WIDGET_SCROLL_SPAN;
-		_screen_size_to_pt(&xs);
-
-		pbd->hscroll = xs.h;
+		pbd->scrh = FRAME_SCROLL_DOTS;
 	}
 
 	if (ws & WD_STYLE_VSCROLL)
 	{
-		xs.fw = WIDGET_SCROLL_SPAN;
-		xs.fh = ZERO_HEIGHT;
-		_screen_size_to_pt(&xs);
-
-		pbd->vscroll = xs.w;
+		pbd->scrw = FRAME_SCROLL_DOTS;
 	}
-
-	if (ws & WD_STYLE_MENUBAR)
-	{
-		xs.fw = ZERO_WIDTH;
-		xs.fh = WIDGET_MENU_SPAN;
-		_screen_size_to_pt(&xs);
-
-		pbd->menu = xs.h;
-	}
-
-	xs.fw = ZERO_WIDTH;
-	xs.fh = WIDGET_ICON_SPAN;
-	_screen_size_to_pt(&xs);
-	pbd->icon = xs.h;
 }
 
 void _get_screen_size(xsize_t* pxs)

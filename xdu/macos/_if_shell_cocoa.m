@@ -25,48 +25,198 @@ LICENSE.GPL3 for more details.
 ***********************************************************************/
 
 #include "../xduloc.h"
+#include <Cocoa/Cocoa.h>
 
 #ifdef XDU_SUPPORT_SHELL
 
-#ifdef XDU_SUPPORT_WIDGET
 bool_t _shell_get_filename(widget_t wt, const tchar_t* defpath, const tchar_t* filter, const tchar_t* defext, bool_t saveit, tchar_t* pathbuf, int pathlen, tchar_t* filebuf, int filelen)
-{
-	return 0;
-}
+{@autoreleasepool {
+    NSSavePanel *panelSave = nil;
+    NSOpenPanel *panelOpen = nil;
+    NSSavePanel *panel = nil;
+
+    if (saveit) 
+    {
+        panelSave = [NSSavePanel savePanel];
+        if (defext && *defext)
+        {
+            panelSave.allowedFileTypes = @[ [NSString stringWithUTF8String:defext] ];
+        }
+
+        panel = panelSave;
+    } else 
+    {
+        panelOpen = [NSOpenPanel openPanel];
+        panelOpen.canChooseFiles = YES;
+        panelOpen.canChooseDirectories = NO;
+        panelOpen.allowsMultipleSelection = NO;
+
+        panel = (NSSavePanel*)panelOpen;
+    }
+
+    if (defpath && *defpath) {
+        NSString *nsDir = [NSString stringWithUTF8String:defpath];
+        panel.directoryURL = [NSURL fileURLWithPath:nsDir];
+    }
+
+    if(!saveit && filter && *filter)
+    {
+        NSMutableArray *tabExts = [NSMutableArray array];
+        filter += (xslen(filter) + 1);
+        while(filter && *filter)
+        {
+            NSString *nsExt = [NSString stringWithUTF8String:filter];
+            if ([nsExt hasPrefix:@"*."]) nsExt = [nsExt substringFromIndex:2];
+            if ([nsExt hasPrefix:@"."])  nsExt = [nsExt substringFromIndex:1];
+            if (nsExt.length) [tabExts addObject:nsExt];
+
+            filter += (xslen(filter) + 1);
+        }
+
+        if (tabExts.count)
+        {
+            [(NSOpenPanel*)panel setAllowedFileTypes:tabExts];
+        }
+    }
+
+    if ([panel runModal] != NSModalResponseOK)
+        return 0;
+
+    NSURL *nsUrl = saveit ? [panelSave URL] : [[panelOpen URLs] firstObject];
+    if (!nsUrl) return 0;
+
+    NSString *nsFull = nsUrl.path;
+    NSString *nsFile = nsFull.lastPathComponent;
+    NSString *nsPath   = [nsFull stringByDeletingLastPathComponent];
+
+    if (pathbuf && pathlen > 0) 
+    {
+        NSData *nsBytes = [nsPath dataUsingEncoding:NSUTF8StringEncoding];
+        int copyLen = (int)MIN(pathlen - 1, (int)nsBytes.length);
+        xmem_copy(pathbuf, nsBytes.bytes, copyLen);
+        pathbuf[copyLen] = 0;
+    }
+
+	if (filebuf && filelen > 0) 
+    {
+        NSData *nsBytes = [nsFile dataUsingEncoding:NSUTF8StringEncoding];
+        int copyLen = (int)MIN(filelen - 1, (int)nsBytes.length);
+        xmem_copy(filebuf, nsBytes.bytes, copyLen);
+        filebuf[copyLen] = 0;
+    }
+    
+	return 1;
+}}
 
 bool_t _shell_get_pathname(widget_t wt, const tchar_t* defpath, bool_t createit, tchar_t* pathbuf, int pathlen)
-{
-	return 0;
-}
-#endif
+{@autoreleasepool {
+	NSOpenPanel *panel = [NSOpenPanel openPanel];
+    panel.canChooseFiles = NO;
+    panel.canChooseDirectories = YES;
+    panel.allowsMultipleSelection = NO;
+    panel.canCreateDirectories = createit ? YES : NO;
+        
+	if (defpath && *defpath)
+    {
+        panel.directoryURL = [NSURL fileURLWithPath:[NSString stringWithUTF8String:defpath]];
+    }
+    if ([panel runModal] != NSModalResponseOK) return 0;
+
+    NSURL *nsUrl = panel.URL;
+    if (!nsUrl) return 0;
+
+    NSString *nsDir = nsUrl.path;
+    if (pathbuf && pathlen > 0) 
+    {
+        NSData *nsBytes = [nsDir dataUsingEncoding:NSUTF8StringEncoding];
+        int copyLen = (int)MIN(pathlen - 1, (int)nsBytes.length);
+        xmem_copy(pathbuf, nsBytes.bytes, copyLen);
+        pathbuf[copyLen] = 0;
+    }
+    
+	return 1;
+}}
 
 bool_t _shell_get_curpath(tchar_t* pathbuf, int pathlen)
-{
+{@autoreleasepool {
+	NSString *nsPath = [[NSFileManager defaultManager] currentDirectoryPath];
+    NSData *nsBytes = [nsPath dataUsingEncoding:NSUTF8StringEncoding];
+
+    int copyLen = (int)MIN(pathlen - 1, (int)nsBytes.length);
+    if (pathbuf && pathlen > 0) 
+    {
+        xmem_copy(pathbuf, nsBytes.bytes, copyLen);
+        pathbuf[copyLen] = 0;
+        return 1;
+    }
+    
 	return 0;
-}
+}}
 
 bool_t _shell_get_runpath(tchar_t* pathbuf, int pathlen)
-{
-	
+{@autoreleasepool {
+	NSString *nsPath = [[NSBundle mainBundle] executablePath];
+    NSString *nsDir = nsPath.stringByDeletingLastPathComponent;
+    NSData *nsBytes = [nsDir dataUsingEncoding:NSUTF8StringEncoding];
+    
+	int copyLen = (int)MIN(pathlen - 1, (int)nsBytes.length);
+    if (pathbuf && pathlen > 0) 
+    {
+        xmem_copy(pathbuf, nsBytes.bytes, copyLen);
+        pathbuf[copyLen] = 0;
+        return 1;
+    }
+    
 	return 0;
-}
+}}
 
 bool_t _shell_get_apppath(tchar_t* pathbuf, int pathlen)
-{
-	
-	return 0;
-}
+{@autoreleasepool {
+	NSString *nsPath = [[NSBundle mainBundle] bundlePath];
+    NSData *nsBytes = [nsPath dataUsingEncoding:NSUTF8StringEncoding];
+
+    int copyLen = (int)MIN(pathlen - 1, (int)nsBytes.length);
+    if (pathbuf && pathlen > 0) 
+    {
+        xmem_copy(pathbuf, nsBytes.bytes, copyLen);
+        pathbuf[copyLen] = 0;
+        return 1;
+    }
+
+    return 0;
+}}
 
 bool_t _shell_get_docpath(tchar_t* pathbuf, int pathlen)
-{
-	
-	return 0;
-}
+{@autoreleasepool {
+	NSArray *nsTab = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString *nsDoc = nsTab.firstObject ?: @"";
+    NSData *nsBytes = [nsDoc dataUsingEncoding:NSUTF8StringEncoding];
+
+    int copyLen = (int)MIN(pathlen - 1, (int)nsBytes.length);
+    if (pathbuf && pathlen > 0) 
+    {
+        xmem_copy(pathbuf, nsBytes.bytes, copyLen);
+        pathbuf[copyLen] = 0;
+        return 1;
+    }
+
+    return 0;
+}}
 
 bool_t _shell_get_tmppath(tchar_t* pathbuf, int pathlen)
-{
-	
-	return 0;
-}
+{@autoreleasepool {
+	NSString *nsPath = NSTemporaryDirectory();
+    NSData *nsBytes = [nsPath dataUsingEncoding:NSUTF8StringEncoding];
+
+    int copyLen = (int)MIN(pathlen - 1, (int)nsBytes.length);
+    if (pathbuf && pathlen > 0) 
+    {
+        xmem_copy(pathbuf, nsBytes.bytes, copyLen);
+        pathbuf[copyLen] = 0;
+        return 1;
+    }
+
+    return 0;
+}}
 
 #endif

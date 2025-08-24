@@ -42,12 +42,12 @@ typedef struct _font_metrix_t {
 typedef struct _mem_font_t* mem_font_ptr;
 
 typedef struct _mem_font_t{
-	font_t(*createFont)(const xfont_t* pxf);
-	void(*destroyFont)(font_t fnt);
-	void(*getFontInfo)(font_t fnt, xfont_t* pxf);
-	void(*getFontMetrix)(font_t fnt, const tchar_t* pch, font_metrix_t* pmetrix);
-	void(*getCharSize)(font_t fnt, const tchar_t *pch, xsize_t* pse);
-	int(*getCharPixmap)(font_t fnt, const tchar_t* pch, mem_pixmap_ptr ppixmap);
+	fontset_t(*createFontSet)(const xfont_t* pxf);
+	void(*destroyFontSet)(fontset_t fnt);
+	void(*getFontInfo)(fontset_t fnt, xfont_t* pxf);
+	void(*getFontMetrix)(fontset_t fnt, const tchar_t* pch, font_metrix_t* pmetrix);
+	void(*getCharSize)(fontset_t fnt, const tchar_t *pch, xsize_t* pse);
+	int(*getCharPixmap)(fontset_t fnt, const tchar_t* pch, mem_pixmap_ptr ppixmap);
 } mem_font_t;
 
 extern mem_font_t font_Internal;

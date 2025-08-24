@@ -39,7 +39,7 @@ typedef struct _checkbox_delta_t{
 #define SETCHECKBOXDELTA(ph,ptd) widget_set_user_delta(ph,(vword_t)ptd)
 
 /********************************************************************************/
-void _checkbox_reset_page(widget_t widget)
+static void _checkbox_reset_page(widget_t widget)
 {
 	checkbox_delta_t* ptd = GETCHECKBOXDELTA(widget);
 	xrect_t xr;
@@ -132,9 +132,20 @@ void hand_checkbox_size(widget_t widget, int code, const xsize_t* prs)
 {
 	checkbox_delta_t* ptd = GETCHECKBOXDELTA(widget);
 	
-	_checkbox_reset_page(widget);
+	XDK_ASSERT(ptd != NULL);
 
-	widget_erase(widget, NULL);
+	switch(code)
+	{
+	case WS_SIZE_FULLSCREEN:
+		break;
+	case WS_SIZE_MAXIMIZED:
+		break;
+	case WS_SIZE_MINIMIZED:
+		break;
+	case WS_SIZE_LAYOUT:
+		_checkbox_reset_page(widget);
+		break;
+	}
 }
 
 void hand_checkbox_xfont(widget_t widget, const xfont_t* pxf)
@@ -199,7 +210,7 @@ widget_t checkbox_create(widget_t widget, dword_t style, const xrect_t* pxr)
 		
 		EVENT_ON_XFONT(hand_checkbox_xfont)
 
-		EVENT_ON_NC_IMPLEMENT
+		
 
 	EVENT_END_DISPATH
 

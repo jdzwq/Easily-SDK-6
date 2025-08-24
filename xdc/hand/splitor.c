@@ -52,7 +52,6 @@ static bool_t _splitor_item_resize(link_t_ptr ilk, void* pv)
 	{
 		widget_move(win, RECTPOINT(&xr));
 		widget_size(win, RECTSIZE(&xr));
-		widget_paint(win);
 	}
 
 	return 1;
@@ -102,7 +101,7 @@ void noti_splitor_item_sized(splitor_t* ptd, const xpoint_t* pxp)
 
 		xs.w = 0;
 		xs.h = pt_cur.y - pt_org.y;
-		widget_size_to_tm(ptd->widget, &xs);
+		widget_size_to_mm(ptd->widget, &xs);
 
 		adjust_split_item(ilk, xs.fh);
 	}
@@ -113,7 +112,7 @@ void noti_splitor_item_sized(splitor_t* ptd, const xpoint_t* pxp)
 
 		xs.w = pt_cur.x - pt_org.x;
 		xs.h = 0;
-		widget_size_to_tm(ptd->widget, &xs);
+		widget_size_to_mm(ptd->widget, &xs);
 
 		adjust_split_item(ilk, xs.fw);
 	}
@@ -139,7 +138,7 @@ bool_t hand_splitor_mouse_move(splitor_t* ptd, dword_t dw, const xpoint_t* pxp)
 
 	pt.x = pxp->x;
 	pt.y = pxp->y;
-	widget_point_to_tm(ptd->widget, &pt);
+	widget_point_to_mm(ptd->widget, &pt);
 
 	nHint = calc_split_hint(ptd->split, &pt, &plk);
 
@@ -175,7 +174,7 @@ bool_t hand_splitor_lbutton_down(splitor_t* ptd, const xpoint_t* pxp)
 
 	pt.x = pxp->x;
 	pt.y = pxp->y;
-	widget_point_to_tm(ptd->widget, &pt);
+	widget_point_to_mm(ptd->widget, &pt);
 
 	nHint = calc_split_hint(ptd->split, &pt, &ilk);
 
@@ -215,7 +214,7 @@ void hand_splitor_size(splitor_t* ptd, const xrect_t* pxr)
 	XDK_ASSERT(ptd->split != NULL);
 
 	xmem_copy((void*)&xr, (void*)pxr, sizeof(xrect_t));
-	widget_rect_to_tm(ptd->widget, &xr);
+	widget_rect_to_mm(ptd->widget, &xr);
 
 	set_split_item_x(ptd->split, xr.fx);
 	set_split_item_y(ptd->split, xr.fy);

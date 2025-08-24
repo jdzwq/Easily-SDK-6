@@ -29,8 +29,6 @@ LICENSE.GPL3 for more details.
 
 #if defined(XDU_SUPPORT_CONTEXT_GDI)
 
-static LOGFONT lf_gdiplus = { 0 };
-
 #ifndef ULONG_PTR
 #define ULONG_PTR ULONG
 #endif
@@ -69,21 +67,21 @@ static Pen* create_pen(const xpen_t* pxp)
 	xcolor_t pen_color = {0};
 	short sp;
 
-	if (is_null(pxp->color))
-		parse_xcolor(&pen_color, GDI_ATTR_RGB_GRAY);
-	else
+	if (pxp && !is_null(pxp->color))
 		parse_xcolor(&pen_color,pxp->color);
-
-	if (is_null(pxp->size))
-		sp = 1;
 	else
+		parse_xcolor(&pen_color, GDI_ATTR_RGB_GRAY);
+		
+	if (pxp && !is_null(pxp->size))
 		sp = xstol(pxp->size);
+	else
+		sp = 1;	
 
 	Pen* pp = new Pen(Color(pen_color.r,pen_color.g,pen_color.b),(REAL)sp);
 
-	if(xscmp(pxp->style,GDI_ATTR_STROKE_STYLE_DASH) == 0)
+	if(pxp && xscmp(pxp->style,GDI_ATTR_STROKE_STYLE_DASH) == 0)
 		pp->SetDashStyle(DashStyleDot);
-	else if(xscmp(pxp->style,GDI_ATTR_STROKE_STYLE_DASHDASH) == 0)
+	else if(pxp && xscmp(pxp->style,GDI_ATTR_STROKE_STYLE_DASHDASH) == 0)
 		pp->SetDashStyle(DashStyleDash);
 
 	return pp;
@@ -95,17 +93,17 @@ static Brush* create_brush(const xbrush_t* pxb, const xrect_t* pxr, GraphicsPath
 	xcolor_t linear_color = { 0 };
 	short opacity;
 
-	if (is_null(pxb->color))
-		parse_xcolor(&brush_color, GDI_ATTR_RGB_SOFTWHITE);
-	else
+	if (pxb && !is_null(pxb->color))
 		parse_xcolor(&brush_color,pxb->color);
-
-	if (is_null(pxb->opacity))
-		opacity = 255;
 	else
-		opacity = xstol(pxb->opacity);
+		parse_xcolor(&brush_color, GDI_ATTR_RGB_SOFTWHITE);
 
-	if (xscmp(pxb->style, GDI_ATTR_FILL_STYLE_GRADIENT) == 0)
+	if (pxb && !is_null(pxb->opacity))
+		opacity = xstol(pxb->opacity);
+	else
+		opacity = 255;
+
+	if (pxb && xscmp(pxb->style, GDI_ATTR_FILL_STYLE_GRADIENT) == 0)
 	{
 		if (is_null(pxb->linear))
 		{
@@ -148,7 +146,7 @@ static Brush* create_brush(const xbrush_t* pxb, const xrect_t* pxr, GraphicsPath
 			}
 		}
 	}
-	else if (xscmp(pxb->style, GDI_ATTR_FILL_STYLE_HATCH) == 0)
+	else if (pxb && xscmp(pxb->style, GDI_ATTR_FILL_STYLE_HATCH) == 0)
 	{
 		return new HatchBrush(HatchStyleCross, Color((BYTE)opacity, brush_color.r, brush_color.g, brush_color.b), Color(255, linear_color.r, linear_color.g, linear_color.b));
 	}
@@ -164,12 +162,12 @@ static Font* create_font(const xfont_t* pxf)
 {
 	FontStyle fs;
 
-	if (xstol(pxf->weight) > 500)
+	if (pxf && xstol(pxf->weight) > 500)
 		fs = FontStyleBold;
 	else
 		fs = FontStyleRegular;
 
-	if(xscmp(pxf->style,GDI_ATTR_FONT_STYLE_ITALIC) == 0)
+	if(pxf && xscmp(pxf->style,GDI_ATTR_FONT_STYLE_ITALIC) == 0)
 	{
 		if (xstol(pxf->weight) > 500)
 			fs = FontStyleBoldItalic;
@@ -177,39 +175,41 @@ static Font* create_font(const xfont_t* pxf)
 			fs = FontStyleItalic;
 	}
 	
-	if(xscmp(pxf->decorate,GDI_ATTR_FONT_DECORATE_UNDERLINE) == 0)
+	if(pxf && xscmp(pxf->decorate,GDI_ATTR_FONT_DECORATE_UNDERLINE) == 0)
 	{
 		fs = FontStyleUnderline;
-	}else if(xscmp(pxf->decorate,GDI_ATTR_FONT_DECORATE_STRIKOUT) == 0)
+	}else if(pxf && xscmp(pxf->decorate,GDI_ATTR_FONT_DECORATE_STRIKOUT) == 0)
 	{
 		fs = FontStyleStrikeout;
 	}
 
 	tchar_t face[32];
 
-	if (is_null(pxf->family))
-	{
-		xscpy(face, lf_gdiplus.lfFaceName);
-	}else
+	if (pxf && !is_null(pxf->family))
 	{
 		xscpy(face, pxf->family);
+	}else
+	{
+		xscpy(face, SYSTEM_FONTNAME);
 	}
 
 	FontFamily ff(face);
-	BYTE fx = (BYTE)xstol(pxf->size);
 
-	return new Font(&ff,fx,fs,UnitPoint);
+	float fx = 12.0f;
+	font_metric_by_pt(xstof(pxf->size), NULL, &fx);
+
+	return new Font(&ff, (BYTE)fx, fs, UnitPixel);
 }
 
 static StringFormat* create_face(const xface_t* pxa)
 {
 	StringFormat* psf = new StringFormat;
 
-	if (xscmp(pxa->line_align, GDI_ATTR_TEXT_ALIGN_NEAR) == 0)
+	if (pxa && xscmp(pxa->line_align, GDI_ATTR_TEXT_ALIGN_NEAR) == 0)
 	{
 		psf->SetLineAlignment(StringAlignmentNear);
 	}
-	else if (xscmp(pxa->line_align, GDI_ATTR_TEXT_ALIGN_FAR) == 0)
+	else if (pxa && xscmp(pxa->line_align, GDI_ATTR_TEXT_ALIGN_FAR) == 0)
 	{
 		psf->SetLineAlignment(StringAlignmentFar);
 	}
@@ -218,11 +218,11 @@ static StringFormat* create_face(const xface_t* pxa)
 		psf->SetLineAlignment(StringAlignmentCenter);
 	}
 
-	if (xscmp(pxa->text_align, GDI_ATTR_TEXT_ALIGN_CENTER) == 0)
+	if (pxa && xscmp(pxa->text_align, GDI_ATTR_TEXT_ALIGN_CENTER) == 0)
 	{
 		psf->SetAlignment(StringAlignmentCenter);
 	}
-	else if (xscmp(pxa->text_align, GDI_ATTR_TEXT_ALIGN_FAR) == 0)
+	else if (pxa && xscmp(pxa->text_align, GDI_ATTR_TEXT_ALIGN_FAR) == 0)
 	{
 		psf->SetAlignment(StringAlignmentFar);
 	}
@@ -231,7 +231,9 @@ static StringFormat* create_face(const xface_t* pxa)
 		psf->SetAlignment(StringAlignmentNear);
 	}
 
-	if (is_null(pxa->text_wrap))
+	if(!pxa)
+		psf->SetFormatFlags(StringFormatFlagsNoWrap);
+	else if (pxa && is_null(pxa->text_wrap))
 		psf->SetFormatFlags(StringFormatFlagsNoWrap);
 
 	return psf;
@@ -526,14 +528,6 @@ static GraphicsPath* create_path(HDC hDC, const tchar_t* aa, const xpoint_t* pa,
 
 void _gdi_init(int osv)
 {
-	NONCLIENTMETRICS ncm = { 0 };
-
-	ncm.cbSize = sizeof(ncm);
-
-	SystemParametersInfo(SPI_GETNONCLIENTMETRICS, sizeof(NONCLIENTMETRICS), (PVOID)&ncm, 0);
-
-	CopyMemory((void*)&lf_gdiplus, (void*)&ncm.lfCaptionFont, sizeof(LOGFONT));
-
 	if (!g_token)
 	{
 		GdiplusStartup(&g_token, &g_input, NULL);
@@ -597,19 +591,6 @@ void _gdi_draw_line(visual_t rdc,const xpen_t* pxp, const xpoint_t*ppt1, const x
 
 	gh.SetPageUnit(UnitPixel);
 
-	if (pxp && (pxp->adorn.feed || pxp->adorn.size))
-	{
-		xcolor_t xc_gray;
-
-		parse_xcolor(&xc_gray, pxp->color);
-		lighten_xcolor(&xc_gray, -10);
-
-		Pen pen(Color(xc_gray.r, xc_gray.g, xc_gray.b), (REAL)pxp->adorn.size);
-
-		gh.SetSmoothingMode(SmoothingModeAntiAlias);
-		gh.DrawLine(&pen, pt[0].x + pxp->adorn.feed, pt[0].y + pxp->adorn.feed, pt[1].x + pxp->adorn.feed, pt[1].y + pxp->adorn.feed);
-	}
-
 	gh.SetSmoothingMode(SmoothingModeAntiAlias);
 	gh.DrawLine(pp,pt[0].x,pt[0].y,pt[1].x,pt[1].y);
 	delete pp;
@@ -641,32 +622,6 @@ void _gdi_draw_polyline(visual_t rdc, const xpen_t* pxp, const xpoint_t* ppt, in
 
 	gh.SetPageUnit(UnitPixel);
 	gh.SetSmoothingMode(SmoothingModeAntiAlias);
-
-	if (pxp && (pxp->adorn.feed || pxp->adorn.size))
-	{
-		GraphicsPath* adron = path.Clone();
-
-		Region region(&path);
-		gh.ExcludeClip(&region);
-
-		Matrix M;
-		M.Translate(pxp->adorn.feed, pxp->adorn.feed);
-
-		adron->Transform(&M);
-
-		xcolor_t xc_gray;
-
-		parse_xcolor(&xc_gray, pxp->color);
-		lighten_xcolor(&xc_gray, -10);
-
-		Pen pen(Color(xc_gray.r, xc_gray.g, xc_gray.b), (REAL)pxp->adorn.size);
-
-		gh.DrawPath(&pen, adron);
-
-		gh.ResetClip();
-
-		delete adron;
-	}
 
 	gh.DrawPath(pp, &path);
 
@@ -721,32 +676,12 @@ void _gdi_draw_arc(visual_t rdc, const xpen_t* pxp, const xpoint_t * ppt1, const
 	gh.SetPageUnit(UnitPixel);
 	gh.SetSmoothingMode(SmoothingModeHighQuality);
 
-	if (pxp && (pxp->adorn.feed || pxp->adorn.size))
-	{
-		xcolor_t xc_gray;
+	Pen* pp = create_pen(pxp);
 
-		parse_xcolor(&xc_gray, pxp->color);
-		lighten_xcolor(&xc_gray, -10);
+	gh.SetCompositingQuality(CompositingQualityGammaCorrected);
+	gh.DrawArc(pp, rf, fdeg, sdeg);
 
-		Pen pen(Color(xc_gray.r, xc_gray.g, xc_gray.b), (REAL)pxp->adorn.size);
-
-		Rect rf2 = rf;
-		rf2.X += pxp->adorn.feed;
-		rf2.Y += pxp->adorn.feed;
-		gh.SetCompositingQuality(CompositingQualityGammaCorrected);
-
-		gh.DrawArc(&pen, rf2, fdeg, sdeg);
-	}
-
-	if (!is_null_xpen(pxp))
-	{
-		Pen* pp = create_pen(pxp);
-
-		gh.SetCompositingQuality(CompositingQualityGammaCorrected);
-		gh.DrawArc(pp, rf, fdeg, sdeg);
-
-		delete pp;
-	}
+	delete pp;
 }
 
 void _gdi_draw_bezier(visual_t rdc, const xpen_t* pxp, const xpoint_t* ppt1, const xpoint_t* ppt2, const xpoint_t* ppt3, const xpoint_t* ppt4)
@@ -828,41 +763,6 @@ void _gdi_draw_rect(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const 
 
 	gh.SetPageUnit(UnitPixel);
 
-	if (pxb && (pxb->shadow.offx || pxb->shadow.offy))
-	{
-		Region region(Rect(pt[0].x, pt[0].y, pt[1].x - pt[0].x, pt[1].y - pt[0].y));
-		gh.ExcludeClip(&region);
-
-		xcolor_t xc_near, xc_far;
-		parse_xcolor(&xc_near, pxb->color);
-		memcpy((void*)&xc_far, (void*)&xc_near, sizeof(xcolor_t));
-		lighten_xcolor(&xc_far, -10);
-
-		LinearGradientBrush brush(Rect(pt[0].x + pxb->shadow.offx, pt[0].y + pxb->shadow.offy, pt[1].x - pt[0].x, pt[1].y - pt[0].y), Color(255, xc_near.r, xc_near.g, xc_near.b), Color(255, xc_far.r, xc_far.g, xc_far.b), LinearGradientModeForwardDiagonal);
-
-		gh.FillRectangle(&brush, Rect(pt[0].x + pxb->shadow.offx, pt[0].y + pxb->shadow.offy, pt[1].x - pt[0].x, pt[1].y - pt[0].y));
-
-		gh.ResetClip();
-	}
-
-	if (pxp && (pxp->adorn.feed || pxp->adorn.size))
-	{
-		Region region(Rect(pt[0].x, pt[0].y, pt[1].x - pt[0].x, pt[1].y - pt[0].y));
-		gh.ExcludeClip(&region);
-
-		xcolor_t xc_gray;
-
-		parse_xcolor(&xc_gray, pxp->color);
-		lighten_xcolor(&xc_gray, -10);
-
-		Pen pen(Color(xc_gray.r, xc_gray.g, xc_gray.b), (REAL)pxp->adorn.size);
-
-		gh.SetSmoothingMode(SmoothingModeAntiAlias);
-		gh.DrawRectangle(&pen, Rect(pt[0].x + pxp->adorn.feed, pt[0].y + pxp->adorn.feed, pt[1].x - pt[0].x, pt[1].y - pt[0].y));
-
-		gh.ResetClip();
-	}
-
 	if (!is_null_xbrush(pxb))
 	{
 		Brush* pb = (Brush*)create_brush(pxb, prt, NULL);
@@ -871,14 +771,11 @@ void _gdi_draw_rect(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const 
 		delete pb;
 	}
 
-	if (!is_null_xpen(pxp))
-	{
-		Pen* pp = (Pen*)create_pen(pxp);
-		gh.SetSmoothingMode(SmoothingModeAntiAlias);
-		gh.DrawRectangle(pp, Rect(pt[0].x, pt[0].y, pt[1].x - pt[0].x, pt[1].y - pt[0].y));
+	Pen* pp = (Pen*)create_pen(pxp);
+	gh.SetSmoothingMode(SmoothingModeAntiAlias);
+	gh.DrawRectangle(pp, Rect(pt[0].x, pt[0].y, pt[1].x - pt[0].x, pt[1].y - pt[0].y));
 
-		delete pp;
-	}
+	delete pp;
 }
 
 void _gdi_draw_round(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const xrect_t* prt, const xsize_t* pxs)
@@ -933,59 +830,6 @@ void _gdi_draw_round(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const
 	gh.SetPageUnit(UnitPixel);
 	gh.SetSmoothingMode(SmoothingModeHighQuality);
 
-	if (pxb && (pxb->shadow.offx || pxb->shadow.offy))
-	{
-		GraphicsPath* shadow = path.Clone();
-
-		Region region(&path);
-		gh.ExcludeClip(&region);
-
-		Matrix M;
-		M.Translate(pxb->shadow.offx, pxb->shadow.offy);
-
-		shadow->Transform(&M);
-
-		xcolor_t xc_near, xc_far;
-		parse_xcolor(&xc_near, pxb->color);
-		memcpy((void*)&xc_far, (void*)&xc_near, sizeof(xcolor_t));
-		lighten_xcolor(&xc_far, -10);
-
-		LinearGradientBrush brush(Rect(pt[0].x + pxb->shadow.offx, pt[0].y + pxb->shadow.offy, pt[1].x - pt[0].x, pt[1].y - pt[0].y), Color(255, xc_near.r, xc_near.g, xc_near.b), Color(255, xc_far.r, xc_far.g, xc_far.b), LinearGradientModeForwardDiagonal);
-
-		gh.FillPath(&brush, shadow);
-
-		gh.ResetClip();
-
-		delete shadow;
-	}
-
-	if (pxp && (pxp->adorn.feed || pxp->adorn.size))
-	{
-		GraphicsPath* adron = path.Clone();
-
-		Region region(&path);
-		gh.ExcludeClip(&region);
-
-		Matrix M;
-		M.Translate(pxp->adorn.feed, pxp->adorn.feed);
-
-		adron->Transform(&M);
-
-		xcolor_t xc_gray;
-
-		parse_xcolor(&xc_gray, pxp->color);
-		lighten_xcolor(&xc_gray, -10);
-
-		Pen pen(Color(xc_gray.r, xc_gray.g, xc_gray.b), (REAL)pxp->adorn.size);
-
-		gh.SetSmoothingMode(SmoothingModeAntiAlias);
-		gh.DrawPath(&pen, adron);
-
-		gh.ResetClip();
-
-		delete adron;
-	}
-
 	if (!is_null_xbrush(pxb))
 	{
 		Brush* pb = create_brush(pxb, prt, &path);
@@ -994,13 +838,10 @@ void _gdi_draw_round(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const
 		delete pb;
 	}
 
-	if (!is_null_xpen(pxp))
-	{
-		Pen* pp = create_pen(pxp);
-		gh.DrawPath(pp, &path);
+	Pen* pp = create_pen(pxp);
+	gh.DrawPath(pp, &path);
 
-		delete pp;
-	}
+	delete pp;
 }
 
 void _gdi_draw_ellipse(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const xrect_t* prt)
@@ -1021,30 +862,6 @@ void _gdi_draw_ellipse(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, con
 	gh.SetPageUnit(UnitPixel);
 	gh.SetSmoothingMode(SmoothingModeAntiAlias);
 
-	if (pxb && (pxb->shadow.offx || pxb->shadow.offy))
-	{
-		xcolor_t xc_near, xc_far;
-		parse_xcolor(&xc_near, pxb->color);
-		memcpy((void*)&xc_far, (void*)&xc_near, sizeof(xcolor_t));
-		lighten_xcolor(&xc_far, -10);
-
-		LinearGradientBrush brush(Rect(pt[0].x + pxb->shadow.offx, pt[0].y + pxb->shadow.offy, pt[1].x - pt[0].x, pt[1].y - pt[0].y), Color(255, xc_near.r, xc_near.g, xc_near.b), Color(255, xc_far.r, xc_far.g, xc_far.b), LinearGradientModeForwardDiagonal);
-
-		gh.FillEllipse(&brush, Rect(pt[0].x + pxb->shadow.offx, pt[0].y + pxb->shadow.offy, pt[1].x - pt[0].x, pt[1].y - pt[0].y));
-	}
-
-	if (pxp && (pxp->adorn.feed || pxp->adorn.size))
-	{
-		xcolor_t xc_gray;
-
-		parse_xcolor(&xc_gray, pxp->color);
-		lighten_xcolor(&xc_gray, -10);
-
-		Pen pen(Color(xc_gray.r, xc_gray.g, xc_gray.b), (REAL)pxp->adorn.size);
-
-		gh.DrawEllipse(&pen, Rect(pt[0].x + pxp->adorn.feed, pt[0].y + pxp->adorn.feed, pt[1].x - pt[0].x, pt[1].y - pt[0].y));
-	}
-
 	if (!is_null_xbrush(pxb))
 	{
 		Brush* pb = (Brush*)create_brush(pxb, prt, NULL);
@@ -1053,13 +870,10 @@ void _gdi_draw_ellipse(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, con
 		delete pb;
 	}
 
-	if (!is_null_xpen(pxp))
-	{
-		Pen* pp = (Pen*)create_pen(pxp);
-		gh.DrawEllipse(pp, Rect(pt[0].x, pt[0].y, pt[1].x - pt[0].x, pt[1].y - pt[0].y));
+	Pen* pp = (Pen*)create_pen(pxp);
+	gh.DrawEllipse(pp, Rect(pt[0].x, pt[0].y, pt[1].x - pt[0].x, pt[1].y - pt[0].y));
 
-		delete pp;
-	}
+	delete pp;
 }
 
 void _gdi_draw_pie(visual_t rdc, const xpen_t* pxp, const xbrush_t*pxb, const xrect_t* prt, double fang, double tang)
@@ -1096,31 +910,6 @@ void _gdi_draw_pie(visual_t rdc, const xpen_t* pxp, const xbrush_t*pxb, const xr
 	gh.SetPageUnit(UnitPixel);
 	gh.SetSmoothingMode(SmoothingModeHighQuality);
 
-	if (pxb && (pxb->shadow.offx || pxb->shadow.offy))
-	{
-		xcolor_t xc_near, xc_far;
-		parse_xcolor(&xc_near, pxb->color);
-		memcpy((void*)&xc_far, (void*)&xc_near, sizeof(xcolor_t));
-		lighten_xcolor(&xc_far, -10);
-
-		LinearGradientBrush brush(Rect(pt[0].x + pxb->shadow.offx, pt[0].y + pxb->shadow.offy, pt[1].x - pt[0].x, pt[1].y - pt[0].y), Color(255, xc_near.r, xc_near.g, xc_near.b), Color(255, xc_far.r, xc_far.g, xc_far.b), LinearGradientModeForwardDiagonal);
-
-		gh.FillPie(&brush, Rect(pt[0].x + pxb->shadow.offx, pt[0].y + pxb->shadow.offy, pt[1].x - pt[0].x, pt[1].y - pt[0].y), fdeg, tdeg);
-	}
-
-	if (pxp && (pxp->adorn.feed || pxp->adorn.size))
-	{
-		xcolor_t xc_gray;
-
-		parse_xcolor(&xc_gray, pxp->color);
-		lighten_xcolor(&xc_gray, -10);
-
-		Pen pen(Color(xc_gray.r, xc_gray.g, xc_gray.b), (REAL)pxp->adorn.size);
-
-		gh.SetCompositingQuality(CompositingQualityGammaCorrected);
-		gh.DrawPie(&pen, Rect(pt[0].x + pxp->adorn.feed, pt[0].y + pxp->adorn.feed, pt[1].x - pt[0].x, pt[1].y - pt[0].y), fdeg, tdeg);
-	}
-
 	if (!is_null_xbrush(pxb))
 	{
 		GraphicsPath gp;
@@ -1134,15 +923,12 @@ void _gdi_draw_pie(visual_t rdc, const xpen_t* pxp, const xbrush_t*pxb, const xr
 		delete pb;
 	}
 
-	if (!is_null_xpen(pxp))
-	{
-		Pen* pp = create_pen(pxp);
+	Pen* pp = create_pen(pxp);
 
-		gh.SetCompositingQuality(CompositingQualityGammaCorrected);
-		gh.DrawPie(pp, rf, fdeg, tdeg);
+	gh.SetCompositingQuality(CompositingQualityGammaCorrected);
+	gh.DrawPie(pp, rf, fdeg, tdeg);
 
-		delete pp;
-	}
+	delete pp;
 }
 
 void _gdi_draw_polygon(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const xpoint_t* ppt, int n)
@@ -1182,61 +968,6 @@ void _gdi_draw_polygon(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, con
 	gh.SetPageUnit(UnitPixel);
 	gh.SetSmoothingMode(SmoothingModeAntiAlias);
 
-	if (pxb && (pxb->shadow.offx || pxb->shadow.offy))
-	{
-		GraphicsPath* shadow = path.Clone();
-
-		Region region(&path);
-		gh.ExcludeClip(&region);
-
-		Matrix M;
-		M.Translate(pxb->shadow.offx, pxb->shadow.offy);
-
-		shadow->Transform(&M);
-
-		xcolor_t xc_near, xc_far;
-		parse_xcolor(&xc_near, pxb->color);
-		memcpy((void*)&xc_far, (void*)&xc_near, sizeof(xcolor_t));
-		lighten_xcolor(&xc_far, -10);
-
-		PathGradientBrush brush(shadow);
-		Color clr[3] = { Color(0, 0, 0, 0), Color(255, xc_near.r, xc_near.g, xc_near.b), Color(255, xc_far.r, xc_far.g, xc_far.b) };
-		REAL pos[3] = { 0.0F, 0.1F, 1.0F };
-		brush.SetInterpolationColors(clr, pos, 3);
-
-		gh.FillPath(&brush, shadow);
-
-		gh.ResetClip();
-
-		delete shadow;
-	}
-
-	if (pxp && (pxp->adorn.feed || pxp->adorn.size))
-	{
-		GraphicsPath* adron = path.Clone();
-
-		Region region(&path);
-		gh.ExcludeClip(&region);
-
-		Matrix M;
-		M.Translate(pxp->adorn.feed, pxp->adorn.feed);
-
-		adron->Transform(&M);
-
-		xcolor_t xc_gray;
-
-		parse_xcolor(&xc_gray, pxp->color);
-		lighten_xcolor(&xc_gray, -10);
-
-		Pen pen(Color(xc_gray.r, xc_gray.g, xc_gray.b), (REAL)pxp->adorn.size);
-
-		gh.DrawPath(&pen, adron);
-
-		gh.ResetClip();
-
-		delete adron;
-	}
-
 	if (!is_null_xbrush(pxb))
 	{
 		Brush* pb = create_brush(pxb, NULL, &path);
@@ -1245,13 +976,10 @@ void _gdi_draw_polygon(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, con
 		delete pb;
 	}
 
-	if (!is_null_xpen(pxp))
-	{
-		Pen* pp = create_pen(pxp);
-		gh.DrawPath(pp, &path);
+	Pen* pp = create_pen(pxp);
+	gh.DrawPath(pp, &path);
 
-		delete pp;
-	}
+	delete pp;
 }
 
 void _gdi_draw_path(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const tchar_t* aa, const xpoint_t* pa, int pn)
@@ -1269,61 +997,6 @@ void _gdi_draw_path(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const 
 	gh.SetPageUnit(UnitPixel);
 	gh.SetSmoothingMode(SmoothingModeAntiAlias);
 
-	if (pxb && (pxb->shadow.offx || pxb->shadow.offy))
-	{
-		GraphicsPath* shadow = path->Clone();
-
-		Region region(path);
-		gh.ExcludeClip(&region);
-
-		Matrix M;
-		M.Translate(pxb->shadow.offx, pxb->shadow.offy);
-
-		shadow->Transform(&M);
-
-		xcolor_t xc_near, xc_far;
-		parse_xcolor(&xc_near, pxb->color);
-		memcpy((void*)&xc_far, (void*)&xc_near, sizeof(xcolor_t));
-		lighten_xcolor(&xc_far, -10);
-
-		PathGradientBrush brush(shadow);
-		Color clr[3] = { Color(0, 0, 0, 0), Color(255, xc_near.r, xc_near.g, xc_near.b), Color(255, xc_far.r, xc_far.g, xc_far.b) };
-		REAL pos[3] = { 0.0F, 0.1F, 1.0F };
-		brush.SetInterpolationColors(clr, pos, 3);
-
-		gh.FillPath(&brush, shadow);
-
-		gh.ResetClip();
-
-		delete shadow;
-	}
-
-	if (pxp && (pxp->adorn.feed || pxp->adorn.size))
-	{
-		GraphicsPath* adron = path->Clone();
-
-		Region region(path);
-		gh.ExcludeClip(&region);
-
-		Matrix M;
-		M.Translate(pxp->adorn.feed, pxp->adorn.feed);
-
-		adron->Transform(&M);
-
-		xcolor_t xc_gray;
-
-		parse_xcolor(&xc_gray, pxp->color);
-		lighten_xcolor(&xc_gray, -10);
-
-		Pen pen(Color(xc_gray.r, xc_gray.g, xc_gray.b), (REAL)pxp->adorn.size);
-
-		gh.DrawPath(&pen, adron);
-
-		gh.ResetClip();
-
-		delete adron;
-	}
-
 	if (!is_null_xbrush(pxb))
 	{
 		Brush* pb = create_brush(pxb, NULL, path);
@@ -1332,14 +1005,10 @@ void _gdi_draw_path(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const 
 		delete pb;
 	}
 
-	if (!is_null_xpen(pxp))
-	{
-		Pen* pp = create_pen(pxp);
-		gh.DrawPath(pp, path);
+	Pen* pp = create_pen(pxp);
+	gh.DrawPath(pp, path);
 
-		delete pp;
-	}
-
+	delete pp;
 	delete path;
 }
 
@@ -1348,13 +1017,13 @@ void _gdi_draw_text(visual_t rdc,const xfont_t* pxf,const xface_t* pxa,const xre
 	win32_context_t* ctx = (win32_context_t*)rdc;
 	HDC hDC = (HDC)(ctx->context);
 
+	if (len < 0) len = xslen(txt);
+	if(!len) return;
+
 	Font* pf = create_font(pxf);
-
 	StringFormat* ps = create_face(pxa);
-
 	xcolor_t text_color = {0};
 	parse_xcolor(&text_color,pxf->color);
-
 	Brush* pb = new SolidBrush(Color(text_color.r,text_color.g,text_color.b));
 
 	POINT pt[2];
@@ -1370,10 +1039,6 @@ void _gdi_draw_text(visual_t rdc,const xfont_t* pxf,const xface_t* pxa,const xre
 	Gdiplus::Graphics gh(hDC);
 
 	gh.SetPageUnit(UnitPixel);
-
-	if (len < 0 && txt)
-		len = xslen(txt);
-
 	gh.DrawString(txt,len,pf,rf,ps,pb);
 
 	delete pb;
@@ -1386,194 +1051,49 @@ void _gdi_text_out(visual_t rdc, const xfont_t* pxf, const xpoint_t* ppt, const 
 	win32_context_t* ctx = (win32_context_t*)rdc;
 	HDC hDC = (HDC)(ctx->context);
 
-	HFONT hFont, orgFont;
-	COLORREF clr, orgClr;
-	int fs;
-	LOGFONT lf;
-	xcolor_t xc;
-
-	CopyMemory((void*)&lf, (void*)&lf_gdiplus, sizeof(LOGFONT));
-
-	fs = xstol(pxf->size);
-
-	parse_xcolor(&xc, pxf->color);
-
-	lf.lfHeight = -MulDiv(fs, GetDeviceCaps(hDC, LOGPIXELSY), 72);
-	lf.lfWeight = xstol(pxf->weight);
-
-	if (xscmp(pxf->style, GDI_ATTR_FONT_STYLE_ITALIC) == 0)
-	{
-		lf.lfItalic = 1;
-	}
-	
-	if (xscmp(pxf->decorate, GDI_ATTR_FONT_DECORATE_UNDERLINE) == 0)
-	{
-		lf.lfUnderline = 1;
-	}
-	else if (xscmp(pxf->decorate, GDI_ATTR_FONT_DECORATE_STRIKOUT) == 0)
-	{
-		lf.lfStrikeOut = 1;
-	}
-
-	if (!is_null(pxf->family))
-	{
-		xscpy(lf.lfFaceName, pxf->family);
-	}
-
-	hFont = CreateFontIndirect(&lf);
-
-	orgFont = (HFONT)SelectObject(hDC, hFont);
-
-	if (len < 0 && txt)
-		len = xslen(txt);
-
-	clr = RGB(xc.r, xc.g, xc.b);
-	orgClr = SetTextColor(hDC, clr);
-
-	TextOut(hDC, ppt->x, ppt->y, txt, len);
-
-	SetTextColor(hDC, orgClr);
-	hFont = (HFONT)SelectObject(hDC, orgFont);
-	DeleteObject(hFont);
-}
-
-void _gdi_text_rect(visual_t rdc, const xfont_t* pxf, const xface_t* pxa, const tchar_t* txt, int len, xrect_t* pxr)
-{
-	win32_context_t* ctx = (win32_context_t*)rdc;
-
-	if (len < 0) len = (txt) ? xslen(txt) : 0;
+	if (len < 0) len = xslen(txt);
 	if(!len) return;
 
-	BOOL bRef = 0;
-	HDC hDC;
+	Font* pf = create_font(pxf);
+	xcolor_t text_color = {0};
+	parse_xcolor(&text_color,pxf->color);
+	Brush* pb = new SolidBrush(Color(text_color.r,text_color.g,text_color.b));
 
-	if (!rdc)
-	{
-		bRef = 1;
-		hDC = GetDC(NULL);
-	}
-	else
-	{
-		hDC = (HDC)(ctx->context);
-	}
+	POINT pt;
+	pt.x = ppt->x;
+	pt.y = ppt->y;
 
-	POINT pt[2];
-	pt[0].x = pxr->x;
-	pt[0].y = pxr->y;
-	pt[1].x = pxr->x + pxr->w;
-	pt[1].y = pxr->y + pxr->h;
-
-	DPtoLP(hDC, pt, 2);
-
-	RectF rf((REAL)pt[0].x, (REAL)pt[0].y, (REAL)(pt[1].x - pt[0].x), (REAL)(pt[1].y - pt[0].y));
+	DPtoLP(hDC, &pt, 1);
 
 	Gdiplus::Graphics gh(hDC);
 
 	gh.SetPageUnit(UnitPixel);
 
-	Font* pf = create_font(pxf);
-	StringFormat* ps = create_face(pxa);
+	gh.DrawString(txt, len, pf, PointF(pt.x, pt.y), pb);
 
-	RectF rfOut;
-	gh.MeasureString((wchar_t*)txt, len, pf, rf, ps, &rfOut);
-
-	/*FontFamily ff;
-	GraphicsPath path;
-
-	pf->GetFamily(&ff);
-
-	path.AddString(txt, len, &ff, pf->GetStyle(), pf->GetSize(), PointF(0, 0), ps);
-
-	path.GetBounds(&rfOut);
-	*/
-
-	pt[0].x = (int)(rfOut.GetLeft());
-	pt[0].y = (int)(rfOut.GetTop());
-	pt[1].x = (int)(rfOut.GetRight());
-	pt[1].y = (int)(rfOut.GetBottom());
-
-	LPtoDP(hDC, pt, 2);
-
-	int width = pt[1].x - pt[0].x;
-	int height = pt[1].y - pt[0].y;
-
+	delete pb;
 	delete pf;
-	delete ps;
-
-	if (bRef)
-		ReleaseDC(NULL, hDC);
-
-	if(pxr->w < width) pxr->w = width;
-	if(pxr->h < height) pxr->h = height;
 }
 
 void _gdi_text_size(visual_t rdc, const xfont_t* pxf, const tchar_t* txt, int len, xsize_t* pxs)
 {
 	win32_context_t* ctx = (win32_context_t*)rdc;
+	HDC hDC = (HDC)(ctx->context);
 
-	if (len < 0) len = (txt) ? xslen(txt) : 0;
-	if(!len)
-	{
-		pxs->w = pxs->h = 0;
-		return;
-	}
+	if (len < 0) len = xslen(txt);
+	if(!len) return;
 
-	BOOL bRef = 0;
-	HDC hDC;
+	Gdiplus::Graphics gh(hDC);
+	gh.SetPageUnit(UnitPixel);
 
-	if (!rdc)
-	{
-		bRef = 1;
-		hDC = GetDC(NULL);
-	}
-	else
-	{
-		hDC = (HDC)(ctx->context);
-	}
+	RectF rf;
+	Font* pf = create_font(pxf);
+	gh.MeasureString(txt, len, pf, PointF(0,0), &rf);
 
-	LOGFONT lf;
-	HFONT hFont, orgFont;
-	SIZE si;
-	int fs;
-
-	CopyMemory((void*)&lf, (void*)&lf_gdiplus, sizeof(LOGFONT));
-
-	fs = xstol(pxf->size);
-
-	lf.lfHeight = -MulDiv(fs, GetDeviceCaps(hDC, LOGPIXELSY), 72);
-	lf.lfWeight = xstol(pxf->weight);
-
-	if (xscmp(pxf->style, GDI_ATTR_FONT_STYLE_ITALIC) == 0)
-	{
-		lf.lfItalic = 1;
-	}
+	delete pf;
 	
-	if (xscmp(pxf->decorate, GDI_ATTR_FONT_DECORATE_UNDERLINE) == 0)
-	{
-		lf.lfUnderline = 1;
-	}
-	else if (xscmp(pxf->decorate, GDI_ATTR_FONT_DECORATE_STRIKOUT) == 0)
-	{
-		lf.lfStrikeOut = 1;
-	}
-
-	if (!is_null(pxf->family))
-	{
-		xscpy(lf.lfFaceName, pxf->family);
-	}
-
-	hFont = CreateFontIndirect(&lf);
-	orgFont = (HFONT)SelectObject(hDC, hFont);
-	GetTextExtentPoint32(hDC, txt, len, &si);
-
-	hFont = (HFONT)SelectObject(hDC, orgFont);
-	DeleteObject(hFont);
-
-	if (bRef)
-		ReleaseDC(NULL, hDC);
-
-	pxs->w = si.cx;
-	pxs->h = si.cy;
+	pxs->w = (int)(rf.GetRight()) - (int)(rf.GetLeft());
+	pxs->h = (int)(rf.GetBottom()) - (int)(rf.GetTop());
 }
 
 void _gdi_font_size(visual_t rdc, const xfont_t* pxf, xsize_t* pxs)
@@ -1598,7 +1118,10 @@ void _gdi_font_size(visual_t rdc, const xfont_t* pxf, xsize_t* pxs)
 	int fs;
 	TEXTMETRIC tm = { 0 };
 
-	CopyMemory((void*)&lf, (void*)&lf_gdiplus, sizeof(LOGFONT));
+	NONCLIENTMETRICS ncm = { 0 };
+	ncm.cbSize = sizeof(ncm);
+	SystemParametersInfo(SPI_GETNONCLIENTMETRICS, sizeof(NONCLIENTMETRICS), (PVOID)&ncm, 0);
+	CopyMemory((void*)&lf, (void*)&ncm.lfCaptionFont, sizeof(LOGFONT));
 
 	fs = xstol(pxf->size);
 
@@ -1639,6 +1162,8 @@ void _gdi_font_size(visual_t rdc, const xfont_t* pxf, xsize_t* pxs)
 	pxs->h = tm.tmHeight;
 	pxs->w = tm.tmMaxCharWidth;
 }
+
+/**************************************************************************************** */
 
 void _gdi_draw_image(visual_t rdc,bitmap_t bmp,const xcolor_t* clr,const xrect_t* prt)
 {
@@ -1811,5 +1336,45 @@ void _gdi_inclip_rect(visual_t rdc, const xrect_t* pxr)
 	gh.SetClip(Gdiplus::Rect(pxr->x, pxr->y, pxr->w, pxr->h));
 }
 
+/************************************************************************************ */
+
+fontset_t _gdi_create_fontset(const xfont_t* pxf)
+{
+	win32_fontset_t* fst;
+
+	Font* gdi_font = create_font(pxf);
+
+	fst = (win32_fontset_t*)xmem_alloc_handle(sizeof(win32_fontset_t));
+	fst->head.tag = _HANDLE_FONTSET;
+	fst->font_set = (void*)gdi_font;
+
+	return (fontset_t)&(fst->head);
+}
+
+void _gdi_destroy_fontset(fontset_t ft)
+{
+	win32_fontset_t* fst = TypePtrFromHead(win32_fontset_t, ft);
+
+	if(fst && fst->font_set) delete (Font*)(fst->font_set);
+
+	if(fst) xmem_free_handle(&(fst->head));
+}
+
+void _gdi_word_size(fontset_t ft, const tchar_t* pch, int chs, xsize_t* pxs)
+{
+	win32_fontset_t* fst = TypePtrFromHead(win32_fontset_t, ft);
+	HDC hDC;
+	RectF rf;
+
+	hDC = GetDC(NULL);
+	Gdiplus::Graphics gh(hDC);
+
+	gh.MeasureString(pch, chs, (Font*)fst->font_set, PointF(0,0), &rf);
+	
+	pxs->w = (int)(rf.GetRight()) - (int)(rf.GetLeft());
+	pxs->h = (int)(rf.GetBottom()) - (int)(rf.GetTop());
+
+	ReleaseDC(NULL, hDC);
+}
 
 #endif //XDU_SUPPORT_CONTEXT_GRAPHICPLUS

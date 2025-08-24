@@ -105,7 +105,6 @@ void _editbox_auto_resize(widget_t widget)
 		xs.h = xr.h;
 
 		widget_size(widget, &xs);
-		widget_paint(widget);
 	}
 }
 
@@ -134,7 +133,7 @@ int hand_editbox_create(widget_t widget, void* data)
 	default_textor_xface(&ptd->xa);
 
 	ptd->textor.widget = widget;
-	ptd->textor.cdc = widget_client_ctx(widget);
+	ptd->textor.cdc = widget_client_context(widget);
 	ptd->textor.data = (void*)string_alloc();
 	ptd->textor.pf_scan_text = (PF_SCAN_TEXT)scan_var_text;
 	ptd->textor.pf_get_text = _editbox_get_text;
@@ -160,7 +159,7 @@ void hand_editbox_destroy(widget_t widget)
 
 	hand_textor_clean(&ptd->textor);
 
-	widget_release_ctx(widget, ptd->textor.cdc);
+	widget_release_context(widget, ptd->textor.cdc);
 	string_free((string_t)ptd->textor.data);
 
 	xmem_free(ptd);
@@ -496,7 +495,7 @@ void hand_editbox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	xcolor_t xc;
 	drawing_interface ifv = {0};
 
-	widget_hand_paint(widget, dc);
+	widget_hand_paint(widget, dc, NULL);
 	
 	hand_textor_paint(&ptd->textor, dc, pxr);
 
@@ -547,7 +546,7 @@ widget_t editbox_create(widget_t widget, dword_t style, const xrect_t* pxr)
 		EVENT_ON_XFONT(hand_editbox_xfont)
 		EVENT_ON_XFACE(hand_editbox_xface)
 
-		EVENT_ON_NC_IMPLEMENT
+		
 
 	EVENT_END_DISPATH
 
@@ -697,7 +696,6 @@ widget_t editbox_create_keybox(widget_t widget, dword_t style, const xrect_t* px
 
 	widget_size(keybox, RECTSIZE(&xr));
 	widget_take(keybox, (int)WS_TAKE_TOP);
-	widget_paint(keybox);
 	widget_show(keybox, WS_SHOW_NORMAL);
 
 	widget_set_user_prop(editbox, XDCKEYBOX, (vword_t)keybox);

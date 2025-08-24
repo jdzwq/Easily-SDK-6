@@ -52,6 +52,8 @@ visual_t _create_display_context(widget_t wt)
 	ctx->head.tag = _VISUAL_DISPLAY;
 
 	NSGraphicsContext *graphicsContext = [NSGraphicsContext currentContext];
+	ctx->bitmap = NULL;
+	ctx->colors = NULL;
     ctx->context = [graphicsContext CGContext];
 	ctx->client = [(NSView*)(pwidg->self) frame];
 	ctx->type = CONTEXT_SCREEN;

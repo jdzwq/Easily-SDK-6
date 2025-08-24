@@ -40,7 +40,7 @@ OBJS = $(patsubsti %.c,%.obj,$(COBS))
 all : $(OBJS)
 	del $(subst /,\, $@)
 	$(LK) $(LFLAGS) @<<
-	$(OBJS)
+$(OBJS)
 <<
 	del $(subst /,\, $(OBJ_PATH)/*.obj)
 
@@ -63,6 +63,7 @@ uninstall:
 clean:
 	del $(subst /,\, $(TARGET))
 	del $(subst /,\, $(OBJ_PATH)/*.obj)
+	del $(subst /,\, $(OBJ_PATH)/*.asm)
 
 #-----------------------------------------------------------------------------
 # end microsoft NMAKE file

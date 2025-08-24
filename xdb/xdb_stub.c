@@ -158,11 +158,11 @@ void parse_rowset_from_line(link_t_ptr ptr, string_t vs)
 			}
 			else
 			{
-				esc_len = csv_char_decode(token - pos, pos, NULL, MAX_LONG);
+				csv_token_decode(token - pos, pos, NULL, &esc_len);
 				if (esc_len != pos)
 				{
 					sz_esc = xsalloc(esc_len + 1);
-					csv_char_decode(token - pos, pos, sz_esc, esc_len);
+					csv_token_decode(token - pos, pos, sz_esc, &esc_len);
 
 					attach_cell_text(rlk, clk, sz_esc);
 				}

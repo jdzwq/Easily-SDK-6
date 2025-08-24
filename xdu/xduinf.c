@@ -48,15 +48,10 @@ void xdu_impl_shell(if_shell_t* pif)
 	pif->pf_shell_get_docpath = _shell_get_docpath;
 	pif->pf_shell_get_apppath = _shell_get_apppath;
 	pif->pf_shell_get_tmppath = _shell_get_tmppath;
-}
 
-#ifdef XDU_SUPPORT_SHELL_DIALOG
-void xdu_impl_shell_dialog(if_shell_t* pif)
-{
 	pif->pf_shell_get_filename = _shell_get_filename;
 	pif->pf_shell_get_pathname = _shell_get_pathname;
 }
-#endif
 #endif /*XDU_SUPPORT_SHELL*/
 
 
@@ -133,7 +128,6 @@ void xdu_impl_context_graphic(if_context_t* pif)
 	pif->pf_gdi_draw_round = _gdi_draw_round;
 	pif->pf_gdi_draw_text = _gdi_draw_text;
 	pif->pf_gdi_text_out = _gdi_text_out;
-	pif->pf_gdi_text_rect = _gdi_text_rect;
 	pif->pf_gdi_text_size = _gdi_text_size;
 	pif->pf_gdi_font_size = _gdi_font_size;
 	pif->pf_gdi_gradient_rect = _gdi_gradient_rect;
@@ -141,6 +135,11 @@ void xdu_impl_context_graphic(if_context_t* pif)
 	pif->pf_gdi_invert_rect = _gdi_invert_rect;
 	pif->pf_gdi_exclude_rect = _gdi_exclude_rect;
 	pif->pf_gdi_inclip_rect = _gdi_inclip_rect;
+
+	pif->pf_gdi_create_fontset = _gdi_create_fontset;
+	pif->pf_gdi_destroy_fontset = _gdi_destroy_fontset;
+	pif->pf_gdi_word_size = _gdi_word_size;
+	
 #ifdef XDU_SUPPORT_CONTEXT_BITMAP
 	pif->pf_gdi_draw_bitmap = _gdi_draw_bitmap;
 	pif->pf_gdi_draw_image = _gdi_draw_image;
@@ -185,9 +184,9 @@ void xdu_impl_widget(if_widget_t* pif)
 	pif->pf_widget_del_user_prop = _widget_del_user_prop;
 	pif->pf_widget_get_user_result = _widget_get_user_result;
 	pif->pf_widget_set_user_result = _widget_set_user_result;
-	pif->pf_widget_client_ctx = _widget_client_ctx;
-	pif->pf_widget_window_ctx = _widget_window_ctx;
-	pif->pf_widget_release_ctx = _widget_release_ctx;
+	pif->pf_widget_client_context = _widget_client_context;
+	pif->pf_widget_window_context = _widget_window_context;
+	pif->pf_widget_release_context = _widget_release_context;
 	pif->pf_widget_center_window = _widget_center_window;
 	pif->pf_widget_screen_to_client = _widget_screen_to_client;
 	pif->pf_widget_client_to_screen = _widget_client_to_screen;
@@ -204,7 +203,6 @@ void xdu_impl_widget(if_widget_t* pif)
 	pif->pf_widget_take = _widget_take;
 	pif->pf_widget_show = _widget_show;
 	pif->pf_widget_layout = _widget_layout;
-	pif->pf_widget_paint = _widget_paint;
 	pif->pf_widget_erase = _widget_erase;
 	pif->pf_widget_set_capture = _widget_set_capture;
 	pif->pf_widget_set_cursor = _widget_set_cursor;
@@ -227,8 +225,6 @@ void xdu_impl_widget(if_widget_t* pif)
 
 	pif->pf_widget_set_timer = _widget_set_timer;
 	pif->pf_widget_kill_timer = _widget_kill_timer;
-	pif->pf_widget_get_menu_rect = _widget_get_menu_rect;
-	pif->pf_widget_get_border = _widget_get_border;
 
 	pif->pf_widget_enum_child = _widget_enum_child;
 
@@ -254,10 +250,6 @@ void xdu_impl_widget(if_widget_t* pif)
 	pif->pf_widget_get_color_mode = _widget_get_color_mode;
 	pif->pf_widget_set_diaph = _widget_set_diaph;
 	pif->pf_widget_get_diaph = _widget_get_diaph;
-	pif->pf_widget_set_point = _widget_set_point;
-	pif->pf_widget_get_point = _widget_get_point;
-	pif->pf_widget_set_size = _widget_set_size;
-	pif->pf_widget_get_size = _widget_get_size;
 
 	pif->pf_widget_do_main = _widget_do_main;
 	pif->pf_widget_do_modal = _widget_do_modal;
@@ -266,8 +258,8 @@ void xdu_impl_widget(if_widget_t* pif)
 	pif->pf_message_position = _message_position;
 	pif->pf_message_quit = _message_quit;
 
-	pif->pf_adjust_widget_size = _adjust_widget_size;
 	pif->pf_calc_widget_border = _calc_widget_border;
+	pif->pf_adjust_widget_size = _adjust_widget_size;
 	pif->pf_get_screen_size = _get_screen_size;
 	pif->pf_get_desktop_size = _get_desktop_size;
 	pif->pf_screen_size_to_pt = _screen_size_to_pt;

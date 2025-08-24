@@ -27,8 +27,9 @@ LICENSE.GPL3 for more details.
 
 #include <oci.h>
 
+#if defined(_OS_WINDOWS)
 #pragma comment(lib,"oci.lib")
-
+#endif
 
 typedef struct _xdb_oci_context{
 	handle_head head;
@@ -1828,11 +1829,11 @@ bool_t STDCALL db_export(xdb_t db, stream_t stream, const tchar_t* sqlstr)
 			if (pdg[i].ind >= 0)
 			{
 				len_buf = xslen((tchar_t*)pdg[i].buf);
-				len_esc = csv_char_encode((tchar_t*)pdg[i].buf, len_buf, NULL, MAX_LONG);
+				csv_token_encode((tchar_t*)pdg[i].buf, len_buf, NULL, &len_esc);
 				if (len_esc != len_buf)
 				{
 					sz_esc = xsalloc(len_esc + 1);
-					csv_char_decode((tchar_t*)pdg[i].buf, len_buf, sz_esc, len_esc);
+					csv_token_encode((tchar_t*)pdg[i].buf, len_buf, sz_esc, &len_esc);
 
 					string_cat(vs, sz_esc, len_esc);
 					xsfree(sz_esc);
@@ -2047,11 +2048,11 @@ bool_t STDCALL db_import(xdb_t db, stream_t stream, const tchar_t* table)
 				tklen++;
 			}
 
-			len_esc = csv_char_decode(token - tklen, tklen, NULL, MAX_LONG);
+			csv_token_decode(token - tklen, tklen, NULL, &len_esc);
 			if (len_esc != tklen)
 			{
 				sz_esc = xsalloc(len_esc + 1);
-				csv_char_decode(token - tklen, tklen, sz_esc, len_esc);
+				csv_token_decode(token - tklen, tklen, sz_esc, &len_esc);
 
 				pdg[i].bin = NULL;
 				pdg[i].len = (len_esc + 1) * sizeof(tchar_t);

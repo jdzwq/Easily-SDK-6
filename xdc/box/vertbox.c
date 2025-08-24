@@ -192,7 +192,19 @@ void hand_vertbox_size(widget_t widget, int code, const xsize_t* prs)
 {
 	vertbox_delta_t* ptd = GETVERTBOXDELTA(widget);
 	
-	widget_erase(widget, NULL);
+	XDK_ASSERT(ptd != NULL);
+
+	switch(code)
+	{
+	case WS_SIZE_FULLSCREEN:
+		break;
+	case WS_SIZE_MAXIMIZED:
+		break;
+	case WS_SIZE_MINIMIZED:
+		break;
+	case WS_SIZE_LAYOUT:
+		break;
+	}
 }
 
 void hand_vertbox_timer(widget_t widget, vword_t tid)
@@ -274,7 +286,7 @@ widget_t vertbox_create(widget_t widget, dword_t style, const xrect_t* pxr)
 
 		EVENT_ON_TIMER(hand_vertbox_timer)
 
-		EVENT_ON_NC_IMPLEMENT
+		
 
 	EVENT_END_DISPATH
 

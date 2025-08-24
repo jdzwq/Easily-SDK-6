@@ -33,6 +33,8 @@ LICENSE.GPL3 for more details.
 extern "C" {
 #endif
 
+EXP_API void default_widget_color_mode(color_mod_t* pclrs);
+
 EXP_API void default_widget_xfont(xfont_t* pxf);
 
 EXP_API void default_widget_xface(xface_t* pxa);

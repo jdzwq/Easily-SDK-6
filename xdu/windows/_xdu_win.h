@@ -27,7 +27,6 @@ LICENSE.GPL3 for more details.
 #ifndef _XDU_WIN_H
 #define _XDU_WIN_H
 
-#define XDU_SUPPORT_SHELL_DIALOG
 #define XDU_SUPPORT_SHELL
 #define XDU_SUPPORT_CLIPBOARD
 //#define XDU_SUPPORT_BLUT
@@ -38,8 +37,8 @@ LICENSE.GPL3 for more details.
 #define XDU_SUPPORT_CONTEXT_GDI
 #define XDU_SUPPORT_CONTEXT
 
-#define XDU_SUPPORT_WIDGET_NC
 #define XDU_SUPPORT_WIDGET
+//#define XDU_SUPPORT_WIDGET_NC
 
 #if defined(WINCE)
 #undef XDU_SUPPORT_CONTEXT_BITMAP_THUMB
@@ -109,26 +108,20 @@ typedef unsigned int	uid_t;
 typedef struct _win32_widget_t{
 	handle_head head;
 
+	uid_t uid;
 	HWND self;
-	HACCEL acl;
-
 	HWND parent;
 	HWND owner;
-
+	HACCEL accel;
+	
 	dword_t style;
-	uid_t uid;
-
+	int mode;
 	int result;
+	int retcode;
 
-	border_t bd;
-	xpoint_t pt;
-	xsize_t st;
-
-	xcolor_t bkg;
-	xcolor_t frg;
-	xcolor_t txt;
-	xcolor_t msk;
-	xcolor_t ico;
+	scroll_t hs;
+	scroll_t vs;
+	color_mod_t clrs;
 }win32_widget_t;
 
 typedef COLORREF	pixel_t;
@@ -156,11 +149,11 @@ typedef struct _win32_bitmap_t{
 }win32_bitmap_t;
 #endif
 
-typedef struct _win32_font_t{
+typedef struct _win32_fontset_t{
 	handle_head head;
 
-	HFONT font;
-}win32_font_t;
+    void* font_set;
+}win32_fontset_t;
 
 #ifdef XDU_SUPPORT_CONTEXT_OPENGL
 typedef struct _win32_glrc_t{
@@ -189,39 +182,8 @@ typedef struct _win32_glrc_t{
 #ifdef XDU_SUPPORT_WIDGET
 #define WM_EASYMSG_MIN		WM_USER + 10
 #define WM_EASYMSG_MAX		WM_USER  + 100
-
-
-#ifdef XDU_SUPPORT_WIDGET_NC
-/*widget nc hit test*/
-#define HINT_NOWHERE	HTNOWHERE
-#define HINT_CLIENT		HTCLIENT
-#define HINT_MINIMIZE	HTMINBUTTON
-#define HINT_MAXIMIZE	HTMAXBUTTON
-#define HINT_RESTORE	HTSIZE
-#define HINT_CLOSE		HTCLOSE
-#define HINT_TITLE		HTCAPTION
-#define HINT_TOP		HTTOP
-#define HINT_TOPLEFT	HTTOPLEFT
-#define HINT_TOPRIGHT	HTTOPRIGHT
-#define HINT_LEFT		HTLEFT
-#define HINT_RIGHT		HTRIGHT
-#define HINT_BOTTOM		HTBOTTOM
-#define HINT_LEFTBOTTOM	HTBOTTOMLEFT
-#define HINT_RIGHTBOTTOM	HTBOTTOMRIGHT
-#define HINT_BORDER		HTBORDER
-#define HINT_ICON		HTHELP
-#define HINT_MENUBAR	100
-#define HINT_HSCROLL	101
-#define HINT_VSCROLL	102
-#define HINT_PAGEUP		103
-#define HINT_PAGEDOWN	104
-#define HINT_LINEUP		105
-#define HINT_LINEDOWN	106
-#define HINT_LINELEFT	107
-#define HINT_LINERIGHT	108
-#endif
 #endif
 
-#define SYSTEM_FONTNAME     _T("Helvetica")
+#define SYSTEM_FONTNAME     _T("Microsoft YaHei")
 
 #endif //_XDU_WIN_H

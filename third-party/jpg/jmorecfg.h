@@ -228,17 +228,20 @@ typedef unsigned int JDIMENSION;
 
 
 /*
- * On a few systems, type boolean and/or its values FALSE, TRUE may appear
+ * On a few systems, type BOOLE and/or its values FALSE, TRUE may appear
  * in standard header files.  Or you may have conflicts with application-
  * specific header files that you want to include together with these files.
  * Defining HAVE_BOOLEAN before including jpeglib.h should make it work.
  */
 
-#ifndef HAVE_BOOLEAN
-typedef int boolean;
+//#ifndef HAVE_BOOLEAN
+//typedef int BOOLE;
+//#endif
+#ifndef BOOLE
+typedef unsigned char BOOLE;
 #endif
 #ifndef FALSE			/* in case these macros already exist */
-#define FALSE	0		/* values of boolean */
+#define FALSE	0		/* values of BOOLE */
 #endif
 #ifndef TRUE
 #define TRUE	1

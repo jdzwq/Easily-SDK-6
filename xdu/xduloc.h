@@ -49,10 +49,8 @@ LOC_API bool_t	_shell_get_curpath(tchar_t* pathbuf, int pathlen);
 LOC_API bool_t	_shell_get_apppath(tchar_t* pathbuf, int pathlen);
 LOC_API bool_t	_shell_get_docpath(tchar_t* pathbuf, int pathlen);
 LOC_API bool_t	_shell_get_tmppath(tchar_t* pathbuf, int pathlen);
-#ifdef XDU_SUPPORT_SHELL_DIALOG
 LOC_API bool_t	_shell_get_filename(widget_t owner, const tchar_t* defpath, const tchar_t* filter, const tchar_t* defext, bool_t saveit, tchar_t* pathbuf, int pathlen, tchar_t* filebuf, int filelen);
 LOC_API bool_t	_shell_get_pathname(widget_t owner, const tchar_t* defpath, bool_t createit, tchar_t* pathbuf, int pathlen);
-#endif
 #endif /*XDU_SUPPORT_SHELL*/
 /***************************************************************************************************************************/
 #ifdef XDU_SUPPORT_CONTEXT
@@ -115,15 +113,11 @@ LOC_API void _gdi_draw_ellipse(visual_t rdc, const xpen_t* pxp, const xbrush_t*p
 LOC_API void _gdi_draw_pie(visual_t rdc, const xpen_t* pxp, const xbrush_t*pxb, const xrect_t* prt, double arc_from, double arc_to);
 LOC_API void _gdi_draw_text(visual_t rdc, const xfont_t* pxf, const xface_t* pxa, const xrect_t* prt, const tchar_t* txt, int len);
 LOC_API void _gdi_text_out(visual_t rdc, const xfont_t* pxf, const xpoint_t* ppt, const tchar_t* txt, int len);
-LOC_API void _gdi_text_rect(visual_t rdc, const xfont_t* pxf, const xface_t* pxa, const tchar_t* txt, int len, xrect_t* prt);
 LOC_API void _gdi_text_size(visual_t rdc, const xfont_t* pxf, const tchar_t* txt, int len, xsize_t* pxs);
 LOC_API void _gdi_font_size(visual_t rdc, const xfont_t* pxf, xsize_t* pxs);
 #ifdef XDU_SUPPORT_CONTEXT_BITMAP
 LOC_API void _gdi_draw_image(visual_t rdc, bitmap_t bmp, const xcolor_t* clr, const xrect_t* prt);
 LOC_API void _gdi_draw_bitmap(visual_t rdc, bitmap_t bmp, const xpoint_t* ppt);
-#endif
-#ifdef XDU_SUPPORT_CONTEXT_REGION
-LOC_API void _gdi_fill_region(visual_t rdc, const xbrush_t* pxb, res_rgn_t rgn);
 #endif
 LOC_API void _gdi_invert_rect(visual_t rdc, const xrect_t* prt);
 LOC_API void _gdi_gradient_rect(visual_t rdc, const xcolor_t* xc_brim, const xcolor_t* xc_core, const tchar_t* gradient, const xrect_t* prt);
@@ -131,6 +125,14 @@ LOC_API void _gdi_alphablend_rect(visual_t rdc, const xcolor_t* pxc, const xrect
 LOC_API void _gdi_exclude_rect(visual_t rdc, const xrect_t* pxr);
 LOC_API void _gdi_inclip_rect(visual_t rdc, const xrect_t* pxr);
 #endif //XDU_SUPPORT_CONTEXT_GDI
+
+#ifdef XDU_SUPPORT_CONTEXT_OPENGL
+LOC_API res_glc_t	_widget_get_glctx(widget_t wt);
+#endif
+
+LOC_API fontset_t _gdi_create_fontset(const xfont_t* pxf);
+LOC_API void _gdi_destroy_fontset(fontset_t ft);
+LOC_API void _gdi_word_size(fontset_t ft, const tchar_t* pch, int chs, xsize_t* pxs);
 
 #endif /*XDU_SUPPORT_CONTEXT*/
 
@@ -169,9 +171,9 @@ LOC_API void	_widget_create_caret(widget_t wt, int w, int h);
 LOC_API void	_widget_destroy_caret(widget_t wt);
 LOC_API void	_widget_show_caret(widget_t wt, int x, int y);
 
-LOC_API visual_t _widget_client_ctx(widget_t wt);
-LOC_API visual_t _widget_window_ctx(widget_t wt);
-LOC_API void	_widget_release_ctx(widget_t wt, visual_t dc);
+LOC_API visual_t _widget_client_context(widget_t wt);
+LOC_API visual_t _widget_window_context(widget_t wt);
+LOC_API void	_widget_release_context(widget_t wt, visual_t dc);
 LOC_API void	_widget_get_client_rect(widget_t wt, xrect_t* prt);
 LOC_API void	_widget_get_window_rect(widget_t wt, xrect_t* prt);
 LOC_API void	_widget_client_to_screen(widget_t wt, xpoint_t* ppt);
@@ -192,7 +194,6 @@ LOC_API void	_widget_size(widget_t wt, const xsize_t* pxs);
 LOC_API void	_widget_move(widget_t wt, const xpoint_t* ppt);
 LOC_API void	_widget_take(widget_t wt, int zor);
 LOC_API void	_widget_show(widget_t wt, dword_t sw);
-LOC_API void	_widget_paint(widget_t wt);
 LOC_API void	_widget_layout(widget_t wt);
 LOC_API void	_widget_erase(widget_t wt, const xrect_t* prt);
 LOC_API void	_widget_enable(widget_t wt, bool_t b);
@@ -200,14 +201,12 @@ LOC_API void	_widget_active(widget_t wt);
 
 LOC_API void	_widget_set_title(widget_t wt, const tchar_t* token);
 LOC_API int		_widget_get_title(widget_t wt, tchar_t* buf, int max);
-LOC_API void	_widget_get_menu_rect(widget_t wt, xrect_t* pxr);
-LOC_API void	_widget_get_border(widget_t wt, border_t* pbd);
 LOC_API bool_t	_widget_enum_child(widget_t wt, PF_ENUM_WINDOW_PROC pf, vword_t pv);
 
 LOC_API bool_t	_widget_is_maximized(widget_t wt);
 LOC_API bool_t	_widget_is_minimized(widget_t wt);
 
-LOC_API if_subproc_t* _widget_get_subproc(widget_t wt, uid_t sid);
+LOC_API const if_subproc_t* _widget_get_subproc(widget_t wt, uid_t sid);
 LOC_API bool_t	_widget_set_subproc(widget_t wt, uid_t sid, if_subproc_t* sub);
 LOC_API void	_widget_del_subproc(widget_t wt, uid_t sid);
 LOC_API bool_t	_widget_set_subproc_delta(widget_t wt, uid_t sid, vword_t delta);
@@ -235,10 +234,6 @@ LOC_API void	_widget_set_color_mode(widget_t wt, const color_mod_t* pclr);
 LOC_API void	_widget_get_color_mode(widget_t wt, color_mod_t* pclr);
 LOC_API void	_widget_set_diaph(widget_t, float a);
 LOC_API float	_widget_get_diaph(widget_t wt);
-LOC_API void	_widget_set_point(widget_t wt, const xpoint_t* ppt);
-LOC_API void	_widget_get_point(widget_t wt, xpoint_t* ppt);
-LOC_API void	_widget_set_size(widget_t wt, const xsize_t* pst);
-LOC_API void	_widget_get_size(widget_t wt, xsize_t* pst);
 
 LOC_API int		_widget_do_main(widget_t wt);
 LOC_API int		_widget_do_modal(widget_t wt);
@@ -247,16 +242,12 @@ LOC_API void	_widget_do_track(widget_t wt);
 LOC_API void	_message_position(xpoint_t* pxp);
 LOC_API void	_message_quit(int code);
 
-LOC_API void	_adjust_widget_size(dword_t ws, xsize_t* pxs);
-LOC_API void	_calc_widget_border(dword_t ws, border_t* pbd);
+LOC_API void	_adjust_widget_size(dword_t wstyle, xsize_t* pxs);
+LOC_API void	_calc_widget_border(dword_t wstyle, border_t* pbd);
 LOC_API void	_get_screen_size(xsize_t* pxs);
 LOC_API void	_get_desktop_size(xsize_t* pxs);
 LOC_API void	_screen_size_to_pt(xsize_t* pls);
 LOC_API void	_screen_size_to_mm(xsize_t* pxs);
-
-#ifdef XDU_SUPPORT_CONTEXT_OPENGL
-LOC_API res_glc_t	_widget_get_glctx(widget_t wt);
-#endif
 
 #endif /*XDU_SUPPORT_WIDGET*/
 

@@ -157,7 +157,6 @@ void hand_properdlg_size(widget_t widget, int code, const xsize_t* prs)
 	{
 		widget_move(ctrl, RECTPOINT(&xr));
 		widget_size(ctrl, RECTSIZE(&xr));
-		widget_paint(ctrl);
 	}
 
 	widget_get_client_rect(widget, &xr);
@@ -177,7 +176,6 @@ void hand_properdlg_size(widget_t widget, int code, const xsize_t* prs)
 	{
 		widget_move(ctrl, RECTPOINT(&xr));
 		widget_size(ctrl, RECTSIZE(&xr));
-		widget_paint(ctrl);
 	}
 
 	widget_erase(widget, NULL);
@@ -249,7 +247,7 @@ widget_t properdlg_create(const tchar_t* title, link_t_ptr ptr, widget_t owner)
 
 		EVENT_ON_MENU_COMMAND(hand_properdlg_menu_command)
 
-		EVENT_ON_NC_IMPLEMENT
+		
 
 	EVENT_END_DISPATH
 
@@ -260,7 +258,6 @@ widget_t properdlg_create(const tchar_t* title, link_t_ptr ptr, widget_t owner)
 
 	properdlg_popup_size(dlg, RECTSIZE(&xr));
 	widget_size(dlg, RECTSIZE(&xr));
-	widget_paint(dlg);
 	widget_center_window(dlg, owner);
 
 	if (widget_is_valid(owner))

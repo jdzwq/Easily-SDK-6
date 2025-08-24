@@ -95,7 +95,7 @@ int calc_calendar_hint(link_t_ptr ptr, const xpoint_t* ppt, link_t_ptr* pilk)
 	ic = iw / 2;
 
 	xr.fx = 3 * iw;
-	xr.fy = th / 2;
+	xr.fy = th / 2 - CALENDAR_BAR_SPAN;
 	xr.fw = ic;
 	xr.fh = CALENDAR_BAR_SPAN;
 

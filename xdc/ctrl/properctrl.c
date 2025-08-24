@@ -77,7 +77,7 @@ static void _properctrl_entity_text_rect(widget_t widget, link_t_ptr ent, xrect_
 static void _properctrl_reset_page(widget_t widget)
 {
 	proper_delta_t* ptd = GETPROPERDELTA(widget);
-	int pw, ph, fw, fh, lw, lh;
+	int pw, ph, vw, vh, lw, lh;
 	xrect_t xr;
 	xsize_t xs;
 
@@ -85,22 +85,42 @@ static void _properctrl_reset_page(widget_t widget)
 	pw = xr.w;
 	ph = xr.h;
 
-	xs.fw = calc_proper_width(ptd->proper);
-	xs.fh = calc_proper_height(ptd->proper);
+	if (ptd->proper)
+	{
+		widget_size_to_mm(widget, RECTSIZE(&xr));
+		set_proper_width(ptd->proper, xr.fw);
+		set_proper_height(ptd->proper, xr.fh);
 
-	widget_size_to_pt(widget, &xs);
-	fw = xs.w;
-	if (fw < pw)
-		fw = pw;
-	fh = xs.h;
+		xs.fw = calc_proper_width(ptd->proper);
+		xs.fh = calc_proper_height(ptd->proper);
 
-	xs.fw = get_proper_item_height(ptd->proper);
-	xs.fh = get_proper_item_height(ptd->proper);
+		widget_size_to_pt(widget, &xs);
+		vw = xs.w;
+		if (vw < pw)
+			vw = pw;
+		vh = xs.h;
+	}
+	else
+	{
+		vw = pw;
+		vh = ph;
+	}
+
+	if (ptd->proper)
+	{
+		xs.fw = get_proper_item_height(ptd->proper);
+		xs.fh = get_proper_item_height(ptd->proper);
+	}
+	else
+	{
+		xs.fw = 50.f;
+		xs.fh = 5.0f;
+	}
 	widget_size_to_pt(widget, &xs);
 	lw = xs.w;
 	lh = xs.h;
 
-	widget_reset_paging(widget, pw, ph, fw, fh, lw, lh);
+	widget_reset_paging(widget, pw, ph, vw, vh, lw, lh);
 
 	widget_reset_scroll(widget, 1);
 
@@ -176,7 +196,7 @@ void noti_proper_end_size(widget_t widget, int x, int y)
 	iw = get_proper_icon_span(ptd->proper);
 
 	xs.w = x - ptd->org_x;
-	widget_size_to_tm(widget, &xs);
+	widget_size_to_mm(widget, &xs);
 
 	ew += xs.fw;
 	if (ew < iw)
@@ -604,7 +624,7 @@ void noti_proper_reset_scroll(widget_t widget, bool_t bUpdate)
 	if (widget_is_valid(ptd->vsc))
 	{
 		if (bUpdate)
-			widget_paint(ptd->vsc);
+			widget_erase(ptd->vsc, NULL);
 		else
 			widget_close(ptd->vsc, 0);
 	}
@@ -642,20 +662,21 @@ void hand_proper_destroy(widget_t widget)
 void hand_proper_size(widget_t widget, int code, const xsize_t* prs)
 {
 	proper_delta_t* ptd = GETPROPERDELTA(widget);
-	xrect_t xr;
 
-	if (!ptd->proper)
-		return;
+	XDK_ASSERT(ptd != NULL);
 
-	noti_proper_reset_scroll(widget, 0);
-
-	widget_get_client_rect(widget, &xr);
-	widget_rect_to_tm(widget, &xr);
-
-	set_proper_width(ptd->proper, xr.fw);
-	set_proper_height(ptd->proper, xr.fh);
-
-	properctrl_redraw(widget);
+	switch(code)
+	{
+	case WS_SIZE_FULLSCREEN:
+		break;
+	case WS_SIZE_MAXIMIZED:
+		break;
+	case WS_SIZE_MINIMIZED:
+		break;
+	case WS_SIZE_LAYOUT:
+		_properctrl_reset_page(widget);
+		break;
+	}
 }
 
 void hand_proper_notice(widget_t widget, NOTICE* pnt)
@@ -703,7 +724,7 @@ void hand_proper_wheel(widget_t widget, bool_t bHorz, int nDelta)
 			}
 			else
 			{
-				widget_paint(ptd->vsc);
+				widget_erase(ptd->vsc, NULL);
 			}
 		}
 
@@ -733,7 +754,7 @@ void hand_proper_mouse_move(widget_t widget, dword_t dw, const xpoint_t* pxp)
 
 	pt.x = pxp->x;
 	pt.y = pxp->y;
-	widget_point_to_tm(widget, &pt);
+	widget_point_to_mm(widget, &pt);
 
 	slk = elk = NULL;
 	nHint = calc_proper_hint(&pt, ptd->proper, &slk, &elk);
@@ -817,7 +838,7 @@ void hand_proper_lbutton_down(widget_t widget, const xpoint_t* pxp)
 
 	pt.x = pxp->x;
 	pt.y = pxp->y;
-	widget_point_to_tm(widget, &pt);
+	widget_point_to_mm(widget, &pt);
 
 	slk = elk = NULL;
 	nHint = calc_proper_hint(&pt, ptd->proper, &slk, &elk);
@@ -848,7 +869,7 @@ void hand_proper_lbutton_up(widget_t widget, const xpoint_t* pxp)
 
 	pt.x = pxp->x;
 	pt.y = pxp->y;
-	widget_point_to_tm(widget, &pt);
+	widget_point_to_mm(widget, &pt);
 
 	slk = elk = NULL;
 	nHint = calc_proper_hint(&pt, ptd->proper, &slk, &elk);
@@ -1053,7 +1074,7 @@ widget_t properctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* 
 		EVENT_ON_NOTICE(hand_proper_notice)
 		EVENT_ON_CHILD_COMMAND(hand_proper_child_command)
 
-		EVENT_ON_NC_IMPLEMENT
+		
 
 	EVENT_END_DISPATH
 
@@ -1072,7 +1093,7 @@ void properctrl_attach(widget_t widget, link_t_ptr ptr)
 	ptd->proper = ptr;
 
 	widget_get_client_rect(widget, &xr);
-	widget_rect_to_tm(widget, &xr);
+	widget_rect_to_mm(widget, &xr);
 
 	set_proper_width(ptd->proper, xr.fw);
 	set_proper_height(ptd->proper, xr.fh);
@@ -1164,7 +1185,6 @@ void properctrl_redraw(widget_t widget)
 
 	_properctrl_reset_page(widget);
 
-	widget_paint(widget);
 }
 
 void properctrl_redraw_entity(widget_t widget, link_t_ptr elk)

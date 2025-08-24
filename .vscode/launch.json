@@ -8,7 +8,7 @@
         "name": "(lldb) macos",
         "type": "cppdbg",
         "request": "launch",
-        "program": "/Users/zhangwenquan/工程/Easily-app-6/macos/bin/xdu_win_test",
+        "program": "/Users/zhangwenquan/工程/Easily-app-6/macos/bin/xdc_frame_test",
         "args": [],
         "stopAtEntry": false,
         "cwd": "${fileDirname}",
@@ -44,12 +44,12 @@
         "name": "(msvc) windows",
         "type": "cppvsdbg",
         "request": "launch",
-        "program": "Z:/Easily-app-6/windows/bin64/gen_system_glyph.exe",
+        "program": "Z:/Easily-app-6/windows/bin64/xDesign.exe",
         "args": [],
         "stopAtEntry": false,
         "cwd": "${fileDirname}",
         "environment": [],
-        "console": "externalTerminal"
+        "console": ""
     },
     {
         "name": "(gdb) mingw",

@@ -161,7 +161,7 @@ EXP_API float pt_to_mm(canvas_t canv, int pt, bool_t horz);
 @INPUT bool_t horz: nonzero fro horizon mapping, zero for vertical mapping.
 @RETURN float: return the value in points.
 */
-EXP_API int mm_to_pt(canvas_t canv, float tm, bool_t horz);
+EXP_API int mm_to_pt(canvas_t canv, float mm, bool_t horz);
 
 /*
 @FUNCTION rect_mm_to_pt: mapping rectangle points to millimeter in canvas.

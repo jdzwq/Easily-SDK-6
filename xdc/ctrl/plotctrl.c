@@ -46,7 +46,7 @@ typedef struct _plot_delta_t{
 static void _plotctrl_reset_page(widget_t widget)
 {
 	plot_delta_t* ptd = GETPLOTDELTA(widget);
-	int pw, ph, fw, fh, lw, lh;
+	int pw, ph, vw, vh, lw, lh;
 	xrect_t xr;
 	xsize_t xs;
 
@@ -54,19 +54,27 @@ static void _plotctrl_reset_page(widget_t widget)
 	pw = xr.w;
 	ph = xr.h;
 
-	xs.fw = get_plot_width(ptd->plot);
-	xs.fh = get_plot_height(ptd->plot);
-	widget_size_to_pt(widget, &xs);
-	fw = xs.w;
-	fh = xs.h;
+	if (ptd->plot)
+	{
+		xs.fw = get_plot_width(ptd->plot);
+		xs.fh = get_plot_height(ptd->plot);
+		widget_size_to_pt(widget, &xs);
+		vw = xs.w;
+		vh = xs.h;
+	}
+	else
+	{
+		vw = pw;
+		vh = ph;
+	}
 
-	xs.fw = (float)5;
-	xs.fh = (float)5;
+	xs.fw = 5.0f;
+	xs.fh = 5.0f;
 	widget_size_to_pt(widget, &xs);
 	lw = xs.w;
 	lh = xs.h;
 
-	widget_reset_paging(widget, pw, ph, fw, fh, lw, lh);
+	widget_reset_paging(widget, pw, ph, vw, vh, lw, lh);
 
 	widget_reset_scroll(widget, 1);
 
@@ -99,7 +107,7 @@ void noti_plot_reset_scroll(widget_t widget, bool_t bUpdate)
 	if (widget_is_valid(ptd->vsc))
 	{
 		if (bUpdate)
-			widget_paint(ptd->vsc);
+			widget_erase(ptd->vsc, NULL);
 		else
 			widget_close(ptd->vsc, 0);
 	}
@@ -107,7 +115,7 @@ void noti_plot_reset_scroll(widget_t widget, bool_t bUpdate)
 	if (widget_is_valid(ptd->hsc))
 	{
 		if (bUpdate)
-			widget_paint(ptd->hsc);
+			widget_erase(ptd->hsc, NULL);
 		else
 			widget_close(ptd->hsc, 0);
 	}
@@ -151,14 +159,20 @@ void hand_plot_size(widget_t widget, int code, const xsize_t* pxs)
 {
 	plot_delta_t* ptd = GETPLOTDELTA(widget);
 
-	if (!ptd->plot)
-		return;
+	XDK_ASSERT(ptd != NULL);
 
-	noti_plot_reset_scroll(widget, 0);
-
-	_plotctrl_reset_page(widget);
-
-	widget_erase(widget, NULL);
+	switch(code)
+	{
+	case WS_SIZE_FULLSCREEN:
+		break;
+	case WS_SIZE_MAXIMIZED:
+		break;
+	case WS_SIZE_MINIMIZED:
+		break;
+	case WS_SIZE_LAYOUT:
+		_plotctrl_reset_page(widget);
+		break;
+	}
 }
 
 void hand_plot_lbutton_down(widget_t widget, const xpoint_t* pxp)
@@ -250,7 +264,7 @@ void hand_plot_wheel(widget_t widget, bool_t bHorz, int nDelta)
 			}
 			else
 			{
-				widget_paint(ptd->vsc);
+				widget_erase(ptd->vsc, NULL);
 			}
 		}
 
@@ -262,7 +276,7 @@ void hand_plot_wheel(widget_t widget, bool_t bHorz, int nDelta)
 			}
 			else
 			{
-				widget_paint(ptd->hsc);
+				widget_erase(ptd->hsc, NULL);
 			}
 		}
 
@@ -348,7 +362,7 @@ widget_t plotctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* px
 		EVENT_ON_RBUTTON_DOWN(hand_plot_rbutton_down)
 		EVENT_ON_RBUTTON_UP(hand_plot_rbutton_up)
 
-		EVENT_ON_NC_IMPLEMENT
+		
 
 	EVENT_END_DISPATH
 
@@ -402,5 +416,4 @@ void plotctrl_redraw(widget_t widget)
 
 	_plotctrl_reset_page(widget);
 
-	widget_paint(widget);
 }

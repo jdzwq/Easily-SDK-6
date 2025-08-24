@@ -31,8 +31,10 @@ LICENSE.GPL3 for more details.
 #include <sql.h>
 #include <sqlext.h>
 
+#if defined(_OS_WINDOWS)
 #pragma comment(lib,"odbc32.lib")
 #pragma comment(lib,"odbccp32.lib")
+#endif
 
 #define SQL_BREAK	_T("GO")
 
@@ -2063,17 +2065,17 @@ bool_t STDCALL db_export(xdb_t db, stream_t stream, const tchar_t* sqlstr)
 		if (rt != SQL_SUCCESS && rt != SQL_SUCCESS_WITH_INFO)
 			break;
 
-		pos = 0;
 		for (i = 0; i < cols; i++)
 		{
 			if (pbind[i].ind != SQL_NULL_DATA && pbind[i].ind != SQL_NO_TOTAL)
 			{
 				len_buf = xslen((tchar_t*)pbind[i].buf);
-				len_esc = csv_char_encode((tchar_t*)pbind[i].buf, len_buf, NULL, MAX_LONG);
+				csv_token_encode((tchar_t*)pbind[i].buf, len_buf, NULL, &len_esc);
 				if (len_esc != len_buf)
 				{
 					sz_esc = xsalloc(len_esc + 1);
-					csv_char_encode((tchar_t*)pbind[i].buf, len_buf, sz_esc, len_esc);
+					len_esc = 0;
+					csv_token_encode((tchar_t*)pbind[i].buf, len_buf, sz_esc, &len_esc);
 
 					string_cat(vs, sz_esc, len_esc);
 					xsfree(sz_esc);
@@ -2088,6 +2090,7 @@ bool_t STDCALL db_export(xdb_t db, stream_t stream, const tchar_t* sqlstr)
 
 		string_cat(vs, feed + 1, 2);
 
+		pos = 0;
 		if (!stream_write_line(stream, vs, &pos))
 		{
 			raise_user_error(NULL, NULL);
@@ -2289,11 +2292,11 @@ bool_t STDCALL db_import(xdb_t db, stream_t stream, const tchar_t* table)
 				tklen++;
 			}
 
-			len_esc = csv_char_decode(token - tklen, tklen, NULL, MAX_LONG);
+			csv_token_decode(token - tklen, tklen, NULL, &len_esc);
 			if (len_esc != tklen)
 			{
 				sz_esc = xsalloc(len_esc + 1);
-				csv_char_decode(token - tklen, tklen, sz_esc, len_esc);
+				csv_token_decode(token - tklen, tklen, sz_esc, &len_esc);
 
 				pbind[i].len = (len_esc + 1) * sizeof(tchar_t);
 				pbind[i].buf = (byte_t*)sz_esc;

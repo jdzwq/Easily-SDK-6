@@ -73,40 +73,59 @@ static void _listctrl_item_text_rect(widget_t widget, link_t_ptr ilk, xrect_t* p
 static void _listctrl_reset_page(widget_t widget)
 {
 	list_delta_t* ptd = GETLISTDELTA(widget);
-	int pw, ph, fw, fh, lw, lh;
+	int pw, ph, vw, vh, lw, lh;
 	xrect_t xr;
 	xsize_t xs;
-	bool_t b_horz;
-
-	b_horz = (compare_text(get_list_layer_ptr(ptd->list), -1, ATTR_LAYER_HORZ, -1, 0) == 0) ? 1 : 0;
+	bool_t b_horz = 1;
 
 	widget_get_client_rect(widget, &xr);
 	pw = xr.w;
 	ph = xr.h;
 
-	xs.w = pw;
-	xs.h = ph;
-	widget_size_to_tm(widget, &xs);
-
-	if (b_horz)
+	if (ptd->list)
 	{
-		xs.fw = calc_list_width(ptd->list, ptd->parent);
+		b_horz = (compare_text(get_list_layer_ptr(ptd->list), -1, ATTR_LAYER_HORZ, -1, 0) == 0) ? 1 : 0;
+
+		xs.w = pw;
+		xs.h = ph;
+		widget_size_to_mm(widget, &xs);
+
+		set_list_width(ptd->list, xs.fw);
+		set_list_height(ptd->list, xs.fh);
+
+		if (b_horz)
+		{
+			xs.fw = calc_list_width(ptd->list, ptd->parent);
+		}
+		else
+		{
+			xs.fh = calc_list_height(ptd->list, ptd->parent);
+		}
+		widget_size_to_pt(widget, &xs);
+		vw = xs.w;
+		vh = xs.h;
 	}
 	else
 	{
-		xs.fh = calc_list_height(ptd->list, ptd->parent);
+		vw = pw;
+		vh = ph;
 	}
-	widget_size_to_pt(widget, &xs);
-	fw = xs.w;
-	fh = xs.h;
 
-	xs.fw = get_list_item_width(ptd->list);
-	xs.fh = get_list_item_height(ptd->list);
+	if (ptd->list)
+	{
+		xs.fw = get_list_item_width(ptd->list);
+		xs.fh = get_list_item_height(ptd->list);
+	}
+	else
+	{
+		xs.fw = 10.0f;
+		xs.fh = 10.0f;
+	}
 	widget_size_to_pt(widget, &xs);
 	lw = xs.w;
 	lh = xs.h;
 
-	widget_reset_paging(widget, pw, ph, fw, fh, lw, lh);
+	widget_reset_paging(widget, pw, ph, vw, vh, lw, lh);
 
 	if (b_horz)
 		widget_reset_scroll(widget, 1);
@@ -494,7 +513,7 @@ void noti_list_reset_scroll(widget_t widget, bool_t bUpdate)
 	if (widget_is_valid(ptd->vsc))
 	{
 		if (bUpdate)
-			widget_paint(ptd->vsc);
+			widget_erase(ptd->vsc, NULL);
 		else
 			widget_close(ptd->vsc, 0);
 	}
@@ -502,7 +521,7 @@ void noti_list_reset_scroll(widget_t widget, bool_t bUpdate)
 	if (widget_is_valid(ptd->hsc))
 	{
 		if (bUpdate)
-			widget_paint(ptd->hsc);
+			widget_erase(ptd->hsc, NULL);
 		else
 			widget_close(ptd->hsc, 0);
 	}
@@ -549,20 +568,21 @@ void hand_list_destroy(widget_t widget)
 void hand_list_size(widget_t widget, int code, const xsize_t* prs)
 {
 	list_delta_t* ptd = GETLISTDELTA(widget);
-	xrect_t xr;
 
-	if (!ptd->list)
-		return;
+	XDK_ASSERT(ptd != NULL);
 
-	noti_list_reset_scroll(widget, 0);
-
-	widget_get_client_rect(widget, &xr);
-	widget_rect_to_tm(widget, &xr);
-
-	set_list_width(ptd->list, xr.fw);
-	set_list_height(ptd->list, xr.fh);
-
-	listctrl_redraw(widget);
+	switch(code)
+	{
+	case WS_SIZE_FULLSCREEN:
+		break;
+	case WS_SIZE_MAXIMIZED:
+		break;
+	case WS_SIZE_MINIMIZED:
+		break;
+	case WS_SIZE_LAYOUT:
+		_listctrl_reset_page(widget);
+		break;
+	}
 }
 
 void hand_list_scroll(widget_t widget, bool_t bHorz, int nLine)
@@ -609,7 +629,7 @@ void hand_list_wheel(widget_t widget, bool_t bHorz, int nDelta)
 			}
 			else
 			{
-				widget_paint(ptd->vsc);
+				widget_erase(ptd->vsc, NULL);
 			}
 		}
 
@@ -621,7 +641,7 @@ void hand_list_wheel(widget_t widget, bool_t bHorz, int nDelta)
 			}
 			else
 			{
-				widget_paint(ptd->hsc);
+				widget_erase(ptd->hsc, NULL);
 			}
 		}
 
@@ -651,7 +671,7 @@ void hand_list_mouse_move(widget_t widget, dword_t dw, const xpoint_t* pxp)
 
 	pt.x = pxp->x;
 	pt.y = pxp->y;
-	widget_point_to_tm(widget, &pt);
+	widget_point_to_mm(widget, &pt);
 
 	plk = NULL;
 	nHint = calc_list_hint(&pt, ptd->list, ptd->parent, &plk);
@@ -716,7 +736,7 @@ void hand_list_lbutton_dbclick(widget_t widget, const xpoint_t* pxp)
 
 	pt.x = pxp->x;
 	pt.y = pxp->y;
-	widget_point_to_tm(widget, &pt);
+	widget_point_to_mm(widget, &pt);
 
 	plk = NULL;
 	nHint = calc_list_hint(&pt, ptd->list, ptd->parent, &plk);
@@ -755,7 +775,7 @@ void hand_list_lbutton_down(widget_t widget, const xpoint_t* pxp)
 
 	pt.x = pxp->x;
 	pt.y = pxp->y;
-	widget_point_to_tm(widget, &pt);
+	widget_point_to_mm(widget, &pt);
 
 	plk = NULL;
 	nHint = calc_list_hint(&pt, ptd->list, ptd->parent, &plk);
@@ -795,7 +815,7 @@ void hand_list_lbutton_up(widget_t widget, const xpoint_t* pxp)
 
 	pt.x = pxp->x;
 	pt.y = pxp->y;
-	widget_point_to_tm(widget, &pt);
+	widget_point_to_mm(widget, &pt);
 
 	plk = NULL;
 	nHint = calc_list_hint(&pt, ptd->list, ptd->parent, &plk);
@@ -1002,7 +1022,7 @@ widget_t listctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* px
 
 		EVENT_ON_CHILD_COMMAND(hand_list_child_command)
 
-		EVENT_ON_NC_IMPLEMENT
+		
 
 	EVENT_END_DISPATH
 
@@ -1024,7 +1044,7 @@ void listctrl_attach(widget_t widget, link_t_ptr ptr)
 	ptd->parent = ptr;
 
 	widget_get_client_rect(widget, &xr);
-	widget_rect_to_tm(widget, &xr);
+	widget_rect_to_mm(widget, &xr);
 
 	set_list_width(ptd->list, xr.fw);
 	set_list_height(ptd->list, xr.fh);
@@ -1110,7 +1130,6 @@ void listctrl_redraw(widget_t widget)
 
 	_listctrl_reset_page(widget);
 
-	widget_paint(widget);
 }
 
 void listctrl_tabskip(widget_t widget, int nSkip)

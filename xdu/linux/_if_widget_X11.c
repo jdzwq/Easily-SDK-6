@@ -66,14 +66,6 @@ XIM     g_xim = (XIM)0;
 						| KeymapStateMask)
 
 
-
-#define WIDGET_TITLE_SPAN		(float)10	//mm
-#define WIDGET_MENU_SPAN		(float)7.5	//mm
-#define WIDGET_SCROLL_SPAN		(float)5	//mm
-#define WIDGET_ICON_SPAN		(float)3	//mm
-#define WIDGET_FRAME_EDGE		(float)1.5	//mm
-#define WIDGET_CHILD_EDGE		(float)0.5	//mm
-
 #define WIDGET_BORDER_WIDTH		2 //pt
 
 #define DEFAULT_SCROLL_DELTA	120
@@ -339,6 +331,33 @@ static void SETXDUUSERDELTA(Window win, void* p)
     _WindowSetProper(win, g_atoms.xdu_user_delta, bys, VOID_SIZE);
 }
 
+static void _WindowBorder(Window win, int* left, int* right, int* top, int* bottom)
+{
+	Atom atom_extent;
+    Atom atom_type;
+    int format;
+    unsigned long nitems, bytes_after;
+    long* extents = NULL;
+    
+	*left = *right = *top = *bottom = 0;
+
+    atom_extent = XInternAtom(g_display, "_NET_FRAME_EXTENTS", False);
+    if (XGetWindowProperty(g_display, win, atom_extent,
+                          0, 4, False, XA_CARDINAL,
+                          &atom_type, &format,
+                          &nitems, &bytes_after,
+                          (unsigned char**)&extents) == Success)
+    {
+        if (extents && nitems == 4) {
+			*left = extents[0];
+			*right = extents[1];
+			*top = extents[2];
+			*bottom = extents[3];
+        }
+        
+        if (extents) XFree(extents);
+    }
+}
 /*******************************************************************************************/
 
 void _widget_startup(int ver)
@@ -483,12 +502,12 @@ static bool_t _message_translate(XEvent* pmsg)
 			break;
 		}
 
-		if(pxw->acl)
+		if(pxw->accel)
 		{
 			pch = XKeysymToString(keysys);
 			kch = (pch) ? *pch : 0;
 
-			pac = (accel_table_t*)pxw->acl;
+			pac = (accel_table_t*)pxw->accel;
 			i = 0;
 			while (pac[i].vir != 0 && pac[i].key != 0)
 			{
@@ -527,6 +546,7 @@ static bool_t _message_translate(XEvent* pmsg)
 		ev.data.l[0] = (long)wc;
 
 		XSendEvent(g_display, pmsg->xkey.window, False, SubstructureNotifyMask, (XEvent *)&ev);
+		return 1;
 	}else if(pmsg->type == KeyRelease)
 	{
 		if(XFilterEvent(pmsg, pmsg->xkey.window))
@@ -535,6 +555,12 @@ static bool_t _message_translate(XEvent* pmsg)
 
     return 0;
 }
+
+static Time last_click_time = 0;
+static int last_click_x = 0;
+static int last_click_y = 0;
+static int last_click_count = 0;
+#define DOUBLE_CLICK_INTERVAL 500
 
 static int _message_dispatch(XEvent* pmsg)
 {
@@ -545,7 +571,6 @@ static int _message_dispatch(XEvent* pmsg)
 
 	KeySym key;
 	xpoint_t xp;
-	xsize_t xs;
 	xrect_t xr;
 	dword_t ms;
 	
@@ -601,19 +626,35 @@ static int _message_dispatch(XEvent* pmsg)
 			}
 			break;
 		case ButtonPress:
-		pxw = GETXDUSTRUCT(pmsg->xbutton.window);
+			pxw = GETXDUSTRUCT(pmsg->xbutton.window);
 			if(!pxw) break;
 			if(pxw->disable) break;
 			wt = &(pxw->head);
-		
+
+			if(pmsg->xbutton.button == Button1)
+			{
+				if(last_click_time &&
+           			pmsg->xbutton.time - last_click_time < DOUBLE_CLICK_INTERVAL &&
+           			pmsg->xbutton.x == last_click_x &&
+           			pmsg->xbutton.y == last_click_y) 
+				{
+            		last_click_count++;
+        		}else
+				{
+        			last_click_time = pmsg->xbutton.time;
+        			last_click_x = pmsg->xbutton.x;
+        			last_click_y = pmsg->xbutton.y;
+					last_click_count = 1;
+				}
+			}
+
 			xp.x = pmsg->xbutton.x;
 			xp.y = pmsg->xbutton.y;
-			_widget_window_to_client(wt, &xp);
 
 			psub = GETXDUSUBPROC(pmsg->xbutton.window);
 			if(pmsg->xbutton.button == Button1)
 			{
-				if(psub && psub->sub_on_lbutton_down)
+				if(last_click_count < 2 && psub && psub->sub_on_lbutton_down)
 				{
 					pxw->result = (*psub->sub_on_lbutton_down)(wt, &xp, psub->sid, psub->delta);
 					if(pxw->result) break;
@@ -630,7 +671,7 @@ static int _message_dispatch(XEvent* pmsg)
 			pif = GETXDUDISPATCH(pmsg->xbutton.window);
 			if(pmsg->xbutton.button == Button1)
 			{
-				if (pif && pif->pf_on_lbutton_down)
+				if (last_click_count < 2 && pif && pif->pf_on_lbutton_down)
 				{
 					(*pif->pf_on_lbutton_down)(wt, &xp);
 				}
@@ -650,15 +691,24 @@ static int _message_dispatch(XEvent* pmsg)
 		
 			xp.x = pmsg->xbutton.x;
 			xp.y = pmsg->xbutton.y;
-			_widget_window_to_client(wt, &xp);
 
 			psub = GETXDUSUBPROC(pmsg->xbutton.window);
 			if(pmsg->xbutton.button == Button1)
 			{
-				if(psub && psub->sub_on_lbutton_up)
+				if(last_click_count > 1)
 				{
-					pxw->result = (*psub->sub_on_lbutton_up)(wt, &xp, psub->sid, psub->delta);
-					if(pxw->result) break;
+					if(psub && psub->sub_on_lbutton_up)
+					{
+						pxw->result = (*psub->sub_on_lbutton_dbclick)(wt, &xp, psub->sid, psub->delta);
+						if(pxw->result) break;
+					}
+				}else
+				{
+					if(psub && psub->sub_on_lbutton_up)
+					{
+						pxw->result = (*psub->sub_on_lbutton_up)(wt, &xp, psub->sid, psub->delta);
+						if(pxw->result) break;
+					}
 				}
 			}else if(pmsg->xbutton.button == Button3)
 			{
@@ -686,9 +736,19 @@ static int _message_dispatch(XEvent* pmsg)
 			pif = GETXDUDISPATCH(pmsg->xbutton.window);
 			if(pmsg->xbutton.button == Button1)
 			{
-				if (pif && pif->pf_on_lbutton_up)
+				if(last_click_count > 1)
 				{
-					(*pif->pf_on_lbutton_up)(wt, &xp);
+					if (pif && pif->pf_on_lbutton_dbclick)
+					{
+						(*pif->pf_on_lbutton_dbclick)(wt, &xp);
+					}
+				}
+				else
+				{
+					if (pif && pif->pf_on_lbutton_up)
+					{
+						(*pif->pf_on_lbutton_up)(wt, &xp);
+					}
 				}
 			}else if(pmsg->xbutton.button == Button3)
 			{
@@ -720,7 +780,6 @@ static int _message_dispatch(XEvent* pmsg)
 
 			xp.x = pmsg->xmotion.x;
 			xp.y = pmsg->xmotion.y;
-			_widget_window_to_client(wt, &xp);
 
 			pxw->mask = _mouse_state(pmsg->xmotion.state) | _key_state(pmsg->xmotion.state);
 
@@ -745,7 +804,6 @@ static int _message_dispatch(XEvent* pmsg)
 
 			xp.x = pmsg->xcrossing.x;
 			xp.y = pmsg->xcrossing.y;
-			_widget_window_to_client(wt, &xp);
 
 			pxw->mask = _mouse_state(pmsg->xcrossing.state) | _key_state(pmsg->xcrossing.state);
 
@@ -770,7 +828,6 @@ static int _message_dispatch(XEvent* pmsg)
 
 			xp.x = pmsg->xcrossing.x;
 			xp.y = pmsg->xcrossing.y;
-			_widget_window_to_client(wt, &xp);
 
 			pxw->mask = _mouse_state(pmsg->xcrossing.state) | _key_state(pmsg->xcrossing.state);
 
@@ -865,79 +922,48 @@ static int _message_dispatch(XEvent* pmsg)
 			}
 			break;
 		case ResizeRequest:
-			pxw = GETXDUSTRUCT(pmsg->xresizerequest.window);
-			if(!pxw) break;
-			wt = &(pxw->head);
-
-			xs.w = pmsg->xresizerequest.width;
-			xs.h = pmsg->xresizerequest.height;
-
-			psub = GETXDUSUBPROC(pmsg->xresizerequest.window);
-			if(psub && psub->sub_on_size)
-			{
-				pxw->result = (*psub->sub_on_size)(wt, WS_SIZE_RESTORE, &xs, psub->sid, psub->delta);
-				if(pxw->result) break;
-			}
-
-			pif = GETXDUDISPATCH(pmsg->xresizerequest.window);
-			if(pif && pif->pf_on_size)
-			{
-				(*pif->pf_on_size)(wt, WS_SIZE_RESTORE, &xs);
-			}
 			break;
 		case ConfigureNotify:
 			pxw = GETXDUSTRUCT(pmsg->xconfigure.window);
 			if(!pxw) break;
 			wt = &(pxw->head);
 
-			xp.x = pmsg->xconfigure.x;
-			xp.y = pmsg->xconfigure.y;
-
-			psub = GETXDUSUBPROC(pmsg->xconfigure.window);
-			if(pxw->pt.x != pmsg->xconfigure.x || pxw->pt.y != pmsg->xconfigure.y)
+			if(pmsg->xconfigure.x != pxw->pt.x || pmsg->xconfigure.y != pxw->pt.y)
 			{
+				pxw->pt.x = pmsg->xconfigure.x;
+				pxw->pt.y = pmsg->xconfigure.y;
+
+				psub = GETXDUSUBPROC(pmsg->xconfigure.window);
 				if(psub && psub->sub_on_move)
 				{
-					pxw->result = (*psub->sub_on_move)(wt, &xp, psub->sid, psub->delta);
-					pxw->pt.x = xp.x;
-					pxw->pt.y = xp.y;
+					pxw->result = (*psub->sub_on_move)(wt, &(pxw->pt), psub->sid, psub->delta);
 					if(pxw->result) break;
 				}
-			}
 
-			pif = GETXDUDISPATCH(pmsg->xconfigure.window);
-			if(pxw->pt.x != pmsg->xconfigure.x || pxw->pt.y != pmsg->xconfigure.y)
-			{
+				pif = GETXDUDISPATCH(pmsg->xconfigure.window);
 				if(pif && pif->pf_on_move)
 				{
-					(*pif->pf_on_move)(wt, &xp);
-				}
-				pxw->pt.x = xp.x;
-				pxw->pt.y = xp.y;
-			}
-
-			xs.w = pmsg->xconfigure.width;
-			xs.h = pmsg->xconfigure.height;
-
-			if(pxw->st.w != pmsg->xconfigure.width || pxw->st.h != pmsg->xconfigure.height)
-			{
-				if(psub && psub->sub_on_size)
-				{
-					pxw->result = (*psub->sub_on_size)(wt, WS_SIZE_LAYOUT, &xs, psub->sid, psub->delta);
-					pxw->st.w = pmsg->xconfigure.width;
-					pxw->st.h = pmsg->xconfigure.height;
-					if(pxw->result) break;
+					(*pif->pf_on_move)(wt, &(pxw->pt));
 				}
 			}
 
-			if(pxw->st.w != pmsg->xconfigure.width || pxw->st.h != pmsg->xconfigure.height)
+			if(pmsg->xconfigure.width != pxw->st.w || pmsg->xconfigure.height != pxw->st.h)
 			{
-				if(pif && pif->pf_on_size)
-				{
-					(*pif->pf_on_size)(wt, WS_SIZE_LAYOUT, &xs);
-				}
 				pxw->st.w = pmsg->xconfigure.width;
 				pxw->st.h = pmsg->xconfigure.height;
+
+				psub = GETXDUSUBPROC(pmsg->xconfigure.window);
+				if(psub && psub->sub_on_size)
+				{
+					pxw->result = (*psub->sub_on_size)(wt, WS_SIZE_LAYOUT, &(pxw->st), psub->sid, psub->delta);
+					if(pxw->result) break;
+				}
+
+				pif = GETXDUDISPATCH(pmsg->xconfigure.window);
+				if(pif && pif->pf_on_size)
+				{
+					(*pif->pf_on_size)(wt, WS_SIZE_LAYOUT, &(pxw->st));
+				}
 			}
 			break;
 		case MapNotify:
@@ -1110,20 +1136,6 @@ static int _message_dispatch(XEvent* pmsg)
 				break;
 			}
 
-			if(pmsg->xclient.message_type == g_atoms.wm_protocols && pmsg->xclient.data.l[0] == g_atoms.wm_take_focus)
-			{
-				wt = &(pxw->head);
-				_widget_set_focus(wt);
-				break;
-			}
-
-			if(pmsg->xclient.message_type == g_atoms.wm_protocols && pmsg->xclient.data.l[0] == g_atoms.wm_delete_window)
-			{
-				wt = &(pxw->head);
-				_widget_close(wt, 0);
-				break;
-			}
-
 			if(pmsg->xclient.message_type == g_atoms.wm_wchar)
 			{
 				psub = GETXDUSUBPROC(pmsg->xclient.window);
@@ -1136,8 +1148,41 @@ static int _message_dispatch(XEvent* pmsg)
 				pif = GETXDUDISPATCH(pmsg->xclient.window);
 				if(pif && pif->pf_on_wchar)
 				{
-					wt = &(pxw->head);
 					(*pif->pf_on_wchar)(wt, (wchar_t)(pmsg->xclient.data.l[0]));
+				}
+				break;
+			}
+
+			if(pmsg->xclient.message_type == g_atoms.wm_protocols && pmsg->xclient.data.l[0] == g_atoms.wm_take_focus)
+			{
+				if(pxw->disable) break;
+				if(pxw->style & WD_STYLE_NOACTIVE) break;
+
+				XSetInputFocus(g_display, pxw->self, RevertToParent, CurrentTime);
+				break;
+			}
+
+			if(pmsg->xclient.message_type == g_atoms.wm_protocols && pmsg->xclient.data.l[0] == g_atoms.wm_delete_window)
+			{
+				psub = GETXDUSUBPROC(pmsg->xclient.window);
+				if(psub && psub->sub_on_close)
+				{
+					pxw->result = (*psub->sub_on_close)(wt, psub->sid, psub->delta);
+					if(pxw->result) break;
+				}
+
+				pif = GETXDUDISPATCH(pmsg->xclient.window);
+				if(pif && pif->pf_on_close)
+				{
+					pxw->result = (*pif->pf_on_close)(wt);
+				}else
+				{
+					pxw->result = 0;
+				}
+
+				if(!pxw->result)
+				{
+					pxw->mode = WS_MODE_INVALID;
 				}
 				break;
 			}
@@ -1182,13 +1227,12 @@ widget_t _widget_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr
 	widget_t wt;
     Window win, rot, par;
     int screen_num, screen_dep;
-	int window_width, window_height, border_width = 0;
+	int window_x, window_y, window_width, window_height, border_width = 0;
     XSetWindowAttributes attr = {0};
 	Atom atom, atoms[2] = {0};
 	XWMHints *hints = NULL;
 	XWindowAttributes wattr = {0};
 
-	border_t bd = {0};
 	X11_widget_t* pxw = NULL;
 	if_dispatch_t* pv = NULL;
 	
@@ -1196,16 +1240,19 @@ widget_t _widget_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr
 	screen_dep = DefaultDepth(g_display, screen_num);
 	rot = RootWindow(g_display, screen_num);
 
-	attr.border_pixel = WhitePixel(g_display, screen_num);
-	attr.background_pixel = BlackPixel(g_display, screen_num);
+	attr.border_pixel = BlackPixel(g_display, screen_num);
+	attr.background_pixel = WhitePixel(g_display, screen_num);
 
-	par = (pxw_par)? pxw_par->self : rot;
+	if(wstyle & WD_STYLE_CHILD)
+		par = pxw_par->self;
+	else
+		par = rot;
 
 	if(wstyle & WD_STYLE_TITLE)
 	{
 		attr.override_redirect = False;
 		attr.event_mask = WIDGET_MAIN_EVENTS;
-		border_width = WIDGET_BORDER_WIDTH;
+		border_width = 0;
 	}else
 	{
 		attr.override_redirect = True;
@@ -1225,12 +1272,14 @@ widget_t _widget_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr
 		attr.event_mask &= ~(KeyPressMask | KeyReleaseMask | FocusChangeMask);
 	}
 
+	window_x = pxr->x;
+	window_y = pxr->y;
 	window_width = (pxr->w > border_width)? pxr->w : (WIDGET_BORDER_WIDTH + 1);
 	window_height = (pxr->h > border_width)? pxr->h : (WIDGET_BORDER_WIDTH + 1);
 
 	win = XCreateWindow(g_display,
 			par,
-			pxr->x, pxr->y, (window_width - border_width), (window_height - border_width),
+			window_x, window_y, (window_width), (window_height),
 			border_width,
 			screen_dep,
 			InputOutput,
@@ -1294,17 +1343,21 @@ widget_t _widget_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr
 
 	pxw = (X11_widget_t*)xmem_alloc_handle(sizeof(X11_widget_t));
 
+	pxw->head.tag = _HANDLE_WIDGET;
 	pxw->parent = (par == rot)? NULL : par;
 	pxw->self = win;
 	pxw->style = wstyle;
+	pxw->mode = WS_MODE_NORMAL;
 	pxw->state = WS_SHOW_HIDE;
 	pxw->evmsk = attr.event_mask;
+	pxw->accel = NULL;
+	
+	pxw->pt.x = window_x;
+	pxw->pt.y = window_y;
+	pxw->st.w = window_width;
+	pxw->st.h = window_height;
 
-	parse_xcolor(&pxw->bkg, GDI_ATTR_RGB_BLACK);
-	parse_xcolor(&pxw->frg, GDI_ATTR_RGB_WHITE);
-	parse_xcolor(&pxw->txt, GDI_ATTR_RGB_WHITE);
-	parse_xcolor(&pxw->msk, GDI_ATTR_RGB_WHITE);
-	parse_xcolor(&pxw->ico, GDI_ATTR_RGB_GRAY);
+	default_widget_color_mode(&(pxw->clrs));
 
 	if(wstyle & WD_STYLE_EDITOR)
 	{
@@ -1342,9 +1395,9 @@ void _widget_destroy(widget_t wt)
 		(*pv->pf_on_destroy)(wt);
 	}
 
-	if(pxw->acl)
+	if(pxw->accel)
 	{
-		xmem_free(pxw->acl);
+		xmem_free(pxw->accel);
 	}
 
 	if(pxw->xic)
@@ -1363,7 +1416,7 @@ void _widget_destroy(widget_t wt)
 	SETXDUSTRUCT(pxw->self, NULL);
     XDestroyWindow(g_display, pxw->self);
 
-	xmem_free_handle((xhand_t)pxw);
+	xmem_free_handle(pxw);
 }
 
 void _widget_close(widget_t wt, int ret)
@@ -1371,19 +1424,39 @@ void _widget_close(widget_t wt, int ret)
 	X11_widget_t* pxw = TypePtrFromHead(X11_widget_t, wt);
     if_dispatch_t* pv;
 
-	pxw->result = ret;
-	
-	pv = GETXDUDISPATCH(pxw->self);
-	if(pv && pv->pf_on_close)
+    XEvent event = {0};
+    event.xclient.type = ClientMessage;
+    event.xclient.window = pxw->self;
+    event.xclient.message_type = g_atoms.wm_protocols;
+    event.xclient.format = 32;
+    event.xclient.data.l[0] = g_atoms.wm_delete_window;
+    event.xclient.data.l[1] = CurrentTime;
+
+    XSendEvent(g_display, pxw->self, False, SubstructureNotifyMask, &event);
+	if(pxw->result) return;
+
+	if(pxw->style & WD_STYLE_CHILD)
 	{
-		if((*pv->pf_on_close)(wt))
-			return;
+		_widget_destroy(wt);
+		return;
 	}
 
-	_widget_destroy(wt);
+	switch(pxw->mode)
+	{
+	case WS_MODE_MAIN:
+		pxw->retcode = ret;
+		_message_quit(ret);
+		break;
+	case WS_MODE_MODAL:
+		pxw->retcode = ret;
+		break;
+	case WS_MODE_TRACK:
+		pxw->retcode = ret;
+		break;
+	}
 }
 
-if_subproc_t* _widget_get_subproc(widget_t wt, uid_t sid)
+const if_subproc_t* _widget_get_subproc(widget_t wt, uid_t sid)
 {
 	X11_widget_t* pxw = TypePtrFromHead(X11_widget_t, wt);
 
@@ -1393,9 +1466,12 @@ if_subproc_t* _widget_get_subproc(widget_t wt, uid_t sid)
 bool_t _widget_set_subproc(widget_t wt, uid_t sid, if_subproc_t* sub)
 {
 	X11_widget_t* pxw = TypePtrFromHead(X11_widget_t, wt);
+	if_subproc_t* psub;
+
+	psub = (if_subproc_t*)xmem_alloc(sizeof(if_subproc_t));
+	xmem_copy((void*)psub, (void*)sub, sizeof(if_subproc_t));
 
 	SETXDUSUBPROC(pxw->self, sub);
-	pxw->sid = sid;
 
 	return 1;
 }
@@ -1403,19 +1479,19 @@ bool_t _widget_set_subproc(widget_t wt, uid_t sid, if_subproc_t* sub)
 void _widget_del_subproc(widget_t wt, uid_t sid)
 {
 	X11_widget_t* pxw = TypePtrFromHead(X11_widget_t, wt);
+	if_subproc_t* psub = GETXDUSUBPROC(pxw->self);
 
-	if(pxw->sid != sid) return;
-
-	SETXDUSUBPROC(pxw->self, NULL);
-	pxw->sid = 0;
+	if(psub)
+	{
+		xmem_free(psub);
+		SETXDUSUBPROC(pxw->self, NULL);
+	}
 }
 
 bool_t _widget_set_subproc_delta(widget_t wt, uid_t sid, vword_t delta)
 {
 	X11_widget_t* pxw = TypePtrFromHead(X11_widget_t, wt);
 	if_subproc_t* psub;
-
-	if(pxw->sid != sid) return 0;
 
 	psub = GETXDUSUBPROC(pxw->self);
 	if(!psub) return 0;
@@ -1429,8 +1505,6 @@ vword_t _widget_get_subproc_delta(widget_t wt, uid_t sid)
 {
 	X11_widget_t* pxw = TypePtrFromHead(X11_widget_t, wt);
 	if_subproc_t* psub;
-
-	if(pxw->sid != sid) return 0;
 
 	psub = GETXDUSUBPROC(pxw->self);
 
@@ -1491,13 +1565,13 @@ void _widget_set_accel(widget_t wt, const accel_table_t* pacl, int n)
 	X11_widget_t* pxw = TypePtrFromHead(X11_widget_t, wt);
 	accel_table_t* pa;
 
-	if(pxw->acl) xmem_free(pxw->acl);
+	if(pxw->accel) xmem_free(pxw->accel);
 
 	pa = (accel_table_t*)xmem_alloc((n + 1) * sizeof(accel_table_t));
 	xmem_copy((void*)pa, (void*)pacl, n * sizeof(accel_table_t));
 
 	pa[n].vir = 0, pa[n].key = 0, pa[n].cmd = 0;
-	pxw->acl = pa;
+	pxw->accel = pa;
 }
 
 void _widget_set_owner(widget_t wt, widget_t owner)
@@ -1628,30 +1702,6 @@ const if_dispatch_t* _widget_get_dispatch(widget_t wt)
 	return GETXDUDISPATCH(pxw->self);
 }
 
-void _widget_get_menu_rect(widget_t wt, xrect_t* pxr)
-{
-	X11_widget_t* pxw = TypePtrFromHead(X11_widget_t, wt);
-	dword_t ws;
-
-	ws = _widget_get_style(wt);
-	if (ws & WD_STYLE_OWNERNC)
-	{
-		_widget_get_window_rect(wt, pxr);
-
-		pxr->x += pxw->bd.edge;
-		pxr->w -= (2 * pxw->bd.edge);
-		pxr->y += (pxw->bd.edge + pxw->bd.title);
-		pxr->h = pxw->bd.menu;
-	}
-}
-
-void _widget_get_border(widget_t wt, border_t* pbd)
-{
-	X11_widget_t* pxw = TypePtrFromHead(X11_widget_t, wt);
-
-	xmem_copy((void*)pbd, (void*)(&pxw->bd), sizeof(border_t));
-}
-
 bool_t _widget_is_maximized(widget_t wt)
 {
 	X11_widget_t* pxw = TypePtrFromHead(X11_widget_t, wt);
@@ -1692,7 +1742,7 @@ bool_t _widget_enum_child(widget_t wt, PF_ENUM_WINDOW_PROC pf, vword_t pv)
     return 1;
 }
 
-visual_t _widget_client_ctx(widget_t wt)
+visual_t _widget_client_context(widget_t wt)
 {
 	X11_widget_t* pxw = TypePtrFromHead(X11_widget_t, wt);
 	visual_t rdc;
@@ -1702,7 +1752,7 @@ visual_t _widget_client_ctx(widget_t wt)
 	return rdc;
 }
 
-visual_t _widget_window_ctx(widget_t wt)
+visual_t _widget_window_context(widget_t wt)
 {
 	X11_widget_t* pxw = TypePtrFromHead(X11_widget_t, wt);
 	visual_t rdc;
@@ -1712,7 +1762,7 @@ visual_t _widget_window_ctx(widget_t wt)
 	return rdc;
 }
 
-void _widget_release_ctx(widget_t wt, visual_t dc)
+void _widget_release_context(widget_t wt, visual_t dc)
 {
 	X11_widget_t* pxw = TypePtrFromHead(X11_widget_t, wt);
 
@@ -1723,15 +1773,15 @@ void _widget_get_client_rect(widget_t wt, xrect_t* prt)
 {
 	X11_widget_t* pxw = TypePtrFromHead(X11_widget_t, wt);
 	XWindowAttributes attr = {0};
-	border_t bd = {0};
+	int top, bottom, left, right;
 
+	//_WindowBorder(pxw->self, &left, &right, &top, &bottom);
 	XGetWindowAttributes(g_display, pxw->self, &attr);
-	_widget_get_border(wt, &bd);
 
 	prt->x = 0;
 	prt->y = 0;
-	prt->w = attr.width - 2 * bd.edge - bd.vscroll;
-	prt->h = attr.height - 2 * bd.edge - bd.title - bd.menu - bd.hscroll;
+	prt->w = attr.width; //- left - right;
+	prt->h = attr.height;// - top - bottom;
 }
 
 void _widget_get_window_rect(widget_t wt, xrect_t* prt)
@@ -1747,10 +1797,10 @@ void _widget_get_window_rect(widget_t wt, xrect_t* prt)
 
 	XTranslateCoordinates(g_display, pxw->self, rot, attr.x, attr.y, &dst_x, &dst_y, &cld);
 
-	prt->x = dst_x - attr.border_width;
-	prt->y = dst_y - attr.border_width;
-	prt->w = attr.width + 2 * attr.border_width;
-	prt->h = attr.height + 2 * attr.border_width;
+	prt->x = dst_x;
+	prt->y = dst_y;
+	prt->w = attr.width;
+	prt->h = attr.height;
 }
 
 void _widget_client_to_screen(widget_t wt, xpoint_t* ppt)
@@ -1784,23 +1834,15 @@ void _widget_screen_to_client(widget_t wt, xpoint_t* ppt)
 void _widget_client_to_window(widget_t wt, xpoint_t* ppt)
 {
 	X11_widget_t* pxw = TypePtrFromHead(X11_widget_t, wt);
-	border_t bd = {0};
-
-	_widget_get_border(wt, &bd);
-
-	ppt->x += bd.edge;
-	ppt->y += (bd.edge + bd.title + bd.menu);
+	
+	NOP;
 }
 
 void _widget_window_to_client(widget_t wt, xpoint_t* ppt)
 {
 	X11_widget_t* pxw = TypePtrFromHead(X11_widget_t, wt);
-	border_t bd = {0};
-
-	_widget_get_border(wt, &bd);
-
-	ppt->x -= bd.edge;
-	ppt->y -= (bd.edge + bd.title + bd.menu);
+	
+	NOP;
 }
 
 void _widget_center_window(widget_t wt, widget_t owner)
@@ -1956,9 +1998,9 @@ static void _widget_caret_proc(void* pa, res_timer_t rt)
 		map = DefaultColormap(g_display, screen);
 		gc = XCreateGC(g_display, pxw->self, 0, NULL);
 	
-		clr.red = XRGB(pxw->frg.r);
-		clr.green = XRGB(pxw->frg.g);
-		clr.blue = XRGB(pxw->frg.b);
+		clr.red = XRGB(pxw->clrs.clr_frg.r);
+		clr.green = XRGB(pxw->clrs.clr_frg.g);
+		clr.blue = XRGB(pxw->clrs.clr_frg.b);
 		XAllocColor(g_display, map, &clr);
 		XSetForeground(g_display, gc, clr.pixel);
 
@@ -2017,13 +2059,21 @@ void _widget_set_focus(widget_t wt)
 
 	Window org = 0;
 	int rev = 0;
+	XEvent event = {0};
 
 	if(pxw->style & WD_STYLE_NOACTIVE) return;
 
 	XGetInputFocus(g_display, &org, &rev);
 	if(org == pxw->self) return;
 	
-	XSetInputFocus(g_display, pxw->self, RevertToParent, CurrentTime);
+    event.xclient.type = ClientMessage;
+    event.xclient.window = pxw->self;
+    event.xclient.message_type = g_atoms.wm_protocols;
+    event.xclient.format = 32;
+    event.xclient.data.l[0] = g_atoms.wm_take_focus;
+    event.xclient.data.l[1] = CurrentTime;
+
+    XSendEvent(g_display, pxw->self, False, SubstructureNotifyMask, &event);
 }
 
 bool_t _widget_key_state(widget_t wt, int ks)
@@ -2167,31 +2217,21 @@ void _widget_show(widget_t wt, dword_t sw)
 	}
 }
 
-void _widget_paint(widget_t wt)
-{
-	X11_widget_t* pxw = TypePtrFromHead(X11_widget_t, wt);
-
-	XClearWindow(g_display, pxw->self);
-    XFlush(g_display);
-}
-
 void _widget_layout(widget_t wt)
 {
 	X11_widget_t* pxw = TypePtrFromHead(X11_widget_t, wt);
 	if_dispatch_t* pif;
-	xsize_t st;
 
 	pif = GETXDUDISPATCH(pxw->self);
 
+	//XClearWindow(g_display, pxw->self);
+
 	if(pif && pif->pf_on_size)
 	{
-		st.w = pxw->st.w;
-		st.h = pxw->st.h;
-		(*pif->pf_on_size)(wt, WS_SIZE_RESTORE, &st);
+		(*pif->pf_on_size)(wt, WS_SIZE_LAYOUT, &(pxw->st));
 	}
 
-	XClearWindow(g_display, pxw->self);
-    XFlush(g_display);
+    //XFlush(g_display);
 }
 
 void _widget_erase(widget_t wt, const xrect_t* prt)
@@ -2527,34 +2567,6 @@ void _widget_set_scroll_info(widget_t wt, bool_t horz, const scroll_t* psl)
 	XFlush(g_display);
 }
 
-void _widget_set_point(widget_t wt, const xpoint_t* ppt)
-{
-	X11_widget_t* pxw = TypePtrFromHead(X11_widget_t, wt);
-
-	xmem_copy((void*)&pxw->pt, (void*)ppt, sizeof(xpoint_t));
-}
-
-void _widget_get_point(widget_t wt, xpoint_t* ppt)
-{
-	X11_widget_t* pxw = TypePtrFromHead(X11_widget_t, wt);
-
-	xmem_copy((void*)ppt, (void*)&pxw->pt, sizeof(xpoint_t));
-}
-
-void _widget_set_size(widget_t wt, const xsize_t* pst)
-{
-	X11_widget_t* pxw = TypePtrFromHead(X11_widget_t, wt);
-
-	xmem_copy((void*)&pxw->st, (void*)pst, sizeof(xsize_t));
-}
-
-void _widget_get_size(widget_t wt, xsize_t* pst)
-{
-	X11_widget_t* pxw = TypePtrFromHead(X11_widget_t, wt);
-
-	xmem_copy((void*)pst, (void*)&pxw->st, sizeof(xsize_t));
-}
-
 static int CALLBACK _widget_set_child_color_mode(widget_t wt, vword_t pv)
 {
 	dword_t dw = _widget_get_style(wt);
@@ -2575,11 +2587,7 @@ void _widget_set_color_mode(widget_t wt, const color_mod_t* pclr)
 
 	if (!(pxw->style & WD_STYLE_NOCHANGE))
 	{
-		xmem_copy((void*)&pxw->bkg, (void*)&pclr->clr_bkg, sizeof(xcolor_t));
-		xmem_copy((void*)&pxw->frg, (void*)&pclr->clr_frg, sizeof(xcolor_t));
-		xmem_copy((void*)&pxw->txt, (void*)&pclr->clr_txt, sizeof(xcolor_t));
-		xmem_copy((void*)&pxw->msk, (void*)&pclr->clr_msk, sizeof(xcolor_t));
-		xmem_copy((void*)&pxw->ico, (void*)&pclr->clr_ico, sizeof(xcolor_t));
+		xmem_copy((void*)&(pxw->clrs), (void*)pclr, sizeof(color_mod_t));
 
 		map = DefaultColormap(g_display, DefaultScreen(g_display));
 		frg.red = XRGB(pclr->clr_frg.r);
@@ -2610,11 +2618,7 @@ void _widget_get_color_mode(widget_t wt, color_mod_t* pclr)
 {
 	X11_widget_t* pxw = TypePtrFromHead(X11_widget_t, wt);
 
-	xmem_copy((void*)&pclr->clr_bkg, (void*)&pxw->bkg, sizeof(xcolor_t));
-	xmem_copy((void*)&pclr->clr_frg, (void*)&pxw->frg, sizeof(xcolor_t));
-	xmem_copy((void*)&pclr->clr_txt, (void*)&pxw->txt, sizeof(xcolor_t));
-	xmem_copy((void*)&pclr->clr_msk, (void*)&pxw->msk, sizeof(xcolor_t));
-	xmem_copy((void*)&pclr->clr_ico, (void*)&pxw->ico, sizeof(xcolor_t));
+	xmem_copy((void*)pclr, (void*)&(pxw->clrs), sizeof(color_mod_t));
 }
 
 void _widget_set_diaph(widget_t wt, float f)
@@ -2695,15 +2699,22 @@ void _widget_noti_xpen(widget_t wt, const xpen_t* pxp)
 
 int	_widget_do_main(widget_t wt)
 {
+	X11_widget_t* pxw = TypePtrFromHead(X11_widget_t, wt);
 	XEvent msg = {0};
+	int ret;
     
+	pxw->mode = WS_MODE_MAIN;
+
 	while(_widget_is_valid(wt))
     {
 		while (XPending(g_display))
 		{
-			//_widget_idle(wt, bool_false);
+			_message_fetch(&msg, (Window)0);
 
-			_message_fetch(&msg, (widget_t)0);
+			if(msg.type == ClientMessage && msg.xclient.message_type == g_atoms.wm_quit)
+			{
+				break;
+			}
 
 			if (XFilterEvent(&msg, None))
 				continue;
@@ -2714,40 +2725,44 @@ int	_widget_do_main(widget_t wt)
 			_message_dispatch(&msg);
 		}
 
-		//_widget_idle(wt, bool_true);
+		if(pxw->mode != WS_MODE_MAIN)
+			break;
+
 		usleep(1000);
     }
 
-	return 0;
+	ret = pxw->retcode;
+
+	_widget_destroy(wt);
+
+	return ret;
 }
 
 int	_widget_do_modal(widget_t wt)
 {
 	X11_widget_t* pxw = TypePtrFromHead(X11_widget_t, wt);
+	X11_widget_t* powner;
 	Window own;
-	widget_t wp;
 	XEvent msg = {0};
+	int ret;
     
-	wp = _widget_get_owner(wt);
-	if(wp) 
+	own = (pxw->owner)? pxw->owner : pxw->parent;
+	if(own)
 	{
-		own = ((X11_widget_t*)TypePtrFromHead(X11_widget_t, wp))->self;
-		_widget_enable(wp, 0);
-	}else{
-		own = RootWindow(g_display, DefaultScreen(g_display));
+		XSetTransientForHint(g_display, pxw->self, own);
+		powner = GETXDUSTRUCT(own);
+		powner->disable = 1;
 	}
 
-	XSetTransientForHint(g_display, pxw->self, own);
-
 	_widget_set_focus(wt);
+
+	pxw->mode = WS_MODE_MODAL;
 
 	while(_widget_is_valid(wt))
     {
 		while (XPending(g_display))
 		{
-			//_widget_idle(wt, bool_false);
-
-			_message_fetch(&msg, (widget_t)0);
+			_message_fetch(&msg, (Window)0);
 
 			if (_message_translate(&msg))
 				continue;
@@ -2755,35 +2770,56 @@ int	_widget_do_modal(widget_t wt)
 			_message_dispatch(&msg);
 		}
 
-		//_widget_idle(wt, bool_true);
+		if(pxw->mode != WS_MODE_MODAL)
+			break;
+
 		usleep(1000);
     }
 
-	if(wp)
+	ret = pxw->retcode;
+
+	_widget_destroy(wt);
+
+	if(own)
 	{
-		_widget_enable(wp, 1);
-		_widget_set_focus(wp);
+		powner = GETXDUSTRUCT(own);
+		powner->disable = 0;
+
+		_widget_set_focus(&(powner->head));
 	}
 
-	return 0;
+	return ret;
 }
 
 void _widget_do_track(widget_t wt)
 {
+	X11_widget_t* pxw = TypePtrFromHead(X11_widget_t, wt);
 	XEvent msg = {0};
     
 	XSync(g_display, True);
 
 	_widget_set_capture(wt, 1);
 
+	pxw->mode = WS_MODE_TRACK;
+
 	while(_widget_is_valid(wt))
     {
-		_message_fetch(&msg, (widget_t)0);
+		while (XPending(g_display))
+		{
+			_message_fetch(&msg, (Window)0);
 		
-		_message_dispatch(&msg);
+			_message_dispatch(&msg);
+		}
+
+		if(pxw->mode != WS_MODE_TRACK)
+			break;
+
+		usleep(1000);
     }
 
 	_widget_set_capture(wt, 0);
+
+	_widget_destroy(wt);
 }
 
 void _message_quit(int code)
@@ -2826,24 +2862,41 @@ void _message_position(xpoint_t* pxp)
     }
 }
 /*********************************************************************************************************/
-void _adjust_widget_size(dword_t ws, xsize_t* pxs)
+void _calc_widget_border(dword_t ws, border_t* pbd)
 {
-	if(ws & WD_STYLE_CHILD) return;
+    pbd->edge = pbd->title = pbd->scrh = pbd->scrw = 0;
 
-	if(ws & WD_STYLE_TITLE)
+	if (ws & WD_STYLE_TITLE)
 	{
-		pxs->h += (int)((WIDGET_TITLE_SPAN +  WIDGET_FRAME_EDGE) * PTPERMM);
-		pxs->w += (int)(WIDGET_FRAME_EDGE * 2 * PTPERMM);
-	}else
+		pbd->title = FRAME_TITLE_DOTS;
+	}
+
+	if (ws & WD_STYLE_BORDER)
 	{
-		pxs->h += (int)(WIDGET_CHILD_EDGE * 2 * PTPERMM);
-		pxs->w += (int)(WIDGET_CHILD_EDGE * 2 * PTPERMM);
+		if (ws & WD_STYLE_CHILD)
+			pbd->edge = CHILD_EDGE_DOTS;
+		else
+			pbd->edge = FRAME_EDGE_DOTS;
+	}
+
+	if (ws & WD_STYLE_HSCROLL)
+	{
+		pbd->scrh = FRAME_SCROLL_DOTS;
+	}
+
+	if (ws & WD_STYLE_VSCROLL)
+	{
+		pbd->scrw = FRAME_SCROLL_DOTS;
 	}
 }
 
-void _calc_widget_border(dword_t ws, border_t* pbd)
+void _adjust_widget_size(dword_t wstyle, xsize_t* pxs)
 {
-	NOP;
+	if(wstyle & WD_STYLE_CHILD)
+		return;
+
+	pxs->h += (FRAME_TITLE_DOTS + FRAME_EDGE_DOTS);
+	pxs->w += (FRAME_EDGE_DOTS * 2);
 }
 
 void _get_screen_size(xsize_t* pxs)

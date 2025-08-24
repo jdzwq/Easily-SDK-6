@@ -1,7 +1,6 @@
 SOURCES= \
 ../../../Easily-tmp/windows/xdc/x64/Debug/printbag.c \
 ../../../Easily-tmp/windows/xdc/x64/Debug/widgetex.c \
-../../../Easily-tmp/windows/xdc/x64/Debug/widgetnc.c \
 ../../../Easily-tmp/windows/xdc/x64/Debug/checkbox.c \
 ../../../Easily-tmp/windows/xdc/x64/Debug/datebox.c \
 ../../../Easily-tmp/windows/xdc/x64/Debug/dropbox.c \

@@ -294,7 +294,7 @@ static void _dialogctrl_reset_page(widget_t widget)
 {
 	dialog_delta_t* ptd = GETDIALOGDELTA(widget);
 
-	int pw, ph, fw, fh, lw, lh;
+	int pw, ph, vw, vh, lw, lh;
 	xrect_t xr;
 	xsize_t xs;
 
@@ -302,12 +302,18 @@ static void _dialogctrl_reset_page(widget_t widget)
 	pw = xr.w;
 	ph = xr.h;
 
-	xs.fw = get_dialog_width(ptd->dialog);
-	xs.fh = get_dialog_height(ptd->dialog);
+	if(ptd->dialog)
+	{
+		xs.fw = get_dialog_width(ptd->dialog);
+		xs.fh = get_dialog_height(ptd->dialog);
 
-	widget_size_to_pt(widget, &xs);
-	fw = xs.w;
-	fh = xs.h;
+		widget_size_to_pt(widget, &xs);
+		vw = xs.w;
+		vh = xs.h;
+	}else{
+		vw = pw;
+		vh = ph;
+	}
 
 	xs.fw = (float)10;
 	xs.fh = (float)10;
@@ -315,7 +321,7 @@ static void _dialogctrl_reset_page(widget_t widget)
 	lw = xs.w;
 	lh = xs.h;
 
-	widget_reset_paging(widget, pw, ph, fw, fh, lw, lh);
+	widget_reset_paging(widget, pw, ph, vw, vh, lw, lh);
 
 	widget_reset_scroll(widget, 1);
 
@@ -538,7 +544,7 @@ void noti_dialog_item_drop(widget_t widget, int x, int y)
 	pt.x = xr.x + cx;
 	pt.y = xr.y + cy;
 
-	widget_point_to_tm(widget, &pt);
+	widget_point_to_mm(widget, &pt);
 
 	pt.fx = (float)((int)(pt.fx));
 	pt.fy = (float)((int)(pt.fy));
@@ -621,7 +627,7 @@ void noti_dialog_item_sized(widget_t widget, int x, int y)
 	if (!xs.w && !xs.h)
 		return;
 
-	widget_size_to_tm(widget, &xs);
+	widget_size_to_mm(widget, &xs);
 
 	_dialogctrl_item_rect(widget, ptd->item, &xr);
 
@@ -713,10 +719,20 @@ void hand_dialog_size(widget_t widget, int code, const xsize_t* prs)
 {
 	dialog_delta_t* ptd = GETDIALOGDELTA(widget);
 
-	if (!ptd->dialog)
-		return;
+	XDK_ASSERT(ptd != NULL);
 
-	dialogctrl_redraw(widget);
+	switch(code)
+	{
+	case WS_SIZE_FULLSCREEN:
+		break;
+	case WS_SIZE_MAXIMIZED:
+		break;
+	case WS_SIZE_MINIMIZED:
+		break;
+	case WS_SIZE_LAYOUT:
+		_dialogctrl_reset_page(widget);
+		break;
+	}
 }
 
 void hand_dialog_scroll(widget_t widget, bool_t bHorz, int nLine)
@@ -749,7 +765,7 @@ void hand_dialog_mouse_move(widget_t widget, dword_t dw, const xpoint_t* pxp)
 
 	pt.x = pxp->x;
 	pt.y = pxp->y;
-	widget_point_to_tm(widget, &pt);
+	widget_point_to_mm(widget, &pt);
 
 	ilk = NULL;
 	nHint = calc_dialog_hint(ptd->dialog, &pt, &ilk);
@@ -858,7 +874,7 @@ void hand_dialog_lbutton_down(widget_t widget, const xpoint_t* pxp)
 
 	pt.x = pxp->x;
 	pt.y = pxp->y;
-	widget_point_to_tm(widget, &pt);
+	widget_point_to_mm(widget, &pt);
 
 	ilk = NULL;
 	nHint = calc_dialog_hint(ptd->dialog, &pt, &ilk);
@@ -904,7 +920,7 @@ void hand_dialog_lbutton_up(widget_t widget, const xpoint_t* pxp)
 
 	pt.x = pxp->x;
 	pt.y = pxp->y;
-	widget_point_to_tm(widget, &pt);
+	widget_point_to_mm(widget, &pt);
 
 	ilk = NULL;
 	nHint = calc_dialog_hint(ptd->dialog, &pt, &ilk);
@@ -1092,7 +1108,7 @@ void hand_dialog_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	default_xbrush(&xb);
 	format_xcolor(&clrs.clr_bkg, xb.color);
 	default_xpen(&xp);
-	format_xcolor(&clrs.clr_frg, &xp.color);
+	format_xcolor(&clrs.clr_frg, xp.color);
 
 	canv = widget_get_canvas(widget);
 	pif = widget_get_canvas_interface(widget);
@@ -1200,7 +1216,7 @@ widget_t dialogctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* 
 
 		EVENT_ON_NOTICE(hand_dialog_notice)
 
-		EVENT_ON_NC_IMPLEMENT
+		
 
 	EVENT_END_DISPATH
 
@@ -1278,8 +1294,6 @@ void dialogctrl_redraw(widget_t widget)
 	ptd->hover = NULL;
 
 	_dialogctrl_reset_page(widget);
-
-	widget_paint(widget);
 }
 
 void dialogctrl_redraw_item(widget_t widget, link_t_ptr ilk)

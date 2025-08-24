@@ -860,13 +860,13 @@ void init_instance()
 
     (*if_widget.pf_widget_startup)(0);
 
-    accel_t acs[3] = {
+    accel_table_t acs[3] = {
         {KEY_CONTROL, 'a', 10},
         {KEY_ALT, 's', 20},
         {KEY_SHIFT, '\t', 30}
     };
 
-    res_acl_t acl = (*if_widget.pf_create_accel_table)(acs, 3);
+    res_acl_t acl = (*if_widget.pf_create_accel_table_table)(acs, 3);
 
     if_dispatch_t ev = {0};
 
@@ -909,7 +909,6 @@ void init_instance()
 	g_main = (*if_widget.pf_widget_create)(_T("frame1"), (WD_STYLE_DIALOG & (~WD_STYLE_OWNERNC)), &xr, NULL, &ev);
 	(*if_widget.pf_widget_set_accel)(g_main, acl);
 
-	(*if_widget.pf_widget_update)(g_main);
     (*if_widget.pf_widget_show)(g_main, WS_SHOW_NORMAL);
 
     scroll_t scr = {0};

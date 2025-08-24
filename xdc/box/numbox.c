@@ -33,8 +33,6 @@ typedef struct _numbox_delta_t{
 	int index;
 	int bw, bh;
 
-	xfont_t xf;
-	xbrush_t xb;
 }numbox_delta_t;
 
 #define NUMBOX_COUNT	13
@@ -137,6 +135,7 @@ void hand_numbox_lbutton_up(widget_t widget, const xpoint_t* pxp)
 	xrect_t xr;
 	int i;
 	tchar_t ch = 0;
+	widget_t owner = widget_get_owner(widget);
 
 	widget_set_capture(widget, 0);
 
@@ -162,28 +161,30 @@ void hand_numbox_lbutton_up(widget_t widget, const xpoint_t* pxp)
 		return;
 
 	if (ch == _T('-'))
-		widget_post_key((widget_t)0, KEY_BACK);
+		widget_post_key(owner, KEY_BACK);
 	else if (ch == _T('\n'))
-		widget_post_key((widget_t)0, KEY_ENTER);
+		widget_post_key(owner, KEY_ENTER);
 	else
-		widget_post_wchar((widget_t)0, ch);
+		widget_post_wchar(owner, ch);
 }
 
 void hand_numbox_size(widget_t widget, int code, const xsize_t* prs)
 {
 	numbox_delta_t* ptd = GETNUMBOXDELTA(widget);
-	xrect_t xr;
 
-	widget_get_client_rect(widget, &xr);
+	XDK_ASSERT(ptd != NULL);
 
-	widget_erase(widget, NULL);
-}
-
-void hand_numbox_xfont(widget_t widget, const xfont_t* pxf)
-{
-	numbox_delta_t* ptd = GETNUMBOXDELTA(widget);
-
-	xmem_copy((void*)&ptd->xf, (void*)pxf, sizeof(xfont_t));
+	switch(code)
+	{
+	case WS_SIZE_FULLSCREEN:
+		break;
+	case WS_SIZE_MAXIMIZED:
+		break;
+	case WS_SIZE_MINIMIZED:
+		break;
+	case WS_SIZE_LAYOUT:
+		break;
+	}
 }
 
 void hand_numbox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
@@ -198,30 +199,37 @@ void hand_numbox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	drawing_interface ifv = {0};
 
 	color_mod_t clrs;
+	xfont_t xf_bark, xf_focus;
 	xface_t xa;
 	xbrush_t xb_bark, xb_focus;
 
 	widget_get_color_mode(widget, &clrs);
+
 	default_xbrush(&xb_focus);
-	default_xbrush(&xb_bark);
 	format_xcolor(&clrs.clr_bkg, xb_focus.color);
+
+	default_xbrush(&xb_bark);
 	format_xcolor(&clrs.clr_bkg, xb_bark.color);
-	lighten_xbrush(&xb_focus, DEF_SOFT_LIGHTEN);
-	lighten_xbrush(&xb_bark, DEF_SOFT_DARKEN);
+	lighten_xbrush(&xb_bark, DEF_MIDD_DARKEN);
+
+	default_widget_xfont(&xf_bark);
+	format_xcolor(&clrs.clr_txt, xf_bark.color);
+	xmem_copy((void*)&xf_focus, (void*)&xf_bark, sizeof(xfont_t));
+	ltoxs(xstol(xf_bark.size) + 2, xf_focus.size, INT_LEN);
 
 	default_xface(&xa);
 	xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_CENTER);
 	xscpy(xa.line_align, GDI_ATTR_TEXT_ALIGN_CENTER);
 
+	widget_get_client_rect(widget, &xr);
+	
 	canv = widget_get_canvas(widget);
 
-	widget_get_client_rect(widget, &xr);
-
 	rdc = begin_canvas_paint(canv, dc, xr.w, xr.h);
-
+	
 	get_visual_interface(rdc, &ifv);
 
-	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb_bark, &xr);
+	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb_focus, &xr);
 
 	for (i = 0; i < NUMBOX_COUNT; i++)
 	{
@@ -230,24 +238,38 @@ void hand_numbox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 		xr.y = ptd->bh * NUMBOX_POS[i].y;
 		xr.h = ptd->bh * NUMBOX_POS[i].h;
 
-		xr_focus.x = xr.x + 2;
-		xr_focus.y = xr.y + 2;
-		xr_focus.w = xr.w - 4;
-		xr_focus.h = xr.h - 4;
+		if(ptd->index == i)
+		{
+			xr_focus.x = xr.x + 1;
+			xr_focus.y = xr.y + 1;
+			xr_focus.w = xr.w - 2;
+			xr_focus.h = xr.h - 2;
+		}else
+		{
+			xr_focus.x = xr.x + 2;
+			xr_focus.y = xr.y + 2;
+			xr_focus.w = xr.w - 4;
+			xr_focus.h = xr.h - 4;
+		}
 
 		if (ptd->index == i)
-			(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb_focus, &xr_focus);
+			(*ifv.pf_draw_round)(ifv.ctx, NULL, &xb_focus, &xr_focus, NULL);
 		else
-			(*ifv.pf_draw_rect)(ifv.ctx, NULL, &ptd->xb, &xr_focus);
+			(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb_bark, &xr_focus);
 
 		tk[0] = NUMBOX_DATA[i];
 
 		if (tk[0] == _T('\n'))
-			(*ifv.pf_draw_text)(ifv.ctx, &ptd->xf, &xa, &xr, _T("√"), -1);
+			(*ifv.pf_draw_text)(ifv.ctx, &xf_bark, &xa, &xr, _T("√"), -1);
 		else if (tk[0] == _T('-'))
-			(*ifv.pf_draw_text)(ifv.ctx, &ptd->xf, &xa, &xr, _T("CE"), -1);
+			(*ifv.pf_draw_text)(ifv.ctx, &xf_bark, &xa, &xr, _T("CE"), -1);
 		else
-			(*ifv.pf_draw_text)(ifv.ctx, &ptd->xf, &xa, &xr, tk, -1);
+		{
+			if (ptd->index == i)
+				(*ifv.pf_draw_text)(ifv.ctx, &xf_focus, &xa, &xr, tk, -1);
+			else
+				(*ifv.pf_draw_text)(ifv.ctx, &xf_bark, &xa, &xr, tk, -1);
+		}
 	}
 
 	end_canvas_paint(canv, dc, pxr);
@@ -269,10 +291,6 @@ widget_t numbox_create(widget_t widget, dword_t style, const xrect_t* pxr)
 
 		EVENT_ON_LBUTTON_DOWN(hand_numbox_lbutton_down)
 		EVENT_ON_LBUTTON_UP(hand_numbox_lbutton_up)
-
-		EVENT_ON_XFONT(hand_numbox_xfont)
-
-		EVENT_ON_NC_IMPLEMENT
 
 	EVENT_END_DISPATH
 

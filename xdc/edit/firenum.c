@@ -72,7 +72,6 @@ static int sub_editbox_self_command(widget_t widget, int code, vword_t data, uid
 		if (widget_is_valid(numbox))
 		{
 			widget_set_color_mode(numbox, (color_mod_t*)data);
-			widget_paint(numbox);
 		}
 		return 1;
 	case COMMAND_COMMIT:
@@ -156,7 +155,7 @@ widget_t firenum_create(widget_t widget, const xrect_t* pxr)
 	widget_get_window_rect(numbox, &xr);
 	numbox_popup_size(numbox, RECTSIZE(&xr));
 
-	get_desktop_size(&xs);
+	get_screen_size(&xs);
 
 	if (xr.x + xr.w > xs.w)
 	{
@@ -170,7 +169,6 @@ widget_t firenum_create(widget_t widget, const xrect_t* pxr)
 
 	widget_move(numbox, RECTPOINT(&xr));
 	widget_size(numbox, RECTSIZE(&xr));
-	widget_paint(numbox);
 
 	return editor;
 }

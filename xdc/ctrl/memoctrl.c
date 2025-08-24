@@ -115,7 +115,7 @@ void noti_memoctrl_reset_scroll(widget_t widget, bool_t bUpdate)
 	if (widget_is_valid(ptd->vsc))
 	{
 		if (bUpdate)
-			widget_paint(ptd->vsc);
+			widget_erase(ptd->vsc, NULL);
 		else
 			widget_close(ptd->vsc, 0);
 	}
@@ -123,7 +123,7 @@ void noti_memoctrl_reset_scroll(widget_t widget, bool_t bUpdate)
 	if (widget_is_valid(ptd->hsc))
 	{
 		if (bUpdate)
-			widget_paint(ptd->hsc);
+			widget_erase(ptd->hsc, NULL);
 		else
 			widget_close(ptd->hsc, 0);
 	}
@@ -144,7 +144,7 @@ int hand_memoctrl_create(widget_t widget, void* data)
 	SETMEMOCTRLDELTA(widget, ptd);
 
 	ptd->textor.widget = widget;
-	ptd->textor.cdc = widget_client_ctx(widget);
+	ptd->textor.cdc = widget_client_context(widget);
 	ptd->textor.data = NULL;
 	ptd->textor.pf_scan_text = (PF_SCAN_TEXT)scan_memo_text;
 	ptd->textor.pf_get_text = _memoctrl_get_text;
@@ -174,7 +174,7 @@ void hand_memoctrl_destroy(widget_t widget)
 
 	hand_textor_clean(&ptd->textor);
 
-	widget_release_ctx(widget, ptd->textor.cdc);
+	widget_release_context(widget, ptd->textor.cdc);
 
 	xmem_free(ptd);
 
@@ -567,13 +567,23 @@ void hand_memoctrl_size(widget_t widget, int code, const xsize_t* prs)
 {
 	memoctrl_delta_t* ptd = GETMEMOCTRLDELTA(widget);
 
-	if (!ptd)
-		return;
+	XDK_ASSERT(ptd != NULL);
 
-	if (!ptd->textor.data)
-		return;
+	switch(code)
+	{
+	case WS_SIZE_FULLSCREEN:
+		break;
+	case WS_SIZE_MAXIMIZED:
+		break;
+	case WS_SIZE_MINIMIZED:
+		break;
+	case WS_SIZE_LAYOUT:
+		break;
+	}
 
-	noti_memoctrl_reset_scroll(widget, 0);
+	if (!ptd) return;
+
+	if (!ptd->textor.data) return;
 
 	hand_textor_size(&ptd->textor, code, prs);
 }
@@ -621,7 +631,7 @@ void hand_memoctrl_wheel(widget_t widget, bool_t bHorz, int nDelta)
 			}
 			else
 			{
-				widget_paint(ptd->vsc);
+				widget_erase(ptd->vsc, NULL);
 			}
 		}
 
@@ -633,7 +643,7 @@ void hand_memoctrl_wheel(widget_t widget, bool_t bHorz, int nDelta)
 			}
 			else
 			{
-				widget_paint(ptd->hsc);
+				widget_erase(ptd->hsc, NULL);
 			}
 		}
 
@@ -760,8 +770,6 @@ widget_t memoctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* px
 
 		EVENT_ON_XFONT(hand_memoctrl_xfont)
 		EVENT_ON_XFACE(hand_memoctrl_xface)
-
-		EVENT_ON_NC_IMPLEMENT
 
 	EVENT_END_DISPATH
 

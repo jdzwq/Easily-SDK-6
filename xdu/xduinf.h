@@ -56,10 +56,8 @@ typedef bool_t(*PF_SHELL_GET_CURPATH)(tchar_t*, int);
 typedef bool_t(*PF_SHELL_GET_APPPATH)(tchar_t*, int);
 typedef bool_t(*PF_SHELL_GET_DOCPATH)(tchar_t*, int);
 typedef bool_t(*PF_SHELL_GET_TMPPATH)(tchar_t*, int);
-#ifdef XDU_SUPPORT_SHELL_DIALOG
 typedef bool_t(*PF_SHELL_GET_FILENAME)(widget_t, const tchar_t*, const tchar_t*, const tchar_t*, bool_t, tchar_t*, int, tchar_t*, int);
 typedef bool_t(*PF_SHELL_GET_PATHNAME)(widget_t, const tchar_t*, bool_t, tchar_t*, int);
-#endif
 
 typedef struct _if_shell_t {
 	PF_SHELL_GET_RUNPATH	pf_shell_get_runpath;
@@ -67,10 +65,9 @@ typedef struct _if_shell_t {
 	PF_SHELL_GET_APPPATH	pf_shell_get_apppath;
 	PF_SHELL_GET_DOCPATH	pf_shell_get_docpath;
 	PF_SHELL_GET_TMPPATH	pf_shell_get_tmppath;
-#ifdef XDU_SUPPORT_SHELL_DIALOG
+	
 	PF_SHELL_GET_FILENAME	pf_shell_get_filename;
 	PF_SHELL_GET_PATHNAME	pf_shell_get_pathname;
-#endif
 }if_shell_t;
 #endif /*XDU_SUPPORT_SHELL*/
 
@@ -103,7 +100,6 @@ typedef void(*PF_GDI_DRAW_ELLIPSE)(visual_t, const xpen_t*, const xbrush_t*, con
 typedef void(*PF_GDI_DRAW_PIE)(visual_t, const xpen_t*, const xbrush_t*, const xrect_t*, double, double);
 typedef void(*PF_GDI_DRAW_TEXT)(visual_t, const xfont_t*, const xface_t*, const xrect_t*, const tchar_t*, int);
 typedef void(*PF_GDI_TEXT_OUT)(visual_t, const xfont_t*, const xpoint_t*, const tchar_t*, int);
-typedef void(*PF_GDI_TEXT_RECT)(visual_t, const xfont_t*, const xface_t*, const tchar_t*, int, xrect_t*);
 typedef void(*PF_GDI_TEXT_SIZE)(visual_t, const xfont_t*, const tchar_t*, int, xsize_t*);
 typedef void(*PF_GDI_FONT_SIZE)(visual_t, const xfont_t*, xsize_t*);
 typedef void(*PF_GDI_DRAW_IMAGE)(visual_t, bitmap_t, const xcolor_t*, const xrect_t*);
@@ -113,6 +109,10 @@ typedef void(*PF_GDI_ALPHABLEND_RECT)(visual_t, const xcolor_t*, const xrect_t*,
 typedef void(*PF_GDI_INVERT_RECT)(visual_t, const xrect_t*);
 typedef void(*PF_GDI_EXCLUDE_RECT)(visual_t, const xrect_t*);
 typedef void(*PF_GDI_INCLIP_RECT)(visual_t, const xrect_t*);
+
+typedef fontset_t(*PF_GDI_CREATE_FONTSET)(const xfont_t*);
+typedef void(*PF_GDI_DESTROY_FONTSET)(fontset_t);
+typedef void(*PF_GDI_WORD_SIZE)(fontset_t, const tchar_t*, int, xsize_t*);
 
 #ifdef XDU_SUPPORT_CONTEXT_BITMAP
 /*bitmap interface*/
@@ -133,6 +133,7 @@ typedef dword_t(*PF_GET_BITMAP_BYTES)(bitmap_t);
 typedef bitmap_t(*PF_LOAD_BITMAP_FROM_THUMB)(visual_t, const tchar_t*);
 typedef bitmap_t(*PF_LOAD_BITMAP_FROM_ICON)(visual_t, const tchar_t*);
 #endif
+
 
 #ifdef XDU_SUPPORT_CONTEXT_PRINTER
 /*printer interface*/
@@ -178,12 +179,15 @@ typedef struct _if_context_t{
 	PF_GDI_TEXT_OUT			pf_gdi_text_out;
 	PF_GDI_DRAW_IMAGE		pf_gdi_draw_image;
 	PF_GDI_DRAW_BITMAP		pf_gdi_draw_bitmap;
-	PF_GDI_TEXT_RECT		pf_gdi_text_rect;
 	PF_GDI_TEXT_SIZE		pf_gdi_text_size;
 	PF_GDI_FONT_SIZE		pf_gdi_font_size;
 	PF_GDI_INVERT_RECT		pf_gdi_invert_rect;
 	PF_GDI_EXCLUDE_RECT		pf_gdi_exclude_rect;
 	PF_GDI_INCLIP_RECT		pf_gdi_inclip_rect;
+
+	PF_GDI_CREATE_FONTSET		pf_gdi_create_fontset;
+	PF_GDI_DESTROY_FONTSET		pf_gdi_destroy_fontset;
+	PF_GDI_WORD_SIZE			pf_gdi_word_size;
 
 #ifdef XDU_SUPPORT_CONTEXT_BITMAP
 	PF_DESTROY_BITMAP			pf_destroy_bitmap;
@@ -255,9 +259,9 @@ typedef vword_t (*PF_WIDGET_GET_USER_PROP)(widget_t, const tchar_t*);
 typedef vword_t (*PF_WIDGET_DEL_USER_PROP)(widget_t, const tchar_t*);
 typedef void(*PF_WIDGET_SET_USER_RESULT)(widget_t, int);
 typedef int(*PF_WIDGET_GET_USER_RESULT)(widget_t);
-typedef visual_t(*PF_WIDGET_CLIENT_DC)(widget_t);
-typedef visual_t(*PF_WIDGET_WINDOW_DC)(widget_t);
-typedef void(*PF_WIDGET_RELEASE_DC)(widget_t, visual_t);
+typedef visual_t(*PF_WIDGET_CLIENT_CONTEXT)(widget_t);
+typedef visual_t(*PF_WIDGET_WINDOW_CONTEXT)(widget_t);
+typedef void(*PF_WIDGET_RELEASE_CONTEXT)(widget_t, visual_t);
 typedef widget_t(*PF_WIDGET_GET_CHILD)(widget_t, uid_t);
 typedef widget_t(*PF_WIDGET_GET_PARENT)(widget_t);
 typedef void(*PF_WIDGET_GET_CLIENT_RECT)(widget_t, xrect_t*);
@@ -279,7 +283,6 @@ typedef void(*PF_WIDGET_MOVE)(widget_t, const xpoint_t*);
 typedef void(*PF_WIDGET_TAKE)(widget_t, int);
 typedef void(*PF_WIDGET_SHOW)(widget_t, dword_t);
 typedef void(*PF_WIDGET_LAYOUT)(widget_t);
-typedef void(*PF_WIDGET_PAINT)(widget_t);
 typedef void(*PF_WIDGET_ERASE)(widget_t, const xrect_t*);
 typedef void(*PF_WIDGET_ENABLE)(widget_t, bool_t);
 typedef void(*PF_WIDGET_ACTIVE)(widget_t);
@@ -289,14 +292,11 @@ typedef void(*PF_WIDGET_SHOW_CARET)(widget_t, int, int);
 
 typedef void(*PF_WIDGET_SET_TITLE)(widget_t, const tchar_t*);
 typedef int(*PF_WIDGET_GET_TITLE)(widget_t, tchar_t*, int);
-typedef void(*PF_WIDGET_GET_MENU_RECT)(widget_t, xrect_t*);
 typedef bool_t(*PF_WIDGET_ENUM_CHILD)(widget_t, PF_ENUM_WINDOW_PROC, vword_t);
-typedef void(*PF_WIDGET_MENU_ITEM_RECT)(widget_t, int, xrect_t*);
-typedef	void(*PF_WIDGET_GET_BORDER)(widget_t, border_t*);
 typedef bool_t(*PF_WIDGET_IS_MAXIMIZED)(widget_t);
 typedef bool_t(*PF_WIDGET_IS_MINIMIZED)(widget_t);
 
-typedef if_subproc_t* (*PF_WIDGET_GET_SUBPROC)(widget_t, uid_t);
+typedef const if_subproc_t* (*PF_WIDGET_GET_SUBPROC)(widget_t, uid_t);
 typedef bool_t(*PF_WIDGET_SET_SUBPROC)(widget_t, uid_t, if_subproc_t*);
 typedef void(*PF_WIDGET_DEL_SUBPROC)(widget_t, uid_t);
 typedef bool_t(*PF_WIDGET_SET_SUBPROC_DELTA)(widget_t, uid_t, vword_t);
@@ -324,10 +324,6 @@ typedef void(*PF_WIDGET_SET_COLOR_MODE)(widget_t, const color_mod_t*);
 typedef void(*PF_WIDGET_GET_COLOR_MODE)(widget_t, color_mod_t*);
 typedef void(*PF_WIDGET_SET_DIAPH)(widget_t, float);
 typedef float(*PF_WIDGET_GET_DIAPH)(widget_t);
-typedef void(*PF_WIDGET_SET_POINT)(widget_t, const xpoint_t*);
-typedef void(*PF_WIDGET_GET_POINT)(widget_t, xpoint_t*);
-typedef void(*PF_WIDGET_SET_SIZE)(widget_t, const xsize_t*);
-typedef void(*PF_WIDGET_GET_SIZE)(widget_t, xsize_t*);
 
 typedef int(*PF_WIDGET_DO_MAIN)(widget_t);
 typedef int(*PF_WIDGET_DO_MODAL)(widget_t);
@@ -336,8 +332,8 @@ typedef void(*PF_WIDGET_DO_TRACK)(widget_t);
 typedef void(*PF_MESSAGE_POSITION)(xpoint_t*);
 typedef void(*PF_MESSAGE_QUIT)(int);
 
-typedef void(*PF_ADJUST_WIDGET_SIZE)(dword_t, xsize_t*);
 typedef void(*PF_CALC_WIDGET_BORDER)(dword_t, border_t*);
+typedef void(*PF_ADJUST_WIDGET_SIZE)(dword_t, xsize_t*);
 typedef void(*PF_GET_SCREEN_SIZE)(xsize_t*);
 typedef void(*PF_GET_DESKTOP_SIZE)(xsize_t*);
 typedef void(*PF_SCREEN_SIZE_TO_PT)(xsize_t*);
@@ -372,9 +368,9 @@ typedef struct _if_widget_t{
 	PF_WIDGET_DEL_USER_PROP		pf_widget_del_user_prop;
 	PF_WIDGET_SET_USER_RESULT	pf_widget_set_user_result;
 	PF_WIDGET_GET_USER_RESULT	pf_widget_get_user_result;
-	PF_WIDGET_CLIENT_DC			pf_widget_client_ctx;
-	PF_WIDGET_WINDOW_DC			pf_widget_window_ctx;
-	PF_WIDGET_RELEASE_DC		pf_widget_release_ctx;
+	PF_WIDGET_CLIENT_CONTEXT	pf_widget_client_context;
+	PF_WIDGET_WINDOW_CONTEXT	pf_widget_window_context;
+	PF_WIDGET_RELEASE_CONTEXT	pf_widget_release_context;
 	PF_WIDGET_GET_CHILD			pf_widget_get_child;
 	PF_WIDGET_GET_PARENT		pf_widget_get_parent;
 	PF_WIDGET_GET_CLIENT_RECT	pf_widget_get_client_rect;
@@ -396,7 +392,6 @@ typedef struct _if_widget_t{
 	PF_WIDGET_TAKE				pf_widget_take;
 	PF_WIDGET_SHOW				pf_widget_show;
 	PF_WIDGET_LAYOUT			pf_widget_layout;
-	PF_WIDGET_PAINT				pf_widget_paint;
 	PF_WIDGET_ERASE				pf_widget_erase;
 	PF_WIDGET_ENABLE			pf_widget_enable;
 	PF_WIDGET_ACTIVE			pf_widget_active;
@@ -408,8 +403,6 @@ typedef struct _if_widget_t{
 	PF_WIDGET_SET_TIMER			pf_widget_set_timer;
 	PF_WIDGET_KILL_TIMER		pf_widget_kill_timer;
 	PF_WIDGET_ENUM_CHILD		pf_widget_enum_child;
-	PF_WIDGET_GET_MENU_RECT		pf_widget_get_menu_rect;
-	PF_WIDGET_GET_BORDER		pf_widget_get_border;
 
 	PF_WIDGET_IS_MAXIMIZED		pf_widget_is_maximized;
 	PF_WIDGET_IS_MINIMIZED		pf_widget_is_minimized;
@@ -440,10 +433,6 @@ typedef struct _if_widget_t{
 	PF_WIDGET_GET_COLOR_MODE	pf_widget_get_color_mode;
 	PF_WIDGET_SET_DIAPH			pf_widget_set_diaph;
 	PF_WIDGET_GET_DIAPH			pf_widget_get_diaph;
-	PF_WIDGET_SET_POINT			pf_widget_set_point;
-	PF_WIDGET_GET_POINT			pf_widget_get_point;
-	PF_WIDGET_SET_SIZE			pf_widget_set_size;
-	PF_WIDGET_GET_SIZE			pf_widget_get_size;
 
 	PF_WIDGET_DO_MAIN			pf_widget_do_main;
 	PF_WIDGET_DO_MODAL			pf_widget_do_modal;
@@ -452,8 +441,8 @@ typedef struct _if_widget_t{
 	PF_MESSAGE_POSITION			pf_message_position;
 	PF_MESSAGE_QUIT				pf_message_quit;
 
-	PF_ADJUST_WIDGET_SIZE		pf_adjust_widget_size;
 	PF_CALC_WIDGET_BORDER		pf_calc_widget_border;
+	PF_ADJUST_WIDGET_SIZE		pf_adjust_widget_size;
 	PF_GET_SCREEN_SIZE			pf_get_screen_size;
 	PF_GET_DESKTOP_SIZE			pf_get_desktop_size;
 	PF_SCREEN_SIZE_TO_PT		pf_screen_size_to_pt;
@@ -476,9 +465,6 @@ extern "C" {
 
 #ifdef XDU_SUPPORT_SHELL
 	EXP_API void xdu_impl_shell(if_shell_t* pif);
-#ifdef XDU_SUPPORT_SHELL_DIALOG
-	EXP_API void xdu_impl_shell_dialog(if_shell_t* pif);
-#endif
 #endif /*XDU_SUPPORT_SHELL*/
 
 #ifdef XDU_SUPPORT_CONTEXT

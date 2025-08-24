@@ -44,7 +44,7 @@ typedef struct _owner_delta_t{
 static int noti_owner_owner(widget_t widget, unsigned int code, void* data)
 {
 	owner_delta_t* ptd = GETOWNERDELTA(widget);
-
+	widget_t owner;
 	NOTICE_OWNER nf = { 0 };
 
 	nf.widget = widget;
@@ -53,8 +53,14 @@ static int noti_owner_owner(widget_t widget, unsigned int code, void* data)
 	nf.data = data;
 	nf.ret = 0;
 
-	widget_send_notice(widget_get_owner(widget), (LPNOTICE)&nf);
-	return nf.ret;
+	owner = widget_get_owner(widget);
+	if (owner)
+	{
+		widget_send_notice(owner, (LPNOTICE)&nf);
+		return nf.ret;
+	}
+
+	return 0;
 }
 
 void noti_owner_reset_scroll(widget_t widget, bool_t bUpdate)
@@ -64,7 +70,7 @@ void noti_owner_reset_scroll(widget_t widget, bool_t bUpdate)
 	if (widget_is_valid(ptd->vsc))
 	{
 		if (bUpdate)
-			widget_paint(ptd->vsc);
+			widget_erase(ptd->vsc, NULL);
 		else
 			widget_close(ptd->vsc, 0);
 	}
@@ -72,7 +78,7 @@ void noti_owner_reset_scroll(widget_t widget, bool_t bUpdate)
 	if (widget_is_valid(ptd->hsc))
 	{
 		if (bUpdate)
-			widget_paint(ptd->hsc);
+			widget_erase(ptd->hsc, NULL);
 		else
 			widget_close(ptd->hsc, 0);
 	}
@@ -216,11 +222,20 @@ void hand_owner_size(widget_t widget, int code, const xsize_t* prs)
 {
 	owner_delta_t* ptd = GETOWNERDELTA(widget);
 
-	XDK_ASSERT(ptd != NULL);
+		XDK_ASSERT(ptd != NULL);
 
-	noti_owner_reset_scroll(widget, 0);
-
-	ownerctrl_redraw(widget);
+	switch(code)
+	{
+	case WS_SIZE_FULLSCREEN:
+		break;
+	case WS_SIZE_MAXIMIZED:
+		break;
+	case WS_SIZE_MINIMIZED:
+		break;
+	case WS_SIZE_LAYOUT:
+		_ownerctrl_reset_page(widget);
+		break;
+	}
 }
 
 void hand_owner_scroll(widget_t widget, bool_t bHorz, int nLine)
@@ -259,7 +274,7 @@ void hand_owner_wheel(widget_t widget, bool_t bHorz, int nDelta)
 			}
 			else
 			{
-				widget_paint(ptd->vsc);
+				widget_erase(ptd->vsc, NULL);
 			}
 		}
 
@@ -271,7 +286,7 @@ void hand_owner_wheel(widget_t widget, bool_t bHorz, int nDelta)
 			}
 			else
 			{
-				widget_paint(ptd->hsc);
+				widget_erase(ptd->hsc, NULL);
 			}
 		}
 
@@ -350,7 +365,7 @@ widget_t ownerctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* p
 		EVENT_ON_RBUTTON_DOWN(hand_owner_rbutton_down)
 		EVENT_ON_RBUTTON_UP(hand_owner_rbutton_up)
 
-		EVENT_ON_NC_IMPLEMENT
+		
 
 	EVENT_END_DISPATH
 
@@ -365,7 +380,6 @@ void ownerctrl_redraw(widget_t widget)
 
 	_ownerctrl_reset_page(widget);
 
-	widget_paint(widget);
 
 	widget_erase(widget, NULL);
 }

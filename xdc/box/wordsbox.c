@@ -61,7 +61,7 @@ void _wordsbox_item_rect(widget_t widget, link_t_ptr plk, xrect_t* pxr)
 	widget_rect_to_pt(widget, pxr);
 }
 
-void _wordsbox_reset_page(widget_t widget)
+static void _wordsbox_reset_page(widget_t widget)
 {
 	words_delta_t* ptd = GETWORDSDELTA(widget);
 	measure_interface im = { 0 };
@@ -69,12 +69,19 @@ void _wordsbox_reset_page(widget_t widget)
 	xrect_t xr;
 	xsize_t xs;
 
-	get_canvas_measure(widget_get_canvas(widget), &im);
-
-	calc_wordsbox_size(&im, &ptd->xf, ptd->words, &xs);
-	widget_size_to_pt(widget, &xs);
-
 	widget_get_client_rect(widget, &xr);
+
+	if (ptd->words)
+	{
+		get_canvas_measure(widget_get_canvas(widget), &im);
+		calc_wordsbox_size(&im, &ptd->xf, ptd->words, &xs);
+		widget_size_to_pt(widget, &xs);
+	}
+	else
+	{
+		xs.w = xr.w;
+		xs.h = xr.h;
+	}
 
 	widget_reset_paging(widget, xr.w, xr.h, xs.w, xs.h, 0, 0);
 }
@@ -241,7 +248,7 @@ void hand_words_lbutton_up(widget_t widget, const xpoint_t* pxp)
 
 	pt.x = pxp->x;
 	pt.y = pxp->y;
-	widget_point_to_tm(widget, &pt);
+	widget_point_to_mm(widget, &pt);
 
 	calc_wordsbox_hint(&im, &ptd->xf, &pt, ptd->words, ptd->page, &ilk);
 
@@ -261,10 +268,20 @@ void hand_words_size(widget_t widget, int code, const xsize_t* prs)
 {
 	words_delta_t* ptd = GETWORDSDELTA(widget);
 
-	if (!ptd->words)
-		return;
+	XDK_ASSERT(ptd != NULL);
 
-	wordsbox_redraw(widget);
+	switch(code)
+	{
+	case WS_SIZE_FULLSCREEN:
+		break;
+	case WS_SIZE_MAXIMIZED:
+		break;
+	case WS_SIZE_MINIMIZED:
+		break;
+	case WS_SIZE_LAYOUT:
+		_wordsbox_reset_page(widget);
+		break;
+	}
 }
 
 void hand_words_scroll(widget_t widget, bool_t bHorz, int nLine)
@@ -350,7 +367,7 @@ widget_t wordsbox_create(widget_t widget, dword_t style, const xrect_t* pxr)
 
 		EVENT_ON_XFONT(hand_words_xfont)
 
-		EVENT_ON_NC_IMPLEMENT
+		
 
 	EVENT_END_DISPATH
 
@@ -412,8 +429,6 @@ void wordsbox_redraw(widget_t widget)
 		ptd->page = pages;
 
 	_wordsbox_reset_page(widget);
-
-	widget_paint(widget);
 }
 
 bool_t wordsbox_set_focus_item(widget_t widget, link_t_ptr ent)

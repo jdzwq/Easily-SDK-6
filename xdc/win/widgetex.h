@@ -107,12 +107,12 @@ EXP_API void	widget_get_dock_rect(widget_t wt, dword_t style, xrect_t* pxr);
 EXP_API void	widget_rect_to_pt(widget_t wt, xrect_t* pxr);
 
 /*
-@FUNCTION widget_rect_to_tm: mapping rect points value to millimeter value.
+@FUNCTION widget_rect_to_mm: mapping rect points value to millimeter value.
 @INPUT widget_t wt: windowd resource handle.
 @INOUTPUT xrect_t* pxr: the rect struct for inputing points value and outping millimeter value.
 @RETURN void: none.
 */
-EXP_API void	widget_rect_to_tm(widget_t wt, xrect_t* pxr);
+EXP_API void	widget_rect_to_mm(widget_t wt, xrect_t* pxr);
 
 /*
 @FUNCTION widget_size_to_pt: mapping size millimeter value to points value.
@@ -123,12 +123,12 @@ EXP_API void	widget_rect_to_tm(widget_t wt, xrect_t* pxr);
 EXP_API void	widget_size_to_pt(widget_t wt, xsize_t* pxs);
 
 /*
-@FUNCTION widget_size_to_tm: mapping rect millimeter value to points value.
+@FUNCTION widget_size_to_mm: mapping rect millimeter value to points value.
 @INPUT widget_t wt: windowd resource handle.
 @INOUTPUT xsize_t* pxs: the size struct for inputing points value and outping millimeter value.
 @RETURN void: none.
 */
-EXP_API void	widget_size_to_tm(widget_t wt, xsize_t* pxs);
+EXP_API void	widget_size_to_mm(widget_t wt, xsize_t* pxs);
 
 /*
 @FUNCTION widget_point_to_pt: mapping point millimeter value to points value.
@@ -139,12 +139,12 @@ EXP_API void	widget_size_to_tm(widget_t wt, xsize_t* pxs);
 EXP_API void	widget_point_to_pt(widget_t wt, xpoint_t* ppt);
 
 /*
-@FUNCTION widget_point_to_tm: mapping point millimeter value to points value.
+@FUNCTION widget_point_to_mm: mapping point millimeter value to points value.
 @INPUT widget_t wt: windowd resource handle.
 @INOUTPUT xpoint_t* ppt: the point struct for inputing points value and outping millimeter value.
 @RETURN void: none.
 */
-EXP_API void	widget_point_to_tm(widget_t wt, xpoint_t* ppt);
+EXP_API void	widget_point_to_mm(widget_t wt, xpoint_t* ppt);
 
 /*
 @FUNCTION widget_attach_menu: attach a menu document to widget.
@@ -263,7 +263,7 @@ EXP_API void	widget_hand_create(widget_t wt);
 
 EXP_API void	widget_hand_destroy(widget_t wt);
 
-EXP_API void	widget_hand_paint(widget_t wt, visual_t rdc);
+EXP_API void	widget_hand_paint(widget_t wt, visual_t rdc, const tchar_t* gradient);
 
 EXP_API bool_t	widget_hand_scroll(widget_t wt, bool_t b_horz, int pos);
 

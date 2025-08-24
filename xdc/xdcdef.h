@@ -165,11 +165,6 @@ typedef struct _splitor_t{
 #define EVENT_ON_XFACE(proc)			pev->pf_on_xface = proc;
 #define EVENT_ON_XBRUSH(proc)			pev->pf_on_xbrush = proc;
 #define EVENT_ON_XPEN(proc)				pev->pf_on_xpen = proc;
-#ifdef XDU_SUPPORT_WIDGET_NC
-#define EVENT_ON_NC_IMPLEMENT			{pev->pf_on_nc_paint = widgetnc_on_paint;pev->pf_on_nc_calcsize = widgetnc_on_calcsize;pev->pf_on_nc_hittest = widgetnc_on_hittest;pev->pf_on_nc_calcscroll = widgetnc_on_calcscroll;}
-#else
-#define EVENT_ON_NC_IMPLEMENT
-#endif
 #define EVENT_ON_SPLITOR_IMPLEMENT		{pev->pf_on_mouse_move = widget_splitor_on_mousemove;pev->pf_on_lbutton_down=widget_splitor_on_lbuttondown;pev->pf_on_lbutton_up=widget_splitor_on_lbuttonup;pev->pf_on_size=widget_splitor_on_size;pev->pf_on_paint=widget_splitor_on_paint;}
 #define EVENT_ON_DOCKER_IMPLEMENT		{pev->pf_on_mouse_move = widget_docker_on_mousemove;pev->pf_on_lbutton_down=widget_docker_on_lbuttondown;pev->pf_on_lbutton_up=widget_docker_on_lbuttonup;pev->pf_on_paint=widget_docker_on_paint;}
 #define EVENT_END_DISPATH				}

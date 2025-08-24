@@ -231,31 +231,31 @@ vword_t widget_del_user_prop(widget_t wt, const tchar_t* pname)
 	return (pif->pf_widget_del_user_prop)(wt, pname);
 }
 
-visual_t widget_client_ctx(widget_t wt)
+visual_t widget_client_context(widget_t wt)
 {
 	if_widget_t* pif;
 
 	pif = PROCESS_WIDGET_INTERFACE;
 
-	return (pif->pf_widget_client_ctx)(wt);
+	return (pif->pf_widget_client_context)(wt);
 }
 
-visual_t widget_window_ctx(widget_t wt)
+visual_t widget_window_context(widget_t wt)
 {
 	if_widget_t* pif;
 
 	pif = PROCESS_WIDGET_INTERFACE;
 
-	return (pif->pf_widget_window_ctx)(wt);
+	return (pif->pf_widget_window_context)(wt);
 }
 
-void widget_release_ctx(widget_t wt, visual_t dc)
+void widget_release_context(widget_t wt, visual_t dc)
 {
 	if_widget_t* pif;
 
 	pif = PROCESS_WIDGET_INTERFACE;
 
-	(pif->pf_widget_release_ctx)(wt, dc);
+	(pif->pf_widget_release_context)(wt, dc);
 }
 
 void widget_get_client_rect(widget_t wt, xrect_t* prt)
@@ -274,24 +274,6 @@ void widget_get_window_rect(widget_t wt, xrect_t* prt)
 	pif = PROCESS_WIDGET_INTERFACE;
 
 	(pif->pf_widget_get_window_rect)(wt, prt);
-}
-
-void widget_get_border(widget_t wt, border_t* pbd)
-{
-	if_widget_t* pif;
-
-	pif = PROCESS_WIDGET_INTERFACE;
-
-	(pif->pf_widget_get_border)(wt, pbd);
-}
-
-void widget_get_menu_rect(widget_t wt, xrect_t* prt)
-{
-	if_widget_t* pif;
-
-	pif = PROCESS_WIDGET_INTERFACE;
-
-	(pif->pf_widget_get_menu_rect)(wt, prt);
 }
 
 void widget_get_window_edge(widget_t wt, xsize_t* pxs)
@@ -650,15 +632,6 @@ void widget_layout(widget_t wt)
 	(pif->pf_widget_layout)(wt);
 }
 
-void widget_paint(widget_t wt)
-{
-	if_widget_t* pif;
-
-	pif = PROCESS_WIDGET_INTERFACE;
-
-	(pif->pf_widget_paint)(wt);
-}
-
 void widget_erase(widget_t wt, const xrect_t* prt)
 {
 	if_widget_t* pif;
@@ -821,24 +794,6 @@ void  widget_noti_xpen(widget_t wt, const xpen_t* pxp)
 	(pif->pf_widget_noti_xpen)(wt, pxp);
 }
 
-void  widget_set_point(widget_t wt, const xpoint_t* ppt)
-{
-	if_widget_t* pif;
-
-	pif = PROCESS_WIDGET_INTERFACE;
-
-	(pif->pf_widget_set_point)(wt, ppt);
-}
-
-void  widget_get_point(widget_t wt, xpoint_t* ppt)
-{
-	if_widget_t* pif;
-
-	pif = PROCESS_WIDGET_INTERFACE;
-
-	(pif->pf_widget_get_point)(wt, ppt);
-}
-
 void widget_set_color_mode(widget_t wt, const color_mod_t* pclr)
 {
 	if_widget_t* pif;
@@ -920,84 +875,22 @@ void message_position(xpoint_t* pxp)
 	(pif->pf_message_position)(pxp);
 }
 
-void calc_widget_border(dword_t ws, border_t* pbd)
-{
-	xsize_t xs;
-
-	pbd->edge = pbd->title = pbd->hscroll = pbd->vscroll = pbd->menu = pbd->icon = 0;
-
-	if (ws & WD_STYLE_TITLE)
-	{
-		xs.fw = ZERO_WIDTH;
-		xs.fh = WIDGET_TITLE_SPAN;
-		screen_size_to_pt(&xs);
-
-		pbd->title = xs.h;
-	}
-
-	if (ws & WD_STYLE_BORDER)
-	{
-		xs.fw = ZERO_WIDTH;
-		if (ws & WD_STYLE_CHILD)
-			xs.fh = WIDGET_CHILD_EDGE;
-		else
-			xs.fh = WIDGET_FRAME_EDGE;
-		screen_size_to_pt(&xs);
-
-		pbd->edge = xs.h;
-	}
-
-	if (ws & WD_STYLE_HSCROLL)
-	{
-		xs.fw = ZERO_WIDTH;
-		xs.fh = WIDGET_SCROLL_SPAN;
-		screen_size_to_pt(&xs);
-
-		pbd->hscroll = xs.h;
-	}
-
-	if (ws & WD_STYLE_VSCROLL)
-	{
-		xs.fw = WIDGET_SCROLL_SPAN;
-		xs.fh = ZERO_HEIGHT;
-		screen_size_to_pt(&xs);
-
-		pbd->vscroll = xs.w;
-	}
-
-	if (ws & WD_STYLE_MENUBAR)
-	{
-		xs.fw = ZERO_WIDTH;
-		xs.fh = WIDGET_MENU_SPAN;
-		screen_size_to_pt(&xs);
-
-		pbd->menu = xs.h;
-	}
-
-	xs.fw = ZERO_WIDTH;
-	xs.fh = WIDGET_ICON_SPAN;
-	screen_size_to_pt(&xs);
-	pbd->icon = xs.h;
-}
-
-void adjust_widget_size(dword_t ws, xsize_t* pxs)
+void calc_widget_border(dword_t wstyle, border_t* pbd)
 {
 	if_widget_t* pif;
-	border_t bd;
 
 	pif = PROCESS_WIDGET_INTERFACE;
 
-	if (ws & WD_STYLE_OWNERNC)
-	{
-		calc_widget_border(ws, &bd);
+	(pif->pf_calc_widget_border)(wstyle, pbd);
+}
 
-		pxs->w += (2 * bd.edge + bd.vscroll);
-		pxs->h += (2 * bd.edge + bd.title + bd.menu + bd.hscroll);
-	}
-	else
-	{
-		(pif->pf_adjust_widget_size)(ws, pxs);
-	}
+void adjust_widget_size(dword_t wstyle, xsize_t* pxs)
+{
+	if_widget_t* pif;
+
+	pif = PROCESS_WIDGET_INTERFACE;
+
+	(pif->pf_adjust_widget_size)(wstyle, pxs);
 }
 
 void get_screen_size(xsize_t* pxs)

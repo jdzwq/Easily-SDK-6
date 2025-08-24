@@ -2,6 +2,7 @@
 #ifndef _TP_IMG_H
 #define _TP_IMG_H
 
+#include "jpg/jconfig.h"
 #include "jpg/jpeglib.h"
 
 #include "png/pnglib.h"

@@ -193,28 +193,28 @@ EXP_API vword_t	widget_get_user_prop(widget_t wt, const tchar_t* pkey);
 EXP_API vword_t	widget_del_user_prop(widget_t wt, const tchar_t* pkey);
 
 /*
-@FUNCTION widget_client_ctx: reference a widget client device context, it clipped by widget client rectangle.
+@FUNCTION widget_client_context: reference a widget client device context, it clipped by widget client rectangle.
 client context used to draw user view.
 @INPUT widget_t wt: the widget resource handle.
 @RETURN visual_t: if succeeds return device context resource handle, fails return NULL.
 */
-EXP_API visual_t widget_client_ctx(widget_t wt);
+EXP_API visual_t widget_client_context(widget_t wt);
 
 /*
-@FUNCTION widget_window_ctx: reference a widget window device context, it clipped by widget window rectangle.
+@FUNCTION widget_window_context: reference a widget window device context, it clipped by widget window rectangle.
 window context used to draw frame.
 @INPUT widget_t wt: the widget resource handle.
 @RETURN visual_t: if succeeds return device context resource handle, fails return NULL.
 */
-EXP_API visual_t widget_window_ctx(widget_t wt);
+EXP_API visual_t widget_window_context(widget_t wt);
 
 /*
-@FUNCTION widget_release_ctx: release client or window device context.
+@FUNCTION widget_release_context: release client or window device context.
 @INPUT widget_t wt: the widget resource handle.
 @INPUT visual_t dc: the device context handle.
 @RETURN void: none.
 */
-EXP_API void	widget_release_ctx(widget_t wt, visual_t dc);
+EXP_API void	widget_release_context(widget_t wt, visual_t dc);
 
 /*
 @FUNCTION widget_get_client_rect: get client rectangle, the coordinate is window client based.
@@ -327,13 +327,6 @@ EXP_API void	widget_layout(widget_t wt);
 @RETURN void: none.
 */
 EXP_API void	widget_erase(widget_t wt, const xrect_t* prt);
-
-/*
-@FUNCTION widget_update_window: redraw whole widndow immediately.
-@INPUT widget_t wt: the widget resource handle.
-@RETURN void: none.
-*/
-EXP_API void	widget_paint(widget_t wt);
 
 /*
 @FUNCTION widget_enable: enable or disable window, the window disabled can not get focus for inputing.
@@ -694,42 +687,6 @@ EXP_API void	widget_noti_xbrush(widget_t wt, const xbrush_t* pxb);
 EXP_API void	widget_noti_xpen(widget_t wt, const xpen_t* pxp);
 
 /*
-@FUNCTION widget_set_point: set the child widget position in client coordinate.
-@INPUT widget_t wt: windowd resource handle.
-@INPUT const xpoint_t* ppt: the point struct.
-@RETURN void: none.
-*/
-EXP_API void	widget_set_point(widget_t wt, const xpoint_t* ppt);
-
-/*
-@FUNCTION widget_get_point: get the child widget position in client coordinate.
-@INPUT widget_t wt: windowd resource handle.
-@OUTPUT xpoint_t* ppt: the point struct.
-@RETURN void: none.
-*/
-EXP_API void	widget_get_point(widget_t wt, xpoint_t* ppt);
-
-/*
-@FUNCTION widget_set_size: set the child widget size in client coordinate.
-@INPUT widget_t wt: windowd resource handle.
-@INPUT const xsize_t* ppt: the size struct.
-@RETURN void: none.
-*/
-EXP_API void	widget_set_size(widget_t wt, const xsize_t* ppt);
-
-/*
-@FUNCTION widget_get_size: get the child widget size in client coordinate.
-@INPUT widget_t wt: windowd resource handle.
-@OUTPUT xsize_t* ppt: the size struct.
-@RETURN void: none.
-*/
-EXP_API void	widget_get_size(widget_t wt, xsize_t* ppt);
-
-EXP_API void	widget_get_menu_rect(widget_t wt, xrect_t* pxr);
-
-EXP_API void	widget_get_border(widget_t wt, border_t* pbd);
-
-/*
 @FUNCTION widget_set_color_mode: set the widget color mode.
 @INPUT widget_t wt: windowd resource handle.
 @INPUT const color_mod_t* pclr: the color mode struct.
@@ -759,6 +716,10 @@ EXP_API void	widget_set_diaph(widget_t wt, float b);
 @RETURN byte_t: the alphablend level, 255 for not setting alphablend level.
 */
 EXP_API float	widget_get_diaph(widget_t wt);
+
+EXP_API void	calc_widget_border(dword_t wstyle, border_t* pbd);
+
+EXP_API void	adjust_widget_size(dword_t wstyle, xsize_t* pxs);
 
 /*
 @FUNCTION get_screen_size: calc screen size in points.
@@ -817,9 +778,6 @@ EXP_API void 	message_quit(int ret);
 
 EXP_API void 	message_position(xpoint_t* pxp);
 
-EXP_API void	adjust_widget_size(dword_t ws, xsize_t* pxs);
-
-EXP_API void	calc_widget_border(dword_t ws, border_t* pbd);
 
 #ifdef	__cplusplus
 }

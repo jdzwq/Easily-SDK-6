@@ -86,7 +86,7 @@ static void _treectrl_item_expand_rect(widget_t widget, link_t_ptr ilk, xrect_t*
 static void _treectrl_reset_page(widget_t widget)
 {
 	tree_delta_t* ptd = GETTREEDELTA(widget);
-	int pw, ph, fw, fh, lh;
+	int pw, ph, vw, vh, lw, lh;
 	xrect_t xr;
 	xsize_t xs;
 	canvas_t canv;
@@ -96,26 +96,48 @@ static void _treectrl_reset_page(widget_t widget)
 	pw = xr.w;
 	ph = xr.h;
 
-	canv = widget_get_canvas(widget);
-	get_canvas_measure(canv, &im);
-	widget_get_canv_rect(widget, (canvbox_t*)&(im.rect));
+	if (ptd->tree)
+	{
+		widget_rect_to_mm(widget, &xr);
+		set_tree_width(ptd->tree, xr.fw);
+		set_tree_height(ptd->tree, xr.fh);
 
-	xs.fw = calc_tree_width(&im, ptd->tree);
-	xs.fh = calc_tree_height(ptd->tree);
+		canv = widget_get_canvas(widget);
+		get_canvas_measure(canv, &im);
+		widget_get_canv_rect(widget, (canvbox_t *)&(im.rect));
 
+		xs.fw = calc_tree_width(&im, ptd->tree);
+		xs.fh = calc_tree_height(ptd->tree);
+
+		widget_size_to_pt(widget, &xs);
+		vw = xs.w;
+		if (vw < pw)
+			vw = pw;
+		vh = xs.h;
+	}
+	else
+	{
+		vw = pw;
+		vh = ph;
+	}
+
+	if(ptd->tree)
+	{
+		xs.fw = 5.0f;
+		if(ptd->tree)
+			xs.fh = get_tree_item_height(ptd->tree);
+		else
+			xs.fh = 5.0f;
+	}else
+	{
+		xs.fw = 5.0f;
+		xs.fh = 5.0f;
+	}
 	widget_size_to_pt(widget, &xs);
-	fw = xs.w;
-	if (fw < pw)
-		fw = pw;
-	fh = xs.h;
-
-	xs.fw = ZERO_WIDTH;
-	xs.fh = get_tree_item_height(ptd->tree);
-
-	widget_size_to_pt(widget, &xs);
+	lw = xs.w;
 	lh = xs.h;
 
-	widget_reset_paging(widget, pw, ph, fw, fh, lh, lh);
+	widget_reset_paging(widget, pw, ph, vw, vh, lw, lh);
 
 	widget_reset_scroll(widget, 1);
 
@@ -463,7 +485,7 @@ void noti_tree_reset_scroll(widget_t widget, bool_t bUpdate)
 	if (widget_is_valid(ptd->vsc))
 	{
 		if (bUpdate)
-			widget_paint(ptd->vsc);
+			widget_erase(ptd->vsc, NULL);
 		else
 			widget_close(ptd->vsc, 0);
 	}
@@ -507,20 +529,21 @@ void hand_tree_destroy(widget_t widget)
 void hand_tree_size(widget_t widget, int code, const xsize_t* pxs)
 {
 	tree_delta_t* ptd = GETTREEDELTA(widget);
-	xrect_t xr;
 
-	if (!ptd->tree)
-		return;
+	XDK_ASSERT(ptd != NULL);
 
-	noti_tree_reset_scroll(widget, 0);
-
-	widget_get_client_rect(widget, &xr);
-	widget_rect_to_tm(widget, &xr);
-
-	set_tree_width(ptd->tree, xr.fw);
-	set_tree_height(ptd->tree, xr.fh);
-
-	treectrl_redraw(widget);
+	switch(code)
+	{
+	case WS_SIZE_FULLSCREEN:
+		break;
+	case WS_SIZE_MAXIMIZED:
+		break;
+	case WS_SIZE_MINIMIZED:
+		break;
+	case WS_SIZE_LAYOUT:
+		_treectrl_reset_page(widget);
+		break;
+	}
 }
 
 void hand_tree_lbutton_down(widget_t widget, const xpoint_t* pxp)
@@ -543,7 +566,7 @@ void hand_tree_lbutton_down(widget_t widget, const xpoint_t* pxp)
 
 	pt.x = pxp->x;
 	pt.y = pxp->y;
-	widget_point_to_tm(widget, &pt);
+	widget_point_to_mm(widget, &pt);
 
 	tlk = NULL;
 	nHint = calc_tree_hint(&pt, ptd->tree, &tlk);
@@ -585,7 +608,7 @@ void hand_tree_lbutton_up(widget_t widget, const xpoint_t* pxp)
 
 	pt.x = pxp->x;
 	pt.y = pxp->y;
-	widget_point_to_tm(widget, &pt);
+	widget_point_to_mm(widget, &pt);
 
 	tlk = NULL;
 	nHint = calc_tree_hint(&pt, ptd->tree, &tlk);
@@ -670,7 +693,7 @@ void hand_tree_mouse_move(widget_t widget, dword_t dw, const xpoint_t* pxp)
 
 	pt.x = pxp->x;
 	pt.y = pxp->y;
-	widget_point_to_tm(widget, &pt);
+	widget_point_to_mm(widget, &pt);
 
 	tlk = NULL;
 	nHint = calc_tree_hint(&pt, ptd->tree, &tlk);
@@ -798,7 +821,7 @@ void hand_tree_wheel(widget_t widget, bool_t bHorz, int nDelta)
 			}
 			else
 			{
-				widget_paint(ptd->vsc);
+				widget_erase(ptd->vsc, NULL);
 			}
 		}
 
@@ -912,7 +935,7 @@ widget_t treectrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* px
 
 		EVENT_ON_CHILD_COMMAND(hand_tree_child_command)
 
-		EVENT_ON_NC_IMPLEMENT
+		
 
 	EVENT_END_DISPATH
 
@@ -934,7 +957,7 @@ void treectrl_attach(widget_t widget, link_t_ptr ptr)
 	ptd->item = NULL;
 
 	widget_get_client_rect(widget, &xr);
-	widget_rect_to_tm(widget, &xr);
+	widget_rect_to_mm(widget, &xr);
 
 	set_tree_width(ptd->tree, xr.fw);
 	set_tree_height(ptd->tree, xr.fh);
@@ -1022,7 +1045,6 @@ void treectrl_redraw(widget_t widget)
 
 	_treectrl_reset_page(widget);
 
-	widget_paint(widget);
 }
 
 void treectrl_redraw_item(widget_t widget, link_t_ptr ilk)

@@ -297,7 +297,7 @@ static bitmap_t _modelctrl_merge_anno(widget_t widget)
 	if (!ptd->bmp && !ptd->anno)
 		return NULL;
 
-	rdc = widget_client_ctx(widget);
+	rdc = widget_client_context(widget);
 
 	get_bitmap_size(ptd->bmp, &xs.w, &xs.h);
 
@@ -323,7 +323,7 @@ static bitmap_t _modelctrl_merge_anno(widget_t widget)
 
 	destroy_context(memdc);
 
-	widget_release_ctx(widget, rdc);
+	widget_release_context(widget, rdc);
 
 	return membm;
 }
@@ -331,7 +331,7 @@ static bitmap_t _modelctrl_merge_anno(widget_t widget)
 static void _modelctrl_reset_page(widget_t widget)
 {
 	model_delta_t* ptd = GETMODELDELTA(widget);
-	int pw, ph, fw, fh;
+	int pw, ph, vw, vh;
 	xrect_t xr;
 
 	widget_get_client_rect(widget, &xr);
@@ -341,15 +341,15 @@ static void _modelctrl_reset_page(widget_t widget)
 	if (ptd->bmp)
 	{
 
-		get_bitmap_size(ptd->bmp, &fw, &fh);
+		get_bitmap_size(ptd->bmp, &vw, &vh);
 	}
 	else
 	{
-		fw = pw;
-		fh = ph;
+		vw = pw;
+		vh = ph;
 	}
 
-	widget_reset_paging(widget, pw, ph, fw, fh, 20, 20);
+	widget_reset_paging(widget, pw, ph, vw, vh, 20, 20);
 
 	widget_reset_scroll(widget, 1);
 
@@ -418,7 +418,7 @@ void noti_model_arti_drop(widget_t widget, int x, int y)
 	ppt = (xpoint_t*)xmem_alloc(sizeof(xpoint_t)*count);
 	get_anno_arti_xpoint(ptd->arti, ppt, count);
 
-	widget_size_to_tm(widget, &xs);
+	widget_size_to_mm(widget, &xs);
 
 	for (i = 0; i < count; i++)
 	{
@@ -485,7 +485,7 @@ void noti_model_arti_sized(widget_t widget, int x, int y)
 	ppt = (xpoint_t*)xmem_alloc(sizeof(xpoint_t)*count);
 	get_anno_arti_xpoint(ptd->arti, ppt, count);
 
-	widget_size_to_tm(widget, &xs);
+	widget_size_to_mm(widget, &xs);
 
 	ppt[ptd->index].fx += xs.fw;
 	ppt[ptd->index].fy += xs.fh;
@@ -652,7 +652,7 @@ void noti_model_reset_scroll(widget_t widget, bool_t bUpdate)
 	if (widget_is_valid(ptd->vsc))
 	{
 		if (bUpdate)
-			widget_paint(ptd->vsc);
+			widget_erase(ptd->vsc, NULL);
 		else
 			widget_close(ptd->vsc, 0);
 	}
@@ -660,7 +660,7 @@ void noti_model_reset_scroll(widget_t widget, bool_t bUpdate)
 	if (widget_is_valid(ptd->hsc))
 	{
 		if (bUpdate)
-			widget_paint(ptd->hsc);
+			widget_erase(ptd->hsc, NULL);
 		else
 			widget_close(ptd->hsc, 0);
 	}
@@ -734,7 +734,7 @@ void hand_model_mouse_move(widget_t widget, dword_t dw, const xpoint_t* pxp)
 	{
 		pt.x = pxp->x;
 		pt.y = pxp->y;
-		widget_point_to_tm(widget, &pt);
+		widget_point_to_mm(widget, &pt);
 
 		hint = calc_anno_hint(&pt, ptd->anno, &ilk, &ind);
 
@@ -774,7 +774,7 @@ void hand_model_lbutton_down(widget_t widget, const xpoint_t* pxp)
 
 	pt.x = pxp->x;
 	pt.y = pxp->y;
-	widget_point_to_tm(widget, &pt);
+	widget_point_to_mm(widget, &pt);
 
 	hint = calc_anno_hint(&pt, ptd->anno, &ilk, &ind);
 
@@ -830,7 +830,7 @@ void hand_model_lbutton_up(widget_t widget, const xpoint_t* pxp)
 
 	pt.x = pxp->x;
 	pt.y = pxp->y;
-	widget_point_to_tm(widget, &pt);
+	widget_point_to_mm(widget, &pt);
 
 	hint = calc_anno_hint(&pt, ptd->anno, &ilk, &ind);
 
@@ -917,7 +917,7 @@ void hand_model_wheel(widget_t widget, bool_t bHorz, int nDelta)
 			}
 			else
 			{
-				widget_paint(ptd->vsc);
+				widget_erase(ptd->vsc, NULL);
 			}
 		}
 
@@ -929,7 +929,7 @@ void hand_model_wheel(widget_t widget, bool_t bHorz, int nDelta)
 			}
 			else
 			{
-				widget_paint(ptd->hsc);
+				widget_erase(ptd->hsc, NULL);
 			}
 		}
 
@@ -1022,11 +1022,20 @@ void hand_model_size(widget_t widget, int code, const xsize_t* prs)
 {
 	model_delta_t* ptd = GETMODELDELTA(widget);
 
-	noti_model_reset_scroll(widget, 0);
+	XDK_ASSERT(ptd != NULL);
 
-	_modelctrl_reset_page(widget);
-
-	widget_erase(widget, NULL);
+	switch(code)
+	{
+	case WS_SIZE_FULLSCREEN:
+		break;
+	case WS_SIZE_MAXIMIZED:
+		break;
+	case WS_SIZE_MINIMIZED:
+		break;
+	case WS_SIZE_LAYOUT:
+		_modelctrl_reset_page(widget);
+		break;
+	}
 }
 
 void hand_model_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
@@ -1113,7 +1122,7 @@ widget_t modelctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* p
 		EVENT_ON_SET_FOCUS(hand_model_set_focus)
 		EVENT_ON_KILL_FOCUS(hand_model_kill_focus)
 
-		EVENT_ON_NC_IMPLEMENT
+		
 
 	EVENT_END_DISPATH
 
@@ -1165,7 +1174,7 @@ void modelctrl_set_object(widget_t widget, const byte_t* data, dword_t size)
 
 	noti_model_reset_editor(widget, 0);
 
-	rdc = widget_client_ctx(widget);
+	rdc = widget_client_context(widget);
 
 	if (ptd->bmp)
 	{
@@ -1175,7 +1184,7 @@ void modelctrl_set_object(widget_t widget, const byte_t* data, dword_t size)
 
 	ptd->bmp = load_bitmap_from_bytes(rdc, data, size);
 
-	widget_release_ctx(widget, rdc);
+	widget_release_context(widget, rdc);
 
 	_modelctrl_reset_page(widget);
 
@@ -1197,11 +1206,11 @@ dword_t modelctrl_get_object(widget_t widget, byte_t* buf, dword_t max)
 	if (!buf)
 		return len_bmp;
 
-	rdc = widget_client_ctx(widget);
+	rdc = widget_client_context(widget);
 
 	save_bitmap_to_bytes(rdc, ptd->bmp, buf, max);
 
-	widget_release_ctx(widget, rdc);
+	widget_release_context(widget, rdc);
 
 	return max;
 }

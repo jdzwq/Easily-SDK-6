@@ -98,7 +98,19 @@ void hand_tipbox_size(widget_t widget, int code, const xsize_t* prs)
 {
 	tipbox_delta_t* ptd = GETTIPBOXDELTA(widget);
 	
-	widget_erase(widget, NULL);
+	XDK_ASSERT(ptd != NULL);
+
+	switch(code)
+	{
+	case WS_SIZE_FULLSCREEN:
+		break;
+	case WS_SIZE_MAXIMIZED:
+		break;
+	case WS_SIZE_MINIMIZED:
+		break;
+	case WS_SIZE_LAYOUT:
+		break;
+	}
 }
 
 void hand_tipbox_timer(widget_t widget, vword_t tid)
@@ -192,7 +204,7 @@ widget_t tipbox_create(widget_t widget, dword_t style, const xrect_t* pxr, int t
 		EVENT_ON_XFONT(hand_tipbox_xfont)
 		EVENT_ON_XFACE(hand_tipbox_xface)
 
-		EVENT_ON_NC_IMPLEMENT
+		
 
 	EVENT_END_DISPATH
 
@@ -218,13 +230,13 @@ void tipbox_popup_size(widget_t widget, xsize_t* pxs)
 	xrect_t xr = { 0 };
 	drawing_interface ifv = {0};
 
-	rdc = widget_client_ctx(widget);
+	rdc = widget_client_context(widget);
 
 	get_visual_interface(rdc, &ifv);
 
 	(*ifv.pf_text_rect)(ifv.ctx, &ptd->xf, &ptd->xa, ptd->sz_text, -1, &xr);
 
-	widget_release_ctx(widget, rdc);
+	widget_release_context(widget, rdc);
 
 	pxs->w = xr.w + 10;
 	pxs->h = xr.h + 4;
@@ -252,7 +264,7 @@ widget_t show_toolbox(const xpoint_t* ppt, const tchar_t* sz_text)
 	}
 	else
 	{
-		get_desktop_size(&xs);
+		get_screen_size(&xs);
 		xr.x = xs.w - xr.w - 1;
 		xr.y = xs.h - xr.h;
 	}
@@ -265,7 +277,6 @@ widget_t show_toolbox(const xpoint_t* ppt, const tchar_t* sz_text)
 	widget_move(wt, RECTPOINT(&xr));
 	widget_size(wt, RECTSIZE(&xr));
 	widget_take(wt, (int)WS_TAKE_TOPMOST);
-	widget_paint(wt);
 
 	widget_set_timer(wt, DEF_TIPTIME);
 
@@ -297,7 +308,7 @@ bool_t reset_toolbox(widget_t widget, const xpoint_t* ppt, const tchar_t* sz_tex
 	}
 	else
 	{
-		get_desktop_size(&xs);
+		get_screen_size(&xs);
 		xr.x = xs.w - xr.w - 1;
 		xr.y = xs.h - xr.h;
 	}
@@ -305,7 +316,6 @@ bool_t reset_toolbox(widget_t widget, const xpoint_t* ppt, const tchar_t* sz_tex
 	widget_move(widget, RECTPOINT(&xr));
 	widget_size(widget, RECTSIZE(&xr));
 	widget_take(widget, (int)WS_TAKE_TOPMOST);
-	widget_paint(widget);
 
 	widget_set_timer(widget, DEF_TIPTIME);
 

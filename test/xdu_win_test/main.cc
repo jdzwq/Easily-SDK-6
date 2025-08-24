@@ -7,6 +7,7 @@ if_widget_t if_widget = {0};
 widget_t g_main = 0;
 vword_t g_timer = 0;
 
+
 int pop_on_create(widget_t wt, void* param)
 {
     printf("pop on_create\n");
@@ -45,10 +46,104 @@ void pop_on_self_command(widget_t wt, int code, vword_t data)
 {
     printf("pop on_self_command code: %d \n", code);
 }
+
+void pop_on_paint(widget_t wt, visual_t rdc, const xrect_t* prt)
+{
+    printf("pop on_paint the rect is x:%d y:%d w:%d h:%d \n", prt->x, prt->y, prt->w, prt->h);
+
+    xrect_t rt;
+    (*if_widget.pf_widget_get_client_rect)(wt, &rt);
+    visual_t ctx = (*if_context.pf_create_compatible_context)(rdc, rt.w, rt.h);
+
+	xpen_t xp = { 0 };
+	default_xpen(&xp);
+	xscpy(xp.color, GDI_ATTR_RGB_DARKBLACK);
+
+	xbrush_t xb = { 0 };
+	default_xbrush(&xb);
+	xscpy(xb.color, GDI_ATTR_RGB_SLATE);
+
+    (*if_context.pf_gdi_draw_rect)(ctx, &xp, &xb, &rt);
+
+    (*if_context.pf_render_context)(ctx, 0,0, rdc, 0, 0, rt.w, rt.h);
+
+    (*if_context.pf_destroy_context)(ctx);
+}
 /****************************************************************************/
+int sub_on_create(widget_t wt, void* param)
+{
+    xrect_t xr;
+    (*if_widget.pf_widget_get_window_rect)(wt, &xr);
+
+    printf("sub on_create at x:%d y:%d w:%d h:%d \n", xr.x, xr.y, xr.w, xr.h);
+
+    (*if_widget.pf_widget_post_command)(wt, 4, IDC_SELF, 100);
+    
+    return 0;
+}
+
+void sub_on_destroy(widget_t wt)
+{
+    printf("sub on_destroy\n");
+}
+
+void sub_on_paint(widget_t wt, visual_t rdc, const xrect_t* prt)
+{
+    printf("sub on_paint the rect is x:%d y:%d w:%d h:%d \n", prt->x, prt->y, prt->w, prt->h);
+
+    xrect_t rt;
+    (*if_widget.pf_widget_get_client_rect)(wt, &rt);
+    visual_t ctx = (*if_context.pf_create_compatible_context)(rdc, rt.w, rt.h);
+
+	xpen_t xp = { 0 };
+	default_xpen(&xp);
+	xscpy(xp.color, GDI_ATTR_RGB_DARKBLACK);
+
+	xbrush_t xb = { 0 };
+	default_xbrush(&xb);
+	xscpy(xb.color, GDI_ATTR_RGB_GREEN);
+
+    (*if_context.pf_gdi_draw_rect)(ctx, &xp, &xb, &rt);
+
+    (*if_context.pf_render_context)(ctx, 0,0, rdc, 0, 0, rt.w, rt.h);
+
+    (*if_context.pf_destroy_context)(ctx);
+}
+
+void sub_on_mouse_move(widget_t wt, dword_t ms, const xpoint_t* ppt)
+{
+    if(ms & MS_WITH_LBUTTON)
+        printf("sub on_mouse_move x:%d y:%d with lbutton\n", ppt->x, ppt->y);
+    else if(ms & MS_WITH_RBUTTON)
+        printf("sub on_mouse_move x:%d y:%d with rbutton\n", ppt->x, ppt->y);
+    else
+        printf("sub on_mouse_move x:%d y:%d\n", ppt->x, ppt->y);
+}
+/****************************************************************************/
+
 int child_on_create(widget_t wt, void* param)
 {
-    printf("child on_create\n");
+    xrect_t xr;
+    (*if_widget.pf_widget_get_window_rect)(wt, &xr);
+
+    printf("child on_create at x:%d y:%d w:%d h:%d \n", xr.x, xr.y, xr.w, xr.h);
+    
+    if_dispatch_t ev = {0};
+
+    ev.pf_on_create = sub_on_create;
+	ev.pf_on_destroy = sub_on_destroy;
+    ev.pf_on_paint = sub_on_paint;
+    ev.pf_on_mouse_move = sub_on_mouse_move;
+
+    xr.x = 50;
+    xr.y = 50;
+    xr.w = 100;
+    xr.h = 100;
+
+    widget_t sub = (*if_widget.pf_widget_create)(_T("sub"),WD_STYLE_CONTROL,&xr,wt,&ev);
+    (*if_widget.pf_widget_set_owner)(sub, wt);
+    (*if_widget.pf_widget_set_user_id)(sub, 2000);
+    (*if_widget.pf_widget_show)(sub, 0);
 
     return 0;
 }
@@ -56,6 +151,9 @@ int child_on_create(widget_t wt, void* param)
 void child_on_destroy(widget_t wt)
 {
     printf("child on_destroy\n");
+
+    widget_t sub = (*if_widget.pf_widget_get_child)(wt, 2000);
+    if(sub) (*if_widget.pf_widget_destroy)(sub);
 }
 
 void child_on_mouse_move(widget_t wt, dword_t ms, const xpoint_t* ppt)
@@ -150,6 +248,7 @@ void child_on_lbutton_dbclick(widget_t wt, const xpoint_t* ppt)
     nt2.widget = wt;
 
     (*if_widget.pf_widget_post_notice)(wt, &nt2);
+    
     printf("child post notice\n");    
 }
 
@@ -162,29 +261,28 @@ void child_on_rbutton_up(widget_t wt, const xpoint_t* ppt)
 {
     printf("child on_rbutton_up x:%d y:%d\n", ppt->x, ppt->y);
 
-     if_dispatch_t ev = {0};
+    if_dispatch_t ev = {0};
 
     ev.pf_on_create = pop_on_create;
 	ev.pf_on_destroy = pop_on_destroy;
     ev.pf_on_lbutton_down = pop_on_lbutton_down;
     ev.pf_on_lbutton_up = pop_on_lbutton_up;
     ev.pf_on_self_command = pop_on_self_command;
+    ev.pf_on_paint = pop_on_paint;
 
     xrect_t xr;
     xr.x = ppt->x;
     xr.y = ppt->y;
-    xr.w = 200;
-    xr.h = 300;
+    xr.w = 100;
+    xr.h = 200;
 
     (*if_widget.pf_widget_client_to_screen)(wt, RECTPOINT(&xr));
 
     widget_t pop = (*if_widget.pf_widget_create)(_T("popup"),WD_STYLE_MENU,&xr,g_main,&ev);
 
-    (*if_widget.pf_widget_show)(pop, 0);
-
     (*if_widget.pf_widget_set_owner)(pop, wt);
 
-    (*if_widget.pf_widget_take)(pop, WS_TAKE_TOPMOST);
+    (*if_widget.pf_widget_show)(pop, 0);
 
     (*if_widget.pf_widget_do_track)(pop);
 }
@@ -557,17 +655,18 @@ void child_on_paint(widget_t wt, visual_t rdc, const xrect_t* prt)
     xface_t xa = {0};
     default_xface(&xa);
 
+    const tchar_t* token = _T("您好，世界！");
+    
     xsize_t xs = {0};
     (*if_context.pf_gdi_font_size)(ctx, &xf, &xs);
-	(*if_context.pf_gdi_text_size)(ctx, &xf,  _T("Hello World!"), -1, &xs);
-	xp1.x = 0;
-	xp1.y = 30;
+	(*if_context.pf_gdi_text_size)(ctx, &xf,  token, -1, &xs);
+	xp1.x = 10;
+	xp1.y = 10;
 	xp2.x = xp1.x + xs.w;
-	xp2.y = 30;
+	xp2.y = 10;
 
-	//(*if_context.pf_gdi_draw_line)(ctx, &xp, &xp1, &xp2);
-	//(*if_context.pf_gdi_text_out)(ctx, &xf, &xp1, _T("Hello World!"), -1);
-
+	(*if_context.pf_gdi_draw_line)(ctx, &xp, &xp1, &xp2);
+	(*if_context.pf_gdi_text_out)(ctx, &xf, &xp1, token, -1);
 
     xr.x = 10;
     xr.y = 20;
@@ -660,11 +759,21 @@ int dlg_on_close(widget_t wt)
 
     return 0;
 }
+
+void dlg_on_lbutton_dbclick(widget_t wt, const xpoint_t* ppt)
+{
+    printf("dlg on_lbutton_dbclick x:%d y:%d\n", ppt->x, ppt->y);
+
+    (*if_widget.pf_widget_close)(wt, 0);   
+}
 /**********************************************************************************/
 
 int main_on_create(widget_t wt, void* param)
 {
-    printf("on_create: main\n");
+    xrect_t xr;
+    (*if_widget.pf_widget_get_window_rect)(wt, &xr);
+
+    printf("main on_create at x:%d y:%d w:%d h:%d \n", xr.x, xr.y, xr.w, xr.h);
 
     color_mod_t clrs = {0};
     parse_xcolor(&clrs.clr_bkg, GDI_ATTR_RGB_HARDBLACK);
@@ -694,7 +803,6 @@ int main_on_create(widget_t wt, void* param)
 	ev.pf_on_menu_command = child_on_menu_command;
 	ev.pf_on_parent_command = child_on_parent_command;
 
-	xrect_t xr = { 0 };
     xr.x = 50;
 	xr.y = 50;
 	xr.w = 300;
@@ -767,7 +875,7 @@ void main_on_lbutton_dbclick(widget_t wt, const xpoint_t* ppt)
 void main_on_rbutton_down(widget_t wt, const xpoint_t* ppt)
 {
     printf("main on_rbutton_down x:%d y:%d\n", ppt->x, ppt->y);
-    //(*if_widget.pf_widget_post_wchar)(wt, L'中');
+    //(*if_widget.pf_widget_post_wchar)(wt, L'��');
 }
 
 void main_on_rbutton_up(widget_t wt, const xpoint_t* ppt)
@@ -779,6 +887,7 @@ void main_on_rbutton_up(widget_t wt, const xpoint_t* ppt)
     ev.pf_on_create = dlg_on_create;
 	ev.pf_on_destroy = dlg_on_destroy;
     ev.pf_on_close = dlg_on_close;
+    ev.pf_on_lbutton_dbclick = dlg_on_lbutton_dbclick;
 
     xrect_t xr;
     xr.x = ppt->x;
@@ -793,8 +902,6 @@ void main_on_rbutton_up(widget_t wt, const xpoint_t* ppt)
     (*if_widget.pf_widget_show)(dlg, 0);
 
     (*if_widget.pf_widget_set_owner)(dlg, wt);
-
-    (*if_widget.pf_widget_take)(dlg, WS_TAKE_TOPMOST);
 
     (*if_widget.pf_widget_do_modal)(dlg);
 }
@@ -935,7 +1042,7 @@ void main_on_move(widget_t wt, const xpoint_t* ppt)
     printf("main on_move position x:%d y:%d\n", ppt->x, ppt->y);
     xrect_t xr;
 
-    (*if_widget.pf_widget_get_window_rect)(g_main, &xr);
+    (*if_widget.pf_widget_get_window_rect)(wt, &xr);
     printf("main window at: x:%d y:%d w:%d h:%d\n", xr.x, xr.y, xr.w, xr.h);
 }
 
@@ -1106,15 +1213,14 @@ void init_instance()
 
     xrect_t xr = {0};
     xr.x = 100;
-	xr.y = 800;
+	xr.y = 582;
 	xr.w = 600;
-	xr.h = 300;
+	xr.h = 400;
 
-	g_main = (*if_widget.pf_widget_create)(_T("frame1"), (WD_STYLE_FRAME & (~WD_STYLE_OWNERNC)), &xr, NULL, &ev);
+	g_main = (*if_widget.pf_widget_create)(_T("frame1"), (WD_STYLE_FRAME /*& (~WD_STYLE_OWNERNC)*/), &xr, NULL, &ev);
 	(*if_widget.pf_widget_set_accel)(g_main, acs, sizeof(acs) / sizeof(accel_table_t));
 
     (*if_widget.pf_widget_set_color_mode)(g_main, &clrs);
-	(*if_widget.pf_widget_paint)(g_main);
     (*if_widget.pf_widget_show)(g_main, WS_SHOW_NORMAL);
 
     scroll_t scr = {0};

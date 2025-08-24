@@ -66,7 +66,7 @@ static int _panelctrl_calc_width(widget_t widget)
 	xrect_t xr;
 	int pw;
 
-	rdc = widget_client_ctx(widget);
+	rdc = widget_client_context(widget);
 
 	pw = 0;
 	ilk = get_arch_first_child_item(ptd->arch);
@@ -78,7 +78,7 @@ static int _panelctrl_calc_width(widget_t widget)
 		ilk = get_arch_next_sibling_item(ilk);
 	}
 
-	widget_release_ctx(widget, rdc);
+	widget_release_context(widget, rdc);
 
 	widget_get_client_rect(widget, &xr);
 	pw = xr.w;
@@ -94,7 +94,7 @@ static int _panelctrl_calc_height(widget_t widget)
 	xrect_t xr;
 	int ph;
 
-	rdc = widget_client_ctx(widget);
+	rdc = widget_client_context(widget);
 
 	ilk = get_arch_first_child_item(ptd->arch);
 	while (ilk)
@@ -105,7 +105,7 @@ static int _panelctrl_calc_height(widget_t widget)
 		ilk = get_arch_next_sibling_item(ilk);
 	}
 
-	widget_release_ctx(widget, rdc);
+	widget_release_context(widget, rdc);
 
 	widget_get_client_rect(widget, &xr);
 	ph = xr.h;
@@ -211,9 +211,12 @@ static void _panelctrl_reset_page(widget_t widget)
 	xrect_t xr;
 	int mh;
 
-	mh = _panelctrl_calc_height(widget);
-
 	widget_get_client_rect(widget, &xr);
+
+	if(ptd->arch)
+		mh = _panelctrl_calc_height(widget);
+	else
+		mh = xr.h;
 
 	widget_reset_paging(widget, xr.w, xr.h, xr.w, mh, ptd->item_width, ptd->title_height);
 }
@@ -339,7 +342,7 @@ void noti_panel_reset_scroll(widget_t widget, bool_t bUpdate)
 	if (widget_is_valid(ptd->vsc))
 	{
 		if (bUpdate)
-			widget_paint(ptd->vsc);
+			widget_erase(ptd->vsc, NULL);
 		else
 			widget_close(ptd->vsc, 0);
 	}
@@ -546,12 +549,20 @@ void hand_panel_size(widget_t widget, int code, const xsize_t* prs)
 {
 	panel_delta_t* ptd = GETPANELDELTA(widget);
 
-	if (!ptd->arch)
-		return;
+	XDK_ASSERT(ptd != NULL);
 
-	noti_panel_reset_scroll(widget, 0);
-
-	panelctrl_redraw(widget);
+	switch(code)
+	{
+	case WS_SIZE_FULLSCREEN:
+		break;
+	case WS_SIZE_MAXIMIZED:
+		break;
+	case WS_SIZE_MINIMIZED:
+		break;
+	case WS_SIZE_LAYOUT:
+		_panelctrl_reset_page(widget);
+		break;
+	}
 }
 
 void hand_panel_scroll(widget_t widget, bool_t bHorz, int nLine)
@@ -591,7 +602,7 @@ void hand_panel_wheel(widget_t widget, bool_t bHorz, int nDelta)
 			}
 			else
 			{
-				widget_paint(ptd->vsc);
+				widget_erase(ptd->vsc, NULL);
 			}
 		}
 
@@ -759,7 +770,7 @@ widget_t panelctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* p
 		EVENT_ON_XFONT(hand_panel_xfont)
 		EVENT_ON_XFACE(hand_panel_xface)
 
-		EVENT_ON_NC_IMPLEMENT
+		
 
 	EVENT_END_DISPATH
 
@@ -846,7 +857,6 @@ void panelctrl_redraw(widget_t widget)
 
 	_panelctrl_reset_page(widget);
 
-	widget_paint(widget);
 }
 
 void panelctrl_redraw_item(widget_t widget, link_t_ptr ilk)

@@ -102,14 +102,12 @@ static int sub_editbox_self_command(widget_t widget, int code, vword_t data, uid
 		if (widget_is_valid(dropbox))
 		{
 			widget_set_color_mode(dropbox, (color_mod_t*)data);
-			widget_paint(dropbox);
 		}
 
 		/*keybox = editbox_get_keybox(widget);
 		if (widget_is_valid(keybox))
 		{
 			widget_set_color_mode(keybox, (color_mod_t*)data);
-			widget_paint(keybox);
 		}*/
 		return 1;
 	case COMMAND_COMMIT:
@@ -257,7 +255,7 @@ widget_t firelist_create(widget_t widget, const xrect_t* pxr, link_t_ptr data)
 	widget_get_window_rect(dropbox, &xr);
 	dropbox_popup_size(dropbox, RECTSIZE(&xr));
 
-	get_desktop_size(&xs);
+	get_screen_size(&xs);
 
 	if (xr.x + xr.w > xs.w)
 	{
@@ -271,7 +269,6 @@ widget_t firelist_create(widget_t widget, const xrect_t* pxr, link_t_ptr data)
 
 	widget_move(dropbox, RECTPOINT(&xr));
 	widget_size(dropbox, RECTSIZE(&xr));
-	widget_paint(dropbox);
 
 	return editor;
 }

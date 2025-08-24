@@ -7,7 +7,6 @@
 #include "hand/textor.h"
 
 #include "win/widgetex.h"
-#include "win/widgetnc.h"
 #include "box/box.h"
 #include "edit/editor.h"
 #include "ctrl/ctrl.h"

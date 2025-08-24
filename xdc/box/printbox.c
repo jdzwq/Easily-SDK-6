@@ -88,7 +88,7 @@ static int _printbox_calc_pages(widget_t widget)
 static void _printbox_reset_page(widget_t widget)
 {
 	print_delta_t* ptd = GETPRINTDELTA(widget);
-	int pw, ph, fw, fh, lw, lh;
+	int pw, ph, vw, vh, lw, lh;
 	xrect_t xr;
 	xsize_t xs;
 
@@ -96,43 +96,63 @@ static void _printbox_reset_page(widget_t widget)
 	pw = xr.w;
 	ph = xr.h;
 
-	if (is_form_doc(ptd->sheet))
+	if (ptd->sheet && is_form_doc(ptd->sheet))
 	{
 		xs.fw = get_form_width(ptd->sheet);
 		xs.fh = get_form_height(ptd->sheet);
+
+		widget_size_to_pt(widget, &xs);
+		vw = xs.w;
+		vh = xs.h;
 	}
-	else if (is_grid_doc(ptd->sheet))
+	else if (ptd->sheet && is_grid_doc(ptd->sheet))
 	{
 		xs.fw = get_grid_width(ptd->sheet);
 		xs.fh = get_grid_height(ptd->sheet);
+
+		widget_size_to_pt(widget, &xs);
+		vw = xs.w;
+		vh = xs.h;
 	}
-	else if (is_statis_doc(ptd->sheet))
+	else if (ptd->sheet && is_statis_doc(ptd->sheet))
 	{
 		xs.fw = get_statis_width(ptd->sheet);
 		xs.fh = get_statis_height(ptd->sheet);
+
+		widget_size_to_pt(widget, &xs);
+		vw = xs.w;
+		vh = xs.h;
 	}
-	else if (is_rich_doc(ptd->sheet))
+	else if (ptd->sheet && is_rich_doc(ptd->sheet))
 	{
 		xs.fw = get_rich_width(ptd->sheet);
 		xs.fh = get_rich_height(ptd->sheet);
+
+		widget_size_to_pt(widget, &xs);
+		vw = xs.w;
+		vh = xs.h;
 	}
-	else if (is_memo_doc(ptd->sheet))
+	else if (ptd->sheet && is_memo_doc(ptd->sheet))
 	{
 		xs.fw = get_memo_width(ptd->sheet);
 		xs.fh = get_memo_height(ptd->sheet);
+
+		widget_size_to_pt(widget, &xs);
+		vw = xs.w;
+		vh = xs.h;
+	}else
+	{
+		vw = pw;
+		vh = ph;
 	}
 
-	widget_size_to_pt(widget, &xs);
-	fw = xs.w;
-	fh = xs.h;
-
-	xs.fw = (float)5;
-	xs.fh = (float)5;
+	xs.fw = 5.0f;
+	xs.fh = 5.0f;
 	widget_size_to_pt(widget, &xs);
 	lw = xs.w;
 	lh = xs.h;
 
-	widget_reset_paging(widget, pw, ph, fw, fh, lw, lh);
+	widget_reset_paging(widget, pw, ph, vw, vh, lw, lh);
 
 	widget_reset_scroll(widget, 1);
 
@@ -181,12 +201,20 @@ void hand_print_size(widget_t widget, int code, const xsize_t* pxs)
 {
 	print_delta_t* ptd = GETPRINTDELTA(widget);
 
-	if (!ptd->sheet)
-		return;
+	XDK_ASSERT(ptd != NULL);
 
-	_printbox_reset_page(widget);
-
-	widget_erase(widget, NULL);
+	switch(code)
+	{
+	case WS_SIZE_FULLSCREEN:
+		break;
+	case WS_SIZE_MAXIMIZED:
+		break;
+	case WS_SIZE_MINIMIZED:
+		break;
+	case WS_SIZE_LAYOUT:
+		_printbox_reset_page(widget);
+		break;
+	}
 }
 
 void hand_print_lbutton_down(widget_t widget, const xpoint_t* pxp)
@@ -406,7 +434,7 @@ widget_t printbox_create(widget_t widget, dword_t style, const xrect_t* pxr)
 		EVENT_ON_XFONT(hand_print_xfont)
 		EVENT_ON_XFACE(hand_print_xface)
 
-		EVENT_ON_NC_IMPLEMENT
+		
 
 	EVENT_END_DISPATH
 
@@ -450,8 +478,6 @@ void printbox_redraw(widget_t widget)
 		ptd->page = pages;
 
 	_printbox_reset_page(widget);
-
-	widget_paint(widget);
 }
 
 void printbox_move_prev_page(widget_t widget)

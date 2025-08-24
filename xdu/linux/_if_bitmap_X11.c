@@ -66,7 +66,7 @@ void _get_bitmap_size(bitmap_t rbm, int* pw, int* ph)
 
 bitmap_t _create_context_bitmap(visual_t rdc)
 {
-	X11_context_t* ctx = (X11_context_t*)rdc;
+	X11_context_t* ctx = TypePtrFromHead(X11_context_t, rdc);
 	X11_bitmap_t* bmp;
 
 	bmp = (X11_bitmap_t*)xmem_alloc_handle(sizeof(X11_bitmap_t));
@@ -79,7 +79,7 @@ bitmap_t _create_context_bitmap(visual_t rdc)
 
 bitmap_t _create_color_bitmap(visual_t rdc, const xcolor_t* pxc, int w, int h)
 {
-	X11_context_t* ctx = (X11_context_t*)rdc;
+	X11_context_t* ctx = TypePtrFromHead(X11_context_t, rdc);
     X11_bitmap_t* bmp;
 
 	int screen, deep = 32;
@@ -129,7 +129,7 @@ bitmap_t _create_color_bitmap(visual_t rdc, const xcolor_t* pxc, int w, int h)
 
 bitmap_t _create_pattern_bitmap(visual_t rdc, const xcolor_t* pxc_front, const xcolor_t* pxc_back, int w, int h)
 {
-	X11_context_t* ctx = (X11_context_t*)rdc;
+	X11_context_t* ctx = TypePtrFromHead(X11_context_t, rdc);
     X11_bitmap_t* bmp;
 
 	int screen, deep = 32;
@@ -179,7 +179,7 @@ bitmap_t _create_pattern_bitmap(visual_t rdc, const xcolor_t* pxc_front, const x
 
 bitmap_t _create_gradient_bitmap(visual_t rdc, const xcolor_t* pxc_brim, const xcolor_t* pxc_core, int w, int h, const tchar_t* type)
 {
-	X11_context_t* ctx = (X11_context_t*)rdc;
+	X11_context_t* ctx = TypePtrFromHead(X11_context_t, rdc);
     X11_bitmap_t* bmp;
 
 	int screen, deep = 32;
@@ -229,7 +229,7 @@ bitmap_t _create_gradient_bitmap(visual_t rdc, const xcolor_t* pxc_brim, const x
 
 bitmap_t _create_code128_bitmap(visual_t rdc, const xcolor_t* pxc_front, const xcolor_t* pxc_back, const byte_t* bar_buf, int bar_cols)
 {
-	X11_context_t* ctx = (X11_context_t*)rdc;
+	X11_context_t* ctx = TypePtrFromHead(X11_context_t, rdc);
     X11_bitmap_t* bmp;
 
 	int screen, deep = 32;
@@ -283,7 +283,7 @@ bitmap_t _create_code128_bitmap(visual_t rdc, const xcolor_t* pxc_front, const x
 
 bitmap_t _create_pdf417_bitmap(visual_t rdc, const xcolor_t* pxc_front, const xcolor_t* pxc_back, const byte_t* bar_buf, int bar_rows, int bar_cols)
 {
-	X11_context_t* ctx = (X11_context_t*)rdc;
+	X11_context_t* ctx = TypePtrFromHead(X11_context_t, rdc);
     X11_bitmap_t* bmp;
 
 	int screen, deep = 32;
@@ -337,7 +337,7 @@ bitmap_t _create_pdf417_bitmap(visual_t rdc, const xcolor_t* pxc_front, const xc
 
 bitmap_t _create_qrcode_bitmap(visual_t rdc, const xcolor_t* pxc_front, const xcolor_t* pxc_back, const byte_t* bar_buf, int bar_rows, int bar_cols)
 {
-	X11_context_t* ctx = (X11_context_t*)rdc;
+	X11_context_t* ctx = TypePtrFromHead(X11_context_t, rdc);
     X11_bitmap_t* bmp;
 
 	int screen, deep = 32;
@@ -391,7 +391,7 @@ bitmap_t _create_qrcode_bitmap(visual_t rdc, const xcolor_t* pxc_front, const xc
 
 bitmap_t _create_storage_bitmap(visual_t rdc, const tchar_t* fname)
 {
-	X11_context_t* ctx = (X11_context_t*)rdc;
+	X11_context_t* ctx = TypePtrFromHead(X11_context_t, rdc);
 	int screen;
 
 	struct stat st = {0};
@@ -629,7 +629,7 @@ dword_t _get_bitmap_bytes(bitmap_t rb)
 
 bitmap_t _load_bitmap_from_bytes(visual_t rdc, const unsigned char* pb, dword_t bytes)
 {
-	X11_context_t* ctx = (X11_context_t*)rdc;
+	X11_context_t* ctx = TypePtrFromHead(X11_context_t, rdc);
 
 	bitmap_infohead_t* pbmi;
 	bitmap_filehead_t bfh;
@@ -665,7 +665,7 @@ bitmap_t _load_bitmap_from_bytes(visual_t rdc, const unsigned char* pb, dword_t 
 
 dword_t _save_bitmap_to_bytes(visual_t rdc, bitmap_t rb, unsigned char* buf, dword_t max)
 {
-	X11_context_t* ctx = (X11_context_t*)rdc;
+	X11_context_t* ctx = TypePtrFromHead(X11_context_t, rdc);
 	X11_bitmap_t* bmp = (X11_bitmap_t*)rb;
     
 	bitmap_infohead_t* pbmi;

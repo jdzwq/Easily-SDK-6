@@ -287,7 +287,7 @@ void hand_timebox_lbutton_up(widget_t widget, const xpoint_t* pxp)
 	pt.x = pxp->x;
 	pt.y = pxp->y;
 
-	widget_point_to_tm(widget, &pt);
+	widget_point_to_mm(widget, &pt);
 
 	get_canvas_measure(widget_get_canvas(widget), &im);
 
@@ -333,7 +333,19 @@ void hand_timebox_size(widget_t widget, int code, const xsize_t* prs)
 {
 	timebox_delta_t* ptd = GETTIMEBOXDELTA(widget);
 	
-	widget_erase(widget, NULL);
+	XDK_ASSERT(ptd != NULL);
+
+	switch(code)
+	{
+	case WS_SIZE_FULLSCREEN:
+		break;
+	case WS_SIZE_MAXIMIZED:
+		break;
+	case WS_SIZE_MINIMIZED:
+		break;
+	case WS_SIZE_LAYOUT:
+		break;
+	}
 }
 
 void hand_timebox_xfont(widget_t widget, const xfont_t* pxf)
@@ -396,7 +408,7 @@ widget_t timebox_create(widget_t widget, dword_t style, const xrect_t* pxr)
 
 		EVENT_ON_XFONT(hand_timebox_xfont)
 
-		EVENT_ON_NC_IMPLEMENT
+		
 
 	EVENT_END_DISPATH
 

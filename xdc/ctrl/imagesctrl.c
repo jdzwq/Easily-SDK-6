@@ -170,40 +170,56 @@ static void _imagesctrl_text_rect(widget_t widget, link_t_ptr ilk, xrect_t* pxr)
 static void _imagesctrl_reset_page(widget_t widget)
 {
 	images_delta_t* ptd = GETIMAGESDELTA(widget);
-	int pw, ph, fw, fh, lw, lh;
+	int pw, ph, vw, vh, lw, lh;
 	xrect_t xr;
 	xsize_t xs;
 	bool_t b_horz;
-
-	b_horz = (compare_text(get_images_layer_ptr(ptd->images), -1, ATTR_LAYER_HORZ, -1, 0) == 0) ? 1 : 0;
 
 	widget_get_client_rect(widget, &xr);
 	pw = xr.w;
 	ph = xr.h;
 
-	xs.w = pw;
-	xs.h = ph;
-	widget_size_to_tm(widget, &xs);
-
-	if (b_horz)
+	if (ptd->images)
 	{
-		xs.fw = calc_images_width(ptd->images);
+		b_horz = (compare_text(get_images_layer_ptr(ptd->images), -1, ATTR_LAYER_HORZ, -1, 0) == 0) ? 1 : 0;
+
+		xs.w = pw;
+		xs.h = ph;
+		widget_size_to_mm(widget, &xs);
+
+		if (b_horz)
+		{
+			xs.fw = calc_images_width(ptd->images);
+		}
+		else
+		{
+			xs.fh = calc_images_height(ptd->images);
+		}
+		widget_size_to_pt(widget, &xs);
+		vw = xs.w;
+		vh = xs.h;
 	}
 	else
 	{
-		xs.fh = calc_images_height(ptd->images);
+		vw = pw;
+		vh = ph;
 	}
-	widget_size_to_pt(widget, &xs);
-	fw = xs.w;
-	fh = xs.h;
 
-	xs.fw = get_images_item_width(ptd->images);
-	xs.fh = get_images_item_height(ptd->images);
+	if (ptd->images)
+	{
+		xs.fw = get_images_item_width(ptd->images);
+		xs.fh = get_images_item_height(ptd->images);
+	}
+	else
+	{
+		xs.fw = 10.0f;
+		xs.fh = 10.0f;
+	}
 	widget_size_to_pt(widget, &xs);
 	lw = xs.w;
 	lh = xs.h;
 
-	widget_reset_paging(widget, pw, ph, fw, fh, lw, lh);
+	widget_reset_paging(widget, pw, ph, vw, vh, lw, lh);
 
 	if (b_horz)
 		widget_reset_scroll(widget, 1);
@@ -513,7 +529,7 @@ void noti_images_reset_scroll(widget_t widget, bool_t bUpdate)
 	if (widget_is_valid(ptd->vsc))
 	{
 		if (bUpdate)
-			widget_paint(ptd->vsc);
+			widget_erase(ptd->vsc, NULL);
 		else
 			widget_close(ptd->vsc, 0);
 	}
@@ -521,7 +537,7 @@ void noti_images_reset_scroll(widget_t widget, bool_t bUpdate)
 	if (widget_is_valid(ptd->hsc))
 	{
 		if (bUpdate)
-			widget_paint(ptd->hsc);
+			widget_erase(ptd->hsc, NULL);
 		else
 			widget_close(ptd->hsc, 0);
 	}
@@ -570,12 +586,20 @@ void hand_images_size(widget_t widget, int code, const xsize_t* prs)
 {
 	images_delta_t* ptd = GETIMAGESDELTA(widget);
 
-	if (!ptd->images)
-		return;
+	XDK_ASSERT(ptd != NULL);
 
-	noti_images_reset_scroll(widget, 0);
-
-	imagesctrl_redraw(widget);
+	switch(code)
+	{
+	case WS_SIZE_FULLSCREEN:
+		break;
+	case WS_SIZE_MAXIMIZED:
+		break;
+	case WS_SIZE_MINIMIZED:
+		break;
+	case WS_SIZE_LAYOUT:
+		_imagesctrl_reset_page(widget);
+		break;
+	}
 }
 
 void hand_images_scroll(widget_t widget, bool_t bHorz, int nLine)
@@ -622,7 +646,7 @@ void hand_images_wheel(widget_t widget, bool_t bHorz, int nDelta)
 			}
 			else
 			{
-				widget_paint(ptd->vsc);
+				widget_erase(ptd->vsc, NULL);
 			}
 		}
 
@@ -634,7 +658,7 @@ void hand_images_wheel(widget_t widget, bool_t bHorz, int nDelta)
 			}
 			else
 			{
-				widget_paint(ptd->hsc);
+				widget_erase(ptd->hsc, NULL);
 			}
 		}
 
@@ -664,7 +688,7 @@ void hand_images_mouse_move(widget_t widget, dword_t dw, const xpoint_t* pxp)
 
 	pt.x = pxp->x;
 	pt.y = pxp->y;
-	widget_point_to_tm(widget, &pt);
+	widget_point_to_mm(widget, &pt);
 
 	plk = NULL;
 	nHint = calc_images_hint(&pt, ptd->images, &plk);
@@ -747,7 +771,7 @@ void hand_images_lbutton_down(widget_t widget, const xpoint_t* pxp)
 
 	pt.x = pxp->x;
 	pt.y = pxp->y;
-	widget_point_to_tm(widget, &pt);
+	widget_point_to_mm(widget, &pt);
 
 	plk = NULL;
 	nHint = calc_images_hint(&pt, ptd->images, &plk);
@@ -785,7 +809,7 @@ void hand_images_lbutton_up(widget_t widget, const xpoint_t* pxp)
 
 	pt.x = pxp->x;
 	pt.y = pxp->y;
-	widget_point_to_tm(widget, &pt);
+	widget_point_to_mm(widget, &pt);
 
 	plk = NULL;
 	nHint = calc_images_hint(&pt, ptd->images, &plk);
@@ -1027,7 +1051,7 @@ widget_t imagesctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* 
 		EVENT_ON_SET_FOCUS(hand_images_set_focus)
 		EVENT_ON_KILL_FOCUS(hand_images_kill_focus)
 
-		EVENT_ON_NC_IMPLEMENT
+		
 
 	EVENT_END_DISPATH
 
@@ -1112,7 +1136,6 @@ void imagesctrl_redraw(widget_t widget)
 
 	_imagesctrl_reset_page(widget);
 
-	widget_paint(widget);
 }
 
 void imagesctrl_tabskip(widget_t widget, int nSkip)

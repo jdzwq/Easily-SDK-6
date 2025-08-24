@@ -337,7 +337,7 @@ static void _topogctrl_reset_matrix(widget_t widget, int row, int col)
 static void _topogctrl_reset_page(widget_t widget)
 {
 	topog_delta_t* ptd = GETTOPOGDELTA(widget);
-	int pw, ph, fw, fh, lw, lh;
+	int pw, ph, vw, vh, lw, lh;
 	xrect_t xr;
 	xsize_t xs;
 
@@ -345,19 +345,31 @@ static void _topogctrl_reset_page(widget_t widget)
 	pw = xr.w;
 	ph = xr.h;
 
-	xs.fw = get_topog_cols(ptd->topog) * get_topog_rx(ptd->topog);
-	xs.fh = get_topog_rows(ptd->topog) * get_topog_ry(ptd->topog);
-	widget_size_to_pt(widget, &xs);
-	fw = xs.w;
-	fh = xs.h;
+	if (ptd->topog)
+	{
+		widget_rect_to_mm(widget, &xr);
+		set_topog_width(ptd->topog, xr.fw);
+		set_topog_height(ptd->topog, xr.fh);
 
-	xs.fw = (float)10;
-	xs.fh = (float)10;
+		xs.fw = get_topog_cols(ptd->topog) * get_topog_rx(ptd->topog);
+		xs.fh = get_topog_rows(ptd->topog) * get_topog_ry(ptd->topog);
+		widget_size_to_pt(widget, &xs);
+		vw = xs.w;
+		vh = xs.h;
+	}
+	else
+	{
+		vw = pw;
+		vh = ph;
+	}
+
+	xs.fw = 10.0f;
+	xs.fh = 10.0f;
 	widget_size_to_pt(widget, &xs);
 	lw = xs.w;
 	lh = xs.h;
 
-	widget_reset_paging(widget, pw, ph, fw, fh, lw, lh);
+	widget_reset_paging(widget, pw, ph, vw, vh, lw, lh);
 
 	widget_reset_scroll(widget, 1);
 
@@ -605,7 +617,7 @@ void noti_topog_reset_scroll(widget_t widget, bool_t bUpdate)
 	if (widget_is_valid(ptd->vsc))
 	{
 		if (bUpdate)
-			widget_paint(ptd->vsc);
+			widget_erase(ptd->vsc, NULL);
 		else
 			widget_close(ptd->vsc, 0);
 	}
@@ -613,7 +625,7 @@ void noti_topog_reset_scroll(widget_t widget, bool_t bUpdate)
 	if (widget_is_valid(ptd->hsc))
 	{
 		if (bUpdate)
-			widget_paint(ptd->hsc);
+			widget_erase(ptd->hsc, NULL);
 		else
 			widget_close(ptd->hsc, 0);
 	}
@@ -678,7 +690,7 @@ void hand_topogctrl_mouse_move(widget_t widget, dword_t dw, const xpoint_t* pxp)
 
 	pt.x = pxp->x;
 	pt.y = pxp->y;
-	widget_point_to_tm(widget, &pt);
+	widget_point_to_mm(widget, &pt);
 
 	ilk = NULL;
 	row = col = -1;
@@ -747,7 +759,7 @@ void hand_topogctrl_lbutton_down(widget_t widget, const xpoint_t* pxp)
 
 	pt.x = pxp->x;
 	pt.y = pxp->y;
-	widget_point_to_tm(widget, &pt);
+	widget_point_to_mm(widget, &pt);
 
 	ilk = NULL;
 	row = col = -1;
@@ -791,7 +803,7 @@ void hand_topogctrl_lbutton_up(widget_t widget, const xpoint_t* pxp)
 
 	pt.x = pxp->x;
 	pt.y = pxp->y;
-	widget_point_to_tm(widget, &pt);
+	widget_point_to_mm(widget, &pt);
 
 	ilk = NULL;
 	row = col = -1;
@@ -892,7 +904,7 @@ void hand_topogctrl_wheel(widget_t widget, bool_t bHorz, int nDelta)
 			}
 			else
 			{
-				widget_paint(ptd->vsc);
+				widget_erase(ptd->vsc, NULL);
 			}
 		}
 
@@ -904,7 +916,7 @@ void hand_topogctrl_wheel(widget_t widget, bool_t bHorz, int nDelta)
 			}
 			else
 			{
-				widget_paint(ptd->hsc);
+				widget_erase(ptd->hsc, NULL);
 			}
 		}
 
@@ -1043,20 +1055,21 @@ void hand_topogctrl_copy(widget_t widget)
 void hand_topogctrl_size(widget_t widget, int code, const xsize_t* prs)
 {
 	topog_delta_t* ptd = GETTOPOGDELTA(widget);
-	xrect_t xr;
 
-	if (!ptd->topog)
-		return;
+	XDK_ASSERT(ptd != NULL);
 
-	noti_topog_reset_scroll(widget, 0);
-
-	widget_get_client_rect(widget, &xr);
-	widget_rect_to_tm(widget, &xr);
-
-	set_topog_width(ptd->topog, xr.fw);
-	set_topog_height(ptd->topog, xr.fh);
-
-	topogctrl_redraw(widget);
+	switch(code)
+	{
+	case WS_SIZE_FULLSCREEN:
+		break;
+	case WS_SIZE_MAXIMIZED:
+		break;
+	case WS_SIZE_MINIMIZED:
+		break;
+	case WS_SIZE_LAYOUT:
+		_topogctrl_reset_page(widget);
+		break;
+	}
 }
 
 void hand_topogctrl_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
@@ -1154,7 +1167,7 @@ widget_t topogctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* p
 		EVENT_ON_RBUTTON_DOWN(hand_topogctrl_rbutton_down)
 		EVENT_ON_RBUTTON_UP(hand_topogctrl_rbutton_up)
 
-		EVENT_ON_NC_IMPLEMENT
+		
 
 	EVENT_END_DISPATH
 
@@ -1176,7 +1189,7 @@ void topogctrl_attach(widget_t widget, link_t_ptr data)
 	ptd->col = -1;
 
 	widget_get_client_rect(widget, &xr);
-	widget_rect_to_tm(widget, &xr);
+	widget_rect_to_mm(widget, &xr);
 
 	set_topog_width(ptd->topog, xr.fw);
 	set_topog_height(ptd->topog, xr.fh);
@@ -1247,7 +1260,6 @@ void topogctrl_redraw(widget_t widget)
 
 	_topogctrl_reset_page(widget);
 
-	widget_paint(widget);
 }
 
 void topogctrl_tabskip(widget_t widget, int nSkip)
@@ -1419,7 +1431,7 @@ bool_t topogctrl_set_bitmap(widget_t widget, bitmap_t bmp)
 
 	XDK_ASSERT(ptd != NULL);
 
-	rdc = widget_client_ctx(widget);
+	rdc = widget_client_context(widget);
 
 	if (ptd->img.source)
 		xsfree(ptd->img.source);
@@ -1431,7 +1443,7 @@ bool_t topogctrl_set_bitmap(widget_t widget, bitmap_t bmp)
 	else
 		rt = 1;
 
-	widget_release_ctx(widget, rdc);
+	widget_release_context(widget, rdc);
 
 	topogctrl_redraw(widget);
 

@@ -75,7 +75,6 @@ EXP_API bool_t shell_get_apppath(tchar_t* pathbuf, int pathlen);
 */
 EXP_API bool_t shell_get_tmppath(tchar_t* pathbuf, int pathlen);
 
-#ifdef XDU_SUPPORT_SHELL_DIALOG
 /*
 @FUNCTION shell_get_filename: use system file explorer to select single or multiple file name.
 @INPUT widget_t owner: the file explorer dialog owner window.
@@ -101,7 +100,6 @@ EXP_API bool_t shell_get_filename(widget_t owner, const tchar_t* defpath, const 
 @RETURN bool_t: if succeeds return nonzero, fails return zero.
 */
 EXP_API bool_t shell_get_pathname(widget_t owner, const tchar_t* defpath, bool_t createit, tchar_t* pathbuf, int pathlen);
-#endif
 
 #ifdef	__cplusplus
 }

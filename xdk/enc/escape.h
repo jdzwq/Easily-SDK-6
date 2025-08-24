@@ -122,7 +122,7 @@ extern "C" {
 
 EXP_API void csv_token_encode(const tchar_t* val, int len, tchar_t* buf, int* pdw);
 
-EXP_API int csv_token_decode(const tchar_t* val, int len, tchar_t* buf, int* pdw);
+EXP_API void csv_token_decode(const tchar_t* val, int len, tchar_t* buf, int* pdw);
 
 EXP_API dword_t url_byte_encode(const byte_t* val, dword_t len, byte_t* buf, dword_t max);
 

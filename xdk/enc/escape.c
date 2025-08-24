@@ -94,7 +94,7 @@ void csv_token_encode(const tchar_t* val, int len, tchar_t* buf, int* pdw)
 	if (pdw) *pdw = total;
 }
 
-int csv_token_decode(const tchar_t* val, int len, tchar_t* buf, int* pdw)
+void csv_token_decode(const tchar_t* val, int len, tchar_t* buf, int* pdw)
 {
 	const tchar_t* token = val;
 	int pos = 0, total = 0;
@@ -146,8 +146,6 @@ int csv_token_decode(const tchar_t* val, int len, tchar_t* buf, int* pdw)
 	}
 
 	if(pdw) *pdw = total;
-
-	return (pos);
 }
 /***************************************************************************************/
 //static tchar_t url_esc[] = { _T(' '), _T('"'),_T('#'), _T('%'), _T('&'), _T('('), _T(')'), _T('+'), _T(','), _T('/'), _T(':'), _T(';'), _T('<'), _T('='), _T('>'), _T('?'), _T('@'), _T('\\'), _T('|'), _T('\0') };

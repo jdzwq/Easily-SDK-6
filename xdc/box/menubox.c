@@ -59,7 +59,7 @@ static void _menubox_item_rect(widget_t widget, link_t_ptr ilk, xrect_t* pxr)
 static void _menubox_reset_page(widget_t widget)
 {
 	menu_delta_t* ptd = GETMENUDELTA(widget);
-	int pw, ph, fw, fh, lw, lh;
+	int pw, ph, vw, vh, lw, lh;
 	xrect_t xr;
 	xsize_t xs;
 	canvas_t canv;
@@ -73,29 +73,45 @@ static void _menubox_reset_page(widget_t widget)
 	get_canvas_measure(canv, &im);
 	widget_get_canv_rect(widget, (canvbox_t*)&(im.rect));
 
-	xs.fw = calc_menu_width(&im, ptd->menu);
-	xs.fh = calc_menu_height(&im, ptd->menu);
-
-	widget_size_to_pt(widget, &xs);
-
-	if (compare_text(get_menu_layer_ptr(ptd->menu), -1, ATTR_LAYER_HORZ, -1, 0) == 0)
+	if (ptd->menu)
 	{
-		fw = xs.w;
-		fh = ph;
+		xs.fw = calc_menu_width(&im, ptd->menu);
+		xs.fh = calc_menu_height(&im, ptd->menu);
+
+		widget_size_to_pt(widget, &xs);
+
+		if (compare_text(get_menu_layer_ptr(ptd->menu), -1, ATTR_LAYER_HORZ, -1, 0) == 0)
+		{
+			vw = xs.w;
+			vh = ph;
+		}
+		else
+		{
+			vw = pw;
+			vh = xs.h;
+		}
 	}
 	else
 	{
-		fw = pw;
-		fh = xs.h;
+		vw = pw;
+		vh = ph;
 	}
 
-	xs.fw = get_menu_icon_span(ptd->menu);
-	xs.fh = get_menu_icon_span(ptd->menu);
+	if (ptd->menu)
+	{
+		xs.fw = get_menu_icon_span(ptd->menu);
+		xs.fh = get_menu_icon_span(ptd->menu);
+	}
+	else
+	{
+		xs.fw = 5.0f;
+		xs.fh = 5.0f;
+	}
 	widget_size_to_pt(widget, &xs);
 	lw = xs.w;
 	lh = xs.h;
 
-	widget_reset_paging(widget, pw, ph, fw, fh, lw, lh);
+	widget_reset_paging(widget, pw, ph, vw, vh, lw, lh);
 }
 
 /************************************************************************************************/
@@ -163,10 +179,20 @@ void hand_menu_size(widget_t widget, int code, const xsize_t* prs)
 {
 	menu_delta_t* ptd = GETMENUDELTA(widget);
 
-	if (!ptd->menu)
-		return;
+	XDK_ASSERT(ptd != NULL);
 
-	menubox_redraw(widget);
+	switch(code)
+	{
+	case WS_SIZE_FULLSCREEN:
+		break;
+	case WS_SIZE_MAXIMIZED:
+		break;
+	case WS_SIZE_MINIMIZED:
+		break;
+	case WS_SIZE_LAYOUT:
+		_menubox_reset_page(widget);
+		break;
+	}
 }
 
 void hand_menu_mouse_move(widget_t widget, dword_t dw, const xpoint_t* pxp)
@@ -195,7 +221,7 @@ void hand_menu_lbutton_down(widget_t widget, const xpoint_t* pxp)
 
 	pt.x = pxp->x;
 	pt.y = pxp->y;
-	widget_point_to_tm(widget, &pt);
+	widget_point_to_mm(widget, &pt);
 
 	canv = widget_get_canvas(widget);
 	get_canvas_measure(canv, &im);
@@ -357,7 +383,7 @@ widget_t menubox_create(widget_t wparent, dword_t wstyle, const xrect_t* pxr)
 
 		EVENT_ON_XFONT(hand_menu_xfont)
 
-		EVENT_ON_NC_IMPLEMENT
+		
 
 	EVENT_END_DISPATH
 
@@ -414,8 +440,6 @@ void menubox_redraw(widget_t widget)
 	}
 
 	_menubox_reset_page(widget);
-
-	widget_paint(widget);
 }
 
 void menubox_tabskip(widget_t widget, int nSkip)
@@ -595,7 +619,6 @@ void menubox_layout(widget_t widget, const xpoint_t* ppt, int lay)
 	
 	widget_size(widget, RECTSIZE(&xr));
 	widget_move(widget, RECTPOINT(&xr));
-	widget_paint(widget);
 
 	widget_show(widget, WS_SHOW_NORMAL);
 }

@@ -30,7 +30,7 @@ typedef struct {
   size_t readat;		//added by zwq at 2014.10.20
   //FILE * infile;		/* source stream */ //removed by zwq at 2014.10.20
   JOCTET * buffer;		/* start of buffer */
-  boolean start_of_file;	/* have we gotten any data yet? */
+  BOOLE start_of_file;	/* have we gotten any data yet? */
 } my_source_mgr;
 
 typedef my_source_mgr * my_src_ptr;
@@ -103,7 +103,7 @@ init_source (j_decompress_ptr cinfo)
  * the front of the buffer rather than discarding it.
  */
 
-METHODDEF(boolean)
+METHODDEF(BOOLE)
 fill_input_buffer (j_decompress_ptr cinfo)
 {
   my_src_ptr src = (my_src_ptr) cinfo->src;

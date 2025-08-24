@@ -181,10 +181,8 @@ typedef struct _canvbox_t{
 typedef struct _border_t{
 	int title;
 	int edge;
-	int hscroll;
-	int vscroll;
-	int menu;
-	int icon;
+	int scrw;
+	int scrh;
 }border_t;
 
 typedef struct _scroll_t{
@@ -203,27 +201,12 @@ typedef struct _caret_t{
 	int blink;
 }caret_t;
 
-/*define shadow feed*/
-#define DEF_MIN_SHADOW		5
-#define DEF_MAX_SHADOW		10
-
-typedef struct _shadow_t{
-	int offx;
-	int offy;
-}shadow_t;
-
-typedef struct _adorn_t{
-	int feed;
-	int size;
-}adorn_t;
-
 typedef struct _xbrush_t{
 	tchar_t style[RES_LEN + 1];
 	tchar_t opacity[INT_LEN + 1];
 	tchar_t color[CLR_LEN + 1];
 	tchar_t linear[CLR_LEN + 1];
 	tchar_t gradient[RES_LEN + 1];
-	shadow_t shadow;
 }xbrush_t;
 
 typedef struct _xpen_t{
@@ -231,7 +214,6 @@ typedef struct _xpen_t{
 	tchar_t size[INT_LEN + 1];
 	tchar_t opacity[INT_LEN + 1];
 	tchar_t color[CLR_LEN + 1];
-	adorn_t adorn;
 }xpen_t;
 
 typedef struct _xfont_t{

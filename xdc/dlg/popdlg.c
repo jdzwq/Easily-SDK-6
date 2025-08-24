@@ -40,7 +40,7 @@ widget_t create_dialog(link_t_ptr ptr_dlg, widget_t owner)
 	if_dispatch_t ev = { 0 };
 
 	EVENT_BEGIN_DISPATH(&ev)
-		EVENT_ON_NC_IMPLEMENT
+		
 	EVENT_END_DISPATH
 	
 	dlg = widget_create(get_dialog_name_ptr(ptr_dlg), WD_STYLE_DIALOG, &xr, owner, &ev);
@@ -50,7 +50,7 @@ widget_t create_dialog(link_t_ptr ptr_dlg, widget_t owner)
 	widget_set_owner(dlg, owner);
 	widget_set_user_id(dlg, xstol(get_dialog_id_ptr(ptr_dlg)));
 
-	rdc = widget_client_ctx(owner);
+	rdc = widget_client_context(owner);
 
 	ilk = get_dialog_prev_item(ptr_dlg, LINK_LAST);
 	while (ilk)
@@ -176,7 +176,7 @@ widget_t create_dialog(link_t_ptr ptr_dlg, widget_t owner)
 		{
 			widget_set_owner(box, dlg);
 			widget_set_user_id(box, xstol(get_dialog_item_id_ptr(ilk)));
-			widget_set_point(box, RECTPOINT(&xr));
+			//widget_set_point(box, RECTPOINT(&xr));
 			widget_show(box, WS_SHOW_NORMAL);
 		}
 		
@@ -191,11 +191,10 @@ widget_t create_dialog(link_t_ptr ptr_dlg, widget_t owner)
 	//cast_mm_to_pt(rdc, 0, &xn);
 	xr.h = xn.s;
 
-	widget_release_ctx(owner, rdc);
+	widget_release_context(owner, rdc);
 
 	adjust_widget_size(WD_STYLE_DIALOG, RECTSIZE(&xr));
 	widget_size(dlg, RECTSIZE(&xr));
-	widget_paint(dlg);
 	widget_center_window(dlg, owner);
 
 	return dlg;
@@ -247,11 +246,11 @@ int sub_dialog_on_paint(widget_t widget, visual_t dc, const xrect_t* pxr, uid_t 
 
 static int STDCALL _widget_set_child_point(widget_t widget, vword_t pv)
 {
-	xpoint_t pt;
+	//xpoint_t pt;
 
-	widget_get_point(widget, &pt);
+	//widget_get_point(widget, &pt);
 
-	widget_move(widget, &pt);
+	//widget_move(widget, &pt);
 
 	return 1;
 }

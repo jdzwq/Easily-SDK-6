@@ -649,6 +649,11 @@ LOC_API void	gradient_rect_raw(visual_t rdc, const xcolor_t* xc_brim, const xcol
 */
 LOC_API void	alphablend_rect_raw(visual_t rdc, const xcolor_t* pxc, const xrect_t* prt, int opacity);
 
+LOC_API fontset_t create_fontset(const xfont_t* pxf);
+LOC_API void destroy_fontset(fontset_t ft);
+LOC_API void word_size(fontset_t ft, const tchar_t* pch, int bytes, xsize_t* pxs);
+
+
 #ifdef	__cplusplus
 }
 #endif

@@ -143,7 +143,6 @@ static int sub_editbox_self_command(widget_t widget, int code, vword_t data, uid
 		if (widget_is_valid(ctrl))
 		{
 			widget_set_color_mode(ctrl, (color_mod_t*)data);
-			widget_paint(ctrl);
 		}
 		return 1;
 	case COMMAND_COMMIT:
@@ -268,7 +267,7 @@ widget_t firegrid_create(widget_t widget, const xrect_t* pxr, link_t_ptr data)
 	widget_get_window_rect(ctrlbox, &xr);
 	gridctrl_popup_size(ctrlbox, RECTSIZE(&xr));
 
-	get_desktop_size(&xs);
+	get_screen_size(&xs);
 
 	if (xr.x + xr.w > xs.w)
 	{
@@ -282,7 +281,6 @@ widget_t firegrid_create(widget_t widget, const xrect_t* pxr, link_t_ptr data)
 
 	widget_move(ctrlbox, RECTPOINT(&xr));
 	widget_size(ctrlbox, RECTSIZE(&xr));
-	widget_paint(ctrlbox);
 
 	return editor;
 }

@@ -42,13 +42,7 @@ void draw_select_raw(const drawing_interface* piv, const xcolor_t* pxc, const xr
 
 void draw_focus_raw(const drawing_interface* piv, const xcolor_t* pxc, const xrect_t* prt, int deep)
 {
-	xbrush_t xb;
-
-	default_xbrush(&xb);
-	format_xcolor(pxc, xb.color);
-	xsprintf(xb.opacity, _T("%d"), deep);
-
-	(*piv->pf_draw_rect)(piv->ctx, NULL, &xb, prt);
+	(*piv->pf_alphablend_rect)(piv->ctx, pxc, prt, deep);
 }
 
 void draw_sizing_raw(const drawing_interface* piv, const xcolor_t* pxc, const xrect_t* prt, int deep, dword_t pos)

@@ -529,8 +529,10 @@ void _gdi_draw_path(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const 
 		CGContextClosePath(ctx->context);
 	}
 
-	if(pxb)
+	if(pxb && pxp)
 		CGContextDrawPath(ctx->context, kCGPathFillStroke);
+	else if(pxb && !pxp)
+		CGContextDrawPath(ctx->context, kCGPathFill);
 	else
 		CGContextStrokePath(ctx->context);
 }
@@ -560,8 +562,10 @@ void _gdi_draw_rect(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const 
 		CGContextSetRGBFillColor(ctx->context, (float)(xc.r) / 255.0f, (float)(xc.g) / 255.0f, (float)(xc.b) / 255.0f, 1.0); 
 	}
 
-	if(pxb)
+	if(pxb && pxp)
 		CGContextDrawPath(ctx->context, kCGPathFillStroke);
+	else if(pxb && !pxp)
+		CGContextDrawPath(ctx->context, kCGPathFill);
 	else
 		CGContextStrokePath(ctx->context);
 }
@@ -591,8 +595,10 @@ void _gdi_draw_ellipse(visual_t rdc,const xpen_t* pxp,const xbrush_t* pxb,const 
 		CGContextSetRGBFillColor(ctx->context, (float)(xc.r) / 255.0f, (float)(xc.g) / 255.0f, (float)(xc.b) / 255.0f, 1.0); 
 	}
 
-	if(pxb)
+	if(pxb && pxp)
 		CGContextDrawPath(ctx->context, kCGPathFillStroke);
+	else if(pxb && !pxp)
+		CGContextDrawPath(ctx->context, kCGPathFill);
 	else
 		CGContextStrokePath(ctx->context);
 }
@@ -669,8 +675,10 @@ void _gdi_draw_round(visual_t rdc,const xpen_t* pxp,const xbrush_t* pxb,const xr
 		CGContextSetRGBFillColor(ctx->context, (float)(xc.r) / 255.0f, (float)(xc.g) / 255.0f, (float)(xc.b) / 255.0f, 1.0); 
 	}
 
-	if(pxb)
+	if(pxb && pxp)
 		CGContextDrawPath(ctx->context, kCGPathFillStroke);
+	else if(pxb && !pxp)
+		CGContextDrawPath(ctx->context, kCGPathFill);
 	else
 		CGContextStrokePath(ctx->context);
 
@@ -704,8 +712,10 @@ void _gdi_draw_pie(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const x
 		CGContextSetRGBFillColor(ctx->context, (float)(xc.r) / 255.0f, (float)(xc.g) / 255.0f, (float)(xc.b) / 255.0f, 1.0); 
 	}
 
-	if(pxb)
+	if(pxb && pxp)
 		CGContextDrawPath(ctx->context, kCGPathFillStroke);
+	else if(pxb && !pxp)
+		CGContextDrawPath(ctx->context, kCGPathFill);
 	else
 		CGContextStrokePath(ctx->context);
 }
@@ -745,8 +755,10 @@ void _gdi_draw_polygon(visual_t rdc, const xpen_t* pxp, const xbrush_t*pxb, cons
 		CGContextSetRGBFillColor(ctx->context, (float)(xc.r) / 255.0f, (float)(xc.g) / 255.0f, (float)(xc.b) / 255.0f, 1.0); 
 	}
 	
-	if(pxb)
+	if(pxb && pxp)
 		CGContextDrawPath(ctx->context, kCGPathFillStroke);
+	else if(pxb && !pxp)
+		CGContextDrawPath(ctx->context, kCGPathFill);
 	else
 		CGContextStrokePath(ctx->context);
 
@@ -849,33 +861,107 @@ void _gdi_text_rect(visual_t rdc, const xfont_t* pxf, const xface_t* pxa, const 
 	if(len < 0) len = xslen(txt);
 	if(!len) return;
 
-	tchar_t* new_txt = xsnclone(txt, len);
-	CFStringRef cfString = CFStringCreateWithCString(NULL, new_txt, kCFStringEncodingUTF8);
-	xsfree(new_txt);
- 
- 	float px = 0.0f;
+	float px = 0.0f;
 	font_metric_by_pt(xstof(pxf->size), NULL, &px); 
     CFStringRef cfFamily = CFStringCreateWithCString(NULL, pxf->family, kCFStringEncodingUTF8);
     CTFontRef cfFont = CTFontCreateWithName(cfFamily, px, NULL);
 	CFRelease(cfFamily);
 
-    CFMutableAttributedStringRef attrString = CFAttributedStringCreateMutable(kCFAllocatorDefault, 0);
-    CFAttributedStringReplaceString(attrString, CFRangeMake(0, 0), cfString);
-    CFAttributedStringSetAttribute(attrString, CFRangeMake(0, CFStringGetLength(cfString)), kCTFontAttributeName, cfFont);
+	CGFloat ascent,descent,leading;
 
-    CTLineRef cfLine = CTLineCreateWithAttributedString(attrString);
+	int c, n = 0, total = 0;
+	tchar_t pch[CHS_LEN + 1] = {0};
+	xsize_t se;
+	int w, h, maxw = 0;
 
-    CGFloat ascent = 0.0, descent = 0.0, leading = 0.0;
-    CGFloat width = CTLineGetTypographicBounds(cfLine, &ascent, &descent, &leading);
-    CGFloat height = ascent + descent + leading;
+	w = 0;
+	h = 0;
+	n = 0;
+	while (n++ < len)
+	{
+		c = peek_word((txt + total), pch);
+		total += c;
 
-	CFRelease(cfString);
-    CFRelease(cfLine);
-    CFRelease(attrString);
-    CFRelease(cfFont);
+		CFStringRef cfString = CFStringCreateWithCString(NULL, pch, kCFStringEncodingUTF8);
+		CFMutableAttributedStringRef attrString = CFAttributedStringCreateMutable(kCFAllocatorDefault, 0);
+    	CFAttributedStringReplaceString(attrString, CFRangeMake(0, 0), cfString);
+    	CFAttributedStringSetAttribute(attrString, CFRangeMake(0, CFStringGetLength(cfString)), kCTFontAttributeName, cfFont);
 
-    if(pxr->w < (int)width) pxr->w = (int)width;
-	if(pxr->h < (int)height) pxr->h = (int)height;
+    	CTLineRef cfLine = CTLineCreateWithAttributedString(attrString);
+
+		ascent = 0.0, descent = 0.0, leading = 0.0;
+    	se.w = (int)CTLineGetTypographicBounds(cfLine, &ascent, &descent, &leading);
+    	se.h = (int)(ascent + descent + leading);
+
+    	CFRelease(cfLine);
+    	CFRelease(attrString);
+		CFRelease(cfString);
+
+		if (!h)
+		{
+			if (is_null(pxa->line_height))
+				h = se.h;
+			else
+				h = (int)((float)se.h * xstof(pxa->line_height));
+		}
+
+		if (pxa && compare_text(pxa->text_wrap, -1, GDI_ATTR_TEXT_WRAP_WORDBREAK, -1, 1) == 0)
+		{
+			if (pxr->w && (w + se.w > pxr->w))
+			{
+				if (is_null(pxa->line_height))
+					h += se.h;
+				else
+					h += (int)((float)se.h * xstof(pxa->line_height));
+
+				w = 0;
+				total -= c;
+				n--;
+			}
+			else
+			{
+				w += se.w;
+			}
+		}
+		else if (pxa && compare_text(pxa->text_wrap, -1, GDI_ATTR_TEXT_WRAP_LINEBREAK, -1, 1) == 0)
+		{
+			if (pch[0] == _T('\n'))
+			{
+				if (is_null(pxa->line_height))
+					h += se.h;
+				else
+					h += (int)((float)se.h * xstof(pxa->line_height));
+
+				w = 0;
+			}
+			else if (pxr->w && (w + se.w > pxr->w))
+			{
+				if (is_null(pxa->line_height))
+					h += se.h;
+				else
+					h += (int)((float)se.h * xstof(pxa->line_height));
+
+				w = 0;
+				total -= xslen(pch);
+				n--;
+			}
+			else
+			{
+				w += se.w;
+			}
+		}
+		else
+		{
+			w += se.w;
+		}
+
+		if (maxw < w) maxw = w;
+	}
+
+	pxr->h = h;
+	if (!pxr->w) pxr->w = maxw;
+
+	CFRelease(cfFont);
 }
 
 void _gdi_text_size(visual_t rdc, const xfont_t* pxf, const tchar_t* txt, int len, xsize_t* pxs)
@@ -1112,6 +1198,58 @@ void _gdi_draw_bitmap(visual_t rdc, bitmap_t rbm, const xpoint_t* ppt)
 }
 #endif
 
+
+fontset_t _gdi_create_fontset(const xfont_t* pxf)
+{
+	cocoa_fontset_t* fst;
+	
+	float px = 0.0f;
+	font_metric_by_pt(xstof(pxf->size), NULL, &px);
+    CFStringRef cfFamily = CFStringCreateWithCString(NULL, pxf->family, kCFStringEncodingUTF8); 
+    CTFontRef cfFont = CTFontCreateWithName(cfFamily, px, NULL);
+	CFRelease(cfFamily);
+
+	fst = (cocoa_fontset_t*)xmem_alloc_handle(sizeof(cocoa_fontset_t));
+	fst->head.tag = _HANDLE_FONTSET;
+	fst->font_set = (id)cfFont;
+
+	return (fontset_t)&(fst->head);
+}
+
+void _gdi_destroy_fontset(fontset_t ft)
+{
+	cocoa_fontset_t* fst = TypePtrFromHead(cocoa_fontset_t, ft);
+
+	if(fst && fst->font_set) CFRelease(fst->font_set);
+
+	if(fst) xmem_free_handle(fst);
+}
+
+void _gdi_word_size(fontset_t ft, const tchar_t* pch, int chs, xsize_t* pxs)
+{
+	cocoa_fontset_t* fst = TypePtrFromHead(cocoa_fontset_t, ft);
+	tchar_t mbs[CHS_LEN] = {0};
+
+	xsncpy(mbs, pch, chs);
+	CFStringRef cfString = CFStringCreateWithCString(NULL, mbs, kCFStringEncodingUTF8); 
+
+	CFMutableAttributedStringRef attrString = CFAttributedStringCreateMutable(kCFAllocatorDefault, 0);
+    CFAttributedStringReplaceString(attrString, CFRangeMake(0, 0), cfString);
+    CFAttributedStringSetAttribute(attrString, CFRangeMake(0, CFStringGetLength(cfString)), kCTFontAttributeName, fst->font_set);
+
+    CTLineRef cfLine = CTLineCreateWithAttributedString(attrString);
+
+    CGFloat ascent = 0.0, descent = 0.0, leading = 0.0;
+    CGFloat width = CTLineGetTypographicBounds(cfLine, &ascent, &descent, &leading);
+    CGFloat height = ascent + descent;
+
+	CFRelease(cfString);
+    CFRelease(cfLine);
+    CFRelease(attrString);
+
+	pxs->w = (int)width;
+	pxs->h = (int)height;
+}
 
 #endif //XDU_SUPPORT_CONTEXT_GRAPHIC
 

@@ -97,7 +97,19 @@ void hand_staticbox_size(widget_t widget, int code, const xsize_t* prs)
 {
 	staticbox_delta_t* ptd = GETSTATICBOXDELTA(widget);
 	
-	widget_erase(widget, NULL);
+	XDK_ASSERT(ptd != NULL);
+
+	switch(code)
+	{
+	case WS_SIZE_FULLSCREEN:
+		break;
+	case WS_SIZE_MAXIMIZED:
+		break;
+	case WS_SIZE_MINIMIZED:
+		break;
+	case WS_SIZE_LAYOUT:
+		break;
+	}
 }
 
 void hand_staticbox_xfont(widget_t widget, const xfont_t* pxf)
@@ -161,7 +173,7 @@ widget_t staticbox_create(widget_t widget, dword_t style, const xrect_t* pxr)
 
 		EVENT_ON_XFONT(hand_staticbox_xfont)
 
-		EVENT_ON_NC_IMPLEMENT
+		
 
 	EVENT_END_DISPATH
 

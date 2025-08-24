@@ -26,6 +26,15 @@ LICENSE.GPL3 for more details.
 
 #include "xduutil.h"
 
+void default_widget_color_mode(color_mod_t* pclrs)
+{
+	parse_xcolor(&(pclrs->clr_bkg), GDI_ATTR_RGB_WHITE);
+	parse_xcolor(&(pclrs->clr_frg), GDI_ATTR_RGB_BLACK);
+	parse_xcolor(&(pclrs->clr_txt), GDI_ATTR_RGB_BLACK);
+	parse_xcolor(&(pclrs->clr_msk), GDI_ATTR_RGB_WHITE);
+	parse_xcolor(&(pclrs->clr_ico), GDI_ATTR_RGB_GRAY);
+}
+
 void default_widget_xfont(xfont_t* pxf)
 {
 	default_xfont(pxf);

@@ -51,9 +51,6 @@ typedef struct _handle_head	 *widget_t;
 #define XDUUSERDELTA	_T("XDUUSERDELTA")
 #define XDUCOREDELTA	_T("XDUCOREDELTA")
 
-#define ZERO_WIDTH				0.0f
-#define ZERO_HEIGHT				0.0f
-
 /*widget alphablend level*/
 #define ALPHA_SOLID			250
 #define ALPHA_SOFT			128
@@ -94,7 +91,7 @@ typedef struct _handle_head	 *widget_t;
 #define WD_STYLE_PAGING		0x00001000
 #define WD_STYLE_NOACTIVE	0x00002000
 #define WD_STYLE_NOCHANGE	0x00004000
-#if defined(_OS_WINDOWS)
+#ifdef XDU_SUPPORT_WIDGET_NC
 #define WD_STYLE_OWNERNC	0x00008000
 #else
 #define WD_STYLE_OWNERNC	0x00000000
@@ -128,25 +125,33 @@ typedef struct _handle_head	 *widget_t;
 #define	MS_TRACK_LEAVE		0x00000002
 
 /*widget size mode*/
-#define WS_SIZE_RESTORE		0
+#define WS_SIZE_LAYOUT		0
 #define WS_SIZE_MINIMIZED	1
 #define WS_SIZE_MAXIMIZED	2
 #define WS_SIZE_FULLSCREEN	3
-#define WS_SIZE_LAYOUT		9
+#define WS_SIZE_MAXHIDE		4
+#define WS_SIZE_MAXSHOW		5
 
 /*widget position mode*/
-#define WS_TAKE_TOP			(0)
-#define WS_TAKE_BOTTOM		(1)
+#define WS_TAKE_TOP			0
+#define WS_TAKE_BOTTOM		1
 #define WS_TAKE_TOPMOST		(-1)
 #define WS_TAKE_NOTOPMOST	(-2)
 
-/*widget show mode*/
+/*widget show type*/
 #define WS_SHOW_NORMAL		0
 #define WS_SHOW_HIDE		1
 #define WS_SHOW_MAXIMIZE	2
 #define WS_SHOW_MINIMIZE	3
 #define WS_SHOW_FULLSCREEN	4
 #define WS_SHOW_POPUPTOP	5
+
+/*widget running mode*/
+#define WS_MODE_INVALID		(-1)
+#define WS_MODE_NORMAL		0
+#define WS_MODE_MAIN		1
+#define WS_MODE_MODAL		2
+#define WS_MODE_TRACK		3
 
 /*widget docking position*/
 #define WS_DOCK_TOP			0x00000001
@@ -165,6 +170,44 @@ typedef struct _handle_head	 *widget_t;
 #define WS_LAYOUT_RIGHTTOP		2
 #define WS_LAYOUT_LEFTBOTTOM	3
 #define WS_LAYOUT_RIGHTBOTTOM	4
+
+#ifdef XDU_SUPPORT_WIDGET_NC
+/*widget nc hit test*/
+#define HINT_NOWHERE	0
+#define HINT_TITLE		2
+#define HINT_CLIENT		1
+#define HINT_RESTORE	4
+#define HINT_MINIMIZE	8
+#define HINT_MAXIMIZE	9
+#define HINT_LEFT		10
+#define HINT_RIGHT		11
+#define HINT_TOP		12
+#define HINT_TOPLEFT	13
+#define HINT_TOPRIGHT	14
+#define HINT_BOTTOM		15
+#define HINT_LEFTBOTTOM	16
+#define HINT_RIGHTBOTTOM	17
+#define HINT_BORDER		18
+#define HINT_CLOSE		20
+#define HINT_ICON		21
+#define HINT_MENUBAR	22
+#define HINT_HSCROLL	23
+#define HINT_VSCROLL	24
+#define HINT_PAGEUP		25
+#define HINT_PAGEDOWN	26
+#define HINT_LINEUP		27
+#define HINT_LINEDOWN	28
+#define HINT_LINELEFT	29
+#define HINT_LINERIGHT	30
+
+#endif
+
+/*widget frame*/
+#define FRAME_TITLE_DOTS	32
+#define FRAME_SCROLL_DOTS	10
+#define FRAME_ICON_DOTS		10
+#define FRAME_EDGE_DOTS		4
+#define CHILD_EDGE_DOTS		2
 
 /*widget scroll code*/
 #define SCROLL_LINEUP           0
@@ -284,13 +327,6 @@ typedef struct _handle_head	 *widget_t;
 #define KEY_F10			0x79
 #define KEY_F11			0x7A
 #define KEY_F12			0x7B
-
-#define WIDGET_TITLE_SPAN		(float)10	//mm
-#define WIDGET_MENU_SPAN		(float)7.5	//mm
-#define WIDGET_SCROLL_SPAN		(float)5	//mm
-#define WIDGET_ICON_SPAN		(float)3	//mm
-#define WIDGET_FRAME_EDGE		(float)1.5	//mm
-#define WIDGET_CHILD_EDGE		(float)0.5	//mm
 
 typedef struct _accel_table_t{
 	unsigned char vir;
@@ -416,11 +452,6 @@ typedef struct _if_subproc_t{
 	vword_t delta;
 }if_subproc_t;
 
-typedef void(*PF_ON_NCPAINT)(widget_t, visual_t);
-typedef void(*PF_ON_NCCALCSIZE)(widget_t, border_t*);
-typedef int(*PF_ON_NCHITTEST)(widget_t, const xpoint_t*);
-typedef int(*PF_ON_NCCALCSCROLL)(widget_t, bool_t, const xpoint_t*);
-
 typedef int(*PF_ON_CREATE)(widget_t, void*);
 typedef int(*PF_ON_CLOSE)(widget_t);
 typedef void(*PF_ON_DESTROY)(widget_t);
@@ -463,11 +494,6 @@ typedef void(*PF_ON_XPEN)(widget_t, const xpen_t*);
 
 /*widget event*/
 typedef struct _if_dispatch_t{
-	PF_ON_NCPAINT		pf_on_nc_paint;
-	PF_ON_NCCALCSIZE	pf_on_nc_calcsize;
-	PF_ON_NCHITTEST		pf_on_nc_hittest;
-	PF_ON_NCCALCSCROLL	pf_on_nc_calcscroll;
-
 	PF_ON_CREATE		pf_on_create;
 	PF_ON_CLOSE			pf_on_close;
 	PF_ON_DESTROY		pf_on_destroy;

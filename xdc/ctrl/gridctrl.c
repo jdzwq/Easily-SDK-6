@@ -347,7 +347,7 @@ float _gridctrl_page_width(widget_t widget)
 static void _gridctrl_reset_page(widget_t widget)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
-	int pw, ph, fw, fh, lw, lh;
+	int pw, ph, vw, vh, lw, lh;
 	xrect_t xr;
 	xsize_t xs;
 
@@ -355,38 +355,53 @@ static void _gridctrl_reset_page(widget_t widget)
 	pw = xr.w;
 	ph = xr.h;
 
-	if (compare_text(get_grid_printing_ptr(ptd->grid), -1, ATTR_PRINTING_LANDSCAPE, -1, 0) == 0)
+	if (ptd->grid)
 	{
-		xs.fw = _gridctrl_page_width(widget);
-
-		if (xs.fw < get_grid_height(ptd->grid))
+		if (compare_text(get_grid_printing_ptr(ptd->grid), -1, ATTR_PRINTING_LANDSCAPE, -1, 0) == 0)
 		{
-			xs.fw = get_grid_height(ptd->grid);
+			xs.fw = _gridctrl_page_width(widget);
+
+			if (xs.fw < get_grid_height(ptd->grid))
+			{
+				xs.fw = get_grid_height(ptd->grid);
+			}
+			xs.fh = get_grid_width(ptd->grid);
 		}
-		xs.fh = get_grid_width(ptd->grid);
+		else
+		{
+			xs.fw = _gridctrl_page_width(widget);
+
+			if (xs.fw < get_grid_width(ptd->grid))
+			{
+				xs.fw = get_grid_width(ptd->grid);
+			}
+			xs.fh = get_grid_height(ptd->grid);
+		}
+
+		widget_size_to_pt(widget, &xs);
+		vw = xs.w;
+		vh = xs.h;
+	}else
+	{
+		vw = pw;
+		vh = ph;
+	}
+
+	if (ptd->grid)
+	{
+		xs.fw = get_grid_rowbar_height(ptd->grid);
+		xs.fh = get_grid_rowbar_height(ptd->grid);
 	}
 	else
 	{
-		xs.fw = _gridctrl_page_width(widget);
-
-		if (xs.fw < get_grid_width(ptd->grid))
-		{
-			xs.fw = get_grid_width(ptd->grid);
-		}
-		xs.fh = get_grid_height(ptd->grid);
+		xs.fw = 10.0f;
+		xs.fh = 10.0f;
 	}
-
-	widget_size_to_pt(widget, &xs);
-	fw = xs.w;
-	fh = xs.h;
-
-	xs.fw = get_grid_rowbar_height(ptd->grid);
-	xs.fh = get_grid_rowbar_height(ptd->grid);
 	widget_size_to_pt(widget, &xs);
 	lw = xs.w;
 	lh = xs.h;
 
-	widget_reset_paging(widget, pw, ph, fw, fh, lw, lh);
+	widget_reset_paging(widget, pw, ph, vw, vh, lw, lh);
 
 	widget_reset_scroll(widget, 1);
 
@@ -514,7 +529,7 @@ void noti_grid_col_sized(widget_t widget, int x, int y)
 	if (!xs.w)
 		return;
 
-	widget_size_to_tm(widget, &xs);
+	widget_size_to_mm(widget, &xs);
 
 	mw = get_col_width(ptd->col);
 	mw += xs.fw;
@@ -582,7 +597,7 @@ void noti_grid_row_sized(widget_t widget, int x, int y)
 	if (!xs.h)
 		return;
 
-	widget_size_to_tm(widget, &xs);
+	widget_size_to_mm(widget, &xs);
 
 	mh = get_grid_rowbar_height(ptd->grid);
 	mh += xs.fh;
@@ -642,7 +657,7 @@ void noti_grid_col_drop(widget_t widget, int x, int y)
 
 	pt.x = x;
 	pt.y = y;
-	widget_point_to_tm(widget, &pt);
+	widget_point_to_mm(widget, &pt);
 
 	nHint = calc_grid_hint(&pt, ptd->grid, ptd->cur_page, &rlk, &clk);
 	if (clk != ptd->col)
@@ -1271,17 +1286,17 @@ void noti_grid_reset_scroll(widget_t widget, bool_t bUpdate)
 	if (widget_is_valid(ptd->vsc))
 	{
 		if (bUpdate)
-			widget_paint(ptd->vsc);
+			widget_erase(ptd->vsc, NULL);
 		else
-			widget_close(ptd->vsc, 0);
+			widget_destroy(ptd->vsc);
 	}
 
 	if (widget_is_valid(ptd->hsc))
 	{
 		if (bUpdate)
-			widget_paint(ptd->hsc);
+			widget_erase(ptd->hsc, NULL);
 		else
-			widget_close(ptd->hsc, 0);
+			widget_destroy(ptd->hsc);
 	}
 }
 /*******************************************************************************************/
@@ -1378,12 +1393,20 @@ void hand_grid_size(widget_t widget, int code, const xsize_t* prs)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 
-	if (!ptd->grid)
-		return;
+	XDK_ASSERT(ptd != NULL);
 
-	noti_grid_reset_scroll(widget, 0);
-
-	gridctrl_redraw(widget, 1);
+	switch(code)
+	{
+	case WS_SIZE_FULLSCREEN:
+		break;
+	case WS_SIZE_MAXIMIZED:
+		break;
+	case WS_SIZE_MINIMIZED:
+		break;
+	case WS_SIZE_LAYOUT:
+		_gridctrl_reset_page(widget);
+		break;
+	}
 }
 
 void hand_grid_scroll(widget_t widget, bool_t bHorz, int nLine)
@@ -1427,7 +1450,7 @@ void hand_grid_wheel(widget_t widget, bool_t bHorz, int nDelta)
 			}
 			else
 			{
-				widget_paint(ptd->vsc);
+				widget_erase(ptd->vsc, NULL);
 			}
 		}
 
@@ -1439,7 +1462,7 @@ void hand_grid_wheel(widget_t widget, bool_t bHorz, int nDelta)
 			}
 			else
 			{
-				widget_paint(ptd->hsc);
+				widget_erase(ptd->hsc, NULL);
 			}
 		}
 
@@ -1499,7 +1522,7 @@ void hand_grid_mouse_move(widget_t widget, dword_t dw, const xpoint_t* pxp)
 
 	pt.x = pxp->x;
 	pt.y = pxp->y;
-	widget_point_to_tm(widget, &pt);
+	widget_point_to_mm(widget, &pt);
 
 	nHint = calc_grid_hint(&pt, ptd->grid, ptd->cur_page, &row, &col);
 
@@ -1605,7 +1628,7 @@ void hand_grid_lbutton_down(widget_t widget, const xpoint_t* pxp)
 
 	pt.x = pxp->x;
 	pt.y = pxp->y;
-	widget_point_to_tm(widget, &pt);
+	widget_point_to_mm(widget, &pt);
 
 	nHint = calc_grid_hint(&pt, ptd->grid, ptd->cur_page, &rlk, &clk);
 
@@ -1692,7 +1715,7 @@ void hand_grid_lbutton_up(widget_t widget, const xpoint_t* pxp)
 
 	pt.x = pxp->x;
 	pt.y = pxp->y;
-	widget_point_to_tm(widget, &pt);
+	widget_point_to_mm(widget, &pt);
 
 	nHint = calc_grid_hint(&pt, ptd->grid, ptd->cur_page, &rlk, &clk);
 
@@ -2055,7 +2078,7 @@ widget_t gridctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* px
 		EVENT_ON_CHILD_COMMAND(hand_grid_child_command)
 		EVENT_ON_MENU_COMMAND(hand_grid_menu_command)
 
-		EVENT_ON_NC_IMPLEMENT
+		
 
 	EVENT_END_DISPATH
 
@@ -2179,13 +2202,11 @@ void gridctrl_redraw(widget_t widget, bool_t bCalc)
 	if (!b)
 	{
 		widget_get_client_rect(widget, &xr);
-		widget_rect_to_tm(widget, &xr);
+		widget_rect_to_mm(widget, &xr);
 		set_grid_height(ptd->grid, xr.fh);
 	}
 
 	_gridctrl_reset_page(widget);
-
-	widget_paint(widget);
 }
 
 void gridctrl_tabskip(widget_t widget, int dir)

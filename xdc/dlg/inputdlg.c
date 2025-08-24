@@ -185,7 +185,6 @@ void hand_inputdlg_size(widget_t widget, int code, const xsize_t* prs)
 		xr.w = xr.h;
 		widget_move(ptd->button, RECTPOINT(&xr));
 		widget_size(ptd->button, RECTSIZE(&xr));
-		widget_paint(ptd->button);
 	}
 
 	if (ptd->editor)
@@ -193,7 +192,6 @@ void hand_inputdlg_size(widget_t widget, int code, const xsize_t* prs)
 		widget_get_client_rect(widget, &xr);
 		xr.w -= xr.h;
 		widget_size(ptd->editor, RECTSIZE(&xr));
-		widget_paint(ptd->editor);
 	}
 
 	widget_erase(widget, NULL);
@@ -217,7 +215,6 @@ void hand_inputdlg_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 
 	color_mod_t clrs;
 	xbrush_t xb = { 0 };
-	xcolor_t xc_brim, xc_core;
 
 	widget_get_color_mode(widget, &clrs);
 	default_xbrush(&xb);
@@ -264,7 +261,7 @@ widget_t inputdlg_create(const tchar_t* title, tchar_t* buf, int max, widget_t o
 
 		EVENT_ON_XFONT(hand_inputdlg_xfont)
 
-		EVENT_ON_NC_IMPLEMENT
+		
 
 	EVENT_END_DISPATH
 	
@@ -274,7 +271,6 @@ widget_t inputdlg_create(const tchar_t* title, tchar_t* buf, int max, widget_t o
 
 	inputdlg_popup_size(dlg, RECTSIZE(&xr));
 	widget_size(dlg, RECTSIZE(&xr));
-	widget_paint(dlg);
 
 	widget_center_window(dlg, owner);
 

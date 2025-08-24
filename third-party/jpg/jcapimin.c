@@ -116,7 +116,7 @@ jpeg_abort_compress (j_compress_ptr cinfo)
  */
 
 GLOBAL(void)
-jpeg_suppress_tables (j_compress_ptr cinfo, boolean suppress)
+jpeg_suppress_tables (j_compress_ptr cinfo, BOOLE suppress)
 {
   int i;
   JQUANT_TBL * qtbl;

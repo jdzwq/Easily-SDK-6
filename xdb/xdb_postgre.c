@@ -1731,11 +1731,11 @@ bool_t STDCALL db_export(xdb_t db, stream_t stream, const tchar_t* sqlstr)
                 d_len = utf8_to_mbs((byte_t*)fval, vlen, d_str, d_len);
 #endif
 
-				len_esc = csv_char_encode(d_str, d_len, NULL, MAX_LONG);
+				csv_token_encode(d_str, d_len, NULL, &len_esc);
 				if (len_esc != d_len)
 				{
 					sz_esc = xsalloc(len_esc + 1);
-					csv_char_encode(d_str, d_len, sz_esc, len_esc);
+					csv_token_encode(d_str, d_len, sz_esc, &len_esc);
 
 					string_cat(vs, sz_esc, len_esc);
 					xsfree(sz_esc);
@@ -1936,11 +1936,11 @@ bool_t STDCALL db_import(xdb_t db, stream_t stream, const tchar_t* table)
             if(tklen)
             {
                 tkpre = token - tklen;
-                len_esc = csv_char_decode(tkpre, tklen, NULL, MAX_LONG);
+                csv_token_decode(tkpre, tklen, NULL, &len_esc);
                 if (len_esc != tklen)
                 {
                     sz_esc = xsalloc(len_esc + 1);
-					csv_char_decode(tkpre, tklen, sz_esc, len_esc);
+					csv_token_decode(tkpre, tklen, sz_esc, &len_esc);
                     
 #ifdef _UNICODE
                     plen[i] = ucs_to_utf8(sz_esc, len_esc, NULL, MAX_LONG);

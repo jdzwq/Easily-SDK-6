@@ -115,7 +115,7 @@ void noti_richctrl_reset_scroll(widget_t widget, bool_t bUpdate)
 	if (widget_is_valid(ptd->vsc))
 	{
 		if (bUpdate)
-			widget_paint(ptd->vsc);
+			widget_erase(ptd->vsc, NULL);
 		else
 			widget_close(ptd->vsc, 0);
 	}
@@ -123,7 +123,7 @@ void noti_richctrl_reset_scroll(widget_t widget, bool_t bUpdate)
 	if (widget_is_valid(ptd->hsc))
 	{
 		if (bUpdate)
-			widget_paint(ptd->hsc);
+			widget_erase(ptd->hsc, NULL);
 		else
 			widget_close(ptd->hsc, 0);
 	}
@@ -141,7 +141,7 @@ int hand_richctrl_create(widget_t widget, void* data)
 	SETRICHCTRLDELTA(widget, ptd);
 
 	ptd->textor.widget = widget;
-	ptd->textor.cdc = widget_client_ctx(widget);
+	ptd->textor.cdc = widget_client_context(widget);
 	ptd->textor.data = NULL;
 	ptd->textor.pf_scan_text = (PF_SCAN_TEXT)scan_rich_text;
 	ptd->textor.pf_get_text = _richctrl_get_text;
@@ -171,7 +171,7 @@ void hand_richctrl_destroy(widget_t widget)
 
 	hand_textor_clean(&ptd->textor);
 
-	widget_release_ctx(widget, ptd->textor.cdc);
+	widget_release_context(widget, ptd->textor.cdc);
 
 	xmem_free(ptd);
 
@@ -566,13 +566,25 @@ void hand_richctrl_size(widget_t widget, int code, const xsize_t* prs)
 {
 	richctrl_delta_t* ptd = GETRICHCTRLDELTA(widget);
 
+	XDK_ASSERT(ptd != NULL);
+
+	switch(code)
+	{
+	case WS_SIZE_FULLSCREEN:
+		break;
+	case WS_SIZE_MAXIMIZED:
+		break;
+	case WS_SIZE_MINIMIZED:
+		break;
+	case WS_SIZE_LAYOUT:
+		break;
+	}
+
 	if (!ptd)
 		return;
 
 	if (!ptd->textor.data)
 		return;
-
-	noti_richctrl_reset_scroll(widget, 0);
 
 	hand_textor_size(&ptd->textor, code, prs);
 }
@@ -620,7 +632,7 @@ void hand_richctrl_wheel(widget_t widget, bool_t bHorz, int nDelta)
 			}
 			else
 			{
-				widget_paint(ptd->vsc);
+				widget_erase(ptd->vsc, NULL);
 			}
 		}
 
@@ -632,7 +644,7 @@ void hand_richctrl_wheel(widget_t widget, bool_t bHorz, int nDelta)
 			}
 			else
 			{
-				widget_paint(ptd->hsc);
+				widget_erase(ptd->hsc, NULL);
 			}
 		}
 
@@ -757,7 +769,7 @@ widget_t richctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* px
 		EVENT_ON_XFONT(hand_richctrl_xfont)
 		EVENT_ON_XFACE(hand_richctrl_xface)
 
-		EVENT_ON_NC_IMPLEMENT
+		
 
 	EVENT_END_DISPATH
 

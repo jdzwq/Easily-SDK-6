@@ -119,7 +119,7 @@ link_t_ptr  widget_detach_menu(widget_t wt)
 void  widget_menu_item_rect(widget_t wt, int iid, xrect_t* pxr)
 {
 	link_t_ptr plk, ilk;
-	xrect_t xr, xrItem;
+	xrect_t xrItem, xr = {0};
 	xsize_t xs;
 	const tchar_t* text;
 	visual_t rdc;
@@ -135,7 +135,7 @@ void  widget_menu_item_rect(widget_t wt, int iid, xrect_t* pxr)
 	if (!plk)
 		return;
 
-	widget_get_menu_rect(wt, &xr);
+	//widget_get_menu_rect(wt, &xr);
 
 	if (!xr.w)
 		return;
@@ -147,7 +147,7 @@ void  widget_menu_item_rect(widget_t wt, int iid, xrect_t* pxr)
 
 	default_widget_xfont(&xf);
 
-	rdc = widget_window_ctx(wt);
+	rdc = widget_window_context(wt);
 
 	get_visual_interface(rdc, &ifv);
 
@@ -174,7 +174,7 @@ void  widget_menu_item_rect(widget_t wt, int iid, xrect_t* pxr)
 		ilk = get_menu_next_item(pwt->menu, ilk);
 	}
 
-	widget_release_ctx(wt, rdc);
+	widget_release_context(wt, rdc);
 }
 
 void  widget_attach_splitor(widget_t wt, link_t_ptr split)
@@ -351,13 +351,6 @@ void widget_reset_scroll(widget_t wt, bool_t horz)
 	}
 
 	widget_set_scroll_info(wt, horz, &sc);
-
-#ifdef XDU_SUPPORT_WIDGET_NC
-	if (widget_get_style(wt) & WD_STYLE_OWNERNC)
-	{
-		widget_draw_scroll(wt, horz);
-	}
-#endif
 }
 
 void widget_reset_paging(widget_t wt, int ww, int wh, int vw, int vh, int lw, int lh)
@@ -585,7 +578,7 @@ void widget_rect_to_pt(widget_t wt, xrect_t* pxr)
 	rect_mm_to_pt(canv, pxr);
 }
 
-void widget_rect_to_tm(widget_t wt, xrect_t* pxr)
+void widget_rect_to_mm(widget_t wt, xrect_t* pxr)
 {
 	canvas_t canv;
 	canvbox_t cb;
@@ -617,7 +610,7 @@ void widget_point_to_pt(widget_t wt, xpoint_t* ppt)
 	point_mm_to_pt(canv, ppt);
 }
 
-void widget_point_to_tm(widget_t wt, xpoint_t* ppt)
+void widget_point_to_mm(widget_t wt, xpoint_t* ppt)
 {
 	canvas_t canv;
 	canvbox_t cb;
@@ -644,7 +637,7 @@ void widget_size_to_pt(widget_t wt, xsize_t* pxs)
 	size_mm_to_pt(canv, pxs);
 }
 
-void widget_size_to_tm(widget_t wt, xsize_t* pxs)
+void widget_size_to_mm(widget_t wt, xsize_t* pxs)
 {
 	canvas_t canv;
 
@@ -674,14 +667,16 @@ void widget_hand_create(widget_t wt)
 	widget_exten_t* pwt;
 	visual_t rdc;
 	color_mod_t clrs;
+	xrect_t xr;
 
 	widget_get_color_mode(wt, &clrs);
+	widget_get_client_rect(wt, &xr);
 
 	pwt = (widget_exten_t*)xmem_alloc(sizeof(widget_exten_t));
 
-	rdc = widget_client_ctx(wt);
+	rdc = widget_client_context(wt);
 	pwt->canv = create_display_canvas(rdc);
-	widget_release_ctx(wt, rdc);
+	widget_release_context(wt, rdc);
 
 	pwt->pif = (drawing_interface*)xmem_alloc(sizeof(drawing_interface));
 
@@ -690,24 +685,43 @@ void widget_hand_create(widget_t wt)
 	xmem_copy((void*)&(pwt->pif->mode), (void*)&clrs, sizeof(color_mod_t));
 
 	SETEXTENSTRUCT(wt, pwt);
+
+	widget_reset_paging(wt, xr.w, xr.h, xr.w, xr.h, 0, 0);
 }
 
-void widget_hand_paint(widget_t wt, visual_t rdc)
+void widget_hand_paint(widget_t wt, visual_t rdc, const tchar_t* gradient)
 {
 	drawing_interface ifv = {0};
 	color_mod_t clrs;
-	xrect_t xr;
+	xcolor_t xc_brim, xc_core;
 	xbrush_t xb;
+	xrect_t xr;
 
 	widget_get_color_mode(wt, &clrs);
 	widget_get_client_rect(wt, &xr);
 
-	default_xbrush(&xb);
-	format_xcolor(xb.color, &clrs.clr_bkg);
-
 	get_visual_interface(rdc, &ifv);
+	if(compare_text(gradient,-1,GDI_ATTR_GRADIENT_VERT,-1,1) == 0)
+	{
+		xmem_copy((void*)&xc_brim, (void*)&clrs.clr_bkg, sizeof(xcolor_t));
+		xmem_copy((void*)&xc_core, (void*)&clrs.clr_bkg, sizeof(xcolor_t));
+		lighten_xcolor(&xc_core, DEF_SOFT_DARKEN);
 
-	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
+		(*ifv.pf_gradient_rect)(ifv.ctx, &xc_core, &xc_brim, GDI_ATTR_GRADIENT_VERT, &xr);
+	}else if(compare_text(gradient,-1,GDI_ATTR_GRADIENT_HORZ,-1,1) == 0)
+	{
+		xmem_copy((void*)&xc_brim, (void*)&clrs.clr_bkg, sizeof(xcolor_t));
+		xmem_copy((void*)&xc_core, (void*)&clrs.clr_bkg, sizeof(xcolor_t));
+		lighten_xcolor(&xc_core, DEF_SOFT_DARKEN);
+
+		(*ifv.pf_gradient_rect)(ifv.ctx, &xc_core, &xc_brim, GDI_ATTR_GRADIENT_HORZ, &xr);
+	}else
+	{
+		default_xbrush(&xb);
+		format_xcolor(&clrs.clr_bkg, xb.color);
+
+		(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
+	}
 }
 
 void widget_hand_destroy(widget_t wt)

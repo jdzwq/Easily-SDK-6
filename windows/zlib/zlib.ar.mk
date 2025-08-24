@@ -63,6 +63,7 @@ uninstall:
 clean:
 	del $(subst /,\, $(TARGET))
 	del $(subst /,\, $(OBJ_PATH)/*.obj)
+	del $(subst /,\, $(OBJ_PATH)/*.asm)
 
 #-----------------------------------------------------------------------------
 # end microsoft NMAKE file

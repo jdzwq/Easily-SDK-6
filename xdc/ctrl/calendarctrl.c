@@ -29,9 +29,9 @@ LICENSE.GPL3 for more details.
 #include "../xdcobj.h"
 
 
-#define CALENDAR_LINE_FEED		(float)50
-#define CALENDAR_DAILY_MIN_WIDTH	(float)10
-#define CALENDAR_DAILY_MIN_HEIGHT	(float)10
+#define CALENDAR_LINE_FEED			50.0f
+#define CALENDAR_DAILY_MIN_WIDTH	10.0f
+#define CALENDAR_DAILY_MIN_HEIGHT	10.0f
 
 typedef struct _calendar_delta_t{
 	link_t_ptr calendar;
@@ -62,7 +62,7 @@ static void _calendarctrl_reset_page(widget_t widget)
 {
 	calendar_delta_t* ptd = GETCALENDARDELTA(widget);
 
-	int pw, ph, fw, fh, lw, lh;
+	int pw, ph, vw, vh, lw, lh;
 	xrect_t xr;
 	xsize_t xs;
 
@@ -70,12 +70,19 @@ static void _calendarctrl_reset_page(widget_t widget)
 	pw = xr.w;
 	ph = xr.h;
 
-	xs.fw = get_calendar_width(ptd->calendar);
-	xs.fh = get_calendar_height(ptd->calendar);
+	if(ptd->calendar)
+	{
+		xs.fw = get_calendar_width(ptd->calendar);
+		xs.fh = get_calendar_height(ptd->calendar);
 
-	widget_size_to_pt(widget, &xs);
-	fw = xs.w;
-	fh = xs.h;
+		widget_size_to_pt(widget, &xs);
+		vw = xs.w;
+		vh = xs.h;
+	}else
+	{
+		vw = pw;
+		vh = ph;
+	}
 
 	xs.fw = (float)10;
 	xs.fh = (float)10;
@@ -83,7 +90,7 @@ static void _calendarctrl_reset_page(widget_t widget)
 	lw = xs.w;
 	lh = xs.h;
 
-	widget_reset_paging(widget, pw, ph, fw, fh, lw, lh);
+	widget_reset_paging(widget, pw, ph, vw, vh, lw, lh);
 
 	widget_reset_scroll(widget, 1);
 
@@ -277,10 +284,21 @@ void hand_calendar_size(widget_t widget, int code, const xsize_t* prs)
 {
 	calendar_delta_t* ptd = GETCALENDARDELTA(widget);
 
-	if (!ptd->calendar)
-		return;
+	XDK_ASSERT(ptd != NULL);
+	
+	switch(code)
+	{
+	case WS_SIZE_FULLSCREEN:
+		break;
+	case WS_SIZE_MAXIMIZED:
+		break;
+	case WS_SIZE_MINIMIZED:
+		break;
+	case WS_SIZE_LAYOUT:
+		_calendarctrl_reset_page(widget);
+		break;
 
-	calendarctrl_redraw(widget);
+	}
 }
 
 void hand_calendar_scroll(widget_t widget, bool_t bHorz, int nLine)
@@ -333,7 +351,7 @@ void hand_calendar_mouse_move(widget_t widget, dword_t dw, const xpoint_t* pxp)
 
 	pt.x = pxp->x;
 	pt.y = pxp->y;
-	widget_point_to_tm(widget, &pt);
+	widget_point_to_mm(widget, &pt);
 
 	ilk = NULL;
 	nHint = calc_calendar_hint(ptd->calendar, &pt, &ilk);
@@ -399,7 +417,7 @@ void hand_calendar_lbutton_down(widget_t widget, const xpoint_t* pxp)
 
 	pt.x = pxp->x;
 	pt.y = pxp->y;
-	widget_point_to_tm(widget, &pt);
+	widget_point_to_mm(widget, &pt);
 
 	ilk = NULL;
 	nHint = calc_calendar_hint(ptd->calendar, &pt, &ilk);
@@ -433,7 +451,7 @@ void hand_calendar_lbutton_up(widget_t widget, const xpoint_t* pxp)
 
 	pt.x = pxp->x;
 	pt.y = pxp->y;
-	widget_point_to_tm(widget, &pt);
+	widget_point_to_mm(widget, &pt);
 
 	ilk = NULL;
 	nHint = calc_calendar_hint(ptd->calendar, &pt, &ilk);
@@ -524,6 +542,8 @@ void hand_calendar_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	get_visual_interface(rdc, &ifv);
 	widget_get_view_rect(widget, (viewbox_t*)(&ifv.rect));
 
+	widget_hand_paint(widget, rdc, NULL);
+
 	draw_calendar(pif, ptd->calendar);
 
 	//draw focus
@@ -585,7 +605,7 @@ widget_t calendarctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t
 
 		EVENT_ON_NOTICE(hand_calendar_notice)
 
-		EVENT_ON_NC_IMPLEMENT
+		
 
 	EVENT_END_DISPATH
 
@@ -663,8 +683,6 @@ void calendarctrl_redraw(widget_t widget)
 	ptd->hover = NULL;
 
 	_calendarctrl_reset_page(widget);
-
-	widget_paint(widget);
 }
 
 void calendarctrl_redraw_daily(widget_t widget, link_t_ptr ilk)

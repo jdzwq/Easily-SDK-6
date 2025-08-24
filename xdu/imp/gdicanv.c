@@ -54,16 +54,16 @@ float pt_to_mm(canvas_t canv, int pt, bool_t horz)
 		return (float)((float)pt / pcanv->vtpermm - pcanv->vert_feed);
 }
 
-int mm_to_pt(canvas_t canv, float tm, bool_t horz)
+int mm_to_pt(canvas_t canv, float mm, bool_t horz)
 {
 	rdc_canvas_t* pcanv = TypePtrFromHead(rdc_canvas_t, canv);
 
 	XDK_ASSERT(canv);
 
 	if (horz)
-		return ROUNDINT((tm + pcanv->horz_feed) * pcanv->htpermm);
+		return ROUNDINT((mm + pcanv->horz_feed) * pcanv->htpermm);
 	else
-		return ROUNDINT((tm + pcanv->vert_feed) * pcanv->vtpermm);
+		return ROUNDINT((mm + pcanv->vert_feed) * pcanv->vtpermm);
 }
 
 void rect_mm_to_pt(canvas_t canv, xrect_t* pxr)

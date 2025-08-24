@@ -27,56 +27,9 @@ LICENSE.GPL3 for more details.
 #include "../xduloc.h"
 #include "../xduutil.h"
 
+#include <X11/Xft/Xft.h>
+
 #ifdef XDU_SUPPORT_CONTEXT_GDI
-
-static tchar_t *x11_font_name[] = {_T("*")};
-static tchar_t *x11_font_weight[] = {_T("regular"), _T("medium"), _T("bold")};
-static tchar_t *x11_font_style[]  = {_T("r"), _T("i"), _T("o")};
-static tchar_t *x11_font_size[] = {_T("9"),_T("10"),_T("12"),_T("13"),_T("14"),_T("15"),_T("16"),_T("18"), _T("24") ,_T("26"), _T("36"), _T("42"), _T("54"), _T("63"), _T("72")};
-static tchar_t x11_pattern[] = {_T("-*-%s-%s-%s-*--%s-*-*-*-*-*-*")};
-//font pattern eg: -misc-fixed-medium-r-normal--10-100-75-75-c-60-iso8859-1
-//font pattern eg: -*-helvetica-*-*-*-*-12-*-*-*-*-*-*
-
-#define default_fixed_pattern	_T("fixed")
-
-static int format_font_pattern(const xfont_t* pxf, tchar_t* buf)
-{
-    const tchar_t* fs_name = NULL;
-    const tchar_t* fs_style = NULL;
-    const tchar_t* fs_weight = NULL;
-	const tchar_t* fs_size = NULL;
-    int i;
-    
-    if(is_null((pxf->family)))
-        fs_name = x11_font_name[0];
-    else
-        fs_name = pxf->family;
-    
-    if(xstol(pxf->weight) < 400)
-        fs_weight = x11_font_weight[0];
-    else if(xstol(pxf->weight) < 700)
-        fs_weight = x11_font_weight[1];
-    else
-        fs_weight = x11_font_weight[2];
-    
-    if(xscmp(pxf->style,GDI_ATTR_FONT_STYLE_ITALIC) == 0)
-        fs_style = x11_font_style[1];
-    else if(xscmp(pxf->style,GDI_ATTR_FONT_STYLE_OBLIQUE) == 0)
-        fs_style = x11_font_style[2];
-    else
-        fs_style = x11_font_style[0];
-    
-	for(i = 0; i< 15; i++)
-	{
-		if(xstol(pxf->size) <= xstol(x11_font_size[i]))
-			break;
-	}
-	if(i == 15) i--;
-	
-	fs_size = x11_font_size[i];
-
-    return xsprintf(buf, x11_pattern, fs_name, fs_weight, fs_style, fs_size);
-}
 
 static void DPtoLP(visual_t rdc, XPoint* pt,int n)
 {
@@ -141,18 +94,6 @@ static void _calc_point(const xpoint_t* pt, int r, double a, xpoint_t* pp)
 	pp->y = pt->y + (int)((float)r * sin(a));
 }
 
-static XFontStruct* _create_font(const xfont_t* pxf)
-{
-	char font_token[1024] = {0};
-	
-	if(pxf)
-		format_font_pattern(pxf, font_token);
-	else
-		xscpy(font_token, default_fixed_pattern);
-
-	return XLoadQueryFont(g_display, font_token);
-}
-
 static void calc_penmode(const xpen_t* pxp, int* fs, int* ds)
 {
 	*fs = is_null(pxp->size) ? 1 : xstol(pxp->size);
@@ -191,7 +132,7 @@ void _gdi_set_point(visual_t rdc, const xcolor_t* pxc, const xpoint_t* ppt)
 
 void _gdi_draw_points(visual_t rdc, const xcolor_t* pxc, const xpoint_t* ppt, int n)
 {
-	X11_context_t* ctx = (X11_context_t*)rdc;
+	X11_context_t* ctx = TypePtrFromHead(X11_context_t, rdc);
 
 	XColor ext, clr_pen = {0};
 	XPoint* ppp;
@@ -225,7 +166,7 @@ void _gdi_draw_points(visual_t rdc, const xcolor_t* pxc, const xpoint_t* ppt, in
 
 void _gdi_draw_line(visual_t rdc,const xpen_t* pxp, const xpoint_t* ppt1, const xpoint_t* ppt2)
 {
-    X11_context_t* ctx = (X11_context_t*)rdc;
+    X11_context_t* ctx = TypePtrFromHead(X11_context_t, rdc);
 
 	xcolor_t xc = {0};
 	int l_w, l_s;
@@ -272,7 +213,7 @@ void _gdi_draw_line(visual_t rdc,const xpen_t* pxp, const xpoint_t* ppt1, const 
 
 void _gdi_draw_polyline(visual_t rdc,const xpen_t* pxp,const xpoint_t* ppt,int n)
 {
-	X11_context_t* ctx = (X11_context_t*)rdc;
+	X11_context_t* ctx = TypePtrFromHead(X11_context_t, rdc);
 
 	xcolor_t xc = {0};
 	int l_w, l_s;
@@ -326,7 +267,7 @@ void _gdi_draw_polyline(visual_t rdc,const xpen_t* pxp,const xpoint_t* ppt,int n
 
 void _gdi_draw_arc(visual_t rdc, const xpen_t* pxp, const xpoint_t * ppt1, const xpoint_t* ppt2, const xsize_t* pxs, bool_t closewise, bool_t largearc)
 {
-    X11_context_t* ctx = (X11_context_t*)rdc;
+    X11_context_t* ctx = TypePtrFromHead(X11_context_t, rdc);
 
 	xcolor_t xc = {0};
 	int l_w, l_s;
@@ -458,12 +399,17 @@ void _gdi_draw_curve(visual_t rdc, const xpen_t* pxp, const xpoint_t* ppt, int p
 		n = dot_curve2(fs, ds, &pt[0], &pt[1], NULL, MAX_LONG);
 		ppt_buf = (xpoint_t *)xmem_alloc(n * sizeof(xpoint_t));
 		n = dot_curve2(fs, ds, &pt[0], &pt[1], ppt_buf, n);
+	}else
+	{
+		ppt_buf = NULL;
+		n = 0;
 	}
+
+	if(!n) return;
 	
 	pt_world_to_screen(ppt[0], ppt_buf, n);
 
 	parse_xcolor(&xc, pxp->color);
-
 	_gdi_draw_points(rdc, &xc, ppt_buf, n);
 
 	xmem_free(ppt_buf); 
@@ -710,7 +656,7 @@ void _gdi_draw_path(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const 
 
 void _gdi_draw_rect(visual_t rdc,const xpen_t* pxp,const xbrush_t* pxb,const xrect_t* prt)
 {
-	X11_context_t* ctx = (X11_context_t*)rdc;
+	X11_context_t* ctx = TypePtrFromHead(X11_context_t, rdc);
 
 	xcolor_t xc = {0};
 	int l_w, l_s;
@@ -772,7 +718,7 @@ void _gdi_draw_rect(visual_t rdc,const xpen_t* pxp,const xbrush_t* pxb,const xre
 
 void _gdi_draw_triangle(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const xrect_t* pxr, const tchar_t* orient)
 {
-	X11_context_t* ctx = (X11_context_t*)rdc;
+	X11_context_t* ctx = TypePtrFromHead(X11_context_t, rdc);
 
 	xpoint_t pt[3];
 
@@ -808,7 +754,7 @@ void _gdi_draw_triangle(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, co
 
 void _gdi_draw_round(visual_t rdc,const xpen_t* pxp,const xbrush_t* pxb,const xrect_t* prt,const xsize_t* pxs)
 {
-	X11_context_t* ctx = (X11_context_t*)rdc;
+	X11_context_t* ctx = TypePtrFromHead(X11_context_t, rdc);
 
 	tchar_t ta[10] = {0};
 	xpoint_t pa[16];
@@ -872,7 +818,7 @@ void _gdi_draw_round(visual_t rdc,const xpen_t* pxp,const xbrush_t* pxb,const xr
 
 void _gdi_draw_ellipse(visual_t rdc,const xpen_t* pxp,const xbrush_t* pxb,const xrect_t* prt)
 {
-	X11_context_t* ctx = (X11_context_t*)rdc;
+	X11_context_t* ctx = TypePtrFromHead(X11_context_t, rdc);
 
 	xcolor_t xc = {0};
 	int l_w, l_s;
@@ -934,7 +880,7 @@ void _gdi_draw_ellipse(visual_t rdc,const xpen_t* pxp,const xbrush_t* pxb,const 
 
 void _gdi_draw_pie(visual_t rdc, const xpen_t* pxp, const xbrush_t*pxb, const xrect_t* prt,  double arcf, double arct)
 {
-	X11_context_t* ctx = (X11_context_t*)rdc;
+	X11_context_t* ctx = TypePtrFromHead(X11_context_t, rdc);
 
 	xcolor_t xc = {0};
 	int l_w, l_s;
@@ -1006,7 +952,7 @@ void _gdi_draw_pie(visual_t rdc, const xpen_t* pxp, const xbrush_t*pxb, const xr
 
 void _gdi_draw_polygon(visual_t rdc, const xpen_t* pxp, const xbrush_t*pxb, const xpoint_t* ppt, int n)
 {
-    X11_context_t* ctx = (X11_context_t*)rdc;
+    X11_context_t* ctx = TypePtrFromHead(X11_context_t, rdc);
 
 	xcolor_t xc = {0};
 	int l_w, l_s;
@@ -1075,7 +1021,7 @@ void _gdi_draw_polygon(visual_t rdc, const xpen_t* pxp, const xbrush_t*pxb, cons
 
 void _gdi_draw_sector(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const xpoint_t* ppt, const xspan_t* prl, const xspan_t* prs, double arcf, double arct)
 {
-	X11_context_t* ctx = (X11_context_t*)rdc;
+	X11_context_t* ctx = TypePtrFromHead(X11_context_t, rdc);
 
 	xpoint_t pt[4] = { 0 };
 	tchar_t ta[5] = { 0 };
@@ -1108,56 +1054,34 @@ void _gdi_draw_sector(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, cons
 
 void _gdi_draw_text(visual_t rdc,const xfont_t* pxf,const xface_t* pxa,const xrect_t* prt,const tchar_t* txt,int len)
 {
-	X11_context_t* ctx = (X11_context_t*)rdc;
-	XFontStruct* pfs = NULL;
-	GContext cid;
+	X11_context_t* ctx = TypePtrFromHead(X11_context_t, rdc);
+	X11_fontset_t* fst;
+	XftFont* xft_font;
+	XftDraw* xft_draw;
+	XftColor xft_color;
+	XRenderColor render_color = { 0, 0, 0, 65535 };
+	xcolor_t xc;
 
-	xcolor_t xc = {0};
-	int tw, th;
-	XColor ext, clr_font = {0};
+	XGlyphInfo exten = {0};
 
-	XCharStruct chs = {0};
-	int direct = 0, ascent = 0, descent = 0;
 	XPoint pt[2];
 	XRectangle rt;
 
+	pt[0].x = prt->x;
+	pt[0].y = prt->y;
+	pt[1].x = prt->x + prt->w;
+	pt[1].y = prt->y + prt->h;
 	DPtoLP(rdc,pt,2);
 
-	pfs = _create_font(pxf);
-	if(!pfs)
-	{
-		pfs = _create_font(NULL);
-	}
-	if(!pfs)
-	{
-		cid = XGContextFromGC(ctx->context);
-		pfs = XQueryFont(g_display, cid);
-	}
-	if(!pfs) return;
-
-	XSetFont(g_display, ctx->context, pfs->fid);
-
-	if(pxf)
-	{
-		parse_xcolor(&xc, pxf->color);
-
-		clr_font.red = XRGB(xc.r);
-		clr_font.green = XRGB(xc.g);
-		clr_font.blue = XRGB(xc.b);
-
-		XAllocColor(g_display, ctx->color, &clr_font);
-		XSetForeground(g_display, ctx->context, clr_font.pixel);
-		XFreeColors(g_display, ctx->color, &(clr_font.pixel), 1, 0);
-	}
-
-	XSetFillRule(g_display, ctx->context, EvenOddRule);
-	XSetFillStyle(g_display, ctx->context, FillOpaqueStippled);
-    
 	if(len < 0) len = xslen(txt);
+	if(!len) return;
 
-	XTextExtents(pfs, txt, len, &direct, &ascent, &descent, &chs);
-	tw = chs.width;
-	th = chs.ascent + chs.descent;
+	fst = (X11_fontset_t*)_gdi_create_fontset(pxf);
+	if(!fst) return;
+
+	xft_font = (XftFont*)fst->font_set;
+
+	XftTextExtentsUtf8(g_display, xft_font, (const FcChar8*)txt, len, &exten);
 
 	rt.x = prt->x;
 	rt.y = prt->y;
@@ -1165,179 +1089,120 @@ void _gdi_draw_text(visual_t rdc,const xfont_t* pxf,const xface_t* pxa,const xre
 	rt.height = prt->h;
 
 	if(pxa)
-		_adjust_rect(&rt, tw, th, pxa->text_align,pxa->line_align);
+		_adjust_rect(&rt, exten.width, exten.height, pxa->text_align,pxa->line_align);
 	else
-		_adjust_rect(&rt, tw, th, GDI_ATTR_TEXT_ALIGN_NEAR, GDI_ATTR_TEXT_ALIGN_CENTER);
+		_adjust_rect(&rt, exten.width, exten.height, GDI_ATTR_TEXT_ALIGN_NEAR, GDI_ATTR_TEXT_ALIGN_CENTER);
 	
 	pt[0].x = rt.x;
 	pt[0].y = rt.y + rt.height;
 
-	XDrawString(g_display, ctx->device, ctx->context, pt[0].x, pt[0].y, txt, len);
-
-	XFreeFont(g_display, pfs);
-}
-
-void _gdi_text_out(visual_t rdc, const xfont_t* pxf, const xpoint_t* ppt, const tchar_t* txt, int len)
-{
-	X11_context_t* ctx = (X11_context_t*)rdc;
-	XFontStruct* pfs = NULL;
-	GContext cid;
-
-	xcolor_t xc = {0};
-	int l_w, l_s;
-	XColor ext, clr_font = {0};
-	XCharStruct chs = {0};
-	int direct = 0, ascent = 0, descent = 0;
-	XPoint pt[2];
-    
-	pt[0].x = ppt->x;
-	pt[0].y = ppt->y;
-	pt[1].x = ppt->x;
-	pt[1].y = ppt->y;
-
-	DPtoLP(rdc,pt,2);
-
-	pfs = _create_font(pxf);
-	if(!pfs)
-	{
-		pfs = _create_font(NULL);
-	}
-	if(!pfs)
-	{
-		cid = XGContextFromGC(ctx->context);
-		pfs = XQueryFont(g_display, cid);
-	}
-	if(!pfs) return;
-
-	XSetFont(g_display, ctx->context, pfs->fid);
+	xft_draw = XftDrawCreate(g_display, ctx->device, ctx->visual, ctx->color);
 
 	if(pxf)
 	{
 		parse_xcolor(&xc, pxf->color);
-
-		clr_font.red = XRGB(xc.r);
-		clr_font.green = XRGB(xc.g);
-		clr_font.blue = XRGB(xc.b);
-
-		XAllocColor(g_display, ctx->color, &clr_font);
-		XSetForeground(g_display, ctx->context, clr_font.pixel);
-		XFreeColors(g_display, ctx->color, &(clr_font.pixel), 1, 0);
+		render_color.red = XRGB(xc.r);
+		render_color.green = XRGB(xc.g);
+		render_color.blue = XRGB(xc.b);
 	}
+	XftColorAllocValue(g_display, ctx->visual, ctx->color, &render_color, &xft_color);
 
-	XSetFillRule(g_display, ctx->context, EvenOddRule);
-	XSetFillStyle(g_display, ctx->context, FillOpaqueStippled);
-    
-	if(len < 0) len = xslen(txt);
+    XftDrawStringUtf8(xft_draw, &xft_color, xft_font, pt[0].x, pt[0].y, (XftChar8*)txt, len);
 
-	XTextExtents(pfs, txt, len, &direct, &ascent, &descent, &chs);
-	pt[0].y += ascent;
-
-	XDrawString(g_display, ctx->device, ctx->context, pt[0].x, pt[0].y, txt, len);
-
-	XFreeFont(g_display, pfs);
+    XftDrawDestroy(xft_draw);
+	_gdi_destroy_fontset((fontset_t)&(fst->head));
 }
 
-void _gdi_text_rect(visual_t rdc, const xfont_t* pxf, const xface_t* pxa, const tchar_t* txt, int len, xrect_t* prt)
+void _gdi_text_out(visual_t rdc, const xfont_t* pxf, const xpoint_t* ppt, const tchar_t* txt, int len)
 {
-	X11_context_t* ctx = (X11_context_t*)rdc;
-	XFontStruct* pfs = NULL;
-	GContext cid;
+	X11_context_t* ctx = TypePtrFromHead(X11_context_t, rdc);
+	X11_fontset_t* fst;
+	XftFont* xft_font;
+	XftDraw* xft_draw;
+	XftColor xft_color;
+	XRenderColor render_color = { 0, 0, 0, 65535 };
+	xcolor_t xc;
 
-	XCharStruct chs = {0};
-	int direct = 0, ascent = 0, descent = 0;
+	XGlyphInfo exten = {0};
 
-	pfs = _create_font(pxf);
-	if(!pfs)
-	{
-		pfs = _create_font(NULL);
-	}
-	if(!pfs)
-	{
-		cid = XGContextFromGC(ctx->context);
-		pfs = XQueryFont(g_display, cid);
-	}
-	if(!pfs) return;
-	
+	XPoint pt;
+	pt.x = ppt->x;
+	pt.y = ppt->y;
+	DPtoLP(rdc,&pt,1);
+
 	if(len < 0) len = xslen(txt);
+	if(!len) return;
 
-	XTextExtents(pfs, txt, len, &direct, &ascent, &descent, &chs);
-	prt->w = chs.width;
-	prt->h = ascent + descent;
+	fst = (X11_fontset_t*)_gdi_create_fontset(pxf);
+	if(!fst) return;
 
-	XFreeFont(g_display, pfs);
+	xft_font = (XftFont*)fst->font_set;
+
+	XftTextExtentsUtf8(g_display, xft_font, (const FcChar8*)txt, len, &exten);
+	pt.y += exten.height;
+
+	xft_draw = XftDrawCreate(g_display, ctx->device, ctx->visual, ctx->color);
+
+	if(pxf)
+	{
+		parse_xcolor(&xc, pxf->color);
+		render_color.red = XRGB(xc.r);
+		render_color.green = XRGB(xc.g);
+		render_color.blue = XRGB(xc.b);
+	}
+	XftColorAllocValue(g_display, ctx->visual, ctx->color, &render_color, &xft_color);
+
+    XftDrawStringUtf8(xft_draw, &xft_color, xft_font, pt.x, pt.y, (XftChar8*)txt, len);
+
+    XftDrawDestroy(xft_draw);
+	_gdi_destroy_fontset((fontset_t)&(fst->head));
 }
 
 void _gdi_text_size(visual_t rdc, const xfont_t* pxf, const tchar_t* txt, int len, xsize_t* pxs)
 {
-	X11_context_t* ctx = (X11_context_t*)rdc;
-	GContext cid;
+	X11_context_t* ctx = TypePtrFromHead(X11_context_t, rdc);
+	X11_fontset_t* fst;
+	XftFont* xft_font;
+	XGlyphInfo exten = {0};
 
-	XFontStruct* pfs = NULL;
-	XCharStruct chs = {0};
-	int direct = 0, ascent = 0, descent = 0;
-
-	pfs = _create_font(pxf);
-	if(!pfs)
-	{
-		pfs = _create_font(NULL);
-	}
-	if(!pfs)
-	{
-		cid = XGContextFromGC(ctx->context);
-		pfs = XQueryFont(g_display, cid);
-	}
-	if(!pfs) return;
-	
 	if(len < 0) len = xslen(txt);
+	if(!len) return;
 
-	XTextExtents(pfs, txt, len, &direct, &ascent, &descent, &chs);
+	fst = (X11_fontset_t*)_gdi_create_fontset(pxf);
+	if(!fst) return;
+	
+	xft_font = (XftFont*)fst->font_set;
 
-	pxs->w = chs.width;
-	pxs->h = ascent + descent;
+	XftTextExtentsUtf8(g_display, xft_font, (const FcChar8*)txt, len, &exten);
 
-	XFreeFont(g_display, pfs);
+	pxs->w = exten.width;
+	pxs->h = exten.height;
+
+    _gdi_destroy_fontset((fontset_t)&(fst->head));
 }
 
 void _gdi_font_size(visual_t rdc, const xfont_t* pxf, xsize_t* pxs)
 {
-	X11_context_t* ctx = (X11_context_t*)rdc;
-	GContext cid;
+	X11_context_t* ctx = TypePtrFromHead(X11_context_t, rdc);
+	X11_fontset_t* fst;
+	XftFont* xft_font;
+	XGlyphInfo exten = {0};
 
-	XFontStruct* pfs = NULL;
-	XCharStruct chs = {0};
-	//int direct = 0, ascent = 0, descent = 0;
-	Atom am_size;
-	unsigned long val = 0;
-	bool_t b_free = 1;
-
-	pfs = _create_font(pxf);
-	if(!pfs)
-	{
-		pfs = _create_font(NULL);
-	}
-	if(!pfs)
-	{
-		cid = XGContextFromGC(ctx->context);
-		pfs = XQueryFont(g_display, cid);
-		b_free = 0;
-	} 
-	if(!pfs) return;
+	fst = (X11_fontset_t*)_gdi_create_fontset(pxf);
+	if(!fst) return;
 	
-	am_size = XInternAtom(g_display, "PIXEL_SIZE", True);
-	XGetFontProperty(pfs, am_size, &val);
-	pxs->w = (int)val;
-	pxs->h = (int)val;
-	//XTextExtents(pfs, "aj", 2, &direct, &ascent, &descent, &chs);
-	//pxs->w = chs.width / 2;
-	//pxs->h = (ascent + descent) / 2;
+	xft_font = (XftFont*)fst->font_set;
 
-	if(b_free) XFreeFont(g_display, pfs);
+	pxs->w = xft_font->max_advance_width;
+	pxs->h = xft_font->ascent + xft_font->descent + xft_font->height;
+
+    _gdi_destroy_fontset((fontset_t)&(fst->head));
 }
 
 #ifdef XDU_SUPPORT_CONTEXT_BITMAP
 void _gdi_draw_image(visual_t rdc,bitmap_t rbm,const xcolor_t* clr,const xrect_t* prt)
 {
-    X11_context_t* ctx = (X11_context_t*)rdc;
+    X11_context_t* ctx = TypePtrFromHead(X11_context_t, rdc);
 	X11_bitmap_t* bmp = (X11_bitmap_t*)rbm;
 
 	XImage* pmi = (XImage*)bmp->image;
@@ -1364,7 +1229,7 @@ void _gdi_draw_image(visual_t rdc,bitmap_t rbm,const xcolor_t* clr,const xrect_t
 
 void _gdi_draw_bitmap(visual_t rdc, bitmap_t rbm, const xpoint_t* ppt)
 {
-	X11_context_t* ctx = (X11_context_t*)rdc;
+	X11_context_t* ctx = TypePtrFromHead(X11_context_t, rdc);
 	X11_bitmap_t* bmp = (X11_bitmap_t*)rbm;
 
 	XImage* pmi = (XImage*)bmp->image;
@@ -1380,7 +1245,7 @@ void _gdi_draw_bitmap(visual_t rdc, bitmap_t rbm, const xpoint_t* ppt)
 
 void _gdi_gradient_rect(visual_t rdc, const xcolor_t* clr_brim, const xcolor_t* clr_core, const tchar_t* gradient, const xrect_t* prt)
 {
-	X11_context_t* ctx = (X11_context_t*)rdc;
+	X11_context_t* ctx = TypePtrFromHead(X11_context_t, rdc);
 
 	int scr;
 	Visual *vis;
@@ -1520,7 +1385,7 @@ void _gdi_gradient_rect(visual_t rdc, const xcolor_t* clr_brim, const xcolor_t* 
 
 void _gdi_alphablend_rect(visual_t rdc, const xcolor_t* pxc, const xrect_t* prt, int opacity)
 {
-	X11_context_t* ctx = (X11_context_t*)rdc;
+	X11_context_t* ctx = TypePtrFromHead(X11_context_t, rdc);
 
 	int scr;
 	Visual *vis;
@@ -1550,7 +1415,7 @@ void _gdi_alphablend_rect(visual_t rdc, const xcolor_t* pxc, const xrect_t* prt,
 
 void _gdi_invert_rect(visual_t rdc, const xrect_t* prt)
 {
-	X11_context_t* ctx = (X11_context_t*)rdc;
+	X11_context_t* ctx = TypePtrFromHead(X11_context_t, rdc);
 	int old_func;
 
     XGetGCValues(g_display, ctx->context, GCFunction, &old_func);
@@ -1563,7 +1428,7 @@ void _gdi_invert_rect(visual_t rdc, const xrect_t* prt)
 
 void _gdi_exclude_rect(visual_t rdc, const xrect_t* pxr)
 {
-	X11_context_t* ctx = (X11_context_t*)rdc;
+	X11_context_t* ctx = TypePtrFromHead(X11_context_t, rdc);
 	Region full_region, excl_region;
 	XRectangle full_rect = {
 		.x = 0,
@@ -1594,7 +1459,7 @@ void _gdi_exclude_rect(visual_t rdc, const xrect_t* pxr)
 
 void _gdi_inclip_rect(visual_t rdc, const xrect_t* pxr)
 {
-	X11_context_t* ctx = (X11_context_t*)rdc;
+	X11_context_t* ctx = TypePtrFromHead(X11_context_t, rdc);
 
     XRectangle clip_rect = {
 		.x = pxr->x,
@@ -1609,7 +1474,7 @@ void _gdi_inclip_rect(visual_t rdc, const xrect_t* pxr)
 #ifdef XDU_SUPPORT_CONTEXT_REGION
 void _gdi_fill_region(visual_t rdc, const xbrush_t* pxb, res_rgn_t rgn)
 {
-    X11_context_t* ctx = (X11_context_t*)rdc;
+    X11_context_t* ctx = TypePtrFromHead(X11_context_t, rdc);
 	xcolor_t xc;
 	XColor clr;
 	XRectangle rect;
@@ -1633,5 +1498,130 @@ void _gdi_fill_region(visual_t rdc, const xbrush_t* pxb, res_rgn_t rgn)
 }
 #endif
 
+
+static tchar_t *x11_font_name[] = {_T("Fixed")};
+static tchar_t *x11_font_weight[] = {_T("Regular"),_T("Medium"), _T("Bold")};
+static tchar_t *x11_font_style[]  = {_T("Regular"), _T("Italic"), _T("Oblique")};
+static tchar_t *x11_font_size[] = {_T("9"),_T("10"),_T("12"),_T("13"),_T("14"),_T("15"),_T("16"),_T("18"), _T("24") ,_T("26"), _T("36"), _T("42"), _T("54"), _T("63"), _T("72")};
+static tchar_t x11_pattern[] = {_T("%s-%s-%s-%s")};
+//font pattern <family>[-<style>][-<weight>][-<size>]
+//font pattern eg: -misc-fixed-medium-r-normal--10-100-75-75-c-60-iso8859-1
+//font pattern eg: -*-helvetica-*-*-*-*-12-*-*-*-*-*-*
+
+#define default_fixed_pattern	_T("fixed")
+
+static void format_font_pattern(const xfont_t* pxf, tchar_t* buf)
+{
+    const tchar_t* fs_name = NULL;
+    const tchar_t* fs_style = NULL;
+    const tchar_t* fs_weight = NULL;
+	const tchar_t* fs_size = NULL;
+    float pt, px = 0;
+	int i;
+    
+    if(is_null((pxf->family)))
+        fs_name = x11_font_name[0];
+    else
+        fs_name = pxf->family;
+
+	xscpy(buf, fs_name);
+
+	if(xscmp(pxf->style,GDI_ATTR_FONT_STYLE_ITALIC) == 0)
+        fs_style = x11_font_style[1];
+    else if(xscmp(pxf->style,GDI_ATTR_FONT_STYLE_OBLIQUE) == 0)
+        fs_style = x11_font_style[2];
+    else
+        fs_style = NULL;
+
+	if(fs_style)
+	{
+		xscat(buf, _T("-"));
+		xscat(buf, fs_style);
+	}
+    
+    if(xstol(pxf->weight) >= 700)
+        fs_weight = x11_font_weight[2];
+    else if(xstol(pxf->weight) >= 400)
+        fs_weight = x11_font_weight[1];
+    else
+        fs_weight = NULL;
+
+	if(fs_weight)
+	{
+		xscat(buf, _T("-"));
+		xscat(buf, fs_weight);
+	}
+
+	if(!is_null(pxf->size))
+	{
+		pt = xstof(pxf->size);
+		font_metric_by_pt(pt, NULL, &px);
+    
+		for(i = 0; i< 15; i++)
+		{
+			if((int)px <= xstol(x11_font_size[i]))
+				break;
+		}
+		if(i == 15) i--;
+	
+		fs_size = x11_font_size[i];
+	}else
+	{
+		fs_size = NULL;
+	}
+
+	if(fs_size)
+	{
+		xscat(buf, _T("-"));
+		xscat(buf, fs_size);
+	}
+}
+
+fontset_t _gdi_create_fontset(const xfont_t* pxf)
+{
+	X11_fontset_t* fst;
+	XftFont* xft_font;
+	tchar_t font_token[1024] = {0};
+	
+	format_font_pattern(pxf, font_token);
+
+	xft_font = XftFontOpenName(g_display, DefaultScreen(g_display), font_token);
+    if (!xft_font)
+	{
+        xft_font = XftFontOpenName(g_display, DefaultScreen(g_display), default_fixed_pattern);
+    }
+
+	if(!xft_font) return (fontset_t)0;
+
+	fst = (X11_fontset_t*)xmem_alloc_handle(sizeof(X11_fontset_t));
+	fst->head.tag = _HANDLE_FONTSET;
+	fst->font_set = (void*)xft_font;
+
+	return (fontset_t)&(fst->head);
+}
+
+void _gdi_destroy_fontset(fontset_t ft)
+{
+	X11_fontset_t* fst = TypePtrFromHead(X11_fontset_t, ft);
+
+	if(fst && fst->font_set) XftFontClose(g_display, (XftFont*)(fst->font_set));
+
+	if(fst) xmem_free_handle(fst);
+}
+
+void _gdi_word_size(fontset_t ft, const tchar_t* pch, int chs, xsize_t* pxs)
+{
+	X11_fontset_t* fst = TypePtrFromHead(X11_fontset_t, ft);
+	XftFont* xft_font = (XftFont*)fst->font_set;
+	XGlyphInfo exten = {0};
+
+	XftTextExtentsUtf8(g_display, xft_font, (const FcChar8*)pch, chs, &exten);
+	
+	pxs->w = exten.width;
+	pxs->h = exten.height;
+}
+
 #endif //XDU_SUPPORT_CONTEXT_GRAPHIC
+
+
 

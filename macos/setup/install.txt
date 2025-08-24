@@ -1,0 +1,67 @@
+[SQLServer ODBC ARM64]
+Install the Microsoft ODBC driver for SQL Server (macOS)
+
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+brew tap microsoft/mssql-release https://github.com/Microsoft/homebrew-mssql-release
+brew update
+HOMEBREW_ACCEPT_EULA=Y brew install msodbcsql18 mssql-tools18
+
+sudo mkdir /usr/local/odbc
+sudo ln -s /opt/Homebrew/include /usr/local/odbc
+sudo ln -s /opt/Homebrew/lib /usr/local/odbc
+
+sudo ln -s /opt/Homebrew/etc/odbcinst.ini /etc/odbcinst.ini
+sudo ln -s /opt/Homebrew/etc/odbc.ini /etc/odbc.ini
+
+# odbcinst -j
+# odbcinst -q -d
+
+# sudo ldconfig
+# sudo vi /etc/odbcinst.ini
+
+[Oracle Client ARM64]
+Oracle Instant Client Downloads for macOS (ARM64)  Basic Light (dmg)  SDK (dmg) 
+
+# sudo mkdir /usr/local/oracle/instantclient_23_3
+# sudo cp -rf ~/Downloads/instantclient_23_3/* /usr/local/oracle/instantclient_23_3
+
+# sudo vi .bash_profile
+
+export ORACLE_HOME=/usr/local/oracle/instantclient23_3
+export TNS_ADMIN=$ORACLE_HOME/network/admin
+export NLS_LANG=SIMPLIFIED_CHINESE_CHINA.ALUTF8
+export LD_LIBRARY_PATH=$ORACLE_HOME
+export SQLPATH=$ORACLE_HOME
+export PATH=$ORACLE_HOME:$PATH
+unset no_proxy
+unset NLS_LANG
+
+# source .bash_profile
+
+# sudo mkdir /usr/local/oci
+# sudo ln -s /opt/oracle/instantclient_23_3/sdk/include /usr/local/oci
+# sudo ln -s /opt/oracle/instantclient_23_3 /usr/local/oci
+
+[Postgres Client ARM64]
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+# brew install libpq
+
+echo 'export PATH="/opt/homebrew/opt/libpq/bin:$PATH"' >> ~/.zshrc
+export LDFLAGS="-L/opt/homebrew/opt/libpq/lib"
+export CPPFLAGS="-I/opt/homebrew/opt/libpq/include"
+
+# sudo mkdir /usr/local/pq
+# sudo ln -s /opt/homebrew/opt/libpq/include /usr/local/pq
+# sudo ln -s /opt/homebrew/opt/libpq/lib /usr/local/pq
+
+[Mysql Client ARM64]
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+# brew install mysql-client
+echo 'export PATH="/opt/homebrew/opt/mysql-client/bin:$PATH"' >> ~/.zshrc
+export LDFLAGS="-L/opt/homebrew/opt/mysql-client/lib"
+export CPPFLAGS="-I/opt/homebrew/opt/mysql-client/include"
+
+# sudo mkdir /usr/local/mysql
+# sudo ln -s /opt/homebrew/opt/mysql-client/include /usr/local/mysql
+# sudo ln -s /opt/homebrew/opt/mysql-client/lib /usr/local/mysql
+

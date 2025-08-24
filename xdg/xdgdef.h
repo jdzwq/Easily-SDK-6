@@ -60,8 +60,8 @@ typedef struct _handle_head *canvas_t;
 #define _HANDLE_GLYPH		0x50
 typedef struct _handle_head	*glyph_t;
 
-#define _HANDLE_FONT		0x51
-typedef struct _handle_head	 *font_t;
+#define _HANDLE_FONTSET		0x51
+typedef struct _handle_head	 *fontset_t;
 
 #define _HANDLE_BITMAP		0x52
 typedef struct _handle_head	 *bitmap_t;
@@ -69,6 +69,9 @@ typedef struct _handle_head	 *bitmap_t;
 
 #define UNIT_PT				_T("pt")
 #define UNIT_MM				_T("mm")
+
+#define ZERO_WIDTH				0.0f
+#define ZERO_HEIGHT				0.0f
 
 #define PAPER_A4_WIDTH			210.0f
 #define PAPER_A4_HEIGHT			297.0f

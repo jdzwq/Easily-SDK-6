@@ -42,7 +42,7 @@ typedef struct _pushbox_delta_t{
 #define SETPUSHBOXDELTA(ph,ptd) widget_set_user_delta(ph,(vword_t)ptd)
 
 /********************************************************************************/
-void _pushbox_reset_page(widget_t widget)
+static void _pushbox_reset_page(widget_t widget)
 {
 	pushbox_delta_t* ptd = GETPUSHBOXDELTA(widget);
 	xrect_t xr;
@@ -130,16 +130,27 @@ void hand_pushbox_lbutton_up(widget_t widget, const xpoint_t* pxp)
 
 	widget_erase(widget, NULL);
 
-	widget_post_command(widget_get_owner(widget), ptd->b_check, widget_get_user_id(widget), (vword_t)widget);
+	widget_send_command(widget_get_owner(widget), ptd->b_check, widget_get_user_id(widget), (vword_t)widget);
 }
 
 void hand_pushbox_size(widget_t widget, int code, const xsize_t* prs)
 {
 	pushbox_delta_t* ptd = GETPUSHBOXDELTA(widget);
 	
-	_pushbox_reset_page(widget);
+	XDK_ASSERT(ptd != NULL);
 
-	widget_erase(widget, NULL);
+	switch(code)
+	{
+	case WS_SIZE_FULLSCREEN:
+		break;
+	case WS_SIZE_MAXIMIZED:
+		break;
+	case WS_SIZE_MINIMIZED:
+		break;
+	case WS_SIZE_LAYOUT:
+		_pushbox_reset_page(widget);
+		break;
+	}
 }
 
 void hand_pushbox_xfont(widget_t widget, const xfont_t* pxf)
@@ -221,8 +232,6 @@ void hand_pushbox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 
 		if (ptd->b_check)
 		{
-			xp.adorn.feed = 2;
-			xp.adorn.size = 2;
 			(pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr_box);
 		}
 		else
@@ -248,8 +257,6 @@ void hand_pushbox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 
 		if (ptd->b_check)
 		{
-			xp.adorn.feed = 2;
-			xp.adorn.size = 2;
 			(pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr_box);
 		}
 		else
@@ -275,8 +282,6 @@ void hand_pushbox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 
 		if (ptd->b_check)
 		{
-			xp.adorn.feed = 2;
-			xp.adorn.size = 2;
 			(pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr_box);
 		}
 		else
@@ -315,8 +320,6 @@ widget_t pushbox_create(widget_t widget, dword_t style, const xrect_t* pxr)
 		EVENT_ON_LBUTTON_UP(hand_pushbox_lbutton_up)
 
 		EVENT_ON_XFONT(hand_pushbox_xfont)
-
-		EVENT_ON_NC_IMPLEMENT
 
 	EVENT_END_DISPATH
 

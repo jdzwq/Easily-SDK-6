@@ -35,7 +35,6 @@ LICENSE.GPL3 for more details.
 
 #define XDU_SUPPORT_CLIPBOARD
 #define XDU_SUPPORT_WIDGET
-//#define XDU_SUPPORT_WIDGET_NC
 
 #ifdef XDU_SUPPORT_BLUT
 #include <bluetooth/bluetooth.h>
@@ -53,18 +52,11 @@ LICENSE.GPL3 for more details.
 typedef void* id;
 #endif
 
-#ifdef XDU_SUPPORT_WIDGET
-
-#endif
-
-
 #ifdef XDU_SUPPORT_CONTEXT
-
 
 #define XRGB(ch) (unsigned short)((double)ch * 65535.0 / 256.0)
 
 typedef id  res_clrmap_t;
-typedef id	res_font_t;
 
 #ifdef XDU_SUPPORT_CONTEXT_BITMAP
 typedef struct _cocoa_bitmap_t{
@@ -72,6 +64,7 @@ typedef struct _cocoa_bitmap_t{
 
 	CGImageRef image;
 }cocoa_bitmap_t;
+#endif
 
 typedef struct _cocoa_context_t{
     handle_head head;
@@ -84,7 +77,11 @@ typedef struct _cocoa_context_t{
 	int type;
 }cocoa_context_t;
 
-#endif
+typedef struct _cocoa_fontset_t{
+	handle_head head;
+
+    id font_set;
+}cocoa_fontset_t;
 
 #endif /*XDU_SUPPORT_CONTEXT*/
 
@@ -107,66 +104,27 @@ typedef struct _cocoa_context_t{
 typedef struct _cocoa_widget_t{
 	handle_head head;
 
+	uid_t uid;
 	id self;
 	id parent;
 	id owner;
+	void* accel;
 
-	uid_t uid;
 	dword_t style;
+	int mode;
+	int result;
+	int retcode;
+
+	float diaph;
 	dword_t mask;
 	int state;
 	bool_t disable;
-	bool_t idling;
-
-	void* acl;
-
-	int result;
-
-	border_t bd;
-	xpoint_t pt;
-	xsize_t st;
 
 	scroll_t hs;
 	scroll_t vs;
-
-	float diaph;
 	color_mod_t clrs;
 }cocoa_widget_t;
 
-#ifdef XDU_SUPPORT_WIDGET_NC
-/*widget nc hit test*/
-#define HINT_NOWHERE	0
-#define HINT_TITLE		2
-#define HINT_CLIENT		1
-#define HINT_RESTORE	4
-#define HINT_MINIMIZE	8
-#define HINT_MAXIMIZE	9
-#define HINT_LEFT		10
-#define HINT_RIGHT		11
-#define HINT_TOP		12
-#define HINT_TOPLEFT	13
-#define HINT_TOPRIGHT	14
-#define HINT_BOTTOM		15
-#define HINT_LEFTBOTTOM	16
-#define HINT_RIGHTBOTTOM	17
-#define HINT_BORDER		18
-#define HINT_CLOSE		20
-#define HINT_ICON		21
-#define HINT_MENUBAR	100
-#define HINT_HSCROLL	101
-#define HINT_VSCROLL	102
-#define HINT_PAGEUP		103
-#define HINT_PAGEDOWN	104
-#define HINT_MENUBAR	110
-#define HINT_HSCROLL	111
-#define HINT_VSCROLL	112
-#define HINT_PAGEUP		113
-#define HINT_PAGEDOWN	114
-#define HINT_LINEUP		115
-#define HINT_LINEDOWN	116
-#define HINT_LINELEFT	117
-#define HINT_LINERIGHT	118
-#endif
 #endif /*XDU_SUPPORT_WIDGET*/
 
 #define SYSTEM_FONTNAME     _T("Helvetica")

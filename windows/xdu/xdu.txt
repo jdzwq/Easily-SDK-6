@@ -17,4 +17,5 @@ SOURCES= \
 ../../../Easily-tmp/windows/xdu/x64/Debug/impwidget.c \
 ../../../Easily-tmp/windows/xdu/x64/Debug/xduinf.c \
 ../../../Easily-tmp/windows/xdu/x64/Debug/xduinit.c \
+../../../Easily-tmp/windows/xdu/x64/Debug/xdunc.c \
 ../../../Easily-tmp/windows/xdu/x64/Debug/xduutil.c \

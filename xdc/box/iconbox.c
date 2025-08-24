@@ -56,13 +56,13 @@ void _iconbox_item_rect(widget_t widget, link_t_ptr ent, xrect_t* pxr)
 	xs.fh = cb.fh;
 
 	calc_iconbox_item_rect(&im, &ptd->xf, ptd->layer, ptd->align, &xs, ptd->string, ent, pxr);
-	widget_rect_to_tm(widget, pxr);
+	widget_rect_to_mm(widget, pxr);
 }
 
-void _iconbox_reset_page(widget_t widget)
+static void _iconbox_reset_page(widget_t widget)
 {
 	iconbox_delta_t* ptd = GETICONBOXDELTA(widget);
-	int vw, vh, lw, lh;
+	int pw, ph, vw, vh, lw, lh;
 	xrect_t xr;
 	xsize_t xs;
 
@@ -70,25 +70,34 @@ void _iconbox_reset_page(widget_t widget)
 	const drawing_interface* pif = NULL;
 	measure_interface im = { 0 };
 
+	widget_get_client_rect(widget, &xr);
+	pw = xr.w;
+	ph = xr.h;
+
 	canv = widget_get_canvas(widget);
 	pif = widget_get_canvas_interface(widget);
 
 	(pif->pf_get_measure)(pif->ctx, &im);
-
 	(pif->pf_font_size)(pif->ctx, &ptd->xf, &xs);
 
 	widget_size_to_pt(widget, &xs);
 	lw = xs.w;
 	lh = xs.h;
 
-	calc_iconbox_size(&im, &ptd->xf, ptd->layer, ptd->align, ptd->string, &xs);
-	widget_size_to_pt(widget, &xs);
-	vw = xs.w;
-	vh = xs.h;
+	if (ptd->string)
+	{
+		calc_iconbox_size(&im, &ptd->xf, ptd->layer, ptd->align, ptd->string, &xs);
+		widget_size_to_pt(widget, &xs);
+		vw = xs.w;
+		vh = xs.h;
+	}
+	else
+	{
+		vw = pw;
+		vh = ph;
+	}
 
-	widget_get_client_rect(widget, &xr);
-
-	widget_reset_paging(widget, xr.w, xr.h, vw, vh, lw, lh);
+	widget_reset_paging(widget, pw, ph, vw, vh, lw, lh);
 
 	widget_reset_scroll(widget, 0);
 }
@@ -164,7 +173,7 @@ void hand_iconbox_lbutton_up(widget_t widget, const xpoint_t* pxp)
 	pt.x = pxp->x;
 	pt.y = pxp->y;
 
-	widget_point_to_tm(widget, &pt);
+	widget_point_to_mm(widget, &pt);
 
 	default_xfont(&xf);
 
@@ -186,9 +195,20 @@ void hand_iconbox_size(widget_t widget, int code, const xsize_t* prs)
 {
 	iconbox_delta_t* ptd = GETICONBOXDELTA(widget);
 	
-	_iconbox_reset_page(widget);
+	XDK_ASSERT(ptd != NULL);
 
-	widget_erase(widget, NULL);
+	switch(code)
+	{
+	case WS_SIZE_FULLSCREEN:
+		break;
+	case WS_SIZE_MAXIMIZED:
+		break;
+	case WS_SIZE_MINIMIZED:
+		break;
+	case WS_SIZE_LAYOUT:
+		_iconbox_reset_page(widget);
+		break;
+	}
 }
 
 void hand_iconbox_xfont(widget_t widget, const xfont_t* pxf)
@@ -251,7 +271,7 @@ widget_t iconbox_create(widget_t widget, dword_t style, const xrect_t* pxr)
 
 		EVENT_ON_XFONT(hand_iconbox_xfont)
 
-		EVENT_ON_NC_IMPLEMENT
+		
 
 	EVENT_END_DISPATH
 

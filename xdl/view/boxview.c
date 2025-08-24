@@ -1000,8 +1000,6 @@ void draw_pushbox(const drawing_interface* pif, const xfont_t* pxf, const tchar_
 	xr.fw = pbox->fw;
 	xr.fh = pbox->fh;
 
-	xp.adorn.feed = 2;
-	xp.adorn.size = 2;
 	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
 
 	(*pif->pf_draw_text)(pif->ctx, &xf, &xa, &xr, text, -1);

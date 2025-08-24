@@ -69,9 +69,6 @@ void xdu_process_init()
 
 #ifdef XDU_SUPPORT_SHELL
 	xdu_impl_shell(&g_xdu_mou.if_shell);
-#ifdef XDU_SUPPORT_SHELL_DIALOG
-	xdu_impl_shell_dialog(&g_xdu_mou.if_shell);
-#endif
 #endif //XDU_SUPPORT_SHELL
 
 #ifdef XDU_SUPPORT_WIDGET

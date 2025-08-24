@@ -111,17 +111,24 @@ static void _tablectrl_reset_page(widget_t widget)
 
 	measure_interface im = { 0 };
 
-	canv = widget_get_canvas(widget);
-	get_canvas_measure(canv, &im);
-	widget_get_canv_rect(widget, (canvbox_t*)&(im.rect));
-
-	(*im.pf_measure_font)(im.ctx, &ptd->xf, &xs);
-	xs.fw = xs.fh;
-	xs.fh = calc_table_height(&im, &ptd->xf, &ptd->xa, ptd->table);
-
-	widget_size_to_pt(widget, &xs);
-
 	widget_get_client_rect(widget, &xr);
+
+	if (ptd->table)
+	{
+		canv = widget_get_canvas(widget);
+		get_canvas_measure(canv, &im);
+		widget_get_canv_rect(widget, (canvbox_t *)&(im.rect));
+
+		(*im.pf_measure_font)(im.ctx, &ptd->xf, &xs);
+		xs.fw = xs.fh;
+		xs.fh = calc_table_height(&im, &ptd->xf, &ptd->xa, ptd->table);
+		widget_size_to_pt(widget, &xs);
+	}
+	else
+	{
+		xs.w = xr.w;
+		xs.h = xr.h;
+	}
 
 	widget_reset_paging(widget, xr.w, xr.h, xr.w, xs.h, xs.w, xs.w);
 }
@@ -185,7 +192,7 @@ void noti_tablectrl_end_size(widget_t widget, int x, int y)
 
 	xs.h = 0;
 	xs.w = (x - ptd->org_x);
-	widget_size_to_tm(widget, &xs);
+	widget_size_to_mm(widget, &xs);
 	xs.fw += cb.fw * ptd->ratio;
 
 	if (xs.fw < DEF_TOUCH_SPAN)
@@ -394,7 +401,7 @@ void noti_tablectrl_reset_scroll(widget_t widget, bool_t bUpdate)
 	if (widget_is_valid(ptd->vsc))
 	{
 		if (bUpdate)
-			widget_paint(ptd->vsc);
+			widget_erase(ptd->vsc, NULL);
 		else
 			widget_close(ptd->vsc, 0);
 	}
@@ -541,7 +548,7 @@ void hand_tablectrl_lbutton_down(widget_t widget, const xpoint_t* pxp)
 
 	pt.x = pxp->x;
 	pt.y = pxp->y;
-	widget_point_to_tm(widget, &pt);
+	widget_point_to_mm(widget, &pt);
 
 	ilk = NULL;
 	hint = calc_table_hint(&im, &ptd->xf, &ptd->xa, &pt, ptd->table, ptd->ratio, &ilk);
@@ -578,7 +585,7 @@ void hand_tablectrl_lbutton_up(widget_t widget, const xpoint_t* pxp)
 
 	pt.x = pxp->x;
 	pt.y = pxp->y;
-	widget_point_to_tm(widget, &pt);
+	widget_point_to_mm(widget, &pt);
 
 	ilk = NULL;
 	hint = calc_table_hint(&im, &ptd->xf, &ptd->xa, &pt, ptd->table, ptd->ratio, &ilk);
@@ -637,12 +644,20 @@ void hand_tablectrl_size(widget_t widget, int code, const xsize_t* prs)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
 
-	if (!ptd->table)
-		return;
+	XDK_ASSERT(ptd != NULL);
 
-	noti_tablectrl_reset_scroll(widget, 0);
-
-	tablectrl_redraw(widget);
+	switch(code)
+	{
+	case WS_SIZE_FULLSCREEN:
+		break;
+	case WS_SIZE_MAXIMIZED:
+		break;
+	case WS_SIZE_MINIMIZED:
+		break;
+	case WS_SIZE_LAYOUT:
+		_tablectrl_reset_page(widget);
+		break;
+	}
 }
 
 void hand_tablectrl_scroll(widget_t widget, bool_t bHorz, int nLine)
@@ -682,7 +697,7 @@ void hand_tablectrl_wheel(widget_t widget, bool_t bHorz, int nDelta)
 			}
 			else
 			{
-				widget_paint(ptd->vsc);
+				widget_erase(ptd->vsc, NULL);
 			}
 		}
 
@@ -812,7 +827,7 @@ widget_t tablectrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* p
 		EVENT_ON_XFONT(hand_tablectrl_xfont)
 		EVENT_ON_XFACE(hand_tablectrl_xface)
 
-		EVENT_ON_NC_IMPLEMENT
+		
 
 	EVENT_END_DISPATH
 
@@ -894,7 +909,6 @@ void tablectrl_redraw(widget_t widget)
 
 	_tablectrl_reset_page(widget);
 
-	widget_paint(widget);
 }
 
 void tablectrl_redraw_item(widget_t widget, link_t_ptr ent)

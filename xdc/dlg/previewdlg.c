@@ -685,7 +685,6 @@ void hand_previewdlg_size(widget_t widget, int code, const xsize_t* prs)
 	{
 		widget_move(ptd->treectrl, RECTPOINT(&xr));
 		widget_size(ptd->treectrl, RECTSIZE(&xr));
-		widget_paint(ptd->treectrl);
 	}
 
 	_previewdlg_calc_statusbar(widget, &xr);
@@ -694,7 +693,6 @@ void hand_previewdlg_size(widget_t widget, int code, const xsize_t* prs)
 	{
 		widget_move(ptd->statusctrl, RECTPOINT(&xr));
 		widget_size(ptd->statusctrl, RECTSIZE(&xr));
-		widget_paint(ptd->statusctrl);
 
 		status = statusctrl_fetch(ptd->statusctrl);
 		ilk = get_status_item(status, IDN_PREVIEWDLG_STATUS_NAVI);
@@ -702,7 +700,6 @@ void hand_previewdlg_size(widget_t widget, int code, const xsize_t* prs)
 
 		widget_move(ptd->navibox, RECTPOINT(&xr));
 		widget_size(ptd->navibox, RECTSIZE(&xr));
-		widget_paint(ptd->navibox);
 	}
 
 	_previewdlg_calc_svgbar(widget, &xr);
@@ -711,7 +708,6 @@ void hand_previewdlg_size(widget_t widget, int code, const xsize_t* prs)
 	{
 		widget_move(ptd->svgctrl, RECTPOINT(&xr));
 		widget_size(ptd->svgctrl, RECTSIZE(&xr));
-		widget_paint(ptd->svgctrl);
 	}
 
 	_previewdlg_calc_toolbar(widget, &xr);
@@ -737,7 +733,6 @@ void hand_previewdlg_size(widget_t widget, int code, const xsize_t* prs)
 	{
 		widget_move(pushbox, RECTPOINT(&xr));
 		widget_size(pushbox, RECTSIZE(&xr));
-		widget_paint(pushbox);
 	}
 
 	xr.x -= (xr.w + nSplit);
@@ -746,7 +741,6 @@ void hand_previewdlg_size(widget_t widget, int code, const xsize_t* prs)
 	{
 		widget_move(pushbox, RECTPOINT(&xr));
 		widget_size(pushbox, RECTSIZE(&xr));
-		widget_paint(pushbox);
 	}
 
 	xr.x -= (xr.w + nSplit);
@@ -755,7 +749,6 @@ void hand_previewdlg_size(widget_t widget, int code, const xsize_t* prs)
 	{
 		widget_move(pushbox, RECTPOINT(&xr));
 		widget_size(pushbox, RECTSIZE(&xr));
-		widget_paint(pushbox);
 	}
 
 	xr.x -= (xr.w + nSplit);
@@ -764,7 +757,6 @@ void hand_previewdlg_size(widget_t widget, int code, const xsize_t* prs)
 	{
 		widget_move(pushbox, RECTPOINT(&xr));
 		widget_size(pushbox, RECTSIZE(&xr));
-		widget_paint(pushbox);
 	}
 
 	xr.x -= (xr.w + nSplit);
@@ -773,7 +765,6 @@ void hand_previewdlg_size(widget_t widget, int code, const xsize_t* prs)
 	{
 		widget_move(pushbox, RECTPOINT(&xr));
 		widget_size(pushbox, RECTSIZE(&xr));
-		widget_paint(pushbox);
 	}
 
 	xr.x -= (xr.w + nSplit);
@@ -782,7 +773,6 @@ void hand_previewdlg_size(widget_t widget, int code, const xsize_t* prs)
 	{
 		widget_move(pushbox, RECTPOINT(&xr));
 		widget_size(pushbox, RECTSIZE(&xr));
-		widget_paint(pushbox);
 	}
 
 	xr.x -= (xr.w + nSplit);
@@ -791,7 +781,6 @@ void hand_previewdlg_size(widget_t widget, int code, const xsize_t* prs)
 	{
 		widget_move(pushbox, RECTPOINT(&xr));
 		widget_size(pushbox, RECTSIZE(&xr));
-		widget_paint(pushbox);
 	}
 
 	xr.x -= (xr.w + nSplit);
@@ -800,7 +789,6 @@ void hand_previewdlg_size(widget_t widget, int code, const xsize_t* prs)
 	{
 		widget_move(pushbox, RECTPOINT(&xr));
 		widget_size(pushbox, RECTSIZE(&xr));
-		widget_paint(pushbox);
 	}
 
 	widget_erase(widget, NULL);
@@ -879,7 +867,7 @@ widget_t previewdlg_create(const tchar_t* title, widget_t owner)
 
 		EVENT_ON_MENU_COMMAND(hand_previewdlg_menu_command)
 
-		EVENT_ON_NC_IMPLEMENT
+		
 
 		EVENT_ON_DOCKER_IMPLEMENT
 

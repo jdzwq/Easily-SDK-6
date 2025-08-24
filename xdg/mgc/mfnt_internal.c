@@ -37,12 +37,12 @@ typedef struct _font_internal_t{
 
 }font_internal_t;
 
-static font_t create_font(const xfont_t* pxf)
+static fontset_t create_fontset(const xfont_t* pxf)
 {
 	font_internal_t* pfnt;
 
 	pfnt = (font_internal_t*)xmem_alloc(sizeof(font_internal_t));
-	pfnt->head.tag = _HANDLE_FONT;
+	pfnt->head.tag = _HANDLE_FONTSET;
 
 	pfnt->a_font_glyph = find_glyph_info(CHARSET_ASCII, pxf);
 	pfnt->c_font_glyph = find_glyph_info(CHARSET_GB2312, pxf);
@@ -50,30 +50,30 @@ static font_t create_font(const xfont_t* pxf)
 	return &(pfnt->head);
 }
 
-static void destroy_font(font_t fnt)
+static void destroy_fontset(fontset_t fnt)
 {
 	font_internal_t* pfnt = (font_internal_t*)fnt;
 
-	XDK_ASSERT(fnt && fnt->tag == _HANDLE_FONT);
+	XDK_ASSERT(fnt && fnt->tag == _HANDLE_FONTSET);
 
 	xmem_free(pfnt);
 }
 
-static void get_font_info(font_t fnt, xfont_t* pxf)
+static void get_font_info(fontset_t fnt, xfont_t* pxf)
 {
 	font_internal_t* pfnt = (font_internal_t*)fnt;
 
-	XDK_ASSERT(fnt && fnt->tag == _HANDLE_FONT);
+	XDK_ASSERT(fnt && fnt->tag == _HANDLE_FONTSET);
 
 	xfont_from_glyph_info(pxf, pfnt->c_font_glyph);
 }
 
-static void get_font_metrix(font_t fnt, const tchar_t* str, font_metrix_t* pmetrix)
+static void get_font_metrix(fontset_t fnt, const tchar_t* str, font_metrix_t* pmetrix)
 {
 	font_internal_t* pfnt = (font_internal_t*)fnt;
 	glyph_metrix_t gm = { 0 };
 
-	XDK_ASSERT(fnt && fnt->tag == _HANDLE_FONT);
+	XDK_ASSERT(fnt && fnt->tag == _HANDLE_FONTSET);
 
 	if(str && is_ascii(str[0]))
 		get_glyph_metrix(pfnt->a_font_glyph, str, &gm);
@@ -87,12 +87,12 @@ static void get_font_metrix(font_t fnt, const tchar_t* str, font_metrix_t* pmetr
 	}
 }
 
-static void get_char_size(font_t fnt, const tchar_t *str, xsize_t* pse)
+static void get_char_size(fontset_t fnt, const tchar_t *str, xsize_t* pse)
 {
 	font_internal_t* pfnt = (font_internal_t*)fnt;
 	glyph_metrix_t gm = { 0 };
 
-	XDK_ASSERT(fnt && fnt->tag == _HANDLE_FONT);
+	XDK_ASSERT(fnt && fnt->tag == _HANDLE_FONTSET);
 
 	if(str && is_ascii(str[0]))
 		get_glyph_metrix(pfnt->a_font_glyph, str, &gm);
@@ -106,11 +106,11 @@ static void get_char_size(font_t fnt, const tchar_t *str, xsize_t* pse)
 	}
 }
 
-static int get_char_pixmap(font_t fnt, const tchar_t* str, mem_pixmap_ptr ppixmap)
+static int get_char_pixmap(fontset_t fnt, const tchar_t* str, mem_pixmap_ptr ppixmap)
 {
 	font_internal_t* pfnt = (font_internal_t*)fnt;
 
-	XDK_ASSERT(fnt && fnt->tag == _HANDLE_FONT);
+	XDK_ASSERT(fnt && fnt->tag == _HANDLE_FONTSET);
 
 	if(str && is_ascii(str[0]))
 		return get_glyph_pixmap(pfnt->a_font_glyph, str, ppixmap->data);
@@ -121,8 +121,8 @@ static int get_char_pixmap(font_t fnt, const tchar_t* str, mem_pixmap_ptr ppixma
 /*****************************************************************************************************************/
 
 mem_font_t font_Internal = {
-	create_font,
-	destroy_font,
+	create_fontset,
+	destroy_fontset,
 	get_font_info,
 	get_font_metrix,
 	get_char_size,

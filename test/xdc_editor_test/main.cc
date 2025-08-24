@@ -120,10 +120,6 @@ int MainFrame_OnClose(widget_t widget)
 {
 	MainFrameDelta* pdt = GETMAINFRAMEDELTA(widget);
 
-	widget_destroy(widget);
-
-	message_quit(0);
-
 	return 0;
 }
 
@@ -139,7 +135,6 @@ void MainFrame_OnSize(widget_t widget, int code, const xsize_t* pxs)
 
 		widget_move(pdt->hEditor, RECTPOINT(&xr));
 		widget_size(pdt->hEditor, RECTSIZE(&xr));
-		widget_paint(pdt->hEditor);
 	}
 }
 
@@ -181,7 +176,7 @@ widget_t MainFrame_Create(const tchar_t* mname)
 		EVENT_ON_NOTICE(MainFrame_OnNotice)
 		EVENT_ON_MENU_COMMAND(MainFrame_OnMenuCommand)
 
-		EVENT_ON_NC_IMPLEMENT
+		
 		EVENT_ON_DOCKER_IMPLEMENT
 
 	SUBPROC_END_DISPATH
@@ -199,7 +194,6 @@ widget_t MainFrame_Create(const tchar_t* mname)
 	}
 	
 	widget_show(widget, WS_SHOW_NORMAL);
-	widget_paint(widget);
 
 	return widget;
 }

@@ -65,8 +65,6 @@ static int sub_editbox_self_command(widget_t widget, int code, vword_t data, uid
 		if (widget_is_valid(keybox))
 		{
 			widget_set_color_mode(keybox, (color_mod_t*)data,);
-			widget_update_window(keybox);
-			widget_update_client(keybox);
 		}*/
 		return 1;
 	case COMMAND_COMMIT:

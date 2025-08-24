@@ -46,7 +46,7 @@ typedef struct label_delta_t{
 #define SETLABELDELTA(ph,ptd) widget_set_user_delta(ph,(vword_t)ptd)
 
 /********************************************************************************************/
-void _labelctrl_item_rect(widget_t widget, link_t_ptr ilk, xrect_t* pxr)
+static void _labelctrl_item_rect(widget_t widget, link_t_ptr ilk, xrect_t* pxr)
 {
 	label_delta_t* ptd = GETLABELDELTA(widget);
 
@@ -55,11 +55,11 @@ void _labelctrl_item_rect(widget_t widget, link_t_ptr ilk, xrect_t* pxr)
 	widget_rect_to_pt(widget, pxr);
 }
 
-void _labelctrl_reset_page(widget_t widget)
+static void _labelctrl_reset_page(widget_t widget)
 {
 	label_delta_t* ptd = GETLABELDELTA(widget);
 
-	int pw, ph, fw, fh, lw, lh;
+	int pw, ph, vw, vh, lw, lh;
 	xrect_t xr;
 	xsize_t xs;
 
@@ -67,19 +67,35 @@ void _labelctrl_reset_page(widget_t widget)
 	pw = xr.w;
 	ph = xr.h;
 
-	xs.fw = get_label_width(ptd->label);
-	xs.fh = get_label_height(ptd->label);
-	widget_size_to_pt(widget, &xs);
-	fw = xs.w;
-	fh = xs.h;
+	if (ptd->label)
+	{
+		xs.fw = get_label_width(ptd->label);
+		xs.fh = get_label_height(ptd->label);
+		widget_size_to_pt(widget, &xs);
+		vw = xs.w;
+		vh = xs.h;
+	}
+	else
+	{
+		vw = pw;
+		vh = ph;
+	}
 
-	xs.fw = get_label_item_width(ptd->label);
-	xs.fh = get_label_item_height(ptd->label);
+	if (ptd->label)
+	{
+		xs.fw = get_label_item_width(ptd->label);
+		xs.fh = get_label_item_height(ptd->label);
+	}
+	else
+	{
+		xs.fw = 10.0f;
+		xs.fh = 10.0f;
+	}
 	widget_size_to_pt(widget, &xs);
 	lw = xs.w;
 	lh = xs.h;
 
-	widget_reset_paging(widget, pw, ph, pw, ph, lw, lh);
+	widget_reset_paging(widget, pw, ph, vw, vh, lw, lh);
 
 	widget_reset_scroll(widget, 1);
 
@@ -245,7 +261,7 @@ void noti_label_reset_scroll(widget_t widget, bool_t bUpdate)
 	if (widget_is_valid(ptd->vsc))
 	{
 		if (bUpdate)
-			widget_paint(ptd->vsc);
+			widget_erase(ptd->vsc, NULL);
 		else
 			widget_close(ptd->vsc, 0);
 	}
@@ -253,7 +269,7 @@ void noti_label_reset_scroll(widget_t widget, bool_t bUpdate)
 	if (widget_is_valid(ptd->hsc))
 	{
 		if (bUpdate)
-			widget_paint(ptd->hsc);
+			widget_erase(ptd->hsc, NULL);
 		else
 			widget_close(ptd->hsc, 0);
 	}
@@ -297,12 +313,20 @@ void hand_label_size(widget_t widget, int code, const xsize_t* prs)
 {
 	label_delta_t* ptd = GETLABELDELTA(widget);
 
-	if (!ptd->label)
-		return;
+	XDK_ASSERT(ptd != NULL);
 
-	noti_label_reset_scroll(widget, 0);
-
-	labelctrl_redraw(widget);
+	switch(code)
+	{
+	case WS_SIZE_FULLSCREEN:
+		break;
+	case WS_SIZE_MAXIMIZED:
+		break;
+	case WS_SIZE_MINIMIZED:
+		break;
+	case WS_SIZE_LAYOUT:
+		_labelctrl_reset_page(widget);
+		break;
+	}
 }
 
 void hand_label_scroll(widget_t widget, bool_t bHorz, int nLine)
@@ -342,7 +366,7 @@ void hand_label_wheel(widget_t widget, bool_t bHorz, int nDelta)
 			}
 			else
 			{
-				widget_paint(ptd->vsc);
+				widget_erase(ptd->vsc, NULL);
 			}
 		}
 
@@ -354,7 +378,7 @@ void hand_label_wheel(widget_t widget, bool_t bHorz, int nDelta)
 			}
 			else
 			{
-				widget_paint(ptd->hsc);
+				widget_erase(ptd->hsc, NULL);
 			}
 		}
 
@@ -384,7 +408,7 @@ void hand_label_mouse_move(widget_t widget, dword_t dw, const xpoint_t* pxp)
 
 	pt.x = pxp->x;
 	pt.y = pxp->y;
-	widget_point_to_tm(widget, &pt);
+	widget_point_to_mm(widget, &pt);
 
 	nHint = calc_label_hint(&pt, ptd->label, ptd->cur_page, &ilk);
 
@@ -475,7 +499,7 @@ void hand_label_lbutton_up(widget_t widget, const xpoint_t* pxp)
 
 	pt.x = pxp->x;
 	pt.y = pxp->y;
-	widget_point_to_tm(widget, &pt);
+	widget_point_to_mm(widget, &pt);
 
 	plk = NULL;
 	nHint = calc_label_hint(&pt, ptd->label, ptd->cur_page, &plk);
@@ -628,7 +652,7 @@ widget_t labelctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* p
 		EVENT_ON_RBUTTON_DOWN(hand_label_rbutton_down)
 		EVENT_ON_RBUTTON_UP(hand_label_rbutton_up)
 
-		EVENT_ON_NC_IMPLEMENT
+		
 
 	EVENT_END_DISPATH
 
@@ -716,13 +740,12 @@ void labelctrl_redraw(widget_t widget)
 	if (!b)
 	{
 		widget_get_client_rect(widget, &xr);
-		widget_rect_to_tm(widget, &xr);
+		widget_rect_to_mm(widget, &xr);
 		set_label_height(ptd->label, xr.fh);
 	}
 
 	_labelctrl_reset_page(widget);
 
-	widget_paint(widget);
 }
 
 void labelctrl_tabskip(widget_t widget, int nSkip)

@@ -69,6 +69,13 @@ static void _toolctrl_reset_page(widget_t widget)
 	pw = xr.w;
 	ph = xr.h;
 
+	if(ptd->tool)
+	{
+		widget_rect_to_mm(widget, &xr);
+		set_tool_width(ptd->tool, xr.fw);
+		set_tool_height(ptd->tool, xr.fh);
+	}
+
 	widget_reset_paging(widget, pw, ph, pw, ph, 0, 0);
 }
 
@@ -216,18 +223,21 @@ void hand_tool_destroy(widget_t widget)
 void hand_tool_size(widget_t widget, int code, const xsize_t* prs)
 {
 	tool_delta_t* ptd = GETTOOLDELTA(widget);
-	xrect_t xr;
 
-	if (!ptd->tool)
-		return;
+	XDK_ASSERT(ptd != NULL);
 
-	widget_get_client_rect(widget, &xr);
-	widget_rect_to_tm(widget, &xr);
-
-	set_tool_width(ptd->tool, xr.fw);
-	set_tool_height(ptd->tool, xr.fh);
-
-	toolctrl_redraw(widget);
+	switch(code)
+	{
+	case WS_SIZE_FULLSCREEN:
+		break;
+	case WS_SIZE_MAXIMIZED:
+		break;
+	case WS_SIZE_MINIMIZED:
+		break;
+	case WS_SIZE_LAYOUT:
+		_toolctrl_reset_page(widget);
+		break;
+	}
 }
 
 void hand_tool_mouse_move(widget_t widget, dword_t dw, const xpoint_t* pxp)
@@ -243,7 +253,7 @@ void hand_tool_mouse_move(widget_t widget, dword_t dw, const xpoint_t* pxp)
 
 	pt.x = pxp->x;
 	pt.y = pxp->y;
-	widget_point_to_tm(widget, &pt);
+	widget_point_to_mm(widget, &pt);
 
 	plk = NULL;
 	nHint = calc_tool_point_hint(&pt, ptd->tool, &glk, &plk);
@@ -336,7 +346,7 @@ void hand_tool_lbutton_up(widget_t widget, const xpoint_t* pxp)
 
 	pt.x = pxp->x;
 	pt.y = pxp->y;
-	widget_point_to_tm(widget, &pt);
+	widget_point_to_mm(widget, &pt);
 
 	plk = NULL;
 	nHint = calc_tool_point_hint(&pt, ptd->tool, &glk, &plk);
@@ -383,7 +393,7 @@ void hand_tool_rbutton_up(widget_t widget, const xpoint_t* pxp)
 
 	pt.x = pxp->x;
 	pt.y = pxp->y;
-	widget_point_to_tm(widget, &pt);
+	widget_point_to_mm(widget, &pt);
 
 	plk = NULL;
 	nHint = calc_tool_point_hint(&pt, ptd->tool, &glk, &plk);
@@ -427,17 +437,7 @@ void hand_tool_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	const drawing_interface* pif = NULL;
 	drawing_interface ifv = {0};
 
-	color_mod_t clrs;
-	xbrush_t xb;
-	xcolor_t xc_brim, xc_core;
-
-	if (!ptd->tool) return;
-
-	widget_get_color_mode(widget, &clrs);
-	default_xbrush(&xb);
-	format_xcolor(&clrs.clr_bkg, xb.color);
-	xmem_copy((void*)&xc_brim, (void*)&clrs.clr_bkg, sizeof(xcolor_t));
-	xmem_copy((void*)&xc_core, (void*)&clrs.clr_bkg, sizeof(xcolor_t));
+	xcolor_t xc_focus;
 
 	canv = widget_get_canvas(widget);
 	pif = widget_get_canvas_interface(widget);
@@ -445,24 +445,24 @@ void hand_tool_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	widget_get_client_rect(widget, &xr);
 
 	rdc = begin_canvas_paint(canv, dc, xr.w, xr.h);
+	
+	widget_hand_paint(widget, rdc, GDI_ATTR_GRADIENT_VERT);
 
-	get_visual_interface(rdc, &ifv);
-
-	lighten_xbrush(&xb, DEF_SOFT_DARKEN);
-
-	(*ifv.pf_gradient_rect)(ifv.ctx, &xc_core, &xc_brim, GDI_ATTR_GRADIENT_VERT, &xr);
-
-	draw_tool(pif, ptd->tool);
-
-	//draw focus
-	if (ptd->hover && ptd->b_press)
+	if(ptd->tool)
 	{
-		_toolctrl_item_rect(widget, ptd->hover, &xr);
-		pt_expand_rect(&xr, DEF_INNER_FEED, DEF_INNER_FEED);
+		draw_tool(pif, ptd->tool);
+		//draw focus
+		if (ptd->hover && ptd->b_press)
+		{
+			get_visual_interface(rdc, &ifv);
+			widget_get_view_rect(widget, (viewbox_t*)(&ifv.rect));
 
-		parse_xcolor(&xc_brim, DEF_ALPHA_COLOR);
+			_toolctrl_item_rect(widget, ptd->hover, &xr);
+			pt_expand_rect(&xr, DEF_INNER_FEED, DEF_INNER_FEED);
 
-		//(*ifv.pf_draw_rect)(ifv.ctx, &xp, NULL, &xr);
+			parse_xcolor(&xc_focus, DEF_ALPHA_COLOR);
+			draw_select_raw(&ifv, &xc_focus, &xr, ALPHA_SOLID);
+		}
 	}
 
 	end_canvas_paint(canv, dc, pxr);
@@ -495,7 +495,7 @@ widget_t toolctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* px
 		EVENT_ON_RBUTTON_DOWN(hand_tool_rbutton_down)
 		EVENT_ON_RBUTTON_UP(hand_tool_rbutton_up)
 
-		EVENT_ON_NC_IMPLEMENT
+		
 
 	EVENT_END_DISPATH
 
@@ -515,7 +515,7 @@ void toolctrl_attach(widget_t widget, link_t_ptr ptr)
 	ptd->tool = ptr;
 
 	widget_get_client_rect(widget, &xr);
-	widget_rect_to_tm(widget, &xr);
+	widget_rect_to_mm(widget, &xr);
 
 	set_tool_width(ptd->tool, xr.fw);
 	set_tool_height(ptd->tool, xr.fh);

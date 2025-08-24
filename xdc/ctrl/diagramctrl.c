@@ -297,7 +297,7 @@ static void _diagramctrl_reset_page(widget_t widget)
 {
 	diagram_delta_t* ptd = GETDIAGRAMDELTA(widget);
 
-	int pw, ph, fw, fh, lw, lh;
+	int pw, ph, vw, vh, lw, lh;
 	xrect_t xr;
 	xsize_t xs;
 
@@ -305,20 +305,27 @@ static void _diagramctrl_reset_page(widget_t widget)
 	pw = xr.w;
 	ph = xr.h;
 
-	if (compare_text(get_diagram_printing_ptr(ptd->diagram), -1, ATTR_PRINTING_LANDSCAPE, -1, 0) == 0)
+	if(ptd->diagram)
 	{
-		xs.fw = get_diagram_height(ptd->diagram);
-		xs.fh = get_diagram_width(ptd->diagram);
-	}
-	else
-	{
-		xs.fw = get_diagram_width(ptd->diagram);
-		xs.fh = get_diagram_height(ptd->diagram);
-	}
+		if (compare_text(get_diagram_printing_ptr(ptd->diagram), -1, ATTR_PRINTING_LANDSCAPE, -1, 0) == 0)
+		{
+			xs.fw = get_diagram_height(ptd->diagram);
+			xs.fh = get_diagram_width(ptd->diagram);
+		}
+		else
+		{
+			xs.fw = get_diagram_width(ptd->diagram);
+			xs.fh = get_diagram_height(ptd->diagram);
+		}
 
-	widget_size_to_pt(widget, &xs);
-	fw = xs.w;
-	fh = xs.h;
+		widget_size_to_pt(widget, &xs);
+		vw = xs.w;
+		vh = xs.h;
+	}else
+	{
+		vw = pw;
+		vh = ph;
+	}
 
 	xs.fw = (float)10;
 	xs.fh = (float)10;
@@ -326,7 +333,7 @@ static void _diagramctrl_reset_page(widget_t widget)
 	lw = xs.w;
 	lh = xs.h;
 
-	widget_reset_paging(widget, pw, ph, fw, fh, lw, lh);
+	widget_reset_paging(widget, pw, ph, vw, vh, lw, lh);
 
 	widget_reset_scroll(widget, 1);
 
@@ -549,7 +556,7 @@ void noti_diagram_entity_drop(widget_t widget, int x, int y)
 	pt.x = xr.x + cx;
 	pt.y = xr.y + cy;
 
-	widget_point_to_tm(widget, &pt);
+	widget_point_to_mm(widget, &pt);
 
 	pt.fx = (float)((int)(pt.fx));
 	pt.fy = (float)((int)(pt.fy));
@@ -632,7 +639,7 @@ void noti_diagram_entity_sized(widget_t widget, int x, int y)
 	if (!xs.w && !xs.h)
 		return;
 
-	widget_size_to_tm(widget, &xs);
+	widget_size_to_mm(widget, &xs);
 
 	_diagramctrl_entity_rect(widget, ptd->entity, &xr);
 
@@ -694,17 +701,17 @@ void noti_diagram_reset_scroll(widget_t widget, bool_t bUpdate)
 	if (widget_is_valid(ptd->vsc))
 	{
 		if (bUpdate)
-			widget_paint(ptd->vsc);
+			widget_erase(ptd->vsc, NULL);
 		else
-			widget_close(ptd->vsc, 0);
+			widget_destroy(ptd->vsc);
 	}
 
 	if (widget_is_valid(ptd->hsc))
 	{
 		if (bUpdate)
-			widget_paint(ptd->hsc);
+			widget_erase(ptd->hsc, NULL);
 		else
-			widget_close(ptd->hsc, 0);
+			widget_destroy(ptd->hsc);
 	}
 }
 
@@ -751,12 +758,20 @@ void hand_diagram_size(widget_t widget, int code, const xsize_t* prs)
 {
 	diagram_delta_t* ptd = GETDIAGRAMDELTA(widget);
 
-	if (!ptd->diagram)
-		return;
+	XDK_ASSERT(ptd != NULL);
 
-	noti_diagram_reset_scroll(widget, 0);
-
-	diagramctrl_redraw(widget);
+	switch(code)
+	{
+	case WS_SIZE_FULLSCREEN:
+		break;
+	case WS_SIZE_MAXIMIZED:
+		break;
+	case WS_SIZE_MINIMIZED:
+		break;
+	case WS_SIZE_LAYOUT:
+		_diagramctrl_reset_page(widget);
+		break;
+	}
 }
 
 void hand_diagram_scroll(widget_t widget, bool_t bHorz, int nLine)
@@ -796,7 +811,7 @@ void hand_diagram_wheel(widget_t widget, bool_t bHorz, int nDelta)
 			}
 			else
 			{
-				widget_paint(ptd->vsc);
+				widget_erase(ptd->vsc, NULL);
 			}
 		}
 
@@ -808,7 +823,7 @@ void hand_diagram_wheel(widget_t widget, bool_t bHorz, int nDelta)
 			}
 			else
 			{
-				widget_paint(ptd->hsc);
+				widget_erase(ptd->hsc, NULL);
 			}
 		}
 
@@ -843,7 +858,7 @@ void hand_diagram_mouse_move(widget_t widget, dword_t dw, const xpoint_t* pxp)
 
 	pt.x = pxp->x;
 	pt.y = pxp->y;
-	widget_point_to_tm(widget, &pt);
+	widget_point_to_mm(widget, &pt);
 
 	ilk = NULL;
 	nHint = calc_diagram_hint(ptd->diagram, &pt, &ilk);
@@ -952,7 +967,7 @@ void hand_diagram_lbutton_down(widget_t widget, const xpoint_t* pxp)
 
 	pt.x = pxp->x;
 	pt.y = pxp->y;
-	widget_point_to_tm(widget, &pt);
+	widget_point_to_mm(widget, &pt);
 
 	ilk = NULL;
 	nHint = calc_diagram_hint(ptd->diagram, &pt, &ilk);
@@ -998,7 +1013,7 @@ void hand_diagram_lbutton_up(widget_t widget, const xpoint_t* pxp)
 
 	pt.x = pxp->x;
 	pt.y = pxp->y;
-	widget_point_to_tm(widget, &pt);
+	widget_point_to_mm(widget, &pt);
 
 	ilk = NULL;
 	nHint = calc_diagram_hint(ptd->diagram, &pt, &ilk);
@@ -1186,7 +1201,7 @@ void hand_diagram_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	default_xbrush(&xb);
 	format_xcolor(&clrs.clr_bkg, xb.color);
 	default_xpen(&xp);
-	format_xcolor(&clrs.clr_frg, &xp.color);
+	format_xcolor(&clrs.clr_frg, xp.color);
 
 	canv = widget_get_canvas(widget);
 	pif = widget_get_canvas_interface(widget);
@@ -1294,7 +1309,7 @@ widget_t diagramctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t*
 
 		EVENT_ON_NOTICE(hand_diagram_notice)
 
-		EVENT_ON_NC_IMPLEMENT
+		
 
 	EVENT_END_DISPATH
 
@@ -1372,8 +1387,6 @@ void diagramctrl_redraw(widget_t widget)
 	ptd->hover = NULL;
 
 	_diagramctrl_reset_page(widget);
-
-	widget_paint(widget);
 }
 
 void diagramctrl_redraw_entity(widget_t widget, link_t_ptr ilk)

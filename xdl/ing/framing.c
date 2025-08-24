@@ -80,8 +80,6 @@ void draw_corner(const drawing_interface* pif, const xcolor_t* pxc, const xrect_
 
 	xscpy(xp.style, GDI_ATTR_STROKE_STYLE_SOLID);
 	xscpy(xp.size, _T("2"));
-	xp.adorn.feed = 2;
-	xp.adorn.size = 2;
 
 	pt1.fx = xr.fx;
 	pt1.fy = xr.fy;

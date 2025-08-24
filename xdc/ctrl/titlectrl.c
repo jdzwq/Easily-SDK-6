@@ -59,6 +59,13 @@ static void _titlectrl_reset_page(widget_t widget)
 	pw = xr.w;
 	ph = xr.h;
 
+	if (ptd->title)
+	{
+		widget_rect_to_mm(widget, &xr);
+		set_title_width(ptd->title, xr.fw);
+		set_title_height(ptd->title, xr.fh);
+	}
+
 	widget_reset_paging(widget, pw, ph, pw, ph, 0, 0);
 }
 
@@ -187,18 +194,21 @@ void hand_title_destroy(widget_t widget)
 void hand_title_size(widget_t widget, int code, const xsize_t* pxs)
 {
 	title_delta_t* ptd = GETTITLEDELTA(widget);
-	xrect_t xr;
 
-	if (!ptd->title)
-		return;
+	XDK_ASSERT(ptd != NULL);
 
-	widget_get_client_rect(widget, &xr);
-	widget_rect_to_tm(widget, &xr);
-
-	set_title_width(ptd->title, xr.fw);
-	set_title_height(ptd->title, xr.fh);
-
-	titlectrl_redraw(widget);
+	switch(code)
+	{
+	case WS_SIZE_FULLSCREEN:
+		break;
+	case WS_SIZE_MAXIMIZED:
+		break;
+	case WS_SIZE_MINIMIZED:
+		break;
+	case WS_SIZE_LAYOUT:
+		_titlectrl_reset_page(widget);
+		break;
+	}
 }
 
 void hand_title_mouse_move(widget_t widget, dword_t dw, const xpoint_t* pxp)
@@ -214,7 +224,7 @@ void hand_title_mouse_move(widget_t widget, dword_t dw, const xpoint_t* pxp)
 
 	pt.x = pxp->x;
 	pt.y = pxp->y;
-	widget_point_to_tm(widget, &pt);
+	widget_point_to_mm(widget, &pt);
 
 	plk = NULL;
 	nHint = calc_title_hint(&pt, ptd->title, ptd->item, &plk);
@@ -287,7 +297,7 @@ void hand_title_lbutton_up(widget_t widget, const xpoint_t* pxp)
 
 	pt.x = pxp->x;
 	pt.y = pxp->y;
-	widget_point_to_tm(widget, &pt);
+	widget_point_to_mm(widget, &pt);
 
 	plk = NULL;
 	nHint = calc_title_hint(&pt, ptd->title, ptd->item, &plk);
@@ -376,42 +386,24 @@ void hand_title_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 
 	canvas_t canv;
 	const drawing_interface* pif = NULL;
-	drawing_interface ifv = {0};
 
-	color_mod_t clrs;
-	xbrush_t xb;
-	xcolor_t xc_brim = { 0 };
-	xcolor_t xc_core = { 0 };
-
-	if (!ptd->title) return;
-
-	widget_get_color_mode(widget, &clrs);
-	default_xbrush(&xb);
-	format_xcolor(&clrs.clr_bkg, xb.color);
-	xmem_copy((void*)&xc_brim, (void*)&clrs.clr_bkg, sizeof(xcolor_t));
-	xmem_copy((void*)&xc_core, (void*)&clrs.clr_bkg, sizeof(xcolor_t));
+	widget_get_client_rect(widget, &xr);
 
 	canv = widget_get_canvas(widget);
 	pif = widget_get_canvas_interface(widget);
 	
-	orita = get_title_oritation_ptr(ptd->title);
-
-	widget_get_client_rect(widget, &xr);
-
 	rdc = begin_canvas_paint(canv, dc, xr.w, xr.h);
 
-	get_visual_interface(rdc, &ifv);
-
-	lighten_xbrush(&xb, DEF_SOFT_DARKEN);
-
+	orita = get_title_oritation_ptr(ptd->title);
 	if (compare_text(orita, -1, ATTR_ORITATION_BOTTOM, -1, 0) == 0 || compare_text(orita, -1, ATTR_ORITATION_TOP, -1, 0) == 0)
-		xscpy(token, GDI_ATTR_GRADIENT_VERT);
+		widget_hand_paint(widget, rdc, GDI_ATTR_GRADIENT_VERT);
 	else
-		xscpy(token, GDI_ATTR_GRADIENT_HORZ);
-
-	(*ifv.pf_gradient_rect)(ifv.ctx, &xc_brim, &xc_core, token, &xr);
-
-	draw_title(pif, ptd->title, ptd->item);
+		widget_hand_paint(widget, rdc, GDI_ATTR_GRADIENT_HORZ);
+	
+	if (ptd->title)
+	{
+		draw_title(pif, ptd->title, ptd->item);
+	}
 
 	end_canvas_paint(canv, dc, pxr);
 }
@@ -443,7 +435,7 @@ widget_t titlectrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* p
 		EVENT_ON_RBUTTON_DOWN(hand_title_rbutton_down)
 		EVENT_ON_RBUTTON_UP(hand_title_rbutton_up)
 
-		EVENT_ON_NC_IMPLEMENT
+		
 
 	EVENT_END_DISPATH
 
@@ -463,7 +455,7 @@ void titlectrl_attach(widget_t widget, link_t_ptr ptr)
 	ptd->title = ptr;
 
 	widget_get_client_rect(widget, &xr);
-	widget_rect_to_tm(widget, &xr);
+	widget_rect_to_mm(widget, &xr);
 
 	set_title_width(ptd->title, xr.fw);
 	set_title_height(ptd->title, xr.fh);

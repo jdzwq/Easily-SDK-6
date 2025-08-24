@@ -287,7 +287,7 @@ void hand_dropbox_lbutton_up(widget_t widget, const xpoint_t* pxp)
 
 	pt.x = pxp->x;
 	pt.y = pxp->y;
-	widget_point_to_tm(widget, &pt);
+	widget_point_to_mm(widget, &pt);
 
 	hint = calc_dropbox_hint(&im, &ptd->xf, &pt, ptd->table, &ilk);
 
@@ -307,10 +307,20 @@ void hand_dropbox_size(widget_t widget, int code, const xsize_t* prs)
 {
 	dropbox_delta_t* ptd = GETDROPBOXDELTA(widget);
 
-	if (!ptd->table)
-		return;
+	XDK_ASSERT(ptd != NULL);
 
-	dropbox_redraw(widget);
+	switch(code)
+	{
+	case WS_SIZE_FULLSCREEN:
+		break;
+	case WS_SIZE_MAXIMIZED:
+		break;
+	case WS_SIZE_MINIMIZED:
+		break;
+	case WS_SIZE_LAYOUT:
+		_dropbox_reset_page(widget);
+		break;
+	}
 }
 
 void hand_dropbox_scroll(widget_t widget, bool_t bHorz, int nLine)
@@ -399,7 +409,7 @@ widget_t dropbox_create(widget_t widget, dword_t style, const xrect_t* pxr)
 
 		EVENT_ON_XFONT(hand_dropbox_xfont)
 
-		EVENT_ON_NC_IMPLEMENT
+		
 
 	EVENT_END_DISPATH
 

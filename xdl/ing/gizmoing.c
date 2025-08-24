@@ -137,9 +137,6 @@ void draw_plus_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xr
 
 	prt = &rt;
 
-	xp.adorn.feed = 1;
-	xp.adorn.size = 1;
-
 	pt[0].x = prt->x;
 	pt[0].y = prt->y + prt->h / 2;
 	pt[1].x = prt->x + prt->w;
@@ -194,8 +191,6 @@ void draw_minus_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const x
 	pt[1].x = prt->x + prt->w;
 	pt[1].y = prt->y + prt->h / 2;
 
-	xp.adorn.feed = 1;
-	xp.adorn.size = 1;
 	(*pif->pf_draw_line)(pif->ctx, &xp, &(pt[0]), &(pt[1]));
 }
 
@@ -1473,8 +1468,6 @@ void draw_close_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const x
 	pt2.x = xr.x + xr.w - ps;
 	pt2.y = xr.y + xr.h - ps;
 
-	xp.adorn.feed = 1;
-	xp.adorn.size = 1;
 	(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
 
 	pt1.x = xr.x + ps;
@@ -7855,8 +7848,6 @@ void draw_slide_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const x
 	pt[1].x = prt->x + prt->w - ps;
 	pt[1].y = prt->y + prt->h / 2;
 
-	xp.adorn.feed = 2;
-	xp.adorn.size = 2;
 	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
 
 	pt[0].x = prt->x + prt->w / 4 + ps;
@@ -8096,8 +8087,6 @@ void draw_push_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xr
 	xr.w = prt->w / 2;
 	xr.h = 4 * ps;
 
-	xp.adorn.feed = 2;
-	xp.adorn.size = 2;
 	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
 }
 

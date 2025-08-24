@@ -98,7 +98,7 @@ void noti_tagctrl_reset_scroll(widget_t widget, bool_t bUpdate)
 	if (widget_is_valid(ptd->vsc))
 	{
 		if (bUpdate)
-			widget_paint(ptd->vsc);
+			widget_erase(ptd->vsc, NULL);
 		else
 			widget_close(ptd->vsc, 0);
 	}
@@ -106,7 +106,7 @@ void noti_tagctrl_reset_scroll(widget_t widget, bool_t bUpdate)
 	if (widget_is_valid(ptd->hsc))
 	{
 		if (bUpdate)
-			widget_paint(ptd->hsc);
+			widget_erase(ptd->hsc, NULL);
 		else
 			widget_close(ptd->hsc, 0);
 	}
@@ -124,7 +124,7 @@ int hand_tagctrl_create(widget_t widget, void* data)
 	SETTAGCTRLDELTA(widget, ptd);
 
 	ptd->textor.widget = widget;
-	ptd->textor.cdc = widget_client_ctx(widget);
+	ptd->textor.cdc = widget_client_context(widget);
 	ptd->textor.data = NULL;
 	ptd->textor.pf_scan_text = (PF_SCAN_TEXT)scan_tag_text;
 	ptd->textor.pf_get_text = _tagctrl_get_text;
@@ -151,7 +151,7 @@ void hand_tagctrl_destroy(widget_t widget)
 
 	hand_textor_clean(&ptd->textor);
 
-	widget_release_ctx(widget, ptd->textor.cdc);
+	widget_release_context(widget, ptd->textor.cdc);
 
 	xmem_free(ptd);
 
@@ -529,13 +529,25 @@ void hand_tagctrl_size(widget_t widget, int code, const xsize_t* prs)
 {
 	tagctrl_delta_t* ptd = GETTAGCTRLDELTA(widget);
 
+	XDK_ASSERT(ptd != NULL);
+
+	switch(code)
+	{
+	case WS_SIZE_FULLSCREEN:
+		break;
+	case WS_SIZE_MAXIMIZED:
+		break;
+	case WS_SIZE_MINIMIZED:
+		break;
+	case WS_SIZE_LAYOUT:
+		break;
+	}
+
 	if (!ptd)
 		return;
 
 	if (!ptd->textor.data)
 		return;
-
-	noti_tagctrl_reset_scroll(widget, 0);
 
 	hand_textor_size(&ptd->textor, code, prs);
 }
@@ -583,7 +595,7 @@ void hand_tagctrl_wheel(widget_t widget, bool_t bHorz, int nDelta)
 			}
 			else
 			{
-				widget_paint(ptd->vsc);
+				widget_erase(ptd->vsc, NULL);
 			}
 		}
 
@@ -595,7 +607,7 @@ void hand_tagctrl_wheel(widget_t widget, bool_t bHorz, int nDelta)
 			}
 			else
 			{
-				widget_paint(ptd->hsc);
+				widget_erase(ptd->hsc, NULL);
 			}
 		}
 
@@ -702,7 +714,7 @@ widget_t tagctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr
 		EVENT_ON_SELF_COMMAND(hand_tagctrl_self_command)
 		EVENT_ON_MENU_COMMAND(hand_tagctrl_menu_command)
 
-		EVENT_ON_NC_IMPLEMENT
+		
 
 	EVENT_END_DISPATH
 

@@ -125,7 +125,6 @@ void navibox_on_keyboard(widget_t widget)
 	widget_move(ptd->keybox, RECTPOINT(&xr));
 	widget_size(ptd->keybox, RECTSIZE(&xr));
 	widget_take(ptd->keybox, (int)WS_TAKE_TOPMOST);
-	widget_paint(ptd->keybox);
 	widget_show(ptd->keybox, WS_SHOW_NORMAL);
 
 	widget_erase(widget, NULL);
@@ -179,7 +178,7 @@ void hand_navibox_lbutton_up(widget_t widget, const xpoint_t* pxp)
 	pt.x = pxp->x;
 	pt.y = pxp->y;
 
-	widget_point_to_tm(widget, &pt);
+	widget_point_to_mm(widget, &pt);
 
 	get_canvas_measure(widget_get_canvas(widget), &im);
 
@@ -201,7 +200,19 @@ void hand_navibox_size(widget_t widget, int code, const xsize_t* prs)
 {
 	navibox_delta_t* ptd = GETNAVIBOXDELTA(widget);
 	
-	widget_erase(widget, NULL);
+	XDK_ASSERT(ptd != NULL);
+
+	switch(code)
+	{
+	case WS_SIZE_FULLSCREEN:
+		break;
+	case WS_SIZE_MAXIMIZED:
+		break;
+	case WS_SIZE_MINIMIZED:
+		break;
+	case WS_SIZE_LAYOUT:
+		break;
+	}
 }
 
 void hand_navibox_xfont(widget_t widget, const xfont_t* pxf)
@@ -268,7 +279,7 @@ widget_t navibox_create(widget_t widget, dword_t style, const xrect_t* pxr)
 
 		EVENT_ON_XFONT(hand_navibox_xfont)
 
-		EVENT_ON_NC_IMPLEMENT
+		
 
 	EVENT_END_DISPATH
 

@@ -570,11 +570,10 @@ widget_t msgdlg_create(const tchar_t* text, dword_t button, widget_t owner)
 		EVENT_ON_XFONT(hand_msgdlg_xfont)
 		EVENT_ON_XFACE(hand_msgdlg_xface)
 
-		EVENT_ON_NC_IMPLEMENT
-
 	EVENT_END_DISPATH
 
 	dlg = widget_create(NULL, WD_STYLE_DIALOG, &xr, owner, &ev);
+	widget_set_owner(dlg, owner);
 
 	if (button & MSGICO_ERR)
 	{
@@ -591,7 +590,6 @@ widget_t msgdlg_create(const tchar_t* text, dword_t button, widget_t owner)
 
 	msgdlg_popup_size(dlg, RECTSIZE(&xr));
 	widget_size(dlg, RECTSIZE(&xr));
-	widget_paint(dlg);
 	widget_center_window(dlg, owner);
 
 	if (widget_is_valid(owner))

@@ -181,7 +181,7 @@ emit_dqt (j_compress_ptr cinfo, int index)
 
 
 LOCAL(void)
-emit_dht (j_compress_ptr cinfo, int index, boolean is_ac)
+emit_dht (j_compress_ptr cinfo, int index, BOOLE is_ac)
 /* Emit a DHT marker */
 {
   JHUFF_TBL * htbl;
@@ -494,7 +494,7 @@ METHODDEF(void)
 write_frame_header (j_compress_ptr cinfo)
 {
   int ci, prec;
-  boolean is_baseline;
+  BOOLE is_baseline;
   jpeg_component_info *compptr;
   
   /* Emit DQT for each quantization table.

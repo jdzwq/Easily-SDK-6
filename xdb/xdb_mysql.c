@@ -25,7 +25,7 @@ LICENSE.GPL3 for more details.
 
 #include "xdbpro.h"
 
-#include <mysql/mysql.h>
+#include <mysql.h>
 
 #ifdef _OS_WINDOWS
 #pragma comment(lib,"mysqlclient.lib")
@@ -803,8 +803,8 @@ int STDCALL _db_fetch_row(xdb_mysql_context* pdb, MYSQL_STMT* stm, LINKPTR grid)
     MYSQL_RES  *meta = NULL;
     MYSQL_FIELD *field = NULL;
     MYSQL_BIND *bind = NULL;
-    bool* pnull = NULL;
-    bool* perr = NULL;
+    my_bool* pnull = NULL;
+    my_bool* perr = NULL;
     unsigned long* plen = NULL;
     char** pbuf = NULL;
 
@@ -824,8 +824,8 @@ int STDCALL _db_fetch_row(xdb_mysql_context* pdb, MYSQL_STMT* stm, LINKPTR grid)
 
 	bind = (MYSQL_BIND*)xmem_alloc(cols * sizeof(MYSQL_BIND));
     
-    pnull = (bool*)xmem_alloc(cols * sizeof(bool));
-    perr = (bool*)xmem_alloc(cols * sizeof(bool));
+    pnull = (my_bool*)xmem_alloc(cols * sizeof(my_bool));
+    perr = (my_bool*)xmem_alloc(cols * sizeof(my_bool));
     plen = (unsigned long*)xmem_alloc(cols * sizeof(unsigned long));
     pbuf = (char**)xmem_alloc(cols * sizeof(char*));
     
@@ -1387,8 +1387,8 @@ int _db_call_argv(xdb_mysql_context* pdb, const tchar_t* procname, const tchar_t
 {
     MYSQL_STMT *stm = NULL;
     MYSQL_BIND *bind = NULL;
-    bool* pnull = NULL;
-    bool* perr = NULL;
+    my_bool* pnull = NULL;
+    my_bool* perr = NULL;
     unsigned long* plen = NULL;
     char** pbuf = NULL;
     int* pinout = NULL;
@@ -1455,8 +1455,8 @@ int _db_call_argv(xdb_mysql_context* pdb, const tchar_t* procname, const tchar_t
 	d_sql = NULL;
 
     bind = (MYSQL_BIND*)xmem_alloc((ind) * sizeof(MYSQL_BIND));
-    pnull = (bool*)xmem_alloc((ind) * sizeof(bool));
-    perr = (bool*)xmem_alloc((ind) * sizeof(bool));
+    pnull = (my_bool*)xmem_alloc((ind) * sizeof(my_bool));
+    perr = (my_bool*)xmem_alloc((ind) * sizeof(my_bool));
     plen = (unsigned long*)xmem_alloc((ind) * sizeof(unsigned long));
     pbuf = (char**)xmem_alloc((ind) * sizeof(char*));
     pinout = (int*)xmem_alloc((ind) * sizeof(int));
@@ -1649,8 +1649,8 @@ bool_t STDCALL db_call_func(xdb_t db, LINKPTR func)
     
     MYSQL_STMT *stm = NULL;
     MYSQL_BIND *bind = NULL;
-    bool* pnull = NULL;
-    bool* perr = NULL;
+    my_bool* pnull = NULL;
+    my_bool* perr = NULL;
     unsigned long* plen = NULL;
     char** pbuf = NULL;
     int* pinout = NULL;
@@ -1678,8 +1678,8 @@ bool_t STDCALL db_call_func(xdb_t db, LINKPTR func)
     ind = get_func_param_count(func);
     
     bind = (MYSQL_BIND*)xmem_alloc((ind) * sizeof(MYSQL_BIND));
-    pnull = (bool*)xmem_alloc((ind) * sizeof(bool));
-    perr = (bool*)xmem_alloc((ind) * sizeof(bool));
+    pnull = (my_bool*)xmem_alloc((ind) * sizeof(my_bool));
+    perr = (my_bool*)xmem_alloc((ind) * sizeof(my_bool));
     plen = (unsigned long*)xmem_alloc((ind) * sizeof(unsigned long));
     pbuf = (char**)xmem_alloc((ind) * sizeof(char*));
     pinout = (int*)xmem_alloc((ind) * sizeof(int));
@@ -1965,8 +1965,8 @@ bool_t STDCALL db_export(xdb_t db, stream_t stream, const tchar_t* sqlstr)
     MYSQL_FIELD *field = NULL;
     
     MYSQL_BIND *bind = NULL;
-    bool* pnull = NULL;
-    bool* perr = NULL;
+    my_bool* pnull = NULL;
+    my_bool* perr = NULL;
     unsigned long* plen = NULL;
     tchar_t** pbuf = NULL;
     int rt;
@@ -1977,7 +1977,7 @@ bool_t STDCALL db_export(xdb_t db, stream_t stream, const tchar_t* sqlstr)
 
 	string_t vs = NULL;
 
-	tchar_t feed[3] = { TXT_ITEMFEED, TXT_LINEFEED, _T('\n') };
+	tchar_t feed[2] = { CSV_ITEMFEED, CSV_LINEFEED };
 
 	tchar_t* sz_esc = NULL;
 	int len_esc = 0;
@@ -2017,8 +2017,8 @@ bool_t STDCALL db_export(xdb_t db, stream_t stream, const tchar_t* sqlstr)
 	vs = string_alloc();
 
     bind = (MYSQL_BIND*)xmem_alloc((cols) * sizeof(MYSQL_BIND));
-    pnull = (bool*)xmem_alloc((cols) * sizeof(bool));
-    perr = (bool*)xmem_alloc((cols) * sizeof(bool));
+    pnull = (my_bool*)xmem_alloc((cols) * sizeof(my_bool));
+    perr = (my_bool*)xmem_alloc((cols) * sizeof(my_bool));
     plen = (unsigned long*)xmem_alloc((cols) * sizeof(unsigned long));
     pbuf = (tchar_t**)xmem_alloc((cols) * sizeof(tchar_t*));
 
@@ -2064,11 +2064,14 @@ bool_t STDCALL db_export(xdb_t db, stream_t stream, const tchar_t* sqlstr)
         bind[i].error= &perr[i];
 		
 		string_cat(vs, colname, -1);
-		string_cat(vs, feed, 1);
+        if(i != cols -1)
+        {
+		    string_cat(vs, feed, 1);
+        }
 	}
-	string_cat(vs, feed + 1, 2);
+	string_cat(vs, feed + 1, 1);
 
-	if (!stream_write_line(stream, vs, &pos))
+	if (!stream_write_csv_line(stream, vs, &pos))
 	{
 		raise_user_error(NULL, NULL);
 	}
@@ -2121,12 +2124,16 @@ bool_t STDCALL db_export(xdb_t db, stream_t stream, const tchar_t* sqlstr)
                 xsfree(d_str);
                 d_str = NULL;
 			}
-			string_cat(vs, feed, 1);
+
+            if(i != cols-1)
+            {
+			    string_cat(vs, feed, 1);
+            }
 		}
 
-		string_cat(vs, feed + 1, 2);
+		string_cat(vs, feed + 1, 1);
 
-		if (!stream_write_line(stream, vs, &pos))
+		if (!stream_write_csv_line(stream, vs, &pos))
 		{
 			raise_user_error(NULL, NULL);
 		}
@@ -2216,8 +2223,8 @@ bool_t STDCALL db_import(xdb_t db, stream_t stream, const tchar_t* table)
 
     MYSQL_STMT *stm = NULL;
     MYSQL_BIND *bind = NULL;
-    bool* pnull = NULL;
-    bool* perr = NULL;
+    my_bool* pnull = NULL;
+    my_bool* perr = NULL;
     unsigned long* plen = NULL;
     char** pbuf = NULL;
     int i, cols;
@@ -2257,7 +2264,7 @@ bool_t STDCALL db_import(xdb_t db, stream_t stream, const tchar_t* table)
 	vs = string_alloc();
 
 	dw = 0;
-	if (!stream_read_line(stream, vs, &dw))
+	if (!stream_read_csv_line(stream, vs, &dw))
 	{
 		raise_user_error(_T("-1"), _T("read stream failed"));
 	}
@@ -2268,19 +2275,16 @@ bool_t STDCALL db_import(xdb_t db, stream_t stream, const tchar_t* table)
 
 	cols = 0;
 	token = string_ptr(vs);
-	while (*token != TXT_LINEFEED && *token != _T('\0'))
+	while (*token != CSV_LINEFEED && *token != _T('\0'))
 	{
 		tklen = 0;
-		while (*token != TXT_ITEMFEED && *token != TXT_LINEFEED && *token != _T('\0'))
-		{
-			token++;
-			tklen++;
-		}
+		tkpre = csv_token_split(token, -1, &tklen);
 
-		string_cat(vs_sql, token - tklen, tklen);
+		string_cat(vs_sql, tkpre, tklen);
 		string_cat(vs_sql, _T(","), 1);
 
-		if (*token == TXT_ITEMFEED)
+        token = tkpre + tklen;
+		if (*token == CSV_ITEMFEED)
 			token++;
 
 		cols++;
@@ -2330,8 +2334,8 @@ bool_t STDCALL db_import(xdb_t db, stream_t stream, const tchar_t* table)
     cols = mysql_stmt_param_count(stm);
     
     bind = (MYSQL_BIND*)xmem_alloc((cols) * sizeof(MYSQL_BIND));
-    pnull = (bool*)xmem_alloc((cols) * sizeof(bool));
-    perr = (bool*)xmem_alloc((cols) * sizeof(bool));
+    pnull = (my_bool*)xmem_alloc((cols) * sizeof(my_bool));
+    perr = (my_bool*)xmem_alloc((cols) * sizeof(my_bool));
     plen = (unsigned long*)xmem_alloc((cols) * sizeof(unsigned long));
     pbuf = (char**)xmem_alloc((cols) * sizeof(char*));
 
@@ -2342,7 +2346,7 @@ bool_t STDCALL db_import(xdb_t db, stream_t stream, const tchar_t* table)
 	{
 		string_empty(vs);
 		dw = 0;
-		if (!stream_read_line(stream, vs, &dw))
+		if (!stream_read_csv_line(stream, vs, &dw))
 		{
 			raise_user_error(_T("-1"), _T("stream read line failed"));
 		}
@@ -2352,18 +2356,13 @@ bool_t STDCALL db_import(xdb_t db, stream_t stream, const tchar_t* table)
 
 		i = 0;
 		token = string_ptr(vs);
-		while (*token != TXT_LINEFEED && *token != _T('\0'))
+		while (*token != CSV_LINEFEED && *token != _T('\0'))
 		{
 			tklen = 0;
-			while (*token != TXT_ITEMFEED && *token != TXT_LINEFEED && *token != _T('\0'))
-			{
-				token++;
-				tklen++;
-			}
+		    tkpre = csv_token_split(token, -1, &tklen);
 
             if(tklen)
             {
-                tkpre = token - tklen;
                 csv_token_decode(tkpre, tklen, NULL, &len_esc);
                 if (len_esc != tklen)
                 {
@@ -2418,7 +2417,8 @@ bool_t STDCALL db_import(xdb_t db, stream_t stream, const tchar_t* table)
                 bind[i].error= &perr[i];
             }
 
-			if (*token == TXT_ITEMFEED)
+            token = tkpre + tklen;
+			if (*token == CSV_ITEMFEED)
 				token++;
             
 			if (++i == cols)
@@ -2704,3 +2704,47 @@ int STDCALL db_error(xdb_t db, tchar_t* buf, int max)
 
 	return -1;
 }
+
+bool_t STDCALL db_call_json(xdb_t db, const tchar_t* procname, LINKPTR json)
+{
+    NOP;
+    return 0;
+}
+
+
+bool_t STDCALL db_read_blob(xdb_t db, stream_t stream, const tchar_t* sqlstr)
+{
+    NOP;
+    return 0;
+}
+
+bool_t STDCALL db_write_blob(xdb_t db, stream_t stream, const tchar_t* sqlfmt)
+{
+    NOP;
+    return 0;
+}
+
+bool_t STDCALL db_read_clob(xdb_t db, string_t varstr, const tchar_t* sqlstr)
+{
+    NOP;
+    return 0;
+}
+
+bool_t STDCALL db_write_clob(xdb_t db, string_t varstr, const tchar_t* sqlfmt)
+{
+    NOP;
+    return 0;
+}
+
+bool_t STDCALL db_read_xdoc(xdb_t db, LINKPTR domdoc, const tchar_t* sqlstr)
+{
+    NOP;
+    return 0;
+}
+
+bool_t STDCALL db_write_xdoc(xdb_t db, LINKPTR domdoc, const tchar_t* sqlfmt)
+{
+    NOP;
+    return 0;
+}
+

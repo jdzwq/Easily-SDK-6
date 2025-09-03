@@ -55,7 +55,7 @@ int call_buffer_read_escape(void* p_obj, int max, int pos, int encode, tchar_t* 
 		return (int)xml_utf16big_decode(buf, pch);
 	case _GB2312:
 		return (int)xml_gb2312_decode(buf, pch);
-	case _UTF8:
+	case _UTF8_BOM:
 		return (int)xml_utf8_decode(buf, pch);
 	default:
 		return (int)xml_unn_decode(buf, pch);
@@ -76,7 +76,7 @@ int call_buffer_write_escape(void* p_obj, int max, int pos, int encode, tchar_t 
 		return (int)xml_utf16big_encode(ch, buf, max - pos);
 	case _GB2312:
 		return (int)xml_gb2312_encode(ch, buf, max - pos);
-	case _UTF8:
+	case _UTF8_BOM:
 		return (int)xml_utf8_encode(ch, buf, max - pos);
 	default:
 		return (int)xml_unn_encode(ch, buf, max - pos);
@@ -121,7 +121,7 @@ int call_buffer_read_char(void* p_obj, int max, int pos, int encode, tchar_t* pc
 		gb2312_byte_to_mbs(buf, pch);
 #endif 
 		break;
-	case _UTF8:
+	case _UTF8_BOM:
 		pos = utf8_sequence(*(buf));
 #ifdef _UNICODE
 		utf8_byte_to_ucs(buf, pch);
@@ -184,7 +184,7 @@ int call_buffer_read_token(void* p_obj, int max, int pos, int encode, tchar_t* p
 			ret = gb2312_byte_to_mbs(buf, pch);
 #endif
 			break;
-		case _UTF8:
+		case _UTF8_BOM:
 			pos += utf8_sequence(*(buf));
 #ifdef _UNICODE
 			ret = utf8_byte_to_ucs(buf, pch);
@@ -236,7 +236,7 @@ int call_buffer_write_char(void* p_obj, int max, int pos, int encode, const tcha
 		pos = mbs_byte_to_gb2312(pch, buf);
 #endif
 		break;
-	case _UTF8:
+	case _UTF8_BOM:
 #ifdef _UNICODE
 		pos = ucs_byte_to_utf8(*pch, buf);
 #else
@@ -288,7 +288,7 @@ int call_buffer_write_token(void* p_obj, int max, int pos, int encode, const tch
 		pos = mbs_to_gb2312(pch, len, buf, max - pos);
 #endif
 		break;
-	case _UTF8:
+	case _UTF8_BOM:
 #ifdef _UNICODE
 		pos = ucs_to_utf8(pch, len, buf, max - pos);
 #else

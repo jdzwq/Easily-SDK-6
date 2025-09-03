@@ -124,6 +124,8 @@ EXP_API void csv_token_encode(const tchar_t* val, int len, tchar_t* buf, int* pd
 
 EXP_API void csv_token_decode(const tchar_t* val, int len, tchar_t* buf, int* pdw);
 
+EXP_API tchar_t* csv_token_split(tchar_t* val, int max, int* plen);
+
 EXP_API dword_t url_byte_encode(const byte_t* val, dword_t len, byte_t* buf, dword_t max);
 
 EXP_API dword_t url_byte_decode(const byte_t* val, dword_t len, byte_t* buf, dword_t max);

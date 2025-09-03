@@ -2,10 +2,6 @@
 #include <xdl.h>
 #include <xdb.h>
 
-#ifdef _OS_WINDOWS
-#include <conio.h>
-#endif
-
 PF_DB_OPEN_DSN pf_db_open_dsn;
 PF_DB_OPEN pf_db_open;
 PF_DB_CLOSE pf_db_close;
@@ -26,11 +22,12 @@ PF_DB_IMPORT pf_db_import;
 PF_DB_EXPORT pf_db_export;
 PF_DB_CALL_FUNC pf_db_call_func;
 
-//#define dsnfile _T("./demo_stub.dsn")
-#define dsnfile _T("./demo_odbc.dsn")
-//#define dsnfile _T("./demo_mysql.dsn")
-//#define dsnfile _T("./demo_oci.dsn")
-//#define dsnfile _T("./demo_postgre.dsn")
+//#define dsnfile _T("/demo_stub.dsn")
+#define dsnfile _T("/demo_odbc.dsn")
+//#define dsnfile _T("/demo_oci.dsn")
+//#define dsnfile _T("/demo_mysql.dsn")
+//#define dsnfile _T("/demo_postgre.dsn")
+//#define dsnfile _T("/demo_sqlite.dsn")
 
 #if defined(_OS_WINDOWS)
 //#define xdblib	_T("xdb_stub.dll")
@@ -38,19 +35,30 @@ PF_DB_CALL_FUNC pf_db_call_func;
 //#define xdblib	_T("xdb_mysql.dll")
 //#define xdblib	_T("xdb_oci.dll")
 //#define xdblib	_T("xdb_postgre.dll")
-#else
+//#define xdblib	_T("xdb_sqlite.dll")
+#endif
+#if defined(_OS_LINUX)
 //#define xdblib	_T("libxdb_stub.so")
-//#define xdblib	_T("libxdb_mysql.so")
-#define xdblib	_T("libxdb_odbc.so")
-//#define xdblib	_T("libxdb_postgre.so")
+//#define xdblib	_T("libxdb_odbc.so")
 //#define xdblib	_T("libxdb_oci.so")
+#define xdblib	_T("libxdb_mysql.so")
+//#define xdblib	_T("libxdb_postgre.so")
+//#define xdblib	_T("libxdb_sqlite.so")
+#endif
+#if defined(_OS_MACOS)
+//#define xdblib	_T("@rpath/libxdb_stub.dylib")
+//#define xdblib	_T("@rpath/libxdb_odbc.dylib")
+#define xdblib	_T("@rpath/libxdb_oci.dylib")
+//#define xdblib	_T("@rpath/libxdb_mysql.dylib")
+//#define xdblib	_T("@rpath/libxdb_postgre.dylib")
+//#define xdblib	_T("@rpath/libxdb_sqlite.dylib")
 #endif
 
 unsigned int STDCALL test_xdb_datetime(void* param)
 {
 	tchar_t errcode[NUM_LEN + 1] = { 0 };
 	tchar_t errtext[ERR_LEN + 1] = { 0 };
-
+    tchar_t fpath[PATH_LEN] = {0};
 	xdb_t xdb = NULL;
 
 	bool_t rt;
@@ -61,7 +69,10 @@ unsigned int STDCALL test_xdb_datetime(void* param)
 
 	TRY_CATCH;
 
-	xdb = (*pf_db_open_dsn)(dsnfile);
+    get_runpath(0, fpath, PATH_LEN);
+    xscat(fpath, dsnfile);
+
+	xdb = (*pf_db_open_dsn)(fpath);
 	if (!xdb)
 	{
 		raise_user_error(_T("-1"), _T("open connection falied\n"));
@@ -238,7 +249,7 @@ unsigned int STDCALL test_xdb_exec(void* param)
     string_append(vs, _T("insert into dogs (did,dname,dage,dprice) values ('%s','%s','%s','%s')\n"),
                   _T("2"),
                   _T("\r\n来福"),
-                  _T("2015-01-01"),
+                  _T("2015-1-1"),
                   _T("200.50"));
     
     rt = (*pf_db_exec)(xdb, string_ptr(vs), string_len(vs));
@@ -472,6 +483,7 @@ unsigned int STDCALL test_xdb_batch(void* param)
     xdb_t xdb = NULL;
     int rows;
     
+    tchar_t fpath[PATH_LEN] = {0};
     tchar_t fsize[NUM_LEN + 1] = { 0 };
     file_t file = NULL;
     bio_interface bio = {0};
@@ -485,18 +497,21 @@ unsigned int STDCALL test_xdb_batch(void* param)
     
     TRY_CATCH;
     
+    get_runpath(0, fpath, PATH_LEN);
+    xscat(fpath, _T("/dogs.sql"));
+
     xdb = (*pf_db_open_dsn)(dsnfile);
     if (!xdb)
     {
         raise_user_error(_T("-1"), _T("open connection falied\n"));
     }
     
-    if (!xfile_info(NULL, _T("./dogs.sql"), NULL, fsize, NULL, enc))
+    if (!xfile_info(NULL, fpath, NULL, fsize, NULL, enc))
     {
         raise_user_error(_T("-1"), _T("open file falied\n"));
     }
     
-    file = xfile_open(NULL, _T("./dogs.sql"), FILE_OPEN_READ);
+    file = xfile_open(NULL, fpath, FILE_OPEN_READ);
     if (!file)
     {
         raise_user_error(_T("-1"), _T("open file falied\n"));
@@ -574,6 +589,7 @@ unsigned int STDCALL test_xdb_export(void* param)
     xdb_t xdb = NULL;
     int rows;
     
+    tchar_t fpath[PATH_LEN] = {0};
     tchar_t fsize[NUM_LEN + 1] = { 0 };
     file_t file = NULL;
     bio_interface bio = {0};
@@ -587,13 +603,16 @@ unsigned int STDCALL test_xdb_export(void* param)
     
     TRY_CATCH;
     
+    get_runpath(0, fpath, PATH_LEN);
+    xscat(fpath, _T("/dogs.txt"));
+
     xdb = (*pf_db_open_dsn)(dsnfile);
     if (!xdb)
     {
         raise_user_error(_T("-1"), _T("open connection falied\n"));
     }
     
-    file = xfile_open(NULL, _T("./dogs2.txt"), FILE_OPEN_CREATE);
+    file = xfile_open(NULL, fpath, FILE_OPEN_CREATE);
     if (!file)
     {
         raise_user_error(_T("-1"), _T("open file falied\n"));
@@ -609,7 +628,8 @@ unsigned int STDCALL test_xdb_export(void* param)
     
     get_bio_interface(file->fd, &bio);
     stream = stream_alloc(&bio);
-    stream_set_encode(stream, _UTF8);
+    stream_set_mode(stream, LINE_OPERA);
+    stream_set_encode(stream, _UTF8_BOM);
 	stream_write_utfbom(stream, NULL);
     
     rt = (*pf_db_export)(xdb, stream, NULL);
@@ -674,6 +694,7 @@ unsigned int STDCALL test_xdb_import(void* param)
     xdb_t xdb = NULL;
     int rows;
     
+    tchar_t fpath[PATH_LEN] = {0};
     tchar_t fsize[NUM_LEN + 1] = { 0 };
     tchar_t enc[INT_LEN] = { 0 };
     file_t file = NULL;
@@ -681,25 +702,37 @@ unsigned int STDCALL test_xdb_import(void* param)
     stream_t stream = NULL;
     dword_t size = 0;
     bool_t rt;
-    
+
     byte_t bom[4] = { 0 };
     
     xdk_thread_init(0);
     
     TRY_CATCH;
+
+    get_runpath(0, fpath, PATH_LEN);
+    xscat(fpath, _T("/dogs.txt"));
     
     xdb = (*pf_db_open_dsn)(dsnfile);
     if (!xdb)
     {
         raise_user_error(_T("-1"), _T("open connection falied\n"));
     }
+
+    rt = (*pf_db_exec)(xdb, _T("delete from dogs;"), -1);
+    if (!rt)
+    {
+        (*pf_db_error)(xdb, errtext, ERR_LEN);
+        
+        raise_user_error(_T("-1"), errtext);
+    }
     
-    if (!xfile_info(NULL, _T("./dogs.txt"), NULL, fsize, NULL, enc))
+    
+    if (!xfile_info(NULL, fpath, NULL, fsize, NULL, enc))
     {
         raise_user_error(_T("-1"), _T("open file falied\n"));
     }
     
-    file = xfile_open(NULL, _T("./dogs.txt"),FILE_OPEN_READ);
+    file = xfile_open(NULL, fpath, FILE_OPEN_READ);
     if (!file)
     {
         raise_user_error(_T("-1"), _T("open file falied\n"));
@@ -1370,18 +1403,18 @@ int main(int argc, char* argv[])
         //thread_start(&pth[i], (PF_THREADFUNC)test_xdb_datetime, (void*)0);
         
         //thread_start(&pth[i], (PF_THREADFUNC)test_xdb_schema, (void*)0);
-                      
-        //thread_start(&pth[i], (PF_THREADFUNC)test_xdb_exec, (void*)0);
         
         //thread_start(&pth[i], (PF_THREADFUNC)test_xdb_select, (void*)0);
-        
-		//thread_start(&pth[i], (PF_THREADFUNC)test_xdb_proc, (void*)0);
+
+        //thread_start(&pth[i], (PF_THREADFUNC)test_xdb_exec, (void*)0);
 
         //thread_start(&pth[i], (PF_THREADFUNC)test_xdb_batch, (void*)0);
-        
+
         //thread_start(&pth[i], (PF_THREADFUNC)test_xdb_export, (void*)0);
-        
-        //thread_start(&pth[i], (PF_THREADFUNC)test_xdb_import, (void*)0);
+
+        thread_start(&pth[i], (PF_THREADFUNC)test_xdb_import, (void*)0);
+
+    	//thread_start(&pth[i], (PF_THREADFUNC)test_xdb_proc, (void*)0);
         
         thread_sleep(10);
     }
@@ -1398,10 +1431,6 @@ int main(int argc, char* argv[])
 	xdk_process_uninit();
 
 	printf("%s\n", errtext);
-
-#ifdef _OS_WINDOWS
-	getch();
-#endif
 
 	return 0;
 }

@@ -416,7 +416,7 @@ bool_t load_grid_from_csv_file(link_t_ptr ptr, bool_t head, const secu_desc_t* p
 
 	switch (encode)
 	{
-	case _UTF8:
+	case _UTF8_BOM:
 #ifdef _UNICODE
 		len = utf8_to_ucs(buf + skip, size - skip, NULL, MAX_LONG);
 #else
@@ -450,7 +450,7 @@ bool_t load_grid_from_csv_file(link_t_ptr ptr, bool_t head, const secu_desc_t* p
 
 	switch (encode)
 	{
-	case _UTF8:
+	case _UTF8_BOM:
 #ifdef _UNICODE
 		len = utf8_to_ucs(buf + skip, size - skip, str, len);
 #else

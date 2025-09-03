@@ -1967,7 +1967,7 @@ bool_t STDCALL db_export(xdb_t db, stream_t stream, const tchar_t* sqlstr)
 	int len;
 	bindguid_t* pbind = NULL;
 
-	tchar_t feed[3] = { TXT_ITEMFEED, TXT_LINEFEED, _T('\n') };
+	tchar_t feed[2] = { CSV_ITEMFEED, CSV_LINEFEED };
 
 	string_t vs = NULL;
 
@@ -2047,11 +2047,14 @@ bool_t STDCALL db_export(xdb_t db, stream_t stream, const tchar_t* sqlstr)
 		SQLBindCol(pdb->stm, i + 1, SQL_C_TCHAR, pbind[i].buf, pbind[i].len, &pbind[i].ind);
 
 		string_cat(vs, colname, -1);
-		string_cat(vs, feed, 1);
+		if(i != cols-1)
+		{
+			string_cat(vs, feed, 1);
+		}
 	}
-	string_cat(vs, feed + 1, 2);
+	string_cat(vs, feed + 1, 1);
 
-	if (!stream_write_line(stream, vs, &pos))
+	if (!stream_write_csv_line(stream, vs, &pos))
 	{
 		raise_user_error(NULL, NULL);
 	}
@@ -2085,13 +2088,17 @@ bool_t STDCALL db_export(xdb_t db, stream_t stream, const tchar_t* sqlstr)
 					string_cat(vs, (tchar_t*)(pbind[i].buf), len_buf);
 				}
 			}
-			string_cat(vs, feed, 1);
+			
+			if(i != cols-1)
+			{
+				string_cat(vs, feed, 1);
+			}
 		}
 
-		string_cat(vs, feed + 1, 2);
+		string_cat(vs, feed + 1, 1);
 
 		pos = 0;
-		if (!stream_write_line(stream, vs, &pos))
+		if (!stream_write_csv_line(stream, vs, &pos))
 		{
 			raise_user_error(NULL, NULL);
 		}
@@ -2179,6 +2186,7 @@ bool_t STDCALL db_import(xdb_t db, stream_t stream, const tchar_t* table)
 	dword_t dw = 0;
 	string_t vs_sql = NULL;
 	const tchar_t* token;
+	const tchar_t* tkpre;
 	int tklen, i, cols = 0;
 
 	bindguid_t* pbind = NULL;
@@ -2203,7 +2211,7 @@ bool_t STDCALL db_import(xdb_t db, stream_t stream, const tchar_t* table)
 
 	vs = string_alloc();
 
-	if (!stream_read_line(stream, vs, &dw))
+	if (!stream_read_csv_line(stream, vs, &dw))
 	{
 		raise_user_error(_T("-1"), _T("read stream failed"));
 	}
@@ -2219,19 +2227,16 @@ bool_t STDCALL db_import(xdb_t db, stream_t stream, const tchar_t* table)
 
 	cols = 0;
 	token = string_ptr(vs);
-	while (*token != TXT_LINEFEED && *token != _T('\0'))
+	while (*token != CSV_LINEFEED && *token != _T('\0'))
 	{
 		tklen = 0;
-		while (*token != TXT_ITEMFEED && *token != TXT_LINEFEED && *token != _T('\0'))
-		{
-			token++;
-			tklen++;
-		}
+		tkpre = csv_token_split(token, -1, &tklen);
 
-		string_cat(vs_sql, token - tklen, tklen);
+		string_cat(vs_sql, tkpre, tklen);
 		string_cat(vs_sql, _T(","), 1);
 
-		if (*token == TXT_ITEMFEED)
+		token = tkpre + tklen;
+		if (*token == CSV_ITEMFEED)
 			token++;
 
 		cols++;
@@ -2273,7 +2278,7 @@ bool_t STDCALL db_import(xdb_t db, stream_t stream, const tchar_t* table)
 	{
 		string_empty(vs);
 		dw = 0;
-		if (!stream_read_line(stream, vs, &dw))
+		if (!stream_read_csv_line(stream, vs, &dw))
 		{
 			raise_user_error(_T("-1"), _T("stream read line failed"));
 		}
@@ -2283,20 +2288,16 @@ bool_t STDCALL db_import(xdb_t db, stream_t stream, const tchar_t* table)
 
 		i = 0;
 		token = string_ptr(vs);
-		while (*token != TXT_LINEFEED && *token != _T('\0'))
+		while (*token != CSV_LINEFEED && *token != _T('\0'))
 		{
 			tklen = 0;
-			while (*token != TXT_ITEMFEED && *token != TXT_LINEFEED && *token != _T('\0'))
-			{
-				token++;
-				tklen++;
-			}
+			tkpre = csv_token_split(token, -1, &tklen);
 
-			csv_token_decode(token - tklen, tklen, NULL, &len_esc);
+			csv_token_decode(tkpre, tklen, NULL, &len_esc);
 			if (len_esc != tklen)
 			{
 				sz_esc = xsalloc(len_esc + 1);
-				csv_token_decode(token - tklen, tklen, sz_esc, &len_esc);
+				csv_token_decode(tkpre, tklen, sz_esc, &len_esc);
 
 				pbind[i].len = (len_esc + 1) * sizeof(tchar_t);
 				pbind[i].buf = (byte_t*)sz_esc;
@@ -2310,7 +2311,7 @@ bool_t STDCALL db_import(xdb_t db, stream_t stream, const tchar_t* table)
 			{
 				pbind[i].len = (tklen + 1) * sizeof(tchar_t);
 				pbind[i].buf = (byte_t*)xmem_alloc((tklen + 1) * sizeof(tchar_t));
-				xmem_copy((void*)(pbind[i].buf), (void*)(token - tklen), tklen * sizeof(tchar_t));
+				xmem_copy((void*)(pbind[i].buf), (void*)(tkpre), tklen * sizeof(tchar_t));
 
 				if (tklen)
 					pbind[i].ind = tklen * sizeof(tchar_t);
@@ -2318,7 +2319,8 @@ bool_t STDCALL db_import(xdb_t db, stream_t stream, const tchar_t* table)
 					pbind[i].ind = SQL_NULL_DATA;
 			}
 
-			if (*token == TXT_ITEMFEED)
+			token = tkpre + tklen;
+			if (*token == CSV_ITEMFEED)
 				token++;
 
 			if (++i == cols)
@@ -2495,7 +2497,7 @@ EXECUTE:
 
 		string_empty(vs_sql);
 
-		if (rt != SQL_SUCCESS && rt != SQL_NO_DATA && rt != SQL_SUCCESS_WITH_INFO)
+		if (rt != SQL_SUCCESS && rt != SQL_NO_DATA)
 		{
 			_raise_stmt_error(pdb->stm);
 		}

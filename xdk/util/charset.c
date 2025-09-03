@@ -33,7 +33,7 @@ int parse_charset(const tchar_t* enstr)
 	if (xsnicmp(enstr, CHARSET_GB2312, xslen(CHARSET_GB2312)) == 0)
 		return _GB2312;
 	else if (xsnicmp(enstr, CHARSET_UTF8, xslen(CHARSET_UTF8)) == 0)
-		return _UTF8;
+		return _UTF8_BOM;
 	else if (xsnicmp(enstr, CHARSET_UTF16, xslen(CHARSET_UTF16)) == 0)
 		return _UCS2;
 	else
@@ -47,7 +47,7 @@ void format_charset(int encode, tchar_t* buf)
 	case _GB2312:
 		xscpy(buf, CHARSET_GB2312);
 		break;
-	case _UTF8:
+	case _UTF8_BOM:
 		xscpy(buf, CHARSET_UTF8);
 		break;
 	case _UTF16_BIG:
@@ -66,7 +66,7 @@ int parse_encode(const tchar_t* enstr)
 	if (xsnicmp(enstr, _T("gb2312"), xslen(_T("gb2312"))) == 0)
 		return _GB2312;
 	else if (xsnicmp(enstr, _T("utf-8"), xslen(_T("utf-8"))) == 0)
-		return _UTF8;
+		return _UTF8_BOM;
 	else if (xsnicmp(enstr, _T("utf-16-lit"), xslen(_T("utf-16-lit"))) == 0)
 		return _UTF16_LIT;
 	else if (xsnicmp(enstr, _T("utf-16-big"), xslen(_T("utf-16-big"))) == 0)
@@ -82,7 +82,7 @@ void format_encode(int encode, tchar_t* buf)
 	case _GB2312:
 		xscpy(buf, _T("gb2312"));
 		break;
-	case _UTF8:
+	case _UTF8_BOM:
 		xscpy(buf, _T("utf-8"));
 		break;
 	case _UTF16_BIG:
@@ -105,9 +105,9 @@ int parse_utfbom(const byte_t* buf, int len)
 		return _UTF16_BIG;
 
 	if (len > 2 && buf[0] == 0xEF && buf[1] == 0xBB && buf[2] == 0xBF)
-		return _UTF8;
+		return _UTF8_BOM;
 
-	return _GB2312;
+	return _UNKNOWN;
 }
 
 int format_utfbom(int encode, byte_t* buf)
@@ -130,7 +130,7 @@ int format_utfbom(int encode, byte_t* buf)
 		}
 		return 2;
 	}
-	else if (encode == _UTF8)
+	else if (encode == _UTF8_BOM)
 	{
 		if (buf)
 		{

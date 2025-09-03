@@ -18,7 +18,7 @@ SRV_PATH = /usr/local/xService
 LNK_PATH = /usr/local/lib
 
 INC_ODBC = /usr/include
-LIB_ODBC = /usr/lib
+LIB_ODBC = /usr/lib64
 
 INC_PATH = ../../include
 SRC_PATH = ../../xdb
@@ -71,6 +71,7 @@ uninstall:
 .PHONY : clean
 clean:
 	rm -f $(OBJS)
+	rm -f $(OUT_PATH)/$(TARGET)
 #-----------------------------------------------------------------------------
 # end microsoft NMAKE file
 #-----------------------------------------------------------------------------

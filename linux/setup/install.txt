@@ -1,0 +1,71 @@
+---------------------------------------------------------------------------------
+        INSTALL DATABASE CONNECT TOOLS AND LIBRARY FOR ORACLELINUX8 ARM64
+---------------------------------------------------------------------------------
+
+[unix ODBC]
+sudo dnf install unixODBC
+sudo dnf install unixODBC-devel
+
+[MSSQL Driver for ODBC]
+
+# odbcinst -j
+# odbcinst -q -d
+
+# sudo vi /etc/odbcinst.ini
+<<
+Encrypt=Optional
+TrustServerCertificate=Yes
+
+--Declare in Makefile:
+$(INC_ODBC) = /usr/include
+$(LIB_ODBC) = /usr/lib64
+
+[Oracle Client and Library]
+sudo mkdir -p /usr/local/oracle/instantclient_19c
+sudo unzip LINUX.ARM64_1919000_client_home.zip -d /usr/local/oracle/instantclient_19c
+
+[oracle devel]
+# sudo vi ~/.bash_profile
+<<
+export ORACLE_HOME=/usr/local/oracle/instantclient_19c
+export TNS_ADMIN=$ORACLE_HOME/network/admin
+export NLS_LANG=SIMPLIFIED_CHINESE_CHINA.ALUTF8
+export LD_LIBRARY_PATH=$ORACLE_HOME
+export SQLPATH=$ORACLE_HOME
+export PATH=$ORACLE_HOME:$PATH
+unset no_proxy
+unset NLS_LANG
+
+# source .bash_profile
+
+--Declare in Makefile:
+$(INC_OCI) = /usr/local/oracle/instantclient_19c/sdk/include
+$(LIB_OCI) = /usr/local/oracle/instantclient_19c/lib
+
+
+[Postgres Client and Library]
+sudo dnf install postgresql
+sudo dnf install postgresql-devel
+
+--Declare in Makefile:
+$(INC_POSTGRE) = /usr/include
+$(LIB_POSTGRE) = /usr/lib64
+
+
+[Mysql Client and Library]
+sudo dnf install mysql
+sudo dnf install mysql-devel
+
+--Declare in Makefile:
+$(INC_MYSQL) = /usr/include/mysql
+$(LIB_MYSQL) = /usr/lib64/mysql
+
+
+[Sqlite for linux]
+sudo dnf install sqlite
+sudo dnf install sqlite-devel
+
+--Declare in Makefile:
+$(INC_SQLITE) = /usr/include
+$(LIB_SQLITE) = /usr/lib64
+

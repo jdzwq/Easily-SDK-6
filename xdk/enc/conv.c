@@ -1286,14 +1286,38 @@ int mbs_to_mbs(const schar_t* src, int slen, schar_t* dest, int dlen)
 /********************************************************************************************/
 dword_t unn_sequence(byte_t b)
 {
-	return 4;
+	int i;
+
+	i = utf8_sequence(b);
+	if(i < 3)
+	{
+		i = gb2312_sequence(b);
+	}
+
+	return i;
 }
 
 int unn_byte_to_ucs(const byte_t* src, wchar_t* dest)
 {
+	int i;
+
+	i = utf8_sequence(*src);
+
 	if (dest)
 	{
-		*dest = MAKESWORD(src[0], src[1]);
+		switch(i)
+		{
+		case 1:
+			*dest = MAKESWORD(src[0], 0);
+			break;
+		case 2:
+			gb2312_byte_to_ucs(src, dest);
+			break;
+		case 3:
+		case 4:
+			utf8_byte_to_ucs(src, dest);
+			break;
+		}
 	}
 
 	return 1;
@@ -1317,7 +1341,7 @@ dword_t unn_byte_to_gb2312(const byte_t* src, byte_t* dest)
 {
 	dword_t i;
 
-	i = gb2312_sequence(*src);
+	i = unn_sequence(*src);
 
 	if (dest)
 	{
@@ -1345,7 +1369,7 @@ dword_t unn_byte_to_utf8(const byte_t* src, byte_t* dest)
 {
 	dword_t i;
 
-	i = utf8_sequence(*src);
+	i = unn_sequence(*src);
 
 	if (dest)
 	{

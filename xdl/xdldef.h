@@ -154,6 +154,7 @@ typedef struct _page_cator_t{
 #define _DB_OCI			0x2C
 #define _DB_MYSQL		0x2D
 #define _DB_POSTGRE		0x2E
+#define _DB_SQLITE		0x2F
 typedef struct _handle_head	*xdb_t;
 
 

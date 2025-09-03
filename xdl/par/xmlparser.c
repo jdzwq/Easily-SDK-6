@@ -214,7 +214,7 @@ bool_t parse_xml(xml_write_interface* pxp, int encode, opera_interface* pbo)
 	ma.ms = NIL_SKIP;
 	ma.esc = 1;
 	ma.bytes = 0;
-	ma.enc = (encode)? encode : _UTF8;
+	ma.enc = (encode)? encode : _UTF8_BOM;
 	ma.eof = (*pbo->pf_with_eof)(pbo->ctx);
 
 	pos = 0;
@@ -594,7 +594,7 @@ bool_t parse_xml(xml_write_interface* pxp, int encode, opera_interface* pbo)
 
 						if (xsicmp(CHARSET_UTF8, string_ptr(vs_val)) == 0)
 						{
-							ma.enc = _UTF8;
+							ma.enc = _UTF8_BOM;
 							if (pbo->pf_set_encode)
 							{
 								(*pbo->pf_set_encode)(pbo->ctx, ma.enc);

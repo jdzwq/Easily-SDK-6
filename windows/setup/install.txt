@@ -1,0 +1,67 @@
+---------------------------------------------------------------------------------
+        INSTALL DATABASE CONNECT TOOLS AND LIBRARY FOR WINDOWS11 ARM64
+---------------------------------------------------------------------------------
+
+[MSVC ODBC]
+Install the Visual Studio Command Prompt Tools with Windows SDK
+
+[MSSQL Driver For ODBC]
+Install the SQL Server with ODBC Drivers
+
+netsh advfirewall firewall add rule name="SQL Server Port" dir=in action=allow protocol=TCP localport=1433
+
+[Mysql Client and Library]
+--Download from Mysql site:
+https://cdn.mysql.com/archives/mysql-connector-c/mysql-connector-c-6.1.11-winx64.msi
+Install the MySql Connect Library and Client Tools to D:/mysql
+
+--Execute in PowerShell:
+[Environment]::SetEnvironmentVariable("PATH", $env:PATH + ";D:\mysql\bin",[System.EnvironmentVariableTarget]::Machine) 
+
+--Declare in Makefile:
+$(INC_MYSQL) = D:\mysql\include
+$(LIB_MYSQL) = D:\mysql\lib\vc14
+
+[Postgres Client and Library]
+--Download from Postgresql Site:
+https://www.enterprisedb.com/download-postgresql-binaries >> Win x86-64
+Copy the Pgsql Package to D:\pgsql
+
+--Execute in PowerShell:
+[Environment]::SetEnvironmentVariable("PATH", $env:PATH + ";D:\pgsql\bin",[System.EnvironmentVariableTarget]::Machine) 
+
+--Declare in Makefile
+$(INC_POSTGRE) = D:\pgsql\include
+$(LIB_POSTGRE) = D:\pgsql\lib
+
+
+[Oracle Client and Library]
+--Download from Oracle site: 
+https://www.oracle.com/cn/database/technologies/instant-client/winx64-64-downloads.html >> instantclient-basic-windows.x64-19 instantclient-sqlplus-windows.x64-19
+Make directory and Copy the Oracle Package to D:\oracle
+
+--Execurte in PowerShell:
+[Environment]::SetEnvironmentVariable("ORACLE_HOME", "D:\oracle\instantclient_19c", [System.EnvironmentVariableTarget]::Machine)
+[Environment]::SetEnvironmentVariable("NLS_LANG", "SIMPLIFIED_CHINESE_CHINA.ALUTF8", [System.EnvironmentVariableTarget]::Machine)
+[Environment]::SetEnvironmentVariable("PATH", $env:PATH + ";D:\oracle\instantclient_19c",[System.EnvironmentVariableTarget]::Machine) 
+
+--Declare in Makefile:
+$(INC_ORACLE) = D:\oracle\instantclient_19c\sdk\include
+$(LIB_ORACLE) = D:\oracle\instantclient_19c\sdk\lib\msvc
+
+
+[Sqlite Client and Library]
+--Download from Sqlite site:
+https://www.sqlite.org/download.html >> sqlite-src sqlite-amalgamation sqlite-tools-win-x64 sqlite-dll-win-x64
+
+--Extract sqlite-src to D:/sqlite3
+--Build Library for Windows x64
+D:/sqlite3> nmake /f Makefile.msc
+D:/sqlite3> copy sqlite3.lib D:/sqlite/lib
+
+--Execute in PowerShell:
+[Environment]::SetEnvironmentVariable("PATH", $env:PATH + ";D:\sqlite\bin",[System.EnvironmentVariableTarget]::Machine) 
+
+--Declare in Makefile:
+$(INC_SQLITE) = D:\sqlite\include
+$(LIB_SQLITE) = D:\sqlite\lib

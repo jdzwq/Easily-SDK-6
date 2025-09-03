@@ -16,8 +16,8 @@ VER = 6.0
 SRV_PATH = /usr/local/xService
 LNK_PATH = /usr/local/lib
 
-INC_OCI = /usr/local/oci/include
-LIB_OCI = /usr/local/oci/instantclient_23_3
+INC_OCI = /opt/oracle/instantclient_23i/sdk/include
+LIB_OCI = /opt/oracle/instantclient_23i
 
 INC_PATH = ../../include
 SRC_PATH = ../../xdb
@@ -70,6 +70,7 @@ uninstall:
 .PHONY : clean
 clean:
 	rm -f $(OBJS)
+	rm -f $(OUT_PATH)/$(TARGET)
 #-----------------------------------------------------------------------------
 # end GNU MAKE file
 #-----------------------------------------------------------------------------

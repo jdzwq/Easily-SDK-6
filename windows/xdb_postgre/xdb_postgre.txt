@@ -1,0 +1,2 @@
+SOURCES= \
+../../../Easily-tmp/windows/xdb_postgre/x64/Debug/xdb_postgre.c \

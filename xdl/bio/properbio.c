@@ -291,7 +291,7 @@ bool_t load_proper_from_ini_file(link_t_ptr ptr, const secu_desc_t* psd, const t
 
 	switch (encode)
 	{
-	case _UTF8:
+	case _UTF8_BOM:
 #ifdef _UNICODE
 		len = utf8_to_ucs(buf + skip, size - skip, NULL, MAX_LONG);
 #else
@@ -325,7 +325,7 @@ bool_t load_proper_from_ini_file(link_t_ptr ptr, const secu_desc_t* psd, const t
 
 	switch (encode)
 	{
-	case _UTF8:
+	case _UTF8_BOM:
 #ifdef _UNICODE
 		len = utf8_to_ucs(buf + skip, size - skip, str, len);
 #else
@@ -417,7 +417,7 @@ bool_t save_proper_to_ini_file(link_t_ptr ptr, const secu_desc_t* psd, const tch
 
 	buf = (byte_t*)xmem_alloc(skip + size);
 
-	format_utfbom(_UTF8, buf);
+	format_utfbom(_UTF8_BOM, buf);
 
 #ifdef _UNICODE
 	size = ucs_to_mbs(str, len, (schar_t*)(buf + skip), size);

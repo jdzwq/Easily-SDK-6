@@ -116,7 +116,7 @@ bool_t parse_json_doc_from_stream(link_t_ptr json, stream_t xs)
 
 	if (encode == _UNKNOWN)
 	{
-		encode = _UTF8;
+		encode = _UTF8_BOM;
 		stream_set_encode(xs, encode);
 	}
 

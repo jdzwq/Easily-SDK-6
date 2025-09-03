@@ -16,8 +16,8 @@ VER = 6.0
 SRV_PATH = /usr/local/xService
 LNK_PATH = /usr/local/lib
 
-INC_ODBC = /usr/local/odbc/include
-LIB_ODBC = /usr/local/odbc/lib
+INC_ODBC = /opt/Homebrew/include
+LIB_ODBC = /opt/Homebrew/lib
 
 INC_PATH = ../../include
 SRC_PATH = ../../xdb
@@ -70,6 +70,7 @@ uninstall:
 .PHONY : clean
 clean:
 	rm -f $(OBJS)
+	rm -f $(OUT_PATH)/$(TARGET)
 #-----------------------------------------------------------------------------
 # end GNU MAKE file
 #-----------------------------------------------------------------------------

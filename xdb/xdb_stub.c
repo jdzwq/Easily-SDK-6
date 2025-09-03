@@ -823,7 +823,7 @@ bool_t STDCALL db_exec(xdb_t db, const tchar_t* sqlstr, int sqllen)
 #else
 	dw = mbs_to_utf8(sqlstr, sqllen, NULL, MAX_LONG);
 #endif
-	n_bom = format_utfbom(_UTF8, NULL);
+	n_bom = format_utfbom(_UTF8_BOM, NULL);
 
 	xhttp_set_request_content_length(xhttp, (n_bom + dw));
 
@@ -853,7 +853,7 @@ bool_t STDCALL db_exec(xdb_t db, const tchar_t* sqlstr, int sqllen)
 	if (b_continue)
 	{
 		buf = (byte_t*)xmem_alloc(n_bom + dw);
-		format_utfbom(_UTF8, buf);
+		format_utfbom(_UTF8_BOM, buf);
 
 #ifdef _UNICODE
 		ucs_to_utf8(sqlstr, sqllen, (buf + n_bom), dw);
@@ -1565,9 +1565,9 @@ bool_t STDCALL db_call_json(xdb_t db, const tchar_t* procname, link_t_ptr json)
 	xsprintf(sz_auth, _T("%s %s:%s"), HTTP_HEADER_AUTHORIZATION_XDS, pdb->sz_uid, sz_hmac);
 	xhttp_set_request_header(xhttp, HTTP_HEADER_AUTHORIZATION, -1, sz_auth, -1);
 
-	len = format_json_doc_to_bytes(json, NULL, MAX_LONG, _UTF8);
+	len = format_json_doc_to_bytes(json, NULL, MAX_LONG, _UTF8_BOM);
 	buf = (byte_t*)xmem_alloc(len);
-	format_json_doc_to_bytes(json, buf, len, _UTF8);
+	format_json_doc_to_bytes(json, buf, len, _UTF8_BOM);
 
 	rt = xhttp_send_full(xhttp, buf, len);
 	if (!rt)
@@ -1878,7 +1878,7 @@ bool_t STDCALL db_write_clob(xdb_t db, string_t varstr, const tchar_t* sqlfmt)
 
 	xhttp_set_request_content_type(xhttp, HTTP_HEADER_CONTENTTYPE_TEXTPLAIN_UTF8, -1);
 
-	n_size = string_encode(varstr, _UTF8, NULL, MAX_LONG);
+	n_size = string_encode(varstr, _UTF8_BOM, NULL, MAX_LONG);
 	xsprintf(fsize, _T("%d"), n_size);
 	xhttp_set_request_header(xhttp, HTTP_HEADER_CONTENTLENGTH, -1, fsize, -1);
 
@@ -2300,3 +2300,4 @@ int STDCALL db_error(xdb_t db, tchar_t* buf, int max)
 
 	return -1;
 }
+

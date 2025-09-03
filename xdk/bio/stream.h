@@ -275,6 +275,7 @@ EXP_API bool_t stream_read_dword_big(stream_t xs, dword_t* pdw);
 @RETURN bool_t: if succeeds return nonzero, fails return zero.
 */
 EXP_API bool_t stream_read_line(stream_t xs, string_t vs, dword_t* pch);
+EXP_API bool_t stream_read_csv_line(stream_t xs, string_t vs, dword_t* pch);
 
 /*
 @FUNCTION stream_write_line: write one line string token into stream from string object.
@@ -284,6 +285,7 @@ EXP_API bool_t stream_read_line(stream_t xs, string_t vs, dword_t* pch);
 @RETURN bool_t: if succeeds return nonzero, fails return zero.
 */
 EXP_API bool_t stream_write_line(stream_t xs, string_t vs, dword_t* pch);
+EXP_API bool_t stream_write_csv_line(stream_t xs, string_t vs, dword_t* pch);
 
 /*
 @FUNCTION stream_write_utfbom: write a BOM into stream, according to the encode setted.

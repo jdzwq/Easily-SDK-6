@@ -16,8 +16,8 @@ VER = 6.0
 SRV_PATH = /usr/local/xService
 LNK_PATH = /usr/local/lib
 
-INC_MYSQL = /usr/local/mysql/include
-LIB_MYSQL = /usr/local/mysql/lib
+INC_MYSQL = /opt/homebrew/opt/mysql-client/include
+LIB_MYSQL = /opt/homebrew/opt/mysql-client/lib
 
 INC_PATH = ../../include
 SRC_PATH = ../../xdb
@@ -70,6 +70,7 @@ uninstall:
 .PHONY : clean
 clean:
 	rm -f $(OBJS)
+	rm -f $(OUT_PATH)/$(TARGET)
 #-----------------------------------------------------------------------------
 # end GNU MAKE file
 #-----------------------------------------------------------------------------

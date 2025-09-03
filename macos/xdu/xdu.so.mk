@@ -38,13 +38,13 @@ COBS = $(patsubst %.c, %.o, $(COB2))
 OBJS = $(addprefix $(OBJ_PATH)/,$(COBS))
 
 $(OBJ_PATH)/%.o : $(SRC_PATH)/macos/%.m
-	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
+	$(CC) $(MFLAGS) -c $< -o $@ -I $(INC_PATH)
 
 $(OBJ_PATH)/%.o : $(SRC_PATH)/imp/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
 
 $(OBJ_PATH)/%.o : $(SRC_PATH)/%.c
-	$(CC) $(MFLAGS) -c $< -o $@ -I $(INC_PATH)
+	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
 
 all : $(OBJS)
 	rm -f $@
@@ -80,6 +80,7 @@ uninstall:
 .PHONY : clean
 clean:
 	rm -f $(OBJS)
+	rm -f $(OUT_PATH)/$(TARGET)
 #-----------------------------------------------------------------------------
 # end GNU MAKE file
 #-----------------------------------------------------------------------------

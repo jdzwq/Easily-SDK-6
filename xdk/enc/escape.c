@@ -59,11 +59,11 @@ void csv_token_encode(const tchar_t* val, int len, tchar_t* buf, int* pdw)
 			}
 			total ++;
 			glt = 1;
-		}else if(*token == _T('"'))
+		}else if(*token == _T('\"'))
 		{
 			if (buf)
 			{
-				buf[total] = _T('"');
+				buf[total] = _T('\"');
 				buf[total+1] = *token;
 			}
 			total += 2;
@@ -116,7 +116,7 @@ void csv_token_decode(const tchar_t* val, int len, tchar_t* buf, int* pdw)
 		
 		if (*token == _T('\0')) break;
 
-		if (*token == _T('"') && *(token+1) == _T('"'))
+		if (*token == _T('\"') && *(token+1) == _T('\"'))
 		{
 			if (buf)
 			{
@@ -126,7 +126,7 @@ void csv_token_decode(const tchar_t* val, int len, tchar_t* buf, int* pdw)
 
 			pos += 2;
 			token += 2;
-		}else if (*token == _T('"'))
+		}else if (*token == _T('\"'))
 		{
 			pos++;
 			token++;
@@ -146,6 +146,44 @@ void csv_token_decode(const tchar_t* val, int len, tchar_t* buf, int* pdw)
 	}
 
 	if(pdw) *pdw = total;
+}
+
+tchar_t* csv_token_split(tchar_t* val, int max, int* plen)
+{
+	const tchar_t* token = val;
+	int pos = 0;
+	bool_t glt = 0;
+
+	if(max < 0) max = xslen(val);
+	if(!max)
+	{
+		if(plen) *plen = 0;
+		return NULL;
+	}
+
+	while(*token == CSV_ITEMFEED || *token == CSV_LINEFEED)
+	{
+		token ++;
+		max --;
+	}
+
+	while(pos < max)
+	{
+		if(*token == _T('\"'))
+		{
+			glt = (glt)? 0 : 1;
+		}
+
+		if(!glt && (*token == CSV_ITEMFEED || *token == CSV_LINEFEED || *token == _T('\0')))
+			break;
+		
+		token++;
+		pos ++;
+	}
+
+	if(plen) *plen = pos;
+
+	return (tchar_t*)(token - pos);
 }
 /***************************************************************************************/
 //static tchar_t url_esc[] = { _T(' '), _T('"'),_T('#'), _T('%'), _T('&'), _T('('), _T(')'), _T('+'), _T(','), _T('/'), _T(':'), _T(';'), _T('<'), _T('='), _T('>'), _T('?'), _T('@'), _T('\\'), _T('|'), _T('\0') };

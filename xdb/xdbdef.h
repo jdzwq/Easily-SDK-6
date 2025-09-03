@@ -64,8 +64,9 @@ LICENSE.GPL3 for more details.
 #define DSN_PWD			_T("PWD")
 #define DSN_TRUSTED		_T("Trusted_Connection")
 
-#define MAX_SQL_NAME	256
 #define MAX_SQL_TOKEN	128
+#define MAX_SQL_NAME	256
+#define MAX_SQL_CONN	1024
 #define MAX_SQL_DATA	4000
 
 #define MIN_SQL_LEN		1024

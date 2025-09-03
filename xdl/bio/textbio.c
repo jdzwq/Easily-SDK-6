@@ -228,7 +228,7 @@ int load_text_from_file(const secu_desc_t* psd, const tchar_t* fname, tchar_t* b
 
 	switch (encode)
 	{
-	case _UTF8:
+	case _UTF8_BOM:
 #ifdef _UNICODE
 		dw = utf8_to_ucs(data + skip, size - skip, buf, max);
 #else

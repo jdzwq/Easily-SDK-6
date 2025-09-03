@@ -21,9 +21,9 @@ OUT_PATH = ../../../Easily-app-6/windows/sbin64/api
 PDB_PATH = ../../../Easily-tmp/windows/$(ARCH)
 INS_PATH = C:\xService
 
-TARGET = $(OUT_PATH)/$(MODULE)_$(ARCH).dll
-MANIFEST = $(OUT_PATH)/$(MODULE)_$(ARCH).dll.manifest
+TARGET = $(OUT_PATH)/$(MODULE).dll
 LIBRARY = $(LIB_PATH)/$(MODULE).lib
+MANIFEST = $(OUT_PATH)/$(MODULE)_$(ARCH).dll.manifest
 EXPORT = $(LIB_PATH)/$(MODULE)_$(ARCH).exp
 DATABASE = $(OBJ_PATH)/$(MODULE)_$(ARCH).pdb
 INSTRUMENT = $(OBJ_PATH)/$(MODULE)_$(ARCH).pgd

@@ -553,7 +553,7 @@ dword_t string_encode(string_t vs, int encode, byte_t* buf, dword_t max)
 
 	XDK_ASSERT(vs != NULL && vs->tag == MEM_STRING);
 
-	if (encode == _UTF8)
+	if (encode == _UTF8_BOM)
 	{
 #ifdef _UNICODE
 		return ucs_to_utf8(string_ptr(vs), string_len(vs), buf, max);
@@ -622,7 +622,7 @@ int string_decode(string_t vs, int encode, const byte_t* buf, dword_t size)
 
 	XDK_ASSERT(vs != NULL && vs->tag == MEM_STRING);
 
-	if (encode == _UTF8)
+	if (encode == _UTF8_BOM)
 	{
 #ifdef _UNICODE
 		len = utf8_to_ucs(buf, size, NULL, MAX_LONG);
@@ -667,7 +667,7 @@ int string_decode(string_t vs, int encode, const byte_t* buf, dword_t size)
 
 	str = string_ensure_buf(vs, len);
 
-	if (encode == _UTF8)
+	if (encode == _UTF8_BOM)
 	{
 #ifdef _UNICODE
 		len = utf8_to_ucs(buf, size, str, len);

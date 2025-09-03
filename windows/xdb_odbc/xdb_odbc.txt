@@ -1,0 +1,2 @@
+SOURCES= \
+../../../Easily-tmp/windows/xdb_odbc/x64/Debug/xdb_odbc.c \

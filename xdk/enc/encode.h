@@ -67,7 +67,7 @@ LICENSE.GPL3 for more details.
 
 #define _UNKNOWN        0x0000
 #define _GB2312         GBKBOM
-#define _UTF8           UTFBOM
+#define _UTF8_BOM       UTFBOM
 #define _UTF16_LIT      LITBOM
 #define _UTF16_BIG      BIGBOM
 #if ACP_BYTE_ORDER == BIG_ENDIAN
@@ -80,7 +80,7 @@ LICENSE.GPL3 for more details.
 #ifdef _OS_WINDOWS
 #define DEF_MBS			_GB2312
 #else
-#define DEF_MBS			_UTF8
+#define DEF_MBS			_UTF8_BOM
 #endif
 
 #if ACP_BYTE_ORDER == BIG_ENDIAN

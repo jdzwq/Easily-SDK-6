@@ -454,7 +454,7 @@ bool_t stream_write_char(stream_t xs, const tchar_t* buf, dword_t* pch)
 
 	XDK_ASSERT(pxt->pif->fd != NULL);
 
-	if (pxt->encode == _UTF8)
+	if (pxt->encode == _UTF8_BOM)
 	{
 #ifdef _UNICODE
 		bs = ucs_byte_to_utf8(*(buf), ba);
@@ -569,7 +569,7 @@ bool_t stream_read_char(stream_t xs, tchar_t* buf, dword_t* pb)
 	if (!rt || !bs)
 		goto errret;
 
-	if (pxt->encode == _UTF8)
+	if (pxt->encode == _UTF8_BOM)
 	{
 		bs = utf8_sequence(ba[0]);
 	}
@@ -600,7 +600,7 @@ bool_t stream_read_char(stream_t xs, tchar_t* buf, dword_t* pb)
 
 	bs++;
 
-	if (pxt->encode == _UTF8)
+	if (pxt->encode == _UTF8_BOM)
 	{
 #ifdef _UNICODE
 		pos = utf8_byte_to_ucs(ba, buf);
@@ -1087,7 +1087,7 @@ bool_t stream_read_utfbom(stream_t xs, dword_t* pb)
 	{
 		len = 2;
 	}
-	else if (pxt->encode == _UTF8)
+	else if (pxt->encode == _UTF8_BOM)
 	{
 		len = 3;
 	}
@@ -1262,6 +1262,66 @@ bool_t stream_read_line(stream_t xs, string_t vs, dword_t* pb)
 	return rt;
 }
 
+bool_t stream_read_csv_line(stream_t xs, string_t vs, dword_t* pb)
+{
+	tchar_t sch[CHS_LEN + 1] = { 0 };
+	byte_t* buf = NULL;
+	dword_t dw,total = 0;
+	bool_t rt = 1;
+	int mode,encode;
+	bool_t b_gt = 0;
+
+	XDK_ASSERT(xs && xs->tag == _HANDLE_STREAM);
+
+	encode = stream_get_encode(xs);
+	mode = stream_get_mode(xs);
+
+	if (mode != LINE_OPERA)
+	{
+		if(pb) *pb = 0;
+		return 0;
+	}
+
+	while (1)
+	{
+		dw = 0;
+		xszero(sch, CHS_LEN + 1);
+
+		rt = stream_read_char(xs, sch, &dw);
+		if (!rt)
+		{
+			break;
+		}
+		total += dw;
+
+		if (!dw)
+			break;
+
+		string_cat(vs, sch, -1);
+
+		if(sch[0] == _T('\"'))
+		{
+			b_gt = (b_gt)? 0 : 1;
+		}
+
+		if (!b_gt && ((sch[0] == _T('\n')) || sch[0] == _T('\0')))
+		{
+			if (sch[0] == _T('\0'))
+			{
+				stream_read_line_end(xs);
+			}
+			break;
+		}
+	}
+
+	if (pb)
+	{
+		*pb = (rt) ? total : 0;
+	}
+
+	return rt;
+}
+
 bool_t stream_write_line_end(stream_t xs, dword_t* pb)
 {
 	stream_context* pxt = TypePtrFromHead(stream_context, xs);
@@ -1282,11 +1342,6 @@ bool_t stream_write_line_end(stream_t xs, dword_t* pb)
 	if (pxt->encode == _UTF16_LIT || pxt->encode == _UTF16_BIG)
 	{
 		len = 2;
-		rt = _stream_write(pxt, ba, &len);
-	}
-	else if (pxt->encode == _UNKNOWN)
-	{
-		len = 4;
 		rt = _stream_write(pxt, ba, &len);
 	}
 	else
@@ -1352,6 +1407,56 @@ bool_t stream_write_line(stream_t xs, string_t vs, dword_t* pb)
 		{
 			rt = 1;
 		}
+		dw = 0;
+	}
+
+	if (pb)
+		*pb = (rt)? dw : 0;
+
+	return rt;
+}
+
+bool_t stream_write_csv_line(stream_t xs, string_t vs, dword_t* pb)
+{
+	dword_t size,dw = 0;
+	byte_t* buf = NULL;
+	int mode,encode;
+	tchar_t ch = 0;
+	bool_t rt = 1;
+
+	XDK_ASSERT(xs && xs->tag == _HANDLE_STREAM);
+
+	encode = stream_get_encode(xs);
+	mode = stream_get_mode(xs);
+
+	if (mode !=	LINE_OPERA)
+	{
+		if(pb) *pb = 0;
+		return 0;
+	}
+
+	size = (vs)? string_encode(vs, encode, NULL, MAX_LONG) : 0;
+
+	if (size)
+	{
+		buf = (byte_t*)xmem_alloc(size);
+
+		string_encode(vs, encode, buf, size);
+	}
+
+	if (size)
+	{
+		rt = stream_write_bytes(xs, buf, size);
+		if (rt)
+		{
+			dw = size;
+		}
+		xmem_free(buf);
+		buf = NULL;
+	}
+	else
+	{
+		rt = stream_write_line_end(xs, &dw);
 		dw = 0;
 	}
 

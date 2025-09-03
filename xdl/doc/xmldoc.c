@@ -89,7 +89,7 @@ int get_xml_encode(link_t_ptr ptr)
 	if (xsicmp(ptd->encoding, CHARSET_GB2312) == 0)
 		return _GB2312;
 	else if (xsicmp(ptd->encoding, CHARSET_UTF8) == 0)
-		return _UTF8;
+		return _UTF8_BOM;
 	else if (xsicmp(ptd->encoding, CHARSET_UTF16) == 0)
 		return _UCS2;
 	else
@@ -109,7 +109,7 @@ void set_xml_encode(link_t_ptr ptr, int encode)
 	case _GB2312:
 		xscpy(ptd->encoding, CHARSET_GB2312);
 		break;
-	case _UTF8:
+	case _UTF8_BOM:
 		xscpy(ptd->encoding, CHARSET_UTF8);
 		break;
 	case _UTF16_LIT:

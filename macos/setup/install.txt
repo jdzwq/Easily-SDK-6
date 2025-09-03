@@ -1,33 +1,35 @@
-[SQLServer ODBC ARM64]
-Install the Microsoft ODBC driver for SQL Server (macOS)
+---------------------------------------------------------------------------------
+        INSTALL DATABASE CONNECT TOOLS AND LIBRARY FOR MACOS15 ARM64
+---------------------------------------------------------------------------------
 
+[unix ODBC]
+brew install unixODBC unixODBC-devel
+
+[MSSQL Driver for ODBC]
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
-brew tap microsoft/mssql-release https://github.com/Microsoft/homebrew-mssql-release
-brew update
-HOMEBREW_ACCEPT_EULA=Y brew install msodbcsql18 mssql-tools18
+# brew tap microsoft/mssql-release https://github.com/Microsoft/homebrew-mssql-release
+# brew install msodbcsql18 mssql-tools18
 
-sudo mkdir /usr/local/odbc
-sudo ln -s /opt/Homebrew/include /usr/local/odbc
-sudo ln -s /opt/Homebrew/lib /usr/local/odbc
-
-sudo ln -s /opt/Homebrew/etc/odbcinst.ini /etc/odbcinst.ini
-sudo ln -s /opt/Homebrew/etc/odbc.ini /etc/odbc.ini
+# vi /opt/homebrew/etc/odbcinst.ini
+<<
+Encrypt=Optional
+TrustServerCertificate=Yes
 
 # odbcinst -j
 # odbcinst -q -d
 
-# sudo ldconfig
-# sudo vi /etc/odbcinst.ini
+--Declare in Makefile:
+$(INC_ODBC) = /opt/Homebrew/include
+$(LIB_ODBC) = /opt/Homebrew/lib
 
-[Oracle Client ARM64]
-Oracle Instant Client Downloads for macOS (ARM64)  Basic Light (dmg)  SDK (dmg) 
+[Oracle Client and Library]
+--Download from Oracle site: 
+https://www.oracle.com/cn/database/technologies/instant-client/macos-downloads.html Basic Light (dmg)  SDK (dmg) 
+Make directory and Copy the Oracle Package to /opt/oracle/instantclient_23i
 
-# sudo mkdir /usr/local/oracle/instantclient_23_3
-# sudo cp -rf ~/Downloads/instantclient_23_3/* /usr/local/oracle/instantclient_23_3
-
-# sudo vi .bash_profile
-
-export ORACLE_HOME=/usr/local/oracle/instantclient23_3
+# sudo vi ~/.bash_profile
+<<
+export ORACLE_HOME=/opt/oracle/instantclient_23i
 export TNS_ADMIN=$ORACLE_HOME/network/admin
 export NLS_LANG=SIMPLIFIED_CHINESE_CHINA.ALUTF8
 export LD_LIBRARY_PATH=$ORACLE_HOME
@@ -38,30 +40,40 @@ unset NLS_LANG
 
 # source .bash_profile
 
-# sudo mkdir /usr/local/oci
-# sudo ln -s /opt/oracle/instantclient_23_3/sdk/include /usr/local/oci
-# sudo ln -s /opt/oracle/instantclient_23_3 /usr/local/oci
+--Declare in Makefile:
+$(INC_OCI) = /opt/oracle/instantclient_23i/sdk/include
+$(LIB_OCI) = /opt/oracle/instantclient_23i
 
-[Postgres Client ARM64]
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+[Postgres Client and Library]
+# /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 # brew install libpq
 
-echo 'export PATH="/opt/homebrew/opt/libpq/bin:$PATH"' >> ~/.zshrc
-export LDFLAGS="-L/opt/homebrew/opt/libpq/lib"
-export CPPFLAGS="-I/opt/homebrew/opt/libpq/include"
+# echo 'export PATH="/opt/homebrew/opt/libpq/bin:$PATH"' >> ~/.bash_profile
+# source .bash_profile
 
-# sudo mkdir /usr/local/pq
-# sudo ln -s /opt/homebrew/opt/libpq/include /usr/local/pq
-# sudo ln -s /opt/homebrew/opt/libpq/lib /usr/local/pq
+--Declare in Makefile:
+$(INC_POSTGRE) = /opt/homebrew/opt/libpq/include
+$(LIB_POSTGRE) = /opt/homebrew/opt/libpq/lib
 
-[Mysql Client ARM64]
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+[Mysql Client and Library]
+# /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 # brew install mysql-client
-echo 'export PATH="/opt/homebrew/opt/mysql-client/bin:$PATH"' >> ~/.zshrc
-export LDFLAGS="-L/opt/homebrew/opt/mysql-client/lib"
-export CPPFLAGS="-I/opt/homebrew/opt/mysql-client/include"
 
-# sudo mkdir /usr/local/mysql
-# sudo ln -s /opt/homebrew/opt/mysql-client/include /usr/local/mysql
-# sudo ln -s /opt/homebrew/opt/mysql-client/lib /usr/local/mysql
+# echo 'export PATH="/opt/homebrew/opt/mysql-client/bin:$PATH"' >> ~/.bash_profile
+# source .bash_profile
+
+--Declare in Makefile:
+$(INC_MYSQL) = /opt/homebrew/opt/mysql-client/include/mysql
+$(LIB_MYSQL) = /opt/homebrew/opt/mysql-client/lib
+
+[Sqlite for macos]
+#brew install sqlite
+
+# echo 'export PATH="/opt/homebrew/opt/sqlite/bin:$PATH"' >> ~/.bash_profile
+# source .bash_profile
+
+--Declare in Makefile:
+$(INC_SQLITE) = /opt/homebrew/opt/sqlite/include
+$(LIB_SQLITE) = /opt/homebrew/opt/sqlite/lib
+
 

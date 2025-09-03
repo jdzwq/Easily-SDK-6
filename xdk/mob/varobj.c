@@ -652,11 +652,11 @@ void object_set_string(object_t obj, string_t str)
 
 	object_empty(obj);
 
-	dw = string_encode(str, _UTF8, NULL, MAX_LONG);
+	dw = string_encode(str, _UTF8_BOM, NULL, MAX_LONG);
 
 	bytes_realloc(pobj, OBJECT_HEAD_SIZE + dw);
 
-	string_encode(str, _UTF8, OBJECT_DATA_BUFFER(*pobj), dw);
+	string_encode(str, _UTF8_BOM, OBJECT_DATA_BUFFER(*pobj), dw);
 
 	type = (MEM_STRING | MEMENC_MASK);
 	//object type
@@ -695,7 +695,7 @@ bool_t object_get_string(object_t obj, string_t str)
 
 	dw = OBJECT_GET_UNCOMPRE_SIZE(*pobj);
 
-	string_decode(str, _UTF8, OBJECT_DATA_BUFFER(*pobj), dw);
+	string_decode(str, _UTF8_BOM, OBJECT_DATA_BUFFER(*pobj), dw);
 
 	return 1;
 }

@@ -17,8 +17,8 @@ VER = 6.0
 SRV_PATH = /usr/local/xService
 LNK_PATH = /usr/local/lib
 
-INC_POSTGRE = /usr/include/postgresql
-LIB_POSTGRE = /usr/lib
+INC_POSTGRE = /usr/include
+LIB_POSTGRE = /usr/lib64
 
 INC_PATH = ../../include
 SRC_PATH = ../../xdb
@@ -71,6 +71,7 @@ uninstall:
 .PHONY : clean
 clean:
 	rm -f $(OBJS)
+	rm -f $(OUT_PATH)/$(TARGET)
 #-----------------------------------------------------------------------------
 # end microsoft NMAKE file
 #-----------------------------------------------------------------------------

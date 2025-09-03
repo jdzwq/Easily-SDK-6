@@ -380,6 +380,8 @@ xdb_t STDCALL db_open(const tchar_t* srv, const tchar_t* dbn, const tchar_t* uid
 	char sdbn[MAX_SQL_TOKEN + 1] = { 0 };
 	char suid[MAX_SQL_TOKEN + 1] = { 0 };
 	char spwd[MAX_SQL_TOKEN + 1] = { 0 };
+	char port[INT_LEN] = {0};
+	char* tk;
 
 	TRY_CATCH;
 
@@ -395,7 +397,17 @@ xdb_t STDCALL db_open(const tchar_t* srv, const tchar_t* dbn, const tchar_t* uid
     mbs_to_utf8(pwd, -1, (byte_t*)spwd, MAX_SQL_TOKEN);
 #endif
     
-	ctx = PQsetdbLogin(ssrv, NULL, NULL, NULL, sdbn, suid, spwd);
+	if(tk = a_xsstr(ssrv, ":"))
+	{
+		a_xscpy(port, (schar_t*)(tk + 1));
+		*tk = '\0';
+	}
+
+	if(a_is_null(port))
+		ctx = PQsetdbLogin(ssrv, NULL, NULL, NULL, sdbn, suid, spwd);
+	else
+		ctx = PQsetdbLogin(ssrv, port, NULL, NULL, sdbn, suid, spwd);
+
 	if (!ctx)
 	{
 		raise_user_error(_T("-1"), _T("Alloc context handle failed"));
@@ -1650,7 +1662,7 @@ bool_t STDCALL db_export(xdb_t db, stream_t stream, const tchar_t* sqlstr)
 
 	string_t vs = NULL;
 
-	tchar_t feed[3] = { TXT_ITEMFEED, TXT_LINEFEED, _T('\n') };
+	tchar_t feed[2] = { CSV_ITEMFEED, CSV_LINEFEED };
 
 	tchar_t* sz_esc = NULL;
 	int len_esc = 0;
@@ -1697,11 +1709,15 @@ bool_t STDCALL db_export(xdb_t db, stream_t stream, const tchar_t* sqlstr)
 		colname[len] = _T('\0');
         
 		string_cat(vs, colname, -1);
-		string_cat(vs, feed, 1);
-	}
-	string_cat(vs, feed + 1, 2);
 
-	if (!stream_write_line(stream, vs, &pos))
+		if(col != cols -1)
+		{
+			string_cat(vs, feed, 1);
+		}
+	}
+	string_cat(vs, feed + 1, 1);
+
+	if (!stream_write_csv_line(stream, vs, &pos))
 	{
 		raise_user_error(NULL, NULL);
 	}
@@ -1748,12 +1764,16 @@ bool_t STDCALL db_export(xdb_t db, stream_t stream, const tchar_t* sqlstr)
                 xsfree(d_str);
                 d_str = NULL;
 			}
-			string_cat(vs, feed, 1);
+
+			if(col != cols-1)
+			{
+				string_cat(vs, feed, 1);
+			}
 		}
 
-		string_cat(vs, feed + 1, 2);
+		string_cat(vs, feed + 1, 1);
 
-		if (!stream_write_line(stream, vs, &pos))
+		if (!stream_write_csv_line(stream, vs, &pos))
 		{
 			raise_user_error(NULL, NULL);
 		}
@@ -1838,7 +1858,7 @@ bool_t STDCALL db_import(xdb_t db, stream_t stream, const tchar_t* table)
 	vs = string_alloc();
 
 	dw = 0;
-	if (!stream_read_line(stream, vs, &dw))
+	if (!stream_read_csv_line(stream, vs, &dw))
 	{
 		raise_user_error(_T("-1"), _T("read stream failed"));
 	}
@@ -1849,19 +1869,16 @@ bool_t STDCALL db_import(xdb_t db, stream_t stream, const tchar_t* table)
 
 	cols = 0;
 	token = string_ptr(vs);
-	while (*token != TXT_LINEFEED && *token != _T('\0'))
+	while (*token != CSV_LINEFEED && *token != _T('\0'))
 	{
 		tklen = 0;
-		while (*token != TXT_ITEMFEED && *token != TXT_LINEFEED && *token != _T('\0'))
-		{
-			token++;
-			tklen++;
-		}
+		tkpre = csv_token_split(token, -1, &tklen);
 
-		string_cat(vs_sql, token - tklen, tklen);
+		string_cat(vs_sql, tkpre, tklen);
 		string_cat(vs_sql, _T(","), 1);
 
-		if (*token == TXT_ITEMFEED)
+		token = tkpre + tklen;
+		if (*token == CSV_ITEMFEED)
 			token++;
 
 		cols++;
@@ -1914,7 +1931,7 @@ bool_t STDCALL db_import(xdb_t db, stream_t stream, const tchar_t* table)
 	{
 		string_empty(vs);
 		dw = 0;
-		if (!stream_read_line(stream, vs, &dw))
+		if (!stream_read_csv_line(stream, vs, &dw))
 		{
 			raise_user_error(_T("-1"), _T("stream read line failed"));
 		}
@@ -1924,18 +1941,13 @@ bool_t STDCALL db_import(xdb_t db, stream_t stream, const tchar_t* table)
 
 		i = 0;
 		token = string_ptr(vs);
-		while (*token != TXT_LINEFEED && *token != _T('\0'))
+		while (*token != CSV_LINEFEED && *token != _T('\0'))
 		{
 			tklen = 0;
-			while (*token != TXT_ITEMFEED && *token != TXT_LINEFEED && *token != _T('\0'))
-			{
-				token++;
-				tklen++;
-			}
+			tkpre = csv_token_split(token, -1, &tklen);
 
             if(tklen)
             {
-                tkpre = token - tklen;
                 csv_token_decode(tkpre, tklen, NULL, &len_esc);
                 if (len_esc != tklen)
                 {
@@ -1980,7 +1992,8 @@ bool_t STDCALL db_import(xdb_t db, stream_t stream, const tchar_t* table)
 				poid[i] = 0;
             }
 
-			if (*token == TXT_ITEMFEED)
+			token = tkpre + tklen;
+			if (*token == CSV_ITEMFEED)
 				token++;
             
 			if (++i == cols)
@@ -2250,4 +2263,47 @@ int STDCALL db_error(xdb_t db, tchar_t* buf, int max)
 	}
 
 	return -1;
+}
+
+bool_t STDCALL db_call_json(xdb_t db, const tchar_t* procname, LINKPTR json)
+{
+    NOP;
+    return 0;
+}
+
+
+bool_t STDCALL db_read_blob(xdb_t db, stream_t stream, const tchar_t* sqlstr)
+{
+    NOP;
+    return 0;
+}
+
+bool_t STDCALL db_write_blob(xdb_t db, stream_t stream, const tchar_t* sqlfmt)
+{
+    NOP;
+    return 0;
+}
+
+bool_t STDCALL db_read_clob(xdb_t db, string_t varstr, const tchar_t* sqlstr)
+{
+    NOP;
+    return 0;
+}
+
+bool_t STDCALL db_write_clob(xdb_t db, string_t varstr, const tchar_t* sqlfmt)
+{
+    NOP;
+    return 0;
+}
+
+bool_t STDCALL db_read_xdoc(xdb_t db, LINKPTR domdoc, const tchar_t* sqlstr)
+{
+    NOP;
+    return 0;
+}
+
+bool_t STDCALL db_write_xdoc(xdb_t db, LINKPTR domdoc, const tchar_t* sqlfmt)
+{
+    NOP;
+    return 0;
 }

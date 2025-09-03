@@ -197,7 +197,7 @@ bool_t parse_xml_doc_from_stream(link_t_ptr xml, stream_t xs)
 
 	if (encode == _UNKNOWN)
 	{
-		encode = _UTF8;
+		encode = _UTF8_BOM;
 		stream_set_encode(xs, encode);
 	}
 
@@ -289,7 +289,7 @@ bool_t parse_xml_doc_from_bytes(link_t_ptr xml, const byte_t* str, dword_t len)
 
 	if (encode == _UNKNOWN)
 	{
-		encode = _UTF8;
+		encode = _UTF8_BOM;
 	}
 	else
 	{

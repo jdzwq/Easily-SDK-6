@@ -17,8 +17,8 @@ VER = 6.0
 SRV_PATH = /usr/local/xService
 LNK_PATH = /usr/local/lib
 
-INC_MYSQL = /usr/local/mysql/include
-LIB_MYSQL = /usr/local/lib
+INC_MYSQL = /usr/include/mysql
+LIB_MYSQL = /usr/lib64/mysql
 
 INC_PATH = ../../include
 SRC_PATH = ../../xdb
@@ -71,6 +71,7 @@ uninstall:
 .PHONY : clean
 clean:
 	rm -f $(OBJS)
+	rm -f $(OUT_PATH)/$(TARGET)
 #-----------------------------------------------------------------------------
 # end microsoft NMAKE file
 #-----------------------------------------------------------------------------

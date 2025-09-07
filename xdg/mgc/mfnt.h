@@ -39,18 +39,18 @@ typedef struct _font_metrix_t {
 	int maxdescent; /* Maximum height of any character below the baseline */
 }font_metrix_t;
 
-typedef struct _mem_font_t* mem_font_ptr;
+typedef struct _mem_font_interface* mem_font_ptr;
 
-typedef struct _mem_font_t{
+typedef struct _mem_font_interface{
 	fontset_t(*createFontSet)(const xfont_t* pxf);
 	void(*destroyFontSet)(fontset_t fnt);
 	void(*getFontInfo)(fontset_t fnt, xfont_t* pxf);
 	void(*getFontMetrix)(fontset_t fnt, const tchar_t* pch, font_metrix_t* pmetrix);
 	void(*getCharSize)(fontset_t fnt, const tchar_t *pch, xsize_t* pse);
 	int(*getCharPixmap)(fontset_t fnt, const tchar_t* pch, mem_pixmap_ptr ppixmap);
-} mem_font_t;
+} mem_font_interface;
 
-extern mem_font_t font_Internal;
+extern mem_font_interface font_Internal;
 
 #ifdef	__cplusplus
 extern "C" {

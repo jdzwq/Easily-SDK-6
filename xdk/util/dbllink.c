@@ -27,7 +27,7 @@ LICENSE.GPL3 for more details.
 #include "dbllink.h"
 
 #include "../xdkstd.h"
-
+#include "../xdkimp.h"
 
 void init_root_link(link_t_ptr root)
 {

@@ -4,6 +4,7 @@ SOURCES= \
 ../../../Easily-tmp/windows/xdl/x64/Debug/properbag.c \
 ../../../Easily-tmp/windows/xdl/x64/Debug/schemabag.c \
 ../../../Easily-tmp/windows/xdl/x64/Debug/svgbag.c \
+../../../Easily-tmp/windows/xdl/x64/Debug/bioimp.c \
 ../../../Easily-tmp/windows/xdl/x64/Debug/filesbio.c \
 ../../../Easily-tmp/windows/xdl/x64/Debug/formbio.c \
 ../../../Easily-tmp/windows/xdl/x64/Debug/gridbio.c \

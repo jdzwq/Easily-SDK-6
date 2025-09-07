@@ -27,6 +27,7 @@ LICENSE.GPL3 for more details.
 #include "impassert.h"
 
 #include "../xdkstd.h"
+#include "../xdkimp.h"
 
 
 void xdk_assert(const char* _Expr, const char* _File, const char* _Func, unsigned int _Line)

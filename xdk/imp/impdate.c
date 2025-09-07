@@ -27,6 +27,7 @@ LICENSE.GPL3 for more details.
 #include "impdate.h"
 
 #include "../xdkstd.h"
+#include "../xdkimp.h"
 
 #ifdef XDK_SUPPORT_DATE
 

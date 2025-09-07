@@ -24,7 +24,7 @@ OBJ_PATH = ../../../Easily-tmp/macos/$(MODULE)/$(ARCH)
 TARGET = lib$(MODULE).so.$(VER)
 LINKIT = lib$(MODULE).so
 
-LIBS = -L $(LNK_PATH) -lxdk -lxdg -lcrypt
+LIBS = -L $(LNK_PATH) -lxdk -lxdn -lxdg
 DIRS = $(wildcard \
 	$(SRC_PATH)/*.c \
 	$(SRC_PATH)/bag/*.c \
@@ -101,7 +101,7 @@ test:
 
 install:
 	if ! test -d $(SRV_PATH)/api; then \
-	sudo mkdir -p $(SRV_PATH); \
+	sudo mkdir -p $(SRV_PATH)/api; \
 	fi
 	if ! test -d $(LNK_PATH); then \
 	sudo mkdir $(LNK_PATH); \

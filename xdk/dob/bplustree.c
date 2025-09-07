@@ -29,6 +29,7 @@ LICENSE.GPL3 for more details.
 #include "../xdkstd.h"
 #include "../xdkobj.h"
 #include "../xdkoem.h"
+#include "../xdkimp.h"
 
 #define BPLUS_ENTITY_INDEX	1
 #define BPLUS_ENTITY_DATA	0

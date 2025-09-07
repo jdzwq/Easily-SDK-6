@@ -53,7 +53,7 @@ test:
 
 install:
 	if ! test -d $(SRV_PATH)/api; then \
-	sudo mkdir -p $(SRV_PATH); \
+	sudo mkdir -p $(SRV_PATH)/api; \
 	fi
 	if ! test -d $(LNK_PATH); then \
 	sudo mkdir $(LNK_PATH); \

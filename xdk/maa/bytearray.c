@@ -26,6 +26,7 @@ LICENSE.GPL3 for more details.
 
 #include "bytearray.h"
 
+#include "../xdkimp.h"
 #include "../xdkstd.h"
 
 typedef struct _bytes_t{

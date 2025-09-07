@@ -40,149 +40,6 @@ typedef struct _rdc_canvas_t{
 	float horz_size, vert_size;
 }rdc_canvas_t;
 
-/*******************************************************************************************************************/
-
-float pt_to_mm(canvas_t canv, int pt, bool_t horz)
-{
-	rdc_canvas_t* pcanv = TypePtrFromHead(rdc_canvas_t,canv);
-
-	XDK_ASSERT(canv);
-
-	if (horz)
-		return (float)((float)pt / pcanv->htpermm - pcanv->horz_feed);
-	else
-		return (float)((float)pt / pcanv->vtpermm - pcanv->vert_feed);
-}
-
-int mm_to_pt(canvas_t canv, float mm, bool_t horz)
-{
-	rdc_canvas_t* pcanv = TypePtrFromHead(rdc_canvas_t, canv);
-
-	XDK_ASSERT(canv);
-
-	if (horz)
-		return ROUNDINT((mm + pcanv->horz_feed) * pcanv->htpermm);
-	else
-		return ROUNDINT((mm + pcanv->vert_feed) * pcanv->vtpermm);
-}
-
-void rect_mm_to_pt(canvas_t canv, xrect_t* pxr)
-{
-	int left, right, top, bottom;
-
-	if (pxr->fw < 0)
-	{
-		left = mm_to_pt(canv, pxr->fx + pxr->fw, 1);
-		right = mm_to_pt(canv, pxr->fx, 1);
-	}
-	else
-	{
-		left = mm_to_pt(canv, pxr->fx, 1);
-		right = mm_to_pt(canv, pxr->fx + pxr->fw, 1);
-	}
-
-	if (pxr->fh < 0)
-	{
-		top = mm_to_pt(canv, pxr->fy + pxr->fh, 0);
-		bottom = mm_to_pt(canv, pxr->fy, 0);
-	}
-	else
-	{
-		top = mm_to_pt(canv, pxr->fy, 0);
-		bottom = mm_to_pt(canv, pxr->fy + pxr->fh, 0);
-	}
-
-	pxr->x = left;
-	pxr->y = top;
-	pxr->w = right - left;
-	pxr->h = bottom - top;
-}
-
-void rect_pt_to_mm(canvas_t canv, xrect_t* pxr)
-{
-	float left, right, top, bottom;
-
-	if (pxr->w < 0)
-	{
-		left = pt_to_mm(canv, pxr->x + pxr->w, 1);
-		right = pt_to_mm(canv, pxr->x, 1);
-	}
-	else
-	{
-		left = pt_to_mm(canv, pxr->x, 1);
-		right = pt_to_mm(canv, pxr->x + pxr->w, 1);
-	}
-
-	if (pxr->h < 0)
-	{
-		top = pt_to_mm(canv, pxr->y + pxr->h, 0);
-		bottom = pt_to_mm(canv, pxr->y, 0);
-	}
-	else
-	{
-		top = pt_to_mm(canv, pxr->y, 0);
-		bottom = pt_to_mm(canv, pxr->y + pxr->h, 0);
-	}
-
-	pxr->fx = left;
-	pxr->fy = top;
-	pxr->fw = right - left;
-	pxr->fh = bottom - top;
-}
-
-void size_mm_to_pt(canvas_t canv, xsize_t* pxs)
-{
-	int cx, cy;
-
-	cx = mm_to_pt(canv, pxs->fw, 1) - mm_to_pt(canv, 0, 1);
-	cy = mm_to_pt(canv, pxs->fh, 0) - mm_to_pt(canv, 0, 0);
-
-	pxs->w = cx;
-	pxs->h = cy;
-}
-
-void size_pt_to_mm(canvas_t canv, xsize_t* pxs)
-{
-	float cx, cy;
-
-	cx = pt_to_mm(canv, pxs->w, 1) - pt_to_mm(canv, 0, 1);
-	cy = pt_to_mm(canv, pxs->h, 0) - pt_to_mm(canv, 0, 0);
-
-	pxs->fw = cx;
-	pxs->fh = cy;
-}
-
-void point_mm_to_pt(canvas_t canv, xpoint_t* ppt)
-{
-	int x, y;
-
-	x = mm_to_pt(canv, ppt->fx, 1);
-	y = mm_to_pt(canv, ppt->fy, 0);
-
-	ppt->x = x;
-	ppt->y = y;
-}
-
-void point_pt_to_mm(canvas_t canv, xpoint_t* ppt)
-{
-	float x, y;
-
-	x = pt_to_mm(canv, ppt->x, 1);
-	y = pt_to_mm(canv, ppt->y, 0);
-
-	ppt->fx = x;
-	ppt->fy = y;
-}
-
-void span_mm_to_pt(canvas_t canv, xspan_t* pxn)
-{
-	pxn->s = mm_to_pt(canv, pxn->fs, 1) - mm_to_pt(canv, 0, 1);
-}
-
-void span_pt_to_mm(canvas_t canv, xspan_t* pxn)
-{
-	pxn->fs = pt_to_mm(canv, pxn->s, 1) - pt_to_mm(canv, 0, 1);
-}
 /*******************************************************************************************/
 
 canvas_t create_display_canvas(visual_t rdc)
@@ -359,6 +216,150 @@ void  destroy_printer_canvas(canvas_t canv)
 }
 
 #endif //#ifdef XDU_SUPPORT_CONTEXT_PRINTER
+
+/*******************************************************************************************************************/
+
+float pt_to_mm(canvas_t canv, int pt, bool_t horz)
+{
+	rdc_canvas_t* pcanv = TypePtrFromHead(rdc_canvas_t,canv);
+
+	XDK_ASSERT(canv);
+
+	if (horz)
+		return (float)((float)pt / pcanv->htpermm - pcanv->horz_feed);
+	else
+		return (float)((float)pt / pcanv->vtpermm - pcanv->vert_feed);
+}
+
+int mm_to_pt(canvas_t canv, float mm, bool_t horz)
+{
+	rdc_canvas_t* pcanv = TypePtrFromHead(rdc_canvas_t, canv);
+
+	XDK_ASSERT(canv);
+
+	if (horz)
+		return ROUNDINT((mm + pcanv->horz_feed) * pcanv->htpermm);
+	else
+		return ROUNDINT((mm + pcanv->vert_feed) * pcanv->vtpermm);
+}
+
+void rect_mm_to_pt(canvas_t canv, xrect_t* pxr)
+{
+	int left, right, top, bottom;
+
+	if (pxr->fw < 0)
+	{
+		left = mm_to_pt(canv, pxr->fx + pxr->fw, 1);
+		right = mm_to_pt(canv, pxr->fx, 1);
+	}
+	else
+	{
+		left = mm_to_pt(canv, pxr->fx, 1);
+		right = mm_to_pt(canv, pxr->fx + pxr->fw, 1);
+	}
+
+	if (pxr->fh < 0)
+	{
+		top = mm_to_pt(canv, pxr->fy + pxr->fh, 0);
+		bottom = mm_to_pt(canv, pxr->fy, 0);
+	}
+	else
+	{
+		top = mm_to_pt(canv, pxr->fy, 0);
+		bottom = mm_to_pt(canv, pxr->fy + pxr->fh, 0);
+	}
+
+	pxr->x = left;
+	pxr->y = top;
+	pxr->w = right - left;
+	pxr->h = bottom - top;
+}
+
+void rect_pt_to_mm(canvas_t canv, xrect_t* pxr)
+{
+	float left, right, top, bottom;
+
+	if (pxr->w < 0)
+	{
+		left = pt_to_mm(canv, pxr->x + pxr->w, 1);
+		right = pt_to_mm(canv, pxr->x, 1);
+	}
+	else
+	{
+		left = pt_to_mm(canv, pxr->x, 1);
+		right = pt_to_mm(canv, pxr->x + pxr->w, 1);
+	}
+
+	if (pxr->h < 0)
+	{
+		top = pt_to_mm(canv, pxr->y + pxr->h, 0);
+		bottom = pt_to_mm(canv, pxr->y, 0);
+	}
+	else
+	{
+		top = pt_to_mm(canv, pxr->y, 0);
+		bottom = pt_to_mm(canv, pxr->y + pxr->h, 0);
+	}
+
+	pxr->fx = left;
+	pxr->fy = top;
+	pxr->fw = right - left;
+	pxr->fh = bottom - top;
+}
+
+void size_mm_to_pt(canvas_t canv, xsize_t* pxs)
+{
+	int cx, cy;
+
+	cx = mm_to_pt(canv, pxs->fw, 1) - mm_to_pt(canv, 0, 1);
+	cy = mm_to_pt(canv, pxs->fh, 0) - mm_to_pt(canv, 0, 0);
+
+	pxs->w = cx;
+	pxs->h = cy;
+}
+
+void size_pt_to_mm(canvas_t canv, xsize_t* pxs)
+{
+	float cx, cy;
+
+	cx = pt_to_mm(canv, pxs->w, 1) - pt_to_mm(canv, 0, 1);
+	cy = pt_to_mm(canv, pxs->h, 0) - pt_to_mm(canv, 0, 0);
+
+	pxs->fw = cx;
+	pxs->fh = cy;
+}
+
+void point_mm_to_pt(canvas_t canv, xpoint_t* ppt)
+{
+	int x, y;
+
+	x = mm_to_pt(canv, ppt->fx, 1);
+	y = mm_to_pt(canv, ppt->fy, 0);
+
+	ppt->x = x;
+	ppt->y = y;
+}
+
+void point_pt_to_mm(canvas_t canv, xpoint_t* ppt)
+{
+	float x, y;
+
+	x = pt_to_mm(canv, ppt->x, 1);
+	y = pt_to_mm(canv, ppt->y, 0);
+
+	ppt->fx = x;
+	ppt->fy = y;
+}
+
+void span_mm_to_pt(canvas_t canv, xspan_t* pxn)
+{
+	pxn->s = mm_to_pt(canv, pxn->fs, 1) - mm_to_pt(canv, 0, 1);
+}
+
+void span_pt_to_mm(canvas_t canv, xspan_t* pxn)
+{
+	pxn->fs = pt_to_mm(canv, pxn->s, 1) - pt_to_mm(canv, 0, 1);
+}
 
 #endif //#ifdef XDC_SUPPORT_CONTXT
 

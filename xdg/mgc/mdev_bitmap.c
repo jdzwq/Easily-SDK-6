@@ -1088,7 +1088,7 @@ static void stretch_bitmap(device_t dev, int dstx, int dsty, int dstw, int dsth,
 }
 /**************************************************************************************************/
 
-mem_device_t monochrome_bitmap_device = {
+mem_device_interface monochrome_bitmap_device = {
 	MGC_DEVICE_BITMAP_MONOCHROME,
 
 	&monochrome_driver,
@@ -1121,7 +1121,7 @@ mem_device_t monochrome_bitmap_device = {
 	stretch_bitmap
 };
 
-mem_device_t grayscale_bitmap_device = {
+mem_device_interface grayscale_bitmap_device = {
 	MGC_DEVICE_BITMAP_GRAYSCALE,
 
 	&grayscale_driver,
@@ -1154,7 +1154,7 @@ mem_device_t grayscale_bitmap_device = {
 	stretch_bitmap
 };
 
-mem_device_t truecolor16_bitmap_device = {
+mem_device_interface truecolor16_bitmap_device = {
 	MGC_DEVICE_BITMAP_TRUECOLOR16,
 
 	&color555_driver,
@@ -1187,7 +1187,7 @@ mem_device_t truecolor16_bitmap_device = {
 	stretch_bitmap
 };
 
-mem_device_t truecolor24_bitmap_device = {
+mem_device_interface truecolor24_bitmap_device = {
 	MGC_DEVICE_BITMAP_TRUECOLOR24,
 
 	&color888_driver,
@@ -1220,7 +1220,7 @@ mem_device_t truecolor24_bitmap_device = {
 	stretch_bitmap
 };
 
-mem_device_t truecolor32_bitmap_device = {
+mem_device_interface truecolor32_bitmap_device = {
 	MGC_DEVICE_BITMAP_TRUECOLOR32,
 
 	&color8888_driver,

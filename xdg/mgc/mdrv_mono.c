@@ -308,7 +308,7 @@ static void set_pixels(driver_t drv, int x, int y, int w, int h, const PIXELVAL*
 
 /*****************************************************************************************************************/
 
-mem_driver_t monochrome_driver = {
+mem_driver_interface monochrome_driver = {
 	MGC_DRIVER_MONOCHROME, /*the driver name*/
 
 	1,		/* planes */

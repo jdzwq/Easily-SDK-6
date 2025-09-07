@@ -1,0 +1,5 @@
+SOURCES= \
+Z:/Easily-tmp/windows/xudps/x64/Debug/xudps.cc \
+Z:/Easily-tmp/windows/xudps/x64/Debug/xudpsMain.cc \
+Z:/Easily-tmp/windows/xudps/x64/Debug/srvcrt.cc \
+Z:/Easily-tmp/windows/xudps/x64/Debug/srvlog.cc \

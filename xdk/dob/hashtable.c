@@ -28,6 +28,7 @@ LICENSE.GPL3 for more details.
 
 #include "../xdkstd.h"
 #include "../xdkobj.h"
+#include "../xdkimp.h"
 
 typedef struct _hash_entity_t{
 	link_t lk;				/* entity self link component*/

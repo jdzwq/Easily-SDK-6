@@ -1,0 +1,5 @@
+SOURCES= \
+Z:/Easily-tmp/windows/xtcps/x64/Debug/xtcps.cc \
+Z:/Easily-tmp/windows/xtcps/x64/Debug/xtcpsMain.cc \
+Z:/Easily-tmp/windows/xtcps/x64/Debug/srvcrt.cc \
+Z:/Easily-tmp/windows/xtcps/x64/Debug/srvlog.cc \

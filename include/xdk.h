@@ -3,10 +3,10 @@
 #define _XDK_H
 
 #include "../xdk/xdkstd.h"
+#include "../xdk/xdkimp.h"
 #include "../xdk/xdkobj.h"
-#include "../xdk/xdkbio.h"
-#include "../xdk/xdknet.h"
 #include "../xdk/xdkoem.h"
+#include "../xdk/xdkbio.h"
 #include "../xdk/xdktdb.h"
 
 #ifdef _OS_WINDOWS

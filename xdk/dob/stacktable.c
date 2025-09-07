@@ -28,6 +28,7 @@ LICENSE.GPL3 for more details.
 
 #include "../xdkstd.h"
 #include "../xdkobj.h"
+#include "../xdkimp.h"
 
 #define STACKTABLE_INC		32
 

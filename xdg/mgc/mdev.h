@@ -36,9 +36,9 @@ LICENSE.GPL3 for more details.
 #define MGC_DEVICE_BITMAP_TRUECOLOR24		_T("TrueColor24 Bitmap Device")
 #define MGC_DEVICE_BITMAP_TRUECOLOR32		_T("TrueColor32 Bitmap Device")
 
-typedef struct _mem_device_t* mem_device_ptr;
+typedef struct _mem_device_interface* mem_device_ptr;
 
-typedef struct _mem_device_t{
+typedef struct _mem_device_interface{
 	tchar_t dev_name[MAX_DEVICE_NAME];
 
 	mem_driver_ptr driver;
@@ -70,14 +70,14 @@ typedef struct _mem_device_t{
 	void(*radialLinear)(device_t dev, const xrect_t*, const xpoint_t* ppt, const xcolor_t* pxc, int rop);
 	void (*drawBitmap)(device_t dev, int dstx, int dsty, int dstw, int dsth, const byte_t* pbm, int rop);
 	void(*stretchBitmap)(device_t dev, int dstx, int dsty, int dstw, int dsth, const byte_t* pbm, int rop);
-} mem_device_t;
+} mem_device_interface;
 
 
-extern mem_device_t monochrome_bitmap_device;
-extern mem_device_t grayscale_bitmap_device;
-extern mem_device_t truecolor16_bitmap_device;
-extern mem_device_t truecolor24_bitmap_device;
-extern mem_device_t truecolor32_bitmap_device;
+extern mem_device_interface monochrome_bitmap_device;
+extern mem_device_interface grayscale_bitmap_device;
+extern mem_device_interface truecolor16_bitmap_device;
+extern mem_device_interface truecolor24_bitmap_device;
+extern mem_device_interface truecolor32_bitmap_device;
 
 
 #ifdef	__cplusplus

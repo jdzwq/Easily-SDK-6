@@ -165,7 +165,7 @@ typedef struct _handle_head{
 
 #define _HANDLE_UNKNOWN		0x00
 
-/*network type*/
+/*resouce handle type*/
 #define _HANDLE_BLOCK		0x01
 #define _HANDLE_INET		0x02
 #define _HANDLE_CONS		0x03
@@ -174,18 +174,8 @@ typedef struct _handle_head{
 #define _HANDLE_SHARE		0x06
 #define _HANDLE_CACHE		0x07
 #define _HANDLE_UNCF		0x08
-#define _HANDLE_UDP			0x10
-#define _HANDLE_TCP			0x11
-#define _HANDLE_SSL			0x12
-#define _HANDLE_SSH			0x13
-#define _HANDLE_DTLS		0x14
-#define _HANDLE_TFTP		0x15
-#define _HANDLE_MQTT		0x16
-#define _HANDLE_COAP		0x17
-typedef struct _handle_head *xhand_t;
 
-#define _HANDLE_STREAM		0x1F
-typedef struct _handle_head *stream_t;
+typedef struct _handle_head *xhand_t;
 
 
 /*thread function*/
@@ -247,9 +237,10 @@ typedef struct _handle_head *stream_t;
 #endif
 #endif
 
-#include "log/loginf.h"
-#include "bio/bioinf.h"
-#include "imp/platinf.h"
+#include "inf/loginf.h"
+#include "inf/platinf.h"
+#include "inf/bioinf.h"
+#include "inf/fioinf.h"
 
 #endif	/* _XDKDEF_H */
 

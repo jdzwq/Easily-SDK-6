@@ -25,7 +25,7 @@ OBJ_PATH = ../../../Easily-tmp/linux/$(MODULE)/$(ARCH)
 TARGET = lib$(MODULE).so.$(VER)
 LINKIT = lib$(MODULE).so
 
-LIBS = -lxdk -lxdg -lxdu -lxdl
+LIBS = -lxdk -lxdn -lxdg -lxdu -lxdl
 DIRS = $(wildcard $(SRC_PATH)/*.c \
 	$(SRC_PATH)/bag/*.c \
 	$(SRC_PATH)/box/*.c \
@@ -86,7 +86,7 @@ test:
 
 install:
 	if ! test -d $(SRV_PATH)/api; then \
-	sudo mkdir -p $(SRV_PATH); \
+	sudo mkdir -p $(SRV_PATH)/api; \
 	fi
 	if ! test -d $(LNK_PATH); then \
 	sudo mkdir $(LNK_PATH); \

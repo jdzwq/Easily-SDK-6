@@ -27,6 +27,7 @@ LICENSE.GPL3 for more details.
 #include "impsock.h"
 
 #include "../xdkstd.h"
+#include "../xdkimp.h"
 
 #ifdef XDK_SUPPORT_SOCK
 

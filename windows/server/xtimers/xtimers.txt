@@ -1,0 +1,5 @@
+SOURCES= \
+Z:/Easily-tmp/windows/xtimers/x64/Debug/xtimers.cc \
+Z:/Easily-tmp/windows/xtimers/x64/Debug/xtimersMain.cc \
+Z:/Easily-tmp/windows/xtimers/x64/Debug/srvcrt.cc \
+Z:/Easily-tmp/windows/xtimers/x64/Debug/srvlog.cc \

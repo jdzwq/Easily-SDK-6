@@ -9,7 +9,6 @@
 #include "gob/styles.h"
 
 #include "gly/gly.h"
-#include "ttf/ttf.h"
 
 #include "g2/g2.h"
 #include "dot/dot.h"
@@ -23,7 +22,9 @@
 #include "mgc/mdrv.h"
 #include "mgc/mpap.h"
 #include "mgc/mclr.h"
-#include "mgc/mgc.h"
+#include "mgc/mctx.h"
+#include "mgc/mcanv.h"
+#include "mgc/mgdi.h"
 
 #include "img/pdg.h"
 #include "img/bmp.h"

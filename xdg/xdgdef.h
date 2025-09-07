@@ -29,6 +29,7 @@ LICENSE.GPL3 for more details.
 #define	_XGCDEF_H
 
 #include <xdk.h>
+#include <xdn.h>
 
 //#define XGC_USE_GB2312_GLYPH
 

@@ -31,6 +31,7 @@ LICENSE.GPL3 for more details.
 
 #include "integerarray.h"
 
+#include "../xdkimp.h"
 #include "../xdkstd.h"
 
 int** alloc_integer_array(void)

@@ -26,6 +26,7 @@ LICENSE.GPL3 for more details.
 
 #include "numericarray.h"
 
+#include "../xdkimp.h"
 #include "../xdkstd.h"
 
 double** alloc_numeric_array(void)

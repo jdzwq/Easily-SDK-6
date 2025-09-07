@@ -35,9 +35,9 @@ LICENSE.GPL3 for more details.
 #define MGC_DRIVER_COLOR888		_T("Color888 Driver")
 #define MGC_DRIVER_COLOR8888	_T("Color8888 Driver")
 
-typedef struct _mem_driver_t* mem_driver_ptr;
+typedef struct _mem_driver_interface* mem_driver_ptr;
 
-typedef struct _mem_driver_t{
+typedef struct _mem_driver_interface{
 	tchar_t drv_name[MAX_DEVICE_NAME];
 
 	int	planes;			/* planes must be 1 */
@@ -60,13 +60,13 @@ typedef struct _mem_driver_t{
 
 	int(*getPixels)(driver_t drv, int x, int y, int w, int h, PIXELVAL* val, int n, int rop);
 	void(*setPixels)(driver_t drv, int x, int y, int w, int h, const PIXELVAL* val, int n, int rop);
-} mem_driver_t;
+} mem_driver_interface;
 
-extern mem_driver_t monochrome_driver;
-extern mem_driver_t grayscale_driver;
-extern mem_driver_t color555_driver;
-extern mem_driver_t color888_driver;
-extern mem_driver_t color8888_driver;
+extern mem_driver_interface monochrome_driver;
+extern mem_driver_interface grayscale_driver;
+extern mem_driver_interface color555_driver;
+extern mem_driver_interface color888_driver;
+extern mem_driver_interface color8888_driver;
 
 LOC_API PIXELVAL raster_opera(RASTER_MODE rop, PIXELVAL dst, PIXELVAL src);
 

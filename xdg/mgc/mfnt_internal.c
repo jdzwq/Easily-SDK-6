@@ -120,7 +120,7 @@ static int get_char_pixmap(fontset_t fnt, const tchar_t* str, mem_pixmap_ptr ppi
 
 /*****************************************************************************************************************/
 
-mem_font_t font_Internal = {
+mem_font_interface font_Internal = {
 	create_fontset,
 	destroy_fontset,
 	get_font_info,

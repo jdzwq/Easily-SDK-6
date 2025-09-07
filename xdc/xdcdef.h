@@ -29,6 +29,7 @@ LICENSE.GPL3 for more details.
 #define	_XDCDEF_H
 
 #include <xdl.h>
+#include <xdg.h>
 #include <xdu.h>
 
 #define XDCKEYBOX			_T("XDCKEYBOX")

@@ -27,6 +27,7 @@ LICENSE.GPL3 for more details.
 #include "nuid.h"
 
 #include "../xdkstd.h"
+#include "../xdkimp.h"
 
 void nuid_zero(nuid_t* pu)
 {

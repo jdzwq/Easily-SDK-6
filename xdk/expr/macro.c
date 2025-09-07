@@ -45,6 +45,7 @@ numerictoken --> {1 | 2 | ...}
 
 #include "../xdkstd.h"
 #include "../xdkobj.h"
+#include "../xdkimp.h"
 
 /*define some terminated uchar_t*/
 #define NILL			_T('\x02')

@@ -39,8 +39,6 @@ DIRS = $(wildcard \
 		$(SRC_PATH)/mob/*.c \
 		$(SRC_PATH)/dob/*.c \
 		$(SRC_PATH)/expr/*.c \
-		$(SRC_PATH)/bio/*.c \
-		$(SRC_PATH)/net/*.c \
 		$(SRC_PATH)/*.c)
 SRCS = $(notdir $(DIRS))
 COBS = $(patsubst %.c, %.o, $(SRCS))
@@ -82,12 +80,6 @@ $(OBJ_PATH)/%.o : $(SRC_PATH)/dob/%.c
 $(OBJ_PATH)/%.o : $(SRC_PATH)/expr/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
 
-$(OBJ_PATH)/%.o : $(SRC_PATH)/bio/%.c
-	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
-
-$(OBJ_PATH)/%.o : $(SRC_PATH)/net/%.c
-	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
-
 $(OBJ_PATH)/%.o : $(SRC_PATH)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
 
@@ -106,7 +98,7 @@ test:
 
 install:
 	if ! test -d $(SRV_PATH)/api; then \
-	sudo mkdir -p $(SRV_PATH); \
+	sudo mkdir -p $(SRV_PATH)/api; \
 	fi
 	if ! test -d $(LNK_PATH); then \
 	sudo mkdir $(LNK_PATH); \

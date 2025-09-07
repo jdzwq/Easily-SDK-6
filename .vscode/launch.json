@@ -8,7 +8,7 @@
         "name": "(lldb) macos",
         "type": "cppdbg",
         "request": "launch",
-        "program": "/Users/zhangwenquan/工程/Easily-app-6/macos/bin/xdb_lib_test",
+        "program": "/Users/zhangwenquan/工程/Easily-app-6/macos/bin/gen_glyph",
         "args": [],
         "stopAtEntry": false,
         "cwd": "${fileDirname}",

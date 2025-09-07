@@ -29,7 +29,7 @@ LICENSE.GPL3 for more details.
 #include "../xdkobj.h"
 #include "../xdkstd.h"
 #include "../xdkoem.h"
-
+#include "../xdkimp.h"
 
 #define MIN_NEED_COMPRESS	1024
 

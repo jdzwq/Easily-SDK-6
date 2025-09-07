@@ -33,6 +33,7 @@ LICENSE.GPL3 for more details.
 
 #include "../xdkstd.h"
 #include "../xdkobj.h"
+#include "../xdkimp.h"
 
 /*define some exption operator reserve words function*/
 #define OP_AND		_T("AND")

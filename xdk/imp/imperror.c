@@ -27,6 +27,7 @@ LICENSE.GPL3 for more details.
 #include "imperror.h"
 
 #include "../xdkstd.h"
+#include "../xdkimp.h"
 
 void set_last_error(const tchar_t* errcode, const tchar_t* errtext, int len)
 {

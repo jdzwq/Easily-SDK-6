@@ -28,6 +28,7 @@ LICENSE.GPL3 for more details.
 
 #include "../xdkobj.h"
 #include "../xdkstd.h"
+#include "../xdkimp.h"
 
 #define GUID_MEM_PREFIX		_T("mem-")
 

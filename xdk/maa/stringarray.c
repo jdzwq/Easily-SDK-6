@@ -26,6 +26,7 @@ LICENSE.GPL3 for more details.
 
 #include "stringarray.h"
 
+#include "../xdkimp.h"
 #include "../xdkstd.h"
 
 tchar_t** alloc_string_array(void)

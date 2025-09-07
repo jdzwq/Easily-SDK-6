@@ -28,6 +28,7 @@ LICENSE.GPL3 for more details.
 
 #include "../xdkstd.h"
 #include "../xdkobj.h"
+#include "../xdkimp.h"
 
 #define AC_CHAR_INDEX(ch)		((ch >= _T('A') && ch <= _T('Z'))? (ch - 64) : 0)
 #define AC_BASE_INC			127

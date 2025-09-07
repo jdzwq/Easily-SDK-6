@@ -28,6 +28,7 @@ LICENSE.GPL3 for more details.
 
 #include "../xdkstd.h"
 #include "../xdkobj.h"
+#include "../xdkimp.h"
 
 typedef struct _multi_node_t{
 	link_t lkSibling;		// the sibling node link component also as self link component

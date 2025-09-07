@@ -27,6 +27,7 @@ LICENSE.GPL3 for more details.
 #include "impmem.h"
 
 #include "../xdkstd.h"
+#include "../xdkimp.h"
 
 #if defined(XDK_SUPPORT_MEMO_DUMP)
 

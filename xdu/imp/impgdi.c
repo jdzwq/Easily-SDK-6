@@ -878,7 +878,7 @@ void destroy_fontset(fontset_t ft)
 	(*pif->pf_gdi_destroy_fontset)(ft);
 }
 
-void word_size(fontset_t ft, const tchar_t* pch, int bytes, xsize_t* pxs)
+void word_size_raw(fontset_t ft, const tchar_t* pch, int bytes, xsize_t* pxs)
 {
 	if_context_t *pif;
 

@@ -27,6 +27,7 @@ LICENSE.GPL3 for more details.
 #include "acp.h"
 
 #include "../xdkstd.h"
+#include "../xdkimp.h"
 
 xhand_t acp_gb2312 = NULL;
 xhand_t acp_unicode = NULL;

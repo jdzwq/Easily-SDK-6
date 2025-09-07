@@ -29,6 +29,7 @@ LICENSE.GPL3 for more details.
 #define	_XDLDEF_H
 
 #include <xdk.h>
+#include <xdn.h>
 #include <xdg.h>
 
 #if defined(_OS_WINDOWS)
@@ -157,11 +158,9 @@ typedef struct _page_cator_t{
 #define _DB_SQLITE		0x2F
 typedef struct _handle_head	*xdb_t;
 
-
 #include "inf/hintinf.h"
 #include "inf/xdbinf.h"
 #include "inf/xmlinf.h"
-#include "inf/fileinf.h"
 #include "inf/tioinf.h"
 #include "inf/scaninf.h"
 

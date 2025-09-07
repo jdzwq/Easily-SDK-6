@@ -7,9 +7,7 @@
 #include "../third-party/tp_geo.h"
 #include "../third-party/tp_zlib.h"
 
-#include "bar/barcode.h"
-#include "bar/qrcode.h"
-
+#include "bar/bar.h"
 #include "zip/zip.h"
 
 #endif //_XDKOEM_H

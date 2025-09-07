@@ -27,7 +27,7 @@ LICENSE.GPL3 for more details.
 #include "impjmp.h"
 
 #include "../xdkstd.h"
-
+#include "../xdkimp.h"
 
 //#define ONERROR		setjmp(thread_jump_interface()->if_buf)
 

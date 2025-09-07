@@ -26,6 +26,7 @@ LICENSE.GPL3 for more details.
 
 #include "conv.h"
 
+#include "../xdkimp.h"
 #include "../xdkstd.h"
 
 bool_t is_ascii(tchar_t c)

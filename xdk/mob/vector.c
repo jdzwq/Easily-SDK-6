@@ -28,6 +28,7 @@ LICENSE.GPL3 for more details.
 
 #include "../xdkobj.h"
 #include "../xdkstd.h"
+#include "../xdkimp.h"
 
 typedef struct _vector_context{
 	memobj_head head;

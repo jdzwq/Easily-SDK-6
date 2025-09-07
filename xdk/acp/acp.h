@@ -142,21 +142,64 @@ LOC_API int acp_unicode_to_utf8(const wchar_t* src, int slen, byte_t* dest, dwor
 extern "C" {
 #endif
 
-	EXP_API int acp_ascii_code_count(void);
+/***********************************************************************
+@FUNCTION: get ascii characters count in code page.
+@RETURN int: character count.
+***********************************************************************/
+EXP_API int acp_ascii_code_count(void);
 
-	EXP_API bool_t acp_next_ascii_char(byte_t *pch);
+/***********************************************************************
+@FUNCTION: get next ascii character in code page.
+@INOUTPUT pch: current character input and for next character outputing,
+	the pch byte buffer size need 1 byte.
+@RETURN bool_t: if next character exist return bool_true, 
+	otherwise return bool_false.
+***********************************************************************/
+EXP_API bool_t acp_next_ascii_char(byte_t *pch);
 
-	EXP_API int acp_gb2312_code_count(void);
+/***********************************************************************
+@FUNCTION: get gb2312 characters count in code page.
+@RETURN int: character count.
+***********************************************************************/
+EXP_API int acp_gb2312_code_count(void);
 
-	EXP_API bool_t acp_next_gb2312_char(byte_t *pch);
+/***********************************************************************
+@FUNCTION: get next gb2312 character in code page.
+@INOUTPUT pch: current character input and for next character outputing.
+	the pch byte buffer size need 2 bytes.
+@RETURN bool_t: if next character exist return bool_true, 
+	otherwise return bool_false.
+***********************************************************************/
+EXP_API bool_t acp_next_gb2312_char(byte_t *pch);
 
-	EXP_API int acp_unicode_code_count(void);
+/***********************************************************************
+@FUNCTION: get unicode characters count in code page.
+@RETURN int: character count.
+***********************************************************************/
+EXP_API int acp_unicode_code_count(void);
 
-	EXP_API bool_t acp_next_unicode_char(byte_t *pch);
+/***********************************************************************
+@FUNCTION: get next unicode character in code page.
+@INOUTPUT pch: current character input and for next character outputing.
+	the pch byte buffer size need 2 bytes.
+@RETURN bool_t: if next character exist return bool_true, 
+	otherwise return bool_false.
+***********************************************************************/
+EXP_API bool_t acp_next_unicode_char(byte_t *pch);
 
-	EXP_API int w_acp_help_code(const wchar_t* src, int len, wchar_t* buf, int max);
-
-	EXP_API int a_acp_help_code(const schar_t* src, int len, schar_t* buf, int max);
+/***********************************************************************
+@FUNCTION: get help ascii character.
+@INPUT src: the string token.
+@INPUT len: the string character length.
+@OUTPUT buf: for help string returning buffer.
+@INPUT max: the buffer size, not include the zero-terminated character.
+@RETURN int: the length of actual help characters returned.
+@NOTE: the parameter buf set to NULL and max set to MAX_LONG, 
+	can be used to test the length of help characters may be returned.
+	w_ prefix is the UCS-VERSION and a_ prefix is the MBS_VERSION function.
+***********************************************************************/
+EXP_API int w_acp_help_code(const wchar_t* src, int len, wchar_t* buf, int max);
+EXP_API int a_acp_help_code(const schar_t* src, int len, schar_t* buf, int max);
 
 #if defined (DEBUG) || defined (_DEBUG)
 	EXP_API void share_acp_dump(void);
@@ -167,9 +210,9 @@ extern "C" {
 #endif
 
 #if defined(_UNICODE) || defined(UNICODE)
-#define acp_help_code			w_acp_help_code
+#define acp_help_code	w_acp_help_code
 #else
-#define acp_help_code			a_acp_help_code
+#define acp_help_code	a_acp_help_code
 #endif
 
 

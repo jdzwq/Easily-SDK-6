@@ -27,6 +27,7 @@ LICENSE.GPL3 for more details.
 #include "impcons.h"
 
 #include "../xdkstd.h"
+#include "../xdkimp.h"
 
 #ifdef XDK_SUPPORT_CONS
 

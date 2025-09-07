@@ -27,6 +27,7 @@ LICENSE.GPL3 for more details.
 #include "calendar.h"
 #include "compare.h"
 
+#include "../xdkimp.h"
 #include "../xdkstd.h"
 
 static tchar_t week_day[7][4] = { _T("Sun"), _T("Mon"), _T("Tue"), _T("Wed"), _T("Thu"), _T("Fri"), _T("Sat") };

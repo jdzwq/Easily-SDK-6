@@ -27,7 +27,7 @@ LICENSE.GPL3 for more details.
 #include "impblock.h"
 
 #include "../xdkstd.h"
-
+#include "../xdkimp.h"
 
 typedef struct _block_context{
 	handle_head head;		//reserved for xhand_t

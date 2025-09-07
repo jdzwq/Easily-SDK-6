@@ -25,11 +25,10 @@ OBJ_PATH = ../../../Easily-tmp/macos/$(MODULE)/$(ARCH)
 TARGET = lib$(MODULE).$(CUR_VER).dylib
 LINKIT = lib$(MODULE).dylib
 
-LIBS = -lm -L $(LNK_PATH) -lxdk -limg
+LIBS = -lm -L $(LNK_PATH) -limg -lxdk -lxdn
 DIRS = $(wildcard \
 		$(SRC_PATH)/gob/*.c \
 		$(SRC_PATH)/gly/*.c \
-		$(SRC_PATH)/ttf/*.c \
 		$(SRC_PATH)/dot/*.c \
 		$(SRC_PATH)/g2/*.c \
 		$(SRC_PATH)/mgc/*.c \
@@ -46,9 +45,6 @@ $(OBJ_PATH)/%.o : $(SRC_PATH)/gob/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
 
 $(OBJ_PATH)/%.o : $(SRC_PATH)/gly/%.c
-	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
-
-$(OBJ_PATH)/%.o : $(SRC_PATH)/ttf/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
 
 $(OBJ_PATH)/%.o : $(SRC_PATH)/dot/%.c
@@ -94,7 +90,7 @@ test:
 
 install:
 	if ! test -d $(SRV_PATH)/api; then \
-	sudo mkdir -p $(SRV_PATH); \
+	sudo mkdir -p $(SRV_PATH)/api; \
 	fi
 	if ! test -d $(LNK_PATH); then \
 	sudo mkdir $(LNK_PATH); \

@@ -28,6 +28,7 @@ LICENSE.GPL3 for more details.
 #include "xdkinit.h"
 
 #include "xdkstd.h"
+#include "xdkimp.h"
 
 #ifndef XDK_SUPPORT_ACP_TABLE
 #include "acp/acp.h"

@@ -24,7 +24,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
 LICENSE.GPL3 for more details.
 ***********************************************************************/
 
-#include "mgc.h"
+#include "mcanv.h"
 
 #include "../xdgobj.h"
 
@@ -32,16 +32,34 @@ typedef struct _mgc_canvas_t{
 	handle_head head;
 
 	visual_t view;
+
+	float htpermm, vtpermm;
+	float horz_feed, vert_feed;
+	float horz_size, vert_size;
 }mgc_canvas_t;
+
+/*********************************************************************/
 
 canvas_t create_mgc_canvas(visual_t view)
 {
 	mgc_canvas_t* pcanv;
+	dev_cap_t cap = { 0 };
+	float pm = 0.0f;
 
 	pcanv = (mgc_canvas_t*)xmem_alloc(sizeof(mgc_canvas_t));
 
 	pcanv->view = view;
-	pcanv->head.tag = _CANVAS_PRINTER;
+	pcanv->head.tag = _CANVAS_DISPLAY;
+
+	mgc_get_device_caps(pcanv->view, &cap);
+	pm = mgc_pixel_metric(pcanv->view);
+	
+	pcanv->htpermm = (float)(1.0f/pm);
+	pcanv->vtpermm = (float)(1.0f/pm);
+	pcanv->horz_size = cap.horz_size;
+	pcanv->vert_size = cap.vert_size;
+	pcanv->horz_feed = 0.0f;
+	pcanv->vert_feed = 0.0f;
 
 	return &pcanv->head;
 }
@@ -50,18 +68,106 @@ void destroy_mgc_canvas(canvas_t canv)
 {
 	mgc_canvas_t* pcanv = TypePtrFromHead(mgc_canvas_t, canv);
 
-	XDK_ASSERT(canv && canv->tag == _CANVAS_PRINTER);
+	XDK_ASSERT(canv && canv->tag == _CANVAS_DISPLAY);
 
 	xmem_free(pcanv);
+}
+
+void set_canvas_ratio(canvas_t canv, float htpermm, float vtpermm)
+{
+	mgc_canvas_t* pcanv = TypePtrFromHead(mgc_canvas_t, canv);
+
+	XDK_ASSERT(canv);
+
+	pcanv->htpermm = htpermm;
+	pcanv->vtpermm = vtpermm;
+}
+
+float get_canvas_horz_size(canvas_t canv)
+{
+	mgc_canvas_t* pcanv = TypePtrFromHead(mgc_canvas_t, canv);
+
+	XDK_ASSERT(canv);
+
+	return pcanv->horz_size - 2 * pcanv->horz_feed;
+}
+
+float get_canvas_vert_size(canvas_t canv)
+{
+	mgc_canvas_t* pcanv = TypePtrFromHead(mgc_canvas_t, canv);
+
+	XDK_ASSERT(canv);
+
+	return pcanv->vert_size - 2 * pcanv->vert_feed;
+}
+
+void set_canvas_horz_feed(canvas_t canv, float cx)
+{
+	mgc_canvas_t* pcanv = TypePtrFromHead(mgc_canvas_t, canv);
+
+	XDK_ASSERT(canv);
+
+	pcanv->horz_feed = cx;
+}
+
+float get_canvas_horz_feed(canvas_t canv)
+{
+	mgc_canvas_t* pcanv = TypePtrFromHead(mgc_canvas_t, canv);
+
+	XDK_ASSERT(canv);
+
+	return pcanv->horz_feed;
+}
+
+void set_canvas_vert_feed(canvas_t canv, float cx)
+{
+	mgc_canvas_t* pcanv = TypePtrFromHead(mgc_canvas_t, canv);
+
+	XDK_ASSERT(canv);
+
+	pcanv->vert_feed = cx;
+}
+
+float get_canvas_vert_feed(canvas_t canv)
+{
+	mgc_canvas_t* pcanv = TypePtrFromHead(mgc_canvas_t, canv);
+
+	XDK_ASSERT(canv);
+
+	return pcanv->vert_feed;
 }
 
 visual_t mgc_get_canvas_visual(canvas_t canv)
 {
 	mgc_canvas_t* pcanv = TypePtrFromHead(mgc_canvas_t, canv);
 
-	XDK_ASSERT(canv && canv->tag == _CANVAS_PRINTER);
+	XDK_ASSERT(canv && canv->tag == _CANVAS_DISPLAY);
 
 	return pcanv->view;
+}
+
+float mgc_pt_to_mm(canvas_t canv, int pt, bool_t horz)
+{
+	mgc_canvas_t* pcanv = TypePtrFromHead(mgc_canvas_t, canv);
+
+	XDK_ASSERT(canv);
+
+	if (horz)
+		return (float)((float)pt / pcanv->htpermm - pcanv->horz_feed);
+	else
+		return (float)((float)pt / pcanv->vtpermm - pcanv->vert_feed);
+}
+
+int mgc_mm_to_pt(canvas_t canv, float mm, bool_t horz)
+{
+	mgc_canvas_t* pcanv = TypePtrFromHead(mgc_canvas_t, canv);
+
+	XDK_ASSERT(canv);
+
+	if (horz)
+		return ROUNDINT((mm + pcanv->horz_feed) * pcanv->htpermm);
+	else
+		return ROUNDINT((mm + pcanv->vert_feed) * pcanv->vtpermm);
 }
 
 void mgc_rect_mm_to_pt(canvas_t canv, xrect_t* pxr)

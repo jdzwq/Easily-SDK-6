@@ -28,7 +28,6 @@ LICENSE.GPL3 for more details.
 #define _IMPERROR_H
 
 #include "../xdkdef.h"
-#include "../log/loginf.h"
 
 #ifdef	__cplusplus
 extern "C" {

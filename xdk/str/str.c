@@ -26,6 +26,7 @@ LICENSE.GPL3 for more details.
 
 #include "str.h"
 
+#include "../xdkimp.h"
 #include "../xdkstd.h"
 
 schar_t* a_xsalloc(int len)
@@ -947,7 +948,7 @@ unsigned char w_binntouc(const wchar_t* token, int n)
 
 unsigned char w_bintouc(const wchar_t* token)
 {
-	return a_binntouc(token, w_xslen(token));
+	return w_binntouc(token, w_xslen(token));
 }
 
 int a_uctobin(unsigned char c, schar_t* buf, int n)

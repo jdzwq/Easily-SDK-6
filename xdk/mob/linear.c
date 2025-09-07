@@ -28,6 +28,7 @@ LICENSE.GPL3 for more details.
 
 #include "../xdkobj.h"
 #include "../xdkstd.h"
+#include "../xdkimp.h"
 
 typedef struct _linear_frame{
 		int frm_seq;

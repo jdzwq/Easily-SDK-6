@@ -27,7 +27,7 @@ LICENSE.GPL3 for more details.
 #include "impcache.h"
 
 #include "../xdkstd.h"
-
+#include "../xdkimp.h"
 
 /////////////////////////////////////////////////////////////////////////////////////////
 #ifdef XDK_SUPPORT_MEMO_CACHE

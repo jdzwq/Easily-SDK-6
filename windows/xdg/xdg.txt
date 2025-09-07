@@ -7,7 +7,6 @@ SOURCES= \
 ../../../Easily-tmp/windows/xdg/x64/Debug/gly_finder.c \
 ../../../Easily-tmp/windows/xdg/x64/Debug/gly_loader.c \
 ../../../Easily-tmp/windows/xdg/x64/Debug/gly_pattern.c \
-../../../Easily-tmp/windows/xdg/x64/Debug/ttf_loader.c \
 ../../../Easily-tmp/windows/xdg/x64/Debug/dot_arc.c \
 ../../../Easily-tmp/windows/xdg/x64/Debug/dot_curve.c \
 ../../../Easily-tmp/windows/xdg/x64/Debug/dot_ellipse.c \
@@ -31,6 +30,7 @@ SOURCES= \
 ../../../Easily-tmp/windows/xdg/x64/Debug/mfnt_internal.c \
 ../../../Easily-tmp/windows/xdg/x64/Debug/mgc_canvas.c \
 ../../../Easily-tmp/windows/xdg/x64/Debug/mgc_context.c \
+../../../Easily-tmp/windows/xdg/x64/Debug/mgc_gdi.c \
 ../../../Easily-tmp/windows/xdg/x64/Debug/dib_color.c \
 ../../../Easily-tmp/windows/xdg/x64/Debug/bmp.c \
 ../../../Easily-tmp/windows/xdg/x64/Debug/jpg.c \

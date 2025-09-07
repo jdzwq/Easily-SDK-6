@@ -1,0 +1,6 @@
+SOURCES= \
+Z:/Easily-tmp/windows/xtimerd/x64/Debug/xtimers.cc \
+Z:/Easily-tmp/windows/xtimerd/x64/Debug/xtimerd.cc \
+Z:/Easily-tmp/windows/xtimerd/x64/Debug/xtimerdMain_windows.cc \
+Z:/Easily-tmp/windows/xtimerd/x64/Debug/srvcrt.cc \
+Z:/Easily-tmp/windows/xtimerd/x64/Debug/srvlog.cc \

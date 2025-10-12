@@ -29,8 +29,6 @@ LICENSE.GPL3 for more details.
 
 #include "../xdldef.h"
 
-#if defined(XDL_SUPPORT_SVG)
-
 #ifdef	__cplusplus
 extern "C" {
 #endif
@@ -49,6 +47,5 @@ EXP_API void	draw_svg(const drawing_interface* pif, const xrect_t* prt, link_t_p
 }
 #endif
 
-#endif /*XDL_SUPPORT_SVG*/
 
 #endif /*SVGING_H*/

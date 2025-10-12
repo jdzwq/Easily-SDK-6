@@ -35,7 +35,18 @@ LICENSE.GPL3 for more details.
 
 res_modu_t _load_library(const tchar_t* lname)
 {
-	return dlopen(lname, RTLD_LAZY);
+	void* rh;
+    char* err;
+
+    rh = dlopen(lname, RTLD_LAZY);
+
+    if(rh == NULL)
+    {
+        err = dlerror();
+        printf(err);
+    }
+
+    return (res_modu_t)rh;
 }
 
 void _free_library(res_modu_t lib)

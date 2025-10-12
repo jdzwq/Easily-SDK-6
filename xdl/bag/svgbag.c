@@ -30,8 +30,6 @@ LICENSE.GPL3 for more details.
 #include "../xdldoc.h"
 #include "../xdlview.h"
 
-#ifdef XDL_SUPPORT_SVG
-
 void svg_print_form(link_t_ptr svg, link_t_ptr form, int page)
 {
 	visual_t view;
@@ -277,9 +275,5 @@ void svg_print_rich(link_t_ptr svg, const xfont_t* pxf, const xface_t* pxa, link
 
 	destroy_svg_canvas(canv);
 	destroy_svg_visual(view);
-	
-}
+}	
 
-
-
-#endif //

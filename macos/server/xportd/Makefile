@@ -1,28 +1,30 @@
 #-----------------------------------------------------------------------------
 # begin GNU MAKE file
-# making order:
-# 1. make -f Makefile.mk tools --if need to creating some directory or file-list
-# 2. make -f Makefile.mk clean
-# 3. make -f Makefile.mk
-# 4. make -f Makefile.mk install
+# making order for release:
+# 1. make test
+# 2. make clean
+# 3. make all
+# 4. make install
 #-----------------------------------------------------------------------------
 CC = clang
-CFLAGS = -g -Wall -D _DEBUG
+CFLAGS = -g -Wall
 
 MODULE = xportd
 ARCH = aarch64
 
 LIB_PATH = /usr/local/lib
+SRV_PATH = /usr/local/Easily/sbin
 
-INC_PATH = ~/工程/Easily-sdk-6/include
-SRC_PATH = ~/工程/Easily-sdk-6/server
-OBJ_PATH = ~/工程/Easily-tmp/macos/$(MODULE)/$(ARCH)
-OUT_PATH = ~/工程/Easily-app-6/macos/sbin
+INC_PATH = ../../../include
+SRC_PATH = ../../../server
+
+OBJ_PATH = ~/工程/Easily-temp/macos/$(MODULE)/$(ARCH)
 
 DIRS = $(wildcard \
 	$(SRC_PATH)/xhttps/xhttps.cc \
 	$(SRC_PATH)/xtcps/xtcps.cc \
 	$(SRC_PATH)/xudps/xudps.cc \
+	$(SRC_PATH)/xportd/macos/xportdMain_macos.cc \
 	$(SRC_PATH)/xportd/*.cc \
 	$(SRC_PATH)/*.cc)
 SRCS = $(notdir $(DIRS))
@@ -38,6 +40,9 @@ $(OBJ_PATH)/%.o : $(SRC_PATH)/xtcps/%.cc
 $(OBJ_PATH)/%.o : $(SRC_PATH)/xudps/%.cc
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
 
+$(OBJ_PATH)/%.o : $(SRC_PATH)/xportd/macos/%.cc
+	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
+
 $(OBJ_PATH)/%.o : $(SRC_PATH)/xportd/%.cc
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
 
@@ -46,7 +51,7 @@ $(OBJ_PATH)/%.o : $(SRC_PATH)/%.cc
 
 all : $(OBJS)
 	rm -f $@
-	$(CC) -o $(OUT_PATH)/$(MODULE) $(OBJS) -L $(LIB_PATH) -lxdk -lxdn -lxdg -lxdl \
+	$(CC) -o $(OBJ_PATH)/$(MODULE) $(OBJS) -L $(LIB_PATH) -lxdk -lxdg -lxdl \
 	-Wl,-rpath $(LIB_PATH)
 
 test:
@@ -54,14 +59,26 @@ test:
 	mkdir -p $(OBJ_PATH); \
 	chmod 755 $(OBJ_PATH); \
 	fi
+
 	@echo $(DIRS)
 	@echo $(SRCS)
 	@echo $(OBJS)
 
+install:
+	if ! test -d $(SRV_PATH); then \
+	sudo mkdir $(SRV_PATH); \
+	fi
+
+	sudo cp -f $(OBJ_PATH)/$(MODULE) $(SRV_PATH);
+	sudo chmod +x $(SRV_PATH)/$(MODULE);
+
+uninstall:
+	sudo rm -f $(SRV_PATH)/$(MODULE)
+
 .PHONY : clean
 clean:
 	rm -f $(OBJS)
-	rm -f $(OUT_PATH)/$(MODULE)
+	rm -f $(OBJ_PATH)/$(MODULE)
 #-----------------------------------------------------------------------------
 # end GNU MAKE file
 #-----------------------------------------------------------------------------

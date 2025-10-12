@@ -16,7 +16,7 @@ LIB_PATH = /usr/local/lib
 
 INC_PATH = ~/工程/Easily-sdk-6/include
 SRC_PATH = ~/工程/Easily-sdk-6/test/oem_crypt_test
-OBJ_PATH = ~/工程/Easily-tmp/macos/$(MODULE)/$(ARCH)
+OBJ_PATH = ~/工程/Easily-temp/macos/$(MODULE)/$(ARCH)
 OUT_PATH = ~/工程/Easily-app-6/macos/bin
 
 DIRS = $(wildcard $(SRC_PATH)/*.cc)

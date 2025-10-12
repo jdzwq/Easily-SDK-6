@@ -2,7 +2,7 @@
 #include <sys/resource.h>
 #include <syslog.h>
 
-#include "xtimerd.h"
+#include "../xtimerd.h"
 
 #define PID_FILE "/var/run/xtimerd.pid"
 

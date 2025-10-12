@@ -35,52 +35,55 @@ typedef bool_t(*PF_ENUM_AC_TABLE)(const tchar_t* key, int len, vword_t delta, vo
 extern "C" {
 #endif
 
-/*
-@FUNCTION create_ac_table: create a ac table.
-@RETURN link_t_ptr: return the ac table link component.
-*/
+/***********************************************************************
+@FUNCTION: create ac-table.
+@RETURN: the link compoment of ac-table or NULL if failed.
+***********************************************************************/
 EXP_API link_t_ptr create_ac_table(void);
 
-/*
-@FUNCTION destroy_ac_table: destroy a ac table.
-@INPUT link_t_ptr ptr: the ac table link component.
-@RETURN void: none.
-*/
+/***********************************************************************
+@FUNCTION: destroy ac-table.
+@INPUT: the link compomenet of actable.
+@RETURN: none.
+***********************************************************************/
 EXP_API void destroy_ac_table(link_t_ptr ptr);
 
-/*
-@FUNCTION insert_ac_table: insert a key and value into ac table.
-@INPUT link_t_ptr ptr: the ac table link component.
-@INPUT const tchar_t* key: the key string token.
-@INPUT int len: the key string token length in characters.
-@INPUT vword_t val: the int val.
-@RETURN void: none.
-*/
+/***********************************************************************
+@FUNCTION: insert a pair of key-value into ac-table.
+@INPUT: the link compomenet of ac-table.
+@INPUT: the key name.
+@INPUT: the key name characters or -1 indicate zero terminated.
+@INPUT: the key value.
+@RETURN: none.
+@NOTE: if the key name exists in ac-table then the value to be replaced,
+	otherwise new key-value to be added.
+***********************************************************************/
 EXP_API void insert_ac_table(link_t_ptr ptr, const tchar_t* key, int len, vword_t val);
 
-/*
-@FUNCTION build_ac_table: build failure transfer table of the ac table .
-@INPUT link_t_ptr ptr: the ac table link component.
-@RETURN void: none.
-*/
+/***********************************************************************
+@FUNCTION: build failure transfer table of the ac-table.
+@INPUT: the link compomenet of actable.
+@RETURN: none.
+***********************************************************************/
 EXP_API void build_ac_table(link_t_ptr ptr);
 
-/*
-@FUNCTION find_ac_table: find and return data in ac table by the key.
-@INPUT link_t_ptr ptr: the ac table link component.
-@INPUT const tchar_t* key: the key string token.
-@INPUT int len: the key string token length in characters.
-@RETURN vword_t: return the data if finded, otherwise return zero.
-*/
+/***********************************************************************
+@FUNCTION: find the key-value pair in ac-table.
+@INPUT: the link compomenet of ac-table.
+@INPUT: the key name.
+@INPUT: the key name characters or -1 indicate zero terminated.
+@RETURN: value of the key or zero if not find.
+***********************************************************************/
 EXP_API vword_t find_ac_table(link_t_ptr ptr, const tchar_t* key, int len);
 
-/*
-@FUNCTION enum_ac_table: enum ac table key and value.
-@INPUT link_t_ptr ptr: the ac table link component.
-@INPUT PF_ENUM_AC_TABLE pf: the enum callback function.
-@INPUT void* pa: the parameter tanslate to callback function.
-@RETURN void: none.
-*/
+/***********************************************************************
+@FUNCTION: enumerate the key-value pairs in ac-table.
+@INPUT: the link compomenet of ac-table.
+@INPUT: the callback function for getting one key-value per called.
+@INPUT: the user-parameter trans back to callback function.
+@RETURN: none.
+@NOTE: return non-zero in callback function will break the enumerating.
+***********************************************************************/
 EXP_API void enum_ac_table(link_t_ptr ptr, PF_ENUM_AC_TABLE pf, void* pa);
 
 

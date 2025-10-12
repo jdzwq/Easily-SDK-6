@@ -1,18 +1,20 @@
+--linux
+sudo cp -rf ./templ/xService/* /usr/local/xService
 
 -linux
 cd /usr/local/xService
-vi ./.bashrc
+vi ~/.bashrc
 export XSERVICE_ROOT="/usr/local/xService"
 export XSERVICE_DATA="/usr/local/xService/nfs"
-source ./.bashrc
+source ~/.bashrc
 
---linux
-vi /etc/ld.so.conf
+sudo vi /etc/ld.so.conf
 /usr/local/lib
 /usr/local/xService/api
 
-ldconfig
+sudo ldconfig
 
+--linux
 sudo systemctl enable xportd.service
 systemctl daemon-reload
 systemctl list-unit-files

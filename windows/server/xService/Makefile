@@ -1,9 +1,10 @@
 #-----------------------------------------------------------------------------
 # begin microsoft NMAKE file
-# making order:
-# 1. nmake /f Makefile.mk test --if need to creating some directory or file-list
-# 2. nmake /f Makefile.mk clean
-# 3. nmake /f Makefile.mk
+# making order for release version:
+# 1. nmake test
+# 2. nmake clean
+# 3. nmake all
+# 4. nmake install
 #-----------------------------------------------------------------------------
 !if EXIST("xService.txt")
 !include xService.txt
@@ -12,27 +13,29 @@
 ARCH = x64
 MODULE = xService
 
-INC_PATH = Z:/Easily-sdk-6/include
-SRC_PATH = Z:/Easily-sdk-6/server
-LIB_PATH = Z:/Easily-sdk-6/windows/lib/$(ARCH)
-OBJ_PATH = Z:/Easily-tmp/windows/$(MODULE)/$(ARCH)/Debug
-PDB_PATH = Z:/Easily-tmp/windows/$(ARCH)
-OUT_PATH = Z:/Easily-app-6/windows/sbin64
+INC_PATH = ../../../include
+SRC_PATH = ../../../server
 
-TARGET = $(OUT_PATH)/$(MODULE).exe
+LIB_PATH = ../../lib/$(ARCH)
+INS_PATH = C:\Easily\sbin64
+
+OBJ_PATH = D:/Easily-temp/windows/$(MODULE)/$(ARCH)/Debug
+PDB_PATH = D:/Easily-temp/windows/$(ARCH)
+
+TARGET = $(OBJ_PATH)/$(MODULE).exe
 DATABASE = $(OBJ_PATH)/$(MODULE).pdb
 INSTRUMENT = $(OBJ_PATH)/$(MODULE).pgd
 
 CC = cl.exe
 CFLAGS = /c /GL /W3 /Zc:wchar_t /Zi /Od /Fd"$(PDB_PATH)/vc140.pdb" /fp:precise \
-	/D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_UNICODE" /D "UNICODE" \
-	/errorReport:prompt /WX- /Zc:forScope /RTC1 /Gd /MDd \
+	/D "WIN32" /D "_WINDOWS" /D "_UNICODE" /D "UNICODE" \
+	/errorReport:prompt /WX- /Zc:forScope /RTC1 /Gd /MT \
 	/Fa"$(OBJ_PATH)/" /EHsc /nologo /Fo"$(OBJ_PATH)/" /Fp"$(OBJ_PATH)/$(MODULE).pch"
 
 LK = link.exe
 LFLAGS = /OUT:"$(TARGET)" /NXCOMPAT /PDB:"$(DATABASE)" \
 	/DYNAMICBASE "kernel32.lib" "advapi32.lib" \
-	/DEBUG /MACHINE:$(ARCH) /LTCG:PGINSTRUMENT /PGD:"$(INSTRUMENT)" /SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup \
+	/MACHINE:$(ARCH) /LTCG:PGINSTRUMENT /PGD:"$(INSTRUMENT)" /SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup \
 	/LIBPATH:"$(LIB_PATH)" \
 	/ERRORREPORT:PROMPT /NOLOGO /TLBID:1
 
@@ -80,10 +83,11 @@ test:
 	if not exist $(abspath $(subst /,\, $(OBJ_PATH))) mkdir $(abspath $(subst /,\, $(OBJ_PATH)))
 
 install:
-	copy /y $(subst /,\, $(TARGET)) $(INS_PATH)\api\
+	if not exist $(INS_PATH) mkdir $(INS_PATH)
+	copy /y $(subst /,\, $(TARGET)) $(INS_PATH)
 
 uninstall:
-	del $(INS_PATH)/api/$(MODULE)_$(ARCH).exe
+	del $(INS_PATH)/$(MODULE).exe
 
 .PHONY : clean
 clean:

@@ -29,8 +29,6 @@ LICENSE.GPL3 for more details.
 
 #include "../xdldef.h"
 
-#if defined(XDL_SUPPORT_SVG)
-
 #ifdef	__cplusplus
 extern "C" {
 #endif
@@ -196,7 +194,5 @@ EXP_API int svg_mm_to_pt_raw(visual_t view, float tm, bool_t horz);
 #ifdef	__cplusplus
 }
 #endif
-
-#endif /*XDL_SUPPORT_SVG*/
 
 #endif /*SVGCANV_H*/

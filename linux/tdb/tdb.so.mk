@@ -13,13 +13,13 @@ MODULE = tdb
 ARCH = aarch64
 VER = 6.0
 
-SRV_PATH = /usr/local/xService
+SRV_PATH = /usr/local/Easily/sbin
 LNK_PATH = /usr/local/lib
 
 INC_PATH = ../../include
 SRC_PATH = ../../tdb
 OUT_PATH = ../../../Easily-app-6/linux/sbin/api
-OBJ_PATH = ../../../Easily-tmp/linux/$(MODULE)/$(ARCH)
+OBJ_PATH = ../../../Easily-temp/linux/$(MODULE)/$(ARCH)
 
 TARGET = lib$(MODULE).so.$(VER)
 LINKIT = lib$(MODULE).so

@@ -20,6 +20,8 @@
 #include "maa/integerarray.h"
 #include "maa/numericarray.h"
 
+#include "math/arith.h"
+
 #include "util/calendar.h"
 #include "util/charset.h"
 #include "util/compare.h"

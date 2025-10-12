@@ -13,13 +13,13 @@ MODULE = dicm
 ARCH = aarch64
 VER = 6.0
 
-SRV_PATH = /usr/local/xService
+SRV_PATH = /usr/local/Easily/sbin
 LNK_PATH = /usr/local/lib
 
 INC_PATH = ../../include
 SRC_PATH = ../../dicm
 OUT_PATH = ../../../Easily-app-6/macos/sbin/api
-OBJ_PATH = ../../../Easily-tmp/macos/$(MODULE)/$(ARCH)
+OBJ_PATH = ~/工程/Easily-temp/macos/$(MODULE)/$(ARCH)
 
 TARGET = lib$(MODULE).so.$(VER)
 LINKIT = lib$(MODULE).so

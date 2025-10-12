@@ -38,11 +38,6 @@ void xdu_process_init()
 
     g_xdu_mou.if_ok = 1;
 
-
-#ifdef XDU_SUPPORT_BLUT
-	xdu_impl_blut(&g_xdu_mou.if_blut);
-#endif
-
 #ifdef XDU_SUPPORT_CONTEXT
 	xdu_impl_context(&g_xdu_mou.if_context);
 

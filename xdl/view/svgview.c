@@ -30,9 +30,6 @@ LICENSE.GPL3 for more details.
 #include "../xdldoc.h"
 
 
-#if defined(XDL_SUPPORT_SVG)
-
-
 void draw_svg(const drawing_interface* pif, const xrect_t* pbox, link_t_ptr ptr)
 {
 	link_t_ptr ilk;
@@ -274,5 +271,3 @@ void draw_svg(const drawing_interface* pif, const xrect_t* pbox, link_t_ptr ptr)
 	destroy_svg_canvas(canv);
 	destroy_svg_visual(view);
 }
-
-#endif /*XDL_SUPPORT_SVG*/

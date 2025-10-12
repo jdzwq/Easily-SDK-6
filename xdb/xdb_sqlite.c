@@ -1,5 +1,5 @@
 ﻿/***********************************************************************
-	Easily xdb postgres
+	Easily SDK v6.0
 
 	(c) 2005-2016 JianDe LiFang Technology Corporation.  All Rights Reserved.
 
@@ -9,6 +9,7 @@
 
 	@module	xdb_sqlite.c | xdb sqlite implement file
 
+	@devnote 张文权 2021.01 - 2021.12	v6.0
 ***********************************************************************/
 
 /**********************************************************************
@@ -2092,7 +2093,7 @@ EXECUTE:
 
 		if (SQLITE_OK != sqlite3_prepare_v2(pdb->ctx, d_sql, d_len, &stm, 0))
 		{
-			_raise_ctx_error(pdb);
+			_raise_ctx_error((sqlite3*)pdb);
 		}
 
 		xmem_free(d_sql);
@@ -2103,7 +2104,7 @@ EXECUTE:
 			_raise_ctx_error(pdb->ctx);
 		}
 
-		pdb->rows += sqlite3_changes(stm);
+		pdb->rows += sqlite3_changes((sqlite3*)stm);
 		sqlite3_finalize(stm);
 		stm = NULL;
 

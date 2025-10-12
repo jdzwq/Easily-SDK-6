@@ -1,7 +1,7 @@
 ﻿
 
 /***********************************************************************
-	Easily Timer Service
+	Easily SDK v6.0
 
 	(c) 2005-2016 JianDe LiFang Technology Corporation.  All Rights Reserved.
 

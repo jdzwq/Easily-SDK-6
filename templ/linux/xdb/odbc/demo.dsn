@@ -1,0 +1,9 @@
+[ODBC]
+DRIVER={ODBC Driver 17 for SQL Server}
+SERVER=tcp:172.16.110.10,1433
+UID=usr
+PWD=123
+DATABASE=demo
+Trusted_Connection=yes
+Encrypt=no
+TrustServerCertificate=yes

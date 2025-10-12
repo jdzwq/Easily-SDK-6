@@ -27,7 +27,7 @@ void cov_text(const tchar_t* pathname, const tchar_t* src_chs, const tchar_t* ds
 		src_enc = parse_encode(src_chs);
 
 	if (xsicmp(dst_chs, _T("UNK")) == 0)
-		dst_enc = _UTF8;
+		dst_enc = _UTF8_BOM;
 	else
 		dst_enc = parse_encode(dst_chs);
 

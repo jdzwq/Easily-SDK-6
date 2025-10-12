@@ -15,13 +15,13 @@ AFLAGS = -rcs
 MODULE = rtf
 ARCH = aarch64
 
-SRV_PATH = /usr/local/xService
+SRV_PATH = /usr/local/Easily/sbin
 LNK_PATH = /usr/local/lib
 
 INC_PATH = ../../include
 SRC_PATH = ../../third-party
 OUT_PATH = ../lib
-OBJ_PATH = ../../../Easily-tmp/macos/$(MODULE)/$(ARCH)
+OBJ_PATH = ~/工程/Easily-temp/macos/$(MODULE)/$(ARCH)
 
 TARGET = lib$(MODULE).a
 

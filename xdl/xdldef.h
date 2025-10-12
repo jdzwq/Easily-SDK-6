@@ -29,15 +29,14 @@ LICENSE.GPL3 for more details.
 #define	_XDLDEF_H
 
 #include <xdk.h>
-#include <xdn.h>
 #include <xdg.h>
 
 #if defined(_OS_WINDOWS)
-#include "windows/_cfg_win32.h"
+#include "lang/_lang_gb2312.h"
 #elif defined(_OS_MACOS)
-#include "macos/_cfg_macos.h"
+#include "lang/_lang_utf8.h"
 #elif defined(_OS_LINUX)
-#include "linux/_cfg_linux.h"
+#include "lang/_lang_utf8.h"
 #endif
 
 #include "attr/cssattr.h"
@@ -154,7 +153,7 @@ typedef struct _page_cator_t{
 #define _DB_ODBC		0x2B
 #define _DB_OCI			0x2C
 #define _DB_MYSQL		0x2D
-#define _DB_POSTGRE		0x2E
+#define _DB_PGSQL		0x2E
 #define _DB_SQLITE		0x2F
 typedef struct _handle_head	*xdb_t;
 

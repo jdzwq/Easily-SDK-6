@@ -30,7 +30,7 @@ bool_t get_bio_interface(xhand_t io, bio_interface* pio)
 {
 	if(xdk_bio_interface(io, pio)) return 1;
 
-	if(xdn_bio_interface(io, pio)) return 1;
+	if(xdk_bio_interface(io, pio)) return 1;
 	
 	return 0;
 }

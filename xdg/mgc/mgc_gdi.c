@@ -1077,16 +1077,16 @@ void mgc_draw_polygon_raw(visual_t mgc, const xpen_t *pxp, const xbrush_t *pxb, 
 		parse_xcolor(&xc[0], pxb->color);
 		parse_xcolor(&xc[1], pxb->linear);
 
-		pt_gravity_point(ppt_buff, total, &pt);
+		pt_gravity_point(ppt_buff, total, pt);
 		pt_polygon_rect(ppt_buff, total, &xr);
 
 		if (compare_text(pxb->style, -1, GDI_ATTR_FILL_STYLE_GRADIENT, -1, 1) == 0)
 		{
-			(*(pdev->radialLinear))(hand, &xr, &pt, xc, rop);
+			(*(pdev->radialLinear))(hand, &xr, pt, xc, rop);
 		}
 		else
 		{
-			(*(pdev->floodFill))(hand, &xr, &pt, xc, rop);
+			(*(pdev->floodFill))(hand, &xr, pt, xc, rop);
 		}
 	}
 

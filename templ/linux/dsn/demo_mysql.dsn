@@ -1,0 +1,7 @@
+[MYSQL]
+DRIVER=MYSQL
+UID=usr
+PWD=123
+DATABASE=demo
+SERVER=172.16.110.5:3306
+Description=demo

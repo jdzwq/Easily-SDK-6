@@ -1,0 +1,5 @@
+[OCI]
+SERVER=172.16.110.5:1521
+DATABASE=ordb
+UID=usr
+PWD=abc

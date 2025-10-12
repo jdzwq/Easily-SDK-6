@@ -8,19 +8,52 @@
         "name": "(lldb) macos",
         "type": "cppdbg",
         "request": "launch",
-        "program": "/Users/zhangwenquan/工程/Easily-app-6/macos/bin/gen_glyph",
+        "program": "/Users/zhangwenquan/工程/Easily-app-6/macos/sbin/xportd",
         "args": [],
         "stopAtEntry": false,
         "cwd": "${fileDirname}",
         "environment": [],
         "externalConsole": false,
-        "MIMode": "lldb"
+        "MIMode": "lldb",
+        "followFork": "child",
+        "stopOnFork": true,
+        "initCommands": [
+            "settings set target.process.follow-fork-mode child",
+            "settings set target.process.stop-on-exec true"
+        ]
     },
     {
         "name": "(gdb) linux",
         "type": "cppdbg",
         "request": "launch",
-        "program": "/home/zwq/Easily-app-6/linux/bin/xdc_editor_test",
+        "program": "/home/jdzwq/Easily-app-6/linux/sbin/xportd",
+        "args": [],
+        "stopAtEntry": false,
+        "cwd": "${fileDirname}",
+        "environment": [],
+        "externalConsole": false,
+        "MIMode": "gdb",
+        "setupCommands": [
+            {
+                "description": "Enable pretty-printing for gdb",
+                "text": "-enable-pretty-printing",
+                "ignoreFailures": true
+            },
+            {
+                "description": "Set Disassembly Flavor to Intel",
+                "text": "-gdb-set disassembly-flavor intel",
+                "ignoreFailures": true
+            },
+            {"text": "-gdb-set follow-fork-mode child", "ignoreFailures": true},
+            {"text": "-gdb-set detach-on-fork on", "ignoreFailures": true},
+            {"text": "-gdb-set scheduler-lockin on", "ignoreFailures": true}
+        ]
+    },
+    {
+        "name": "(gdb) chrome",
+        "type": "cppdbg",
+        "request": "launch",
+        "program": "/home/jdzwq997/Easily-app-6/chrome/bin/xdu_win_test",
         "args": [],
         "stopAtEntry": false,
         "cwd": "${fileDirname}",
@@ -44,7 +77,7 @@
         "name": "(msvc) windows",
         "type": "cppvsdbg",
         "request": "launch",
-        "program": "Z:/Easily-app-6/windows/bin64/xdb_lib_test.exe",
+        "program": "C:/Easily/sbin64/xportd.exe",
         "args": [],
         "stopAtEntry": false,
         "cwd": "${fileDirname}",

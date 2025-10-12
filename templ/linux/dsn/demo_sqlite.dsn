@@ -1,0 +1,7 @@
+[SQLITE]
+DRIVER=sqlit3
+UID=
+PWD=
+DATABASE=demo.db
+SERVER=/home/jdzwq/test
+Description=demo

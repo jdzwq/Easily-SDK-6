@@ -16,7 +16,7 @@ LIB_PATH = /usr/local/lib
 
 INC_PATH = ~/Easily-sdk-6/include
 SRC_PATH = ~/Easily-sdk-6/test/xdg_mgc_test
-OBJ_PATH = ~/Easily-tmp/linux/$(MODULE)/$(ARCH)
+OBJ_PATH = ~/Easily-temp/linux/$(MODULE)/$(ARCH)
 OUT_PATH = ~/Easily-app-6/linux/bin
 
 DIRS = $(wildcard $(SRC_PATH)/*.cc)

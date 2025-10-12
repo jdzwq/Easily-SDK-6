@@ -2,7 +2,7 @@
 #include <sys/resource.h>
 #include <syslog.h>
 
-#include "xportd.h"
+#include "../xportd.h"
 
 #define PID_FILE "/var/run/xportd.pid"
 

@@ -29,8 +29,6 @@ LICENSE.GPL3 for more details.
 #include "../xdlgdi.h"
 #include "../xdlview.h"
 
-#if defined(XDL_SUPPORT_SVG)
-
 void svg_get_canvas_interface(canvas_t canv, drawing_interface* pif)
 {
 	pif->ctx = (void*)canv;
@@ -137,5 +135,3 @@ void svg_get_canvas_measure(canvas_t canv, measure_interface* pim)
 	pim->pf_measure_size = (PF_MEASURE_SIZE)svg_text_size;
 	pim->pf_measure_rect = (PF_MEASURE_RECT)svg_text_rect;
 }
-
-#endif /**/

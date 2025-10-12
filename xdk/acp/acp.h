@@ -144,56 +144,56 @@ extern "C" {
 
 /***********************************************************************
 @FUNCTION: get ascii characters count in code page.
-@RETURN int: character count.
+@RETURN: character count.
 ***********************************************************************/
 EXP_API int acp_ascii_code_count(void);
 
 /***********************************************************************
 @FUNCTION: get next ascii character in code page.
-@INOUTPUT pch: current character input and for next character outputing,
+@INOUTPUT: current character input and for next character outputing,
 	the pch byte buffer size need 1 byte.
-@RETURN bool_t: if next character exist return bool_true, 
+@RETURN: if next character exist return bool_true, 
 	otherwise return bool_false.
 ***********************************************************************/
 EXP_API bool_t acp_next_ascii_char(byte_t *pch);
 
 /***********************************************************************
 @FUNCTION: get gb2312 characters count in code page.
-@RETURN int: character count.
+@RETURN: character count.
 ***********************************************************************/
 EXP_API int acp_gb2312_code_count(void);
 
 /***********************************************************************
 @FUNCTION: get next gb2312 character in code page.
-@INOUTPUT pch: current character input and for next character outputing.
+@INOUTPUT: current character input and for next character outputing.
 	the pch byte buffer size need 2 bytes.
-@RETURN bool_t: if next character exist return bool_true, 
+@RETURN: if next character exist return bool_true, 
 	otherwise return bool_false.
 ***********************************************************************/
 EXP_API bool_t acp_next_gb2312_char(byte_t *pch);
 
 /***********************************************************************
 @FUNCTION: get unicode characters count in code page.
-@RETURN int: character count.
+@RETURN: character count.
 ***********************************************************************/
 EXP_API int acp_unicode_code_count(void);
 
 /***********************************************************************
 @FUNCTION: get next unicode character in code page.
-@INOUTPUT pch: current character input and for next character outputing.
+@INOUTPUT: current character input and for next character outputing.
 	the pch byte buffer size need 2 bytes.
-@RETURN bool_t: if next character exist return bool_true, 
+@RETURN: if next character exist return bool_true, 
 	otherwise return bool_false.
 ***********************************************************************/
 EXP_API bool_t acp_next_unicode_char(byte_t *pch);
 
 /***********************************************************************
 @FUNCTION: get help ascii character.
-@INPUT src: the string token.
-@INPUT len: the string character length.
-@OUTPUT buf: for help string returning buffer.
-@INPUT max: the buffer size, not include the zero-terminated character.
-@RETURN int: the length of actual help characters returned.
+@INPUT: the string token.
+@INPUT: the string character length.
+@OUTPUT: for help string returning buffer.
+@INPUT: the buffer size, not include the zero-terminated character.
+@RETURN: the length of actual help characters returned.
 @NOTE: the parameter buf set to NULL and max set to MAX_LONG, 
 	can be used to test the length of help characters may be returned.
 	w_ prefix is the UCS-VERSION and a_ prefix is the MBS_VERSION function.

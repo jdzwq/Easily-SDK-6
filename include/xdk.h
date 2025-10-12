@@ -6,6 +6,8 @@
 #include "../xdk/xdkimp.h"
 #include "../xdk/xdkobj.h"
 #include "../xdk/xdkoem.h"
+#include "../xdk/xdknet.h"
+#include "../xdk/xdkstm.h"
 #include "../xdk/xdkbio.h"
 #include "../xdk/xdktdb.h"
 

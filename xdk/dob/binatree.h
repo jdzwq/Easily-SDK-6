@@ -40,122 +40,132 @@ typedef enum{
 extern "C" {
 #endif
 
-/*
-@FUNCTION create_bina_tree: create a binary tree.
-@RETURN link_t_ptr: return the binary tree link component.
-*/
+
+/***********************************************************************
+@FUNCTION: create b-tree.
+@RETURN: the link compoment of b-tree or NULL if failed.
+***********************************************************************/
 EXP_API link_t_ptr create_bina_tree(int level);
 
-/*
-@FUNCTION destroy_bina_tree: destroy a binary tree.
-@INPUT link_t_ptr ptr: the binary tree link component.
-@RETURN void: none.
-*/
+/***********************************************************************
+@FUNCTION: destroy b-tree.
+@INPUT: the link compomenet of b-tree.
+@RETURN: none.
+***********************************************************************/
 EXP_API void destroy_bina_tree(link_t_ptr ptr);
 
-/*
-@FUNCTION insert_bina_node: insert a binary node.
-@INPUT link_t_ptr ptr: the binary tree link component.
-@INPUT variant_t key: the variant key.
-@INPUT object_t val: the object value.
-@RETURN link_t_ptr: return the node link component.
-*/
+/***********************************************************************
+@FUNCTION: insert a pair of key-value into b-tree.
+@INPUT: the link compomenet of b-tree.
+@INPUT: the key identify.
+@INPUT: the value object.
+@RETURN: none.
+@NOTE: if the key identify exists in b-tree then the value object to be replaced,
+	otherwise new key-value to be added.
+***********************************************************************/
 EXP_API link_t_ptr insert_bina_node(link_t_ptr ptr, variant_t key, object_t val);
 
-/*
-@FUNCTION delete_bina_node: delete a binary node by key.
-@INPUT link_t_ptr ptr: the binary tree link component.
-@INPUT variant_t key: the variant key.
-@RETURN bool_t: return nonzero if exists, otherwise return zero.
-*/
+/***********************************************************************
+@FUNCTION: delete a pair of key-value from b-tree.
+@INPUT: the link compomenet of b-tree.
+@INPUT: the key identify.
+@RETURN: if key-value pair exists in b-tree then delete it and return none-zero,
+	otherwise return zero.
+***********************************************************************/
 EXP_API bool_t delete_bina_node(link_t_ptr ptr, variant_t key);
 
-/*
-@FUNCTION find_bina_node: find a binary node by key and return the value.
-@INPUT link_t_ptr ptr: the binary tree link component.
-@INPUT variant_t key: the variant key.
-@OUTPUT object_t val: the object for returning value.
-@RETURN link_t_ptr: return the node link component if exists, otherwise return NULL.
-*/
+/***********************************************************************
+@FUNCTION: find the key-value pair in b-tree.
+@INPUT: the link compomenet of b-tree.
+@INPUT: the key identify.
+@INPUT: the value object.
+@RETURN: the link compomenet of key-value pair node, or NULL if not find.
+***********************************************************************/
 EXP_API link_t_ptr find_bina_node(link_t_ptr ptr, variant_t key, object_t val);
 
-/*
-@FUNCTION attach_bina_leaf_object: attach value to node leaf, then the orginal leaf object will be freed.
-@INPUT link_t_ptr nlk: the node link component.
-@INPUT object_t val: the object value for attaching.
-@RETURN void: none.
-*/
+/***********************************************************************
+@FUNCTION: attach a value to key-value pair node.
+@INPUT: the link compomenet of key-value pair node.
+@INPUT: the value object to attach.
+@RETURN: none.
+@NOTE: the origin value object need to detached first.
+***********************************************************************/
 EXP_API void attach_bina_leaf_object(link_t_ptr nlk, object_t val);
 
-/*
-@FUNCTION detach_bina_leaf_object: detach value from node left leaf, then the leaf value is empty.
-@INPUT link_t_ptr nlk: the node link component.
-@RETURN object_t: return the object value if exists, otherwise return NULL.
-*/
+/***********************************************************************
+@FUNCTION: detach a value from key-value pair node.
+@INPUT: the link compomenet of key-value pair node.
+@RETURN: the value object.
+@NOTE: after detached, the value in the key-value pair node is empty.
+***********************************************************************/
 EXP_API object_t detach_bina_leaf_object(link_t_ptr nlk);
 
-/*
-@FUNCTION get_bina_left_child_node: get left child node.
-@INPUT link_t_ptr nlk: the node link component.
-@RETURN link_t_ptr: return the left child node link component if exists, otherwise return NULL.
-*/
+/***********************************************************************
+@FUNCTION: get left child node.
+@INPUT: the link compomenet of key-value pair node.
+@RETURN: the link compomenet of child node.
+***********************************************************************/
 EXP_API link_t_ptr get_bina_left_child_node(link_t_ptr nlk);
 
-/*
-@FUNCTION get_bina_right_child_node: get right child node.
-@INPUT link_t_ptr nlk: the node link component.
-@RETURN link_t_ptr: return the right child node link component if exists, otherwise return NULL.
-*/
+/***********************************************************************
+@FUNCTION: get right child node.
+@INPUT: the link compomenet of key-value pair node.
+@RETURN: the link compomenet of child node.
+***********************************************************************/
 EXP_API link_t_ptr get_bina_right_child_node(link_t_ptr nlk);
 
-/*
-@FUNCTION get_bina_parent_node: get parent node.
-@INPUT link_t_ptr nlk: the node link component.
-@RETURN link_t_ptr: return the parent node link component if exists, otherwise return NULL.
-*/
+/***********************************************************************
+@FUNCTION: get parent node.
+@INPUT: the link compomenet of key-value pair node.
+@RETURN: the link compomenet of child node.
+***********************************************************************/
 EXP_API link_t_ptr get_bina_parent_node(link_t_ptr nlk);
 
-/*
-@FUNCTION is_bina_leaf: test is a leaf node.
-@INPUT link_t_ptr nlk: the node link component.
-@RETURN bool_t: return nonzero for a leaf node, otherwise return zero.
-*/
+/***********************************************************************
+@FUNCTION: test is or not a leaf node.
+@INPUT: the link compomenet of key-value pair node.
+@RETURN: non-zero if leaf node, zero for not.
+***********************************************************************/
 EXP_API bool_t is_bina_leaf(link_t_ptr nlk);
 
-/*
-@FUNCTION traver_bina_tree_preorder: enum the binary tree nodes by preorder.
-@INPUT link_t_ptr ptr: the binary tree link component.
-@INPUT CALLBACK_ENUMLINK pf: the callback function, if the call return zero, the travering will be breaked.
-@INPUT void* param: parameter translate into callback function.
-@RETURN link_t_ptr: return node link component breaked at.
-*/
+/***********************************************************************
+@FUNCTION: num the binary tree nodes by preorder.
+@INPUT: the link compomenet of b-tree.
+@INPUT: the callback function for getting one key-value per called.
+@INPUT: the user-parameter trans back to callback function.
+@RETURN: none.
+@NOTE: if the callback function return none-zero, the enumerating breaked.
+***********************************************************************/
 EXP_API link_t_ptr traver_bina_tree_preorder(link_t_ptr ptr, CALLBACK_ENUMLINK pf, void* param);
 
-/*
-@FUNCTION traver_bina_tree_postorder: enum the binary tree nodes by postorder.
-@INPUT link_t_ptr ptr: the binary tree link component.
-@INPUT CALLBACK_ENUMLINK pf: the callback function, if the call return zero, the travering will be breaked.
-@INPUT void* param: parameter translate into callback function.
-@RETURN link_t_ptr: return node link component breaked at.
-*/
+/***********************************************************************
+@FUNCTION: num the binary tree nodes by postorder.
+@INPUT: the link compomenet of b-tree.
+@INPUT: the callback function for getting one key-value per called.
+@INPUT: the user-parameter trans back to callback function.
+@RETURN: none.
+@NOTE: if the callback function return none-zero, the enumerating breaked.
+***********************************************************************/
 EXP_API link_t_ptr traver_bina_tree_postorder(link_t_ptr ptr, CALLBACK_ENUMLINK pf, void* param);
 
-/*
-@FUNCTION traver_bina_tree_inorder: enum the binary tree nodes by inorder.
-@INPUT link_t_ptr ptr: the binary tree link component.
-@INPUT CALLBACK_ENUMLINK pf: the callback function, if the call return zero, the travering will be breaked.
-@INPUT void* param: parameter translate into callback function.
-@RETURN link_t_ptr: return node link component breaked at.
-*/
+/***********************************************************************
+@FUNCTION: num the binary tree nodes by inorder.
+@INPUT: the link compomenet of b-tree.
+@INPUT: the callback function for getting one key-value per called.
+@INPUT: the user-parameter trans back to callback function.
+@RETURN: none.
+@NOTE: if the callback function return none-zero, the enumerating breaked.
+***********************************************************************/
 EXP_API link_t_ptr traver_bina_tree_inorder(link_t_ptr ptr, CALLBACK_ENUMLINK pf, void* param);
 
-/*
-@FUNCTION traver_bina_tree_levelorder: enum the binary tree nodes by level order.
-@INPUT link_t_ptr ptr: the binary tree link component.
-@INPUT CALLBACK_ENUMLINK pf: the callback function, if the call return zero, the travering will be breaked.
-@INPUT void* param: parameter translate into callback function.
-@RETURN link_t_ptr: return node link component breaked at.
-*/
+/***********************************************************************
+@FUNCTION: num the binary tree nodes by level-order.
+@INPUT: the link compomenet of b-tree.
+@INPUT: the callback function for getting one key-value per called.
+@INPUT: the user-parameter trans back to callback function.
+@RETURN: none.
+@NOTE: if the callback function return none-zero, the enumerating breaked.
+***********************************************************************/
 EXP_API link_t_ptr traver_bina_tree_levelorder(link_t_ptr ptr, CALLBACK_ENUMLINK pf, void* param);
 
 

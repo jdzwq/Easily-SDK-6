@@ -6,7 +6,7 @@
 # 3. make -f Makefile.mk
 # 4. make -f Makefile.mk install
 #-----------------------------------------------------------------------------
-CC = gcc
+CC = g++
 CFLAGS = -g -Wall -D _DEBUG
 
 MODULE = xdb_lib_test
@@ -16,7 +16,7 @@ LIB_PATH = /usr/local/lib
 
 INC_PATH = ~/Easily-sdk-6/include
 SRC_PATH = ~/Easily-sdk-6/test/xdb_lib_test
-OBJ_PATH = ~/Easily-tmp/linux/$(MODULE)/$(ARCH)
+OBJ_PATH = ~/Easily-temp/linux/$(MODULE)/$(ARCH)
 OUT_PATH = ~/Easily-app-6/linux/bin
 
 DIRS = $(wildcard $(SRC_PATH)/*.cc)
@@ -30,7 +30,6 @@ $(OBJ_PATH)%.o : $(SRC_PATH)/%.cc
 all : $(OBJS)
 	rm -f $@
 	$(CC) -o $(OUT_PATH)/$(MODULE) $(OBJS) -L $(LIB_PATH) -lxdk -lxdl
-#	rm -f $(OBJS)
 
 test:
 	if ! test -d $(OBJ_PATH); then \

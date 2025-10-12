@@ -2,7 +2,7 @@
 #include <sys/resource.h>
 #include <syslog.h>
 
-#include "xportd.h"
+#include "../xportd.h"
 
 #define PID_FILE "/var/run/xportd.pid"
 
@@ -23,7 +23,7 @@ static void _action_child(int sig)
 
 static void _action_pipe(int sig)
 {
-    
+    NOP;
 }
 
 int main(int argc, const char * argv[])
@@ -46,7 +46,7 @@ int main(int argc, const char * argv[])
     {
         strcpy(param, argv[1]);
     }
-    
+#ifndef _DEBUG
     f_pid = fopen(PID_FILE, "r");
     if (f_pid)
     {
@@ -75,9 +75,11 @@ int main(int argc, const char * argv[])
 
         syslog(LOG_INFO, "remove a zombie pidfile");
     }
-
+#endif
     if(strstr(param, "shutdown") != NULL)
     {
+        unlink(PID_FILE);
+        
         return 0;
     }
     
@@ -141,10 +143,10 @@ int main(int argc, const char * argv[])
     }
     if (fd > 2){
         close(fd);
-        syslog(LOG_INFO,  "xportd: /dev/null opened");
+        syslog(LOG_INFO,  "xportd /dev/null opened");
         exit(-1);
     }
-    
+ #ifndef _DEBUG   
     f_pid = fopen(PID_FILE, "w");
     if (!f_pid){
         syslog(LOG_INFO,  "xportd write pidfile failed");
@@ -154,7 +156,7 @@ int main(int argc, const char * argv[])
     fprintf(f_pid, "%d", getpid());
     fclose(f_pid);
     f_pid = NULL;
-    
+#endif 
     sigemptyset(&sa.sa_mask);
     sa.sa_handler = _action_term;
     sa.sa_flags = SA_SIGINFO | SA_RESETHAND;
@@ -179,6 +181,7 @@ int main(int argc, const char * argv[])
         usleep(100000);
     }
 
+#ifndef _DEBUG
     //empty pid
     f_pid = fopen(PID_FILE, "w");
     if (f_pid)
@@ -186,9 +189,9 @@ int main(int argc, const char * argv[])
         fclose(f_pid);
         f_pid = NULL;
     }
-
     unlink(PID_FILE);
-    
+  #endif
+
     END_CATCH;
     
     xdk_process_uninit();
@@ -198,7 +201,7 @@ ONERROR:
     get_last_error(errnum, errtxt, ERR_LEN);
     
     syslog(LOG_INFO, "%s\n", errtxt);
-
+#ifndef _DEBUG
     if(f_pid)
     {
         fclose(f_pid);
@@ -212,9 +215,9 @@ ONERROR:
         fclose(f_pid);
         f_pid = NULL;
     }
-
     unlink(PID_FILE);
-    
+#endif
+
     xdk_process_uninit();
     
     exit((int)xstol(errnum));

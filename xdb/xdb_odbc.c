@@ -1,5 +1,5 @@
 ﻿/***********************************************************************
-	Easily xdb odbc
+	Easily SDK v6.0
 
 	(c) 2005-2016 JianDe LiFang Technology Corporation.  All Rights Reserved.
 
@@ -9,6 +9,7 @@
 
 	@module	xdb_odbc.c | xdb odbc implement file
 
+	@devnote 张文权 2021.01 - 2021.12	v6.0
 ***********************************************************************/
 
 /**********************************************************************
@@ -141,6 +142,19 @@ static void odbctodt(SQLSMALLINT type,tchar_t* dt)
 		xscpy(dt,ATTR_DATA_TYPE_STRING);
 		break;
 	}
+}
+
+static void _raise_env_error(SQLHENV env)
+{
+	tchar_t err_code[NUM_LEN + 1] = { 0 };
+	tchar_t err_text[ERR_LEN + 1] = { 0 };
+
+	SQLINTEGER ne = 0;
+	SQLSMALLINT si = 0;
+
+	SQLGetDiagRec(SQL_HANDLE_ENV, env, 1, (SQLTCHAR*)err_code, &ne, (SQLTCHAR*)err_text, ERR_LEN, &si);
+
+	raise_user_error(err_code, err_text);
 }
 
 static void _raise_dbc_error(SQLHDBC dbc)
@@ -308,7 +322,7 @@ xdb_t STDCALL db_open_dsn(const tchar_t* dsnfile)
 	if (is_null(tru))
 		xsprintf(sql, _T("DRIVER=%s;SERVER=%s;DATABASE=%s;UID=%s;PWD=%s;"),drv, srv, dbn, uid, pwd);
 	else
-		xsprintf(sql, _T("DRIVER=%s;SERVER=%s;DATABASE=%s;UID=%s;PWD=%s;Trusted_Connection=%s;"), drv, srv, dbn, uid, pwd, tru);
+		xsprintf(sql, _T("DRIVER=%s;SERVER=%s;DATABASE=%s;UID=%s;PWD=%s;Encrypt=no;TrustServerCertificate=yes;"), drv, srv, dbn, uid, pwd);
 
 	rt = SQLDriverConnect(d_dbc, NULL, (SQLTCHAR*)sql, SQL_NTS, (SQLTCHAR*)sql2, MAX_SQL_NAME, &si, SQL_DRIVER_NOPROMPT);
 

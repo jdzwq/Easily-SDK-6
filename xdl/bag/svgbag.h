@@ -29,8 +29,6 @@ LICENSE.GPL3 for more details.
 
 #include "../xdldef.h"
 
-#ifdef XDL_SUPPORT_SVG
-
 #ifdef	__cplusplus
 extern "C" {
 #endif
@@ -58,6 +56,5 @@ EXP_API void svg_print_rich(link_t_ptr svg, const xfont_t* pxf, const xface_t* p
 }
 #endif
 
-#endif
 
 #endif /*SVGBAG_H*/

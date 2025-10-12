@@ -1,10 +1,10 @@
 #-----------------------------------------------------------------------------
 # begin microsoft nmake file
-# making order:
-# 1. nmake /f xdu.so.mk test --if need to creating some directory or file-list
-# 2. nmake /f xdu.so.mk clean
-# 3. nmake /f xdu.so.mk
-# 4. nmake /f xdu.so.mk install
+# making order for release version:
+# 1. nmake test
+# 2. nmake clean
+# 3. nmake all
+# 4. nmake install
 #-----------------------------------------------------------------------------
 !if EXIST("xdk.txt")
 !include xdk.txt
@@ -15,28 +15,29 @@ MODULE = xdk
 
 INC_PATH = ../../include
 SRC_PATH = ../../xdk
-LIB_PATH = ../../windows/lib/$(ARCH)
-OBJ_PATH = ../../../Easily-tmp/windows/$(MODULE)/$(ARCH)/Debug
-OUT_PATH = ../../../Easily-app-6/windows/sbin64/api
-PDB_PATH = ../../../Easily-tmp/windows/$(ARCH)
-INS_PATH = C:\xService
 
-TARGET = $(OUT_PATH)/$(MODULE).dll
+LIB_PATH = ../lib/$(ARCH)
+INS_PATH = C:\Easily\bin64
+
+OBJ_PATH = D:\Easily-temp\windows\$(MODULE)\$(ARCH)\Debug
+PDB_PATH = D:\Easily-temp\windows\$(ARCH)
+
+TARGET = $(OBJ_PATH)/$(MODULE).dll
 LIBRARY = $(LIB_PATH)/$(MODULE).lib
-MANIFEST = $(OUT_PATH)/$(MODULE)_$(ARCH).dll.manifest
+MANIFEST = $(OBJ_PATH)/$(MODULE)_$(ARCH).dll.manifest
 EXPORT = $(LIB_PATH)/$(MODULE)_$(ARCH).exp
 DATABASE = $(OBJ_PATH)/$(MODULE)_$(ARCH).pdb
 INSTRUMENT = $(OBJ_PATH)/$(MODULE)_$(ARCH).pgd
 
 CC = cl.exe
 CFLAGS = /c /GL /TC /W3 /Zc:wchar_t /Zi /Od /Fd"$(PDB_PATH)/vc140.pdb" /fp:precise \
-	/D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_USRDLL" /D "_WINDLL" /D "_UNICODE" /D "UNICODE" /D _CRT_SECURE_NO_WARNINGS \
-	/errorReport:prompt /WX- /Zc:forScope /RTC1 /Gd /MDd \
+	/D "WIN32" /D "_WINDOWS" /D "_USRDLL" /D "_WINDLL" /D "_UNICODE" /D "UNICODE" /D _CRT_SECURE_NO_WARNINGS \
+	/errorReport:prompt /WX- /Zc:forScope /RTC1 /Gd /MT \
 	/Fa"$(OBJ_PATH)/" /nologo /Fo"$(OBJ_PATH)/" /Fp"$(OBJ_PATH)/$(MODULE)_$(ARCH).pch"
 
 LK = link.exe
 LFLAGS = /OUT:"$(TARGET)" /MANIFEST /NXCOMPAT /PDB:"$(DATABASE)" \
-	/DYNAMICBASE "kernel32.lib" "user32.lib" "Advapi32.lib" /IMPLIB:"$(LIBRARY)" /DEBUG /DLL /MACHINE:$(ARCH) \
+	/DYNAMICBASE "kernel32.lib" "user32.lib" "Advapi32.lib" /IMPLIB:"$(LIBRARY)" /DLL /MACHINE:$(ARCH) \
 	/LTCG:PGINSTRUMENT /PGD:"$(INSTRUMENT)" /SUBSYSTEM:WINDOWS \
 	/LIBPATH:"$(LIB_PATH)" \
 	/ERRORREPORT:PROMPT /NOLOGO /TLBID:1
@@ -79,14 +80,22 @@ ASMS = $(patsubsti %.obj,%.asm,$(OBJS))
 {$(SRC_PATH)/dob}.c{$(OBJ_PATH)}.obj::
 	$(CC) $(CFLAGS) /I $(INC_PATH) $<
 
+{$(SRC_PATH)/net}.c{$(OBJ_PATH)}.obj::
+	$(CC) $(CFLAGS) /I $(INC_PATH) $<
+
+{$(SRC_PATH)/stm}.c{$(OBJ_PATH)}.obj::
+	$(CC) $(CFLAGS) /I $(INC_PATH) $<
+
 {$(SRC_PATH)/expr}.c{$(OBJ_PATH)}.obj::
+	$(CC) $(CFLAGS) /I $(INC_PATH) $<
+
+{$(SRC_PATH)/math}.c{$(OBJ_PATH)}.obj::
 	$(CC) $(CFLAGS) /I $(INC_PATH) $<
 
 {$(SRC_PATH)}.c{$(OBJ_PATH)}.obj::
 	$(CC) $(CFLAGS) /I $(INC_PATH) $<
 
 all : $(OBJS)
-	del $(subst /,\, $@)
 	$(LK) $(LFLAGS) @<<
 $(OBJS)
 <<
@@ -95,6 +104,9 @@ $(OBJS)
 	del $(subst /,\, $(OBJ_PATH)/*.asm)
 
 test:
+	if not exist $(abspath $(subst /,\, $(PDB_PATH))) mkdir $(abspath $(subst /,\, $(PDB_PATH)))
+	if not exist $(abspath $(subst /,\, $(OBJ_PATH))) mkdir $(abspath $(subst /,\, $(OBJ_PATH)))
+
  	echo SOURCES= \>$(MODULE).txt
  	for %i in ($(SRC_PATH)/windows/*.cc) do @echo $(OBJ_PATH)/%i \>>$(MODULE).txt
 	for %i in ($(SRC_PATH)/imp/*.c) do @echo $(OBJ_PATH)/%i \>>$(MODULE).txt
@@ -107,20 +119,22 @@ test:
 	for %i in ($(SRC_PATH)/zip/*.c) do @echo $(OBJ_PATH)/%i \>>$(MODULE).txt
 	for %i in ($(SRC_PATH)/mob/*.c) do @echo $(OBJ_PATH)/%i \>>$(MODULE).txt
 	for %i in ($(SRC_PATH)/dob/*.c) do @echo $(OBJ_PATH)/%i \>>$(MODULE).txt
+	for %i in ($(SRC_PATH)/net/*.c) do @echo $(OBJ_PATH)/%i \>>$(MODULE).txt
+	for %i in ($(SRC_PATH)/stm/*.c) do @echo $(OBJ_PATH)/%i \>>$(MODULE).txt
 	for %i in ($(SRC_PATH)/expr/*.c) do @echo $(OBJ_PATH)/%i \>>$(MODULE).txt
+	for %i in ($(SRC_PATH)/math/*.c) do @echo $(OBJ_PATH)/%i \>>$(MODULE).txt
 	for %i in ($(SRC_PATH)/*.c) do @echo $(OBJ_PATH)/%i \>>$(MODULE).txt
-
-	if not exist $(abspath $(subst /,\, $(OBJ_PATH))) mkdir $(abspath $(subst /,\, $(OBJ_PATH)))
 
 	@echo $(SOURCES)
 	@echo $(OBJS)
 	@echo $(ASMS)
 
 install:
-	copy /y $(subst /,\, $(TARGET)) $(INS_PATH)\api\
+	if not exist $(INS_PATH) mkdir $(INS_PATH)
+	copy /y $(subst /,\, $(TARGET)) $(INS_PATH)
 
 uninstall:
-	del $(INS_PATH)/api/$(MODULE)_$(ARCH).dll
+	del $(INS_PATH)/$(MODULE).dll
 
 .PHONY : clean
 clean:

@@ -1,5 +1,5 @@
 ﻿/***********************************************************************
-	Easily Port Service
+	Easily SDK v6.0
 
 	(c) 2005-2016 JianDe LiFang Technology Corporation.  All Rights Reserved.
 
@@ -9,6 +9,7 @@
 
 	@module	srvdef.h | service definition interface file
 
+	@devnote 张文权 2021.01 - 2021.12	v6.0
 ***********************************************************************/
 
 /**********************************************************************
@@ -28,7 +29,6 @@ LICENSE.GPL3 for more details.
 #define _SRVDEF_H
 
 #include <xdk.h>
-#include <xdn.h>
 #include <xdg.h>
 #include <xdl.h>
 

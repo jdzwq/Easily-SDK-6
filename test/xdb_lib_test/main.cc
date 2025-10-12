@@ -23,35 +23,35 @@ PF_DB_EXPORT pf_db_export;
 PF_DB_CALL_FUNC pf_db_call_func;
 
 //#define dsnfile _T("/demo_stub.dsn")
-#define dsnfile _T("/demo_odbc.dsn")
+//#define dsnfile _T("/demo_odbc.dsn")
 //#define dsnfile _T("/demo_oci.dsn")
 //#define dsnfile _T("/demo_mysql.dsn")
-//#define dsnfile _T("/demo_postgre.dsn")
-//#define dsnfile _T("/demo_sqlite.dsn")
+//#define dsnfile _T("/demo_pgsql.dsn")
+#define dsnfile _T("/demo_sqlite.dsn")
 
 #if defined(_OS_WINDOWS)
 //#define xdblib	_T("xdb_stub.dll")
-#define xdblib	_T("xdb_odbc.dll")
-//#define xdblib	_T("xdb_mysql.dll")
+//#define xdblib	_T("xdb_odbc.dll")
 //#define xdblib	_T("xdb_oci.dll")
-//#define xdblib	_T("xdb_postgre.dll")
+#define xdblib	_T("xdb_mysql.dll")
+//#define xdblib	_T("xdb_pgsql.dll")
 //#define xdblib	_T("xdb_sqlite.dll")
 #endif
 #if defined(_OS_LINUX)
 //#define xdblib	_T("libxdb_stub.so")
 //#define xdblib	_T("libxdb_odbc.so")
 //#define xdblib	_T("libxdb_oci.so")
-#define xdblib	_T("libxdb_mysql.so")
-//#define xdblib	_T("libxdb_postgre.so")
-//#define xdblib	_T("libxdb_sqlite.so")
+//#define xdblib	_T("libxdb_mysql.so")
+//#define xdblib	_T("libxdb_pgsql.so")
+#define xdblib	_T("libxdb_sqlite.so")
 #endif
 #if defined(_OS_MACOS)
 //#define xdblib	_T("@rpath/libxdb_stub.dylib")
 //#define xdblib	_T("@rpath/libxdb_odbc.dylib")
-#define xdblib	_T("@rpath/libxdb_oci.dylib")
+//#define xdblib	_T("@rpath/libxdb_oci.dylib")
 //#define xdblib	_T("@rpath/libxdb_mysql.dylib")
-//#define xdblib	_T("@rpath/libxdb_postgre.dylib")
-//#define xdblib	_T("@rpath/libxdb_sqlite.dylib")
+//#define xdblib	_T("@rpath/libxdb_pgsql.dylib")
+#define xdblib	_T("@rpath/libxdb_sqlite.dylib")
 #endif
 
 unsigned int STDCALL test_xdb_datetime(void* param)
@@ -1400,7 +1400,7 @@ int main(int argc, char* argv[])
 
     for (int i = 0; i < maxt; i++)
     {
-        //thread_start(&pth[i], (PF_THREADFUNC)test_xdb_datetime, (void*)0);
+        thread_start(&pth[i], (PF_THREADFUNC)test_xdb_datetime, (void*)0);
         
         //thread_start(&pth[i], (PF_THREADFUNC)test_xdb_schema, (void*)0);
         
@@ -1412,7 +1412,7 @@ int main(int argc, char* argv[])
 
         //thread_start(&pth[i], (PF_THREADFUNC)test_xdb_export, (void*)0);
 
-        thread_start(&pth[i], (PF_THREADFUNC)test_xdb_import, (void*)0);
+        //thread_start(&pth[i], (PF_THREADFUNC)test_xdb_import, (void*)0);
 
     	//thread_start(&pth[i], (PF_THREADFUNC)test_xdb_proc, (void*)0);
         

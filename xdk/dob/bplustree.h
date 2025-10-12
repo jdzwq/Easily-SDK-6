@@ -36,74 +36,75 @@ typedef bool_t(*ENUM_BPLUSTREE_ENTITY)(variant_t key, object_t val, void* pv);
 extern "C" {
 #endif
 
-/*
-@FUNCTION create_bplus_tree: create a bplus tree.
-@RETURN link_t_ptr: return the bplus tree link component.
-*/
+/***********************************************************************
+@FUNCTION: create b+ tree.
+@RETURN: the link compoment of b+tree or NULL if failed.
+***********************************************************************/
 EXP_API link_t_ptr create_bplus_tree(void);
 
-/*
-@FUNCTION create_bplus_file_table: create a bplus tree with index and data file table.
-@INPUT link_t_ptr index_table: the index file table.
-@INPUT link_t_ptr data_table: the data file table.
-@RETURN link_t_ptr: return the bplus tree link component.
-*/
+/***********************************************************************
+@FUNCTION: create b+ tree with index and data file table.
+@INPUT: the link compoment of index file table.
+@INPUT: the link compoment of data file table.
+@RETURN: the link compoment of b+tree or NULL if failed.
+***********************************************************************/
 EXP_API link_t_ptr create_bplus_file_table(link_t_ptr index_table, link_t_ptr data_table);
 
-/*
-@FUNCTION destroy_bplus_tree: destroy a bplus tree.
-@INPUT link_t_ptr ptr: the bplus tree link component.
-@RETURN void: none.
-*/
+/***********************************************************************
+@FUNCTION: destroy b+ tree.
+@INPUT: the link compomenet of b+ tree.
+@RETURN: none.
+***********************************************************************/
 EXP_API void destroy_bplus_tree(link_t_ptr ptr);
 
-/*
-@FUNCTION clear_bplus_tree: clear all child entity in the bplus tree.
-@INPUT link_t_ptr ptr: the bplus tree link component.
-@RETURN void: none.
-*/
+/***********************************************************************
+@FUNCTION: remove all child nodes of b+ tree.
+@INPUT: the link compomenet of b+ tree.
+@RETURN: none.
+***********************************************************************/
 EXP_API void clear_bplus_tree(link_t_ptr ptr);
 
-/*
-@FUNCTION is_bplus_tree: test is the bplus tree.
-@INPUT link_t_ptr ptr: the bplus tree link component.
-@RETURN boo_t: return nonzero for bplus tree, otherwise return zero.
-*/
+/***********************************************************************
+@FUNCTION: test for b+ tree.
+@INPUT: the link compomenet of b+ tree.
+@RETURN: none-zero for b+ tree or zero for not.
+***********************************************************************/
 EXP_API bool_t is_bplus_tree(link_t_ptr ptr);
 
-/*
-@FUNCTION insert_bplus_entity: insert a entity with the key and value.
-@INPUT link_t_ptr ptr: the bplus tree link component.
-@INPUT variant_t var: the variant key.
-@INPUT object_t val: the object value.
-@RETURN boo_t: if succeeds return nonzero, fails return zero.
-*/
+/***********************************************************************
+@FUNCTION: insert a key-value pair into b+ tree.
+@INPUT: the link compomenet of b+ tree.
+@INPUT: the key identify.
+@INPUT: the value object.
+@RETURN: none-zero for success or zero for failed.
+***********************************************************************/
 EXP_API bool_t insert_bplus_entity(link_t_ptr ptr, variant_t key, object_t val);
 
-/*
-@FUNCTION delete_bplus_entity: delete a entity by the key.
-@INPUT link_t_ptr ptr: the bplus tree link component.
-@INPUT variant_t key: the variant key.
-@RETURN boo_t: if succeeds return nonzero, fails return zero.
-*/
+/***********************************************************************
+@FUNCTION: delete a key-value pair from b+ tree.
+@INPUT: the link compomenet of b+ tree.
+@INPUT: the key identify.
+@RETURN: none-zero for success or zero for failed.
+***********************************************************************/
 EXP_API bool_t delete_bplus_entity(link_t_ptr ptr, variant_t key);
 
-/*
-@FUNCTION find_bplus_entity: find a entity by the key and get the entity value.
-@INPUT link_t_ptr ptr: the bplus tree link component.
-@INPUT variant_t key: the variant key.
-@OUTPUT object_t val: the object for returning value.
-@RETURN boo_t: if succeeds return nonzero, fails return zero.
-*/
-EXP_API bool_t find_bplus_entity(link_t_ptr ptr, variant_t var, object_t val);
+/***********************************************************************
+@FUNCTION: find a key-value pair from b+ tree.
+@INPUT: the link compomenet of b+ tree.
+@INPUT: the key identify.
+@OUTPUT: if finded, the val object holding the value content.
+@RETURN: none-zero for success or zero for failed.
+***********************************************************************/
+EXP_API bool_t find_bplus_entity(link_t_ptr ptr, variant_t key, object_t val);
 
-/*
-@FUNCTION enum_bplus_entity: enum bplus tree entities.
-@INPUT link_t_ptr ptr: the bplus tree link component.
-@INPUT CALLBACK_ENUMLINK pf: the callback function.
-@INPUT void* param: the parameter translate into callback function.
-@RETURN void: none.
-*/
+/***********************************************************************
+@FUNCTION: enumerate the key-value pairs in b+ tree.
+@INPUT: the link compomenet of b+ tree.
+@INPUT: the callback function for getting one key-value per called.
+@INPUT: the user-parameter trans back to callback function.
+@RETURN: none.
+@NOTE: return non-zero in callback function will break the enumerating.
+***********************************************************************/
 EXP_API void enum_bplus_entity(link_t_ptr ptr, ENUM_BPLUSTREE_ENTITY pf, void* param);
 
 

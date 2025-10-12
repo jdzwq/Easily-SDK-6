@@ -29,7 +29,6 @@ LICENSE.GPL3 for more details.
 
 #include "../xdldef.h"
 
-#if defined(XDL_SUPPORT_SVG)
 
 #ifdef	__cplusplus
 extern "C" {
@@ -57,6 +56,5 @@ LOC_API void	svg_get_canvas_measure(canvas_t canv, measure_interface* pim);
 }
 #endif
 
-#endif /*XDL_SUPPORT_SVG*/
 
 #endif /*MGCIML_H*/

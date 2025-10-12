@@ -1,5 +1,5 @@
 SOURCES= \
-Z:/Easily-tmp/windows/xhttps/x64/Debug/xhttps.cc \
-Z:/Easily-tmp/windows/xhttps/x64/Debug/xhttpsMain.cc \
-Z:/Easily-tmp/windows/xhttps/x64/Debug/srvcrt.cc \
-Z:/Easily-tmp/windows/xhttps/x64/Debug/srvlog.cc \
+D:/Easily-temp/windows/xhttps/x64/Debug/xhttps.cc \
+D:/Easily-temp/windows/xhttps/x64/Debug/xhttpsMain.cc \
+D:/Easily-temp/windows/xhttps/x64/Debug/srvcrt.cc \
+D:/Easily-temp/windows/xhttps/x64/Debug/srvlog.cc \

@@ -31,9 +31,6 @@ LICENSE.GPL3 for more details.
 #include "../xdldoc.h"
 #include "../xdlview.h"
 
-#if defined(XDL_SUPPORT_SVG)
-
-/***************************************************************************************************************/
 
 void svg_draw_line_raw(visual_t view, const xpen_t* pxp, const xpoint_t* ppt1, const xpoint_t* ppt2)
 {
@@ -1033,7 +1030,4 @@ void svg_draw_image(canvas_t canv, const ximage_t* pxi, const xrect_t* pxr)
 	svg_draw_image_raw(view, pxi, &xr);
 }
 
-
-
-#endif /**/
 

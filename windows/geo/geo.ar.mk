@@ -15,9 +15,10 @@ MODULE = geo
 
 INC_PATH = ../../include
 SRC_PATH = ../../third-party
-LIB_PATH = ../../windows/lib/$(ARCH)
-OBJ_PATH = ../../../Easily-tmp/windows/$(MODULE)/$(ARCH)/Debug
-PDB_PATH = ../../../Easily-tmp/windows/$(ARCH)
+LIB_PATH = ../lib/$(ARCH)
+
+OBJ_PATH = D:\Easily-temp\windows\$(MODULE)\$(ARCH)\Debug
+PDB_PATH = D:\Easily-temp\windows\$(ARCH)
 
 TARGET = $(LIB_PATH)/$(MODULE).lib
 
@@ -38,7 +39,6 @@ OBJS = $(patsubsti %.c,%.obj,$(COBS))
 	$(CC) $(CFLAGS) /I $(INC_PATH) $<
 
 all : $(OBJS)
-	del $(subst /,\, $@)
 	$(LK) $(LFLAGS) @<<
 	$(OBJS)
 <<
@@ -51,6 +51,7 @@ test:
 	@echo $(SOURCES)
 	@echo $(OBJS)
 
+	if not exist $(abspath $(subst /,\, $(PDB_PATH))) mkdir $(abspath $(subst /,\, $(PDB_PATH)))
 	if not exist $(abspath $(subst /,\, $(OBJ_PATH))) mkdir $(abspath $(subst /,\, $(OBJ_PATH)))
 
 install:

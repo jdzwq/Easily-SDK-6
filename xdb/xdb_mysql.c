@@ -1,5 +1,5 @@
 ﻿/***********************************************************************
-	Easily xdb mysql
+	Easily SDK v6.0
 
 	(c) 2005-2016 JianDe LiFang Technology Corporation.  All Rights Reserved.
 
@@ -9,6 +9,7 @@
 
 	@module	xdb_mysql.c | xdb mysql implement file
 
+    @devnote 张文权 2021.01 - 2021.12	v6.0
 ***********************************************************************/
 
 /**********************************************************************
@@ -29,6 +30,10 @@ LICENSE.GPL3 for more details.
 
 #ifdef _OS_WINDOWS
 #pragma comment(lib,"mysqlclient.lib")
+#endif
+
+#ifndef my_bool
+typedef char my_bool;
 #endif
 
 #define MYSQL_PARAM_TYPE_UNKNOWN    0
@@ -346,6 +351,9 @@ xdb_t STDCALL db_open(const tchar_t* srv, const tchar_t* dbn, const tchar_t* uid
 	char suid[MAX_SQL_TOKEN + 1] = { 0 };
 	char spwd[MAX_SQL_TOKEN + 1] = { 0 };
 
+    unsigned int port = 0;
+	char* tk;
+
 	TRY_CATCH;
 
 #ifdef _UNICODE
@@ -359,14 +367,22 @@ xdb_t STDCALL db_open(const tchar_t* srv, const tchar_t* dbn, const tchar_t* uid
     mbs_to_utf8(uid, -1, (byte_t*)suid, MAX_SQL_TOKEN);
     mbs_to_utf8(pwd, -1, (byte_t*)spwd, MAX_SQL_TOKEN);
 #endif
+
+    if(tk = a_xsstr(ssrv, ":"))
+	{
+		port = a_xstol((schar_t*)(tk + 1));
+		*tk = '\0';
+	}
     
 	ctx = mysql_init(NULL);
 	if (!ctx)
 	{
 		raise_user_error(_T("-1"), _T("Alloc context handle failed"));
 	}
-
-	if (!mysql_real_connect(ctx, ssrv, suid, spwd, sdbn, 0, NULL, 0))
+#ifdef MYSQL_OPT_SSL_MODE
+    mysql_options(ctx, MYSQL_OPT_SSL_MODE, (void*)SSL_MODE_DISABLED);
+#endif
+	if (!mysql_real_connect(ctx, ssrv, suid, spwd, sdbn, port, NULL, 0))
 	{
         _raise_ctx_error(ctx);
 	}

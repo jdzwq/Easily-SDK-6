@@ -32,11 +32,11 @@ LICENSE.GPL3 for more details.
 #include <xdg.h>
 
 #if defined(_OS_WINDOWS)
-#include "windows/_xdu_win.h"
+#include "win32/_xdu_win32.h"
 #elif defined(_OS_MACOS)
-#include "macos/_xdu_macos.h"
+#include "cocoa/_xdu_cocoa.h"
 #elif defined(_OS_LINUX)
-#include "linux/_xdu_linux.h"
+#include "X11/_xdu_X11.h"
 #endif
 
 #define _HANDLE_WIDGET		0x60
@@ -333,15 +333,6 @@ typedef struct _accel_table_t{
 	unsigned short key;
 	unsigned short cmd;
 }accel_table_t;
-
-//bluetooth device
-typedef struct _dev_blt_t{
-	tchar_t major_class[RES_LEN + 1];
-	tchar_t minor_class[RES_LEN + 1];
-	tchar_t name[META_LEN + 1];
-	tchar_t uuid[UUID_LEN + 1];
-	tchar_t addr[ADDR_LEN + 1];
-}dev_blt_t;
 
 typedef struct _str_find_t{
 	bool_t b_case;

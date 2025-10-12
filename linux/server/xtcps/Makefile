@@ -1,23 +1,24 @@
 #-----------------------------------------------------------------------------
 # begin GNU MAKE file
-# making order:
-# 1. nmake /f xtcps.so.mk test --if need to creating some directory or file-list
-# 2. nmake /f xtcps.so.mk clean
-# 3. nmake /f xtcps.so.mk
-# 4. nmake /f xtcps.so.mk install
+# making order for release version:
+# 1. make test
+# 2. make clean
+# 3. make all
+# 4. make install
 #-----------------------------------------------------------------------------
 CC = gcc
-CFLAGS = -g -Wall -D _DEBUG
+CFLAGS = -g -Wall
 
 MODULE = xtcps
 ARCH = aarch64
 
 LIB_PATH = /usr/local/lib
+SRV_PATH = /usr/local/Easily/sbin
 
-INC_PATH = ~/Easily-sdk-6/include
-SRC_PATH = ~/Easily-sdk-6/server
-OBJ_PATH = ~/Easily-tmp/linux/$(MODULE)/$(ARCH)
-OUT_PATH = ~/Easily-app-6/linux/bin
+INC_PATH = ../../../include
+SRC_PATH = ../../../server
+
+OBJ_PATH = ~/Easily-temp/linux/$(MODULE)/$(ARCH)
 
 DIRS = $(wildcard \
 	$(SRC_PATH)/xtcps/*.cc \
@@ -33,22 +34,33 @@ $(OBJ_PATH)/%.o : $(SRC_PATH)/%.cc
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
 
 all : $(OBJS)
-	rm -f $@
-	$(CC) -o $(OUT_PATH)/$(MODULE) $(OBJS) -L $(LIB_PATH) -lxdk -lxdn -lxdg -lxdl
+	$(CC) -o $(OBJ_PATH)/$(MODULE) $(OBJS) -L $(LIB_PATH) -lxdk -lxdg -lxdl
 
 test:
 	if ! test -d $(OBJ_PATH); then \
 	mkdir -p $(OBJ_PATH); \
 	chmod 755 $(OBJ_PATH); \
 	fi
+	
 	@echo $(DIRS)
 	@echo $(SRCS)
 	@echo $(OBJS)
 
+install:
+	if ! test -d $(SRV_PATH); then \
+	sudo mkdir $(SRV_PATH); \
+	fi
+
+	sudo cp -f $(OBJ_PATH)/$(MODULE) $(SRV_PATH);
+	sudo chmod +x $(SRV_PATH)/$(MODULE);
+
+uninstall:
+	sudo rm -f $(SRV_PATH)/$(MODULE)
+
 .PHONY : clean
 clean:
 	rm -f $(OBJS)
-	rm -f $(OUT_PATH)/$(MODULE)
+	rm -f $(OBJ_PATH)/$(MODULE)
 #-----------------------------------------------------------------------------
 # end GNU MAKE file
 #-----------------------------------------------------------------------------

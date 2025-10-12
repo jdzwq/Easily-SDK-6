@@ -11,9 +11,10 @@ MODULE = xdb_lib_test
 INC_PATH = Z:/Easily-sdk-6/include
 SRC_PATH = Z:/Easily-sdk-6/test/xdb_lib_test
 LIB_PATH = Z:/Easily-sdk-6/windows/lib/$(ARCH)
-OBJ_PATH = Z:/Easily-tmp/windows/$(MODULE)/$(ARCH)/Debug
-PDB_PATH = Z:/Easily-tmp/windows/$(ARCH)
 OUT_PATH = Z:/Easily-app-6/windows/bin64
+
+OBJ_PATH = D:/Easily-temp/windows/$(MODULE)/$(ARCH)/Debug
+PDB_PATH = D:/Easily-temp/windows/$(ARCH)
 
 TARGET = $(OUT_PATH)/$(MODULE).exe
 DATABASE = $(OBJ_PATH)/$(MODULE).pdb

@@ -1,5 +1,5 @@
 ﻿/***********************************************************************
-	Easily Port Monitor
+	Easily SDK v6.0
 
 	(c) 2005-2016 JianDe LiFang Technology Corporation.  All Rights Reserved.
 
@@ -9,6 +9,7 @@
 
 	@module	xportm.h | port monitor definition interface file
 
+	@devnote 张文权 2021.01 - 2021.12	v6.0
 ***********************************************************************/
 
 /**********************************************************************

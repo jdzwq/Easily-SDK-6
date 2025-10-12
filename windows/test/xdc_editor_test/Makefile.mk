@@ -11,8 +11,8 @@ MODULE = xdc_editor_test
 INC_PATH = Z:/Easily-sdk-6/include
 SRC_PATH = Z:/Easily-sdk-6/test/xdc_editor_test
 LIB_PATH = Z:/Easily-sdk-6/windows/lib/$(ARCH)
-OBJ_PATH = Z:/Easily-tmp/windows/$(MODULE)/$(ARCH)/Debug
-PDB_PATH = Z:/Easily-tmp/windows/$(ARCH)
+OBJ_PATH = Z:/Easily-temp/windows/$(MODULE)/$(ARCH)/Debug
+PDB_PATH = Z:/Easily-temp/windows/$(ARCH)
 OUT_PATH = Z:/Easily-app-6/windows/bin64
 
 TARGET = $(OUT_PATH)/$(MODULE).exe

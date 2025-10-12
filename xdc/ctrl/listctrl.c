@@ -919,7 +919,7 @@ void hand_list_wchar(widget_t widget, wchar_t ch)
 	{
 		if (xslen(ptd->help) < MAX_HELP)
 		{
-			xsncat(ptd->help, &ch, 1);
+			xsncat(ptd->help, (tchar_t*)&ch, 1);
 			_listctrl_find(widget, ptd->help);
 		}
 	}

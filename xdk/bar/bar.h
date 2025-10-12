@@ -36,11 +36,11 @@ extern "C" {
 
 /***********************************************************************
 @FUNCTION: encode binary sequence to code128 sequence.
-@INPUT token: bytes sequence.
-@INPUT len: bytes size.
-@OUTPUT buf: byte buffer for returning code128 sequence.
-@INPUT max: the buffer bytes size.
-@RETURN dword_t: the bytes of actual code128-encoded sequence.
+@INPUT: bytes sequence.
+@INPUT: bytes size.
+@OUTPUT: byte buffer for returning code128 sequence.
+@INPUT: the buffer bytes size.
+@RETURN: the bytes of actual code128-encoded sequence.
 @NOTE: the parameter buf set to NULL and max set to MAX_LONG, 
 	can be used to test the bytes of code128-encoded sequence may be returned.
 ***********************************************************************/
@@ -48,21 +48,21 @@ EXP_API dword_t code128_encode(const byte_t* token, dword_t len, byte_t* buf, dw
 
 /***********************************************************************
 @FUNCTION: get code128 sequence drawing units.
-@INPUT bar_buf: code128-encoded sequence.
-@INPUT cols: column indicated.
-@RETURN int: the count of code128 drawing units.
+@INPUT: code128-encoded sequence.
+@INPUT: column indicated.
+@RETURN: the count of code128 drawing units.
 ***********************************************************************/
 EXP_API int code128_units(const byte_t* bar_buf, int cols);
 
 /***********************************************************************
 @FUNCTION: encode binary sequence to pdf417 sequence.
-@INPUT token: bytes sequence.
-@INPUT len: bytes size.
-@OUTPUT buf: byte buffer for returning pdf417 sequence.
-@OUTPUT prows: rows for returning pdf417 encoded.
-@OUTPUT pcols: clos for returning pdf417 encoded.
-@INPUT max: the buffer bytes size.
-@RETURN dword_t: the bytes of actual pdf417-encoded sequence.
+@INPUT: bytes sequence.
+@INPUT: bytes size.
+@OUTPUT: byte buffer for returning pdf417 sequence.
+@OUTPUT: rows for returning pdf417 encoded.
+@OUTPUT: clos for returning pdf417 encoded.
+@INPUT: the buffer bytes size.
+@RETURN: the bytes of actual pdf417-encoded sequence.
 @NOTE: the parameter buf set to NULL and max set to MAX_LONG, 
 	can be used to test the bytes of pdf417-encoded sequence may be returned.
 ***********************************************************************/
@@ -70,22 +70,22 @@ EXP_API dword_t pdf417_encode(const byte_t* token, dword_t len, byte_t* buf, dwo
 
 /***********************************************************************
 @FUNCTION: get pdf417 sequence drawing units.
-@INPUT bar_buf: pdf417-encoded sequence.
-@INPUT rows: row indicated.
-@INPUT cols: column indicated.
-@RETURN int: the count of pdf417 drawing units.
+@INPUT: pdf417-encoded sequence.
+@INPUT: row indicated.
+@INPUT: column indicated.
+@RETURN: the count of pdf417 drawing units.
 ***********************************************************************/
 EXP_API int pdf417_units(const byte_t* bar_buf, int rows, int cols);
 
 /***********************************************************************
 @FUNCTION: encode binary sequence to qrcode sequence.
-@INPUT token: bytes sequence.
-@INPUT len: bytes size.
-@OUTPUT buf: byte buffer for returning qrcode sequence.
-@OUTPUT prows: rows for returning qrcode encoded.
-@OUTPUT pcols: clos for returning qrcode encoded.
-@INPUT max: the buffer bytes size.
-@RETURN dword_t: the bytes of actual qrcode-encoded sequence.
+@INPUT: bytes sequence.
+@INPUT: bytes size.
+@OUTPUT: byte buffer for returning qrcode sequence.
+@OUTPUT: rows for returning qrcode encoded.
+@OUTPUT: clos for returning qrcode encoded.
+@INPUT: the buffer bytes size.
+@RETURN: the bytes of actual qrcode-encoded sequence.
 @NOTE: the parameter buf set to NULL and max set to MAX_LONG, 
 	can be used to test the bytes of qrcode-encoded sequence may be returned.
 ***********************************************************************/
@@ -93,10 +93,10 @@ EXP_API dword_t qr_encode(const byte_t* token, dword_t len, byte_t* buf, dword_t
 
 /***********************************************************************
 @FUNCTION: get qrcode sequence drawing units.
-@INPUT bar_buf: qrcode-encoded sequence.
-@INPUT rows: row indicated.
-@INPUT cols: column indicated.
-@RETURN int: the count of qrcode drawing units.
+@INPUT: qrcode-encoded sequence.
+@INPUT: row indicated.
+@INPUT: column indicated.
+@RETURN: the count of qrcode drawing units.
 ***********************************************************************/
 EXP_API int qr_units(const byte_t* bar_buf, int rows, int cols);
 

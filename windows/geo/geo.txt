@@ -1,2 +1,2 @@
 SOURCES= \
-../../../Easily-tmp/windows/geo/x64/Debug/geo.c \
+../../../Easily-temp/windows/geo/x64/Debug/geo.c \

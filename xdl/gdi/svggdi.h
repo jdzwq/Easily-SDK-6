@@ -29,8 +29,6 @@ LICENSE.GPL3 for more details.
 
 #include "../xdldef.h"
 
-#if defined(XDL_SUPPORT_SVG)
-
 #ifdef	__cplusplus
 extern "C" {
 #endif
@@ -291,7 +289,5 @@ LOC_API void	svg_draw_image_raw(visual_t view, const ximage_t* pxi, const xrect_
 #ifdef	__cplusplus
 }
 #endif
-
-#endif /*XDL_SUPPORT_SVG*/
 
 #endif /*SVGGDI_H*/

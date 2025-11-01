@@ -33,8 +33,8 @@ res_file_t _cons_alloc(tchar_t* cname, int max)
 	HANDLE hCon;
 	BOOL rt;
 
-	if (!AllocConsole())
-		return INVALID_FILE;
+	rt = AllocConsole();
+	//if(!rt) return INVALID_FILE;
 
 	hCon = GetStdHandle(STD_INPUT_HANDLE);
 	if (hCon)

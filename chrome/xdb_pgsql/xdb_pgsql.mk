@@ -12,23 +12,23 @@ LFLAGS = -shared -fPIC -pthread
 
 MODULE = xdb_postgre
 ARCH = amd64
-VER = 6.0
-
-SRV_PATH = /usr/local/Easily/sbin
-LNK_PATH = /usr/local/lib
+VER = 6
 
 INC_POSTGRE = /usr/include
 LIB_POSTGRE = /usr/lib64
 
+LIB_PATH = /usr/local/lib
+
 INC_PATH = ../../include
 SRC_PATH = ../../xdb
-OUT_PATH = ../../../Easily-app-6/chrome/sbin/api
+
 OBJ_PATH = ~/Easily-temp/chrome/$(MODULE)/$(ARCH)
+OUT_PATH = ~/Easily-app-6/chrome/lib
 
 TARGET = lib$(MODULE).so.$(VER)
 LINKIT = lib$(MODULE).so
 
-LIBS = -L $(LNK_PATH) -lxdk -lxdl -L $(LIB_POSTGRE) -lpq
+LIBS = -L $(LIB_PATH) -lxdk -lxdl -L $(LIB_POSTGRE) -lpq
 DIRS = $(wildcard $(SRC_PATH)/xdb_postgre.c)
 SRCS = $(notdir $(DIRS))
 COBS = $(patsubst %.c, %.o, $(SRCS))
@@ -38,43 +38,36 @@ $(OBJ_PATH)/%.o : $(SRC_PATH)/xdb_postgre.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH) -I $(INC_POSTGRE)
 
 all : $(OBJS)
-	$(CC) $(LFLAGS) -o $(OUT_PATH)/$(TARGET) $(OBJS) $(LIBS)
+	$(CC) $(LFLAGS) -o $(OBJ_PATH)/$(TARGET) $(OBJS) $(LIBS)
 
 test:
-	if ! test -d $(OUT_PATH); then \
-	mkdir -p $(OUT_PATH); \
-	chmod 755 $(OUT_PATH); \
-	fi
-
 	if ! test -d $(OBJ_PATH); then \
 	mkdir -p $(OBJ_PATH); \
 	chmod 755 $(OBJ_PATH); \
 	fi
+
 	@echo $(DIRS)
 	@echo $(SRCS)
 	@echo $(OBJS)
 
 install:
-	if ! test -d $(SRV_PATH)/api; then \
-	sudo mkdir -p $(SRV_PATH)/api; \
-	fi
-	if ! test -d $(LNK_PATH); then \
-	sudo mkdir $(LNK_PATH); \
+	if ! test -d $(OUT_PATH); then \
+	sudo mkdir -p $(OUT_PATH); \
 	fi
 
-	sudo cp -f $(OUT_PATH)/$(TARGET) $(SRV_PATH)/api;
-	sudo chmod 755 $(SRV_PATH)/api/$(TARGET);
-	sudo rm -f $(LNK_PATH)/$(LINKIT);
-	sudo ln -s $(SRV_PATH)/api/$(TARGET) $(LNK_PATH)/$(LINKIT);
+	sudo cp -f $(OBJ_PATH)/$(TARGET) $(OUT_PATH);
+	sudo chmod 755 $(OUT_PATH)/$(TARGET);
+	sudo rm -f $(LIB_PATH)/$(LINKIT);
+	sudo ln -s $(OUT_PATH)/$(TARGET) $(LIB_PATH)/$(LINKIT);
 
 uninstall:
-	sudo rm -r $(LNK_PATH)/$(LINKIT);
-	sudo rm -f $(SRV_PATH)/api/$(TARGET)
+	sudo rm -r $(LIB_PATH)/$(LINKIT);
+	sudo rm -f $(OUT_PATH)/$(TARGET)
 	
 .PHONY : clean
 clean:
 	rm -f $(OBJS)
-	rm -f $(OUT_PATH)/$(TARGET)
+	rm -f $(OBJ_PATH)/$(TARGET)
 #-----------------------------------------------------------------------------
 # end microsoft NMAKE file
 #-----------------------------------------------------------------------------

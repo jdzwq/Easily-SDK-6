@@ -20,7 +20,7 @@ OUT_PATH = ../../../Easily-app-6/windows/sbin64/api
 
 OBJ_PATH = D:\Easily-temp\windows\$(MODULE)\$(ARCH)\Debug
 PDB_PATH = D:\Easily-temp\windows\$(ARCH)
-INS_PATH = C:\xService
+OUT_PATH = C:\xService
 
 TARGET = $(OUT_PATH)/$(MODULE).dll
 LIBRARY = $(LIB_PATH)/$(MODULE).lib
@@ -74,10 +74,10 @@ test:
 	if not exist $(abspath $(subst /,\, $(OBJ_PATH))) mkdir $(abspath $(subst /,\, $(OBJ_PATH)))
 
 install:
-	copy /y $(subst /,\, $(TARGET)) $(INS_PATH)\api\
+	copy /y $(subst /,\, $(TARGET)) $(OUT_PATH)\api\
 
 uninstall:
-	del $(INS_PATH)/api/$(MODULE)_$(ARCH).dll
+	del $(OUT_PATH)/api/$(MODULE)_$(ARCH).dll
 
 .PHONY : clean
 clean:

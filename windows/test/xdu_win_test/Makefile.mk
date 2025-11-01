@@ -11,9 +11,10 @@ MODULE = xdu_win_test
 INC_PATH = Z:/Easily-sdk-6/include
 SRC_PATH = Z:/Easily-sdk-6/test/xdu_win_test
 LIB_PATH = Z:/Easily-sdk-6/windows/lib/$(ARCH)
-OBJ_PATH = Z:/Easily-temp/windows/$(MODULE)/$(ARCH)/Debug
-PDB_PATH = Z:/Easily-temp/windows/$(ARCH)
-OUT_PATH = Z:/Easily-app-6/windows/bin64
+
+OBJ_PATH = D:/Easily-temp/windows/$(MODULE)/$(ARCH)/Debug
+PDB_PATH = D:/Easily-temp/windows/$(ARCH)
+OUT_PATH = Z:/Easily-app-6/windows/bin
 
 TARGET = $(OUT_PATH)/$(MODULE).exe
 DATABASE = $(OBJ_PATH)/$(MODULE).pdb
@@ -40,7 +41,7 @@ ASMS = $(patsubsti %.obj,%.asm,$(OBJS))
 	$(CC) $(CFLAGS) /I $(INC_PATH) $<
 
 all : $(OBJS)
-	del $(subst /,\, $(TARGET))
+#	del $(subst /,\, $(TARGET))
 	$(LK) $(LFLAGS) $(OBJS)
 	del $(subst /,\, $(OBJ_PATH)/*.obj)
 	del $(subst /,\, $(OBJ_PATH)/*.asm)
@@ -53,10 +54,8 @@ test:
 	if not exist $(abspath $(subst /,\, $(OBJ_PATH))) mkdir $(abspath $(subst /,\, $(OBJ_PATH)))
 
 install:
-	copy /y $(subst /,\, $(TARGET)) $(INS_PATH)\api\
 
 uninstall:
-	del $(INS_PATH)/api/$(MODULE)_$(ARCH).dll
 
 .PHONY : clean
 clean:

@@ -17,10 +17,10 @@ INC_PATH = ../../../include
 SRC_PATH = ../../../server
 
 LIB_PATH = ../../lib/$(ARCH)
-INS_PATH = C:\Easily\sbin64
 
 OBJ_PATH = D:/Easily-temp/windows/$(MODULE)/$(ARCH)/Debug
 PDB_PATH = D:/Easily-temp/windows/$(ARCH)
+OUT_PATH = Z:\Easily-app-6\windows\sbin
 
 TARGET = $(OBJ_PATH)/$(MODULE).exe
 DATABASE = $(OBJ_PATH)/$(MODULE).pdb
@@ -67,11 +67,11 @@ test:
 	if not exist $(abspath $(subst /,\, $(OBJ_PATH))) mkdir $(abspath $(subst /,\, $(OBJ_PATH)))
 
 install:
-	if not exist $(INS_PATH) mkdir $(INS_PATH)
-	copy /y $(subst /,\, $(TARGET)) $(INS_PATH)
+	if not exist $(OUT_PATH) mkdir $(OUT_PATH)
+	copy /y $(subst /,\, $(TARGET)) $(OUT_PATH)
 
 uninstall:
-	del $(INS_PATH)/$(MODULE).exe
+	del $(OUT_PATH)/$(MODULE).exe
 
 .PHONY : clean
 clean:

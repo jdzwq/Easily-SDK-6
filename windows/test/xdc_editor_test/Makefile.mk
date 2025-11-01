@@ -13,7 +13,7 @@ SRC_PATH = Z:/Easily-sdk-6/test/xdc_editor_test
 LIB_PATH = Z:/Easily-sdk-6/windows/lib/$(ARCH)
 OBJ_PATH = Z:/Easily-temp/windows/$(MODULE)/$(ARCH)/Debug
 PDB_PATH = Z:/Easily-temp/windows/$(ARCH)
-OUT_PATH = Z:/Easily-app-6/windows/bin64
+OUT_PATH = Z:/Easily-app-6/windows/bin
 
 TARGET = $(OUT_PATH)/$(MODULE).exe
 DATABASE = $(OBJ_PATH)/$(MODULE).pdb
@@ -53,10 +53,10 @@ test:
 	if not exist $(abspath $(subst /,\, $(OBJ_PATH))) mkdir $(abspath $(subst /,\, $(OBJ_PATH)))
 
 install:
-	copy /y $(subst /,\, $(TARGET)) $(INS_PATH)\api\
+	copy /y $(subst /,\, $(TARGET)) $(OUT_PATH)\api\
 
 uninstall:
-	del $(INS_PATH)/api/$(MODULE)_$(ARCH).dll
+	del $(OUT_PATH)/api/$(MODULE)_$(ARCH).dll
 
 .PHONY : clean
 clean:

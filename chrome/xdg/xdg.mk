@@ -12,20 +12,20 @@ LFLAGS = -shared -fPIC -pthread
 
 MODULE = xdg
 ARCH = amd64
-VER = 6.0
+VER = 6
 
-SRV_PATH = /usr/local/Easily/sbin
-LNK_PATH = /usr/local/lib
+LIB_PATH = /usr/local/lib
 
 INC_PATH = ../../include
 SRC_PATH = ../../xdg
-OUT_PATH = ../../../Easily-app-6/chrome/sbin/api
+
 OBJ_PATH = ~/Easily-temp/chrome/$(MODULE)/$(ARCH)
 
 TARGET = lib$(MODULE).so.$(VER)
 LINKIT = lib$(MODULE).so
+OUT_PATH = ~/Easily-app-6/chrome/lib
 
-LIBS = -lm -ldl -lutil -L $(LNK_PATH) -lxdk -limg
+LIBS = -lm -ldl -lutil -L $(LIB_PATH) -lxdk -limg
 DIRS = $(wildcard \
 		$(SRC_PATH)/gob/*.c \
 		$(SRC_PATH)/gly/*.c \
@@ -76,43 +76,36 @@ $(OBJ_PATH)/%.o : $(SRC_PATH)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
 
 all : $(OBJS)
-	$(CC) $(LFLAGS) -o $(OUT_PATH)/$(TARGET) $(OBJS) $(LIBS)
+	$(CC) $(LFLAGS) -o $(OBJ_PATH)/$(TARGET) $(OBJS) $(LIBS)
 
 test:
-	if ! test -d $(OUT_PATH); then \
-	mkdir -p $(OUT_PATH); \
-	chmod 755 $(OUT_PATH); \
-	fi
-
 	if ! test -d $(OBJ_PATH); then \
 	mkdir -p $(OBJ_PATH); \
 	chmod 755 $(OBJ_PATH); \
 	fi
+
 	@echo $(DIRS)
 	@echo $(SRCS)
 	@echo $(OBJS)
 
 install:
-	if ! test -d $(SRV_PATH)/api; then \
-	sudo mkdir -p $(SRV_PATH)/api; \
-	fi
-	if ! test -d $(LNK_PATH); then \
-	sudo mkdir $(LNK_PATH); \
+	if ! test -d $(OUT_PATH); then \
+	sudo mkdir -p $(OUT_PATH); \
 	fi
 
-	sudo cp -f $(OUT_PATH)/$(TARGET) $(SRV_PATH)/api;
-	sudo chmod 755 $(SRV_PATH)/api/$(TARGET);
-	sudo rm -f $(LNK_PATH)/$(LINKIT);
-	sudo ln -s $(SRV_PATH)/api/$(TARGET) $(LNK_PATH)/$(LINKIT);
+	sudo cp -f $(OBJ_PATH)/$(TARGET) $(OUT_PATH);
+	sudo chmod 755 $(OUT_PATH)/$(TARGET);
+	sudo rm -f $(LIB_PATH)/$(LINKIT);
+	sudo ln -s $(OUT_PATH)/$(TARGET) $(LIB_PATH)/$(LINKIT);
 
 uninstall:
-	sudo rm -r $(LNK_PATH)/$(LINKIT);
-	sudo rm -f $(SRV_PATH)/api/$(TARGET)
+	sudo rm -r $(LIB_PATH)/$(LINKIT);
+	sudo rm -f $(OUT_PATH)/$(TARGET)
 	
 .PHONY : clean
 clean:
 	rm -f $(OBJS)
-	rm -f $(OUT_PATH)/$(TARGET)
+	rm -f $(OBJ_PATH)/$(TARGET)
 #-----------------------------------------------------------------------------
 # end microsoft NMAKE file
 #-----------------------------------------------------------------------------

@@ -17,10 +17,10 @@ INC_PATH = ../../include
 SRC_PATH = ../../xdb
 
 LIB_PATH = ../lib/$(ARCH)
-INS_PATH = C:\Easily\bin64
 
 OBJ_PATH = D:\Easily-temp\windows\$(MODULE)\$(ARCH)\Debug
 PDB_PATH = D:\Easily-temp\windows\$(ARCH)
+OUT_PATH = Z:\Easily-app-6\windows\lib
 
 TARGET = $(OBJ_PATH)/$(MODULE).dll
 LIBRARY = $(LIB_PATH)/$(MODULE).lib
@@ -48,7 +48,7 @@ COBS = $(patsubsti %.cc,%.c,$(DIRS))
 OBJS = $(patsubsti %.c,%.obj,$(COBS))
 ASMS = $(patsubsti %.obj,%.asm,$(OBJS))
 
-{$(SRC_PATH)}.c{$(OBJ_PATH)}.obj::
+{$(SRC_PATH)/odbc}.c{$(OBJ_PATH)}.obj::
 	$(CC) $(CFLAGS) /I $(INC_PATH) $<
 
 all : $(OBJS)
@@ -61,7 +61,7 @@ $(OBJS)
 
 test:
  	echo SOURCES= \>$(MODULE).txt
- 	for %i in ($(SRC_PATH)/xdb_odbc.*) do @echo $(OBJ_PATH)/%i \>>$(MODULE).txt
+ 	for %i in ($(SRC_PATH)/odbc/*.c) do @echo $(OBJ_PATH)/%i \>>$(MODULE).txt
 
 	@echo $(SOURCES)
 	@echo $(OBJS)
@@ -71,11 +71,11 @@ test:
 	if not exist $(abspath $(subst /,\, $(OBJ_PATH))) mkdir $(abspath $(subst /,\, $(OBJ_PATH)))
 
 install:
-	if not exist $(INS_PATH) mkdir $(INS_PATH)
-	copy /y $(subst /,\, $(TARGET)) $(INS_PATH)
+	if not exist $(OUT_PATH) mkdir $(OUT_PATH)
+	copy /y $(subst /,\, $(TARGET)) $(OUT_PATH)
 
 uninstall:
-	del $(INS_PATH)/$(MODULE).dll
+	del $(OUT_PATH)/$(MODULE).dll
 
 .PHONY : clean
 clean:

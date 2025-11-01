@@ -57,6 +57,12 @@ void* _get_address(res_modu_t lib, const schar_t* fname)
 #endif //WINCE
 }
 
+void _get_curpath(tchar_t* buf, int max)
+{
+	max = (int)GetCurrentDirectory(max, buf);
+	buf[max] = _T('\0');
+}
+
 void _get_runpath(res_modu_t ins, tchar_t* buf, int max)
 {
 	tchar_t* token;

@@ -72,6 +72,17 @@ void* get_address(res_modu_t lib, const schar_t* fname)
 	return (*pif->pf_get_address)(lib,fname);
 }
 
+void get_curpath(tchar_t* buf, int max)
+{
+	if_process_t* pif;
+
+	pif = PROCESS_PROCESS_INTERFACE;
+
+	XDK_ASSERT(pif != NULL);
+
+	(*pif->pf_get_curpath)(buf, max);
+}
+
 void get_runpath(res_modu_t ins, tchar_t* buf, int max)
 {
 	if_process_t* pif;

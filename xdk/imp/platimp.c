@@ -340,6 +340,7 @@ void xdk_impl_process(if_process_t* pif)
 	pif->pf_free_library = _free_library;
 	pif->pf_get_address = _get_address;
 	pif->pf_load_library = _load_library;
+	pif->pf_get_curpath = _get_curpath;
 	pif->pf_get_runpath = _get_runpath;
 	pif->pf_create_process = _create_process;
 	pif->pf_release_process = _release_process;

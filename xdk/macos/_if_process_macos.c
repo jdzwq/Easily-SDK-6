@@ -59,6 +59,11 @@ void* _get_address(res_modu_t lib, const tchar_t* fname)
     return dlsym(lib, fname);
 }
 
+void _get_curpath(tchar_t *buf, int max)
+{
+    getcwd(buf, max);
+}
+
 void _get_runpath(res_modu_t ins, tchar_t* buf, int max)
 {
     char* p;

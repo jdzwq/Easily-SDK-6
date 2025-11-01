@@ -288,6 +288,7 @@ LOC_API dword_t	_comm_listen(res_file_t fh, async_t* pb);
 LOC_API res_modu_t _load_library(const tchar_t* lname);
 LOC_API void	_free_library(res_modu_t lib);
 LOC_API void*	_get_address(res_modu_t lib, const schar_t* fname);
+LOC_API void	_get_curpath(tchar_t* buf, int max);
 LOC_API void	_get_runpath(res_modu_t ins, tchar_t* buf, int max);
 LOC_API bool_t	_create_process(const tchar_t* exename, const tchar_t* cmdline, int share, proc_info_t* ppi);
 LOC_API void	_release_process(proc_info_t* ppi);

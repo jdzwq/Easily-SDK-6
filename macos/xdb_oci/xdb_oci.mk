@@ -14,27 +14,27 @@ ARCH = aarch64
 MAJ_VER = 6
 CUR_VER = 6
 
-SRV_PATH = /usr/local/Easily/lib
-LNK_PATH = /usr/local/lib
-
 INC_OCI = /opt/oracle/instantclient_23i/sdk/include
 LIB_OCI = /opt/oracle/instantclient_23i
+
+LIB_PATH = /usr/local/lib
 
 INC_PATH = ../../include
 SRC_PATH = ../../xdb
 
 OBJ_PATH = ~/工程/Easily-temp/macos/$(MODULE)/$(ARCH)
+OUT_PATH = ~/工程/Easily-app-6/macos/lib
 
 TARGET = lib$(MODULE).$(CUR_VER).dylib
 LINKIT = lib$(MODULE).dylib
 
 LIBS = -lxdk -lxdg -lxdl -L $(LIB_OCI) -lclntsh
-DIRS = $(wildcard $(SRC_PATH)/xdb_oci.c)
+DIRS = $(wildcard $(SRC_PATH)/oci/*.c)
 SRCS = $(notdir $(DIRS))
 COBS = $(patsubst %.c, %.o, $(SRCS))
 OBJS = $(addprefix $(OBJ_PATH)/,$(COBS))
 
-$(OBJ_PATH)/%.o : $(SRC_PATH)/xdb_oci.c
+$(OBJ_PATH)/%.o : $(SRC_PATH)/oci/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH) -I $(INC_OCI)
 
 all : $(OBJS)
@@ -57,21 +57,18 @@ test:
 	@echo $(OBJS)
 
 install:
-	if ! test -d $(SRV_PATH); then \
-	sudo mkdir -p $(SRV_PATH); \
-	fi
-	if ! test -d $(LNK_PATH); then \
-	sudo mkdir $(LNK_PATH); \
+	if ! test -d $(OUT_PATH); then \
+	sudo mkdir -p $(OUT_PATH); \
 	fi
 
-	sudo cp -f $(OBJ_PATH)/$(TARGET) $(SRV_PATH);
-	sudo chmod 755 $(SRV_PATH)/$(TARGET);
-	sudo rm -f $(LNK_PATH)/$(LINKIT);
-	sudo ln -s $(SRV_PATH)/$(TARGET) $(LNK_PATH)/$(LINKIT);
+	sudo cp -f $(OBJ_PATH)/$(TARGET) $(OUT_PATH);
+	sudo chmod 755 $(OUT_PATH)/$(TARGET);
+	sudo rm -f $(LIB_PATH)/$(LINKIT);
+	sudo ln -s $(OUT_PATH)/$(TARGET) $(LIB_PATH)/$(LINKIT);
 
 uninstall:
-	sudo rm -r $(LNK_PATH)/$(LINKIT);
-	sudo rm -f $(SRV_PATH)/$(TARGET)
+	sudo rm -r $(LIB_PATH)/$(LINKIT);
+	sudo rm -f $(OUT_PATH)/$(TARGET)
 	
 .PHONY : clean
 clean:

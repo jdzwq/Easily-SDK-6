@@ -13,12 +13,12 @@ MODULE = xhttps
 ARCH = aarch64
 
 LIB_PATH = /usr/local/lib
-SRV_PATH = /usr/local/Easily/sbin
 
 INC_PATH = ../../../include
 SRC_PATH = ../../../server
 
 OBJ_PATH = ~/Easily-temp/linux/$(MODULE)/$(ARCH)
+OUT_PATH = ~/Easily-app-6/linux/sbin
 
 DIRS = $(wildcard \
 	$(SRC_PATH)/xhttps/*.cc \
@@ -47,15 +47,15 @@ test:
 	@echo $(OBJS)
 
 install:
-	if ! test -d $(SRV_PATH); then \
-	sudo mkdir $(SRV_PATH); \
+	if ! test -d $(OUT_PATH); then \
+	sudo mkdir $(OUT_PATH); \
 	fi
 
-	sudo cp -f $(OBJ_PATH)/$(MODULE) $(SRV_PATH);
-	sudo chmod +x $(SRV_PATH)/$(MODULE);
+	sudo cp -f $(OBJ_PATH)/$(MODULE) $(OUT_PATH);
+	sudo chmod +x $(OUT_PATH)/$(MODULE);
 
 uninstall:
-	sudo rm -f $(SRV_PATH)/$(MODULE)
+	sudo rm -f $(OUT_PATH)/$(MODULE)
 
 .PHONY : clean
 clean:

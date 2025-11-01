@@ -11,16 +11,16 @@
         "program": "/Users/zhangwenquan/工程/Easily-app-6/macos/sbin/xportd",
         "args": [],
         "stopAtEntry": false,
-        "cwd": "${fileDirname}",
+        "cwd": "/Users/zhangwenquan/工程/Easily-app-6/macos/sbin",
         "environment": [],
         "externalConsole": false,
         "MIMode": "lldb",
-        "followFork": "child",
-        "stopOnFork": true,
-        "initCommands": [
-            "settings set target.process.follow-fork-mode child",
-            "settings set target.process.stop-on-exec true"
-        ]
+        "setupCommands": [
+        { "text": "-interpreter-exec console \"settings set target.process.follow-fork-mode child\"" },
+        { "text": "-interpreter-exec console \"settings set target.process.stop-on-fork true\"" },
+        { "text": "-interpreter-exec console \"settings set target.process.follow-exec-mode child\"" },
+        { "text": "-interpreter-exec console \"settings set target.process.stop-on-exec true\"" }
+      ]
     },
     {
         "name": "(gdb) linux",
@@ -29,7 +29,7 @@
         "program": "/home/jdzwq/Easily-app-6/linux/sbin/xportd",
         "args": [],
         "stopAtEntry": false,
-        "cwd": "${fileDirname}",
+        "cwd": "/home/jdzwq/Easily-app-6/linux/sbin",
         "environment": [],
         "externalConsole": false,
         "MIMode": "gdb",
@@ -77,10 +77,10 @@
         "name": "(msvc) windows",
         "type": "cppvsdbg",
         "request": "launch",
-        "program": "C:/Easily/sbin64/xportd.exe",
+        "program": "Z:/Easily-app-6/windows/sbin/xportd.exe",
         "args": [],
         "stopAtEntry": false,
-        "cwd": "${fileDirname}",
+        "cwd": "Z:/Easily-app-6/windows/sbin",
         "environment": [],
         "console": ""
     },
@@ -88,7 +88,7 @@
         "name": "(gdb) mingw",
         "type": "cppdbg",
         "request": "launch",
-        "program": "Z:/Easily-app-6/windows/bin64/gen_system_glyph.exe",
+        "program": "Z:/Easily-app-6/windows/bin/gen_system_glyph.exe",
         "args": [],
         "stopAtEntry": false,
         "cwd": "${fileDirname}",

@@ -14,9 +14,8 @@ AFLAGS = -rcs
 
 MODULE = rtf
 ARCH = aarch64
-
-SRV_PATH = /usr/local/Easily/sbin
-LNK_PATH = /usr/local/lib
+OUT_PATH = ~/工程/Easily-app-6/macos/sbin
+LIB_PATH = /usr/local/lib
 
 INC_PATH = ../../include
 SRC_PATH = ../../third-party
@@ -50,15 +49,15 @@ test:
 	@echo $(OBJS)
 
 install:
-	if ! test -d $(LNK_PATH); then \
-	sudo mkdir -p $(LNK_PATH); \
+	if ! test -d $(LIB_PATH); then \
+	sudo mkdir -p $(LIB_PATH); \
 	fi
 
-	sudo cp -f $(OUT_PATH)/$(TARGET) $(LNK_PATH);
-	sudo chmod 644 $(LNK_PATH)/$(TARGET);
+	sudo cp -f $(OUT_PATH)/$(TARGET) $(LIB_PATH);
+	sudo chmod 644 $(LIB_PATH)/$(TARGET);
 
 uninstall:
-	sudo rm -r $(LNK_PATH)/$(TARGET);
+	sudo rm -r $(LIB_PATH)/$(TARGET);
 	
 .PHONY : clean
 clean:

@@ -57,6 +57,8 @@ EXP_API void free_library(res_modu_t lib);
 */
 EXP_API void* get_address(res_modu_t lib, const schar_t* fname);
 
+EXP_API void get_curpath(tchar_t* buf, int max);
+
 /*
 @FUNCTION get_runpath: get the module running path.
 @INPUT res_modu_t ins: the module system resource handle.

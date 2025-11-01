@@ -11,7 +11,7 @@ MODULE = xdb_lib_test
 INC_PATH = Z:/Easily-sdk-6/include
 SRC_PATH = Z:/Easily-sdk-6/test/xdb_lib_test
 LIB_PATH = Z:/Easily-sdk-6/windows/lib/$(ARCH)
-OUT_PATH = Z:/Easily-app-6/windows/bin64
+OUT_PATH = Z:/Easily-app-6/windows/bin
 
 OBJ_PATH = D:/Easily-temp/windows/$(MODULE)/$(ARCH)/Debug
 PDB_PATH = D:/Easily-temp/windows/$(ARCH)
@@ -54,10 +54,10 @@ test:
 	if not exist $(abspath $(subst /,\, $(OBJ_PATH))) mkdir $(abspath $(subst /,\, $(OBJ_PATH)))
 
 install:
-	copy /y $(subst /,\, $(TARGET)) $(INS_PATH)\api\
+	copy /y $(subst /,\, $(TARGET)) $(OUT_PATH)\api\
 
 uninstall:
-	del $(INS_PATH)/api/$(MODULE)_$(ARCH).dll
+	del $(OUT_PATH)/api/$(MODULE)_$(ARCH).dll
 
 .PHONY : clean
 clean:

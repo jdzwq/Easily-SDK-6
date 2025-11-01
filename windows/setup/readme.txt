@@ -1,20 +1,9 @@
 
--macos
-cd /usr/local/xService
-vi ~/.bash_profile
-export XSERVICE_ROOT="/usr/local/xService"
-export XSERVICE_DATA="/usr/local/xService/nfs"
-source ~/.bash_profile
+--windows
+export XSERVICE_ROOT="C:\Easily\xService"
+export XSERVICE_DATA="C:\Easily\xService\nfs"
+set Path = C:\Easily\lib;C:\Easily\sbin\api;%Path%
 
---macos
-sudo vi /etc/paths
->> /usr/local/lib
->> /usr/local/xService/api
-
-sudo systemctl enable xportd.service
-systemctl daemon-reload
-systemctl list-unit-files
-systemctl start xportd.service
-systemctl stop xportd.service
-systemctl reload xportd.service
-systemctl status xportd.service
+sc create xService binPath= "C:\Easily\sbin\xService.exe" start= demand DisplayName= "Easily Port Service"
+sc start xService
+sc delete xService

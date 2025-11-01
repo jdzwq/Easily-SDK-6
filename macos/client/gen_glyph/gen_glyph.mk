@@ -16,12 +16,12 @@ FT_PATH = /opt/homebrew/opt/freetype/include/freetype2
 FT_LIBS = /opt/homebrew/opt/freetype/lib -lfreetype
 
 LIB_PATH = /usr/local/lib
-CLI_PATH = /usr/local/Easily/bin
 
 INC_PATH = ../../../include
 SRC_PATH = ../../../client
 
 OBJ_PATH = ~/工程/Easily-temp/macos/$(MODULE)/$(ARCH)
+OUT_PATH = ~/工程/Easily-app-6/macos/bin
 
 DIRS = $(wildcard $(SRC_PATH)/gen_glyph/gen_freetype.cc)
 SRCS = $(notdir $(DIRS))
@@ -46,15 +46,15 @@ test:
 	@echo $(OBJS)
 
 install:
-	if ! test -d $(CLI_PATH); then \
-	sudo mkdir $(CLI_PATH); \
+	if ! test -d $(OUT_PATH); then \
+	sudo mkdir $(OUT_PATH); \
 	fi
 
-	sudo cp -f $(OBJ_PATH)/$(MODULE) $(CLI_PATH);
-	sudo chmod +x $(CLI_PATH)/$(MODULE);
+	sudo cp -f $(OBJ_PATH)/$(MODULE) $(OUT_PATH);
+	sudo chmod +x $(OUT_PATH)/$(MODULE);
 
 uninstall:
-	sudo rm -f $(CLI_PATH)/$(MODULE)
+	sudo rm -f $(OUT_PATH)/$(MODULE)
 
 .PHONY : clean
 clean:

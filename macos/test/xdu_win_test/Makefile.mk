@@ -30,8 +30,8 @@ $(OBJ_PATH)%.o : $(SRC_PATH)/%.cc
 
 all : $(OBJS)
 	rm -f $@
-	$(CC) -o $(OUT_PATH)/$(MODULE) $(OBJS) -L $(LIB_PATH) -lxdk -lxdg -lxdu
-#	rm -f $(OBJS)
+	$(CC) -o $(OBJ_PATH)/$(MODULE) $(OBJS) -L $(LIB_PATH) -lxdk -lxdg -lxdu \
+	-Wl,-rpath $(LIB_PATH)
 
 test:
 	if ! test -d $(OBJ_PATH); then \
@@ -42,9 +42,21 @@ test:
 	@echo $(SRCS)
 	@echo $(OBJS)
 
+install:
+	if ! test -d $(OUT_PATH); then \
+	sudo mkdir $(OUT_PATH); \
+	fi
+
+	sudo cp -f $(OBJ_PATH)/$(MODULE) $(OUT_PATH);
+	sudo chmod +x $(OUT_PATH)/$(MODULE);
+
+uninstall:
+	sudo rm -f $(OUT_PATH)/$(MODULE)
+	
 .PHONY : clean
 clean:
-	-rm -f $(OBJS)
+	rm -f $(OBJS)
+	rm -f $(OBJ_PATH)/$(MODULE)
 #-----------------------------------------------------------------------------
 # end GNU MAKE file
 #-----------------------------------------------------------------------------

@@ -1,17 +1,28 @@
 --linux
-sudo cp -rf ./templ/xService/* /usr/local/xService
+sudo cp -rf ./templ/linux/xportd.config /usr/local/Easily/sbin
+sudo cp -rf ./templ/linux/xtimerd.config /usr/local/Easily/sbin
+sudo cp -rf ./templ/linux/cfg /usr/local/Easily/sbin
+sudo cp -rf ./templ/linux/crt /usr/local/Easily/sbin
+sudo cp -rf ./templ/linux/loc /usr/local/Easily/sbin
+sudo cp -rf ./templ/linux/www /usr/local/Easily/sbin
+sudo cp -rf ./templ/linux/nfs /usr/local/Easily/sbin
+
+sudo chmod -R 644 ./usr/local/Easily/sbin/cfg
+sudo chmod -R 644 ./usr/local/Easily/sbin/crt
+sudo chmod -R 644 ./usr/local/Easily/sbin/loc
+sudo chmod -R 644 ./usr/local/Easily/sbin/www
+sudo chmod -R 666 ./usr/local/Easily/sbin/nfs
+...
 
 -linux
-cd /usr/local/xService
 vi ~/.bashrc
-export XSERVICE_ROOT="/usr/local/xService"
-export XSERVICE_DATA="/usr/local/xService/nfs"
+export XSERVICE_ROOT="/usr/local/Easily/sbin"
+export XSERVICE_DATA="/usr/local/Easily/sbin/nfs"
+export PATH="/usr/local/Easily/sbin/api:$PATH"
 source ~/.bashrc
 
 sudo vi /etc/ld.so.conf
 /usr/local/lib
-/usr/local/xService/api
-
 sudo ldconfig
 
 --linux

@@ -14,27 +14,27 @@ MODULE = xdb_pgsql
 ARCH = aarch64
 VER = 6
 
-SRV_PATH = /usr/local/Easily/lib
-LNK_PATH = /usr/local/lib
-
 INC_POSTGRE = /usr/include
 LIB_POSTGRE = /usr/lib64
+
+LIB_PATH = /usr/local/lib
 
 INC_PATH = ../../include
 SRC_PATH = ../../xdb
 
 OBJ_PATH = ~/Easily-temp/linux/$(MODULE)/$(ARCH)
+OUT_PATH = ~/Easily-app-6/linux/lib
 
 TARGET = lib$(MODULE).so.$(VER)
 LINKIT = lib$(MODULE).so
 
-LIBS = -L $(LNK_PATH) -lxdk -lxdl -L $(LIB_POSTGRE) -lpq
-DIRS = $(wildcard $(SRC_PATH)/xdb_pgsql.c)
+LIBS = -L $(LIB_PATH) -lxdk -lxdl -L $(LIB_POSTGRE) -lpq
+DIRS = $(wildcard $(SRC_PATH)/pgsql/*.c)
 SRCS = $(notdir $(DIRS))
 COBS = $(patsubst %.c, %.o, $(SRCS))
 OBJS = $(addprefix $(OBJ_PATH)/,$(COBS))
 
-$(OBJ_PATH)/%.o : $(SRC_PATH)/xdb_pgsql.c
+$(OBJ_PATH)/%.o : $(SRC_PATH)/pgsql/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH) -I $(INC_POSTGRE)
 
 all : $(OBJS)
@@ -51,21 +51,18 @@ test:
 	@echo $(OBJS)
 
 install:
-	if ! test -d $(SRV_PATH); then \
-	sudo mkdir -p $(SRV_PATH); \
-	fi
-	if ! test -d $(LNK_PATH); then \
-	sudo mkdir $(LNK_PATH); \
+	if ! test -d $(OUT_PATH); then \
+	sudo mkdir -p $(OUT_PATH); \
 	fi
 
-	sudo cp -f $(OBJ_PATH)/$(TARGET) $(SRV_PATH);
-	sudo chmod 755 $(SRV_PATH)/$(TARGET);
-	sudo rm -f $(LNK_PATH)/$(LINKIT);
-	sudo ln -s $(SRV_PATH)/$(TARGET) $(LNK_PATH)/$(LINKIT);
+	sudo cp -f $(OBJ_PATH)/$(TARGET) $(OUT_PATH);
+	sudo chmod 755 $(OUT_PATH)/$(TARGET);
+	sudo rm -f $(LIB_PATH)/$(LINKIT);
+	sudo ln -s $(OUT_PATH)/$(TARGET) $(LIB_PATH)/$(LINKIT);
 
 uninstall:
-	sudo rm -r $(LNK_PATH)/$(LINKIT);
-	sudo rm -f $(SRV_PATH)/$(TARGET)
+	sudo rm -r $(LIB_PATH)/$(LINKIT);
+	sudo rm -f $(OUT_PATH)/$(TARGET)
 	
 .PHONY : clean
 clean:

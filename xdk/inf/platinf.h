@@ -631,6 +631,7 @@ typedef struct _if_date_t{
 typedef res_modu_t(*PF_LOAD_LIBRARY)(const tchar_t*);
 typedef void (*PF_FREE_LIBRARY)(res_modu_t);
 typedef void* (*PF_GET_ADDRESS)(res_modu_t, const schar_t*);
+typedef void (*PF_GET_CURPATH)(tchar_t*, int);
 typedef void (*PF_GET_RUNPATH)(res_modu_t, tchar_t*, int);
 typedef bool_t (*PF_CREATE_PROCESS)(const tchar_t*, const tchar_t*, int, proc_info_t*);
 typedef void (*PF_RELEASE_PROCESS)(proc_info_t*);
@@ -653,6 +654,7 @@ typedef struct _if_process_t{
 	PF_LOAD_LIBRARY		pf_load_library;
 	PF_FREE_LIBRARY		pf_free_library;
 	PF_GET_ADDRESS		pf_get_address;
+	PF_GET_CURPATH		pf_get_curpath;
 	PF_GET_RUNPATH		pf_get_runpath;
 	PF_CREATE_PROCESS	pf_create_process;
 	PF_RELEASE_PROCESS	pf_release_process;

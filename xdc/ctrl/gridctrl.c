@@ -957,7 +957,7 @@ void noti_grid_begin_edit(widget_t widget)
 		widget_set_user_id(ptd->editor, IDC_FIREEDIT);
 		widget_set_owner(ptd->editor, widget);
 
-		widget_noti_xfont(ptd->editor, &xf);
+		editbox_set_xfont(ptd->editor, &xf);
 		widget_set_color_mode(ptd->editor, &ob);
 		widget_show(ptd->editor, WS_SHOW_NORMAL);
 		widget_set_focus(ptd->editor);
@@ -976,7 +976,7 @@ void noti_grid_begin_edit(widget_t widget)
 		widget_set_user_id(ptd->editor, IDC_FIRENUM);
 		widget_set_owner(ptd->editor, widget);
 
-		widget_noti_xfont(ptd->editor, &xf);
+		editbox_set_xfont(ptd->editor, &xf);
 		widget_set_color_mode(ptd->editor, &ob);
 		widget_show(ptd->editor, WS_SHOW_NORMAL);
 		widget_set_focus(ptd->editor);
@@ -995,7 +995,7 @@ void noti_grid_begin_edit(widget_t widget)
 		widget_set_user_id(ptd->editor, IDC_FIREDATE);
 		widget_set_owner(ptd->editor, widget);
 
-		widget_noti_xfont(ptd->editor, &xf);
+		editbox_set_xfont(ptd->editor, &xf);
 		widget_set_color_mode(ptd->editor, &ob);
 		widget_show(ptd->editor, WS_SHOW_NORMAL);
 		widget_set_focus(ptd->editor);
@@ -1014,7 +1014,7 @@ void noti_grid_begin_edit(widget_t widget)
 		widget_set_user_id(ptd->editor, IDC_FIRETIME);
 		widget_set_owner(ptd->editor, widget);
 
-		widget_noti_xfont(ptd->editor, &xf);
+		editbox_set_xfont(ptd->editor, &xf);
 		widget_set_color_mode(ptd->editor, &ob);
 		widget_show(ptd->editor, WS_SHOW_NORMAL);
 		widget_set_focus(ptd->editor);
@@ -1037,7 +1037,7 @@ void noti_grid_begin_edit(widget_t widget)
 		widget_set_user_id(ptd->editor, IDC_FIRELIST);
 		widget_set_owner(ptd->editor, widget);
 
-		widget_noti_xfont(ptd->editor, &xf);
+		editbox_set_xfont(ptd->editor, &xf);
 		widget_set_color_mode(ptd->editor, &ob);
 		widget_show(ptd->editor, WS_SHOW_NORMAL);
 		widget_set_focus(ptd->editor);
@@ -1057,7 +1057,7 @@ void noti_grid_begin_edit(widget_t widget)
 		widget_set_user_id(ptd->editor, IDC_FIREWORDS);
 		widget_set_owner(ptd->editor, widget);
 
-		widget_noti_xfont(ptd->editor, &xf);
+		editbox_set_xfont(ptd->editor, &xf);
 		widget_set_color_mode(ptd->editor, &ob);
 		widget_show(ptd->editor, WS_SHOW_NORMAL);
 		widget_set_focus(ptd->editor);
@@ -1080,7 +1080,7 @@ void noti_grid_begin_edit(widget_t widget)
 		widget_set_user_id(ptd->editor, IDC_FIREGRID);
 		widget_set_owner(ptd->editor, widget);
 
-		widget_noti_xfont(ptd->editor, &xf);
+		editbox_set_xfont(ptd->editor, &xf);
 		widget_set_color_mode(ptd->editor, &ob);
 		widget_show(ptd->editor, WS_SHOW_NORMAL);
 		widget_set_focus(ptd->editor);

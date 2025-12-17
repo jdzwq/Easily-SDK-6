@@ -128,20 +128,20 @@ EXP_API link_t_ptr detach_dom_node(link_t_ptr ilk, link_t_ptr pos);
 /*
 @FUNCTION enum_dom_node: enum a dom document nodes.
 @INPUT link_t_ptr ptr: the dom document link component.
-@INPUT CALLBACK_ENUMLINK pf: the callback function, if the function return zero, the enumerating will be breaked.
+@INPUT PF_ENUMLINK pf: the callback function, if the function return zero, the enumerating will be breaked.
 @INPUT void* param: the parameter translate into callback function.
 @RETURN link_t_ptr: return the link component enumeration breaken at, otherwise return NULL.
 */
-EXP_API link_t_ptr enum_dom_node(link_t_ptr ptr, CALLBACK_ENUMLINK pf, void* param);
+EXP_API link_t_ptr enum_dom_node(link_t_ptr ptr, PF_ENUMLINK pf, void* param);
 
 /*
 @FUNCTION enum_dom_node: enum a dom document nodes by deep order.
 @INPUT link_t_ptr ptr: the dom document link component.
-@INPUT CALLBACK_ENUMLINK pf: the callback function, if the function return zero, the enumerating will be breaked.
+@INPUT PF_ENUMLINK pf: the callback function, if the function return zero, the enumerating will be breaked.
 @INPUT void* param: the parameter translate into callback function.
 @RETURN link_t_ptr: return the link component enumeration breaken at, otherwise return NULL.
 */
-EXP_API link_t_ptr enum_dom_node_deep(link_t_ptr ptr, CALLBACK_ENUMLINK pf, void* param);
+EXP_API link_t_ptr enum_dom_node_deep(link_t_ptr ptr, PF_ENUMLINK pf, void* param);
 
 /*
 @FUNCTION insert_dom_node_before: insert a new dom node before the position.

@@ -33,7 +33,6 @@ typedef struct _navibox_delta_t{
 	widget_t target;
 	widget_t keybox;
 
-	xfont_t xf;
 }navibox_delta_t;
 
 #define GETNAVIBOXDELTA(ph) 	(navibox_delta_t*)widget_get_user_delta(ph)
@@ -141,8 +140,6 @@ int hand_navibox_create(widget_t widget, void* data)
 	ptd = (navibox_delta_t*)xmem_alloc(sizeof(navibox_delta_t));
 	xmem_zero((void*)ptd, sizeof(navibox_delta_t));
 
-	default_widget_xfont(&ptd->xf);
-
 	SETNAVIBOXDELTA(widget, ptd);
 
 	return 0;
@@ -182,7 +179,7 @@ void hand_navibox_lbutton_up(widget_t widget, const xpoint_t* pxp)
 
 	get_canvas_measure(widget_get_canvas(widget), &im);
 
-	hint = calc_navibox_hint(&im, &ptd->xf, &pt);
+	hint = calc_navibox_hint(&im, &pt);
 
 	if (hint == NAVIBOX_HINT_HOME)
 		navibox_on_home(widget);
@@ -213,13 +210,6 @@ void hand_navibox_size(widget_t widget, int code, const xsize_t* prs)
 	case WS_SIZE_LAYOUT:
 		break;
 	}
-}
-
-void hand_navibox_xfont(widget_t widget, const xfont_t* pxf)
-{
-	navibox_delta_t* ptd = GETNAVIBOXDELTA(widget);
-
-	xmem_copy((void*)&ptd->xf, (void*)pxf, sizeof(xfont_t));
 }
 
 void hand_navibox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
@@ -255,7 +245,7 @@ void hand_navibox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 
 	ns.keyboxed = widget_is_valid(ptd->keybox);
 
-	draw_navibox(pif, &ptd->xf, &ns);
+	draw_navibox(pif, &ns);
 
 	end_canvas_paint(canv, dc, pxr);
 }
@@ -276,10 +266,6 @@ widget_t navibox_create(widget_t widget, dword_t style, const xrect_t* pxr)
 
 		EVENT_ON_LBUTTON_DOWN(hand_navibox_lbutton_down)
 		EVENT_ON_LBUTTON_UP(hand_navibox_lbutton_up)
-
-		EVENT_ON_XFONT(hand_navibox_xfont)
-
-		
 
 	EVENT_END_DISPATH
 
@@ -302,7 +288,7 @@ void navibox_popup_size(widget_t widget, xsize_t* pxs)
 
 	get_canvas_measure(widget_get_canvas(widget), &im);
 
-	calc_navibox_size(&im, &ptd->xf, pxs);
+	calc_navibox_size(&im, pxs);
 
 	widget_size_to_pt(widget, pxs);
 

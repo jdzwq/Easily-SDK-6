@@ -23,6 +23,7 @@
 #include "view/plotview.h"
 #include "view/annoview.h"
 #include "view/calendarview.h"
+#include "view/notesview.h"
 #include "view/svgview.h"
 
 

@@ -655,38 +655,6 @@ EXP_API void	widget_set_accel(widget_t wt, const accel_table_t* pacl, int n);
 EXP_API bool_t	widget_enum_child(widget_t wt, PF_ENUM_WINDOW_PROC pf, vword_t pv);
 
 /*
-@FUNCTION widget_noti_xfont: notify the widget font changed.
-@INPUT widget_t wt: windowd resource handle.
-@INPUT const xfont_t* pxf: the font struct.
-@RETURN void: none.
-*/
-EXP_API void	widget_noti_xfont(widget_t wt, const xfont_t* pxf);
-
-/*
-@FUNCTION widget_noti_xface: notify the widget face changed.
-@INPUT widget_t wt: windowd resource handle.
-@INPUT const xface_t* pxa: the face struct.
-@RETURN void: none.
-*/
-EXP_API void	widget_noti_xface(widget_t wt, const xface_t* pxa);
-
-/*
-@FUNCTION widget_noti_xbrush: notify the widget brush changed.
-@INPUT widget_t wt: windowd resource handle.
-@INPUT const xbrush_t* pxb: the brush struct.
-@RETURN void: none.
-*/
-EXP_API void	widget_noti_xbrush(widget_t wt, const xbrush_t* pxb);
-
-/*
-@FUNCTION widget_noti_xpen: notify the widget pen changed.
-@INPUT widget_t wt: windowd resource handle.
-@INPUT const xpen_t* pxp: the pen struct.
-@RETURN void: none.
-*/
-EXP_API void	widget_noti_xpen(widget_t wt, const xpen_t* pxp);
-
-/*
 @FUNCTION widget_set_color_mode: set the widget color mode.
 @INPUT widget_t wt: windowd resource handle.
 @INPUT const color_mod_t* pclr: the color mode struct.
@@ -701,6 +669,7 @@ EXP_API void	widget_set_color_mode(widget_t wt, const color_mod_t* pclr);
 @RETURN void: none.
 */
 EXP_API void	widget_get_color_mode(widget_t wt, color_mod_t* pclr);
+EXP_API const color_mod_t* widget_get_color_mode_ptr(widget_t wt);
 
 /*
 @FUNCTION widget_set_diaph: set widget alphablend level.

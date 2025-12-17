@@ -32,7 +32,6 @@ LICENSE.GPL3 for more details.
 typedef struct _datebox_delta_t{
 	xdate_t dt;
 
-	xfont_t xf;
 }datebox_delta_t;
 
 #define GETDATEBOXDELTA(ph) 	(datebox_delta_t*)widget_get_user_delta(ph)
@@ -102,8 +101,6 @@ int hand_datebox_create(widget_t widget, void* data)
 
 	get_loc_date(&ptd->dt);
 
-	default_widget_xfont(&ptd->xf);
-
 	return 0;
 }
 
@@ -141,7 +138,7 @@ void hand_datebox_lbutton_up(widget_t widget, const xpoint_t* pxp)
 	get_canvas_measure(widget_get_canvas(widget), &im);
 
 	day = 0;
-	hint = calc_datebox_hint(&im, &ptd->xf, &pt, &ptd->dt, &day);
+	hint = calc_datebox_hint(&im, &pt, &ptd->dt, &day);
 
 	if (hint == DATEBOX_HINT_PREV)
 		datebox_on_prev_month(widget);
@@ -174,13 +171,6 @@ void hand_datebox_size(widget_t widget, int code, const xsize_t* prs)
 	}
 }
 
-void hand_datebox_xfont(widget_t widget, const xfont_t* pxf)
-{
-	datebox_delta_t* ptd = GETDATEBOXDELTA(widget);
-	
-	xmem_copy((void*)&ptd->xf, (void*)pxf, sizeof(xfont_t));
-}
-
 void hand_datebox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 {
 	datebox_delta_t* ptd = GETDATEBOXDELTA(widget);
@@ -208,7 +198,7 @@ void hand_datebox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 
 	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
 
-	draw_datebox(pif, &ptd->xf, &ptd->dt);
+	draw_datebox(pif, &ptd->dt);
 
 	end_canvas_paint(canv, dc, pxr);
 }
@@ -230,10 +220,6 @@ widget_t datebox_create(widget_t widget, dword_t style, const xrect_t* pxr)
 		EVENT_ON_LBUTTON_DOWN(hand_datebox_lbutton_down)
 		EVENT_ON_LBUTTON_UP(hand_datebox_lbutton_up)
 
-		EVENT_ON_XFONT(hand_datebox_xfont)
-
-		
-
 	EVENT_END_DISPATH
 
 	return widget_create(NULL, style, pxr, widget, &ev);
@@ -243,15 +229,12 @@ void datebox_popup_size(widget_t widget, xsize_t* pxs)
 {
 	datebox_delta_t* ptd = GETDATEBOXDELTA(widget);
 	measure_interface im = { 0 };
-	xfont_t xf = { 0 };
 
 	XDK_ASSERT(ptd != NULL);
 
-	default_xfont(&xf);
-
 	get_canvas_measure(widget_get_canvas(widget), &im);
 
-	calc_datebox_size(&im, &xf, pxs);
+	calc_datebox_size(&im, pxs);
 
 	widget_size_to_pt(widget, pxs);
 

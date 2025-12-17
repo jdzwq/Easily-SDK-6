@@ -31,16 +31,16 @@ LICENSE.GPL3 for more details.
 #include "../xdkimp.h"
 
 typedef struct _map_context{
-	memobj_head head;
+	memo_head head;
 
 	int bits;
-	int nums;
+	dword_t nums;
 	void* data;
 }map_context;
 
 #define MAP_CALC_COLS(bits)	(sizeof(dword_t) * 8 / bits)
 
-int map_calc_rows(int nums, int bits)
+static int map_calc_rows(int nums, int bits)
 {
 	int rows, cols;
 
@@ -52,19 +52,19 @@ int map_calc_rows(int nums, int bits)
 	return rows;
 }
 
-int map_calc_size(int nums, int bits)
+dword_t map_need_size(dword_t nums, int bits)
 {
-	int rows, cols;
+	dword_t rows, cols;
 
 	cols = MAP_CALC_COLS(bits);
 	rows = nums / cols;
 	if (nums % cols)
 		rows++;
 
-	return (rows * cols * bits / 8);
+	return (dword_t)(rows * cols * bits / 8);
 }
 
-map_t map_alloc(int nums, int bits)
+map_t map_alloc(dword_t nums, int bits)
 {
 	map_context* pmm;
 
@@ -91,74 +91,36 @@ void map_free(map_t map)
 
 	XDK_ASSERT(map != NULL && map->tag == MEM_MAP);
 	
-	if (pmm->data)
-		xmem_free(pmm->data);
+	//must detach data buffer frist
+	XDK_ASSERT(pmm->data == NULL);
 
 	xmem_free(pmm);
-}
-
-void map_reset(map_t map, int nums, int bits)
-{
-	map_context* pmm = TypePtrFromHead(map_context, map);
-
-	XDK_ASSERT(map != NULL && map->tag == MEM_MAP);
-
-	if (pmm->data)
-		xmem_free(pmm->data);
-
-	pmm->data = NULL;
-	pmm->nums = nums;
-	pmm->bits = bits;
-}
-
-map_t map_clone(matrix_t map)
-{
-	map_context* pmm = TypePtrFromHead(map_context, map);
-	map_context* pnew;
-	int n;
-
-	XDK_ASSERT(map != NULL && map->tag == MEM_MAP);
-
-	pnew = (map_context*)map_alloc(pmm->nums, pmm->bits);
-	
-	if (pmm->data)
-	{
-		n = map_calc_size(pmm->nums, pmm->bits);
-		pnew->data = xmem_realloc(pnew->data, n);
-		xmem_copy((void*)pnew->data, (void*)pmm->data, n);
-	}
-
-	return (map_t)&(pnew->head);
 }
 
 void map_copy(map_t dst, map_t src)
 {
 	map_context* psrc = (map_context*)src;
 	map_context* pdst = (map_context*)dst;
-	int n;
+	dword_t n;
 
 	XDK_ASSERT(psrc && psrc->head.tag == MEM_MAP && pdst && pdst->head.tag == MEM_MAP);
+	XDK_ASSERT(psrc->nums == pdst->nums && psrc->bits == pdst->bits);
 
-	map_reset(dst, psrc->nums, psrc->bits);
-
-	if (psrc->data)
+	if (psrc->data && pdst->data)
 	{
-		n = map_calc_size(psrc->nums, psrc->bits);
-		pdst->data = xmem_realloc(pdst->data, n);
+		XDK_ASSERT(pdst->data != NULL);
+		n = map_need_size(psrc->nums, psrc->bits);
 		xmem_copy(pdst->data, psrc->data, n);
 	}
 }
 
-int map_size(map_t map)
+dword_t map_size(map_t map)
 {
 	map_context* pmm = TypePtrFromHead(map_context, map);
-	int n;
 
 	XDK_ASSERT(map != NULL && map->tag == MEM_MAP);
 
-	n = map_calc_size(pmm->nums, pmm->bits);
-
-	return n;
+	return (pmm->data)? map_need_size(pmm->nums, pmm->bits) : 0;
 }
 
 int map_bits(map_t map)
@@ -184,9 +146,7 @@ void map_attach(map_t map, void* data)
 	map_context* pmm = TypePtrFromHead(map_context, map);
 
 	XDK_ASSERT(map != NULL && map->tag == MEM_MAP);
-
-	if (pmm->data)
-		xmem_free(pmm->data);
+	XDK_ASSERT(pmm->data == NULL);
 
 	pmm->data = data;
 }
@@ -207,37 +167,30 @@ void* map_detach(map_t map)
 void map_zero(map_t map)
 {
 	map_context* pmm = TypePtrFromHead(map_context, map);
-	int n;
+	dword_t n;
 
 	XDK_ASSERT(map != NULL && map->tag == MEM_MAP);
 
-	n = map_calc_size(pmm->nums, pmm->bits);
+	n = map_need_size(pmm->nums, pmm->bits);
 
-	if (!pmm->data)
+	if (pmm->data)
 	{
-		pmm->data = xmem_alloc(n);
+		xmem_zero((void*)pmm->data, n);
 	}
-
-	xmem_zero((void*)pmm->data, n);
 }
 
-void map_set_bit(map_t map, int i, byte_t b)
+void map_set_bit(map_t map, dword_t i, byte_t b)
 {
 	map_context* pmm = TypePtrFromHead(map_context, map);
 	dword_t* pd;
-	int n, rows, cols;
-	int row, col;
+	dword_t n, rows, cols;
+	dword_t row, col;
 	int j;
 	dword_t bit, msk;
 
 	XDK_ASSERT(map != NULL && map->tag == MEM_MAP);
-
-	if (!pmm->data)
-	{
-		n = map_calc_size(pmm->nums, pmm->bits);
-		pmm->data = xmem_alloc(n);
-	}
-
+	XDK_ASSERT(pmm->data != NULL);
+	
 	pd = (dword_t*)pmm->data;
 	cols = MAP_CALC_COLS(pmm->bits);
 	rows = map_calc_rows(pmm->nums, pmm->bits);
@@ -266,22 +219,18 @@ void map_set_bit(map_t map, int i, byte_t b)
 	pd[row] |= bit;
 }
 
-byte_t map_get_bit(map_t map, int i)
+byte_t map_get_bit(map_t map, dword_t i)
 {
 	map_context* pmm = TypePtrFromHead(map_context, map);
 	dword_t* pd;
-	int rows, cols;
-	int row, col;
+	dword_t rows, cols;
+	dword_t row, col;
 	int j;
 	dword_t msk;
 
 	XDK_ASSERT(map != NULL && map->tag == MEM_MAP);
-
-	if (!pmm->data)
-	{
-		return (byte_t)0;
-	}
-
+	XDK_ASSERT(pmm->data != NULL);
+	
 	pd = (dword_t*)pmm->data;
 	cols = MAP_CALC_COLS(pmm->bits);
 	rows = map_calc_rows(pmm->nums, pmm->bits);
@@ -308,29 +257,27 @@ byte_t map_get_bit(map_t map, int i)
 	return (byte_t)(msk & 0xFF);
 }
 
-int map_find_bit(map_t map, int i, byte_t b)
+dword_t map_find_bit(map_t map, dword_t i, byte_t b)
 {
 	map_context* pmm = TypePtrFromHead(map_context, map);
 	dword_t* pd;
-	int rows, cols;
-	int row, col;
+	dword_t rows, cols;
+	dword_t row, col;
 	int j;
 	dword_t fix, bit, msk;
 
 	XDK_ASSERT(map != NULL && map->tag == MEM_MAP);
-
-	if (!pmm->data)
-	{
-		return C_ERR;
-	}
-
+	XDK_ASSERT(pmm->data != NULL);
+	
 	pd = (dword_t*)pmm->data;
 	cols = MAP_CALC_COLS(pmm->bits);
 	rows = map_calc_rows(pmm->nums, pmm->bits);
 
 	row = i / cols;
 	if (!pd || row >= rows)
-		return C_ERR;
+	{
+		return INVALID_BLOCK;
+	}
 
 	fix = 1;
 	for (j = 1; j < pmm->bits; j++)
@@ -366,24 +313,20 @@ int map_find_bit(map_t map, int i, byte_t b)
 		}
 	}
 
-	return C_ERR;
+	return INVALID_BLOCK;
 }
 
-int map_test_bit(map_t map, int i, byte_t b, int n)
+dword_t map_test_bit(map_t map, dword_t i, byte_t b, dword_t n)
 {
 	map_context* pmm = TypePtrFromHead(map_context, map);
 	dword_t* pd;
-	int rows, cols;
-	int row, col, k = 0;
+	dword_t rows, cols;
+	dword_t row, col, k = 0;
 	int j;
 	dword_t fix, bit, msk;
 
 	XDK_ASSERT(map != NULL && map->tag == MEM_MAP);
-
-	if (!pmm->data)
-	{
-		return C_ERR;
-	}
+	XDK_ASSERT(pmm->data != NULL);
 
 	pd = (dword_t*)pmm->data;
 	cols = MAP_CALC_COLS(pmm->bits);
@@ -391,7 +334,9 @@ int map_test_bit(map_t map, int i, byte_t b, int n)
 
 	row = i / cols;
 	if (!pd || row >= rows)
-		return C_ERR;
+	{
+		return INVALID_BLOCK;
+	}
 
 	fix = 1;
 	for (j = 1; j < pmm->bits; j++)
@@ -435,23 +380,17 @@ void map_parse(map_t map, const tchar_t* str, int len)
 {
 	map_context* pmm = TypePtrFromHead(map_context, map);
 	dword_t* pd;
-	int rows;
+	dword_t rows, n, j;
 	const tchar_t* token;
-	int j, n;
 
 	XDK_ASSERT(map != NULL && map->tag == MEM_MAP);
+	XDK_ASSERT(pmm->data != NULL);
 
 	if (len < 0)
 		len = xslen(str);
 
 	if (!len)
 		return;
-
-	if (!pmm->data)
-	{
-		n = map_calc_size(pmm->nums, pmm->bits);
-		pmm->data = xmem_alloc(n);
-	}
 
 	pd = (dword_t*)pmm->data;
 	rows = map_calc_rows(pmm->nums, pmm->bits);
@@ -490,8 +429,8 @@ int map_format(map_t map, tchar_t* buf, int max)
 {
 	map_context* pmm = TypePtrFromHead(map_context, map);
 	dword_t* pd;
-	int rows;
-	int j, n;
+	dword_t rows;
+	dword_t j, n;
 	int total = 0;
 
 	XDK_ASSERT(map != NULL && map->tag == MEM_MAP);
@@ -544,57 +483,172 @@ int map_format(map_t map, tchar_t* buf, int max)
 	return total;
 }
 
-/*
-struct{
-	byte[1]: bits
-	byte[3]: nums
-	byte[]: data
-}map_dump
-*/
-dword_t map_encode(map_t map, byte_t* buf, dword_t max)
+/**********************************************************************
+ASN.1 CER ENCODING
+Map::=SEQUENCE{
+	Head: BER_INTEGERS {bits: BYTE[1] nums: BYTE[3]}
+	Data: BER_OCTET_STRING
+}
+**********************************************************************/
+dword_t map_encode(map_t map, byte_t* buf)
 {
 	map_context* pmm = TypePtrFromHead(map_context, map);
-	dword_t n = 0;
+	dword_t n, total = 0;
+	dword_t mn, hn;
+	byte_t* pos = NULL;
 	
 	XDK_ASSERT(map != NULL && map->tag == MEM_MAP);
 
-	if (buf)
+	n = ver_write_sequence(((buf)? buf + total : NULL), &pos);
+	if(!n)
 	{
-		PUT_BYTE(buf, 0, (byte_t)(pmm->bits));
-		PUT_THREEBYTE_LOC(buf, 1, pmm->nums);
-	}
+		set_last_error(_T("map_encode"), _T("ver_write_sequence"), -1);
+		return 0;
+	} 
+	total += n;
 
-	n = map_calc_size(pmm->nums, pmm->bits);
-	n = (n < max) ? n : max;
-	if (buf && pmm->data)
+	hn = ((pmm->bits) << 24) | (pmm->nums & 0x00FFFFFF);
+	n = ver_write_int(((buf)? buf + total : NULL), (int)hn);
+	if(!n)
 	{
-		xmem_copy((void*)(buf + 4), (void*)pmm->data, n);
-	}
+		set_last_error(_T("map_encode"), _T("ver_write_int"), -1);
+		return 0;
+	} 
+	total += n;
 
-	return (n + 4);
+	mn = map_need_size(pmm->nums, pmm->bits);
+	if(pmm->data)
+	{
+		n = ver_write_byte_array(((buf) ? buf + total : NULL), (byte_t *)pmm->data, mn);
+	}else
+	{
+		n = ver_write_byte_array(((buf) ? buf + total : NULL), NULL, 0);
+	}
+	if(!n)
+	{
+		set_last_error(_T("map_encode"), _T("ver_write_byte_array"), -1);
+		return 0;
+	} 
+	total += n;
+
+	if(pos) ver_write_sequence_length(pos, total);
+
+	return total;
 }
 
 dword_t map_decode(map_t map, const byte_t* buf)
 {
 	map_context* pmm = TypePtrFromHead(map_context, map);
-	dword_t n = 0;
-	int bits, nums;
+	dword_t len, n, total = 0;
 
-	if (!buf)
+	if (!buf) return total;
+
+	n = ver_read_sequence(buf + total, &len);
+	if(!n)
 	{
+		set_last_error(_T("map_decode"), _T("ver_read_sequence"), -1);
 		return 0;
 	}
+	total += n;
 
-	bits = GET_BYTE(buf, 0);
-	nums = GET_THREEBYTE_LOC(buf, 1);
-
-	n = map_calc_size(nums, bits);
-	if (map)
+	n = ver_read_int(buf + total, (int*)&len);
+	if(!n)
 	{
-		map_reset(map, nums, bits);
-		pmm->data = xmem_realloc(pmm->data, n);
-		xmem_copy((void*)pmm->data, (void*)(buf + 4), n);
+		set_last_error(_T("map_decode"), _T("ver_read_int"), -1);
+		return 0;
+	}
+	total += n;
+
+	if(pmm)
+	{
+		pmm->bits = (int)((len & 0xFF000000) >> 24);
+		pmm->nums = (int)(len & 0x00FFFFFF);
 	}
 
-	return (n + 4);
+	len = map_need_size(pmm->nums, pmm->bits);
+	n = ver_read_byte_array(buf + total, ((pmm)? pmm->data : NULL), ((pmm)? len : 0));
+	if(!n)
+	{
+		set_last_error(_T("map_decode"), _T("ver_read_byte_array"), -1);
+		return 0;
+	}
+	total += n;
+
+	return total;
 }
+
+/**********************************************************************/
+#if defined (DEBUG) || defined (_DEBUG)
+void map_self_test(void)
+{
+	int items = 128;
+	int b = 0x01;
+	int i, k, n, size, len;
+	map_t map;
+	void* mb;
+	dword_t bys;
+	tchar_t bits[10] = {0};
+	tchar_t* buf;
+
+	printf("test map...\n");
+
+	for (k = 1; k <= 8; k <<= 1)
+	{
+		size = map_need_size(items, k);
+		mb = xmem_alloc(size);
+
+		map = map_alloc(items, k);
+		map_attach(map, mb);
+
+		_tprintf(_T("items:%d bits:%d size:%d mask:%d\n"), items, k, size, b);
+
+		for (i = 0; i < items; i++)
+			map_set_bit(map, i, 0);
+
+		int rows = items / 32;
+
+		for (i = 0; i < rows; i++)
+			map_set_bit(map, i * 32 + i % 32, b);
+
+		len = map_format(map, NULL, MAX_LONG);
+		buf = xsalloc(len + 1);
+		map_format(map, buf, len);
+
+		map_zero(map);
+		map_parse(map, buf, len);
+		xsfree(buf);
+
+		bys = map_encode(map, NULL);
+		mb = xmem_alloc(bys);
+		map_encode(map, mb);
+		bys = map_decode(map, mb);
+		xmem_free(mb);
+
+		for (i = 0; i < items; i++)
+		{
+			n = k;
+			while(n--)
+			{
+				if (map_get_bit(map, i) == b)
+					_tprintf(_T("1"));
+				else
+					_tprintf(_T("0"));
+			}
+
+			_tprintf(_T(" "));
+
+			if (!((i + 1) % 32))
+				_tprintf(_T("\n"));
+		}
+
+		b <<= 1;
+		b |= 1;
+		
+		mb = map_detach(map);
+		xmem_free(mb);
+		map_free(map);
+	}
+
+	printf("test map end\n");
+}
+#endif

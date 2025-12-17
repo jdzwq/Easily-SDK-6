@@ -33,7 +33,7 @@ LICENSE.GPL3 for more details.
 #define VARSTR_INC	512
 
 typedef struct _string_context{
-	memobj_head head;
+	memo_head head;
 
 	int count;
 	int size;
@@ -562,7 +562,6 @@ dword_t string_encode(string_t vs, int encode, byte_t* buf, dword_t max)
 		return mbs_to_utf8(string_ptr(vs), string_len(vs), buf, max);
 #endif
 	}
-#if defined(XDM_SUPPORT_ACP) || defined(XDK_SUPPORT_MBCS)
 	else if (encode == _GB2312)
 	{
 #ifdef _UNICODE
@@ -571,7 +570,6 @@ dword_t string_encode(string_t vs, int encode, byte_t* buf, dword_t max)
 		return mbs_to_gb2312(string_ptr(vs), string_len(vs), buf, max);
 #endif
 	}
-#endif
 	else if (encode == _UTF16_LIT)
 	{
 #ifdef _UNICODE
@@ -631,7 +629,6 @@ int string_decode(string_t vs, int encode, const byte_t* buf, dword_t size)
 		len = utf8_to_mbs(buf, size, NULL, MAX_LONG);
 #endif
 	}
-#if defined(XDM_SUPPORT_ACP) || defined(XDK_SUPPORT_MBCS)
 	else if (encode == _GB2312)
 	{
 #ifdef _UNICODE
@@ -640,7 +637,6 @@ int string_decode(string_t vs, int encode, const byte_t* buf, dword_t size)
 		len = gb2312_to_mbs(buf, size, NULL, MAX_LONG);
 #endif
 	}
-#endif
 	else if (encode == _UTF16_LIT)
 	{
 #ifdef _UNICODE
@@ -676,7 +672,6 @@ int string_decode(string_t vs, int encode, const byte_t* buf, dword_t size)
 		len = utf8_to_mbs(buf, size,  str, len);
 #endif
 	}
-#if defined(XDM_SUPPORT_ACP) || defined(XDK_SUPPORT_MBCS)
 	else if (encode == _GB2312)
 	{
 #ifdef _UNICODE
@@ -685,7 +680,6 @@ int string_decode(string_t vs, int encode, const byte_t* buf, dword_t size)
 		len = gb2312_to_mbs(buf, size, str, len);
 #endif
 	}
-#endif
 	else if (encode == _UTF16_LIT)
 	{
 #ifdef _UNICODE

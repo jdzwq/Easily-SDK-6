@@ -10,7 +10,7 @@
 !include xdc.txt
 !endif
 
-ARCH = x64
+ARCH = x86
 MODULE = xdc
 
 INC_PATH = ../../include

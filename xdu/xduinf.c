@@ -114,19 +114,18 @@ void xdu_impl_context_graphic(if_context_t* pif)
 	pif->pf_gdi_draw_curve = _gdi_draw_curve;
 	pif->pf_gdi_draw_rect = _gdi_draw_rect;
 	pif->pf_gdi_draw_round = _gdi_draw_round;
+	pif->pf_gdi_get_xfont = _gdi_get_xfont;
+	pif->pf_gdi_set_xfont = _gdi_set_xfont;
+	pif->pf_gdi_font_size = _gdi_font_size;
 	pif->pf_gdi_draw_text = _gdi_draw_text;
 	pif->pf_gdi_text_out = _gdi_text_out;
 	pif->pf_gdi_text_size = _gdi_text_size;
-	pif->pf_gdi_font_size = _gdi_font_size;
+	pif->pf_gdi_text_rect = _gdi_text_rect;
 	pif->pf_gdi_gradient_rect = _gdi_gradient_rect;
 	pif->pf_gdi_alphablend_rect = _gdi_alphablend_rect;
 	pif->pf_gdi_invert_rect = _gdi_invert_rect;
 	pif->pf_gdi_exclude_rect = _gdi_exclude_rect;
 	pif->pf_gdi_inclip_rect = _gdi_inclip_rect;
-
-	pif->pf_gdi_create_fontset = _gdi_create_fontset;
-	pif->pf_gdi_destroy_fontset = _gdi_destroy_fontset;
-	pif->pf_gdi_word_size = _gdi_word_size;
 	
 #ifdef XDU_SUPPORT_CONTEXT_BITMAP
 	pif->pf_gdi_draw_bitmap = _gdi_draw_bitmap;
@@ -230,12 +229,9 @@ void xdu_impl_widget(if_widget_t* pif)
 	pif->pf_widget_set_scroll_info = _widget_set_scroll_info;
 	pif->pf_widget_get_scroll_info = _widget_get_scroll_info;
 
-	pif->pf_widget_noti_xfont = _widget_noti_xfont;
-	pif->pf_widget_noti_xface = _widget_noti_xface;
-	pif->pf_widget_noti_xbrush = _widget_noti_xbrush;
-	pif->pf_widget_noti_xpen = _widget_noti_xpen;
 	pif->pf_widget_set_color_mode = _widget_set_color_mode;
 	pif->pf_widget_get_color_mode = _widget_get_color_mode;
+	pif->pf_widget_get_color_mode_ptr = _widget_get_color_mode_ptr;
 	pif->pf_widget_set_diaph = _widget_set_diaph;
 	pif->pf_widget_get_diaph = _widget_get_diaph;
 

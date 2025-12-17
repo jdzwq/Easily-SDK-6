@@ -1,2 +1,0 @@
-SOURCES= \
-D:/Easily-temp/windows/gen_glyph/x64/Debug/gen_system.cc \

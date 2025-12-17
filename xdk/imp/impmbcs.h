@@ -55,6 +55,9 @@ extern "C" {
 
 	EXP_API int sys_ucs_to_utf(const wchar_t* src, int slen, byte_t* dest, dword_t dlen);
 
+#if defined (DEBUG) || defined (_DEBUG)
+EXP_API void mbcs_self_test();
+#endif
 
 #ifdef	__cplusplus
 }

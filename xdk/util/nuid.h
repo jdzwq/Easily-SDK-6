@@ -60,6 +60,8 @@ extern "C" {
 
 	EXP_API void nuid_to_md5(nuid_t* pu, byte_t buf[16]);
 
+	EXP_API int nuid_format_hash(nuid_t* pu, tchar_t buf[24]);
+
 	EXP_API void nuid_parse_string(nuid_t* pu, const tchar_t buf[36]);
 
 	EXP_API int nuid_format_string(nuid_t* pu, tchar_t buf[36]);

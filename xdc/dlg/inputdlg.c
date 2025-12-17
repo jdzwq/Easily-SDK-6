@@ -36,8 +36,6 @@ typedef struct _inputdlg_delta_t{
 	int max;
 	widget_t editor;
 	widget_t button;
-
-	xfont_t xf;
 }inputdlg_delta_t;
 
 typedef struct _INPUTPARAM{
@@ -89,8 +87,6 @@ int hand_inputdlg_create(widget_t widget, void* data)
 
 	SETINPUTDLGDELTA(widget, ptd);
 
-	default_xfont(&ptd->xf);
-
 	if (pim)
 	{
 		ptd->buf = pim->buf;
@@ -114,7 +110,6 @@ int hand_inputdlg_create(widget_t widget, void* data)
 	widget_set_user_id(ptd->editor, IDC_FIREEDIT);
 	widget_set_owner(ptd->editor, widget);
 	
-	widget_noti_xfont(ptd->editor, &ptd->xf);
 	widget_set_color_mode(ptd->editor, &ob);
 
 	widget_show(ptd->editor, WS_SHOW_NORMAL);
@@ -197,13 +192,6 @@ void hand_inputdlg_size(widget_t widget, int code, const xsize_t* prs)
 	widget_erase(widget, NULL);
 }
 
-void hand_inputdlg_xfont(widget_t widget, const xfont_t* pxf)
-{
-	inputdlg_delta_t* ptd = GETINPUTDLGDELTA(widget);
-
-	xmem_copy((void*)&ptd->xf, (void*)pxf, sizeof(xfont_t));
-}
-
 void hand_inputdlg_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 {
 	inputdlg_delta_t* ptd = GETINPUTDLGDELTA(widget);
@@ -259,10 +247,6 @@ widget_t inputdlg_create(const tchar_t* title, tchar_t* buf, int max, widget_t o
 
 		EVENT_ON_MENU_COMMAND(hand_inputdlg_menu_command)
 
-		EVENT_ON_XFONT(hand_inputdlg_xfont)
-
-		
-
 	EVENT_END_DISPATH
 	
 	dlg = widget_create(NULL, WD_STYLE_POPUP | WD_STYLE_BORDER, &xr, owner, &ev);
@@ -290,7 +274,7 @@ void inputdlg_popup_size(widget_t widget, xsize_t* pxs)
 	xsize_t xs;
 	float pm;
 
-	font_metric_by_pt(xstof(ptd->xf.size), &pm, NULL);
+	font_metric_by_pt(xstof(GDI_ATTR_FONT_SIZE_TEXT), &pm, NULL);
 	xs.fw = pm;
 	xs.fh = pm;
 	widget_size_to_pt(widget, &xs);

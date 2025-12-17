@@ -480,6 +480,12 @@ EXP_API widget_t shapebox_create(widget_t widget, dword_t style, const xrect_t* 
 */
 EXP_API void shapebox_set_shape(widget_t widget, const tchar_t* shape);
 
+EXP_API void shapebox_set_xbrush(widget_t widget, const xbrush_t* pxb);
+EXP_API void shapebox_get_xbrush(widget_t widget, xbrush_t* pxb);
+
+EXP_API void shapebox_set_xpen(widget_t widget, const xpen_t* pxp);
+EXP_API void shapebox_get_xpen(widget_t widget, xpen_t* pxp);
+
 /******************************icon box*****************************************************/
 
 /*
@@ -768,6 +774,11 @@ EXP_API const tchar_t* editbox_get_text_ptr(widget_t widget);
 @RETURN void: none.
 */
 EXP_API void editbox_auto_size(widget_t widget, bool_t b);
+
+EXP_API void editbox_set_xface(widget_t widget, const xface_t* pxa);
+EXP_API void editbox_get_xface(widget_t widget, xface_t* pxa);
+EXP_API void editbox_set_xfont(widget_t widget, const xfont_t* pxf);
+EXP_API void editbox_get_xfont(widget_t widget, xfont_t* pxf);
 
 /*
 @FUNCTION editbox_is_select: test the editbox text is in select mode.

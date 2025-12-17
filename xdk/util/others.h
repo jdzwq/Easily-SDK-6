@@ -44,6 +44,8 @@ LICENSE.GPL3 for more details.
 extern "C" {
 #endif
 
+EXP_API dword_t integer_bytes(int num);
+
 EXP_API void bytes_turn(byte_t* ba, int n);
 
 EXP_API int format_password(const tchar_t* sz, tchar_t* buf, int max);

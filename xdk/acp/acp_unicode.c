@@ -28,13 +28,46 @@ LICENSE.GPL3 for more details.
 
 #include "../xdkstd.h"
 
-int acp_unicode_byte_to_gb2312(wchar_t ch, byte_t* buf)
+int acp_unicode_byte_to_gb2312(wchar_t wch, byte_t* buf)
 {
-#ifdef XDK_SUPPORT_ACP_TABLE
-	return table_unicode_seek_gb2312((unsigned short)ch, (unsigned char*)buf);
-#else
-	return share_unicode_seek_gb2312((unsigned short)ch, (unsigned char*)buf);
-#endif
+	bool_t b;
+	unsigned short uch;
+
+	if (wch == BIGBOM || wch == LITBOM)
+	{
+		if (buf)
+		{
+			buf[0] = ALT_CHAR;
+		}
+		return 1;
+	}
+
+	if (wch >= 0x0000 && wch <= 0x007F)
+	{
+		if (buf)
+		{
+			buf[0] = (unsigned char)wch;
+		}
+		return 1;
+	}
+
+	b = share_unicode_seek_gb2312((unsigned short)wch, (unsigned short*)&uch);
+	if(!b)
+	{
+		if (buf)
+		{
+			buf[0] = ALT_CHAR;
+		}
+		return 1;
+	}
+	
+	if(buf)
+	{
+		buf[0] = GETLBYTE(uch);
+		buf[1] = GETHBYTE(uch);
+	}
+
+	return 2;
 }
 
 int acp_unicode_to_gb2312(const wchar_t* src, int slen, byte_t* dest, dword_t dlen)
@@ -42,13 +75,17 @@ int acp_unicode_to_gb2312(const wchar_t* src, int slen, byte_t* dest, dword_t dl
 	int total = 0;
 	dword_t len = 0;
 
+	if (src && slen < 0)
+	{
+		slen = 0;
+		while (*(src + slen))
+			slen++;
+	}
+	
 	while (total < slen && len < dlen)
 	{
-#ifdef XDK_SUPPORT_ACP_TABLE
-		len += table_unicode_seek_gb2312((unsigned short)(src[total]), ((dest) ? (unsigned char*)(dest + len) : NULL));
-#else
-		len += share_unicode_seek_gb2312((unsigned short)(src[total]), ((dest) ? (unsigned char*)(dest + len) : NULL));
-#endif
+		len += acp_unicode_byte_to_gb2312((unsigned short)(src[total]), ((dest) ? (unsigned char*)(dest + len) : NULL));
+
 		total++;
 	}
 

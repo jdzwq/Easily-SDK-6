@@ -10,7 +10,7 @@
 !include xdg.txt
 !endif
 
-ARCH = x64
+ARCH = x86
 MODULE = xdg
 
 INC_PATH = ../../include

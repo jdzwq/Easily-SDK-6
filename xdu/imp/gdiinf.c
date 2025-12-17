@@ -59,6 +59,8 @@ void get_canvas_interface(canvas_t canv, drawing_interface* pif)
 	pif->pf_draw_equilagon = (PF_DRAW_EQUILAGON)draw_equilagon;
 	pif->pf_draw_path = (PF_DRAW_PATH)draw_path;
 
+	pif->pf_set_xfont = (PF_SET_XFONT)set_xfont;
+	pif->pf_get_xfont = (PF_GET_XFONT)get_xfont;
 	pif->pf_font_size = (PF_FONT_SIZE)font_size;
 	pif->pf_text_size = (PF_TEXT_SIZE)text_size;
 	pif->pf_text_rect = (PF_TEXT_RECT)text_rect;
@@ -102,6 +104,8 @@ void get_visual_interface(visual_t visu, drawing_interface* piv)
 	piv->pf_draw_equilagon = (PF_DRAW_EQUILAGON)draw_equilagon_raw;
 	piv->pf_draw_path = (PF_DRAW_PATH)draw_path_raw;
 
+	piv->pf_set_xfont = (PF_SET_XFONT)set_xfont_raw;
+	piv->pf_get_xfont = (PF_GET_XFONT)get_xfont_raw;
 	piv->pf_font_size = (PF_FONT_SIZE)font_size_raw;
 	piv->pf_text_size = (PF_TEXT_SIZE)text_size_raw;
 	piv->pf_text_rect = (PF_TEXT_RECT)text_rect_raw;
@@ -127,7 +131,8 @@ void get_visual_measure(visual_t view, measure_interface* pim)
 {
 	pim->ctx = (void*)view;
 
-	pim->pf_measure_pixel = (PF_MEASURE_PIXEL)pixel_size_raw;
+	pim->pf_set_xfont = (PF_SET_XFONT)set_xfont_raw;
+	pim->pf_get_xfont = (PF_GET_XFONT)get_xfont_raw;
 	pim->pf_measure_font = (PF_MEASURE_FONT)font_size_raw;
 	pim->pf_measure_size = (PF_MEASURE_SIZE)text_size_raw;
 	pim->pf_measure_rect = (PF_MEASURE_RECT)text_rect_raw;
@@ -137,7 +142,8 @@ void get_canvas_measure(canvas_t canv, measure_interface* pim)
 {
 	pim->ctx = (void*)canv;
 
-	pim->pf_measure_pixel = (PF_MEASURE_PIXEL)pixel_size;
+	pim->pf_set_xfont = (PF_SET_XFONT)set_xfont;
+	pim->pf_get_xfont = (PF_GET_XFONT)get_xfont;
 	pim->pf_measure_font = (PF_MEASURE_FONT)font_size;
 	pim->pf_measure_size = (PF_MEASURE_SIZE)text_size;
 	pim->pf_measure_rect = (PF_MEASURE_RECT)text_rect;

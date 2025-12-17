@@ -180,8 +180,9 @@ void xdk_impl_timer(if_timer_t* pif)
 #ifdef XDK_SUPPORT_RANDOM
 void xdk_impl_random(if_random_t* pif)
 {
-	pif->pf_system_random32 = _system_random32;
-	pif->pf_system_random64 = _system_random64;
+	pif->pf_system_srand = _system_srand;
+	pif->pf_system_rand32 = _system_rand32;
+	pif->pf_system_rand64 = _system_rand64;
 }
 #endif
 

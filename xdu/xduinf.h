@@ -62,7 +62,7 @@ typedef void(*PF_DESTROY_CONTEXT)(visual_t);
 typedef void(*PF_RENDER_CONTEXT)(visual_t, int, int, visual_t, int, int, int, int);
 typedef void(*PF_GET_DEVICE_CAPS)(visual_t, dev_cap_t*);
 typedef float(*PF_PIXEL_METRIC)(visual_t);
-typedef float(*PF_FONT_METRIC)(visual_t, const xfont_t*);
+typedef float(*PF_FONT_METRIC)(visual_t, const tchar_t*);
 
 /*graphic interface*/
 typedef void(*PF_GDI_SET_POINT)(visual_t, const xcolor_t*, const xpoint_t*);
@@ -79,10 +79,13 @@ typedef void(*PF_GDI_DRAW_POLYGON)(visual_t, const xpen_t*, const xbrush_t*, con
 typedef void(*PF_GDI_DRAW_ROUND)(visual_t, const xpen_t*, const xbrush_t*, const xrect_t*, const xsize_t*);
 typedef void(*PF_GDI_DRAW_ELLIPSE)(visual_t, const xpen_t*, const xbrush_t*, const xrect_t*);
 typedef void(*PF_GDI_DRAW_PIE)(visual_t, const xpen_t*, const xbrush_t*, const xrect_t*, double, double);
-typedef void(*PF_GDI_DRAW_TEXT)(visual_t, const xfont_t*, const xface_t*, const xrect_t*, const tchar_t*, int);
-typedef void(*PF_GDI_TEXT_OUT)(visual_t, const xfont_t*, const xpoint_t*, const tchar_t*, int);
-typedef void(*PF_GDI_TEXT_SIZE)(visual_t, const xfont_t*, const tchar_t*, int, xsize_t*);
-typedef void(*PF_GDI_FONT_SIZE)(visual_t, const xfont_t*, xsize_t*);
+typedef void(*PF_GDI_SET_XFONT)(visual_t, const xfont_t*);
+typedef void(*PF_GDI_GET_XFONT)(visual_t, xfont_t*);
+typedef void(*PF_GDI_FONT_SIZE)(visual_t, xsize_t*);
+typedef void(*PF_GDI_DRAW_TEXT)(visual_t, const xface_t*, const xrect_t*, const tchar_t*, int);
+typedef void(*PF_GDI_TEXT_OUT)(visual_t, const xface_t*, const xpoint_t*, const tchar_t*, int);
+typedef void(*PF_GDI_TEXT_SIZE)(visual_t, const tchar_t*, int, xsize_t*);
+typedef void(*PF_GDI_TEXT_RECT)(visual_t, const xface_t*, const tchar_t*, int, xrect_t*);
 typedef void(*PF_GDI_DRAW_IMAGE)(visual_t, bitmap_t, const xcolor_t*, const xrect_t*);
 typedef void(*PF_GDI_DRAW_BITMAP)(visual_t, bitmap_t, const xpoint_t*);
 typedef void(*PF_GDI_GRADIENT_RECT)(visual_t, const xcolor_t* xc_brim, const xcolor_t* xc_core, const tchar_t* gradient, const xrect_t*);
@@ -90,10 +93,6 @@ typedef void(*PF_GDI_ALPHABLEND_RECT)(visual_t, const xcolor_t*, const xrect_t*,
 typedef void(*PF_GDI_INVERT_RECT)(visual_t, const xrect_t*);
 typedef void(*PF_GDI_EXCLUDE_RECT)(visual_t, const xrect_t*);
 typedef void(*PF_GDI_INCLIP_RECT)(visual_t, const xrect_t*);
-
-typedef fontset_t(*PF_GDI_CREATE_FONTSET)(const xfont_t*);
-typedef void(*PF_GDI_DESTROY_FONTSET)(fontset_t);
-typedef void(*PF_GDI_WORD_SIZE)(fontset_t, const tchar_t*, int, xsize_t*);
 
 #ifdef XDU_SUPPORT_CONTEXT_BITMAP
 /*bitmap interface*/
@@ -156,19 +155,18 @@ typedef struct _if_context_t{
 	PF_GDI_DRAW_ELLIPSE		pf_gdi_draw_ellipse;
 	PF_GDI_DRAW_PIE			pf_gdi_draw_pie;
 	PF_GDI_DRAW_ARC			pf_gdi_draw_arc;
+	PF_GDI_SET_XFONT		pf_gdi_set_xfont;
+	PF_GDI_GET_XFONT		pf_gdi_get_xfont;
+	PF_GDI_FONT_SIZE		pf_gdi_font_size;
 	PF_GDI_DRAW_TEXT		pf_gdi_draw_text;
 	PF_GDI_TEXT_OUT			pf_gdi_text_out;
 	PF_GDI_DRAW_IMAGE		pf_gdi_draw_image;
 	PF_GDI_DRAW_BITMAP		pf_gdi_draw_bitmap;
 	PF_GDI_TEXT_SIZE		pf_gdi_text_size;
-	PF_GDI_FONT_SIZE		pf_gdi_font_size;
+	PF_GDI_TEXT_RECT		pf_gdi_text_rect;
 	PF_GDI_INVERT_RECT		pf_gdi_invert_rect;
 	PF_GDI_EXCLUDE_RECT		pf_gdi_exclude_rect;
 	PF_GDI_INCLIP_RECT		pf_gdi_inclip_rect;
-
-	PF_GDI_CREATE_FONTSET		pf_gdi_create_fontset;
-	PF_GDI_DESTROY_FONTSET		pf_gdi_destroy_fontset;
-	PF_GDI_WORD_SIZE			pf_gdi_word_size;
 
 #ifdef XDU_SUPPORT_CONTEXT_BITMAP
 	PF_DESTROY_BITMAP			pf_destroy_bitmap;
@@ -297,11 +295,8 @@ typedef void(*PF_WIDGET_KILL_TIMER)(widget_t, vword_t);
 typedef void(*PF_WIDGET_SCROLL)(widget_t, bool_t, int);
 typedef void(*PF_WIDGET_GET_SCROLLINFO)(widget_t, bool_t, scroll_t*);
 typedef void(*PF_WIDGET_SET_SCROLLINFO)(widget_t, bool_t, const scroll_t*);
-typedef void(*PF_WIDGET_NOTI_XFONT)(widget_t,const xfont_t*);
-typedef void(*PF_WIDGET_NOTI_XFACE)(widget_t, const xface_t*);
-typedef void(*PF_WIDGET_NOTI_XBRUSH)(widget_t, const xbrush_t*);
-typedef void(*PF_WIDGET_NOTI_XPEN)(widget_t, const xpen_t*);
 typedef void(*PF_WIDGET_SET_COLOR_MODE)(widget_t, const color_mod_t*);
+typedef const color_mod_t*(*PF_WIDGET_GET_COLOR_MODE_PTR)(widget_t);
 typedef void(*PF_WIDGET_GET_COLOR_MODE)(widget_t, color_mod_t*);
 typedef void(*PF_WIDGET_SET_DIAPH)(widget_t, float);
 typedef float(*PF_WIDGET_GET_DIAPH)(widget_t);
@@ -406,12 +401,9 @@ typedef struct _if_widget_t{
 	PF_WIDGET_GET_SCROLLINFO	pf_widget_get_scroll_info;
 	PF_WIDGET_SET_SCROLLINFO	pf_widget_set_scroll_info;
 
-	PF_WIDGET_NOTI_XFONT		pf_widget_noti_xfont;
-	PF_WIDGET_NOTI_XFACE		pf_widget_noti_xface;
-	PF_WIDGET_NOTI_XBRUSH		pf_widget_noti_xbrush;
-	PF_WIDGET_NOTI_XPEN			pf_widget_noti_xpen;
 	PF_WIDGET_SET_COLOR_MODE	pf_widget_set_color_mode;
 	PF_WIDGET_GET_COLOR_MODE	pf_widget_get_color_mode;
+	PF_WIDGET_GET_COLOR_MODE_PTR pf_widget_get_color_mode_ptr;
 	PF_WIDGET_SET_DIAPH			pf_widget_set_diaph;
 	PF_WIDGET_GET_DIAPH			pf_widget_get_diaph;
 

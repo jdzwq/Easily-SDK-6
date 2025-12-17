@@ -27,18 +27,20 @@ LICENSE.GPL3 for more details.
 #ifndef _DRWINF_H
 #define _DRWINF_H
 
-typedef float(*PF_MEASURE_PIXEL)(void*);
-typedef void(*PF_MEASURE_RECT)(void*, const xfont_t*, const xface_t*, const tchar_t*, int, xrect_t* pxr);
-typedef void(*PF_MEASURE_SIZE)(void*, const xfont_t*, const tchar_t*, int, xsize_t* pxs);
-typedef void(*PF_MEASURE_FONT)(void*, const xfont_t*, xsize_t* pxs);
+typedef void(*PF_SET_XFONT)(void*, const xfont_t*); 
+typedef void(*PF_GET_XFONT)(void*, xfont_t*); 
+typedef void(*PF_MEASURE_FONT)(void*, const xsize_t*);
+typedef void(*PF_MEASURE_RECT)(void*, const xface_t*, const tchar_t*, int, xrect_t* pxr);
+typedef void(*PF_MEASURE_SIZE)(void*, const tchar_t*, int, xsize_t* pxs);
 
 typedef struct _measure_interface{
 	void* ctx; //visual_t or canvas_t
 
-	PF_MEASURE_PIXEL	pf_measure_pixel;
+	PF_SET_XFONT		pf_set_xfont;
+	PF_GET_XFONT		pf_get_xfont;
+	PF_MEASURE_FONT		pf_measure_font;
 	PF_MEASURE_RECT		pf_measure_rect;
 	PF_MEASURE_SIZE		pf_measure_size;
-	PF_MEASURE_FONT		pf_measure_font;
 
 	xrect_t rect;
 }measure_interface;
@@ -69,12 +71,12 @@ typedef void(*PF_DRAW_POLYGON)(void*, const xpen_t*, const xbrush_t*, const xpoi
 typedef void(*PF_DRAW_EQUILAGON)(void*, const xpen_t*, const xbrush_t*, const xpoint_t*, const xspan_t*, int);
 typedef void(*PF_DRAW_PATH)(void*, const xpen_t*, const xbrush_t*, const tchar_t*, const xpoint_t*, int n);
 
-typedef void(*PF_TEXT_RECT)(void*, const xfont_t*, const xface_t*, const tchar_t*, int, xrect_t* pxr);
-typedef void(*PF_TEXT_SIZE)(void*, const xfont_t*, const tchar_t*, int, xsize_t* pps);
-typedef void(*PF_FONT_SIZE)(void*, const xfont_t*, xsize_t* pps);
-typedef void(*PF_DRAW_TEXT)(void*, const xfont_t*, const xface_t*, const xrect_t*, const tchar_t*, int);
-typedef void(*PF_TEXT_OUT)(void*, const xfont_t*, const xpoint_t*, const tchar_t*, int);
-typedef void(*PF_MULTI_LINE)(void*, const xfont_t*, const xface_t*, const xpen_t*, const xrect_t*);
+typedef void(*PF_TEXT_RECT)(void*, const xface_t*, const tchar_t*, int, xrect_t* pxr);
+typedef void(*PF_TEXT_SIZE)(void*, const tchar_t*, int, xsize_t* pps);
+typedef void(*PF_FONT_SIZE)(void*, xsize_t* pps);
+typedef void(*PF_DRAW_TEXT)(void*, const xface_t*, const xrect_t*, const tchar_t*, int);
+typedef void(*PF_TEXT_OUT)(void*, const xface_t*, const xpoint_t*, const tchar_t*, int);
+typedef void(*PF_MULTI_LINE)(void*, const xface_t*, const xpen_t*, const xrect_t*);
 
 typedef void(*PF_COLOR_OUT)(void*, const xrect_t*, bool_t horz, const tchar_t*, int);
 typedef void(*PF_DRAW_IMAGE)(void*, const ximage_t*, const xrect_t*);
@@ -96,8 +98,8 @@ typedef void(*PF_GET_INTERFACE)(void*, drawing_interface_ptr);
 
 typedef struct _drawing_interface{
 	int tag;
-
 	void* ctx;
+	const color_mod_t* clrs;
 
 	PF_GET_MEASURE		pf_get_measure;
 
@@ -117,6 +119,8 @@ typedef struct _drawing_interface{
 	PF_DRAW_EQUILAGON	pf_draw_equilagon;
 	PF_DRAW_PATH		pf_draw_path;
 
+	PF_SET_XFONT		pf_set_xfont;
+	PF_GET_XFONT		pf_get_xfont;
 	PF_FONT_SIZE		pf_font_size;
 	PF_TEXT_RECT		pf_text_rect;
 	PF_TEXT_SIZE		pf_text_size;
@@ -148,8 +152,6 @@ typedef struct _drawing_interface{
 	PF_GET_MEASURE		pf_get_visual_measure;
 	PF_GET_INTERFACE	pf_get_visual_interface;
 	PF_GET_VISUAL		pf_get_visual_handle;
-
-	color_mod_t mode;
 
 	xrect_t rect;
 }drawing_interface;

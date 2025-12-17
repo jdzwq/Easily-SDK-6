@@ -164,9 +164,9 @@ void annodlg_on_select_color(widget_t widget, const tchar_t* mid)
 
 	org_style = get_anno_arti_style_ptr(ilk);
 
-	len = write_style_attr(org_style, -1, GDI_ATTR_FONT_COLOR, -1, mid, -1, NULL, MAX_LONG);
+	len = write_style_attr(org_style, -1, GDI_ATTR_TEXT_COLOR, -1, mid, -1, NULL, MAX_LONG);
 	new_style = xsalloc(len + 1);
-	write_style_attr(org_style, -1, GDI_ATTR_FONT_COLOR, -1, mid, -1, new_style, len);
+	write_style_attr(org_style, -1, GDI_ATTR_TEXT_COLOR, -1, mid, -1, new_style, len);
 
 	set_anno_arti_style(ilk, new_style);
 

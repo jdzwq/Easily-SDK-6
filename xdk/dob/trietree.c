@@ -167,7 +167,7 @@ static void _find_trie_node(link_t_ptr ilk, const tchar_t* key, int len, trie_in
 	tchar_t feed;
 
 	int rt;
-	int n, total = 0;
+	int n, total = 0, step = 0;
 
 	XDK_ASSERT(ilk && (ilk->tag == lkTrieNode || ilk->tag == lkTrieLeaf));
 
@@ -179,6 +179,7 @@ static void _find_trie_node(link_t_ptr ilk, const tchar_t* key, int len, trie_in
 
 	while (pti->parent)
 	{
+		step ++;
 		feed = _get_trie_key_feed(pti->parent);
 
 		pti->sub = NULL;
@@ -193,11 +194,13 @@ static void _find_trie_node(link_t_ptr ilk, const tchar_t* key, int len, trie_in
 		child = _get_trie_first_child_node(pti->parent);
 		while (child)
 		{
+			step ++;
 			ptc = TrieNodeFromLink(child);
 
 			rt = compare_text(ptc->key, ptc->len, pti->sub, pti->len, 0);
 			if (!rt)
 			{
+				PUT_THREEBYTE_LOC(pti->parent->lru,0,step);
 				pti->parent = child;
 				pti->child = NULL;
 				break;
@@ -300,7 +303,7 @@ link_t_ptr read_trie_node(link_t_ptr ptr, const tchar_t* key, int len, object_t 
 
 	if (ti.len)
 	{
-		object_empty(val);
+		object_clear(val);
 		return NULL;
 	}
 
@@ -309,7 +312,7 @@ link_t_ptr read_trie_node(link_t_ptr ptr, const tchar_t* key, int len, object_t 
 	if (ptt->val && val)
 		object_copy(val, ptt->val);
 	else if (val)
-		object_empty(val);
+		object_clear(val);
 
 	return ti.parent;
 }
@@ -472,7 +475,7 @@ void get_trie_node_val(link_t_ptr ilk, object_t val)
 	if (ptt->val)
 		object_copy(val, ptt->val);
 	else
-		object_empty(val);
+		object_clear(val);
 }
 
 void set_trie_node_val(link_t_ptr ilk, object_t val)
@@ -609,3 +612,72 @@ link_t_ptr enum_trie_tree(link_t_ptr ptr, ENUM_TRIETREE_NODE pf, void* param)
 
 	return nlk;
 }
+
+/**********************************************************************/
+#if defined (DEBUG) || defined (_DEBUG)
+static bool_t CALLBACK print_leaf(const tchar_t* key, link_t_ptr nlk, void* p)
+{
+	object_t ob = get_trie_node_val_ptr(nlk);
+
+	string_t vs = string_alloc();
+	object_decode_string(ob, vs);
+
+	_tprintf(_T("%s %s\n"), key, string_ptr(vs));
+
+	string_free(vs);
+
+	return 1;
+}
+
+void trie_tree_self_test()
+{
+	printf("test trie tree...\n");
+
+	object_t v = object_alloc();
+
+	string_t vs = string_alloc();
+	string_cpy(vs, _T("trie"), -1);
+	object_encode_string(v, vs);
+	string_free(vs);
+
+	link_t_ptr ptr = create_trie_tree(_T('.'));
+
+	link_t_ptr ilk = write_trie_node(ptr, _T("1.111.1111"), -1, v);
+
+	ilk = write_trie_node(ptr, _T("1.111"), -1, v);
+
+	ilk = write_trie_node(ptr, _T("1.11.111"), -1, v);
+
+	ilk = write_trie_node(ptr, _T("1.11.222"), -1, v);
+
+	ilk = write_trie_node(ptr, _T("1.11.111.11"), -1, v);
+
+	ilk = write_trie_node(ptr, _T("1.1.11.11"), -1, v);
+
+	ilk = write_trie_node(ptr, _T("1.2.3"), -1, v);
+
+	enum_trie_tree(ptr, print_leaf, NULL);
+
+	delete_trie_node(ptr, _T("1.111"), -1);
+
+	delete_trie_node(ptr, _T("1.11.111.11"), -1);
+
+	delete_trie_node(ptr, _T("1.2.3.4"), -1);
+
+	delete_trie_node(ptr, _T("1.2.3"), -1);
+
+	delete_trie_node(ptr, _T("1.11.111"), -1);
+
+	delete_trie_node(ptr, _T("1.11.222"), -1);
+
+	delete_trie_node(ptr, _T("1.1.11.11"), -1);
+
+	delete_trie_node(ptr, _T("1.111.1111"), -1);
+
+	enum_trie_tree(ptr, print_leaf, NULL);
+
+	object_free(v);
+
+	destroy_trie_tree(ptr);
+}
+#endif

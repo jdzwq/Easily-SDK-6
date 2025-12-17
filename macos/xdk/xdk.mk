@@ -11,8 +11,9 @@ CFLAGS = -g -Wall -fPIC -D _DEBUG
 
 MODULE = xdk
 ARCH = aarch64
-MAJ_VER = 6
-CUR_VER = 6
+CUR_VER = 25
+MAX_VER = 11
+MIN_VER = 0
 
 LIB_PATH = /usr/local/lib
 
@@ -22,27 +23,29 @@ SRC_PATH = ../../xdk
 OBJ_PATH = ~/工程/Easily-temp/macos/$(MODULE)/$(ARCH)
 OUT_PATH = ~/工程/Easily-app-6/macos/lib
 
-TARGET = lib$(MODULE).$(CUR_VER).dylib
+TARGET = lib$(MODULE).$(CUR_VER).$(MAX_VER).$(MIN_VER).dylib
 LINKIT = lib$(MODULE).dylib
 
 LIBS = -lm -L $(LIB_PATH) -limg -lbar -lcrypt -lzlib
 DIRS = $(wildcard \
 		$(SRC_PATH)/macos/*.c \
-		$(SRC_PATH)/imp/*.c \
 		$(SRC_PATH)/acp/*.c \
+		$(SRC_PATH)/aob/*.c \
+		$(SRC_PATH)/bar/*.c \
+		$(SRC_PATH)/dob/*.c \
+		$(SRC_PATH)/imp/*.c \
 		$(SRC_PATH)/str/*.c \
 		$(SRC_PATH)/enc/*.c \
-		$(SRC_PATH)/maa/*.c \
 		$(SRC_PATH)/util/*.c \
-		$(SRC_PATH)/bar/*.c \
 		$(SRC_PATH)/zip/*.c \
 		$(SRC_PATH)/mob/*.c \
-		$(SRC_PATH)/dob/*.c \
+		$(SRC_PATH)/vob/*.c \
 		$(SRC_PATH)/net/*.c \
 		$(SRC_PATH)/stm/*.c \
 		$(SRC_PATH)/expr/*.c \
 		$(SRC_PATH)/math/*.c \
-		$(SRC_PATH)/*.c)
+		$(SRC_PATH)/*.c )
+
 SRCS = $(notdir $(DIRS))
 COBS = $(patsubst %.c, %.o, $(SRCS))
 OBJS = $(addprefix $(OBJ_PATH)/,$(COBS))
@@ -50,10 +53,19 @@ OBJS = $(addprefix $(OBJ_PATH)/,$(COBS))
 $(OBJ_PATH)/%.o : $(SRC_PATH)/macos/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
 
-$(OBJ_PATH)/%.o : $(SRC_PATH)/imp/%.c
+$(OBJ_PATH)/%.o : $(SRC_PATH)/acp/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
 
-$(OBJ_PATH)/%.o : $(SRC_PATH)/acp/%.c
+$(OBJ_PATH)/%.o : $(SRC_PATH)/aob/%.c
+	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
+
+$(OBJ_PATH)/%.o : $(SRC_PATH)/bar/%.c
+	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
+
+$(OBJ_PATH)/%.o : $(SRC_PATH)/dob/%.c
+	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
+
+$(OBJ_PATH)/%.o : $(SRC_PATH)/imp/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
 
 $(OBJ_PATH)/%.o : $(SRC_PATH)/str/%.c
@@ -62,13 +74,7 @@ $(OBJ_PATH)/%.o : $(SRC_PATH)/str/%.c
 $(OBJ_PATH)/%.o : $(SRC_PATH)/enc/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
 
-$(OBJ_PATH)/%.o : $(SRC_PATH)/maa/%.c
-	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
-
 $(OBJ_PATH)/%.o : $(SRC_PATH)/util/%.c
-	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
-
-$(OBJ_PATH)/%.o : $(SRC_PATH)/bar/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
 
 $(OBJ_PATH)/%.o : $(SRC_PATH)/zip/%.c
@@ -77,7 +83,7 @@ $(OBJ_PATH)/%.o : $(SRC_PATH)/zip/%.c
 $(OBJ_PATH)/%.o : $(SRC_PATH)/mob/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
 
-$(OBJ_PATH)/%.o : $(SRC_PATH)/dob/%.c
+$(OBJ_PATH)/%.o : $(SRC_PATH)/vob/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
 
 $(OBJ_PATH)/%.o : $(SRC_PATH)/net/%.c
@@ -101,7 +107,7 @@ all : $(OBJS)
 	-o $(OBJ_PATH)/$(TARGET) $(OBJS) $(LIBS) \
 	-Wl,-install_name,@rpath/$(LINKIT) \
 	-current_version $(CUR_VER) \
-	-compatibility_version $(MAJ_VER)
+	-compatibility_version $(MAX_VER) 
 
 test:
 	if ! test -d $(OBJ_PATH); then \
@@ -115,17 +121,19 @@ test:
 
 install:
 	if ! test -d $(OUT_PATH); then \
-	sudo mkdir -p $(OUT_PATH); \
+	mkdir -p $(OUT_PATH); \
 	fi
 
-	sudo cp -f $(OBJ_PATH)/$(TARGET) $(OUT_PATH);
-	sudo chmod 755 $(OUT_PATH)/$(TARGET);
+	cp -f $(OBJ_PATH)/$(TARGET) $(OUT_PATH);
+	chmod 755 $(OUT_PATH)/$(TARGET);
+
 	sudo rm -f $(LIB_PATH)/$(LINKIT);
 	sudo ln -sf $(OUT_PATH)/$(TARGET) $(LIB_PATH)/$(LINKIT);
 
 uninstall:
 	sudo rm -r $(LIB_PATH)/$(LINKIT);
-	sudo rm -f $(OUT_PATH)/$(TARGET)
+	
+	rm -f $(OUT_PATH)/$(TARGET)
 	
 .PHONY : clean
 clean:

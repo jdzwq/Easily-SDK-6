@@ -328,6 +328,11 @@ typedef struct _handle_head	 *widget_t;
 #define KEY_F11			0x7A
 #define KEY_F12			0x7B
 
+#define KEY_COPY		0x1163
+#define KEY_PASTE		0x1176
+#define KEY_CUT			0x1178
+#define KEY_UNDO		0x117A
+
 typedef struct _accel_table_t{
 	unsigned char vir;
 	unsigned short key;

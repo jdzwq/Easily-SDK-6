@@ -361,12 +361,14 @@ typedef struct _if_timer_t{
 #endif /*XDK_SUPPORT_TIMER*/
 
 #ifdef XDK_SUPPORT_RANDOM
-typedef void	(*PF_SYSTEM_RANDOM32)(dword_t*);
-typedef void	(*PF_SYSTEM_RANDOM64)(lword_t*);
+typedef void	(*PF_SYSTEM_SRAND)(void);
+typedef dword_t	(*PF_SYSTEM_RAND32)(void);
+typedef lword_t	(*PF_SYSTEM_RAND64)(void);
 
 typedef struct _if_random_t{
-	PF_SYSTEM_RANDOM32		pf_system_random32;
-	PF_SYSTEM_RANDOM64		pf_system_random64;
+	PF_SYSTEM_SRAND			pf_system_srand;
+	PF_SYSTEM_RAND32		pf_system_rand32;
+	PF_SYSTEM_RAND64		pf_system_rand64;
 }if_random_t;
 #endif
 

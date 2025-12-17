@@ -109,8 +109,6 @@ void draw_diagram(const drawing_interface* pif, link_t_ptr ptr)
 
 	default_xfont(&xf);
 	default_xface(&xa);
-	default_xpen(&xp);
-	default_xbrush(&xb);
 
 	style = get_diagram_style_ptr(ptr);
 
@@ -118,21 +116,25 @@ void draw_diagram(const drawing_interface* pif, link_t_ptr ptr)
 	parse_xface_from_style(&xa, style);
 	if (!b_print)
 	{
-		format_xcolor(&pif->mode.clr_txt, xf.color);
+		format_xcolor(&pif->clrs->clr_txt, xa.text_color);
+		(*pif->pf_set_xfont)(pif->ctx, &xf);
 	}
+
+	default_xpen(&xp);
+	default_xbrush(&xb);
 
 	/*parse_xpen_from_style(&xp, style);
 	if (!b_print)
 	{
-		format_xcolor(&pif->mode.clr_frg, xp.color);
+		format_xcolor(&pif->clrs->clr_frg, xp.color);
 	}*/
 
 	parse_xbrush_from_style(&xb, style);
 	if (!b_print)
 	{
-		format_xcolor(&pif->mode.clr_bkg, xb.color);
+		format_xcolor(&pif->clrs->clr_bkg, xb.color);
 	}
-	
+
 	xscpy(xp.color, xb.color);
 	parse_xcolor(&xc, xp.color);
 	lighten_xpen(&xp, DEF_HARD_DARKEN);
@@ -140,19 +142,19 @@ void draw_diagram(const drawing_interface* pif, link_t_ptr ptr)
 	ilk = get_diagram_next_entity(ptr, LINK_FIRST);
 	while (ilk)
 	{
-		default_xfont(&xf);
-		default_xface(&xa);
-		
-		style = get_diagram_entity_style_ptr(ilk);
-
 		calc_diagram_entity_rect(ptr, ilk, &xr);
 		ft_offset_rect(&xr, pbox->fx, pbox->fy);
 
-		parse_xfont_from_style(&xf, style);
-		parse_xface_from_style(&xa, style);
-		if (!b_print)
+		style = get_diagram_entity_style_ptr(ilk);
+		if(style)
 		{
-			format_xcolor(&pif->mode.clr_txt, xf.color);
+			parse_xfont_from_style(&xf, style);
+			parse_xface_from_style(&xa, style);
+			if (!b_print)
+			{
+				format_xcolor(&pif->clrs->clr_txt, xa.text_color);
+				(*pif->pf_set_xfont)(pif->ctx, &xf);
+			}
 		}
 
 		entity = get_diagram_entity_class_ptr(ilk);
@@ -196,7 +198,7 @@ void draw_diagram(const drawing_interface* pif, link_t_ptr ptr)
 		}
 		else if (compare_text(entity, -1, DOC_DIAGRAM_COUNTER, -1, 0) == 0)
 		{
-			//draw_counter_entity(pif->ctx, &xp, &xb, &xf, &xr, get_diagram_counter_entity_layer_ptr(ilk), get_diagram_entity_text_ptr(ilk), get_diagram_counter_entity_size(ilk));
+			//draw_counter_entity(pif->ctx, &xp, &xb, &xr, get_diagram_counter_entity_layer_ptr(ilk), get_diagram_entity_text_ptr(ilk), get_diagram_counter_entity_size(ilk));
 		}
 		else if (compare_text(entity, -1, DOC_DIAGRAM_LINE, -1, 0) == 0)
 		{
@@ -204,7 +206,7 @@ void draw_diagram(const drawing_interface* pif, link_t_ptr ptr)
 			pvt = vector_alloc(n);
 			if (n)
 			{
-				//draw_line_entity(pif->ctx, &xp, &xb, &xf, &xr, get_diagram_line_entity_base(ilk), get_diagram_line_entity_span(ilk), pvt);
+				//draw_line_entity(pif->ctx, &xp, &xb, &xr, get_diagram_line_entity_base(ilk), get_diagram_line_entity_span(ilk), pvt);
 			}
 			vector_free(pvt);
 		}
@@ -214,7 +216,7 @@ void draw_diagram(const drawing_interface* pif, link_t_ptr ptr)
 			pvt = vector_alloc(n);
 			if (n)
 			{
-				//draw_bar_entity(pif->ctx, &xp, &xb, &xf, &xr, get_diagram_bar_entity_base(ilk), get_diagram_bar_entity_span(ilk), pvt);
+				//draw_bar_entity(pif->ctx, &xp, &xb, &xr, get_diagram_bar_entity_base(ilk), get_diagram_bar_entity_span(ilk), pvt);
 			}
 			vector_free(pvt);
 		}*/

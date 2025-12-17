@@ -30,10 +30,6 @@ LICENSE.GPL3 for more details.
 #include "xdkstd.h"
 #include "xdkimp.h"
 
-#ifndef XDK_SUPPORT_ACP_TABLE
-#include "acp/acp.h"
-#endif
-
 xdk_mou_t g_xdk_mou = { 0 };
 
 jmp_buf* thread_jump_buff(void)
@@ -458,7 +454,7 @@ void xdk_process_init(dword_t opt)
 	}
 #endif
 
-#ifndef XDK_SUPPORT_ACP_TABLE
+#ifdef XDK_SUPPORT_ACP
 	share_acp_init();
 #endif
 }
@@ -473,7 +469,7 @@ void xdk_process_uninit()
 	if (!g_xdk_mou.if_ok)
 		return;
 
-#ifndef XDK_SUPPORT_ACP_TABLE
+#ifdef XDK_SUPPORT_ACP
 	share_acp_uninit();
 #endif
 

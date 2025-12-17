@@ -507,13 +507,13 @@ void draw_statis_page(const drawing_interface* pif, link_t_ptr ptr, int page)
 	/*parse_xpen_from_style(&xp, style);
 	if (!b_print)
 	{
-		format_xcolor(&pif->mode.clr_frg, xp.color);
+		format_xcolor(&pif->clrs->clr_frg, xp.color);
 	}*/
 
 	parse_xbrush_from_style(&xb, style);
 	if (!b_print)
 	{
-		format_xcolor(&pif->mode.clr_bkg, xb.color);
+		format_xcolor(&pif->clrs->clr_bkg, xb.color);
 	}
 
 	xscpy(xp.color, xb.color);
@@ -524,16 +524,17 @@ void draw_statis_page(const drawing_interface* pif, link_t_ptr ptr, int page)
 	lighten_xbrush(&xb_bar, DEF_SOFT_DARKEN);
 
 	parse_xface_from_style(&xa, style);
-
-	parse_xfont_from_style(&xf, style);
 	if (!b_print)
 	{
-		format_xcolor(&pif->mode.clr_txt, xf.color);
+		format_xcolor(&pif->clrs->clr_txt, xa.text_color);
 	}
 
+	parse_xfont_from_style(&xf, style);
+	(*pif->pf_set_xfont)(pif->ctx, &xf);
+
 	if (!b_print)
 	{
-		format_xcolor(&pif->mode.clr_msk, xi.color);
+		format_xcolor(&pif->clrs->clr_msk, xi.color);
 	}
 
 	b_sum = get_statis_showsum(ptr);
@@ -548,7 +549,7 @@ void draw_statis_page(const drawing_interface* pif, link_t_ptr ptr, int page)
 	xr.fh = th;
 
 	xscpy(xa.text_align, ATTR_ALIGNMENT_NEAR);
-	(*pif->pf_draw_text)(pif->ctx, &xf, &xa, &xr, get_statis_title_ptr(ptr), -1);
+	(*pif->pf_draw_text)(pif->ctx, &xa, &xr, get_statis_title_ptr(ptr), -1);
 
 	//draw frame
 	//top line
@@ -626,7 +627,7 @@ void draw_statis_page(const drawing_interface* pif, link_t_ptr ptr, int page)
 		xr_bar.fw = yw - yh;
 		xr_bar.fh = yh;
 
-		(*pif->pf_draw_text)(pif->ctx, &xf, &xa, &xr_bar, get_yax_title_ptr(ylk), -1);
+		(*pif->pf_draw_text)(pif->ctx, &xa, &xr_bar, get_yax_title_ptr(ylk), -1);
 
 		xr.fy += yh;
 		ylk = get_next_yax(ptr, ylk);
@@ -641,7 +642,7 @@ void draw_statis_page(const drawing_interface* pif, link_t_ptr ptr, int page)
 		xr.fh = yh;
 		ft_center_rect(&xr, DEF_SMALL_ICON, DEF_SMALL_ICON);
 
-		parse_xcolor(&xc, xf.color);
+		parse_xcolor(&xc, xa.text_color);
 		draw_gizmo(pif, &xc, &xr, GDI_ATTR_GIZMO_SUM);
 	}
 
@@ -663,7 +664,7 @@ void draw_statis_page(const drawing_interface* pif, link_t_ptr ptr, int page)
 		(*pif->pf_draw_rect)(pif->ctx, &xp, &xb_bar, &xr);
 
 		xscpy(xa.text_align, ATTR_ALIGNMENT_CENTER);
-		draw_data(pif, &xf, &xa, &xr, get_xax_text_ptr(xlk), -1, 0, xaxtype, xaxfmt, 1, xaxwrp);
+		draw_data(pif, &xa, &xr, get_xax_text_ptr(xlk), -1, 0, xaxtype, xaxfmt, 1, xaxwrp);
 
 		maxdig = 0;
 
@@ -705,7 +706,7 @@ void draw_statis_page(const drawing_interface* pif, link_t_ptr ptr, int page)
 			}
 
 			xscpy(xa.text_align, ATTR_ALIGNMENT_FAR);
-			(*pif->pf_draw_text)(pif->ctx, &xf, &xa, &xr, token, -1);
+			(*pif->pf_draw_text)(pif->ctx, &xa, &xr, token, -1);
 
 			ylk = get_next_yax(ptr, ylk);
 		}
@@ -731,7 +732,7 @@ void draw_statis_page(const drawing_interface* pif, link_t_ptr ptr, int page)
 			}
 
 			xscpy(xa.text_align, ATTR_ALIGNMENT_FAR);
-			(*pif->pf_draw_text)(pif->ctx, &xf, &xa, &xr, token, -1);
+			(*pif->pf_draw_text)(pif->ctx, &xa, &xr, token, -1);
 		}
 
 		if (xlk == xlk_last)
@@ -756,7 +757,7 @@ void draw_statis_page(const drawing_interface* pif, link_t_ptr ptr, int page)
 	while (glk)
 	{
 		//gax title
-		(*pif->pf_draw_text)(pif->ctx, &xf, &xa, &xr, get_gax_title_ptr(glk), -1);
+		(*pif->pf_draw_text)(pif->ctx, &xa, &xr, get_gax_title_ptr(glk), -1);
 
 		gtype = get_gax_statis_type_ptr(glk);
 
@@ -776,7 +777,7 @@ void draw_statis_page(const drawing_interface* pif, link_t_ptr ptr, int page)
 
 		numtoxs_dig(middnum, 1, token, NUM_LEN);
 
-		(*pif->pf_draw_text)(pif->ctx, &xf, &xa, &xr_bar, token, -1);
+		(*pif->pf_draw_text)(pif->ctx, &xa, &xr_bar, token, -1);
 
 		//midd line
 		if (compare_text(gtype, -1, ATTR_STATIS_TYPE_PIE, -1, 0) != 0)
@@ -800,7 +801,7 @@ void draw_statis_page(const drawing_interface* pif, link_t_ptr ptr, int page)
 
 			numtoxs_dig(middnum + i * 10 * stepnum, 1, token, NUM_LEN);
 
-			(*pif->pf_draw_text)(pif->ctx, &xf, &xa, &xr_bar, token, -1);
+			(*pif->pf_draw_text)(pif->ctx, &xa, &xr_bar, token, -1);
 
 			pt[0].fx = yw - 2 * STATIS_MINFEED + px;
 			pt[0].fy = midy - incy * i;
@@ -815,7 +816,7 @@ void draw_statis_page(const drawing_interface* pif, link_t_ptr ptr, int page)
 
 			numtoxs_dig(middnum - i * 10 * stepnum, 1, token, NUM_LEN);
 
-			(*pif->pf_draw_text)(pif->ctx, &xf, &xa, &xr_bar, token, -1);
+			(*pif->pf_draw_text)(pif->ctx, &xa, &xr_bar, token, -1);
 
 			pt[0].fx = yw - 2 * STATIS_MINFEED + px;
 			pt[0].fy = midy + incy * i;
@@ -1008,7 +1009,7 @@ void draw_statis_page(const drawing_interface* pif, link_t_ptr ptr, int page)
 				xr.fh = yh;
 				xsprintf(token, _T("%.2f%c"), dby * 100, _T('%'));
 				xscpy(xa.text_align, ATTR_ALIGNMENT_CENTER);
-				(*pif->pf_draw_text)(pif->ctx, &xf, &xa, &xr, token, -1);
+				(*pif->pf_draw_text)(pif->ctx, &xa, &xr, token, -1);
 
 				psteps++;
 			}

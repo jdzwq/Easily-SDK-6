@@ -35,23 +35,26 @@ double DBL_NEGINF;
 double NA_REAL;
 int	 NA_INTEGER;
 
+#define NAN_HIGH	0x7ff00000
+#define NAN_LOW		1954
+
 void dbl_init()
 {
     NA_INTEGER = INT_MIN;
-    NA_REAL = (double)MAKELWORD(1954, 0x7ff00000);
+    NA_REAL = (double)MAKELWORD(NAN_LOW, NAN_HIGH);
     DBL_NAN = NAN;
     DBL_POSINF = INFINITY;
     DBL_NEGINF = -INFINITY;
 }
 
-bool_t dbl_is_nar(double x)
+bool_t dbl_isnar(double x)
 {
 	lword_t y;
 
     if (isnan(x)) 
 	{
 		y = (lword_t)x;
-		return (GETLDWORD(y) == 1954)? bool_true : bool_false;
+		return (GETLDWORD(y) == NAN_LOW)? bool_true : bool_false;
     }
 
     return bool_false;

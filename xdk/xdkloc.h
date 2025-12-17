@@ -171,8 +171,9 @@ LOC_API bool_t		_alter_timer(res_queue_t rq, res_timer_t rt, dword_t duetime, dw
 #endif
 
 #ifdef XDK_SUPPORT_RANDOM
-LOC_API void		_system_random32(dword_t* pn);
-LOC_API void		_system_random64(lword_t* pn);
+LOC_API void		_system_srand(void);
+LOC_API dword_t		_system_rand32(void);
+LOC_API lword_t		_system_rand64(void);
 #endif
 
 #ifdef XDK_SUPPORT_SOCK

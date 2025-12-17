@@ -5,7 +5,7 @@
 # 2. nmake /f Makefile.mk clean
 # 3. nmake /f Makefile.mk
 #-----------------------------------------------------------------------------
-ARCH = x64
+ARCH = x86
 MODULE = xdu_win_test
 
 INC_PATH = Z:/Easily-sdk-6/include

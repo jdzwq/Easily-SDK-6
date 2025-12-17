@@ -38,8 +38,6 @@ typedef struct _tipbox_delta_t{
 	int n_type;
 	tchar_t* sz_text;
 
-	xfont_t xf;
-	xface_t xa;
 }tipbox_delta_t;
 
 #define GETTIPBOXDELTA(ph) 	(tipbox_delta_t*)widget_get_user_delta(ph)
@@ -60,9 +58,6 @@ int hand_tipbox_create(widget_t widget, void* data)
 	ptd->n_type = ppd->type;
 	ptd->sz_text = xsalloc(xslen(ppd->text) + 1);
 	xscpy(ptd->sz_text, ppd->text);
-
-	default_widget_xfont(&ptd->xf);
-	default_widget_xface(&ptd->xa);
 
 	SETTIPBOXDELTA(widget, ptd);
 
@@ -122,24 +117,6 @@ void hand_tipbox_timer(widget_t widget, vword_t tid)
 	widget_close(widget, 0);
 }
 
-void hand_tipbox_xfont(widget_t widget, const xfont_t* pxf)
-{
-	tipbox_delta_t* ptd = GETTIPBOXDELTA(widget);
-
-	XDK_ASSERT(ptd != NULL);
-
-	xmem_copy((void*)&ptd->xf, (void*)pxf, sizeof(xfont_t));
-}
-
-void hand_tipbox_xface(widget_t widget, const xface_t* pxa)
-{
-	tipbox_delta_t* ptd = GETTIPBOXDELTA(widget);
-
-	XDK_ASSERT(ptd != NULL);
-
-	xmem_copy((void*)&ptd->xa, (void*)pxa, sizeof(xface_t));
-}
-
 void hand_tipbox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 {
 	tipbox_delta_t* ptd = GETTIPBOXDELTA(widget);
@@ -154,10 +131,14 @@ void hand_tipbox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 
 	color_mod_t clrs;
 	xbrush_t xb;
+	xface_t xa;
 
 	widget_get_color_mode(widget, &clrs);
 	default_xbrush(&xb);
 	format_xcolor(&clrs.clr_bkg, xb.color);
+
+	default_xface(&xa);
+	xscpy(xa.text_wrap, GDI_ATTR_TEXT_WRAP_WORDBREAK);
 
 	widget_get_client_rect(widget, &xr);
 
@@ -172,7 +153,7 @@ void hand_tipbox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 
 	token = ptd->sz_text;
 
-	(*ifv.pf_draw_text)(ifv.ctx, &ptd->xf, &ptd->xa, &xr, token, -1);
+	(*ifv.pf_draw_text)(ifv.ctx, &xa, &xr, token, -1);
 
 	end_canvas_paint(canv, dc, pxr);
 }
@@ -201,11 +182,6 @@ widget_t tipbox_create(widget_t widget, dword_t style, const xrect_t* pxr, int t
 
 		EVENT_ON_TIMER(hand_tipbox_timer)
 
-		EVENT_ON_XFONT(hand_tipbox_xfont)
-		EVENT_ON_XFACE(hand_tipbox_xface)
-
-		
-
 	EVENT_END_DISPATH
 
 	return widget_create(NULL, style, pxr, widget, &ev);
@@ -228,13 +204,17 @@ void tipbox_popup_size(widget_t widget, xsize_t* pxs)
 
 	visual_t rdc;
 	xrect_t xr = { 0 };
+	xface_t xa;
 	drawing_interface ifv = {0};
 
+	default_xface(&xa);
+	xscpy(xa.text_wrap, GDI_ATTR_TEXT_WRAP_WORDBREAK);
+	
 	rdc = widget_client_context(widget);
 
 	get_visual_interface(rdc, &ifv);
 
-	(*ifv.pf_text_rect)(ifv.ctx, &ptd->xf, &ptd->xa, ptd->sz_text, -1, &xr);
+	(*ifv.pf_text_rect)(ifv.ctx, &xa, ptd->sz_text, -1, &xr);
 
 	widget_release_context(widget, rdc);
 

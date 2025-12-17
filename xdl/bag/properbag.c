@@ -162,12 +162,12 @@ void properbag_parse_stylesheet(link_t_ptr ptr,const tchar_t* str)
 	set_entity_editable(ent,1);
 	set_entity_editor(ent,ATTR_EDITOR_FIRELIST);
 
-	ent = write_proper(ptr, PROPERTY_BAG_FONTSTYLE, -1, GDI_ATTR_FONT_COLOR, -1, xf.color, -1);
+	parse_xface_from_style(&xa, str);
+
+	ent = write_proper(ptr, PROPERTY_BAG_TEXTSTYLE, -1, GDI_ATTR_TEXT_COLOR, -1, xa.text_color, -1);
 	set_entity_options(ent, GDI_ATTR_RGB_OPTIONS, -1);
 	set_entity_editable(ent, 1);
 	set_entity_editor(ent, ATTR_EDITOR_FIRELIST);
-
-	parse_xface_from_style(&xa, str);
 
 	ent = write_proper(ptr,PROPERTY_BAG_TEXTSTYLE,-1,GDI_ATTR_TEXT_ALIGN,-1,xa.text_align,-1);
 	set_entity_options(ent,GDI_ATTR_TEXT_ALIGN_OPTIONS,-1);
@@ -216,10 +216,10 @@ int properbag_format_stylesheet(link_t_ptr ptr,tchar_t* buf,int len)
 	read_proper(ptr,PROPERTY_BAG_FONTSTYLE,-1,GDI_ATTR_FONT_STYLE,-1,xf.style,RES_LEN);
 	read_proper(ptr,PROPERTY_BAG_FONTSTYLE,-1,GDI_ATTR_FONT_WEIGHT,-1,xf.weight,NUM_LEN);
 	read_proper(ptr,PROPERTY_BAG_FONTSTYLE,-1,GDI_ATTR_FONT_SIZE,-1,xf.size,NUM_LEN);
-	read_proper(ptr, PROPERTY_BAG_FONTSTYLE, -1, GDI_ATTR_FONT_COLOR, -1, xf.color, CLR_LEN);
 
 	size += format_xfont_to_style(&xf,buf + size,len - size);
 
+	read_proper(ptr, PROPERTY_BAG_TEXTSTYLE, -1, GDI_ATTR_TEXT_COLOR, -1, xa.text_color, CLR_LEN);
 	read_proper(ptr, PROPERTY_BAG_TEXTSTYLE, -1, GDI_ATTR_TEXT_ALIGN, -1, xa.text_align, RES_LEN);
 	read_proper(ptr, PROPERTY_BAG_TEXTSTYLE, -1, GDI_ATTR_LINE_ALIGN, -1, xa.line_align, RES_LEN);
 	read_proper(ptr, PROPERTY_BAG_TEXTSTYLE, -1, GDI_ATTR_TEXT_WRAP, -1, xa.text_wrap, RES_LEN);

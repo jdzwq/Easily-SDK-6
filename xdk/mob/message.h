@@ -49,26 +49,91 @@ typedef struct _msg_hdr_t{
 extern "C" {
 #endif
 
-	EXP_API message_t message_alloc(void);
+/**********************************************************************
+@FUNCTION: alloc a message.
+@RETURN: message struct.
+***********************************************************************/
+EXP_API message_t message_alloc(void);
 
-	EXP_API void message_free(message_t msg);
+/**********************************************************************
+@FUNCTION: free a message.
+@INPUT: message struct.
+@RETURN: none.
+***********************************************************************/
+EXP_API void message_free(message_t msg);
 
-	EXP_API dword_t message_size(message_t msg);
+/**********************************************************************
+@FUNCTION: clear message content.
+@INPUT: message struct.
+@RETURN: none.
+***********************************************************************/
+EXP_API void message_clear(message_t msg);
 
-	EXP_API void message_borrow(message_t msg, byte_t* buf);
+/**********************************************************************
+@FUNCTION: get message data size.
+@INPUT: message struct.
+@RETURN: size in bytes.
+***********************************************************************/
+EXP_API dword_t message_size(message_t msg);
 
-	EXP_API byte_t* message_revert(message_t msg);
+/**********************************************************************
+@FUNCTION: attach outer data to message.
+@INPUT: message struct.
+@INPUT: outer data.
+@INPUT: data size in bytes.
+@RETURN: none.
+***********************************************************************/
+EXP_API void message_borrow(message_t msg, byte_t* data, dword_t size);
 
-	EXP_API void message_copy(message_t dst, message_t src);
+/**********************************************************************
+@FUNCTION: detach message data.
+@INPUT: message struct.
+@RETURN: data buffer.
+***********************************************************************/
+EXP_API byte_t* message_revert(message_t msg);
 
-	EXP_API	dword_t message_write(message_t msg, const msg_hdr_t* phr, const byte_t* buf, dword_t len);
+/**********************************************************************
+@FUNCTION: write data into message.
+@INPUT: message struct.
+@INPUT: message control header.
+@INPUT: data buffer.
+@INPUT: data size in bytes.
+@RETURN: bytes writed.
+***********************************************************************/
+EXP_API	dword_t message_write(message_t msg, const msg_hdr_t* phr, const byte_t* data, dword_t bys);
 
-	EXP_API dword_t message_read(message_t msg, msg_hdr_t* phr, byte_t* buf, dword_t max);
+/**********************************************************************
+@FUNCTION: read data from message.
+@INPUT: message struct.
+@INPUT: message control header for reading.
+@INPUT: data buffer for reading.
+@INPUT: buffer size in bytes.
+@RETURN: bytes readed.
+***********************************************************************/
+EXP_API dword_t message_read(message_t msg, msg_hdr_t* phr, byte_t* buff, dword_t max);
 
-	EXP_API dword_t message_encode(message_t msg, byte_t* buf, dword_t max);
+/**********************************************************************
+@FUNCTION: encode the message to buffer.
+@INPUT: message object.
+@INPUT: data buffer for encoding.
+@RETURN: bytes encoded, zero for failed.
+@NOTE: buffer can be NULL for testing how many bytes will be encoded.
+***********************************************************************/
+EXP_API dword_t message_encode(message_t msg, byte_t* buf);
 
-	EXP_API dword_t message_decode(message_t msg, const byte_t* data);
+/**********************************************************************
+@FUNCTION: decode the message from buffer.
+@INPUT: message object.
+@INPUT: data buffer for decoding.
+@RETURN: bytes decoded, zero for failed.
+@NOTE: msg can be NULL for testing how many bytes will be decoded.
+***********************************************************************/
+EXP_API dword_t message_decode(message_t msg, const byte_t* data);
 
+
+#if defined (DEBUG) || defined (_DEBUG)
+EXP_API void message_self_test(void);
+#endif
 
 #ifdef	__cplusplus
 }

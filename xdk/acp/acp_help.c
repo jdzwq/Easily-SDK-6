@@ -35,6 +35,8 @@ int w_acp_help_code(const wchar_t* src, int len, wchar_t* buf, int max)
 {
 	int count = 0;
 	int i = 0;
+	unsigned short sch, uch;
+	bool_t b;
 
 	if (len < 0)
 	{
@@ -45,12 +47,38 @@ int w_acp_help_code(const wchar_t* src, int len, wchar_t* buf, int max)
 
 	while (i < len && count < max)
 	{
-#ifdef XDK_SUPPORT_ACP_TABLE
-		count += table_unicode_seek_help(*(src + i), ((buf) ? buf + count : NULL));
-#else
-		count += share_unicode_seek_help(*(unsigned short*)(src + i), (unsigned short*)((buf) ? buf + count : NULL));
-#endif
-		i++;
+		sch = src[i++];
+		if (sch >= 0x0000 && sch <= 0x007F)
+		{
+			if (sch >= L'A' && sch <= L'Z')
+			{
+				if(buf)
+				{
+					buf[count] = (wchar_t)sch;
+				}
+				count ++;
+			}
+			else if (src[i] >= L'a' && src[i] <= L'z')
+			{
+				sch -= 32;
+				if(buf)
+				{
+					buf[count] = (wchar_t)sch;
+				}
+				count ++;
+			}
+		}else
+		{
+			b = share_unicode_seek_help(sch, &uch);
+			if(b)
+			{
+				if(buf)
+				{
+					buf[count] = (wchar_t)uch;
+				}
+				count ++;
+			}
+		}
 	}
 
 	if (buf) buf[count] = L'\0';
@@ -62,6 +90,8 @@ static int _gb2312_acp_help_code(const schar_t* src, int len, schar_t* buf, int 
 {
 	int seq, count = 0;
 	int i = 0;
+	unsigned short sch, uch;
+	bool_t b;
 
 	if (len < 0)
 	{
@@ -72,14 +102,47 @@ static int _gb2312_acp_help_code(const schar_t* src, int len, schar_t* buf, int 
 
 	while (i < len && count < max)
 	{
-		seq = acp_gb2312_code_sequence(*(byte_t*)(src + i));
+		seq = acp_gb2312_code_sequence((byte_t)(src[i]));
 		if (!seq)
 			break;
-#ifdef XDK_SUPPORT_ACP_TABLE
-		count += table_gb2312_seek_help((byte_t*)(src + i), ((buf) ? buf + count : NULL));
-#else
-		count += share_gb2312_seek_help((unsigned char*)(src + i), (unsigned char*)((buf) ? buf + count : NULL));
-#endif
+
+		if (seq == 1)
+		{
+			sch = src[i];
+			if (sch >= 0x00 && sch <= 0x7F)
+			{
+				if (sch >= 'A' && sch <= 'Z')
+				{
+					if(buf)
+					{
+						buf[count] = (schar_t)sch;
+					}
+					count ++;
+				}
+				else if (sch >= 'a' && sch <= 'z')
+				{
+					sch -= 32;
+					if(buf)
+					{
+						buf[count] = (schar_t)sch;
+					}
+					count ++;
+				}
+			}
+		}else
+		{
+			sch = MAKESHORT(src[0], src[1]);
+			b = share_gb2312_seek_help(sch, &uch);
+			if(b)
+			{
+				if(buf)
+				{
+					buf[count] = (schar_t)uch;
+				}
+				count ++;
+			}
+		}
+
 		i += seq;
 	}
 
@@ -92,7 +155,7 @@ static int _utf8_acp_help_code(const schar_t* src, int len, schar_t* buf, int ma
 {
 	int seq, count = 0;
 	int i = 0;
-	wchar_t wc;
+	wchar_t wc, hlp;
 
 	if (len < 0)
 	{
@@ -108,11 +171,16 @@ static int _utf8_acp_help_code(const schar_t* src, int len, schar_t* buf, int ma
 			break;
 
 		utf8_byte_to_ucs((byte_t*)(src + i), &wc);
-#ifdef XDK_SUPPORT_ACP_TABLE
-		count += table_unicode_seek_help(wc, ((buf) ? buf + count : NULL));
-#else
-		count += share_unicode_seek_help(wc, (unsigned short*)((buf) ? buf + count : NULL));
-#endif
+
+		if(w_acp_help_code(&wc, 1, &hlp, 1) > 0)
+		{
+			if(buf)
+			{
+				buf[count] = (schar_t)hlp;
+			}
+			count ++;
+		}
+
 		i += seq;
 	}
 

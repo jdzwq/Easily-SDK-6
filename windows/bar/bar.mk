@@ -10,7 +10,7 @@
 !include bar.txt
 !endif
 
-ARCH = x64
+ARCH = x86
 MODULE = bar
 
 INC_PATH = ../../include

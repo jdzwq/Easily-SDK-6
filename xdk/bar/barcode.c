@@ -82,13 +82,13 @@ dword_t code128_encode(const byte_t* token, dword_t len, byte_t* buf, dword_t ma
 	return size;
 }
 
-int code128_units(const byte_t* bar_buf, int cols)
+int code128_units(const byte_t* bar_buf, dword_t bar_len)
 {
 	int n = 0;
 
-	while (cols--)
+	while (bar_len--)
 	{
-		n += (int)(bar_buf[cols] - '0');
+		n += (int)(bar_buf[bar_len] - '0');
 	}
 
 	return n;

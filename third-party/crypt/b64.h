@@ -82,7 +82,7 @@ OEM_EXP_API int base64_decode(unsigned char *dst, uint32_t dlen, uint32_t *olen,
  *
  * \return         0 if successful, or 1 if the test failed
  */
-OEM_EXP_API int base64_self_test( int verbose );
+OEM_EXP_API int b64_self_test( int verbose );
 
 #endif /* SELF_TEST */
 

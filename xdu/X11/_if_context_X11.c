@@ -43,15 +43,24 @@ int _context_startup(void)
 
     if(!g_display) return (-1);
 
+ #ifdef XDU_SUPPORT_CONTEXT_GDI
+	_gdi_init(0);
+#endif
+
 	return nVer;
 }
 
 void _context_cleanup(void)
 {
+#ifdef XDU_SUPPORT_CONTEXT_GDI
+	_gdi_uninit();
+#endif
+
     if(g_display)
+    {
         XCloseDisplay(g_display);
-    
-    g_display = 0;
+        g_display = 0;
+    }
 }
 
 visual_t _create_display_context(widget_t wt)
@@ -73,6 +82,7 @@ visual_t _create_display_context(widget_t wt)
     ctx->type = CONTEXT_WIDGET;
     ctx->device = (wt)? pxw->self : DefaultRootWindow(g_display);
     ctx->context = XCreateGC(g_display, ctx->device, 0, &gv);
+    ctx->fontset = g_fontset;
 
     XGetWindowAttributes(g_display, ctx->device, &attr);
 
@@ -101,6 +111,8 @@ visual_t _create_compatible_context(visual_t rdc, int cx, int cy)
     ctx->type = CONTEXT_MEMORY;
     ctx->device = XCreatePixmap (g_display, r, cx, cy, org->depth);
     ctx->context = XCreateGC(g_display, org->device, 0, &gv);
+    ctx->fontset = g_fontset;
+
     ctx->width = cx;
     ctx->height = cy;
     if(org->type == CONTEXT_MEMORY)
@@ -156,18 +168,28 @@ void _render_context(visual_t src, int srcx, int srcy, visual_t dst, int dstx, i
     XCopyArea(g_display, src_ctx->device, dst_ctx->device, src_ctx->context, srcx, srcy, dstw, dsth, dstx, dsty);
 }
 
-
 float _pixel_metric(visual_t rdc)
 {
 	return LOGMMPERPT;
 }
 
-float _font_metric(visual_t rdc, const xfont_t* pxf)
+float _font_metric(visual_t rdc, const tchar_t* xf_size)
 {
-	float pt = xstof(pxf->size);
-	float pm = 0.0f;
+	const tchar_t* tk;
+	int len;
+	float pt, pm = 0.0f;
 
-	font_metric_by_pt(pt, &pm, NULL);
+	tk = xsistr(xf_size, _T("px"));
+	if(tk)
+	{
+		pt = xsntof(xf_size, (int)(tk - xf_size));
+		font_metric_by_px(pt, &pm, NULL);
+	}
+	else
+	{
+		pt = xstof(xf_size);
+		font_metric_by_pt(pt, &pm, NULL);
+	}
 
 	return pm;
 }

@@ -377,7 +377,7 @@ void test_hkv()
 		xsprintf(kid, _T("key%d"), i);
 		variant_from_string(key, kid, -1);
 
-		object_set_variant(val, key);
+		object_encode_variant(val, key);
 
 		hkv_write(hkv, key, val);
 	}

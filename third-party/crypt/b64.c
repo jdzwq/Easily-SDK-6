@@ -243,7 +243,7 @@ static const unsigned char base64_test_enc[] =
 /*
 * Checkup routine
 */
-int base64_self_test(int verbose)
+int b64_self_test(int verbose)
 {
 	uint32_t len;
 	const unsigned char *src;

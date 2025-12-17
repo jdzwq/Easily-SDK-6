@@ -47,9 +47,9 @@ EXP_API void svg_print_diagram(link_t_ptr svg, link_t_ptr diagram);
 
 EXP_API void svg_print_plot(link_t_ptr svg, link_t_ptr plot);
 
-EXP_API void svg_print_memo(link_t_ptr svg, const xfont_t* pxf, const xface_t* pxa, link_t_ptr memo, int page);
+EXP_API void svg_print_memo(link_t_ptr svg, link_t_ptr memo, int page);
 
-EXP_API void svg_print_rich(link_t_ptr svg, const xfont_t* pxf, const xface_t* pxa, link_t_ptr rich, int page);
+EXP_API void svg_print_rich(link_t_ptr svg, link_t_ptr rich, int page);
 
 
 #ifdef	__cplusplus

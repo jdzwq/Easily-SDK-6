@@ -650,8 +650,7 @@ void hand_panel_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	viewbox_t vb = { 0 };
 
 	color_mod_t clrs;
-	xfont_t xf_top = { 0 };
-	xface_t xa_top = { 0 };
+	xface_t xa = { 0 };
 	xbrush_t xb_bar, xb = { 0 };
 	xpen_t xp = { 0 };
 	xcolor_t xc = { 0 };
@@ -664,11 +663,7 @@ void hand_panel_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	default_xpen(&xp);
 	format_xcolor(&clrs.clr_frg, xp.color);
 
-	memcpy((void*)&xf_top, (void*)&ptd->xf, sizeof(xfont_t));
-	xscpy(xf_top.weight, GDI_ATTR_FONT_WEIGHT_BOLD);
-
-	memcpy((void*)&xa_top, (void*)&ptd->xa, sizeof(xface_t));
-	xscpy(xa_top.text_wrap, _T(""));
+	default_xface(&xa);
 
 	memcpy((void*)&xb_bar, (void*)&xb, sizeof(xbrush_t));
 	lighten_xbrush(&xb_bar, DEF_SOFT_DARKEN);
@@ -728,7 +723,7 @@ void hand_panel_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 		xr_icon.y = xr.y;
 		xr_icon.w = ptd->item_width - 12;
 		xr_icon.h = ptd->title_height;
-		(*ifv.pf_draw_text)(ifv.ctx, &ptd->xf, &ptd->xa, &xr_icon, title, -1);
+		(*ifv.pf_draw_text)(ifv.ctx, &xa, &xr_icon, title, -1);
 
 		xr.x += ptd->item_width;
 
@@ -766,11 +761,6 @@ widget_t panelctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* p
 		EVENT_ON_LBUTTON_DBCLICK(hand_panel_lbutton_dbclick)
 		EVENT_ON_RBUTTON_DOWN(hand_panel_rbutton_down)
 		EVENT_ON_RBUTTON_UP(hand_panel_rbutton_up)
-
-		EVENT_ON_XFONT(hand_panel_xfont)
-		EVENT_ON_XFACE(hand_panel_xface)
-
-		
 
 	EVENT_END_DISPATH
 

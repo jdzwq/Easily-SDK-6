@@ -33,59 +33,43 @@ LICENSE.GPL3 for more details.
 
 #define MIN_NEED_COMPRESS	1024
 
-/***********************************
-struct{
-	struct{
-		byte_t[1] tag;
-		byte_t[3] len; 4 + encoded bytes or compressed bytes
-	}memobj_head;
-	byte_t[1]: if compressed
-	byte_t[3]: origin bytes
-	byte_t[encoded bytes | conpressed bytes] data;
-}object;
-*************************************/
+#define MEM_TYPE_MASK	0x10
+#define MEM_SIZE_MASK	0x80000000
 
-#define OBJECT_HEAD_SIZE		(sizeof(memobj_head) + 4)
 
-#define OBJECT_GET_TYPE(obj)	GET_BYTE((obj),0)
-#define OBJECT_SET_TYPE(obj,n)	PUT_BYTE((obj),0,n)
+typedef struct _object_context{
+	memo_head head;
 
-#define OBJECT_SET_SIZE(obj,n)	PUT_THREEBYTE_LOC((obj),1,(n + 4))
-#define OBJECT_GET_SIZE(obj)	(GET_THREEBYTE_LOC((obj),1) - 4)
+	nuid_t nuid;	// object identify
+	dword_t size;	// object encoded or commpressed size in bytes, data may commpressed with high-bit set to 1 
+	byte_t* data;	// object encoded or commpressed data
+}object_context;
 
-#define OBJECT_GET_COMPRESS(obj)	GET_BYTE((obj), sizeof(memobj_head))
-#define OBJECT_SET_COMPRESS(obj, b)	PUT_BYTE((obj),sizeof(memobj_head),(byte_t)b)
-
-#define OBJECT_SET_UNCOMPRE_SIZE(obj,n)	PUT_THREEBYTE_LOC((obj),(sizeof(memobj_head) + 1),n)
-#define OBJECT_GET_UNCOMPRE_SIZE(obj)	GET_THREEBYTE_LOC((obj),(sizeof(memobj_head) + 1))
-
-#define OBJECT_DATA_BUFFER(obj)		(obj + sizeof(memobj_head) + 4)
-
-static void _object_compress(byte_t** pobj)
+static void _object_compress(object_context* pobj)
 {
 	byte_t type;
-	bool_t compre;
+	bool_t ziped;
 	dword_t cur, org;
 	byte_t* buf;
 
-	type = OBJECT_GET_TYPE(*pobj);
-	compre = OBJECT_GET_COMPRESS(*pobj);
+	type = (pobj->head.tag & MEM_TYPE_MASK);
+	ziped = (pobj->size & MEM_SIZE_MASK);
 
 	//object bytes
-	org = OBJECT_GET_SIZE(*pobj);
+	org = (pobj->size & (~MEM_SIZE_MASK));
 	cur = org;
 
-	//if compressed
-	if (compre || org < MIN_NEED_COMPRESS) return;
+	//if compresse
+	if (ziped || org < MIN_NEED_COMPRESS) return;
 
-	switch ((type & 0x0F))
+	switch (type)
 	{
-	case MEM_BINARY:
+	case MEM_STRING:
 		cur += (cur / 10);
 		if (cur == org) cur++;
 
-		buf = (byte_t*)xmem_alloc(cur);
-		if (xzlib_compress_bytes(OBJECT_DATA_BUFFER(*pobj), org, buf, &cur) == 0)
+		buf = (byte_t*)xmem_alloc(cur + 4);
+		if ((cur = lzf_compress(pobj->data, org, buf, cur)) == 0)
 		{
 			xmem_free(buf);
 			return;
@@ -95,8 +79,8 @@ static void _object_compress(byte_t** pobj)
 		cur += (cur / 10);
 		if (cur == org) cur++;
 
-		buf = (byte_t*)xmem_alloc(cur);
-		if ((cur = lzf_compress(OBJECT_DATA_BUFFER(*pobj), org, buf, cur)) == 0)
+		buf = (byte_t*)xmem_alloc(cur + 4);
+		if (xzlib_compress_bytes(pobj->data, org, buf, &cur) == 0)
 		{
 			xmem_free(buf);
 			return;
@@ -104,55 +88,44 @@ static void _object_compress(byte_t** pobj)
 		break;
 	}
 
-	bytes_realloc(pobj, OBJECT_HEAD_SIZE + cur);
-	xmem_copy(OBJECT_DATA_BUFFER(*pobj), buf, cur);
-	xmem_free(buf);
-
-	//object bytes (compressed)
-	OBJECT_SET_SIZE(*pobj, cur);
-	//set commpress bit
-	OBJECT_SET_COMPRESS(*pobj, 1);
-	//uncompressed bytes (uncompressed)
-	OBJECT_SET_UNCOMPRE_SIZE(*pobj, org);
+	xmem_free(pobj->data);
+	pobj->data = buf;
+	pobj->size |= MEM_SIZE_MASK;
+	PUT_DWORD_NET(pobj->data, 0, cur);
 }
 
-static void _object_decompress(byte_t** pobj)
+static void _object_decompress(object_context* pobj)
 {
 	byte_t type;
-	bool_t compre;
+	bool_t ziped;
 	dword_t cur, org;
 	byte_t* buf;
 
-	type = OBJECT_GET_TYPE(*pobj);
-	compre = OBJECT_GET_COMPRESS(*pobj);
+	type = (pobj->head.tag & MEM_TYPE_MASK);
+	ziped = (pobj->size & MEM_SIZE_MASK);
 
 	//if not compressed
-	if (!compre) return;
+	if (!ziped) return;
 
-	//object bytes
-	org = OBJECT_GET_SIZE(*pobj);
-
+	//compressed bytes
+	org = GET_DWORD_NET(pobj->data, 0);
 	//uncompressed bytes
-	cur = OBJECT_GET_UNCOMPRE_SIZE(*pobj);
-	if (!cur)
-		return;
+	cur = (pobj->size & (~MEM_SIZE_MASK));
+	if (!cur) return;
 
-	buf = (byte_t*)xmem_alloc(org);
-	xmem_copy(buf, OBJECT_DATA_BUFFER(*pobj), org);
+	buf = (byte_t*)xmem_alloc(cur);
 
-	bytes_realloc(pobj, OBJECT_HEAD_SIZE + cur);
-
-	switch ((type & 0x0F))
+	switch (type)
 	{
-	case MEM_BINARY:
-		if (!xzlib_uncompress_bytes(buf, org, OBJECT_DATA_BUFFER(*pobj), &cur))
+	case MEM_STRING:
+		if ((cur = lzf_decompress((pobj->data + 4), org, buf, cur)) == 0)
 		{
 			xmem_free(buf);
 			return;
 		}
 		break;
 	default:
-		if ((cur = lzf_decompress(buf, org, OBJECT_DATA_BUFFER(*pobj), cur)) == 0)
+		if (!xzlib_uncompress_bytes((pobj->data + 4), org, buf, &cur))
 		{
 			xmem_free(buf);
 			return;
@@ -160,176 +133,131 @@ static void _object_decompress(byte_t** pobj)
 		break;
 	}
 	
-	xmem_free(buf);
-
-	//object bytes (uncompressed)
-	OBJECT_SET_SIZE(*pobj, cur);
-	//set commpress bit
-	OBJECT_SET_COMPRESS(*pobj, 0);
-	//original bytes (uncompressed)
-	OBJECT_SET_UNCOMPRE_SIZE(*pobj, cur);
+	xmem_free(pobj->data);
+	pobj->data = buf;
+	pobj->size &= 0x7FFFFFFF;
 }
 
 /*********************************************************************************/
 object_t object_alloc(void)
 {
-	byte_t** pobj;
+	object_context* pobj;
 
-	pobj = bytes_alloc();
-	bytes_realloc(pobj, OBJECT_HEAD_SIZE);
+	pobj = (object_context*)xmem_alloc(sizeof(object_context));
+	pobj->head.tag = (MEM_EMPTY | MEM_TYPE_MASK);
 
-	//type
-	OBJECT_SET_TYPE(*pobj, (MEM_BINARY | MEMENC_MASK));
-	//object size
-	OBJECT_SET_SIZE(*pobj, 0);
-	//set commpress bit
-	OBJECT_SET_COMPRESS(*pobj, 0);
-	//uncompressed size
-	OBJECT_SET_UNCOMPRE_SIZE(*pobj, 0);
-
-	return (object_t)pobj;
+	return (object_t)&(pobj->head);
 }
 
 void object_free(object_t obj)
 {
-	byte_t** pobj = (byte_t**)obj;
-	byte_t type;
+	object_context* pobj = TypePtrFromHead(object_context, obj);
 
-	XDK_ASSERT(obj != NULL);
+	XDK_ASSERT(obj && IS_OBJECT_TYPE(obj->tag));
 
-	type = OBJECT_GET_TYPE(*pobj);
+	if(pobj->data) xmem_free(pobj->data);
 
-	XDK_ASSERT(IS_OBJECT_TYPE(type));
-
-	bytes_free(pobj);
+	xmem_free(pobj);
 }
 
-void object_empty(object_t obj)
+void object_clear(object_t obj)
 {
-	byte_t** pobj = (byte_t**)obj;
-	byte_t type;
+	object_context* pobj = TypePtrFromHead(object_context, obj);
 
-	XDK_ASSERT(obj != NULL);
+	XDK_ASSERT(obj && IS_OBJECT_TYPE(obj->tag));
 
-	type = OBJECT_GET_TYPE(*pobj);
+	if(pobj->data) xmem_free(pobj->data);
 
-	XDK_ASSERT(IS_OBJECT_TYPE(type));
-
-	bytes_realloc(pobj, OBJECT_HEAD_SIZE);
-
-	//type
-	OBJECT_SET_TYPE(*pobj, (MEM_BINARY | MEMENC_MASK));
-	//object size
-	OBJECT_SET_SIZE(*pobj, 0);
-	//set commpress bit
-	OBJECT_SET_COMPRESS(*pobj, 0);
-	//uncompressed size
-	OBJECT_SET_UNCOMPRE_SIZE(*pobj, 0);
+	pobj->data = NULL;
+	pobj->size = 0;
+	xmem_zero((void*)&(pobj->nuid), sizeof(nuid_t));
+	
+	obj->tag = (MEM_EMPTY | MEM_TYPE_MASK);
 }
 
 dword_t object_size(object_t obj)
 {
-	byte_t** pobj = (byte_t**)obj;
-	dword_t size;
-	byte_t type;
+	object_context* pobj = TypePtrFromHead(object_context, obj);
 
-	XDK_ASSERT(obj != NULL);
+	XDK_ASSERT(obj && IS_OBJECT_TYPE(obj->tag));
 
-	type = OBJECT_GET_TYPE(*pobj);
-
-	XDK_ASSERT(IS_OBJECT_TYPE(type));
-
-	//uncompressed size
-	size = OBJECT_GET_UNCOMPRE_SIZE(*pobj);
-
-	return size;
-}
-
-void object_copy(object_t dst, object_t src)
-{
-	byte_t** pdst = (byte_t**)dst;
-	byte_t** psrc = (byte_t**)src;
-	byte_t t1, t2;
-	dword_t n;
-
-	XDK_ASSERT(dst && src);
-
-	t1 = OBJECT_GET_TYPE(*psrc);
-	t2 = OBJECT_GET_TYPE(*pdst);
-
-	XDK_ASSERT(IS_OBJECT_TYPE(t1) && IS_OBJECT_TYPE(t2));
-
-	n = OBJECT_GET_SIZE(*psrc);
-
-	bytes_realloc(pdst, OBJECT_HEAD_SIZE + n);
-
-	xmem_copy((void*)(*pdst), (void*)(*psrc), OBJECT_HEAD_SIZE);
-	xmem_copy((void*)OBJECT_DATA_BUFFER(*pdst), (void*)OBJECT_DATA_BUFFER(*psrc), n);
+	return (pobj->size & (~MEM_SIZE_MASK));
 }
 
 object_t object_clone(object_t obj)
 {
-	byte_t** pdst;
-	byte_t** psrc = (byte_t**)obj;
-	byte_t type;
+	object_context* pobj = TypePtrFromHead(object_context, obj);
+	object_context* pnew;
+	dword_t zips;
 
-	XDK_ASSERT(obj != NULL);
+	XDK_ASSERT(obj && IS_OBJECT_TYPE(obj->tag));
 
-	type = OBJECT_GET_TYPE(*psrc);
+	pnew = (object_context*)xmem_alloc(sizeof(object_context));
+	pnew->head.tag = (MEM_EMPTY | MEM_TYPE_MASK);
+	xmem_copy((void*)&(pnew->nuid), (void*)&(pobj->nuid), sizeof(nuid_t));
+	if(pobj->size)
+	{
+		zips = (pobj->size & MEM_SIZE_MASK)? GET_DWORD_NET(pobj->data, 0) : pobj->size;
+		pnew->data = (byte_t*)xmem_clone((void*)pobj->data, zips);
+	}
+	pnew->size = pobj->size;
 
-	XDK_ASSERT(IS_OBJECT_TYPE(type));
+	return (object_t)&(pnew->head);
+}
 
-	pdst = (byte_t**)object_alloc();
-	object_copy((object_t)pdst, obj);
+void object_copy(object_t dst, object_t src)
+{
+	object_context* pdst = TypePtrFromHead(object_context, dst);
+	object_context* psrc = TypePtrFromHead(object_context, src);
+	bool_t ziped;
 
-	return (object_t)pdst;
+	XDK_ASSERT(dst && IS_OBJECT_TYPE(dst->tag));
+	XDK_ASSERT(src && IS_OBJECT_TYPE(src->tag));
+
+	ziped = object_get_commpress(src);
+	if(ziped)
+	{
+		_object_decompress(psrc);
+	}
+
+	object_clear(dst);
+	
+	pdst->head.tag = psrc->head.tag;
+	xmem_copy((void*)&(pdst->nuid), (void*)&(psrc->nuid), sizeof(nuid_t));
+	pdst->size = psrc->size;
+	pdst->data = (byte_t*)xmem_clone((void*)psrc->data, psrc->size);
 }
 
 int object_get_type(object_t obj)
 {
-	byte_t** pobj = (byte_t**)obj;
-	byte_t type;
+	object_context* pobj = TypePtrFromHead(object_context, obj);
 
-	XDK_ASSERT(pobj);
+	XDK_ASSERT(obj && IS_OBJECT_TYPE(obj->tag));
 
-	type = OBJECT_GET_TYPE(*pobj);
-
-	XDK_ASSERT(IS_OBJECT_TYPE(type));
-
-	return (int)type;
+	return (int)(obj->tag & 0x0F);
 }
 
 bool_t object_get_commpress(object_t obj)
 {
-	byte_t** pobj = (byte_t**)obj;
-	byte_t type;
+	object_context* pobj = TypePtrFromHead(object_context, obj);
 
-	XDK_ASSERT(pobj);
+	XDK_ASSERT(obj && IS_OBJECT_TYPE(obj->tag));
 
-	type = OBJECT_GET_TYPE(*pobj);
-
-	XDK_ASSERT(IS_OBJECT_TYPE(type));
-
-	return (OBJECT_GET_COMPRESS(*pobj)) ? 1 : 0;
+	return (pobj->size & MEM_SIZE_MASK) ? 1 : 0;
 }
 
 void object_set_commpress(object_t obj, bool_t b)
 {
-	byte_t** pobj = (byte_t**)obj;
-	bool_t compre;
-	byte_t type;
+	object_context* pobj = TypePtrFromHead(object_context, obj);
+	bool_t ziped;
 
-	XDK_ASSERT(pobj);
+	XDK_ASSERT(obj && IS_OBJECT_TYPE(obj->tag));
 
-	type = OBJECT_GET_TYPE(*pobj);
+	ziped = object_get_commpress(obj);
 
-	XDK_ASSERT(IS_OBJECT_TYPE(type));
-
-	compre = object_get_commpress(obj);
-
-	if (compre && b)
+	if (ziped && b)
 		return;
-	else if (!compre && !b)
+	else if (!ziped && !b)
 		return;
 	else if (b)
 		_object_compress(pobj);
@@ -337,749 +265,506 @@ void object_set_commpress(object_t obj, bool_t b)
 		_object_decompress(pobj);
 }
 
-bool_t object_get_message(object_t obj, message_t val)
+bool_t object_decode_message(object_t obj, message_t val)
 {
-	byte_t** pobj = (byte_t**)obj;
-
+	object_context* pobj = TypePtrFromHead(object_context, obj);
 	byte_t type;
-	bool_t compre;
+	bool_t ziped;
 
-	XDK_ASSERT(obj != NULL);
+	XDK_ASSERT(obj && IS_OBJECT_TYPE(obj->tag));
 
-	type = OBJECT_GET_TYPE(*pobj);
-	compre = OBJECT_GET_COMPRESS(*pobj);
+	type = object_get_type(obj);
+	ziped = object_get_commpress(obj);
 
-	XDK_ASSERT(IS_OBJECT_TYPE(type));
-
-	if ((type & 0x0F) != MEM_MESSAGE)
+	if (type != MEM_MESSAGE)
 		return 0;
 
-	if (compre)
+	if (ziped)
 	{
 		//decompress first
 		_object_decompress(pobj);
 	}
 
-	message_decode(val, OBJECT_DATA_BUFFER(*pobj));
-
-	return 1;
+	return (pobj->size == message_decode(val, pobj->data))? bool_true : bool_false;
 }
 
-void object_set_message(object_t obj, message_t val)
+void object_encode_message(object_t obj, message_t val)
 {
-	byte_t** pobj = (byte_t**)obj;
+	object_context* pobj = TypePtrFromHead(object_context, obj);
 
-	byte_t type;
-	dword_t dw;
+	XDK_ASSERT(obj && IS_OBJECT_TYPE(obj->tag));
 
-	XDK_ASSERT(obj != NULL);
+	object_clear(obj);
 
-	type = OBJECT_GET_TYPE(*pobj);
+	pobj->head.tag = (MEM_MESSAGE | MEM_TYPE_MASK);
+	pobj->size = message_encode(val, NULL);
+	pobj->data = (byte_t*)xmem_alloc(pobj->size);
 
-	XDK_ASSERT(IS_OBJECT_TYPE(type));
-
-	object_empty(obj);
-
-	dw = message_encode(val, NULL, MAX_LONG);
-
-	bytes_realloc(pobj, OBJECT_HEAD_SIZE + dw);
-
-	message_encode(val, OBJECT_DATA_BUFFER(*pobj), dw);
-
-	type = (MEM_MESSAGE | MEMENC_MASK);
-	//object type
-	OBJECT_SET_TYPE(*pobj, type);
-	//object size
-	OBJECT_SET_SIZE(*pobj, dw);
-	//set commpress bit
-	OBJECT_SET_COMPRESS(*pobj, 0);
-	//uncompressed bytes
-	OBJECT_SET_UNCOMPRE_SIZE(*pobj, dw);
+	message_encode(val, pobj->data);
 }
 
-bool_t object_get_queue(object_t obj, queue_t val)
+bool_t object_decode_matrix(object_t obj, matrix_t val)
 {
-	byte_t** pobj = (byte_t**)obj;
-
+	object_context* pobj = TypePtrFromHead(object_context, obj);
 	byte_t type;
-	bool_t compre;
+	bool_t ziped;
 
-	XDK_ASSERT(obj != NULL);
+	XDK_ASSERT(obj && IS_OBJECT_TYPE(obj->tag));
 
-	type = OBJECT_GET_TYPE(*pobj);
-	compre = OBJECT_GET_COMPRESS(*pobj);
+	type = object_get_type(obj);
+	ziped = object_get_commpress(obj);
 
-	XDK_ASSERT(IS_OBJECT_TYPE(type));
-
-	if ((type & 0x0F) != MEM_QUEUE)
+	if (type != MEM_MATRIX)
 		return 0;
 
-	if (compre)
+	if (ziped)
 	{
 		//decompress first
 		_object_decompress(pobj);
 	}
 
-	queue_decode(val, OBJECT_DATA_BUFFER(*pobj));
-
-	return 1;
+	return (pobj->size == matrix_decode(val, pobj->data))? bool_true : bool_false;
 }
 
-void object_set_queue(object_t obj, queue_t val)
+void object_encode_matrix(object_t obj, matrix_t val)
 {
-	byte_t** pobj = (byte_t**)obj;
+	object_context* pobj = TypePtrFromHead(object_context, obj);
 
-	byte_t type;
-	dword_t dw;
+	XDK_ASSERT(obj && IS_OBJECT_TYPE(obj->tag));
 
-	XDK_ASSERT(obj != NULL);
+	object_clear(obj);
 
-	type = OBJECT_GET_TYPE(*pobj);
+	pobj->head.tag = (MEM_MATRIX | MEM_TYPE_MASK);
+	pobj->size = matrix_encode(val, NULL);
+	pobj->data = (byte_t*)xmem_alloc(pobj->size);
 
-	XDK_ASSERT(IS_OBJECT_TYPE(type));
-
-	object_empty(obj);
-
-	dw = queue_encode(val, NULL, MAX_LONG);
-
-	bytes_realloc(pobj, OBJECT_HEAD_SIZE + dw);
-
-	queue_encode(val, OBJECT_DATA_BUFFER(*pobj), dw);
-
-	type = (MEM_QUEUE | MEMENC_MASK);
-	//object type
-	OBJECT_SET_TYPE(*pobj, type);
-	//object size
-	OBJECT_SET_SIZE(*pobj, dw);
-	//set commpress bit
-	OBJECT_SET_COMPRESS(*pobj, 0);
-	//uncompressed bytes
-	OBJECT_SET_UNCOMPRE_SIZE(*pobj, dw);
+	matrix_encode(val, pobj->data);
 }
 
-bool_t object_get_matrix(object_t obj, matrix_t val)
+bool_t object_decode_vector(object_t obj, vector_t val)
 {
-	byte_t** pobj = (byte_t**)obj;
-
+	object_context* pobj = TypePtrFromHead(object_context, obj);
 	byte_t type;
-	bool_t compre;
+	bool_t ziped;
 
-	XDK_ASSERT(obj != NULL);
+	XDK_ASSERT(obj && IS_OBJECT_TYPE(obj->tag));
 
-	type = OBJECT_GET_TYPE(*pobj);
-	compre = OBJECT_GET_COMPRESS(*pobj);
+	type = object_get_type(obj);
+	ziped = object_get_commpress(obj);
 
-	XDK_ASSERT(IS_OBJECT_TYPE(type));
-
-	if ((type & 0x0F) != MEM_MATRIX)
+	if (type != MEM_VECTOR)
 		return 0;
 
-	if (compre)
+	if (ziped)
 	{
 		//decompress first
 		_object_decompress(pobj);
 	}
 
-	matrix_decode(val, OBJECT_DATA_BUFFER(*pobj));
-
-	return 1;
+	return (pobj->size == vector_decode(val, pobj->data))? bool_true : bool_false;
 }
 
-void object_set_matrix(object_t obj, matrix_t val)
+void object_encode_vector(object_t obj, vector_t val)
 {
-	byte_t** pobj = (byte_t**)obj;
+	object_context* pobj = TypePtrFromHead(object_context, obj);
 
-	byte_t type;
-	dword_t dw;
+	XDK_ASSERT(obj && IS_OBJECT_TYPE(obj->tag));
 
-	XDK_ASSERT(obj != NULL);
+	object_clear(obj);
 
-	type = OBJECT_GET_TYPE(*pobj);
+	pobj->head.tag = (MEM_VECTOR | MEM_TYPE_MASK);
+	pobj->size = vector_encode(val, NULL);
+	pobj->data = (byte_t*)xmem_alloc(pobj->size);
 
-	XDK_ASSERT(IS_OBJECT_TYPE(type));
-
-	object_empty(obj);
-
-	dw = matrix_encode(val, NULL, MAX_LONG);
-
-	bytes_realloc(pobj, OBJECT_HEAD_SIZE + dw);
-
-	matrix_encode(val, OBJECT_DATA_BUFFER(*pobj), dw);
-
-	type = (MEM_MATRIX | MEMENC_MASK);
-	//object type
-	OBJECT_SET_TYPE(*pobj, type);
-	//object size
-	OBJECT_SET_SIZE(*pobj, dw);
-	//set commpress bit
-	OBJECT_SET_COMPRESS(*pobj, 0);
-	//uncompressed bytes
-	OBJECT_SET_UNCOMPRE_SIZE(*pobj, dw);
+	vector_encode(val, pobj->data);
 }
 
-bool_t object_get_vector(object_t obj, vector_t val)
+bool_t object_decode_map(object_t obj, map_t val)
 {
-	byte_t** pobj = (byte_t**)obj;
-
+	object_context* pobj = TypePtrFromHead(object_context, obj);
 	byte_t type;
-	bool_t compre;
+	bool_t ziped;
 
-	XDK_ASSERT(obj != NULL);
+	XDK_ASSERT(obj && IS_OBJECT_TYPE(obj->tag));
 
-	type = OBJECT_GET_TYPE(*pobj);
-	compre = OBJECT_GET_COMPRESS(*pobj);
+	type = object_get_type(obj);
+	ziped = object_get_commpress(obj);
 
-	XDK_ASSERT(IS_OBJECT_TYPE(type));
-
-	if ((type & 0x0F) != MEM_VECTOR)
+	if (type != MEM_MAP)
 		return 0;
 
-	if (compre)
+	if (ziped)
 	{
 		//decompress first
 		_object_decompress(pobj);
 	}
 
-	vector_decode(val, OBJECT_DATA_BUFFER(*pobj));
-
-	return 1;
+	return (pobj->size == map_decode(val, pobj->data))? bool_true : bool_false;
 }
 
-void object_set_vector(object_t obj, vector_t val)
+void object_encode_map(object_t obj, map_t val)
 {
-	byte_t** pobj = (byte_t**)obj;
+	object_context* pobj = TypePtrFromHead(object_context, obj);
 
-	byte_t type;
+	XDK_ASSERT(obj && IS_OBJECT_TYPE(obj->tag));
+
+	object_clear(obj);
+
+	pobj->head.tag = (MEM_MAP | MEM_TYPE_MASK);
+	pobj->size = map_encode(val, NULL);
+	pobj->data = (byte_t*)xmem_alloc(pobj->size);
+
+	map_encode(val, pobj->data);
+}
+
+void object_encode_variant(object_t obj, variant_t val)
+{
+	object_context* pobj = TypePtrFromHead(object_context, obj);
 	dword_t dw;
+	bool_t ziped;
 
-	XDK_ASSERT(obj != NULL);
+	XDK_ASSERT(obj && IS_OBJECT_TYPE(obj->tag));
 
-	type = OBJECT_GET_TYPE(*pobj);
+	object_clear(obj);
 
-	XDK_ASSERT(IS_OBJECT_TYPE(type));
+	pobj->size = variant_encode(val, NULL);
+	pobj->head.tag = (MEM_VARIANT | MEM_TYPE_MASK);
+	pobj->data = (byte_t*)xmem_alloc(pobj->size);
 
-	object_empty(obj);
-
-	dw = vector_encode(val, NULL, MAX_LONG);
-
-	bytes_realloc(pobj, OBJECT_HEAD_SIZE + dw);
-
-	vector_encode(val, OBJECT_DATA_BUFFER(*pobj), dw);
-
-	type = (MEM_VECTOR | MEMENC_MASK);
-	//object type
-	OBJECT_SET_TYPE(*pobj, type);
-	//object size
-	OBJECT_SET_SIZE(*pobj, dw);
-	//set commpress bit
-	OBJECT_SET_COMPRESS(*pobj, 0);
-	//uncompressed bytes
-	OBJECT_SET_UNCOMPRE_SIZE(*pobj, dw);
+	variant_encode(val, pobj->data);
 }
 
-bool_t object_get_map(object_t obj, map_t val)
+bool_t object_decode_variant(object_t obj, variant_t val)
 {
-	byte_t** pobj = (byte_t**)obj;
-
+	object_context* pobj = TypePtrFromHead(object_context, obj);
 	byte_t type;
-	bool_t compre;
+	bool_t ziped;
 
-	XDK_ASSERT(obj != NULL);
+	XDK_ASSERT(obj && IS_OBJECT_TYPE(obj->tag));
 
-	type = OBJECT_GET_TYPE(*pobj);
-	compre = OBJECT_GET_COMPRESS(*pobj);
+	type = object_get_type(obj);
+	ziped = object_get_commpress(obj);
 
-	XDK_ASSERT(IS_OBJECT_TYPE(type));
-
-	if ((type & 0x0F) != MEM_MAP)
+	if (type != MEM_VARIANT)
 		return 0;
 
-	if (compre)
+	if (ziped)
 	{
 		//decompress first
 		_object_decompress(pobj);
 	}
 
-	map_decode(val, OBJECT_DATA_BUFFER(*pobj));
-
-	return 1;
+	return (pobj->size == variant_decode(val, pobj->data))? bool_true : bool_false;
 }
 
-void object_set_map(object_t obj, map_t val)
+void object_encode_string(object_t obj, string_t str)
 {
-	byte_t** pobj = (byte_t**)obj;
-
-	byte_t type;
+	object_context* pobj = TypePtrFromHead(object_context, obj);
 	dword_t dw;
+	bool_t ziped;
 
-	XDK_ASSERT(obj != NULL);
+	XDK_ASSERT(obj && IS_OBJECT_TYPE(obj->tag));
 
-	type = OBJECT_GET_TYPE(*pobj);
+	object_clear(obj);
 
-	XDK_ASSERT(IS_OBJECT_TYPE(type));
+	pobj->size = string_encode(str, _UTF8_BOM, NULL, MAX_LONG);
+	pobj->head.tag = (MEM_VARIANT | MEM_TYPE_MASK);
+	pobj->data = (byte_t*)xmem_alloc(pobj->size);
 
-	object_empty(obj);
-
-	dw = map_encode(val, NULL, MAX_LONG);
-
-	bytes_realloc(pobj, OBJECT_HEAD_SIZE + dw);
-
-	map_encode(val, OBJECT_DATA_BUFFER(*pobj), dw);
-
-	type = (MEM_MAP | MEMENC_MASK);
-	//object type
-	OBJECT_SET_TYPE(*pobj, type);
-	//object size
-	OBJECT_SET_SIZE(*pobj, dw);
-	//set commpress bit
-	OBJECT_SET_COMPRESS(*pobj, 0);
-	//uncompressed bytes
-	OBJECT_SET_UNCOMPRE_SIZE(*pobj, dw);
+	string_encode(str, _UTF8_BOM, pobj->data, pobj->size);
 }
 
-void object_set_string(object_t obj, string_t str)
+bool_t object_decode_string(object_t obj, string_t str)
 {
-	byte_t** pobj = (byte_t**)obj;
-
+	object_context* pobj = TypePtrFromHead(object_context, obj);
 	byte_t type;
-	dword_t dw;
+	bool_t ziped;
 
-	XDK_ASSERT(obj != NULL);
+	XDK_ASSERT(obj && IS_OBJECT_TYPE(obj->tag));
 
-	type = OBJECT_GET_TYPE(*pobj);
+	type = object_get_type(obj);
+	ziped = object_get_commpress(obj);
 
-	XDK_ASSERT(IS_OBJECT_TYPE(type));
-
-	object_empty(obj);
-
-	dw = string_encode(str, _UTF8_BOM, NULL, MAX_LONG);
-
-	bytes_realloc(pobj, OBJECT_HEAD_SIZE + dw);
-
-	string_encode(str, _UTF8_BOM, OBJECT_DATA_BUFFER(*pobj), dw);
-
-	type = (MEM_STRING | MEMENC_MASK);
-	//object type
-	OBJECT_SET_TYPE(*pobj, type);
-	//object size
-	OBJECT_SET_SIZE(*pobj, dw);
-	//set commpress bit
-	OBJECT_SET_COMPRESS(*pobj, 0);
-	//uncompressed bytes
-	OBJECT_SET_UNCOMPRE_SIZE(*pobj, dw);
-}
-
-bool_t object_get_string(object_t obj, string_t str)
-{
-	byte_t** pobj = (byte_t**)obj;
-
-	byte_t type;
-	bool_t compre;
-	dword_t dw;
-
-	XDK_ASSERT(obj != NULL);
-
-	type = OBJECT_GET_TYPE(*pobj);
-	compre = OBJECT_GET_COMPRESS(*pobj);
-
-	XDK_ASSERT(IS_OBJECT_TYPE(type));
-
-	if ((type & 0x0F) != MEM_STRING)
+	if (type != MEM_STRING)
 		return 0;
 
-	if (compre)
+	if (ziped)
 	{
 		//decompress first
 		_object_decompress(pobj);
 	}
 
-	dw = OBJECT_GET_UNCOMPRE_SIZE(*pobj);
-
-	string_decode(str, _UTF8_BOM, OBJECT_DATA_BUFFER(*pobj), dw);
-
-	return 1;
-}
-
-bool_t object_get_variant(object_t obj, variant_t val)
-{
-	byte_t** pobj = (byte_t**)obj;
-
-	byte_t type;
-	bool_t compre;
-	dword_t dw;
-
-	XDK_ASSERT(obj != NULL);
-
-	type = OBJECT_GET_TYPE(*pobj);
-	compre = OBJECT_GET_COMPRESS(*pobj);
-
-	XDK_ASSERT(IS_OBJECT_TYPE(type));
-
-	if ((type & 0x0F) != MEM_VARIANT)
-		return 0;
-
-	if (compre)
-	{
-		//decompress first
-		_object_decompress(pobj);
-	}
-
-	dw = OBJECT_GET_UNCOMPRE_SIZE(*pobj);
-
-	variant_decode(val, OBJECT_DATA_BUFFER(*pobj));
-
-	return 1;
-}
-
-void object_set_variant(object_t obj, variant_t val)
-{
-	byte_t** pobj = (byte_t**)obj;
-
-	byte_t type;
-	dword_t dw;
-
-	XDK_ASSERT(obj != NULL);
-
-	type = OBJECT_GET_TYPE(*pobj);
-
-	XDK_ASSERT(IS_OBJECT_TYPE(type));
-
-	object_empty(obj);
-
-	dw = variant_encode(val, NULL, MAX_LONG);
-
-	bytes_realloc(pobj, OBJECT_HEAD_SIZE + dw);
-
-	variant_encode(val, OBJECT_DATA_BUFFER(*pobj), dw);
-
-	type = (MEM_VARIANT | MEMENC_MASK);
-	//object type
-	OBJECT_SET_TYPE(*pobj, type);
-	//object size
-	OBJECT_SET_SIZE(*pobj, dw);
-	//set commpress bit
-	OBJECT_SET_COMPRESS(*pobj, 0);
-	//uncompressed bytes
-	OBJECT_SET_UNCOMPRE_SIZE(*pobj, dw);
-}
-
-#if defined(XDM_SUPPORT_DOC)
-
-void object_set_domdoc(object_t obj, link_t_ptr dom)
-{
-	byte_t** pobj = (byte_t**)obj;
-
-	byte_t type;
-	dword_t dw;
-
-	XDK_ASSERT(obj != NULL);
-
-	type = OBJECT_GET_TYPE(*pobj);
-
-	XDK_ASSERT(IS_OBJECT_TYPE(type));
-
-	object_empty(obj);
-
-	dw = format_dom_doc_to_bytes(dom, NULL, MAX_LONG, _UTF8);
-
-	bytes_realloc(pobj, OBJECT_HEAD_SIZE + dw);
-	format_dom_doc_to_bytes(dom, OBJECT_DATA_BUFFER(*pobj), dw, _UTF8);
-
-	type = MEM_DOMDOC | MEMENC_MASK;
-	//object type
-	OBJECT_SET_TYPE(*pobj, type);
-	//object size
-	OBJECT_SET_SIZE(*pobj, dw);
-	//set commpress bit
-	OBJECT_SET_COMPRESS(*pobj, 0);
-	//uncompressed bytes
-	OBJECT_SET_UNCOMPRE_SIZE(*pobj, dw);
-}
-
-bool_t object_get_domdoc(object_t obj, link_t_ptr dom)
-{
-	byte_t** pobj = (byte_t**)obj;
-
-	byte_t type;
-	bool_t compre;
-	dword_t dw;
-
-	XDK_ASSERT(obj != NULL);
-
-	delete_dom_child_nodes(dom);
-
-	type = OBJECT_GET_TYPE(*pobj);
-	compre = OBJECT_GET_COMPRESS(*pobj);
-
-	XDK_ASSERT(IS_OBJECT_TYPE(type));
-
-	if ((type & 0x0F) != MEM_DOMDOC)
-		return 0;
-
-	if (compre)
-	{
-		//decompress first
-		_object_decompress(pobj);
-	}
-
-	dw = OBJECT_GET_UNCOMPRE_SIZE(*pobj);
-
-	return parse_dom_doc_from_bytes(dom, OBJECT_DATA_BUFFER(*pobj), dw, _UTF8);
-}
-
-#endif
-
-void object_set_bytes(object_t obj, const byte_t* buf, dword_t len)
-{
-	byte_t** pobj = (byte_t**)obj;
-	byte_t type;
-
-	XDK_ASSERT(obj != NULL);
-
-	type = OBJECT_GET_TYPE(*pobj);
-
-	XDK_ASSERT(IS_OBJECT_TYPE(type));
-
-	object_empty(obj);
-
-	bytes_realloc(pobj, OBJECT_HEAD_SIZE + len);
-
-	xmem_copy((void*)OBJECT_DATA_BUFFER(*pobj), (void*)buf, len);
-
-	type = MEM_BINARY | MEMENC_MASK;
-	//object type
-	OBJECT_SET_TYPE(*pobj, type);
-	//object size
-	OBJECT_SET_SIZE(*pobj, len);
-	//set commpress bit
-	OBJECT_SET_COMPRESS(*pobj, 0);
-	//uncompressed bytes
-	OBJECT_SET_UNCOMPRE_SIZE(*pobj, len);
-}
-
-void object_add_bytes(object_t obj, const byte_t* buf, dword_t len)
-{
-	byte_t** pobj = (byte_t**)obj;
-	dword_t off;
-	byte_t type;
-	bool_t compre;
-
-	XDK_ASSERT(obj != NULL);
-
-	type = OBJECT_GET_TYPE(*pobj);
-	compre = OBJECT_GET_COMPRESS(*pobj);
-
-	XDK_ASSERT(IS_OBJECT_TYPE(type));
-
-	if ((type & 0x0F) != MEM_BINARY)
-		return ;
-
-	if (compre)
-	{
-		_object_decompress(pobj);
-	}
-
-	off = OBJECT_GET_UNCOMPRE_SIZE(*pobj);
-
-	bytes_realloc(pobj, OBJECT_HEAD_SIZE + off + len);
-
-	xmem_copy((void*)(OBJECT_DATA_BUFFER(*pobj) + off), (void*)buf, len);
-
-	type = MEM_BINARY | MEMENC_MASK;
-	//object type
-	OBJECT_SET_TYPE(*pobj, type);
-	//object size
-	OBJECT_SET_SIZE(*pobj, (off + len));
-	//set commpress bit
-	OBJECT_SET_COMPRESS(*pobj, 0);
-	//uncompressed bytes
-	OBJECT_SET_UNCOMPRE_SIZE(*pobj, (off + len));
-}
-
-void object_del_bytes(object_t obj, dword_t off)
-{
-	byte_t** pobj = (byte_t**)obj;
-	dword_t len;
-	byte_t type;
-	bool_t compre;
-
-	XDK_ASSERT(obj != NULL);
-
-	type = OBJECT_GET_TYPE(*pobj);
-	compre = OBJECT_GET_COMPRESS(*pobj);
-
-	XDK_ASSERT(IS_OBJECT_TYPE(type));
-
-	if ((type & 0x0F) != MEM_BINARY)
-		return;
-
-	len = OBJECT_GET_UNCOMPRE_SIZE(*pobj);
-	if (len <= off)
-		return;
-
-	if (compre)
-	{
-		_object_decompress(pobj);
-	}
-
-	bytes_realloc(pobj, OBJECT_HEAD_SIZE + off);
-
-	type = MEM_BINARY | MEMENC_MASK;
-	//object type
-	OBJECT_SET_TYPE(*pobj, type);
-	//object size
-	OBJECT_SET_SIZE(*pobj, off);
-	//set commpress bit
-	OBJECT_SET_COMPRESS(*pobj, 0);
-	//uncompressed bytes
-	OBJECT_SET_UNCOMPRE_SIZE(*pobj, off);
-}
-
-dword_t object_get_bytes(object_t obj, byte_t* buf, dword_t max)
-{
-	byte_t** pobj = (byte_t**)obj;
-
-	byte_t type;
-	bool_t compre;
-	dword_t dw;
-
-	XDK_ASSERT(obj != NULL);
-
-	type = OBJECT_GET_TYPE(*pobj);
-	compre = OBJECT_GET_COMPRESS(*pobj);
-
-	XDK_ASSERT(IS_OBJECT_TYPE(type));
-
-	if ((type & 0x0F) != MEM_BINARY)
-		return 0;
-
-	if (compre)
-	{
-		//decompress first
-		_object_decompress(pobj);
-	}
-
-	dw = OBJECT_GET_UNCOMPRE_SIZE(*pobj);
-	dw = (dw < max) ? dw : max;
-
-	if (buf)
-	{
-		xmem_copy((void*)buf, (void*)(OBJECT_DATA_BUFFER(*pobj)), dw);
-	}
-
-	return dw;
-}
-
-dword_t object_encode(object_t obj, byte_t* buf, dword_t max)
-{
-	byte_t** pobj = (byte_t**)obj;
-	dword_t dw;
-	byte_t type;
-
-	XDK_ASSERT(obj != NULL);
-
-	type = OBJECT_GET_TYPE(*pobj);
-
-	XDK_ASSERT(IS_OBJECT_TYPE(type));
-
-	dw = OBJECT_HEAD_SIZE + OBJECT_GET_SIZE(*pobj);
-	dw = (dw < max) ? dw : max;
-
-	if (buf)
-	{
-		xmem_copy((void*)buf, (void*)(*pobj), dw);
-	}
-
-	return dw;
-}
-
-dword_t object_decode(object_t obj, const byte_t* data)
-{
-	byte_t** pobj = (byte_t**)obj;
-	byte_t type;
-	dword_t dw;
-
-	if (!data)
-		return 0;
-
-	type = OBJECT_GET_TYPE(data);
-
-	if (!IS_OBJECT_TYPE(type))
-		return 0;
-
-	dw = OBJECT_HEAD_SIZE + OBJECT_GET_SIZE(data);
-
-	if (obj)
-	{
-		bytes_realloc(pobj, dw);
-		xmem_copy((void*)(*pobj), (void*)data, dw);
-	}
-
-	return dw;
+	return (pobj->size == string_decode(str, _UTF8_BOM, pobj->data, pobj->size))? bool_true : bool_false;
 }
 
 void object_hash32(object_t obj, key32_t* pkey)
 {
-	byte_t** pobj = (byte_t**)obj;
-	byte_t type;
-	dword_t dw;
-	byte_t* buf;
+	object_context* pobj = TypePtrFromHead(object_context, obj);
+	bool_t ziped;
 
-	XDK_ASSERT(obj != NULL);
+	XDK_ASSERT(obj && IS_OBJECT_TYPE(obj->tag));
 
-	type = OBJECT_GET_TYPE(*pobj);
+	ziped = object_get_commpress(obj);
+	if (ziped)
+	{
+		_object_decompress(pobj);
+	}
 
-	XDK_ASSERT(IS_OBJECT_TYPE(type));
-
-	dw = OBJECT_GET_SIZE(*pobj);
-	buf = OBJECT_DATA_BUFFER(*pobj);
-
-	if (dw)
-		murhash32((byte_t*)buf, dw, (byte_t*)pkey);
+	if (pobj->size)
+		murhash32(pobj->data, pobj->size, (byte_t*)pkey);
 	else
 		xmem_zero((void*)pkey, sizeof(key32_t));
 }
 
 void object_hash64(object_t obj, key64_t* pkey)
 {
-	byte_t** pobj = (byte_t**)obj;
-	byte_t type;
-	dword_t dw;
-	byte_t* buf;
+	object_context* pobj = TypePtrFromHead(object_context, obj);
+	bool_t ziped;
 
-	XDK_ASSERT(obj != NULL);
+	XDK_ASSERT(obj && IS_OBJECT_TYPE(obj->tag));
 
-	type = OBJECT_GET_TYPE(*pobj);
+	ziped = object_get_commpress(obj);
+	if (ziped)
+	{
+		_object_decompress(pobj);
+	}
 
-	XDK_ASSERT(IS_OBJECT_TYPE(type));
-
-	dw = OBJECT_GET_SIZE(*pobj);
-	buf = OBJECT_DATA_BUFFER(*pobj);
-
-	if (dw)
-		siphash64((byte_t*)buf, dw, (byte_t*)pkey);
+	if (pobj->size)
+		siphash64(pobj->data, pobj->size, (byte_t*)pkey);
 	else
 		xmem_zero((void*)pkey, sizeof(key64_t));
 }
 
 void object_hash128(object_t obj, key128_t* pkey)
 {
-	byte_t** pobj = (byte_t**)obj;
-	byte_t type;
-	dword_t dw;
-	byte_t* buf;
+	object_context* pobj = TypePtrFromHead(object_context, obj);
+	bool_t ziped;
 
-	XDK_ASSERT(obj != NULL);
+	XDK_ASSERT(obj && IS_OBJECT_TYPE(obj->tag));
 
-	type = OBJECT_GET_TYPE(*pobj);
+	ziped = object_get_commpress(obj);
+	if (ziped)
+	{
+		_object_decompress(pobj);
+	}
 
-	XDK_ASSERT(IS_OBJECT_TYPE(type));
-
-	dw = OBJECT_GET_SIZE(*pobj);
-	buf = OBJECT_DATA_BUFFER(*pobj);
-
-	if (dw)
-		murhash128((byte_t*)buf, dw, (byte_t*)pkey);
+	if (pobj->size)
+		murhash128(pobj->data, pobj->size, (byte_t*)pkey);
 	else
 		xmem_zero((void*)pkey, sizeof(key128_t));
 }
+
+/**********************************************************************
+ASN.1 CER ENCODING
+Object::=SEQUENCE{
+	Type: BYTE
+	Uuid: BYTE[36]
+	Size: BYTE[4]
+	Data: BYTE[]
+}
+**********************************************************************/
+
+dword_t object_encode(object_t obj, byte_t* buf)
+{
+	object_context* pobj = TypePtrFromHead(object_context, obj);
+	bool_t ziped;
+	dword_t len, n, total = 0;
+	byte_t* pos = NULL;
+	byte_t md5[16] = {0};
+
+	XDK_ASSERT(obj && IS_OBJECT_TYPE(obj->tag));
+
+	ziped = object_get_commpress(obj);
+	if (ziped)
+	{
+		_object_decompress(pobj);
+	}
+
+	n = ver_write_sequence(((buf)? (buf + total) : NULL), &pos);
+	if(!n)
+	{
+		set_last_error(_T("object_encode"), _T("ver_write_sequence"), -1);
+		return 0;
+	} 
+	total += n;
+
+	n = ver_write_byte(((buf)? (buf + total) : NULL), obj->tag);
+	if(!n)
+	{
+		set_last_error(_T("object_encode"), _T("ver_write_byte"), -1);
+		return 0;
+	} 
+	total += n;
+	
+	nuid_to_md5(&(pobj->nuid), md5);
+	len = 16;
+	n = ver_write_byte_array(((buf)? (buf + total) : NULL), md5, len);
+	if(!n)
+	{
+		set_last_error(_T("object_encode"), _T("ver_write_byte_array"), -1);
+		return 0;
+	} 
+	total += n;
+	
+	len = pobj->size;
+	n = ver_write_int(((buf)? (buf + total) : NULL), len);
+	if(!n)
+	{
+		set_last_error(_T("object_encode"), _T("ver_write_integer"), -1);
+		return 0;
+	} 
+	total += n;
+
+	n = ver_write_byte_array(((buf)? (buf + total) : NULL), pobj->data, pobj->size);
+	if(!n)
+	{
+		set_last_error(_T("object_encode"), _T("ver_write_byte_array"), -1);
+		return 0;
+	} 
+	total += n;
+
+	if(pos) ver_write_sequence_length(pos, total);
+
+	return total;
+}
+
+dword_t object_decode(object_t obj, const byte_t* buf)
+{
+	object_context* pobj = TypePtrFromHead(object_context, obj);
+	dword_t len, n, total = 0;
+	byte_t* pos = NULL;
+
+	byte_t type;
+	byte_t md5[16] = {0};
+
+	XDK_ASSERT(obj && IS_OBJECT_TYPE(obj->tag));
+
+	object_clear(obj);
+
+	if(!buf) return 0;
+
+	n = ver_read_sequence((buf + total), &len);
+	if(!n)
+	{
+		set_last_error(_T("object_decode"), _T("ver_read_sequence"), -1);
+		return 0;
+	}
+	total += n;
+
+	n = ver_read_byte((buf + total), &type);
+	if(!n)
+	{
+		set_last_error(_T("object_decode"), _T("ver_read_byte_array"), -1);
+		return 0;
+	} 
+	total += n;
+
+	if(!IS_OBJECT_TYPE(type))
+	{
+		set_last_error(_T("object_decode"), _T("object type invalid"), -1);
+		return 0;
+	}
+
+	n = ver_read_byte_array((buf + total), md5, 16);
+	if(!n)
+	{
+		set_last_error(_T("object_decode"), _T("ver_read_byte_array"), -1);
+		return 0;
+	} 
+	total += n;
+
+	nuid_from_md5(&(pobj->nuid), md5);
+
+	n = ver_read_int((buf + total), (int*)&(pobj->size));
+	if(!n)
+	{
+		set_last_error(_T("object_decode"), _T("ver_read_int"), -1);
+		return 0;
+	} 
+	total += n;
+
+	pobj->data = (byte_t*)xmem_alloc(pobj->size);
+
+	n = ver_read_byte_array((buf + total), pobj->data, pobj->size);
+	if(!n)
+	{
+		set_last_error(_T("object_decode"), _T("ver_read_byte_array"), -1);
+		return 0;
+	} 
+	total += n;
+
+	return total;
+}
+
+/**********************************************************************/
+#if defined (DEBUG) || defined (_DEBUG)
+void object_self_test(void)
+{
+	printf("test object...\n");
+
+	object_t obj = object_alloc();
+
+	tchar_t* str;
+	int len;
+
+	string_t s = string_alloc();
+	string_cpy(s, _T("object test 字符对象测试"), -1);
+	len = string_len(s);
+	str = (tchar_t*)string_ptr(s);
+	_tprintf(_T("string object test: %s\n"), str);
+
+	object_encode_string(obj, s);
+	object_set_commpress(obj, 1);
+	len = object_size(obj);
+	_tprintf(_T("string object compressed:%d\n"), len);
+
+	string_empty(s);
+	object_decode_string(obj, s);
+	len = string_len(s);
+	str = (tchar_t*)string_ptr(s);
+	_tprintf(_T("string object unconpressed: %s\n"), str);
+	
+	string_cpy(s, _T("object test 变体对象测试"), -1);
+	len = string_len(s);
+	str = (tchar_t*)string_ptr(s);
+	_tprintf(_T("variant object test: %s\n"), str);
+
+	variant_t v = variant_alloc(VV_STRING_UTF8);
+	variant_from_string(v, string_ptr(s), string_len(s));
+
+	object_encode_variant(obj, v);
+	object_set_commpress(obj, 1);
+	len = object_size(obj);
+	_tprintf(_T("variant object compressed:%d\n"), len);
+
+	variant_to_null(v, VV_STRING_UTF8);
+	object_decode_variant(obj, v);
+	len = variant_to_string(v, NULL, MAX_LONG);
+	str = xsalloc(len + 1);
+	variant_to_string(v, str, len);
+	_tprintf(_T("variant object unconpressed: %s\n"), str);
+	xsfree(str);
+
+	byte_t* buf;
+	dword_t dw;
+	dw = object_encode(obj, NULL);
+	buf = (byte_t*)xmem_alloc(dw);
+	object_encode(obj, buf);
+
+	object_clear(obj);
+	object_decode(obj, buf);
+	xmem_free(buf);
+
+	object_decode_variant(obj, v);
+	len = variant_to_string(v, NULL, MAX_LONG);
+	str = xsalloc(len + 1);
+	variant_to_string(v, str, len);
+	xsfree(str);
+
+	string_free(s);
+	variant_free(v);
+	object_free(obj);
+
+	printf("test object end\n");
+}
+#endif

@@ -33,7 +33,6 @@ typedef struct _listbox_delta_t{
 	link_t_ptr string;
 	link_t_ptr entity;
 
-	xfont_t xf;
 }listbox_delta_t;
 
 #define GETLISTBOXDELTA(ph) 	(listbox_delta_t*)widget_get_user_delta(ph)
@@ -48,7 +47,7 @@ void _listbox_item_rect(widget_t widget, link_t_ptr ent, xrect_t* pxr)
 
 	get_canvas_measure(widget_get_canvas(widget), &im);
 
-	calc_listbox_item_rect(&im, &ptd->xf, ptd->string, ent, pxr);
+	calc_listbox_item_rect(&im, ptd->string, ent, pxr);
 	widget_rect_to_pt(widget, pxr);
 
 	widget_get_client_rect(widget, &xr);
@@ -74,14 +73,14 @@ static void _listbox_reset_page(widget_t widget)
 	pif = widget_get_canvas_interface(widget);
 
 	(pif->pf_get_measure)(pif->ctx, &im);
-	(pif->pf_font_size)(pif->ctx, &ptd->xf, &xs);
+	(pif->pf_font_size)(pif->ctx, &xs);
 	widget_size_to_pt(widget, &xs);
 	lw = xs.w;
 	lh = xs.h;
 
 	if (ptd->string)
 	{
-		calc_listbox_size(&im, &ptd->xf, ptd->string, &xs);
+		calc_listbox_size(&im, ptd->string, &xs);
 		widget_size_to_pt(widget, &xs);
 		vw = xs.w;
 		vh = xs.h;
@@ -299,7 +298,7 @@ void hand_listbox_lbutton_up(widget_t widget, const xpoint_t* pxp)
 	pt.y = pxp->y;
 	widget_point_to_mm(widget, &pt);
 
-	hint = calc_listbox_hint(&im, &ptd->xf, &pt, ptd->string, &ilk);
+	hint = calc_listbox_hint(&im, &pt, ptd->string, &ilk);
 
 	if (ilk != ptd->entity)
 	{
@@ -343,13 +342,6 @@ void hand_listbox_scroll(widget_t widget, bool_t bHorz, int nLine)
 	widget_hand_scroll(widget, bHorz, nLine);
 }
 
-void hand_listbox_xfont(widget_t widget, const xfont_t* pxf)
-{
-	listbox_delta_t* ptd = GETLISTBOXDELTA(widget);
-
-	xmem_copy((void*)&ptd->xf, (void*)pxf, sizeof(xfont_t));
-}
-
 void hand_listbox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 {
 	listbox_delta_t* ptd = GETLISTBOXDELTA(widget);
@@ -380,7 +372,7 @@ void hand_listbox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 
 	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
 
-	draw_listbox(pif, &ptd->xf, ptd->string);
+	draw_listbox(pif, ptd->string);
 
 	//draw focus
 	if (ptd->entity)
@@ -414,10 +406,6 @@ widget_t listbox_create(widget_t widget, dword_t style, const xrect_t* pxr)
 
 		EVENT_ON_LBUTTON_DOWN(hand_listbox_lbutton_down)
 		EVENT_ON_LBUTTON_UP(hand_listbox_lbutton_up)
-
-		EVENT_ON_XFONT(hand_listbox_xfont)
-
-		
 
 	EVENT_END_DISPATH
 
@@ -548,7 +536,7 @@ void listbox_popup_size(widget_t widget, xsize_t* pxs)
 
 	get_canvas_measure(widget_get_canvas(widget), &im);
 
-	calc_listbox_size(&im, &ptd->xf, ptd->string, pxs);
+	calc_listbox_size(&im, ptd->string, pxs);
 
 	if (pxs->fh > 7 * DEF_TOUCH_SPAN)
 		pxs->fh = 7 * DEF_TOUCH_SPAN;

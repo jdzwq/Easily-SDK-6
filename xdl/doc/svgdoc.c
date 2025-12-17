@@ -539,11 +539,6 @@ void write_xfont_to_svg_node(link_t_ptr nlk, const xfont_t* pxf)
 	{
 		set_dom_node_attr(nlk, SVG_ATTR_FONT_FAMILY, -1, pxf->family, -1);
 	}
-
-	if (!is_null(pxf->color))
-	{
-		set_dom_node_attr(nlk, SVG_ATTR_TEXT_COLOR, -1, pxf->color, -1);
-	}
 }
 
 void read_xfont_from_svg_node(link_t_ptr nlk, xfont_t* pxf)
@@ -561,12 +556,6 @@ void read_xfont_from_svg_node(link_t_ptr nlk, xfont_t* pxf)
 	{
 		xscpy(pxf->family, token);
 	}
-
-	token = get_dom_node_attr_ptr(nlk, SVG_ATTR_TEXT_COLOR, -1);
-	if (!is_null(token))
-	{
-		xscpy(pxf->color, token);
-	}
 }
 
 void write_xface_to_svg_node(link_t_ptr nlk, const xface_t* pxa)
@@ -575,6 +564,11 @@ void write_xface_to_svg_node(link_t_ptr nlk, const xface_t* pxa)
 
 	if (is_null_xface(pxa))
 		return;
+
+	if (!is_null(pxa->text_color))
+	{
+		set_dom_node_attr(nlk, SVG_ATTR_TEXT_COLOR, -1, pxa->text_color, -1);
+	}
 
 	if (!is_null(pxa->text_align))
 	{
@@ -592,6 +586,12 @@ void write_xface_to_svg_node(link_t_ptr nlk, const xface_t* pxa)
 void read_xface_from_svg_node(link_t_ptr nlk, xface_t* pxa)
 {
 	const tchar_t* token;
+
+	token = get_dom_node_attr_ptr(nlk, SVG_ATTR_TEXT_COLOR, -1);
+	if (!is_null(token))
+	{
+		xscpy(pxa->text_color, token);
+	}
 
 	token = get_dom_node_attr_ptr(nlk, SVG_ATTR_TEXT_ALIGN, -1);
 	if (!is_null(token))
@@ -1073,6 +1073,11 @@ void write_text_to_svg_node(link_t_ptr glk, const xfont_t* pxf, const xface_t* p
 		set_dom_node_attr(glk, SVG_ATTR_HEIGHT, -1, token, -1);
 	}
 
+	if (!is_null(pxa->text_color))
+	{
+		set_dom_node_attr(glk, SVG_ATTR_TEXT_COLOR, -1, pxa->text_color, -1);
+	}
+
 	if (!is_null(pxf->size))
 	{
 		xsprintf(token, _T("%spt"), pxf->size);
@@ -1082,11 +1087,6 @@ void write_text_to_svg_node(link_t_ptr glk, const xfont_t* pxf, const xface_t* p
 	if (!is_null(pxf->family))
 	{
 		set_dom_node_attr(glk, SVG_ATTR_FONT_FAMILY, -1, pxf->family, -1);
-	}
-
-	if (!is_null(pxf->color))
-	{
-		set_dom_node_attr(glk, SVG_ATTR_TEXT_COLOR, -1, pxf->color, -1);
 	}
 
 	if (prt->w && prt->h)
@@ -1145,6 +1145,12 @@ const tchar_t* read_text_from_svg_node(link_t_ptr glk,xfont_t* pxf, xface_t* pxa
 			prt->y -= prt->h;
 	}
 
+	token = get_dom_node_attr_ptr(glk, SVG_ATTR_TEXT_COLOR, -1);
+	if (!is_null(token))
+	{
+		xscpy(pxa->text_color, token);
+	}
+
 	token = get_dom_node_attr_ptr(glk, SVG_ATTR_FONT_SIZE, -1);
 	if (!is_null(token))
 	{
@@ -1155,12 +1161,6 @@ const tchar_t* read_text_from_svg_node(link_t_ptr glk,xfont_t* pxf, xface_t* pxa
 	if (!is_null(token))
 	{
 		xscpy(pxf->family, token);
-	}
-
-	token = get_dom_node_attr_ptr(glk, SVG_ATTR_TEXT_COLOR, -1);
-	if (!is_null(token))
-	{
-		xscpy(pxf->color, token);
 	}
 
 	token = get_dom_node_attr_ptr(glk, SVG_ATTR_TEXT_ALIGN, -1);

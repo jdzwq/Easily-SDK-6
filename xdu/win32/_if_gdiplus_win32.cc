@@ -29,6 +29,9 @@ LICENSE.GPL3 for more details.
 
 #if defined(XDU_SUPPORT_CONTEXT_GDI)
 
+//global fonstset cache
+fontset_t g_fontset = NULL;
+
 #ifndef ULONG_PTR
 #define ULONG_PTR ULONG
 #endif
@@ -532,10 +535,21 @@ void _gdi_init(int osv)
 	{
 		GdiplusStartup(&g_token, &g_input, NULL);
 	}
+
+	xfont_t xf;
+	default_xfont(&xf);
+
+	g_fontset = _gdi_create_fontset(&xf);
 }
 
 void _gdi_uninit(void)
 {
+	if(g_fontset)
+	{
+		_gdi_destroy_fontset(g_fontset);
+		g_fontset = NULL;
+	}
+
 	if (g_token)
 	{
 		GdiplusShutdown(g_token);
@@ -543,9 +557,108 @@ void _gdi_uninit(void)
 	}
 }
 
+void _gdi_set_xfont(visual_t rdc, const xfont_t* pxf)
+{
+	win32_context_t* ctx = TypePtrFromHead(win32_context_t, rdc);
+	win32_fontset_t* fnt = TypePtrFromHead(win32_fontset_t, ctx->fontset);
+
+	float px = 12.0f;
+	font_metric_by_pt(xstof(pxf->size), NULL, &px);
+
+	FontStyle fs;
+	if (xstol(pxf->weight) > 500)
+		fs = FontStyleBold;
+	else
+		fs = FontStyleRegular;
+
+	if(xscmp(pxf->style,GDI_ATTR_FONT_STYLE_ITALIC) == 0)
+	{
+		if (xstol(pxf->weight) > 500)
+			fs = FontStyleBoldItalic;
+		else
+			fs = FontStyleItalic;
+	}
+	
+	if(xscmp(pxf->decorate,GDI_ATTR_FONT_DECORATE_UNDERLINE) == 0)
+	{
+		fs = FontStyleUnderline;
+	}else if(xscmp(pxf->decorate,GDI_ATTR_FONT_DECORATE_STRIKOUT) == 0)
+	{
+		fs = FontStyleStrikeout;
+	}
+
+	tchar_t curFace[32];
+	if (is_null(pxf->family))
+	{
+		xscpy(curFace, SYSTEM_FONTNAME);
+	}else
+	{
+		xscpy(curFace, pxf->family);
+	}
+	
+	Font* orgFont = (ctx->fontset)? ((Font*)fnt->font_object) : NULL;
+	tchar_t orgFace[32] = {0};
+	if(orgFont)
+	{
+		FontFamily orgFamily;
+		orgFont->GetFamily(&orgFamily);
+		LANGID lang = MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US);
+		orgFamily.GetFamilyName(orgFace, lang);
+	}
+
+	if(orgFont && px == orgFont->GetSize() && fs == orgFont->GetStyle() && xsicmp(curFace, orgFace) == 0)
+	{
+		return;
+	}
+
+	if(g_fontset)
+	{
+		_gdi_destroy_fontset(g_fontset);
+		g_fontset = NULL;
+	}
+
+    g_fontset = _gdi_create_fontset(pxf);
+	ctx->fontset = g_fontset;
+}
+
+void _gdi_get_xfont(visual_t rdc, xfont_t* pxf)
+{
+	win32_context_t* ctx = TypePtrFromHead(win32_context_t, rdc);
+	win32_fontset_t* fnt = TypePtrFromHead(win32_fontset_t, ctx->fontset);
+
+	Font* orgFont = (ctx->fontset)? ((Font*)fnt->font_object) : NULL;
+	if(!orgFont) return;
+
+	FontStyle fs = (FontStyle)orgFont->GetStyle();
+	if(fs == FontStyleStrikeout)
+		xscpy(pxf->decorate, GDI_ATTR_FONT_DECORATE_STRIKOUT);
+	else if(fs == FontStyleUnderline)
+		xscpy(pxf->decorate, GDI_ATTR_FONT_DECORATE_UNDERLINE);
+	else if(fs == FontStyleItalic)
+		xscpy(pxf->style, GDI_ATTR_FONT_STYLE_ITALIC);
+	else if(fs == FontStyleBoldItalic)
+	{
+		xscpy(pxf->style, GDI_ATTR_FONT_STYLE_ITALIC);
+		xscpy(pxf->weight, _T("700"));
+	}
+	else if(fs == FontStyleBold)
+	{
+		xscpy(pxf->style, GDI_ATTR_FONT_STYLE_REGULAR);
+		xscpy(pxf->weight, _T("700"));
+	}else
+	{
+		xscpy(pxf->style, GDI_ATTR_FONT_STYLE_REGULAR);
+	}
+
+	FontFamily orgFamily;
+	orgFont->GetFamily(&orgFamily);
+	LANGID lang = MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US);
+	orgFamily.GetFamilyName(pxf->family, lang);
+}
+
 void _gdi_set_point(visual_t rdc, const xcolor_t* pxc, const xpoint_t* ppt)
 {
-	win32_context_t* ctx = (win32_context_t*)rdc;
+	win32_context_t* ctx = TypePtrFromHead(win32_context_t, rdc);
 	HDC hDC = (HDC)(ctx->context);
 	COLORREF clr;
 
@@ -556,7 +669,7 @@ void _gdi_set_point(visual_t rdc, const xcolor_t* pxc, const xpoint_t* ppt)
 
 void _gdi_get_point(visual_t rdc, xcolor_t* pxc, const xpoint_t* ppt)
 {
-	win32_context_t* ctx = (win32_context_t*)rdc;
+	win32_context_t* ctx = TypePtrFromHead(win32_context_t, rdc);
 	HDC hDC = (HDC)(ctx->context);
 	COLORREF clr;
 
@@ -569,12 +682,12 @@ void _gdi_get_point(visual_t rdc, xcolor_t* pxc, const xpoint_t* ppt)
 
 void _gdi_draw_points(visual_t rdc, const xcolor_t* pxc, const xpoint_t* ppt, int n)
 {
-
+	NOP;
 }
 
 void _gdi_draw_line(visual_t rdc,const xpen_t* pxp, const xpoint_t*ppt1, const xpoint_t* ppt2)
 {
-	win32_context_t* ctx = (win32_context_t*)rdc;
+	win32_context_t* ctx = TypePtrFromHead(win32_context_t, rdc);
 	HDC hDC = (HDC)(ctx->context);
 
 	POINT pt[2];
@@ -598,7 +711,7 @@ void _gdi_draw_line(visual_t rdc,const xpen_t* pxp, const xpoint_t*ppt1, const x
 
 void _gdi_draw_polyline(visual_t rdc, const xpen_t* pxp, const xpoint_t* ppt, int n)
 {
-	win32_context_t* ctx = (win32_context_t*)rdc;
+	win32_context_t* ctx = TypePtrFromHead(win32_context_t, rdc);
 	HDC hDC = (HDC)(ctx->context);
 
 	GraphicsPath path;
@@ -630,7 +743,7 @@ void _gdi_draw_polyline(visual_t rdc, const xpen_t* pxp, const xpoint_t* ppt, in
 
 void _gdi_draw_arc(visual_t rdc, const xpen_t* pxp, const xpoint_t * ppt1, const xpoint_t* ppt2, const xsize_t* pxs, bool_t clockwise, bool_t largearc)
 {
-	win32_context_t* ctx = (win32_context_t*)rdc;
+	win32_context_t* ctx = TypePtrFromHead(win32_context_t, rdc);
 	HDC hDC = (HDC)(ctx->context);
 
 	POINT pt[4] = { 0 };
@@ -686,7 +799,7 @@ void _gdi_draw_arc(visual_t rdc, const xpen_t* pxp, const xpoint_t * ppt1, const
 
 void _gdi_draw_bezier(visual_t rdc, const xpen_t* pxp, const xpoint_t* ppt1, const xpoint_t* ppt2, const xpoint_t* ppt3, const xpoint_t* ppt4)
 {
-	win32_context_t* ctx = (win32_context_t*)rdc;
+	win32_context_t* ctx = TypePtrFromHead(win32_context_t, rdc);
 	HDC hDC = (HDC)(ctx->context);
 
 	POINT pt[4];
@@ -715,7 +828,7 @@ void _gdi_draw_bezier(visual_t rdc, const xpen_t* pxp, const xpoint_t* ppt1, con
 
 void _gdi_draw_curve(visual_t rdc, const xpen_t* pxp, const xpoint_t* ppt, int n)
 {
-	win32_context_t* ctx = (win32_context_t*)rdc;
+	win32_context_t* ctx = TypePtrFromHead(win32_context_t, rdc);
 	HDC hDC = (HDC)(ctx->context);
 
 	Point* pa = new Point[n];
@@ -748,7 +861,7 @@ void _gdi_draw_curve(visual_t rdc, const xpen_t* pxp, const xpoint_t* ppt, int n
 
 void _gdi_draw_rect(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const xrect_t* prt)
 {
-	win32_context_t* ctx = (win32_context_t*)rdc;
+	win32_context_t* ctx = TypePtrFromHead(win32_context_t, rdc);
 	HDC hDC = (HDC)(ctx->context);
 
 	POINT pt[2];
@@ -780,7 +893,7 @@ void _gdi_draw_rect(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const 
 
 void _gdi_draw_round(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const xrect_t* prt, const xsize_t* pxs)
 {
-	win32_context_t* ctx = (win32_context_t*)rdc;
+	win32_context_t* ctx = TypePtrFromHead(win32_context_t, rdc);
 	HDC hDC = (HDC)(ctx->context);
 	int rx, ry;
 
@@ -846,7 +959,7 @@ void _gdi_draw_round(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const
 
 void _gdi_draw_ellipse(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const xrect_t* prt)
 {
-	win32_context_t* ctx = (win32_context_t*)rdc;
+	win32_context_t* ctx = TypePtrFromHead(win32_context_t, rdc);
 	HDC hDC = (HDC)(ctx->context);
 
 	POINT pt[2];
@@ -878,7 +991,7 @@ void _gdi_draw_ellipse(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, con
 
 void _gdi_draw_pie(visual_t rdc, const xpen_t* pxp, const xbrush_t*pxb, const xrect_t* prt, double fang, double tang)
 {
-	win32_context_t* ctx = (win32_context_t*)rdc;
+	win32_context_t* ctx = TypePtrFromHead(win32_context_t, rdc);
 	HDC hDC = (HDC)(ctx->context);
 
 	POINT pt[2];
@@ -933,7 +1046,7 @@ void _gdi_draw_pie(visual_t rdc, const xpen_t* pxp, const xbrush_t*pxb, const xr
 
 void _gdi_draw_polygon(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const xpoint_t* ppt, int n)
 {
-	win32_context_t* ctx = (win32_context_t*)rdc;
+	win32_context_t* ctx = TypePtrFromHead(win32_context_t, rdc);
 	HDC hDC = (HDC)(ctx->context);
 
 	GraphicsPath path;
@@ -984,13 +1097,12 @@ void _gdi_draw_polygon(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, con
 
 void _gdi_draw_path(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const tchar_t* aa, const xpoint_t* pa, int pn)
 {
-	win32_context_t* ctx = (win32_context_t*)rdc;
+	win32_context_t* ctx = TypePtrFromHead(win32_context_t, rdc);
 	HDC hDC = (HDC)(ctx->context);
 
 	GraphicsPath* path = create_path(hDC, aa, pa, pn);
 
-	if (!path)
-		return;
+	if (!path) return;
 
 	Gdiplus::Graphics gh(hDC);
 
@@ -1012,18 +1124,19 @@ void _gdi_draw_path(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const 
 	delete path;
 }
 
-void _gdi_draw_text(visual_t rdc,const xfont_t* pxf,const xface_t* pxa,const xrect_t* prt,const tchar_t* txt,int len)
+void _gdi_draw_text(visual_t rdc,const xface_t* pxa,const xrect_t* prt,const tchar_t* txt,int len)
 {
-	win32_context_t* ctx = (win32_context_t*)rdc;
+	win32_context_t* ctx = TypePtrFromHead(win32_context_t, rdc);
+	win32_fontset_t* fnt = TypePtrFromHead(win32_fontset_t, ctx->fontset);
 	HDC hDC = (HDC)(ctx->context);
 
 	if (len < 0) len = xslen(txt);
 	if(!len) return;
 
-	Font* pf = create_font(pxf);
+	Font* pf = (Font*)(fnt->font_object);
 	StringFormat* ps = create_face(pxa);
 	xcolor_t text_color = {0};
-	parse_xcolor(&text_color,pxf->color);
+	parse_xcolor(&text_color,pxa->text_color);
 	Brush* pb = new SolidBrush(Color(text_color.r,text_color.g,text_color.b));
 
 	POINT pt[2];
@@ -1042,21 +1155,22 @@ void _gdi_draw_text(visual_t rdc,const xfont_t* pxf,const xface_t* pxa,const xre
 	gh.DrawString(txt,len,pf,rf,ps,pb);
 
 	delete pb;
-	delete pf;
 	delete ps;
 }
 
-void _gdi_text_out(visual_t rdc, const xfont_t* pxf, const xpoint_t* ppt, const tchar_t* txt, int len)
+void _gdi_text_out(visual_t rdc, const xface_t* pxa, const xpoint_t* ppt, const tchar_t* txt, int len)
 {
-	win32_context_t* ctx = (win32_context_t*)rdc;
+	win32_context_t* ctx = TypePtrFromHead(win32_context_t, rdc);
+	win32_fontset_t* fnt = TypePtrFromHead(win32_fontset_t, ctx->fontset);
 	HDC hDC = (HDC)(ctx->context);
 
 	if (len < 0) len = xslen(txt);
 	if(!len) return;
 
-	Font* pf = create_font(pxf);
+	Font* pf = (Font*)(fnt->font_object);
+
 	xcolor_t text_color = {0};
-	parse_xcolor(&text_color,pxf->color);
+	parse_xcolor(&text_color,pxa->text_color);
 	Brush* pb = new SolidBrush(Color(text_color.r,text_color.g,text_color.b));
 
 	POINT pt;
@@ -1072,12 +1186,12 @@ void _gdi_text_out(visual_t rdc, const xfont_t* pxf, const xpoint_t* ppt, const 
 	gh.DrawString(txt, len, pf, PointF(pt.x, pt.y), pb);
 
 	delete pb;
-	delete pf;
 }
 
-void _gdi_text_size(visual_t rdc, const xfont_t* pxf, const tchar_t* txt, int len, xsize_t* pxs)
+void _gdi_text_size(visual_t rdc, const tchar_t* txt, int len, xsize_t* pxs)
 {
-	win32_context_t* ctx = (win32_context_t*)rdc;
+	win32_context_t* ctx = TypePtrFromHead(win32_context_t, rdc);
+	win32_fontset_t* fnt = TypePtrFromHead(win32_fontset_t, ctx->fontset);
 	HDC hDC = (HDC)(ctx->context);
 
 	if (len < 0) len = xslen(txt);
@@ -1086,88 +1200,132 @@ void _gdi_text_size(visual_t rdc, const xfont_t* pxf, const tchar_t* txt, int le
 	Gdiplus::Graphics gh(hDC);
 	gh.SetPageUnit(UnitPixel);
 
-	RectF rf;
-	Font* pf = create_font(pxf);
-	gh.MeasureString(txt, len, pf, PointF(0,0), &rf);
+	Font* pf = (Font*)(fnt->font_object);
 
-	delete pf;
+	RectF rf;
+	gh.MeasureString(txt, len, pf, PointF(0,0), &rf);
 	
 	pxs->w = (int)(rf.GetRight()) - (int)(rf.GetLeft());
 	pxs->h = (int)(rf.GetBottom()) - (int)(rf.GetTop());
 }
 
-void _gdi_font_size(visual_t rdc, const xfont_t* pxf, xsize_t* pxs)
+void _gdi_text_rect(visual_t rdc, const xface_t* pxa, const tchar_t* txt, int len, xrect_t* prt)
 {
-	win32_context_t* ctx = (win32_context_t*)rdc;
+	win32_context_t* ctx = TypePtrFromHead(win32_context_t, rdc);
 
-	BOOL bRef = 0;
-	HDC hDC;
+	int c, n = 0, total = 0;
+	tchar_t pch[CHS_LEN + 1] = {0};
+	xsize_t se;
+	int w, h, maxw = 0;
 
-	if (!rdc)
+	if(len < 0) len = xslen(txt);
+	if(!len) return;
+
+	w = 0;
+	h = 0;
+	n = 0;
+	while (n++ < len)
 	{
-		bRef = 1;
-		hDC = GetDC(NULL);
+		c = peek_word((txt + total), pch);
+		total += c;
+
+		_gdi_word_size(ctx->fontset, pch, c, &se);
+
+		if (!h)
+		{
+			if (is_null(pxa->line_height))
+				h = se.h;
+			else
+				h = (int)((float)se.h * xstof(pxa->line_height));
+		}
+
+		if (pxa && compare_text(pxa->text_wrap, -1, GDI_ATTR_TEXT_WRAP_WORDBREAK, -1, 1) == 0)
+		{
+			if (prt->w && (w + se.w > prt->w))
+			{
+				if (is_null(pxa->line_height))
+					h += se.h;
+				else
+					h += (int)((float)se.h * xstof(pxa->line_height));
+
+				w = 0;
+				total -= c;
+				n--;
+			}
+			else
+			{
+				w += se.w;
+			}
+		}
+		else if (pxa && compare_text(pxa->text_wrap, -1, GDI_ATTR_TEXT_WRAP_LINEBREAK, -1, 1) == 0)
+		{
+			if (pch[0] == _T('\n'))
+			{
+				if (is_null(pxa->line_height))
+					h += se.h;
+				else
+					h += (int)((float)se.h * xstof(pxa->line_height));
+
+				w = 0;
+			}
+			else if (prt->w && (w + se.w > prt->w))
+			{
+				if (is_null(pxa->line_height))
+					h += se.h;
+				else
+					h += (int)((float)se.h * xstof(pxa->line_height));
+
+				w = 0;
+				total -= xslen(pch);
+				n--;
+			}
+			else
+			{
+				w += se.w;
+			}
+		}
+		else
+		{
+			w += se.w;
+		}
+
+		if (maxw < w) maxw = w;
 	}
-	else
-	{
-		hDC = (HDC)(ctx->context);
-	}
 
-	LOGFONT lf;
-	HFONT hFont, orgFont;
-	int fs;
-	TEXTMETRIC tm = { 0 };
+	prt->h = h;
+	if (!prt->w) prt->w = maxw;
+}
 
-	NONCLIENTMETRICS ncm = { 0 };
-	ncm.cbSize = sizeof(ncm);
-	SystemParametersInfo(SPI_GETNONCLIENTMETRICS, sizeof(NONCLIENTMETRICS), (PVOID)&ncm, 0);
-	CopyMemory((void*)&lf, (void*)&ncm.lfCaptionFont, sizeof(LOGFONT));
+void _gdi_font_size(visual_t rdc, xsize_t* pxs)
+{
+	win32_context_t* ctx = TypePtrFromHead(win32_context_t, rdc);
+	win32_fontset_t* fnt = TypePtrFromHead(win32_fontset_t, ctx->fontset);
 
-	fs = xstol(pxf->size);
+	FontFamily fam;
+	Font* pf = (Font*)(fnt->font_object);
+	pf->GetFamily(&fam);
 
-	lf.lfHeight = -MulDiv(fs, GetDeviceCaps(hDC, LOGPIXELSY), 72);
-	lf.lfWeight = xstol(pxf->weight);
+    INT fontStyle = pf->GetStyle();
+    REAL fontSize = pf->GetSize();
 
-	if (xscmp(pxf->style, GDI_ATTR_FONT_STYLE_ITALIC) == 0)
-	{
-		lf.lfItalic = 1;
-	}
+    UINT16 emHeight = fam.GetEmHeight(fontStyle);
+    if (emHeight == 0) return;
+
+    UINT16 cellAscent = fam.GetCellAscent(fontStyle);
+    UINT16 cellDescent = fam.GetCellDescent(fontStyle);
+
+    int ascentPx = fontSize * ((float)cellAscent / (float)emHeight);
+    int descentPx = fontSize * ((float)cellDescent / (float)emHeight);
 	
-	if (xscmp(pxf->decorate, GDI_ATTR_FONT_DECORATE_UNDERLINE) == 0)
-	{
-		lf.lfUnderline = 1;
-	}
-	else if (xscmp(pxf->decorate, GDI_ATTR_FONT_DECORATE_STRIKOUT) == 0)
-	{
-		lf.lfStrikeOut = 1;
-	}
-
-	if (!is_null(pxf->family))
-	{
-		xscpy(lf.lfFaceName, pxf->family);
-	}
-
-	hFont = CreateFontIndirect(&lf);
-	orgFont = (HFONT)SelectObject(hDC, hFont);
-
-	GetTextMetrics(hDC, &tm);
-
-	hFont = (HFONT)SelectObject(hDC, orgFont);
-	DeleteObject(hFont);
-
-	if (bRef)
-		ReleaseDC(NULL, hDC);
-
-	//pxs->w = tm.tmAveCharWidth;
-	pxs->h = tm.tmHeight;
-	pxs->w = tm.tmMaxCharWidth;
+    pxs->h = ascentPx + descentPx;
+	pxs->w = LOGPTPERMM;
 }
 
 /**************************************************************************************** */
 
 void _gdi_draw_image(visual_t rdc,bitmap_t bmp,const xcolor_t* clr,const xrect_t* prt)
 {
-	win32_context_t* ctx = (win32_context_t*)rdc;
+	win32_context_t* ctx = TypePtrFromHead(win32_context_t, rdc);
 	HDC hDC = (HDC)(ctx->context);
 	win32_bitmap_t* pwb = (win32_bitmap_t*)bmp;
 
@@ -1210,7 +1368,7 @@ void _gdi_draw_image(visual_t rdc,bitmap_t bmp,const xcolor_t* clr,const xrect_t
 
 void _gdi_draw_bitmap(visual_t rdc, bitmap_t bmp, const xpoint_t* ppt)
 {
-	win32_context_t* ctx = (win32_context_t*)rdc;
+	win32_context_t* ctx = TypePtrFromHead(win32_context_t, rdc);
 	HDC hDC = (HDC)(ctx->context);
 	win32_bitmap_t* pwb = (win32_bitmap_t*)bmp;
 
@@ -1241,7 +1399,7 @@ void _gdi_draw_bitmap(visual_t rdc, bitmap_t bmp, const xpoint_t* ppt)
 
 void _gdi_alphablend_rect(visual_t rdc, const xcolor_t* pxc, const xrect_t* prt, int opacity)
 {
-	win32_context_t* ctx = (win32_context_t*)rdc;
+	win32_context_t* ctx = TypePtrFromHead(win32_context_t, rdc);
 	HDC hDC = (HDC)(ctx->context);
 	xbrush_t xb;
 
@@ -1269,7 +1427,7 @@ void _gdi_alphablend_rect(visual_t rdc, const xcolor_t* pxc, const xrect_t* prt,
 
 void _gdi_gradient_rect(visual_t rdc, const xcolor_t* clr_brim, const xcolor_t* clr_core, const tchar_t* gradient, const xrect_t* prt)
 {
-	win32_context_t* ctx = (win32_context_t*)rdc;
+	win32_context_t* ctx = TypePtrFromHead(win32_context_t, rdc);
 	HDC hDC = (HDC)(ctx->context);
 	bitmap_t bmp;
 	win32_bitmap_t* pwb;
@@ -1306,7 +1464,7 @@ void _gdi_gradient_rect(visual_t rdc, const xcolor_t* clr_brim, const xcolor_t* 
 
 void _gdi_invert_rect(visual_t rdc, const xrect_t* pxr)
 {
-	win32_context_t* ctx = (win32_context_t*)rdc;
+	win32_context_t* ctx = TypePtrFromHead(win32_context_t, rdc);
 	HDC hDC = (HDC)(ctx->context);
 	RECT rt;
 
@@ -1320,7 +1478,7 @@ void _gdi_invert_rect(visual_t rdc, const xrect_t* pxr)
 
 void _gdi_exclude_rect(visual_t rdc, const xrect_t* pxr)
 {
-	win32_context_t* ctx = (win32_context_t*)rdc;
+	win32_context_t* ctx = TypePtrFromHead(win32_context_t, rdc);
 	HDC hDC = (HDC)(ctx->context);
 
 	ExcludeClipRect(hDC, pxr->x, pxr->y, pxr->x + pxr->w, pxr->y + pxr->h);
@@ -1328,7 +1486,7 @@ void _gdi_exclude_rect(visual_t rdc, const xrect_t* pxr)
 
 void _gdi_inclip_rect(visual_t rdc, const xrect_t* pxr)
 {
-	win32_context_t* ctx = (win32_context_t*)rdc;
+	win32_context_t* ctx = TypePtrFromHead(win32_context_t, rdc);
 	HDC hDC = (HDC)(ctx->context);
 
 	Gdiplus::Graphics gh(hDC);
@@ -1337,6 +1495,12 @@ void _gdi_inclip_rect(visual_t rdc, const xrect_t* pxr)
 }
 
 /************************************************************************************ */
+fontset_t _gdi_get_fontset(visual_t rdc)
+{
+	win32_context_t* ctx = TypePtrFromHead(win32_context_t, rdc);
+
+	return ctx->fontset;
+}
 
 fontset_t _gdi_create_fontset(const xfont_t* pxf)
 {
@@ -1346,7 +1510,7 @@ fontset_t _gdi_create_fontset(const xfont_t* pxf)
 
 	fst = (win32_fontset_t*)xmem_alloc_handle(sizeof(win32_fontset_t));
 	fst->head.tag = _HANDLE_FONTSET;
-	fst->font_set = (void*)gdi_font;
+	fst->font_object = (void*)gdi_font;
 
 	return (fontset_t)&(fst->head);
 }
@@ -1355,7 +1519,7 @@ void _gdi_destroy_fontset(fontset_t ft)
 {
 	win32_fontset_t* fst = TypePtrFromHead(win32_fontset_t, ft);
 
-	if(fst && fst->font_set) delete (Font*)(fst->font_set);
+	if(fst && fst->font_object) delete (Font*)(fst->font_object);
 
 	if(fst) xmem_free_handle(&(fst->head));
 }
@@ -1369,7 +1533,7 @@ void _gdi_word_size(fontset_t ft, const tchar_t* pch, int chs, xsize_t* pxs)
 	hDC = GetDC(NULL);
 	Gdiplus::Graphics gh(hDC);
 
-	gh.MeasureString(pch, chs, (Font*)fst->font_set, PointF(0,0), &rf);
+	gh.MeasureString(pch, chs, (Font*)fst->font_object, PointF(0,0), &rf);
 	
 	pxs->w = (int)(rf.GetRight()) - (int)(rf.GetLeft());
 	pxs->h = (int)(rf.GetBottom()) - (int)(rf.GetTop());

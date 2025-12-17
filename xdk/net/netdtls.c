@@ -190,8 +190,8 @@ static void _dtls_init(dtls_context* pdtls)
 
 	pses->pkg_size = DTLS_PKG_SIZE;
 
-	pses->snd_linear = alloc_linear(DTLS_WIN_SIZE);
-	pses->rcv_linear = alloc_linear(DTLS_WIN_SIZE);
+	pses->snd_sequence = alloc_sequence(DTLS_WIN_SIZE);
+	pses->rcv_sequence = alloc_sequence(DTLS_WIN_SIZE);
 
 	//initialize records
 	pses->rcv_record = prec = (dtls_record_context*)xmem_alloc(sizeof(dtls_record_context));
@@ -284,11 +284,11 @@ static void _dtls_uninit(dtls_context* pdtls)
 			(*pses->free_cipher_context)(pses);
 		}
 
-		if (pses->snd_linear)
-			free_linear(pses->snd_linear);
+		if (pses->snd_sequence)
+			free_sequence(pses->snd_sequence);
 
-		if (pses->rcv_linear)
-			free_linear(pses->rcv_linear);
+		if (pses->rcv_sequence)
+			free_sequence(pses->rcv_sequence);
 
 		xmem_free(pses);
 	}

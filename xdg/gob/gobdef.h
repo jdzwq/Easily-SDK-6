@@ -93,18 +93,6 @@ typedef struct _yuv_color_t{
 	unsigned char y, u, v;
 }yuv_color_t;
 
-typedef struct _xcolor_t{
-	unsigned char r, g, b, a;
-}xcolor_t;
-
-typedef struct _color_mod_t{
-	xcolor_t clr_bkg;
-	xcolor_t clr_frg;
-	xcolor_t clr_txt;
-	xcolor_t clr_msk;
-	xcolor_t clr_ico;
-}color_mod_t;
-
 
 typedef struct _xrect_t{
 	union{
@@ -201,6 +189,18 @@ typedef struct _caret_t{
 	int blink;
 }caret_t;
 
+typedef struct _xcolor_t{
+	unsigned char r, g, b, a;
+}xcolor_t;
+
+typedef struct _color_mod_t{
+	xcolor_t clr_bkg;
+	xcolor_t clr_frg;
+	xcolor_t clr_txt;
+	xcolor_t clr_msk;
+	xcolor_t clr_ico;
+}color_mod_t;
+
 typedef struct _xbrush_t{
 	tchar_t style[RES_LEN + 1];
 	tchar_t opacity[INT_LEN + 1];
@@ -222,10 +222,10 @@ typedef struct _xfont_t{
 	tchar_t size[INT_LEN + 1];
 	tchar_t weight[INT_LEN + 1];
 	tchar_t family[FNT_LEN + 1];
-	tchar_t color[CLR_LEN + 1];
 }xfont_t;
 
 typedef struct _xface_t{
+	tchar_t text_color[CLR_LEN + 1];
 	tchar_t text_wrap[RES_LEN + 1];
 	tchar_t text_align[RES_LEN + 1];
 	tchar_t line_align[RES_LEN + 1];

@@ -1105,7 +1105,7 @@ void hand_topogctrl_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 
 	if (ptd->img.source)
 	{
-		format_xcolor(&(pif->mode.clr_msk), ptd->img.color);
+		format_xcolor(&(pif->clrs->clr_msk), ptd->img.color);
 
 		(pif->pf_draw_image)(pif->ctx, &(ptd->img), (xrect_t*)&(pif->rect));
 	}

@@ -29,7 +29,7 @@ LICENSE.GPL3 for more details.
 #include "../xdldoc.h"
 
 
-float calc_table_height(const measure_interface* pif, const xfont_t* pxf, const xface_t* pxa, link_t_ptr ptr)
+float calc_table_height(const measure_interface* pif, const xface_t* pxa, link_t_ptr ptr)
 {
 	float lr,lh, h;
 	xsize_t xs;
@@ -43,7 +43,7 @@ float calc_table_height(const measure_interface* pif, const xfont_t* pxf, const 
 	if (lr < 1)
 		lr = 1.0;
 
-	(*pif->pf_measure_font)(pif->ctx, pxf, &xs);
+	(*pif->pf_measure_font)(pif->ctx, &xs);
 
 	lh = (float)(xs.fh * lr);
 
@@ -59,7 +59,7 @@ float calc_table_height(const measure_interface* pif, const xfont_t* pxf, const 
 	return h;
 }
 
-float calc_table_width(const measure_interface* pif, const xfont_t* pxf, const xface_t* pxa, link_t_ptr ptr)
+float calc_table_width(const measure_interface* pif, const xface_t* pxa, link_t_ptr ptr)
 {
 	float lw, w;
 	xsize_t xs;
@@ -70,10 +70,10 @@ float calc_table_width(const measure_interface* pif, const xfont_t* pxf, const x
 	while (ilk)
 	{
 		lw = 0;
-		(*pif->pf_measure_size)(pif->ctx, pxf, get_string_entity_key_ptr(ilk), -1, &xs);
+		(*pif->pf_measure_size)(pif->ctx, get_string_entity_key_ptr(ilk), -1, &xs);
 		lw += xs.fw;
 
-		(*pif->pf_measure_size)(pif->ctx, pxf, get_string_entity_val_ptr(ilk), -1, &xs);
+		(*pif->pf_measure_size)(pif->ctx, get_string_entity_val_ptr(ilk), -1, &xs);
 		lw += xs.fw;
 
 		if (w < lw)
@@ -85,7 +85,7 @@ float calc_table_width(const measure_interface* pif, const xfont_t* pxf, const x
 	return w;
 }
 
-void calc_table_item_rect(const measure_interface* pif, const xfont_t* pxf, const xface_t* pxa, link_t_ptr ptr, link_t_ptr plk, xrect_t* pxr)
+void calc_table_item_rect(const measure_interface* pif, const xface_t* pxa, link_t_ptr ptr, link_t_ptr plk, xrect_t* pxr)
 {
 	float lr, lh, h, w;
 	xsize_t xs;
@@ -99,7 +99,7 @@ void calc_table_item_rect(const measure_interface* pif, const xfont_t* pxf, cons
 	if (lr < 1)
 		lr = 1.0;
 
-	(*pif->pf_measure_font)(pif->ctx, pxf, &xs);
+	(*pif->pf_measure_font)(pif->ctx, &xs);
 
 	lh = (float)(xs.fh * lr);
 
@@ -111,7 +111,7 @@ void calc_table_item_rect(const measure_interface* pif, const xfont_t* pxf, cons
 		if (ilk == plk)
 			break;
 
-		(*pif->pf_measure_size)(pif->ctx, pxf, get_string_entity_key_ptr(ilk), -1, &xs);
+		(*pif->pf_measure_size)(pif->ctx, get_string_entity_key_ptr(ilk), -1, &xs);
 		if (w < xs.fw)
 			w = xs.fw;
 
@@ -126,28 +126,28 @@ void calc_table_item_rect(const measure_interface* pif, const xfont_t* pxf, cons
 	pxr->fh = lh;
 }
 
-void calc_table_item_key_rect(const measure_interface* pif, const xfont_t* pxf, const xface_t* pxa, link_t_ptr ptr, float ratio, link_t_ptr plk, xrect_t* pxr)
+void calc_table_item_key_rect(const measure_interface* pif, const xface_t* pxa, link_t_ptr ptr, float ratio, link_t_ptr plk, xrect_t* pxr)
 {
 	float fw;
 
 	fw = pif->rect.fw;
 
-	calc_table_item_rect(pif, pxf, pxa, ptr, plk, pxr);
+	calc_table_item_rect(pif, pxa, ptr, plk, pxr);
 	pxr->fw = fw * ratio;
 }
 
-void calc_table_item_val_rect(const measure_interface* pif, const xfont_t* pxf, const xface_t* pxa, link_t_ptr ptr, float ratio, link_t_ptr plk, xrect_t* pxr)
+void calc_table_item_val_rect(const measure_interface* pif, const xface_t* pxa, link_t_ptr ptr, float ratio, link_t_ptr plk, xrect_t* pxr)
 {
 	float fw;
 
 	fw = pif->rect.fw;
 
-	calc_table_item_rect(pif, pxf, pxa, ptr, plk, pxr);
+	calc_table_item_rect(pif, pxa, ptr, plk, pxr);
 	pxr->fx += fw * ratio;
 	pxr->fw = fw * (1 - ratio);
 }
 
-int	calc_table_hint(const measure_interface* pif, const xfont_t* pxf, const xface_t* pxa, const xpoint_t* ppt, link_t_ptr ptr, float ratio, link_t_ptr* pilk)
+int	calc_table_hint(const measure_interface* pif, const xface_t* pxa, const xpoint_t* ppt, link_t_ptr ptr, float ratio, link_t_ptr* pilk)
 {
 	float lr, lh, h;
 	float fw, kw, vw;
@@ -164,7 +164,7 @@ int	calc_table_hint(const measure_interface* pif, const xfont_t* pxf, const xfac
 	if (lr < 1)
 		lr = 1.0;
 
-	(*pif->pf_measure_font)(pif->ctx, pxf, &xs);
+	(*pif->pf_measure_font)(pif->ctx, &xs);
 
 	lh = (float)(xs.fh * lr);
 
@@ -223,7 +223,7 @@ int	calc_table_hint(const measure_interface* pif, const xfont_t* pxf, const xfac
 	return hint;
 }
 
-void draw_table(const drawing_interface* pif, const xfont_t* pxf, const xface_t* pxa, const xpen_t* pxp, const xbrush_t* pxb, link_t_ptr ptr, float ratio)
+void draw_table(const drawing_interface* pif, const xface_t* pxa, const xpen_t* pxp, const xbrush_t* pxb, link_t_ptr ptr, float ratio)
 {
 	float lr, lh, h;
 	float kw, vw;
@@ -242,7 +242,7 @@ void draw_table(const drawing_interface* pif, const xfont_t* pxf, const xface_t*
 	if (lr < 1)
 		lr = 1.0;
 
-	(*pif->pf_font_size)(pif->ctx, pxf, &xs);
+	(*pif->pf_font_size)(pif->ctx, &xs);
 
 	lh = (float)(xs.fh * lr);
 
@@ -264,7 +264,7 @@ void draw_table(const drawing_interface* pif, const xfont_t* pxf, const xface_t*
 		else
 			(*pif->pf_draw_rect)(pif->ctx, pxp, NULL, &xr);
 
-		(*pif->pf_draw_text)(pif->ctx, pxf, pxa, &xr, get_string_entity_key_ptr(ilk), -1);
+		(*pif->pf_draw_text)(pif->ctx, pxa, &xr, get_string_entity_key_ptr(ilk), -1);
 
 		xr.fx = kw + pbox->fx;
 		xr.fy = h + pbox->fy;
@@ -273,7 +273,7 @@ void draw_table(const drawing_interface* pif, const xfont_t* pxf, const xface_t*
 
 		(*pif->pf_draw_rect)(pif->ctx, pxp, NULL, &xr);
 
-		(*pif->pf_draw_text)(pif->ctx, pxf, pxa, &xr, get_string_entity_val_ptr(ilk), -1);
+		(*pif->pf_draw_text)(pif->ctx, pxa, &xr, get_string_entity_val_ptr(ilk), -1);
 
 		h += lh;
 

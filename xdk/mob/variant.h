@@ -38,257 +38,263 @@ LICENSE.GPL3 for more details.
 #define VV_LONG			0x05
 #define VV_FLOAT		0x06
 #define VV_DOUBLE		0x07
+#define VV_DATETIME			0x08
 #define VV_STRING_GB2312	0x0A
 #define VV_STRING_UTF8		0x0B
 #define VV_STRING_UTF16LIT	0x0C
 #define VV_STRING_UTF16BIG	0x0D
 
-#define VV_BOOL_ARRAY	(VV_BOOL | 0x10)
-#define VV_BYTE_ARRAY	(VV_BYTE | 0x10)
-#define VV_SHORT_ARRAY	(VV_SHORT | 0x10)
-#define VV_INT_ARRAY	(VV_INT | 0x10)
-#define VV_LONG_ARRAY	(VV_LONG | 0x10)
-#define VV_FLOAT_ARRAY	(VV_FLOAT | 0x10)
-#define VV_DOUBLE_ARRAY	(VV_DOUBLE | 0x10)
+#define VV_ARRAY	0x10
+
+#define VV_BOOL_ARRAY	(VV_BOOL | VV_ARRAY)
+#define VV_BYTE_ARRAY	(VV_BYTE | VV_ARRAY)
+#define VV_SHORT_ARRAY	(VV_SHORT | VV_ARRAY)
+#define VV_INT_ARRAY	(VV_INT | VV_ARRAY)
+#define VV_LONG_ARRAY	(VV_LONG | VV_ARRAY)
+#define VV_FLOAT_ARRAY	(VV_FLOAT | VV_ARRAY)
+#define VV_DOUBLE_ARRAY	(VV_DOUBLE | VV_ARRAY)
+#define VV_DATETIME_ARRAY	(VV_DATETIME | VV_ARRAY)
 
 
-#define IS_VARIANT_TYPE(tag) (((tag | 0x10) >= 0x10 && (tag | 0x10) <= 0x1D)? 1 : 0)
+#define IS_VARIANT_TYPE(tag) (((tag | VV_ARRAY) >= 0x10 && (tag | VV_ARRAY) <= 0x1D)? 1 : 0)
 
 #ifdef	__cplusplus
 extern "C" {
 #endif
 
-/*
-@FUNCTION variant_alloc: alloc variant object.
-@INPUT int type: the variant type, it can be VV_NULL, VV_BYTE....
-@RETURN variant_t: return variant object.
-*/
+/**********************************************************************
+@FUNCTION: alloc a NULL variant.
+@RETURN: variant struct.
+***********************************************************************/
 EXP_API variant_t variant_alloc(int type);
 
-/*
-@FUNCTION variant_clone: clone a new variant object.
-@INPUT const variant var: the variant object.
-@RETURN variant_t: return new variant object.
-*/
+/**********************************************************************
+@FUNCTION: clone a variant.
+@INPUT: the source variant.
+@RETURN: the new variant struct.
+***********************************************************************/
 EXP_API variant_t variant_clone(variant_t var);
 
-/*
-@FUNCTION variant_free: free a variant object.
-@INPUT variant var: the variant object.
-@RETURN void: none.
-*/
+/**********************************************************************
+@FUNCTION: free a variant.
+@INPUT: the variant.
+@RETURN: none.
+***********************************************************************/
 EXP_API void variant_free(variant_t var);
 
-/*
-@FUNCTION variant_get_type: get the variant type, it can be VV_NULL, VV_BYTE....
-@INPUT variant_t var: the variant.
-@RETURN int: return the variant type.
-*/
+/**********************************************************************
+@FUNCTION: get variant type.
+@INPUT: the variant.
+@RETURN: the VV type.
+***********************************************************************/
 EXP_API int variant_get_type(variant_t var);
 
-/*
-@FUNCTION variant_data: get variant data buffer.
-@INPUT variant_t var: the variant object.
-@RETURN void*: the data buffer.
-*/
-EXP_API void* variant_data(variant_t var);
+/**********************************************************************
+@FUNCTION: get variant data.
+@INPUT: the variant.
+@RETURN: the data buffer.
+***********************************************************************/
+EXP_API const void* variant_data(variant_t var);
 
-/*
-@FUNCTION variant_attach: attach variant data buffer.
-@INPUT variant_t var: the variant object.
-@INPUT void* data: the data buffer.
-@RETURN void*: the data buffer.
-*/
-EXP_API void variant_attach(variant_t var, void* data);
-
-/*
-@FUNCTION variant_detach: detach variant data buffer.
-@INPUT variant_t var: the variant object.
-@RETURN void*: the data buffer.
-*/
-EXP_API const void* variant_detach(variant_t var);
-
-/*
-@FUNCTION variant_copy: copy a variant object.
-@INPUT variant_t pdst: the destination variant object.
-@INPUT const variant_t psrc: the source variant object.
-@RETURN void: none.
-*/
+/**********************************************************************
+@FUNCTION: copy variant data to destination from source.
+@INPUT: the destination variant.
+@INPUT: the source variant.
+@RETURN: none.
+***********************************************************************/
 EXP_API void variant_copy(variant_t pdst, variant_t psrc);
 
-/*
-@FUNCTION variant_is_null: test variant object is empty.
-@INPUT variant var: the variant object.
-@RETURN bool_t: return nonzero for empty variant object, otherwise return zero.
-*/
+/**********************************************************************
+@FUNCTION: copy variant data to destination from source.
+@INPUT: the destination variant.
+@INPUT: the source variant.
+@RETURN: none.
+***********************************************************************/
 EXP_API bool_t variant_is_null(variant_t var);
 
-/*
-@FUNCTION variant_to_null: set variant object to empty and change type.
-@INPUT variant var: the variant object.
-@INPUT int type: the variant type, it can be VV_NULL, VV_BYTE....
-@RETURN void: none.
-*/
+/**********************************************************************
+@FUNCTION: set variant to empty.
+@INPUT: the variant.
+@INPUT: the VV type.
+@RETURN: none.
+***********************************************************************/
 EXP_API void variant_to_null(variant_t var, int type);
 
-/*
-@FUNCTION variant_to_string: format variant object to string buffer.
-@INPUT variant var: the variant object.
-@OUTPUT tchar_t* buf: the string buffer.
-@INPUT int max: the buffer size in characters, not include terminate character.
-@RETURN int: return the string token formated length in characters.
-*/
+/**********************************************************************
+@FUNCTION: format variant value to string token.
+@INPUT: the variant.
+@INPUT: the string buffer.
+@INPUT: the buffer characters, not include zero terminated.
+@RETURN: characters formated in buffer.
+***********************************************************************/
 EXP_API int variant_to_string(variant_t var, tchar_t* buf, int max);
 
-/*
-@FUNCTION variant_from_string: parse variant object from string buffer.
-@INPUT variant var: the variant object.
-@INPUT const tchar_t* str: the string token.
-@INPUT int len: the string token length in characters, not include terminate character.
-@RETURN void: none.
-*/
+/**********************************************************************
+@FUNCTION: parse variant value from string token.
+@INPUT: the variant.
+@INPUT: the string token.
+@INPUT: the string characters, not include zero terminated.
+@RETURN: none.
+@ROTE: the variant VV type no changing .
+***********************************************************************/
 EXP_API void variant_from_string(variant_t var, const tchar_t* str, int len);
 
-/*
-@FUNCTION variant_set_bool: set variant bool value, the variant type must be VV_BOOL.
-@INPUT variant var: the variant object.
-@INPUT bool_t c: the bool value.
-@RETURN void: none.
-*/
+/**********************************************************************
+@FUNCTION: set variant boolean value.
+@INPUT: the variant.
+@INPUT: the boolean value.
+@RETURN: none.
+@ROTE: the variant VV type must be VV_BOOL.
+***********************************************************************/
 EXP_API void variant_set_bool(variant_t var, bool_t c);
 
-/*
-@FUNCTION variant_get_bool: get variant bool value, the variant type must be VV_BYTE.
-@INPUT variant var: the variant object.
-@RETURN bool_t: the bool value..
-*/
+/**********************************************************************
+@FUNCTION: get variant boolean value.
+@INPUT: the variant.
+@RETURN: boolea value.
+@ROTE: the variant VV type must be VV_BOOL.
+***********************************************************************/
 EXP_API bool_t variant_get_bool(variant_t var);
 
-/*
-@FUNCTION variant_set_short: set variant short value, the variant type must be VV_SHORT.
-@INPUT variant var: the variant object.
-@INPUT short c: the short value.
-@RETURN void: none.
-*/
+/**********************************************************************
+@FUNCTION: set variant short value.
+@INPUT: the variant.
+@INPUT: the short integer value.
+@RETURN: none.
+@ROTE: the variant VV type must be VV_SHORT.
+***********************************************************************/
 EXP_API void variant_set_short(variant_t var, short c);
 
-/*
-@FUNCTION variant_get_short: get variant short value, the variant type must be VV_SHORT.
-@INPUT variant var: the variant object.
-@RETURN short: the short value..
-*/
+/**********************************************************************
+@FUNCTION: get variant short value.
+@INPUT: the variant.
+@RETURN: short value.
+@ROTE: the variant VV type must be VV_SHORT.
+***********************************************************************/
 EXP_API short variant_get_short(variant_t var);
 
-/*
-@FUNCTION variant_set_int: set variant int value, the variant type must be VV_INT.
-@INPUT variant var: the variant object.
-@INPUT int c: the int value.
-@RETURN void: none.
-*/
+/**********************************************************************
+@FUNCTION: set variant integer value.
+@INPUT: the variant.
+@INPUT: the integer value.
+@RETURN: none.
+@ROTE: the variant VV type must be VV_INT.
+***********************************************************************/
 EXP_API void variant_set_int(variant_t var, int c);
 
-/*
-@FUNCTION variant_get_int: get variant int value, the variant type must be VV_INT.
-@INPUT variant var: the variant object.
-@RETURN int: the int value..
-*/
+/**********************************************************************
+@FUNCTION: get variant integer value.
+@INPUT: the variant.
+@RETURN: integer value.
+@ROTE: the variant VV type must be VV_INT.
+***********************************************************************/
 EXP_API int variant_get_int(variant_t var);
 
-/*
-@FUNCTION variant_set_long long: set variant long long value, the variant type must be VV_LONG.
-@INPUT variant var: the variant object.
-@INPUT long long c: the long long value.
-@RETURN void: none.
-*/
+/**********************************************************************
+@FUNCTION: set variant long value.
+@INPUT: the variant.
+@INPUT: the long integer value.
+@RETURN: none.
+@ROTE: the variant VV type must be VV_LONG.
+***********************************************************************/
 EXP_API void variant_set_long(variant_t var, long long c);
 
-/*
-@FUNCTION variant_get_long long: get variant long long value, the variant type must be VV_LONG.
-@INPUT variant var: the variant object.
-@RETURN long long: the long long value..
-*/
+/**********************************************************************
+@FUNCTION: get variant long integer value.
+@INPUT: the variant.
+@RETURN: long integer value.
+@ROTE: the variant VV type must be VV_LONH.
+***********************************************************************/
 EXP_API long long variant_get_long(variant_t var);
 
-/*
-@FUNCTION variant_set_float: set variant float value, the variant type must be VV_FLOAT.
-@INPUT variant var: the variant object.
-@INPUT float c: the float value.
-@RETURN void: none.
-*/
+/**********************************************************************
+@FUNCTION: set variant float value.
+@INPUT: the variant.
+@INPUT: the float number.
+@RETURN: none.
+@ROTE: the variant VV type must be VV_FLOAT.
+***********************************************************************/
 EXP_API void variant_set_float(variant_t var, float c);
 
-/*
-@FUNCTION variant_get_float: get variant float value, the variant type must be VV_FLOAT.
-@INPUT variant var: the variant object.
-@RETURN float: the float value..
-*/
+/**********************************************************************
+@FUNCTION: get variant float value.
+@INPUT: the variant.
+@RETURN: float numeric.
+@ROTE: the variant VV type must be VV_FLOAT.
+***********************************************************************/
 EXP_API float variant_get_float(variant_t var);
 
-/*
-@FUNCTION variant_set_double: set variant double value, the variant type must be VV_DOUBLE.
-@INPUT variant var: the variant object.
-@INPUT double c: the double value.
-@RETURN void: none.
-*/
+/**********************************************************************
+@FUNCTION: set variant double value.
+@INPUT: the variant.
+@INPUT: the double number.
+@RETURN: none.
+@ROTE: the variant VV type must be VV_DOUBLE.
+***********************************************************************/
 EXP_API void variant_set_double(variant_t var, double c);
 
-/*
-@FUNCTION variant_get_double: get variant double value, the variant type must be VV_DOUBLE.
-@INPUT variant var: the variant object.
-@RETURN double: the double value..
-*/
+/**********************************************************************
+@FUNCTION: get variant double value.
+@INPUT: the variant.
+@RETURN: double numeric.
+@ROTE: the variant VV type must be VV_DOUBLE.
+***********************************************************************/
 EXP_API double variant_get_double(variant_t var);
 
-/*
-@FUNCTION variant_encode: encode variant object to bytes buffer.
-@INPUT variant var: the variant object.
-@OUTPUT byte_t* buf: the bytes buffer.
-@INPUT dword_t max: the buffer size in bytes.
-@RETURN dword_t: return encoded bytes.
-*/
-EXP_API dword_t variant_encode(variant_t var, byte_t* buf, dword_t max);
-
-/*
-@FUNCTION variant_decode: decode variant object from bytes buffer.
-@INPUT variant var: the variant object.
-@INPUT const byte_t* buf: the data buffer.
-@RETURN dword_t: the decoded size in bytes.
-*/
-EXP_API dword_t variant_decode(variant_t var, const byte_t* buf);
-
-/*
-@FUNCTION variant_comp: compare two variant object, 
-null variant object equal to null variant object and less than other type variant object.
-@INPUT variant var1: the variant object.
-@INPUT variant var2: the variant object.
-@RETURN int: 0 for equal to, 1 for greater than, -1 for less than.
-*/
+/**********************************************************************
+@FUNCTION: compare two variant.
+@INPUT: the destination variant.
+@INPUT: the source variant.
+@RETURN: -1 for v1 < v2, 0 for v1 = v2, 1 for v1 > v2.
+@ROTE: the two variant VV type must be same.
+***********************************************************************/
 EXP_API int variant_comp(variant_t var1, variant_t var2);
 
-/*
-@FUNCTION variant_hash32: get variant object 32bits hash code.
-@INPUT variant var: the variant object.
-@OUTPUT key32_t* pkey: the 32bits key buffer.
-@RETURN void: none.
-*/
+/**********************************************************************
+@FUNCTION: get variant 32 bytes hash code.
+@INPUT: the variant.
+@INPUT: the hash key buffer.
+@RETURN: none.
+***********************************************************************/
 EXP_API void variant_hash32(variant_t var, key32_t* pkey);
 
-/*
-@FUNCTION variant_hash64: get variant object 64bits hash code.
-@INPUT variant var: the variant object.
-@OUTPUT key64_t* pkey: the 64bits key buffer.
-@RETURN void: none.
-*/
+/**********************************************************************
+@FUNCTION: get variant 64 bytes hash code.
+@INPUT: the variant.
+@INPUT: the hash key buffer.
+@RETURN: none.
+***********************************************************************/
 EXP_API void variant_hash64(variant_t var, key64_t* pkey);
 
-/*
-@FUNCTION variant_hash128: get variant object 128bits hash code.
-@INPUT variant var: the variant object.
-@OUTPUT key128_t* pkey: the 128bits key buffer.
-@RETURN void: none.
-*/
+/**********************************************************************
+@FUNCTION: get variant 128 bytes hash code.
+@INPUT: the variant.
+@INPUT: the hash key buffer.
+@RETURN: none.
+***********************************************************************/
 EXP_API void variant_hash128(variant_t var, key128_t* pkey);
 
+/**********************************************************************
+@FUNCTION: encode variant to bytes sequence.
+@INPUT: the variant.
+@INPUT: the bytes buffer for encoding.
+@RETURN: bytes encoded, zero for failed.
+@NOTE: buffer can be NULL for testing how many bytes will be encoded.
+***********************************************************************/
+EXP_API dword_t variant_encode(variant_t var, byte_t* buf);
+
+/**********************************************************************
+@FUNCTION: decode variant from bytes sequence.
+@INPUT: the variant.
+@INPUT: the bytes buffer with encoded data.
+@RETURN: bytes decoded, zero for failed.
+@NOTE: var can be NULL for testing how many bytes will be decoded.
+***********************************************************************/
+EXP_API dword_t variant_decode(variant_t var, const byte_t* buf);
+
+#if defined (DEBUG) || defined (_DEBUG)
+EXP_API void variant_self_test(void);
+#endif
 
 #ifdef	__cplusplus
 }

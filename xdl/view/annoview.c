@@ -178,6 +178,11 @@ void draw_anno(const drawing_interface* pif, link_t_ptr ptr)
 
 	const canvbox_t* pbox = (canvbox_t*)(&pif->rect);
 
+	default_xface(&xa);
+	default_xfont(&xf);
+	default_xpen(&xp);
+	default_xbrush(&xb);
+
 	ilk = get_anno_next_arti(ptr, LINK_FIRST);
 	while (ilk)
 	{
@@ -196,23 +201,27 @@ void draw_anno(const drawing_interface* pif, link_t_ptr ptr)
 
 		if (compare_text(type, -1, ATTR_ANNO_TYPE_TEXT, -1, 0) == 0)
 		{
-			default_xface(&xa);
-			default_xfont(&xf);
-			parse_xfont_from_style(&xf, style);
-			parse_xface_from_style(&xa, style);
+			if(style)
+			{
+				parse_xfont_from_style(&xf, style);
+				parse_xface_from_style(&xa, style);
+				(*pif->pf_set_xfont)(pif->ctx, &xf);
+			}
 
 			xr.fx = ppt[0].fx;
 			xr.fy = ppt[0].fy;
 			xr.fw = ppt[1].fx - ppt[0].fx;
 			xr.fh = ppt[1].fy - ppt[0].fy;
 
-			(*pif->pf_draw_text)(pif->ctx, &xf, &xa, &xr, get_anno_arti_text_ptr(ilk), -1);
+			(*pif->pf_draw_text)(pif->ctx, &xa, &xr, get_anno_arti_text_ptr(ilk), -1);
 		}
 		else if (compare_text(type, -1, ATTR_ANNO_TYPE_ICON, -1, 0) == 0)
 		{
-			default_xfont(&xf);
-			parse_xfont_from_style(&xf, style);
-			parse_xcolor(&xc, xf.color);
+			if(style)
+			{
+				parse_xface_from_style(&xa, style);
+				parse_xcolor(&xc, xa.text_color);
+			}
 
 			xr.fx = ppt[0].fx;
 			xr.fy = ppt[0].fy;
@@ -223,8 +232,10 @@ void draw_anno(const drawing_interface* pif, link_t_ptr ptr)
 		}
 		else if (compare_text(type, -1, ATTR_ANNO_TYPE_CIRCLE, -1, 0) == 0)
 		{
-			default_xpen(&xp);
-			parse_xpen_from_style(&xp, style);
+			if(style)
+			{
+				parse_xpen_from_style(&xp, style);
+			}
 
 			xr.fx = ppt[0].fx;
 			xr.fy = ppt[0].fy;
@@ -235,9 +246,10 @@ void draw_anno(const drawing_interface* pif, link_t_ptr ptr)
 		}
 		else if (compare_text(type, -1, ATTR_ANNO_TYPE_ANCHOR, -1, 0) == 0)
 		{
-			default_xpen(&xp);
-			parse_xpen_from_style(&xp, style);
-			default_xbrush(&xb);
+			if(style)
+			{
+				parse_xpen_from_style(&xp, style);
+			}
 			xscpy(xb.color, xp.color);
 
 			xr.fx = ppt[0].fx - 1;
@@ -254,9 +266,10 @@ void draw_anno(const drawing_interface* pif, link_t_ptr ptr)
 		}
 		else if (compare_text(type, -1, ATTR_ANNO_TYPE_RANGE, -1, 0) == 0)
 		{
-			default_xpen(&xp);
-			parse_xpen_from_style(&xp, style);
-			default_xbrush(&xb);
+			if(style)
+			{
+				parse_xpen_from_style(&xp, style);
+			}
 			xscpy(xb.color, xp.color);
 
 			xr.fx = ppt[0].fx - (float)0.5;
@@ -279,9 +292,9 @@ void draw_anno(const drawing_interface* pif, link_t_ptr ptr)
 			pt2.fy = ppt[1].fy;
 			(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
 
-			default_xfont(&xf);
 			parse_xfont_from_style(&xf, style);
 			xscpy(xf.style, GDI_ATTR_FONT_STYLE_ITALIC);
+			(*pif->pf_set_xfont)(pif->ctx, &xf);
 
 			a1 = (ppt[1].fx - ppt[0].fx);// *pdt->dblX;
 			a2 = (ppt[1].fy - ppt[0].fy);// *pdt->dblY;
@@ -292,18 +305,18 @@ void draw_anno(const drawing_interface* pif, link_t_ptr ptr)
 			//pt1.fx = xr.fx + xr.fw / 2;
 			//pt1.fy = xr.fy + xr.fh / 2 - 5;
 			//xsprintf(token, _T("W: %.1fmm"), a1);
-			//(*pif->pf_text_out)(pif->ctx, &xf, &pt1, token, -1);
+			//(*pif->pf_text_out)(pif->ctx, &xa, &pt1, token, -1);
 
 			//pt1.fx = xr.fx + xr.fw / 2;
 			//pt1.fy = xr.fy + xr.fh / 2;
 			//xsprintf(token, _T("H: %.1fmm"), a2);
-			//(*pif->pf_text_out)(pif->ctx, &xf, &pt1, token, -1);
+			//(*pif->pf_text_out)(pif->ctx, &xa, &pt1, token, -1);
 
 			a1 = sqrt(a1 * a1 + a2 * a2);
 			xsprintf(token, _T("%.1fmm"), a1);
 			pt1.fx = xr.fx + xr.fw / 2;
 			pt1.fy = xr.fy + xr.fh / 2 - 10;
-			(*pif->pf_text_out)(pif->ctx, &xf, &pt1, token, -1);
+			(*pif->pf_text_out)(pif->ctx, &xa, &pt1, token, -1);
 		}
 		else if (compare_text(type, -1, ATTR_ANNO_TYPE_ANGLE, -1, 0) == 0)
 		{
@@ -357,9 +370,9 @@ void draw_anno(const drawing_interface* pif, link_t_ptr ptr)
 
 			//(*pif->pf_draw_arc)(pif->ctx, &xp, &ppt[0], 2, 2, a1, a2);
 
-			default_xfont(&xf);
 			parse_xfont_from_style(&xf, style);
 			xscpy(xf.style, GDI_ATTR_FONT_STYLE_ITALIC);
+			(*pif->pf_set_xfont)(pif->ctx, &xf);
 
 			a1 = (a2 - a1) / XPI * 180;
 			if (a1 < 0)
@@ -371,7 +384,7 @@ void draw_anno(const drawing_interface* pif, link_t_ptr ptr)
 
 			pt1.fx = xr.fx + xr.fw / 2;
 			pt1.fy = xr.fy + xr.fh / 2 - 3;
-			(*pif->pf_text_out)(pif->ctx, &xf, &pt1, token, -1);
+			(*pif->pf_text_out)(pif->ctx, &xa, &pt1, token, -1);
 		}
 	
 		xmem_free(ppt);

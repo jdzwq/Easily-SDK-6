@@ -27,6 +27,7 @@ LICENSE.GPL3 for more details.
 #include "impblock.h"
 
 #include "../xdkstd.h"
+#include "../xdkobj.h"
 #include "../xdkimp.h"
 
 typedef struct _block_context{
@@ -85,7 +86,7 @@ bool_t xblock_read(xhand_t block, byte_t* buf, dword_t* pb)
 
 	size = (*pb < (ppt->write_bytes - ppt->read_bytes)) ? (*pb) : (ppt->write_bytes - ppt->read_bytes);
 
-	bytes_copy((byte_t**)ppt->block, ppt->read_bytes, buf, &size);
+	size = bytes_copy((byte_t**)ppt->block, ppt->read_bytes, buf, size);
 	ppt->read_bytes += (dword_t)size;
 
 	*pb = (dword_t)size;

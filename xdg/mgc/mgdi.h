@@ -217,8 +217,8 @@ EXP_API void	mgc_draw_equilagon_raw(visual_t mgc, const xpen_t* pxp, const xbrus
 @INPUT const xrect_t* pxr: the rect struct using float member.
 @RETURN void: none.
 */
-EXP_API void	mgc_multi_line(canvas_t canv, const xfont_t* pxf, const xface_t* pxa, const xpen_t* pxp, const xrect_t* pxr);
-EXP_API void	mgc_multi_line_raw(visual_t mgc, const xfont_t* pxf, const xface_t* pxa, const xpen_t* pxp, const xrect_t* pxr);
+EXP_API void	mgc_multi_line(canvas_t canv, const xface_t* pxa, const xpen_t* pxp, const xrect_t* pxr);
+EXP_API void	mgc_multi_line_raw(visual_t mgc, const xface_t* pxa, const xpen_t* pxp, const xrect_t* pxr);
 
 /*
 @FUNCTION mgc_draw_path: draw path in canvas using milimeter coordinate.
@@ -233,6 +233,12 @@ EXP_API void	mgc_multi_line_raw(visual_t mgc, const xfont_t* pxf, const xface_t*
 EXP_API void	mgc_draw_path(canvas_t canv, const xpen_t* pxp, const xbrush_t* pxb, const tchar_t* aa, const xpoint_t* pa, int n);
 EXP_API void	mgc_draw_path_raw(visual_t mgc, const xpen_t* pxp, const xbrush_t* pxb, const tchar_t* aa, const xpoint_t* pa, int n);
 
+EXP_API void 	mgc_set_xfont(canvas_t canv, const xfont_t* pxf);
+EXP_API void 	mgc_set_xfont_raw(visual_t mgc, const xfont_t* pxf);
+
+EXP_API void 	mgc_get_xfont(canvas_t canv, xfont_t* pxf);
+EXP_API void 	mgc_get_xfont_raw(visual_t mgc, xfont_t* pxf);
+
 /*
 @FUNCTION mgc_draw_text: draw text in mgc canvas using millimeter coordinate.
 @INPUT canvas_t canv: the mgc canvas object.
@@ -243,8 +249,8 @@ EXP_API void	mgc_draw_path_raw(visual_t mgc, const xpen_t* pxp, const xbrush_t* 
 @INPUT int len: the text length in characters, -1 indicate the text is terminated by zero.
 @RETURN void: none.
 */
-EXP_API void	mgc_draw_text(canvas_t canv, const xfont_t* pxf, const xface_t* pxa, const xrect_t* pxr, const tchar_t* txt, int len);
-EXP_API void	mgc_draw_text_raw(visual_t mgc, const xfont_t* pxf, const xface_t* pxa, const xrect_t* pxr, const tchar_t* txt, int len);
+EXP_API void	mgc_draw_text(canvas_t canv, const xface_t* pxa, const xrect_t* pxr, const tchar_t* txt, int len);
+EXP_API void	mgc_draw_text_raw(visual_t mgc, const xface_t* pxa, const xrect_t* pxr, const tchar_t* txt, int len);
 /*
 @FUNCTION mgc_text_out: output text in mgc canvas using millimeter coordinate.
 @INPUT canvas_t canv: the mgc canvas object.
@@ -254,8 +260,8 @@ EXP_API void	mgc_draw_text_raw(visual_t mgc, const xfont_t* pxf, const xface_t* 
 @INPUT int len: the text length in characters, -1 indicate the text is terminated by zero.
 @RETURN void: none.
 */
-EXP_API void	mgc_text_out(canvas_t canv, const xfont_t* pxf, const xpoint_t* ppt, const tchar_t* txt, int len);
-EXP_API void	mgc_text_out_raw(visual_t mgc, const xfont_t* pxf, const xpoint_t* ppt, const tchar_t* txt, int len);
+EXP_API void	mgc_text_out(canvas_t canv, const xface_t* pxa, const xpoint_t* ppt, const tchar_t* txt, int len);
+EXP_API void	mgc_text_out_raw(visual_t mgc, const xface_t* pxa, const xpoint_t* ppt, const tchar_t* txt, int len);
 
 /*
 @FUNCTION mgc_text_size: calc the text suitable size in mgc canvas using millimeter coordinate.
@@ -266,20 +272,17 @@ EXP_API void	mgc_text_out_raw(visual_t mgc, const xfont_t* pxf, const xpoint_t* 
 @OUTPUT xsize_t* pxs: the size struct for returning float member.
 @RETURN void: none.
 */
-EXP_API void	mgc_text_size(canvas_t canv, const xfont_t* pxf, const tchar_t* txt, int len, xsize_t* pxs);
-EXP_API void	mgc_text_size_raw(visual_t mgc, const xfont_t* pxf, const tchar_t* txt, int len, xsize_t* pxs);
+EXP_API void	mgc_text_size(canvas_t canv, const tchar_t* txt, int len, xsize_t* pxs);
+EXP_API void	mgc_text_size_raw(visual_t mgc, const tchar_t* txt, int len, xsize_t* pxs);
 
-EXP_API void	mgc_text_rect(canvas_t canv, const xfont_t* pxf, const xface_t* pxa, const tchar_t* txt, int len, xrect_t* pxr);
-EXP_API void	mgc_text_rect_raw(visual_t mgc, const xfont_t* pxf, const xface_t* pxa, const tchar_t* txt, int len, xrect_t* pxr);
+EXP_API void	mgc_text_rect(canvas_t canv, const xface_t* pxa, const tchar_t* txt, int len, xrect_t* pxr);
+EXP_API void	mgc_text_rect_raw(visual_t mgc, const xface_t* pxa, const tchar_t* txt, int len, xrect_t* pxr);
 
-EXP_API void	mgc_text_indicate_raw(visual_t mgc, const xfont_t* pxf, const xface_t* pxa, const tchar_t* str, int len, const xrect_t* pxr, xrect_t*pa, int n);
-EXP_API void	mgc_text_indicate(canvas_t canv, const xfont_t* pxf, const xface_t* pxa, const tchar_t* str, int len, const xrect_t* pxr, xrect_t*pa, int n);
+EXP_API void	mgc_text_indicate_raw(visual_t mgc, const xface_t* pxa, const tchar_t* str, int len, const xrect_t* pxr, xrect_t*pa, int n);
+EXP_API void	mgc_text_indicate(canvas_t canv, const xface_t* pxa, const tchar_t* str, int len, const xrect_t* pxr, xrect_t*pa, int n);
 
-EXP_API void	mgc_font_size(canvas_t canv, const xfont_t* pxf, xsize_t* pxs);
-EXP_API void	mgc_font_size_raw(visual_t mgc, const xfont_t* pxf, xsize_t* pxs);
-
-EXP_API float	mgc_pixel_size(canvas_t canv);
-EXP_API float	mgc_pixel_size_raw(visual_t mgc);
+EXP_API void	mgc_font_size(canvas_t canv, xsize_t* pxs);
+EXP_API void	mgc_font_size_raw(visual_t mgc, xsize_t* pxs);
 
 /*
 @FUNCTION mgc_color_out: output color sequence in mgc canvas using millimeter coordinate.

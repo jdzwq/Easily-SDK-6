@@ -113,13 +113,13 @@ typedef struct _dtls_session_context{
 	dword_t snd_next_epoch;
 	dword_t snd_next_seqnum;
 	dtls_record_context_ptr snd_record;
-	linear_t snd_linear;
+	sequence_t snd_sequence;
 
 	sword_t rcv_next_msgnum;
 	dword_t rcv_next_epoch;
 	dword_t rcv_next_seqnum;
 	dtls_record_context_ptr rcv_record;
-	linear_t rcv_linear;
+	sequence_t rcv_sequence;
 }dtls_session_context;
 
 typedef struct _dtls_security_context{

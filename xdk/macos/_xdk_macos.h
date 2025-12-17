@@ -52,8 +52,8 @@ LICENSE.GPL3 for more details.
 #define XDK_SUPPORT_MEMO
 #define XDK_SUPPORT_ERROR
 #define XDK_SUPPORT_DATE
-//#define XDK_SUPPORT_MBCS
-//#define XDK_SUPPORT_ACP_TABLE
+#define XDK_SUPPORT_MBCS
+#define XDK_SUPPORT_ACP
 #define XDK_SUPPORT_ASYNC
 #define XDK_SUPPORT_THREAD_EVENT
 #define XDK_SUPPORT_THREAD_CRITI
@@ -142,6 +142,7 @@ typedef void*		res_find_t;
 #endif
 
 #define INVALID_FILE	((int)(-1))
+#define IS_VALID_FILE(fh) (fh && fh != INVALID_FILE)
 
 #ifdef XDK_SUPPORT_CONS
 typedef void(*MAC_SIGNAL_HANDLER)(int sig);

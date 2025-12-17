@@ -79,7 +79,6 @@ void print_form(const dev_prn_t* pdev, link_t_ptr form)
 
 	end_doc(rdc);
 
-	
 	destroy_printer_canvas(canv);
 	destroy_printer_context(rdc);
 }
@@ -133,7 +132,6 @@ void print_grid(const dev_prn_t* pdev, link_t_ptr grid)
 
 	end_doc(rdc);
 
-	
 	destroy_printer_canvas(canv);
 	destroy_printer_context(rdc);
 }
@@ -187,7 +185,6 @@ void print_statis(const dev_prn_t* pdev, link_t_ptr statis)
 
 	end_doc(rdc);
 
-	
 	destroy_printer_canvas(canv);
 	destroy_printer_context(rdc);
 }
@@ -223,7 +220,6 @@ void print_topog(const dev_prn_t* pdev, link_t_ptr topog)
 
 	end_doc(rdc);
 
-	
 	destroy_printer_canvas(canv);
 	destroy_printer_context(rdc);
 }
@@ -259,7 +255,6 @@ void print_dialog(const dev_prn_t* pdev, link_t_ptr dialog)
 
 	end_doc(rdc);
 
-	
 	destroy_printer_canvas(canv);
 	destroy_printer_context(rdc);
 }
@@ -307,12 +302,11 @@ void print_diagram(const dev_prn_t* pdev, link_t_ptr diagram)
 
 	end_doc(rdc);
 
-	
 	destroy_printer_canvas(canv);
 	destroy_printer_context(rdc);
 }
 
-void print_memo(const dev_prn_t* pdev, const xfont_t* pxf, const xface_t* pxa, link_t_ptr memo)
+void print_memo(const dev_prn_t* pdev, const xface_t* pxa, link_t_ptr memo)
 {
 	visual_t rdc;
 	canvas_t canv;
@@ -344,7 +338,7 @@ void print_memo(const dev_prn_t* pdev, const xfont_t* pxf, const xface_t* pxa, l
 	xr.fw = get_canvas_horz_size(canv);
 	xr.fh = get_canvas_vert_size(canv);
 
-	pages = calc_memo_pages(&ifc, pxf, pxa, &xr, memo);
+	pages = calc_memo_pages(&ifc, pxa, &xr, memo);
 
 	begin_doc(rdc, _T("MEMO"));
 
@@ -352,19 +346,18 @@ void print_memo(const dev_prn_t* pdev, const xfont_t* pxf, const xface_t* pxa, l
 	{
 		begin_page(rdc);
 
-		draw_memo_text(&ifc, pxf, pxa, &xr, memo, i + 1);
+		draw_memo_text(&ifc, pxa, &xr, memo, i + 1);
 
 		end_page(rdc);
 	}
 
 	end_doc(rdc);
 
-	
 	destroy_printer_canvas(canv);
 	destroy_printer_context(rdc);
 }
 
-void print_rich(const dev_prn_t* pdev, const xfont_t* pxf, const xface_t* pxa, link_t_ptr rich)
+void print_rich(const dev_prn_t* pdev, const xface_t* pxa, link_t_ptr rich)
 {
 	visual_t rdc;
 	canvas_t canv;
@@ -396,7 +389,7 @@ void print_rich(const dev_prn_t* pdev, const xfont_t* pxf, const xface_t* pxa, l
 	xr.fw = get_canvas_horz_size(canv);
 	xr.fh = get_canvas_vert_size(canv);
 
-	pages = calc_rich_pages(&ifc, pxf, pxa, &xr, rich);
+	pages = calc_rich_pages(&ifc, pxa, &xr, rich);
 
 	begin_doc(rdc, _T("RICH"));
 
@@ -404,14 +397,13 @@ void print_rich(const dev_prn_t* pdev, const xfont_t* pxf, const xface_t* pxa, l
 	{
 		begin_page(rdc);
 
-		draw_rich_text(&ifc, pxf, pxa, &xr, rich, i + 1);
+		draw_rich_text(&ifc, pxa, &xr, rich, i + 1);
 
 		end_page(rdc);
 	}
 
 	end_doc(rdc);
 
-	
 	destroy_printer_canvas(canv);
 	destroy_printer_context(rdc);
 }
@@ -444,7 +436,6 @@ void print_svg(const dev_prn_t* pdev, link_t_ptr svg)
 
 	end_doc(rdc);
 
-	
 	destroy_printer_canvas(canv);
 	destroy_printer_context(rdc);
 }

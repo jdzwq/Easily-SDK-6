@@ -395,3 +395,50 @@ static void trace_ac_table(link_t_ptr tt, const tchar_t* key, int len)
 
 	_tprintf(_T("\n"));
 }
+
+/**********************************************************************/
+#if defined (DEBUG) || defined (_DEBUG)
+static bool_t CALLBACK printf_ac_node(const tchar_t* key, int len, vword_t delta, void* p)
+{
+	_tprintf(_T("%s\t%d\n"), key, (int)delta);
+
+	return 1;
+}
+
+void ac_table_self_test()
+{
+	link_t_ptr tt;
+
+	printf("test ac table case1...\n");
+	tt = create_ac_table();
+	
+	//test case 1
+	insert_ac_table(tt, _T("AP"), -1, 1);
+	insert_ac_table(tt, _T("BA"), -1, 2);
+	insert_ac_table(tt, _T("ABC"), -1, 3);
+	insert_ac_table(tt, _T("BCAP"), -1, 4);
+
+	build_ac_table(tt);
+
+	enum_ac_table(tt, printf_ac_node, NULL);
+
+	destroy_ac_table(tt);
+
+	printf("test ac table case2...\n");
+	tt = create_ac_table();
+
+	//test case 2
+	insert_ac_table(tt, _T("POOL"), -1, 5);
+	insert_ac_table(tt, _T("PRIZE"), -1, 6);
+	insert_ac_table(tt, _T("PREVIEW"), -1, 7);
+	insert_ac_table(tt, _T("PREPARE"), -1, 8);
+	insert_ac_table(tt, _T("PRODUCE"), -1, 9);
+	insert_ac_table(tt, _T("PROGRESS"), -1, 10);
+
+	build_ac_table(tt);
+
+	enum_ac_table(tt, printf_ac_node, NULL);
+
+	destroy_ac_table(tt);
+}
+#endif

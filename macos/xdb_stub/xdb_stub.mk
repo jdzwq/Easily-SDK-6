@@ -11,8 +11,9 @@ CFLAGS = -g -Wall -fPIC -D _DEBUG
 
 MODULE = xdb_stub
 ARCH = aarch64
-MAJ_VER = 6
-CUR_VER = 6
+CUR_VER = 25
+MAX_VER = 11
+MIN_VER = 0
 
 INC_PATH = ../../include
 SRC_PATH = ../../xdb
@@ -22,7 +23,7 @@ LIB_PATH = /usr/local/lib
 OBJ_PATH = ~/工程/Easily-temp/macos/$(MODULE)/$(ARCH)
 OUT_PATH = ~/工程/Easily-app-6/macos/lib
 
-TARGET = lib$(MODULE).$(CUR_VER).dylib
+TARGET = lib$(MODULE).$(CUR_VER).$(MAX_VER).$(MIN_VER).dylib
 LINKIT = lib$(MODULE).dylib
 
 LIBS = -lxdk -lxdg -lxdl
@@ -40,7 +41,7 @@ all : $(OBJS)
 	-o $(OBJ_PATH)/$(TARGET) $(OBJS) $(LIBS) \
 	-Wl,-install_name,@rpath/$(LINKIT) \
 	-current_version $(CUR_VER) \
-	-compatibility_version $(MAJ_VER)
+	-compatibility_version $(MAX_VER)
 
 test:
 	if ! test -d $(OBJ_PATH); then \

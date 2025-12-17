@@ -10,7 +10,7 @@
 !include zlib.txt
 !endif
 
-ARCH = x64
+ARCH = x86
 MODULE = zlib
 
 INC_PATH = ../../include

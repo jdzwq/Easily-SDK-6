@@ -483,7 +483,7 @@ link_t_ptr peek_link(link_t_ptr root)
 	return get_first_link(root);
 }
 
-void bubble_sort_link(link_t_ptr root, CALLBACK_SORTLINK pf, bool_t desc, void* parm)
+void bubble_sort_link(link_t_ptr root, PF_SORTLINK pf, bool_t desc, void* parm)
 {
 	link_t_ptr prev,next;
 	int tag = 1;
@@ -528,7 +528,7 @@ int _div_link(link_t_ptr root1,link_t_ptr root2)
 	return tag;
 }
 
-void _mrg_link(link_t_ptr root1, link_t_ptr root2, CALLBACK_SORTLINK pf, bool_t desc, void* parm)
+void _mrg_link(link_t_ptr root1, link_t_ptr root2, PF_SORTLINK pf, bool_t desc, void* parm)
 {
 	link_t_ptr next1,next2;
 	link_t_ptr plk;
@@ -560,7 +560,7 @@ void _mrg_link(link_t_ptr root1, link_t_ptr root2, CALLBACK_SORTLINK pf, bool_t 
 	
 }
 
-void merge_sort_link(link_t_ptr root, CALLBACK_SORTLINK pf, bool_t desc, void* parm)
+void merge_sort_link(link_t_ptr root, PF_SORTLINK pf, bool_t desc, void* parm)
 {
 	link_t lk;
 	
@@ -574,7 +574,7 @@ void merge_sort_link(link_t_ptr root, CALLBACK_SORTLINK pf, bool_t desc, void* p
 	}
 }
 
-void _adjust_insert(link_t_ptr* pa, int n, CALLBACK_SORTLINK pf, void* parm)
+void _adjust_insert(link_t_ptr* pa, int n, PF_SORTLINK pf, void* parm)
 {
 	while(n > 1 && (*pf)(pa[0],pa[n/2],parm) > 0)
 	{
@@ -585,7 +585,7 @@ void _adjust_insert(link_t_ptr* pa, int n, CALLBACK_SORTLINK pf, void* parm)
 	pa[n] = pa[0];
 }
 
-void _adjust_delete(link_t_ptr* pa,int n,CALLBACK_SORTLINK pf,void* parm)
+void _adjust_delete(link_t_ptr* pa,int n,PF_SORTLINK pf,void* parm)
 {
 	int i;
 
@@ -602,7 +602,7 @@ void _adjust_delete(link_t_ptr* pa,int n,CALLBACK_SORTLINK pf,void* parm)
 	pa[i/2] = pa[0];
 }
 
-void heap_sort_link(link_t_ptr root, CALLBACK_SORTLINK pf, bool_t desc, void* parm)
+void heap_sort_link(link_t_ptr root, PF_SORTLINK pf, bool_t desc, void* parm)
 {
 	link_t_ptr* pa;
 	int count,i;
@@ -637,7 +637,7 @@ void heap_sort_link(link_t_ptr root, CALLBACK_SORTLINK pf, bool_t desc, void* pa
 	xmem_free(pa);
 }
 
-int _part_sort_link(link_t_ptr* pa,int i,int j,CALLBACK_SORTLINK pf,void* parm)
+int _part_sort_link(link_t_ptr* pa,int i,int j,PF_SORTLINK pf,void* parm)
 {
 	link_t_ptr base,tmp;
 	int n;
@@ -668,7 +668,7 @@ int _part_sort_link(link_t_ptr* pa,int i,int j,CALLBACK_SORTLINK pf,void* parm)
 	return j;
 }
 
-void _quick_sort_link(link_t_ptr* pa, int i, int j, CALLBACK_SORTLINK pf, void* parm)
+void _quick_sort_link(link_t_ptr* pa, int i, int j, PF_SORTLINK pf, void* parm)
 {
 	int n;
 
@@ -679,7 +679,7 @@ void _quick_sort_link(link_t_ptr* pa, int i, int j, CALLBACK_SORTLINK pf, void* 
 		_quick_sort_link(pa,n+1,j,pf,parm);
 }
 
-void quick_sort_link(link_t_ptr root, CALLBACK_SORTLINK pf, bool_t desc, void* parm)
+void quick_sort_link(link_t_ptr root, PF_SORTLINK pf, bool_t desc, void* parm)
 {
 	link_t_ptr* pa;
 	int count,i;
@@ -703,7 +703,7 @@ void quick_sort_link(link_t_ptr root, CALLBACK_SORTLINK pf, bool_t desc, void* p
 	xmem_free(pa);
 }
 
-void enum_link(link_t_ptr root,CALLBACK_ENUMLINK pf,void* parm)
+void enum_link(link_t_ptr root,PF_ENUMLINK pf,void* parm)
 {
 	link_t_ptr plk;
 

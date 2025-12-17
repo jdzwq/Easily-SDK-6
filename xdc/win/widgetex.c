@@ -61,8 +61,6 @@ const drawing_interface* widget_get_canvas_interface(widget_t wt)
 	if (pwt->pif)
 	{
 		widget_get_canv_rect(wt, (canvbox_t*)&(pwt->pif->rect));
-
-		widget_get_color_mode(wt, &(pwt->pif->mode));
 	}
 
 	return pwt->pif;
@@ -123,7 +121,6 @@ void  widget_menu_item_rect(widget_t wt, int iid, xrect_t* pxr)
 	xsize_t xs;
 	const tchar_t* text;
 	visual_t rdc;
-	xfont_t xf = { 0 };
 	widget_exten_t* pwt;
 	drawing_interface ifv = {0};
 
@@ -145,8 +142,6 @@ void  widget_menu_item_rect(widget_t wt, int iid, xrect_t* pxr)
 	xrItem.y = xr.y;
 	xrItem.h = xr.h;
 
-	default_widget_xfont(&xf);
-
 	rdc = widget_window_context(wt);
 
 	get_visual_interface(rdc, &ifv);
@@ -155,7 +150,7 @@ void  widget_menu_item_rect(widget_t wt, int iid, xrect_t* pxr)
 	while (ilk)
 	{
 		text = get_menu_item_title_ptr(ilk);
-		(*ifv.pf_text_size)(ifv.ctx, &xf, text, -1, &xs);
+		(*ifv.pf_text_size)(ifv.ctx, text, -1, &xs);
 
 		xrItem.w = xr.h + xs.w;
 
@@ -666,10 +661,8 @@ void widget_hand_create(widget_t wt)
 {
 	widget_exten_t* pwt;
 	visual_t rdc;
-	color_mod_t clrs;
 	xrect_t xr;
 
-	widget_get_color_mode(wt, &clrs);
 	widget_get_client_rect(wt, &xr);
 
 	pwt = (widget_exten_t*)xmem_alloc(sizeof(widget_exten_t));
@@ -681,8 +674,7 @@ void widget_hand_create(widget_t wt)
 	pwt->pif = (drawing_interface*)xmem_alloc(sizeof(drawing_interface));
 
 	get_canvas_interface(pwt->canv, pwt->pif);
-
-	xmem_copy((void*)&(pwt->pif->mode), (void*)&clrs, sizeof(color_mod_t));
+	pwt->pif->clrs = widget_get_color_mode_ptr(wt);
 
 	SETEXTENSTRUCT(wt, pwt);
 
@@ -692,33 +684,33 @@ void widget_hand_create(widget_t wt)
 void widget_hand_paint(widget_t wt, visual_t rdc, const tchar_t* gradient)
 {
 	drawing_interface ifv = {0};
-	color_mod_t clrs;
+	color_mod_t* pclrs;
 	xcolor_t xc_brim, xc_core;
 	xbrush_t xb;
 	xrect_t xr;
 
-	widget_get_color_mode(wt, &clrs);
+	pclrs = widget_get_color_mode_ptr(wt);
 	widget_get_client_rect(wt, &xr);
 
 	get_visual_interface(rdc, &ifv);
 	if(compare_text(gradient,-1,GDI_ATTR_GRADIENT_VERT,-1,1) == 0)
 	{
-		xmem_copy((void*)&xc_brim, (void*)&clrs.clr_bkg, sizeof(xcolor_t));
-		xmem_copy((void*)&xc_core, (void*)&clrs.clr_bkg, sizeof(xcolor_t));
+		xmem_copy((void*)&xc_brim, (void*)&(pclrs->clr_bkg), sizeof(xcolor_t));
+		xmem_copy((void*)&xc_core, (void*)&(pclrs->clr_bkg), sizeof(xcolor_t));
 		lighten_xcolor(&xc_core, DEF_SOFT_DARKEN);
 
 		(*ifv.pf_gradient_rect)(ifv.ctx, &xc_core, &xc_brim, GDI_ATTR_GRADIENT_VERT, &xr);
 	}else if(compare_text(gradient,-1,GDI_ATTR_GRADIENT_HORZ,-1,1) == 0)
 	{
-		xmem_copy((void*)&xc_brim, (void*)&clrs.clr_bkg, sizeof(xcolor_t));
-		xmem_copy((void*)&xc_core, (void*)&clrs.clr_bkg, sizeof(xcolor_t));
+		xmem_copy((void*)&xc_brim, (void*)&(pclrs->clr_bkg), sizeof(xcolor_t));
+		xmem_copy((void*)&xc_core, (void*)&(pclrs->clr_bkg), sizeof(xcolor_t));
 		lighten_xcolor(&xc_core, DEF_SOFT_DARKEN);
 
 		(*ifv.pf_gradient_rect)(ifv.ctx, &xc_core, &xc_brim, GDI_ATTR_GRADIENT_HORZ, &xr);
 	}else
 	{
 		default_xbrush(&xb);
-		format_xcolor(&clrs.clr_bkg, xb.color);
+		format_xcolor(&pclrs->clr_bkg, xb.color);
 
 		(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
 	}

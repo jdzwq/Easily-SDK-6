@@ -312,23 +312,24 @@ void draw_tool(const drawing_interface* pif, link_t_ptr ptr)
 	default_xface(&xa);
 
 	parse_xface_from_style(&xa, style);
-
-	parse_xfont_from_style(&xf, style);
 	if (!b_print)
 	{
-		format_xcolor(&pif->mode.clr_txt, xf.color);
+		format_xcolor(&pif->clrs->clr_txt, xa.text_color);
 	}
+
+	parse_xfont_from_style(&xf, style);
+	(*pif->pf_set_xfont)(pif->ctx, &xf);
 
 	parse_xbrush_from_style(&xb, style);
 	if (!b_print)
 	{
-		format_xcolor(&pif->mode.clr_bkg, xb.color);
+		format_xcolor(&pif->clrs->clr_bkg, xb.color);
 	}
 
 	/*parse_xpen_from_style(&xp, style);
 	if (!b_print)
 	{
-		format_xcolor(&pif->mode.clr_frg, xp.color);
+		format_xcolor(&pif->clrs->clr_frg, xp.color);
 	}*/
 
 	xscpy(xp.color, xb.color);
@@ -337,16 +338,16 @@ void draw_tool(const drawing_interface* pif, link_t_ptr ptr)
 
 	if (!b_print)
 	{
-		format_xcolor(&pif->mode.clr_msk, xi.color);
+		format_xcolor(&pif->clrs->clr_msk, xi.color);
 	}
 
 	if (!b_print)
 	{
-		xmem_copy((void*)&xc, (void*)&pif->mode.clr_ico, sizeof(xcolor_t));
+		xmem_copy((void*)&xc, (void*)&pif->clrs->clr_ico, sizeof(xcolor_t));
 	}
 	else
 	{
-		parse_xcolor(&xc, xf.color);
+		parse_xcolor(&xc, xa.text_color);
 	}
 
 	xmem_copy((void*)&xb_group, (void*)&xb, sizeof(xbrush_t));
@@ -376,7 +377,7 @@ void draw_tool(const drawing_interface* pif, link_t_ptr ptr)
 
 			(*pif->pf_draw_rect)(pif->ctx, &xp, &xb, &xrClip);
 
-			(*pif->pf_draw_text)(pif->ctx, &xf, &xa, &xrTitle, get_tool_group_title_ptr(glk), -1);
+			(*pif->pf_draw_text)(pif->ctx, &xa, &xrTitle, get_tool_group_title_ptr(glk), -1);
 
 			if (get_tool_group_collapsed(glk))
 			{
@@ -406,13 +407,13 @@ void draw_tool(const drawing_interface* pif, link_t_ptr ptr)
 			}
 			else if (compare_text(show, -1, ATTR_SHOW_TEXTONLY, -1, 0) == 0)
 			{
-				(*pif->pf_draw_text)(pif->ctx, &xf, &xa, &xrItem, get_tool_item_title_ptr(ilk), -1);
+				(*pif->pf_draw_text)(pif->ctx, &xa, &xrItem, get_tool_item_title_ptr(ilk), -1);
 			}
 			else
 			{
 				xrItem.fh /= 2;
 				xrItem.fy += xrItem.fh;
-				(*pif->pf_draw_text)(pif->ctx, &xf, &xa, &xrItem, get_tool_item_title_ptr(ilk), -1);
+				(*pif->pf_draw_text)(pif->ctx, &xa, &xrItem, get_tool_item_title_ptr(ilk), -1);
 
 				xrItem.fy -= xrItem.fh;
 				ft_center_rect(&xrItem, DEF_SMALL_ICON, DEF_SMALL_ICON);

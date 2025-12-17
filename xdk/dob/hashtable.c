@@ -579,7 +579,7 @@ link_t_ptr get_hash_entity(link_t_ptr ptr,const tchar_t* key,int keylen)
 	hash_entity_t* phe;
 	hash_table_t* pht;
 	link_t_ptr plk;
-	int rt;
+	int rt, step = 0;
 
 	XDK_ASSERT(ptr && ptr->tag == lkHashTable);
 
@@ -597,14 +597,20 @@ link_t_ptr get_hash_entity(link_t_ptr ptr,const tchar_t* key,int keylen)
 	plk = get_first_link(&((pht->pp)[HASHINDEX(code,pht->size)]));
 	while(plk != NULL)
 	{
+		step ++;
 		phe = HashEntityFromLink(plk);
 		if(phe->index == KEYINDEX(code))
 		{
 			rt = compare_text(phe->wkey, -1, key, keylen, 0);
-			if (rt == 0)
+			if (!rt)
+			{
+				PUT_THREEBYTE_LOC(plk->lru,0,step);
 				return plk;
+			}
 			else if (rt > 0)
+			{
 				return NULL;
+			}
 		}
 		else if (phe->index > KEYINDEX(code))
 		{
@@ -944,7 +950,7 @@ vword_t get_hash_entity_delta(link_t_ptr elk)
 	return phe->data;
 }
 
-int enum_hash_entity(link_t_ptr ptr,CALLBACK_ENUMLINK pf,void* pv)
+int enum_hash_entity(link_t_ptr ptr,PF_ENUMLINK pf,void* pv)
 {
 	hash_table_t* pht;
 	hash_entity_t* phe;
@@ -1130,7 +1136,7 @@ int hash_table_format_attrset(link_t_ptr ptr,tchar_t* buf,int max)
 	return total;
 }
 
-int hash_table_compare_attr(const tchar_t* key,const tchar_t* sin,const tchar_t* val,void* parm)
+static int hash_table_compare_attr(const tchar_t* key,const tchar_t* sin,const tchar_t* val,void* parm)
 {
 	link_t_ptr ptr;
 	link_t_ptr ent;
@@ -1232,3 +1238,48 @@ int hash_table_format_options(link_t_ptr ptr, tchar_t* buf, int max, tchar_t ite
 
 	return format_options(buf, max, itemfeed, linefeed, (void*)&he, _on_format_token);
 }
+
+/**********************************************************************/
+#if defined (DEBUG) || defined (_DEBUG)
+void hash_table_self_test()
+{
+	printf("test hash table...\n");
+
+	dword_t i;
+	int min,max,step,total = 0,zero = 0;
+	link_t_ptr ptr, plk;
+	tchar_t key[CHS_LEN + 1] = {0};
+
+	ptr = create_hash_table();
+
+	for (i = 0x4E00; i <= 0x9FA5; i++)
+	{
+		ucs_byte_to_mbs((wchar_t)i, key);
+		write_hash_attr(ptr, key, xslen(key), NULL, 0);
+	}
+
+	min = MAX_LONG;
+	max = 0;
+	for (i = 0x4E00; i <= 0x9FA5; i++)
+	{
+		ucs_byte_to_mbs((wchar_t)i, key);
+		plk = get_hash_entity(ptr, key, xslen(key));
+		if(plk)
+		{
+			step = GET_THREEBYTE_LOC(plk->lru, 0);
+			total += step;
+			if(min > step) min = step;
+			if(max < step) max = step;
+		}
+		else
+		{
+			zero ++;
+		}
+	}
+
+	printf("table size is:%d, total step is:%d, average step is:%.2f\n", i, total, (float)total / i);
+	printf("min step is:%d, max step is:%d, not find is:%d\n", min, max, zero);
+
+	destroy_hash_table(ptr);
+}
+#endif

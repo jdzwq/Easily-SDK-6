@@ -10,7 +10,7 @@
 !include xdl.txt
 !endif
 
-ARCH = x64
+ARCH = x86
 MODULE = xdl
 
 INC_PATH = ../../include

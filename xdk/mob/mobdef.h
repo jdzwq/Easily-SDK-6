@@ -29,14 +29,14 @@ LICENSE.GPL3 for more details.
 #define	_MOBDEF_H
 
 
-typedef struct _memobj_head{
+typedef struct _memo_head{
 	byte_t tag; //memo object type
 	byte_t len[3]; //memo object size in bytes
-}memobj_head;
+}memo_head;
 
-#define MEMOBJ_SIZE(obj)		(GET_THREEBYTE_LOC(((obj)->len), 0) + sizeof(memobj_head))
+#define MEMOBJ_SIZE(obj)		(GET_THREEBYTE_LOC(((obj)->len), 0) + sizeof(memo_head))
 
-#define MEM_BINARY	0x00
+#define MEM_EMPTY	0x00
 #define MEM_VARIANT	0x01
 #define MEM_STRING	0x02
 #define MEM_MAP		0x03
@@ -46,23 +46,21 @@ typedef struct _memobj_head{
 #define MEM_DOMDOC	0x0A
 #define MEM_MESSAGE	0x0B
 #define MEM_QUEUE	0x0C
-#define MEM_LINEAR	0x0D
+#define MEM_SEQUENCE	0x0D
 #define MEM_SPINLOCK	0x0E
-
-#define MEMENC_MASK	0x10
 
 #define IS_OBJECT_TYPE(tag)		((tag >= 0x10 && tag <= 0x1F)? 1 : 0)
 
-typedef struct _memobj_head **object_t;
-typedef struct _memobj_head **message_t;
-typedef struct _memobj_head **queue_t;
-typedef struct _memobj_head *variant_t;
-typedef struct _memobj_head *string_t;
-typedef struct _memobj_head *map_t;
-typedef struct _memobj_head *vector_t;
-typedef struct _memobj_head *matrix_t;
-typedef struct _memobj_head *linear_t;
-typedef struct _memobj_head *spinlock_t;
+typedef struct _memo_head *object_t;
+typedef struct _memo_head *queue_t;
+typedef struct _memo_head *message_t;
+typedef struct _memo_head *variant_t;
+typedef struct _memo_head *string_t;
+typedef struct _memo_head *map_t;
+typedef struct _memo_head *vector_t;
+typedef struct _memo_head *matrix_t;
+typedef struct _memo_head *sequence_t;
+typedef struct _memo_head *spinlock_t;
 
 
 #endif	/* _OBJDEF_H */

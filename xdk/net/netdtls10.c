@@ -519,10 +519,10 @@ static int _dtls_write_snd_msg(dtls_context *pdtls)
 		{
 			lin_len = (DTLS_HSH_SIZE + DTLS_MSH_SIZE + haslen - frm_off < pses->pkg_size) ? (DTLS_HSH_SIZE + DTLS_MSH_SIZE + haslen - frm_off) : pses->pkg_size;
 			lin_len += (DTLS_HDR_SIZE);
-			lin_buf = insert_linear_frame(pses->snd_linear, pses->snd_next_seqnum, lin_len);
+			lin_buf = insert_sequence_frame(pses->snd_sequence, pses->snd_next_seqnum, lin_len);
 			if (!lin_buf)
 			{
-				set_last_error(_T("_dtls_write_snd_msg"), _T("linear insert failed"), -1);
+				set_last_error(_T("_dtls_write_snd_msg"), _T("sequence insert failed"), -1);
 				return C_ERR;
 			}
 			frm_len = (lin_len - DTLS_HDR_SIZE - DTLS_HSH_SIZE - DTLS_MSH_SIZE);
@@ -732,10 +732,10 @@ retain:
 	if (prec->rcv_msg_type == SSL_MSG_HANDSHAKE)
 	{
 		lin_len = prec->rcv_msg_len + DTLS_HDR_SIZE;
-		lin_buf = insert_linear_frame(pses->rcv_linear, seqnum, lin_len);
+		lin_buf = insert_sequence_frame(pses->rcv_sequence, seqnum, lin_len);
 		if (!lin_buf)
 		{
-			set_last_error(_T("_dtls_read_rcv_msg"), _T("insert linear failed"), -1);
+			set_last_error(_T("_dtls_read_rcv_msg"), _T("insert sequence failed"), -1);
 			return C_ERR;
 		}
 		xmem_copy((void*)lin_buf, (void*)(prec->rcv_hdr), lin_len);
@@ -763,7 +763,7 @@ retain:
 			prec->rcv_msg_len = DTLS_HSH_SIZE + DTLS_MSH_SIZE;
 
 			do{
-				lin_buf = get_linear_frame(pses->rcv_linear, seqnum--, &lin_len);
+				lin_buf = get_sequence_frame(pses->rcv_sequence, seqnum--, &lin_len);
 				if (!lin_buf)
 					break;
 
@@ -852,9 +852,9 @@ static void _dtls_clear_flight(dtls_context* pdtls)
 {
 	dtls_session_context* pses = (dtls_session_context*)pdtls->session_context;
 
-	clear_linear(pses->snd_linear);
+	clear_sequence(pses->snd_sequence);
 
-	clear_linear(pses->rcv_linear);
+	clear_sequence(pses->rcv_sequence);
 }
 
 static bool_t _dtls_replay_flight(dtls_context* pdtls)
@@ -864,11 +864,11 @@ static bool_t _dtls_replay_flight(dtls_context* pdtls)
 	byte_t* lin_buf = NULL;
 	dword_t lin_len;
 
-	seqnum = get_linear_top(pses->snd_linear);
+	seqnum = get_sequence_top(pses->snd_sequence);
 
 	do{
 		lin_len = 0;
-		lin_buf = get_linear_frame(pses->snd_linear, seqnum++, &lin_len);
+		lin_buf = get_sequence_frame(pses->snd_sequence, seqnum++, &lin_len);
 
 		if (lin_buf && lin_len)
 		{

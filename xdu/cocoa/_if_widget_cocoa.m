@@ -133,6 +133,8 @@ static dword_t _key_state(NSUInteger nsFlags)
         mask |= KS_WITH_ALT;
     if (nsFlags & NSEventModifierFlagCapsLock)
         mask |= KS_WITH_CAPS;
+    if (nsFlags & NSEventModifierFlagCommand)
+        mask |= KS_WITH_CMD;
 
     return mask;
 }
@@ -205,6 +207,25 @@ static void _parent_to_child(NSView* child, NSPoint* point)
     *point = localPoint;
 }
 
+static void _nscolor_to_xcolor(NSColor* nsclr, xcolor_t* xclr)
+{
+    CGFloat r = 0, g = 0, b = 0, a = 1;
+
+    NSColor *srgb = [nsclr colorUsingColorSpace:[NSColorSpace sRGBColorSpace]];
+    [srgb getRed:&r green:&g blue:&b alpha:&a];
+    
+    xclr->r = (uint8_t)lrintf(fminf(fmaxf(r, 0.f), 1.f) * 255.f);
+    xclr->g = (uint8_t)lrintf(fminf(fmaxf(g, 0.f), 1.f) * 255.f);
+    xclr->b = (uint8_t)lrintf(fminf(fmaxf(b, 0.f), 1.f) * 255.f);
+    xclr->a = (uint8_t)lrintf(fminf(fmaxf(a, 0.f), 1.f) * 255.f);
+}
+
+static NSColor* _xcolor_to_nscolor(xcolor_t* xclr)
+{
+    return [NSColor colorWithColorSpace:[NSColorSpace sRGBColorSpace]
+                             components:(CGFloat[]){ xclr->r/255.0, xclr->g/255.0, xclr->b/255.0, 1.0f }
+                                  count:4];
+}
 /**************************************************************************************/
 
 @interface _CocoaApplicationDelegate : NSObject{}
@@ -1373,6 +1394,55 @@ NSString *const CommandMessage = @"CommandMessage";
     }
 }}
 
+- (void)scrollWheel:(NSEvent *)nsEvent
+{@autoreleasepool {
+    if([self isKindOfClass:[_CocoaView class]] == NO) return ;
+
+    _CocoaView* ref_view = self;
+    cocoa_widget_t* pwidg = (cocoa_widget_t*)ref_view.widget;
+
+    double deltaX = [nsEvent scrollingDeltaX];
+    double deltaY = [nsEvent scrollingDeltaY];
+
+    int sx, sy;
+
+    if ([nsEvent hasPreciseScrollingDeltas])
+    {
+        sx = -(int)deltaX;
+        sy = -(int)deltaY;
+    }else
+    {
+        sx = -(int)(deltaX * 0.1);
+        sy = -(int)(deltaY * 0.1);
+    }
+
+    if_subproc_t* psubp = (if_subproc_t*)ref_view.subproc;
+    if(psubp && psubp->sub_on_scroll)
+    {
+        if(sx)
+            pwidg->result = (*psubp->sub_on_scroll)((widget_t)&(pwidg->head), 1, sx, psubp->sid, psubp->delta);
+        else
+            pwidg->result = 0;
+
+        if(sy)
+            pwidg->result = (*psubp->sub_on_scroll)((widget_t)&(pwidg->head), 0, sy, psubp->sid, psubp->delta);
+        else
+            pwidg->result = 0;
+
+        if(pwidg->result) return;
+    }
+
+    if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
+    if(pdisp && pdisp->pf_on_scroll)
+    {
+        if(sx)
+            (*pdisp->pf_on_scroll)((widget_t)&(pwidg->head), 1, sx);
+        
+        if(sy)
+            (*pdisp->pf_on_scroll)((widget_t)&(pwidg->head), 0, sy);
+    }
+}}
+
 - (void)drawRect:(NSRect)dirtyRect
 {@autoreleasepool {
     if([self isKindOfClass:[_CocoaView class]] == NO) return ;
@@ -1419,10 +1489,8 @@ NSString *const CommandMessage = @"CommandMessage";
 
     if(!ref_view.caret_visible) return;
 
-    NSColor *nsColor = [NSColor colorWithCalibratedRed:(float)(pwidg->clrs.clr_frg.r) / 255.0f
-                                    green:(float)(pwidg->clrs.clr_frg.g) / 255.0f
-                                    blue:(float)(pwidg->clrs.clr_frg.b) / 255.0f
-                                    alpha:1.0f];
+    NSColor *nsColor = _xcolor_to_nscolor(&(pwidg->clrs.clr_frg));
+
     [nsColor set];
     NSRectFill(ref_view.caret_rect);
 }}
@@ -1475,9 +1543,32 @@ NSString *const CommandMessage = @"CommandMessage";
 
     unichar nsKey = [[nsEvent charactersIgnoringModifiers] characterAtIndex:0];
     unsigned short key = _cocoa_to_keycode(nsKey);
-    if(!key) key = [nsEvent keyCode];
+    if(!key) key = nsKey;
     NSUInteger nsFlags = [nsEvent modifierFlags];
     dword_t mask = _key_state(nsFlags);
+
+    if((mask & KS_WITH_CONTROL) || (mask & KS_WITH_CMD))
+    {
+        switch(nsKey)
+        {
+        case L'c':
+        case L'C':
+            key = KEY_COPY;
+            break;
+        case L'v':
+        case L'V':
+            key = KEY_PASTE;
+            break;
+        case L'x':
+        case L'X':
+            key = KEY_CUT;
+            break;
+        case L'z':
+        case L'Z':
+            key = KEY_UNDO;
+            break;
+        }
+    } 
 
     accel_table_t* pac = (accel_table_t*)pwidg->accel;
     if(pac)
@@ -1528,9 +1619,34 @@ NSString *const CommandMessage = @"CommandMessage";
     _CocoaView* ref_view = self;
     cocoa_widget_t* pwidg = (cocoa_widget_t*)ref_view.widget;
 
-    unsigned short key = [nsEvent keyCode];
+    unichar nsKey = [[nsEvent charactersIgnoringModifiers] characterAtIndex:0];
+    unsigned short key = _cocoa_to_keycode(nsKey);
+    if(!key) key = nsKey;
     NSUInteger nsFlags = [nsEvent modifierFlags];
     dword_t mask = _key_state(nsFlags);
+
+     if((mask & KS_WITH_CONTROL) || (mask & KS_WITH_CMD))
+    {
+        switch(nsKey)
+        {
+        case L'c':
+        case L'C':
+            key = KEY_COPY;
+            break;
+        case L'v':
+        case L'V':
+            key = KEY_PASTE;
+            break;
+        case L'x':
+        case L'X':
+            key = KEY_CUT;
+            break;
+        case L'z':
+        case L'Z':
+            key = KEY_UNDO;
+            break;
+        }
+    } 
 
     if_subproc_t* psubp = (if_subproc_t*)ref_view.subproc;
     if(psubp && psubp->sub_on_keyup)
@@ -1544,54 +1660,67 @@ NSString *const CommandMessage = @"CommandMessage";
     {
         (*pdisp->pf_on_keyup)((widget_t)&(pwidg->head), mask, (int)key);
     }
+
+    if(key == KEY_ENTER || key == KEY_TAB)
+    {
+        if(psubp && psubp->sub_on_wchar)
+        {
+            pwidg->result = (*psubp->sub_on_wchar)((widget_t)&(pwidg->head), (wchar_t)key, psubp->sid, psubp->delta);
+            if(pwidg->result) return;
+        }
+
+        if(pdisp && pdisp->pf_on_wchar)
+        {
+            (*pdisp->pf_on_wchar)((widget_t)&(pwidg->head), (wchar_t)key);
+        }
+    }
 }}
 
-- (void)scrollWheel:(NSEvent *)nsEvent
+- (void)insertText:(id)string replacementRange:(NSRange)replacementRange
 {@autoreleasepool {
+    //[super insertText:string replacementRange:replacementRange];
     if([self isKindOfClass:[_CocoaView class]] == NO) return ;
 
     _CocoaView* ref_view = self;
     cocoa_widget_t* pwidg = (cocoa_widget_t*)ref_view.widget;
 
-    double deltaX = [nsEvent scrollingDeltaX];
-    double deltaY = [nsEvent scrollingDeltaY];
+    NSString* token;
+    NSEvent* nsEvent = [NSApp currentEvent];
 
-    int sx, sy;
+    if ([string isKindOfClass:[NSAttributedString class]])
+        token = [string string];
+    else
+        token = (NSString*) string;
 
-    if ([nsEvent hasPreciseScrollingDeltas])
+    NSRange range = NSMakeRange(0, [token length]);
+    while (range.length)
     {
-        sx = -(int)deltaX;
-        sy = -(int)deltaY;
-    }else
-    {
-        sx = -(int)(deltaX * 0.1);
-        sy = -(int)(deltaY * 0.1);
-    }
+        uint32_t widechar = 0;
 
-    if_subproc_t* psubp = (if_subproc_t*)ref_view.subproc;
-    if(psubp && psubp->sub_on_scroll)
-    {
-        if(sx)
-            pwidg->result = (*psubp->sub_on_scroll)((widget_t)&(pwidg->head), 1, sx, psubp->sid, psubp->delta);
-        else
-            pwidg->result = 0;
+        if ([token getBytes:&widechar
+                       maxLength:sizeof(widechar)
+                      usedLength:NULL
+                        encoding:NSUTF32StringEncoding
+                         options:0
+                           range:range
+                  remainingRange:&range])
+        {
+            if (widechar >= 0xf700 && widechar <= 0xf7ff)
+                continue;
 
-        if(sy)
-            pwidg->result = (*psubp->sub_on_scroll)((widget_t)&(pwidg->head), 0, sy, psubp->sid, psubp->delta);
-        else
-            pwidg->result = 0;
+            if_subproc_t* psubp = (if_subproc_t*)ref_view.subproc;
+            if(psubp && psubp->sub_on_wchar)
+            {
+                pwidg->result = (*psubp->sub_on_wchar)((widget_t)&(pwidg->head), (wchar_t)widechar, psubp->sid, psubp->delta);
+                if(pwidg->result) continue;
+            }
 
-        if(pwidg->result) return;
-    }
-
-    if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
-    if(pdisp && pdisp->pf_on_scroll)
-    {
-        if(sx)
-            (*pdisp->pf_on_scroll)((widget_t)&(pwidg->head), 1, sx);
-        
-        if(sy)
-            (*pdisp->pf_on_scroll)((widget_t)&(pwidg->head), 0, sy);
+            if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
+            if(pdisp && pdisp->pf_on_wchar)
+            {
+                (*pdisp->pf_on_wchar)((widget_t)&(pwidg->head), (wchar_t)widechar);
+            }
+        }
     }
 }}
 
@@ -1654,54 +1783,6 @@ static const NSRange emptyRange = { NSNotFound, 0 };
     const NSRect frame = [self frame];
     return NSMakeRect(frame.origin.x, frame.origin.y, 0.0, 0.0);
 }
-
-- (void)insertText:(id)string replacementRange:(NSRange)replacementRange
-{@autoreleasepool {
-    //[super insertText:string replacementRange:replacementRange];
-    if([self isKindOfClass:[_CocoaView class]] == NO) return ;
-
-    _CocoaView* ref_view = self;
-    cocoa_widget_t* pwidg = (cocoa_widget_t*)ref_view.widget;
-
-    NSString* token;
-    NSEvent* nsEvent = [NSApp currentEvent];
-
-    if ([string isKindOfClass:[NSAttributedString class]])
-        token = [string string];
-    else
-        token = (NSString*) string;
-
-    NSRange range = NSMakeRange(0, [token length]);
-    while (range.length)
-    {
-        uint32_t widechar = 0;
-
-        if ([token getBytes:&widechar
-                       maxLength:sizeof(widechar)
-                      usedLength:NULL
-                        encoding:NSUTF32StringEncoding
-                         options:0
-                           range:range
-                  remainingRange:&range])
-        {
-            if (widechar >= 0xf700 && widechar <= 0xf7ff)
-                continue;
-
-            if_subproc_t* psubp = (if_subproc_t*)ref_view.subproc;
-            if(psubp && psubp->sub_on_wchar)
-            {
-                pwidg->result = (*psubp->sub_on_wchar)((widget_t)&(pwidg->head), (wchar_t)widechar, psubp->sid, psubp->delta);
-                if(pwidg->result) continue;
-            }
-
-            if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
-            if(pdisp && pdisp->pf_on_wchar)
-            {
-                (*pdisp->pf_on_wchar)((widget_t)&(pwidg->head), (wchar_t)widechar);
-            }
-        }
-    }
-}}
 
 - (void)doCommandBySelector:(SEL)selector
 {@autoreleasepool {
@@ -1848,6 +1929,20 @@ widget_t _widget_create(const tchar_t* wname, dword_t wstyle, const xrect_t* wre
 
         [coc_window setDelegate:win_delegate];
     }
+
+    //NSAppearance *ape = new_view.effectiveAppearance;
+
+    NSColor *bkgColor = [NSColor windowBackgroundColor];
+    //if(ape) [bkgColor resolvedColorWithAppearance:ape];
+    _nscolor_to_xcolor(bkgColor, &(pwidg->clrs.clr_bkg));
+
+    NSColor *frgColor = [NSColor labelColor];
+    //if(ape) [frgColor resolvedColorWithAppearance:ape];
+    _nscolor_to_xcolor(frgColor, &(pwidg->clrs.clr_frg));
+
+    NSColor *txtColor = [NSColor textColor];
+    //if(ape) [txtColor resolvedColorWithAppearance:ape];
+    _nscolor_to_xcolor(txtColor, &(pwidg->clrs.clr_txt));
 
     pwidg->self = new_view;
 
@@ -2301,6 +2396,7 @@ visual_t _widget_client_context(widget_t wt)
 	ctx->head.tag = _VISUAL_DISPLAY;
     ctx->context = [nsContext CGContext];
 	ctx->type = CONTEXT_SCREEN;
+    ctx->fontset = g_fontset;
 	
 	return (visual_t)&(ctx->head);
 }}
@@ -2319,6 +2415,7 @@ visual_t _widget_window_context(widget_t wt)
 	ctx->head.tag = _VISUAL_DISPLAY;
     ctx->context = [nsContext CGContext];
 	ctx->type = CONTEXT_SCREEN;
+    ctx->fontset = g_fontset;
 
 	return (visual_t)&(ctx->head);
 }}
@@ -3252,6 +3349,14 @@ void _widget_set_color_mode(widget_t wt, const color_mod_t* pclr)
 	_widget_enum_child(wt, _widget_set_child_color_mode, (vword_t)pclr);
 }}
 
+const color_mod_t* _widget_get_color_mode_ptr(widget_t wt)
+{@autoreleasepool {
+    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
+    _CocoaView* coc_view = pwidg->self;
+
+    return &(pwidg->clrs);
+}}
+
 void _widget_get_color_mode(widget_t wt, color_mod_t* pclr)
 {@autoreleasepool {
     cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
@@ -3276,54 +3381,6 @@ float _widget_get_diaph(widget_t wt)
     _CocoaView* coc_view = pwidg->self;
 
 	return pwidg->diaph;
-}}
-
-void _widget_noti_xfont(widget_t wt, const xfont_t* pxf)
-{@autoreleasepool {
-    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
-    _CocoaView* coc_view = pwidg->self;
-
-    if_dispatch_t* pdisp = (if_dispatch_t*)coc_view.dispatch;
-	if(pdisp && pdisp->pf_on_xfont)
-	{
-		(*pdisp->pf_on_xfont)(wt, pxf);
-	}
-}}
-
-void _widget_noti_xface(widget_t wt, const xface_t* pxa)
-{@autoreleasepool {
-    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
-    _CocoaView* coc_view = pwidg->self;
-
-    if_dispatch_t* pdisp = (if_dispatch_t*)coc_view.dispatch;
-	if(pdisp && pdisp->pf_on_xface)
-	{
-		(*pdisp->pf_on_xface)(wt, pxa);
-	}
-}}
-
-void _widget_noti_xbrush(widget_t wt, const xbrush_t* pxb)
-{@autoreleasepool {
-    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
-    _CocoaView* coc_view = pwidg->self;
-
-    if_dispatch_t* pdisp = (if_dispatch_t*)coc_view.dispatch;
-	if(pdisp && pdisp->pf_on_xbrush)
-	{
-		(*pdisp->pf_on_xbrush)(wt, pxb);
-	}
-}}
-
-void _widget_noti_xpen(widget_t wt, const xpen_t* pxp)
-{@autoreleasepool {
-    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
-    _CocoaView* coc_view = pwidg->self;
-
-    if_dispatch_t* pdisp = (if_dispatch_t*)coc_view.dispatch;
-	if(pdisp && pdisp->pf_on_xpen)
-	{
-		(*pdisp->pf_on_xpen)(wt, pxp);
-	}
 }}
 
 int	_widget_do_main(widget_t wt)

@@ -5,7 +5,7 @@
 
 	@author ZhangWenQuan, JianDe HangZhou ZheJiang China, Mail: powersuite@hotmaol.com
 
-	@doc der document
+	@doc ASN.1 DER document
 
 	@module	der.h | interface file
 
@@ -29,59 +29,18 @@ LICENSE.GPL3 for more details.
 
 #include "../xdkdef.h"
 
-/**
-* \name DER constants
-* These constants comply with the DER encoded ASN.1 type tags.
-* DER encoding uses hexadecimal representation.
-* An example DER sequence is:\n
-* - 0x02 -- tag indicating INTEGER
-* - 0x01 -- length in octets
-* - 0x05 -- value
-* Such sequences are typically read into \c ::x509_buf.
-* \{
-*/
-#define DER_BOOLEAN                 0x01
-#define DER_INTEGER                 0x02
-#define DER_BIT_STRING              0x03
-#define DER_OCTET_STRING            0x04
-#define DER_NULL                    0x05
-#define DER_OID                     0x06
-#define DER_UTF8_STRING             0x0C
-#define DER_SEQUENCE                0x10
-#define DER_SET                     0x11
-#define DER_PRINTABLE_STRING        0x13
-#define DER_T61_STRING              0x14
-#define DER_IA5_STRING              0x16
-#define DER_UTC_TIME                0x17
-#define DER_GENERALIZED_TIME        0x18
-#define DER_UNIVERSAL_STRING        0x1C
-#define DER_BMP_STRING              0x1E
-#define DER_PRIMITIVE               0x00
-#define DER_CONSTRUCTED             0x20
-#define DER_CONTEXT_SPECIFIC        0x80
-
-/*
-* Bit masks for each of the components of an ASN.1 tag as specified in
-* ITU X.690 (08/2015), section 8.1 "General rules for encoding",
-* paragraph 8.1.2.2:
-*
-* Bit  8     7   6   5          1
-*     +-------+-----+------------+
-*     | Class | P/C | Tag number |
-*     +-------+-----+------------+
-*/
-#define DER_TAG_CLASS_MASK          0xC0
-#define DER_TAG_PC_MASK             0x20
-#define DER_TAG_VALUE_MASK          0x1F
-
 
 #ifdef	__cplusplus
 extern "C" {
 #endif
 
-EXP_API dword_t der_read_tag(const byte_t *buf, byte_t *ptag, dword_t* plen);
+EXP_API dword_t der_read_sequence(const byte_t *buf, dword_t* plen);
 
-EXP_API dword_t der_write_tag(byte_t *buf, byte_t tag, dword_t len);
+EXP_API dword_t der_write_sequence(byte_t *buf, dword_t len);
+
+EXP_API dword_t der_read_set(const byte_t *buf, dword_t* plen);
+
+EXP_API dword_t der_write_set(byte_t *buf, dword_t len);
 
 EXP_API dword_t der_read_bool(const byte_t *buf, bool_t *pval);
 
@@ -91,7 +50,7 @@ EXP_API dword_t der_read_integer(const byte_t *buf, int *pval);
 
 EXP_API dword_t der_write_integer(byte_t *buf, int val);
 
-EXP_API dword_t der_read_bit_string(const byte_t *buf, byte_t** pstr, dword_t* plen, dword_t* pbit);
+EXP_API dword_t der_read_bit_string(const byte_t *buf, byte_t** pstr, dword_t* pbits);
 
 EXP_API dword_t der_write_bit_string(byte_t *buf, const byte_t* bstr, dword_t bits);
 
@@ -123,13 +82,8 @@ EXP_API dword_t der_read_ia5_string(const byte_t *buf, char** pstr, dword_t* ple
 
 EXP_API dword_t der_write_ia5_string(byte_t *buf, const char* str, dword_t len);
 
-EXP_API dword_t der_read_sequence_of(const byte_t *buf, dword_t* plen);
-
-EXP_API dword_t der_write_sequence_of(byte_t *buf, dword_t len);
-
-
-#if defined(XDK_SUPPORT_TEST)
-EXP_API void test_der(void);
+#if defined (DEBUG) || defined (_DEBUG)
+EXP_API void der_self_test(void);
 #endif
 
 #ifdef	__cplusplus

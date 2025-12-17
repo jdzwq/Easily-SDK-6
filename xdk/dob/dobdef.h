@@ -117,10 +117,10 @@ typedef enum{
 }SORT_ORDER;
 
 /*sort link node callback function*/
-typedef int(*CALLBACK_SORTLINK)(link_t_ptr plk1, link_t_ptr plk2, void* pv);
+typedef int(CALLBACK *PF_SORTLINK)(link_t_ptr plk1, link_t_ptr plk2, void* pv);
 
 /*enum link node callback function*/
-typedef bool_t(*CALLBACK_ENUMLINK)(link_t_ptr plk, void* pv);
+typedef bool_t(CALLBACK *PF_ENUMLINK)(link_t_ptr plk, void* pv);
 
 
 

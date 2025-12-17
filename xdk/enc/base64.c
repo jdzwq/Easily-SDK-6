@@ -26,6 +26,8 @@ LICENSE.GPL3 for more details.
 ***********************************************************************/
 #include "base64.h"
 
+#include "../xdkimp.h"
+#include "../xdkstd.h"
 
 const wchar_t w_base_table[] = L"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 const schar_t a_base_table[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
@@ -338,3 +340,30 @@ int w_xbas_encode(const byte_t* src, dword_t slen, wchar_t* dest, int dlen)
 
 	return count;
 }
+
+/**********************************************************************/
+#if defined (DEBUG) || defined (_DEBUG)
+void base64_self_test()
+{
+	printf("test base64 encoding...\n");
+
+	byte_t bys_buf[10] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09};
+	int bys_len;
+	tchar_t enc_buf[1024] = {0};
+	int enc_len;
+
+	printf("the bytes: %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x \n",
+		bys_buf[0],bys_buf[1],bys_buf[2],bys_buf[3],bys_buf[4],bys_buf[5],bys_buf[6],bys_buf[7],bys_buf[8],bys_buf[9]);
+
+	enc_len = xbas_encode((byte_t*)bys_buf, 10, enc_buf, 1024);
+	_tprintf(_T("the base64: %s\n"), enc_buf);
+
+	xmem_zero((void*)bys_buf, 10);
+	bys_len = xbas_decode(enc_buf, enc_len, bys_buf, 10);
+
+	printf("the bytes: %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x \n",
+		bys_buf[0],bys_buf[1],bys_buf[2],bys_buf[3],bys_buf[4],bys_buf[5],bys_buf[6],bys_buf[7],bys_buf[8],bys_buf[9]);
+
+	printf("test base64 end...\n");
+}
+#endif

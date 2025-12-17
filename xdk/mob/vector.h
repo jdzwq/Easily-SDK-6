@@ -33,159 +33,151 @@ LICENSE.GPL3 for more details.
 extern "C" {
 #endif
 
-/*
-@FUNCTION vector_alloc: alloc a vector.
-@INPUT int count: the vector size.
-@INPUT int dimen: the vector dimens, 1-dimens like: (x), 2-dimens like: (x,y), 3-dimens like (x,y,z).
-@RETURN vector_t: return vector struct.
-*/
+/**********************************************************************
+@FUNCTION: calc vector data content size needed.
+@INPUT: array size of vector.
+@INPUT: dimension of vector.
+@RETURN: the bytes needed.
+***********************************************************************/
+EXP_API dword_t vector_need_size(int count, int dimen);
+
+/**********************************************************************
+@FUNCTION: alloc a empty vector.
+@INPUT: the vector array size.
+@INPUT: the vector dimens, 1-dimens like: (x), 2-dimens like: (x,y), 3-dimens like (x,y,z).
+@RETURN: new vector object.
+***********************************************************************/
 EXP_API vector_t vector_alloc(int count, int dimen);
 
-/*
-@FUNCTION vector_free: free the vector.
-@INPUT vector_t: the vector struct.
-@RETURN void: none.
-*/
+/**********************************************************************
+@FUNCTION: free the vector.
+@INPUT: the vector object.
+@RETURN: none.
+***********************************************************************/
 EXP_API void vector_free(vector_t vec);
 
-/*
-@FUNCTION vector_clone: clone a vector from souce.
-@INPUT const vector_t: the source vector struct.
-@RETURN vector_t: return vector struct.
-*/
-EXP_API vector_t vector_clone(vector_t vec);
-
-/*
-@FUNCTION vector_clear: clear vector elements.
-@INPUT vector_t: the vector struct.
-@INPUT int count: the vector size.
-@INPUT int dimen: the vector dimens, 1-dimens like: (x), 2-dimens like: (x,y), 3-dimens like (x,y,z).
-@RETURN void: none.
-*/
-EXP_API void vector_reset(vector_t vec, int count, int dimen);
-
-/*
-@FUNCTION vector_data: get vector data buffer.
-@INPUT vector_t vec: the vector object.
-@RETURN void*: the data buffer.
-*/
+/**********************************************************************
+@FUNCTION: get vector data buffer.
+@INPUT: the vector object.
+@RETURN: the vector inner data buffer.
+@NOTE: the buffer can reading, but MUST NOT write it.
+***********************************************************************/
 EXP_API const void* vector_data(vector_t vec);
 
-/*
-@FUNCTION vector_attach: attach vector data buffer.
-@INPUT vector_t vec: the vector object.
-@INPUT void* data: the data buffer.
-@RETURN void*: the data buffer.
-*/
+/**********************************************************************
+@FUNCTION: attach a data buffer to vector.
+@INPUT: the vector object.
+@INPUT: the data buffer.
+@RETURN: none.
+@NOTE: the data buffer must be attached after vector alloc.
+***********************************************************************/
 EXP_API void vector_attach(vector_t vec, void* data);
 
-/*
-@FUNCTION vector_detach: detach vector data buffer.
-@INPUT vector_t vec: the vector object.
-@RETURN void*: the data buffer.
-*/
+/**********************************************************************
+@FUNCTION: detach vector data buffer.
+@INPUT the vector object.
+@RETURN: the data buffer detached.
+@NOTE: the data buffer must be detached before vector free.
+***********************************************************************/
 EXP_API void* vector_detach(vector_t vec);
 
-/*
-@FUNCTION vector_zero: set vector elements value to zero.
-@INPUT vector_t: the vector struct.
-@RETURN void: none.
-*/
-EXP_API void vector_zero(vector_t vec);
-
-/*
-@FUNCTION vector_unit: set vector elements value to 1.
-@INPUT vector_t: the vector struct.
-@RETURN void: none.
-*/
-EXP_API void vector_unit(vector_t vec);
-
-/*
-@FUNCTION vector_copy: copy the vector.
-@INPUT vector_t: the destent vector struct.
-@INPUT const vector_t: the srource vector struct.
-@RETURN void: none.
-*/
-EXP_API void vector_copy(vector_t dest, vector_t src);
-
-/*
-@FUNCTION vector_get_count: get vector elements count.
-@INPUT vector_t: the vector struct.
-@RETURN int: element count.
-*/
+/**********************************************************************
+@FUNCTION: get vector array size.
+@INPUT: the vector object.
+@RETURN: the array size.
+***********************************************************************/
 EXP_API int vector_get_count(vector_t vec);
 
-/*
-@FUNCTION vector_get_dimen: get vector dimensions.
-@INPUT vector_t: the vector struct.
-@RETURN int: dimensions.
-*/
+/**********************************************************************
+@FUNCTION: get vector dimensions.
+@INPUT: the vector object.
+@RETURN: the dimension size.
+***********************************************************************/
 EXP_API int vector_get_dimen(vector_t vec);
 
-/*
-@FUNCTION vector_set_value: set vector element value.
-@INPUT vector_t: the vector struct.
-@INPUT int i: the vector element zero based index.
-@INPUT double A: the A value to set.
-@INPUT ...: variant double value to set according to vector dimens.
-@RETURN void: none.
-*/
+/**********************************************************************
+@FUNCTION: set vector element value.
+@INPUT: the vector object.
+@INPUT: the vector element zero based index.
+@INPUT: variant double value to set according to vector dimens.
+@RETURN: none.
+***********************************************************************/
 EXP_API void vector_set_value(vector_t vec, int i, ...);
 
-/*
-@FUNCTION vector_get_value: get vector element value.
-@INPUT vector_t: the vector struct.
-@INPUT int i: the vector element zero based index.
-@INPUT double* pA: the buffer for return A value.
-@INPUT ...: variant double value buffer for return more, according to vector dimens.
-@RETURN void: none.
-*/
+/**********************************************************************
+@FUNCTION: get vector element value.
+@INPUT: the vector object.
+@INPUT: the vector element zero based index.
+@INPUT: variant double value buffer for return more, according to vector dimens.
+@RETURN: none.
+***********************************************************************/
 EXP_API void vector_get_value(vector_t vec, int i, ...);
 
-/*
-@FUNCTION vector_parse: parse vector element value from string.
-@INPUT vector_t vec: the vector struct.
-@INPUT const tchar_t* str: string token, number separated by space.
-@INPUT int len: length of string token.
-@RETURN void: none.
-*/
+/**********************************************************************
+@FUNCTION: parse vector element value from string.
+@INPUT: the vector object.
+@INPUT: string token, number separated by space.
+@INPUT: length of string token.
+@RETURN: none.
+***********************************************************************/
 EXP_API void vector_parse(vector_t vec, const tchar_t* str, int len);
 
-/*
-@FUNCTION vector_format: format vector element to string.
-@INPUT vector_t vec: the vector struct.
-@OUTPUT tchar_t* buf: buffer for formating.
-@INPUT int max: the buffer size in characters, not include terminate character.
-@RETURN int: return the formated string token length.
-*/
+/**********************************************************************
+@FUNCTION: format vector element to string.
+@INPUT: the vector object.
+@OUTPUT: buffer for formating.
+@INPUT: the buffer size in characters, not include terminate character.
+@RETURN: the formated string token length.
+***********************************************************************/
 EXP_API int vector_format(vector_t vec, tchar_t* buf, int max);
 
-/*
-@FUNCTION vector_encode: encode vector object to bytes buffer.
-@INPUT vector vec: the vector object.
-@OUTPUT byte_t* buf: the bytes buffer.
-@INPUT dword_t max: the buffer size in bytes.
-@RETURN dword_t: return encoded bytes.
-*/
-EXP_API dword_t vector_encode(vector_t vec, byte_t* buf, dword_t max);
+/**********************************************************************
+@FUNCTION: encode vector object to bytes buffer.
+@INPUT: the vector object.
+@OUTPUT: the bytes buffer.
+@INPUT: the buffer size in bytes.
+@RETURN: encoded bytes, zero for failed.
+@NOTE: buffer can be NULL for testing how many bytes will be encoded.
+***********************************************************************/
+EXP_API dword_t vector_encode(vector_t vec, byte_t* buf);
 
-/*
-@FUNCTION vector_decode: decode vector object from bytes buffer.
-@INPUT vector vec: the vector object.
-@INPUT const byte_t* buf: the data buffer.
-@INPUT dword_t n: the data size in bytes.
-*/
+/**********************************************************************
+@FUNCTION: decode vector object from bytes buffer.
+@INPUT: the vector object.
+@INPUT: the data buffer.
+@RETURN: bytes decoded, zero for failed.
+@NOTE: vec can be NULL for testing how many bytes will be decoded.
+***********************************************************************/
 EXP_API dword_t vector_decode(vector_t vec, const byte_t* buf);
 
-EXP_API vector_t vector_shift(vector_t vt, ...);
+/**********************************************************************
+@FUNCTION: set vector all elements value to zero.
+@INPUT: the vector struct.
+@RETURN: none.
+***********************************************************************/
+EXP_API void vector_zero(vector_t vec);
 
-EXP_API vector_t vector_rotate(vector_t vt, double ang);
+/**********************************************************************
+@FUNCTION: set vector all elements value to 1.
+@INPUT: the vector struct.
+@RETURN: none.
+***********************************************************************/
+EXP_API void vector_unit(vector_t vec);
 
-EXP_API vector_t vector_scale(vector_t vt, ...);
+EXP_API void vector_shift(vector_t dst, vector_t src, ...);
 
-EXP_API vector_t vector_shear(vector_t vt, double sx, double sy);
+EXP_API void vector_rotate(vector_t dst, vector_t src, double ang);
 
-EXP_API vector_t vector_trans(vector_t vt, matrix_t mt);
+EXP_API void vector_scale(vector_t dst, vector_t src, ...);
+
+EXP_API void vector_shear(vector_t dst, vector_t src, double sx, double sy);
+
+EXP_API void vector_trans(vector_t dst, vector_t src, matrix_t mt);
+
+/**********************************************************************/
+#if defined (DEBUG) || defined (_DEBUG)
+EXP_API void vector_self_test();
+#endif
 
 #ifdef	__cplusplus
 }

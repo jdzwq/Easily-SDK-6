@@ -168,7 +168,7 @@ link_t_ptr get_words_item(link_t_ptr ptr, const tchar_t* val, int len)
 	words_table_t* pht;
 	words_item_t* phe;
 	link_t_ptr plk;
-	int rt;
+	int rt, step = 0;
 
 	XDK_ASSERT(ptr && ptr->tag == lkWordsTable);
 
@@ -183,11 +183,15 @@ link_t_ptr get_words_item(link_t_ptr ptr, const tchar_t* val, int len)
 
 	while (plk)
 	{
+		step ++;
 		phe = WordsItemFromLink(plk);
 
 		rt = compare_text(phe->text, -1, val, -1, 1);
 		if (rt == 0)
+		{
+			PUT_THREEBYTE_LOC(plk->lru,0,step);
 			return plk;
+		}
 		else if (rt < 0 && (pht->order != ORDER_NONE))
 			break;
 
@@ -436,3 +440,49 @@ int words_table_format_tokens(link_t_ptr ptr, tchar_t* buf, int max, tchar_t fee
 	}
 	return total;
 }
+
+/**********************************************************************/
+#if defined (DEBUG) || defined (_DEBUG)
+void words_table_self_test()
+{
+	printf("test words table...\n");
+
+	dword_t i;
+	int min, max,step,zero = 0,total = 0;
+	link_t_ptr plk, ptr;
+	tchar_t val[CHS_LEN + 1] = {0};
+
+	ptr = create_words_table(ORDER_ASCEND);
+
+	for (i = 0x4E00; i <= 0x9FA5; i++)
+	{
+		ucs_byte_to_mbs((wchar_t)i, val);
+		insert_words_item(ptr, val, -1);
+	}
+
+	min = MAX_LONG;
+	max = 0;
+	for (i = 0x4E00; i <= 0x9FA5; i++)
+	{
+		ucs_byte_to_mbs((wchar_t)i, val);
+		plk = get_words_item(ptr, val, -1);
+		
+		if(plk)
+		{
+			step = GET_THREEBYTE_LOC(plk->lru, 0);
+			total += step;
+			if(min > step) min = step;
+			if(max < step) max = step;
+		}
+		else
+		{
+			zero ++;
+		}
+	}
+	
+	destroy_words_table(ptr);
+
+	printf("table size is:%d, total step is:%d, average step is:%.2f\n", i, total, (float)total / i);
+	printf("min step is:%d, max step is:%d, not find is:%d\n", min, max, zero);
+}
+#endif

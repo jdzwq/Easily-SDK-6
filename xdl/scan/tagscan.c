@@ -42,9 +42,8 @@ typedef struct _tag_scan_contet{
 
 	int point;
 
-	PF_TEXT_SIZE pf_text_size;
-	void* ctx;
-	const xfont_t* pxf;
+	const measure_interface* pmi;
+	const xface_t* pxa;
 }tag_scan_contet;
 
 #define TAGWORD_INDICATOR_NEXT_NODE		0
@@ -68,17 +67,17 @@ typedef struct _tag_scan_contet{
 #define TAGWORD_IS_PARAGRAPH_SPLIT(pch)	(pch[0] == '\n')
 #endif
 
-bool_t call_tag_is_paging(void* ctx)
+bool_t INFCALL call_tag_is_paging(void* ctx)
 {
 	return 0;
 }
 
-bool_t call_tag_break_page(void* ctx)
+bool_t INFCALL call_tag_break_page(void* ctx)
 {
 	return 0;
 }
 
-int call_tag_next_page(void* ctx)
+int INFCALL call_tag_next_page(void* ctx)
 {
 	tag_scan_contet* pscan = (tag_scan_contet*)ctx;
 
@@ -91,9 +90,10 @@ int call_tag_next_page(void* ctx)
 }
 
 
-int call_tag_next_words(void* ctx, tchar_t** ppch, xsize_t* pse, bool_t* pins, bool_t* pdel, bool_t* psel, bool_t* patom)
+int INFCALL call_tag_next_words(void* ctx, tchar_t** ppch, xsize_t* pse, bool_t* pins, bool_t* pdel, bool_t* psel, bool_t* patom)
 {
 	tag_scan_contet* pscan = (tag_scan_contet*)ctx;
+	measure_interface* pif = pscan->pmi;
 	int n;
 	xsize_t xs;
 
@@ -144,7 +144,7 @@ int call_tag_next_words(void* ctx, tchar_t** ppch, xsize_t* pse, bool_t* pins, b
 			}
 			else
 			{
-				(*pscan->pf_text_size)(pscan->ctx, pscan->pxf, pscan->pch, n, &xs);
+				(*pif->pf_measure_size)(pif->ctx, pscan->pch, n, &xs);
 
 				if (xs.w)
 					pse->w = xs.w;
@@ -171,9 +171,10 @@ int call_tag_next_words(void* ctx, tchar_t** ppch, xsize_t* pse, bool_t* pins, b
 	return n;
 }
 
-int call_tag_insert_words(void* ctx, tchar_t* pch, xsize_t* pse)
+int INFCALL call_tag_insert_words(void* ctx, tchar_t* pch, xsize_t* pse)
 {
 	tag_scan_contet* pscan = (tag_scan_contet*)ctx;
+	measure_interface* pif = pscan->pmi;
 	int n = 0;
 	xsize_t xs = { 0 };
 	link_t_ptr dlk;
@@ -221,7 +222,7 @@ int call_tag_insert_words(void* ctx, tchar_t* pch, xsize_t* pse)
 		}
 		else
 		{
-			(*pscan->pf_text_size)(pscan->ctx, pscan->pxf, pch, n, &xs);
+			(*pif->pf_measure_size)(pif->ctx, pch, n, &xs);
 
 			if (!xs.w)
 				xs.w = pse->w;
@@ -258,7 +259,7 @@ int call_tag_insert_words(void* ctx, tchar_t* pch, xsize_t* pse)
 	return n;
 }
 
-int call_tag_delete_words(void* ctx)
+int INFCALL call_tag_delete_words(void* ctx)
 {
 	tag_scan_contet* pscan = (tag_scan_contet*)ctx;
 	int n = 0;
@@ -338,27 +339,37 @@ int call_tag_delete_words(void* ctx)
 	return n;
 }
 
-void call_tag_cur_object(void* ctx, void** pobj)
+void INFCALL call_tag_cur_object(void* ctx, void** pobj)
 {
 	tag_scan_contet* pscan = (tag_scan_contet*)ctx;
 
 	*pobj = (void*)pscan->nlk;
 }
 
-void scan_tag_text(link_t_ptr ptr, const measure_interface* pif, const xfont_t* pxf, const xface_t* pxa, int bx, int by, int bw, int bh, bool_t paged, PF_SCAN_TEXTOR_CALLBACK pf, void* pp)
+void INFCALL call_tag_object_attr(void* ctx, void* pobj, object_attr_t* pret)
+{
+	tag_scan_contet* pscan = (tag_scan_contet*)ctx;
+
+	if(pret->ret & OBJECT_ATTR_XFACE)
+	{
+		*(pret->ppxa) = pscan->pxa;
+	}
+}
+
+void scan_tag_text(link_t_ptr ptr, const measure_interface* pif, const viewbox_t* pvb, const xface_t* pxa, bool_t paged, PF_SCAN_TEXTOR_CALLBACK pf, void* pp)
 {
 	tag_scan_contet ro = { 0 };
-	wordscan_interface it = { 0 };
+	words_scan_interface it = { 0 };
 
 	ro.tag = ptr;
 	ro.nlk = NULL;
-	ro.pf_text_size = pif->pf_measure_size;
-	ro.ctx = pif->ctx;
-	ro.pxf = pxf;
+	ro.pmi = pif;
+	ro.pxa = pxa;
 
 	it.ctx = (void*)&ro;
 	it.pf_is_paging = call_tag_is_paging;
 	it.pf_cur_object = call_tag_cur_object;
+	it.pf_object_attr = call_tag_object_attr;
 	it.pf_delete_word = call_tag_delete_words;
 	it.pf_insert_word = call_tag_insert_words;
 	it.pf_next_word = call_tag_next_words;
@@ -374,5 +385,5 @@ void scan_tag_text(link_t_ptr ptr, const measure_interface* pif, const xfont_t* 
 		call_tag_next_page((void*)&ro);
 	}
 	
-	scan_object_text(pif, pxf, pxa, bx, by, bw, bh, &it, pf, pp);
+	scan_object_text(pif, pvb, &it, pf, pp);
 }

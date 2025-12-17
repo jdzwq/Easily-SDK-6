@@ -59,7 +59,7 @@
 #define GDI_ATTR_FONT_STYLE			_T("font-style")
 #define GDI_ATTR_FONT_SIZE			_T("font-size")
 #define GDI_ATTR_FONT_WEIGHT		_T("font-weight")
-#define GDI_ATTR_FONT_COLOR			_T("text-color")
+#define GDI_ATTR_TEXT_COLOR			_T("text-color")
 #define GDI_ATTR_TEXT_ALIGN			_T("text-align")
 #define GDI_ATTR_LINE_ALIGN			_T("line-align")
 #define GDI_ATTR_TEXT_WRAP			_T("text-wrap")
@@ -85,10 +85,10 @@
 #define GDI_ATTR_FONT_WEIGHT_NORMAL		_T("400")
 #define GDI_ATTR_FONT_WEIGHT_BOLD		_T("700")
 
-#define GDI_ATTR_FONT_SIZE_FOOTER			_T("9")
-#define GDI_ATTR_FONT_SIZE_SYSTEM			_T("10.5")
-#define GDI_ATTR_FONT_SIZE_TEXT				_T("12")
-#define GDI_ATTR_FONT_SIZE_TITLE			_T("14")
+#define GDI_ATTR_FONT_SIZE_FOOTER			_T("9pt")
+#define GDI_ATTR_FONT_SIZE_SYSTEM			_T("10.5pt")
+#define GDI_ATTR_FONT_SIZE_TEXT				_T("12pt")
+#define GDI_ATTR_FONT_SIZE_TITLE			_T("14pt")
 
 #define GDI_ATTR_FONT_STYLE_REGULAR		_T("regular")
 #define GDI_ATTR_FONT_STYLE_ITALIC		_T("italic")

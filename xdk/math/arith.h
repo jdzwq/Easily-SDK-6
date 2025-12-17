@@ -41,7 +41,7 @@ extern "C" {
 
 EXP_API void dbl_init(void);
 
-EXP_API bool_t dbl_is_nar(double x);
+EXP_API bool_t dbl_isnar(double x);
 
 EXP_API double dbl_pow(double x, double y);
 

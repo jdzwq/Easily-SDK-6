@@ -286,8 +286,6 @@ widget_t vertbox_create(widget_t widget, dword_t style, const xrect_t* pxr)
 
 		EVENT_ON_TIMER(hand_vertbox_timer)
 
-		
-
 	EVENT_END_DISPATH
 
 	return widget_create(NULL, style, pxr, widget, &ev);
@@ -297,15 +295,12 @@ void vertbox_popup_size(widget_t widget, xsize_t* pxs)
 {
 	vertbox_delta_t* ptd = GETVERTBOXDELTA(widget);
 	measure_interface im = { 0 };
-	xfont_t xf = { 0 };
 
 	XDK_ASSERT(ptd != NULL);
 
-	default_xfont(&xf);
-
 	get_canvas_measure(widget_get_canvas(widget), &im);
 
-	calc_vertbox_size(&im, &xf, pxs);
+	calc_vertbox_size(&im, pxs);
 
 	widget_size_to_pt(widget, pxs);
 

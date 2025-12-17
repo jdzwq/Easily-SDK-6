@@ -44,7 +44,7 @@ extern "C" {
 @OUTPUT xrect_t* pxr: the rect struct for returning float member.
 @RETURN void: none.
 */
-EXP_API void	calc_text_rect(const drawing_interface* pif, const xfont_t* pxf, const xface_t* pxa, const tchar_t* txt, int len, xrect_t* pxr);
+EXP_API void calc_text_rect(const drawing_interface* pif, const xface_t* pxa, const tchar_t* txt, int len, xrect_t* pxr);
 
 /*
 @FUNCTION draw_var_text: draw string object in canvas using millimeter coordinate.
@@ -55,7 +55,7 @@ EXP_API void	calc_text_rect(const drawing_interface* pif, const xfont_t* pxf, co
 @INPUT string_t var: the string object.
 @RETURN void: none.
 */
-EXP_API void	draw_var_text(const drawing_interface* pif, const xfont_t* pxf, const xface_t* pxa, const xrect_t* pxr, string_t var);
+EXP_API void draw_var_text(const drawing_interface* pif, const xface_t* pxa, const xrect_t* pxr, string_t var);
 
 /*
 @FUNCTION draw_tag_text: draw tag document in canvas using millimeter coordinate.
@@ -67,7 +67,7 @@ EXP_API void	draw_var_text(const drawing_interface* pif, const xfont_t* pxf, con
 @INPUT int page: the page will be drawed, the page index is 1-based.
 @RETURN void: none.
 */
-EXP_API void	draw_tag_text(const drawing_interface* pif, const xfont_t* pxf, const xface_t* pxa, const xrect_t* pxr, link_t_ptr tag, int page);
+EXP_API void draw_tag_text(const drawing_interface* pif, const xface_t* pxa, const xrect_t* pxr, link_t_ptr tag, int page);
 
 /*
 @FUNCTION calc_tag_pages: calc tag document pages in canvas using millimeter coordinate.
@@ -78,7 +78,7 @@ EXP_API void	draw_tag_text(const drawing_interface* pif, const xfont_t* pxf, con
 @INPUT link_t_ptr tag: the tag document.
 @RETURN int: return total pages.
 */
-EXP_API int		calc_tag_pages(const drawing_interface* pif, const xfont_t* pxf, const xface_t* pxa, const xrect_t* pxr, link_t_ptr memo);
+EXP_API int	calc_tag_pages(const drawing_interface* pif, const xface_t* pxa, const xrect_t* pxr, link_t_ptr memo);
 
 /*
 @FUNCTION draw_memo_text: draw memo document in canvas using millimeter coordinate.
@@ -90,7 +90,7 @@ EXP_API int		calc_tag_pages(const drawing_interface* pif, const xfont_t* pxf, co
 @INPUT int page: the page will be drawed, the page index is 1-based.
 @RETURN void: none.
 */
-EXP_API void draw_memo_text(const drawing_interface* pif, const xfont_t* pxf, const xface_t* pxa, const xrect_t* pxr, link_t_ptr memo, int page);
+EXP_API void draw_memo_text(const drawing_interface* pif, const xface_t* pxa, const xrect_t* pxr, link_t_ptr memo, int page);
 
 /*
 @FUNCTION calc_memo_pages: calc memo document pages in canvas using millimeter coordinate.
@@ -101,7 +101,7 @@ EXP_API void draw_memo_text(const drawing_interface* pif, const xfont_t* pxf, co
 @INPUT link_t_ptr memo: the memo document.
 @RETURN int: return total pages.
 */
-EXP_API int		calc_memo_pages(const drawing_interface* pif, const xfont_t* pxf, const xface_t* pxa, const xrect_t* pxr, link_t_ptr memo);
+EXP_API int	calc_memo_pages(const drawing_interface* pif, const xface_t* pxa, const xrect_t* pxr, link_t_ptr memo);
 
 /*
 @FUNCTION draw_rich_text: draw rich document in canvas using millimeter coordinate.
@@ -113,7 +113,7 @@ EXP_API int		calc_memo_pages(const drawing_interface* pif, const xfont_t* pxf, c
 @INPUT int page: the page will be drawed, the page index is 1-based.
 @RETURN void: none.
 */
-EXP_API void	draw_rich_text(const drawing_interface* pif, const xfont_t* pxf, const xface_t* pxa, const xrect_t* pxr, link_t_ptr rich, int page);
+EXP_API void draw_rich_text(const drawing_interface* pif, const xface_t* pxa, const xrect_t* pxr, link_t_ptr rich, int page);
 
 /*
 @FUNCTION calc_rich_pages: calc rich document pages in canvas using millimeter coordinate.
@@ -124,7 +124,7 @@ EXP_API void	draw_rich_text(const drawing_interface* pif, const xfont_t* pxf, co
 @INPUT link_t_ptr rich: the rich document.
 @RETURN int: return total pages.
 */
-EXP_API int		calc_rich_pages(const drawing_interface* pif, const xfont_t* pxf, const xface_t* pxa, const xrect_t* pxr, link_t_ptr rich);
+EXP_API int	calc_rich_pages(const drawing_interface* pif, const xface_t* pxa, const xrect_t* pxr, link_t_ptr rich);
 
 
 #ifdef	__cplusplus

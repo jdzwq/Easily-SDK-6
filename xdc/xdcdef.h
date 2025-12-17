@@ -162,10 +162,6 @@ typedef struct _splitor_t{
 #define EVENT_ON_SELF_COMMAND(proc)		pev->pf_on_self_command = proc;
 #define EVENT_ON_SYSCMD_CLICK(proc)		pev->pf_on_syscmd_click = proc;
 #define EVENT_ON_TIMER(proc)			pev->pf_on_timer = proc;
-#define EVENT_ON_XFONT(proc)			pev->pf_on_xfont = proc;
-#define EVENT_ON_XFACE(proc)			pev->pf_on_xface = proc;
-#define EVENT_ON_XBRUSH(proc)			pev->pf_on_xbrush = proc;
-#define EVENT_ON_XPEN(proc)				pev->pf_on_xpen = proc;
 #define EVENT_ON_SPLITOR_IMPLEMENT		{pev->pf_on_mouse_move = widget_splitor_on_mousemove;pev->pf_on_lbutton_down=widget_splitor_on_lbuttondown;pev->pf_on_lbutton_up=widget_splitor_on_lbuttonup;pev->pf_on_size=widget_splitor_on_size;pev->pf_on_paint=widget_splitor_on_paint;}
 #define EVENT_ON_DOCKER_IMPLEMENT		{pev->pf_on_mouse_move = widget_docker_on_mousemove;pev->pf_on_lbutton_down=widget_docker_on_lbuttondown;pev->pf_on_lbutton_up=widget_docker_on_lbuttonup;pev->pf_on_paint=widget_docker_on_paint;}
 #define EVENT_END_DISPATH				}

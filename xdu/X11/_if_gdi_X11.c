@@ -31,6 +31,8 @@ LICENSE.GPL3 for more details.
 
 #ifdef XDU_SUPPORT_CONTEXT_GDI
 
+fontset_t g_fontset = NULL;
+
 static void DPtoLP(visual_t rdc, XPoint* pt,int n)
 {
 	int i;
@@ -112,12 +114,90 @@ static void calc_penmode(const xpen_t* pxp, int* fs, int* ds)
 
 void _gdi_init(int osv)
 {
+	xfont_t xf;
 
+	default_xfont(&xf);
+	g_fontset = _gdi_create_fontset(&xf);
 }
 
 void _gdi_uninit(void)
 {
-	
+	if(g_fontset) _gdi_destroy_fontset(g_fontset);
+
+	g_fontset = NULL;
+}
+
+void _gdi_set_xfont(visual_t rdc, const xfont_t* pxf)
+{
+	X11_context_t* ctx = TypePtrFromHead(X11_context_t, rdc);
+	X11_fontset_t* fnt = TypePtrFromHead(X11_fontset_t, ctx->fontset);
+	XftFont* xft_font;
+	char* family = NULL;
+	double size = 0.0;
+	int weight = 0;
+	int slant;
+	tchar_t style[20] = {0};
+
+	xft_font = (XftFont*)fnt->font_object;
+	if(xft_font->pattern)
+	{
+		FcPatternGetString(xft_font->pattern, FC_FAMILY, 0, (FcChar8 **)&family);
+		FcPatternGetDouble(xft_font->pattern, FC_SIZE, 0, &size);
+		FcPatternGetInteger(xft_font->pattern, FC_WEIGHT, 0, &weight);
+		FcPatternGetInteger(xft_font->pattern, FC_SLANT, 0, &slant);
+		if(slant == FC_SLANT_ITALIC)
+			xscpy(style, GDI_ATTR_FONT_STYLE_ITALIC);
+		else if(slant == FC_SLANT_OBLIQUE)
+			xscpy(style, GDI_ATTR_FONT_STYLE_OBLIQUE);
+		else
+			xscpy(style, GDI_ATTR_FONT_STYLE_REGULAR);
+	}
+
+	if(size == xstof(pxf->size) && weight == xstol(pxf->weight) && xsicmp(style, pxf->style) == 0 && xsicmp(family, pxf->family) == 0)
+	{
+		return;
+	}
+
+	if(g_fontset)
+	{
+		_gdi_destroy_fontset(g_fontset);
+		g_fontset = NULL;
+	}
+
+    g_fontset = _gdi_create_fontset(pxf);
+	ctx->fontset = g_fontset;
+}
+
+void _gdi_get_xfont(visual_t rdc, xfont_t* pxf)
+{
+	X11_context_t* ctx = TypePtrFromHead(X11_context_t, rdc);
+	X11_fontset_t* fnt = TypePtrFromHead(X11_fontset_t, ctx->fontset);
+
+	XftFont* xft_font;
+	char* family = NULL;
+	double size = 0.0;
+	int weight = 0;
+	int slant;
+
+	xft_font = (XftFont*)fnt->font_object;
+	if(!xft_font->pattern) return;
+
+	FcPatternGetString(xft_font->pattern, FC_FAMILY, 0, (FcChar8 **)&family);
+	if(family) xscpy(pxf->family, family);
+
+	FcPatternGetDouble(xft_font->pattern, FC_SIZE, 0, &size);
+	ftoxs((float)size, pxf->size, NUM_LEN);
+
+	FcPatternGetInteger(xft_font->pattern, FC_WEIGHT, 0, &weight);
+	ltoxs(weight, pxf->weight, NUM_LEN);
+
+	FcPatternGetInteger(xft_font->pattern, FC_SLANT, 0, &slant);
+	if(slant == FC_SLANT_ITALIC)
+		xscpy(pxf->style, GDI_ATTR_FONT_STYLE_ITALIC);
+	else if(slant == FC_SLANT_OBLIQUE)
+		xscpy(pxf->style, GDI_ATTR_FONT_STYLE_OBLIQUE);
+	else
+		xscpy(pxf->style, GDI_ATTR_FONT_STYLE_REGULAR);
 }
 
 void _gdi_get_point(visual_t rdc, xcolor_t* pxc, const xpoint_t* ppt)
@@ -1052,10 +1132,10 @@ void _gdi_draw_sector(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, cons
 	_gdi_draw_path(rdc, pxp, pxb, ta, pa, 8);
 }
 
-void _gdi_draw_text(visual_t rdc,const xfont_t* pxf,const xface_t* pxa,const xrect_t* prt,const tchar_t* txt,int len)
+void _gdi_draw_text(visual_t rdc,const xface_t* pxa,const xrect_t* prt,const tchar_t* txt,int len)
 {
 	X11_context_t* ctx = TypePtrFromHead(X11_context_t, rdc);
-	X11_fontset_t* fst;
+	X11_fontset_t* fst = TypePtrFromHead(X11_fontset_t, ctx->fontset);
 	XftFont* xft_font;
 	XftDraw* xft_draw;
 	XftColor xft_color;
@@ -1076,10 +1156,7 @@ void _gdi_draw_text(visual_t rdc,const xfont_t* pxf,const xface_t* pxa,const xre
 	if(len < 0) len = xslen(txt);
 	if(!len) return;
 
-	fst = (X11_fontset_t*)_gdi_create_fontset(pxf);
-	if(!fst) return;
-
-	xft_font = (XftFont*)fst->font_set;
+	xft_font = (XftFont*)fst->font_object;
 
 	XftTextExtentsUtf8(g_display, xft_font, (const FcChar8*)txt, len, &exten);
 
@@ -1098,9 +1175,9 @@ void _gdi_draw_text(visual_t rdc,const xfont_t* pxf,const xface_t* pxa,const xre
 
 	xft_draw = XftDrawCreate(g_display, ctx->device, ctx->visual, ctx->color);
 
-	if(pxf)
+	if(pxa)
 	{
-		parse_xcolor(&xc, pxf->color);
+		parse_xcolor(&xc, pxa->text_color);
 		render_color.red = XRGB(xc.r);
 		render_color.green = XRGB(xc.g);
 		render_color.blue = XRGB(xc.b);
@@ -1110,93 +1187,154 @@ void _gdi_draw_text(visual_t rdc,const xfont_t* pxf,const xface_t* pxa,const xre
     XftDrawStringUtf8(xft_draw, &xft_color, xft_font, pt[0].x, pt[0].y, (XftChar8*)txt, len);
 
     XftDrawDestroy(xft_draw);
-	_gdi_destroy_fontset((fontset_t)&(fst->head));
 }
 
-void _gdi_text_out(visual_t rdc, const xfont_t* pxf, const xpoint_t* ppt, const tchar_t* txt, int len)
+void _gdi_text_out(visual_t rdc, const xface_t* pxa, const xpoint_t* ppt, const tchar_t* txt, int len)
 {
 	X11_context_t* ctx = TypePtrFromHead(X11_context_t, rdc);
-	X11_fontset_t* fst;
+	X11_fontset_t* fst = TypePtrFromHead(X11_fontset_t, ctx->fontset);
 	XftFont* xft_font;
 	XftDraw* xft_draw;
 	XftColor xft_color;
 	XRenderColor render_color = { 0, 0, 0, 65535 };
 	xcolor_t xc;
+	xsize_t xs = {0};
 
 	XGlyphInfo exten = {0};
 
 	XPoint pt;
 	pt.x = ppt->x;
 	pt.y = ppt->y;
-	DPtoLP(rdc,&pt,1);
 
 	if(len < 0) len = xslen(txt);
 	if(!len) return;
 
-	fst = (X11_fontset_t*)_gdi_create_fontset(pxf);
-	if(!fst) return;
+	_gdi_font_size(rdc, &xs);
+	pt.y += xs.h;
+	DPtoLP(rdc,&pt,1);
 
-	xft_font = (XftFont*)fst->font_set;
-
-	XftTextExtentsUtf8(g_display, xft_font, (const FcChar8*)txt, len, &exten);
-	pt.y += exten.height;
+	xft_font = (XftFont*)fst->font_object;
 
 	xft_draw = XftDrawCreate(g_display, ctx->device, ctx->visual, ctx->color);
 
-	if(pxf)
+	if(pxa)
 	{
-		parse_xcolor(&xc, pxf->color);
+		parse_xcolor(&xc, pxa->text_color);
 		render_color.red = XRGB(xc.r);
 		render_color.green = XRGB(xc.g);
 		render_color.blue = XRGB(xc.b);
 	}
+
 	XftColorAllocValue(g_display, ctx->visual, ctx->color, &render_color, &xft_color);
 
     XftDrawStringUtf8(xft_draw, &xft_color, xft_font, pt.x, pt.y, (XftChar8*)txt, len);
 
     XftDrawDestroy(xft_draw);
-	_gdi_destroy_fontset((fontset_t)&(fst->head));
 }
 
-void _gdi_text_size(visual_t rdc, const xfont_t* pxf, const tchar_t* txt, int len, xsize_t* pxs)
+void _gdi_text_rect(visual_t rdc, const xface_t* pxa, const tchar_t* txt, int len, xrect_t* prt)
 {
 	X11_context_t* ctx = TypePtrFromHead(X11_context_t, rdc);
-	X11_fontset_t* fst;
+
+	int c, n = 0, total = 0;
+	tchar_t pch[CHS_LEN + 1] = {0};
+	xsize_t se;
+	int w, h, maxw = 0;
+
+	if(len < 0) len = xslen(txt);
+	if(!len) return;
+
+	w = 0;
+	h = 0;
+	n = 0;
+	while (n++ < len)
+	{
+		c = peek_word((txt + total), pch);
+		total += c;
+
+		_gdi_word_size(ctx->fontset, pch, c, &se);
+
+		if (!h)
+		{
+			if (is_null(pxa->line_height))
+				h = se.h;
+			else
+				h = (int)((float)se.h * xstof(pxa->line_height));
+		}
+
+		if (pxa && compare_text(pxa->text_wrap, -1, GDI_ATTR_TEXT_WRAP_WORDBREAK, -1, 1) == 0)
+		{
+			if (prt->w && (w + se.w > prt->w))
+			{
+				if (is_null(pxa->line_height))
+					h += se.h;
+				else
+					h += (int)((float)se.h * xstof(pxa->line_height));
+
+				w = 0;
+				total -= c;
+				n--;
+			}
+			else
+			{
+				w += se.w;
+			}
+		}
+		else if (pxa && compare_text(pxa->text_wrap, -1, GDI_ATTR_TEXT_WRAP_LINEBREAK, -1, 1) == 0)
+		{
+			if (pch[0] == _T('\n'))
+			{
+				if (is_null(pxa->line_height))
+					h += se.h;
+				else
+					h += (int)((float)se.h * xstof(pxa->line_height));
+
+				w = 0;
+			}
+			else if (prt->w && (w + se.w > prt->w))
+			{
+				if (is_null(pxa->line_height))
+					h += se.h;
+				else
+					h += (int)((float)se.h * xstof(pxa->line_height));
+
+				w = 0;
+				total -= xslen(pch);
+				n--;
+			}
+			else
+			{
+				w += se.w;
+			}
+		}
+		else
+		{
+			w += se.w;
+		}
+
+		if (maxw < w) maxw = w;
+	}
+
+	prt->h = h;
+	if (!prt->w) prt->w = maxw;
+}
+
+void _gdi_text_size(visual_t rdc, const tchar_t* txt, int len, xsize_t* pxs)
+{
+	X11_context_t* ctx = TypePtrFromHead(X11_context_t, rdc);
+	X11_fontset_t* fst = TypePtrFromHead(X11_fontset_t, ctx->fontset);
 	XftFont* xft_font;
 	XGlyphInfo exten = {0};
 
 	if(len < 0) len = xslen(txt);
 	if(!len) return;
 
-	fst = (X11_fontset_t*)_gdi_create_fontset(pxf);
-	if(!fst) return;
-	
-	xft_font = (XftFont*)fst->font_set;
+	xft_font = (XftFont*)fst->font_object;
 
 	XftTextExtentsUtf8(g_display, xft_font, (const FcChar8*)txt, len, &exten);
 
 	pxs->w = exten.width;
 	pxs->h = exten.height;
-
-    _gdi_destroy_fontset((fontset_t)&(fst->head));
-}
-
-void _gdi_font_size(visual_t rdc, const xfont_t* pxf, xsize_t* pxs)
-{
-	X11_context_t* ctx = TypePtrFromHead(X11_context_t, rdc);
-	X11_fontset_t* fst;
-	XftFont* xft_font;
-	XGlyphInfo exten = {0};
-
-	fst = (X11_fontset_t*)_gdi_create_fontset(pxf);
-	if(!fst) return;
-	
-	xft_font = (XftFont*)fst->font_set;
-
-	pxs->w = xft_font->max_advance_width;
-	pxs->h = xft_font->ascent + xft_font->descent + xft_font->height;
-
-    _gdi_destroy_fontset((fontset_t)&(fst->head));
 }
 
 #ifdef XDU_SUPPORT_CONTEXT_BITMAP
@@ -1577,6 +1715,34 @@ static void format_font_pattern(const xfont_t* pxf, tchar_t* buf)
 	}
 }
 
+void _gdi_font_size(visual_t rdc, xsize_t* pxs)
+{
+	X11_context_t* ctx = TypePtrFromHead(X11_context_t, rdc);
+	X11_fontset_t* fst = TypePtrFromHead(X11_fontset_t, ctx->fontset);
+	XftFont* xft_font;
+	double size = 0.0;
+	XGlyphInfo exten = {0};
+
+	xft_font = (XftFont*)fst->font_object;
+	if(xft_font->pattern)
+	{
+		FcPatternGetDouble(xft_font->pattern, FC_SIZE, 0, &size);
+	}else
+	{
+		size = (xft_font->ascent + xft_font->descent) / 2;
+	}
+
+	pxs->w = LOGPTPERMM;
+	pxs->h = (int)size;
+}
+
+fontset_t _gdi_get_fontset(visual_t rdc)
+{
+	X11_context_t* ctx = TypePtrFromHead(X11_context_t, rdc);
+
+	return ctx->fontset;
+}
+
 fontset_t _gdi_create_fontset(const xfont_t* pxf)
 {
 	X11_fontset_t* fst;
@@ -1595,7 +1761,7 @@ fontset_t _gdi_create_fontset(const xfont_t* pxf)
 
 	fst = (X11_fontset_t*)xmem_alloc_handle(sizeof(X11_fontset_t));
 	fst->head.tag = _HANDLE_FONTSET;
-	fst->font_set = (void*)xft_font;
+	fst->font_object = (void*)xft_font;
 
 	return (fontset_t)&(fst->head);
 }
@@ -1604,7 +1770,7 @@ void _gdi_destroy_fontset(fontset_t ft)
 {
 	X11_fontset_t* fst = TypePtrFromHead(X11_fontset_t, ft);
 
-	if(fst && fst->font_set) XftFontClose(g_display, (XftFont*)(fst->font_set));
+	if(fst && fst->font_object) XftFontClose(g_display, (XftFont*)(fst->font_object));
 
 	if(fst) xmem_free_handle((xhand_t)fst);
 }
@@ -1612,7 +1778,7 @@ void _gdi_destroy_fontset(fontset_t ft)
 void _gdi_word_size(fontset_t ft, const tchar_t* pch, int chs, xsize_t* pxs)
 {
 	X11_fontset_t* fst = TypePtrFromHead(X11_fontset_t, ft);
-	XftFont* xft_font = (XftFont*)fst->font_set;
+	XftFont* xft_font = (XftFont*)fst->font_object;
 	XGlyphInfo exten = {0};
 
 	XftTextExtentsUtf8(g_display, xft_font, (const FcChar8*)pch, chs, &exten);

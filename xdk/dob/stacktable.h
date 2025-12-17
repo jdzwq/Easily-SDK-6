@@ -33,20 +33,62 @@ LICENSE.GPL3 for more details.
 extern "C" {
 #endif
 
+/**********************************************************************
+@FUNCTION: create a stack table.
+@RETURN: return the stack table link component.
+***********************************************************************/
 EXP_API link_t_ptr create_stack_table(void);
 
+/**********************************************************************
+@FUNCTION: destroy a stack table.
+@INPUT: the stack table link component.
+@RETURN: none.
+***********************************************************************/
 EXP_API void destroy_stack_table(link_t_ptr st);
 
+/**********************************************************************
+@FUNCTION: clear a stack table contents.
+@INPUT: the stack table link component.
+@RETURN: none.
+***********************************************************************/
 EXP_API void clear_stack_table(link_t_ptr st);
 
+/**********************************************************************
+@FUNCTION: push a node into stack table.
+@INPUT: the stack table link component.
+@INPUT: the data pointer.
+@RETURN: none.
+***********************************************************************/
 EXP_API void push_stack_node(link_t_ptr st,void* data);
 
+/**********************************************************************
+@FUNCTION: pop top node from stack table.
+@INPUT: the stack table link component.
+@RETURN: if stack has top node, return the data pointer, 
+	otherwise return NULL, and the node removed.
+***********************************************************************/
 EXP_API void* pop_stack_node(link_t_ptr st);
 
+/**********************************************************************
+@FUNCTION: pick top node from stack table.
+@INPUT: the stack table link component.
+@RETURN: if stack has top node, return the data pointer, otherwise return NULL.
+***********************************************************************/
 EXP_API void* pick_stack_node(link_t_ptr st);
 
+/**********************************************************************
+@FUNCTION: get nodes count from stack table.
+@INPUT: the stack table link component.
+@RETURN: the nodes in stack table.
+***********************************************************************/
 EXP_API int get_stack_node_count(link_t_ptr st);
 
+/**********************************************************************
+@FUNCTION: peek node at some position from stack table.
+@INPUT: the stack table link component.
+@INPUT: the zero-based position.
+@RETURN: if the position has node, return the data pointer, otherwise return NULL.
+***********************************************************************/
 EXP_API void* peek_stack_node(link_t_ptr st, int index);
 
 #ifdef	__cplusplus

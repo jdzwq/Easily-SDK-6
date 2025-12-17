@@ -31,7 +31,7 @@ LICENSE.GPL3 for more details.
 
 #ifdef XDK_SUPPORT_RANDOM
 
-void system_random32(dword_t* pn)
+void system_srand()
 {
 	if_random_t* pif;
 
@@ -39,10 +39,10 @@ void system_random32(dword_t* pn)
 
 	XDK_ASSERT(pif != NULL);
 
-	(*pif->pf_system_random32)(pn);
+	(*pif->pf_system_srand)();
 }
 
-void system_random64(lword_t* pn)
+dword_t system_rand32()
 {
 	if_random_t* pif;
 
@@ -50,7 +50,18 @@ void system_random64(lword_t* pn)
 
 	XDK_ASSERT(pif != NULL);
 
-	(*pif->pf_system_random64)(pn);
+	return (*pif->pf_system_rand32)();
+}
+
+lword_t system_rand64()
+{
+	if_random_t* pif;
+
+	pif = PROCESS_RANDOM_INTERFACE;
+
+	XDK_ASSERT(pif != NULL);
+
+	return (*pif->pf_system_rand64)();
 }
 
 #endif /*XDK_SUPPORT_RANDOM*/

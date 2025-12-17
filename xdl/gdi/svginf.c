@@ -58,6 +58,8 @@ void svg_get_canvas_interface(canvas_t canv, drawing_interface* pif)
 	pif->pf_draw_equilagon = (PF_DRAW_EQUILAGON)svg_draw_equilagon;
 	pif->pf_draw_path = (PF_DRAW_PATH)svg_draw_path;
 
+	pif->pf_set_xfont = (PF_SET_XFONT)svg_set_xfont;
+	pif->pf_get_xfont = (PF_GET_XFONT)svg_get_xfont;
 	pif->pf_font_size = (PF_FONT_SIZE)svg_font_size;
 	pif->pf_text_size = (PF_TEXT_SIZE)svg_text_size;
 	pif->pf_draw_text = (PF_DRAW_TEXT)svg_draw_text;
@@ -69,12 +71,6 @@ void svg_get_canvas_interface(canvas_t canv, drawing_interface* pif)
 
 	pif->pf_get_visual_interface = (PF_GET_INTERFACE)svg_get_visual_interface;
 	pif->pf_get_visual_handle = (PF_GET_VISUAL)svg_get_canvas_visual;
-
-	parse_xcolor(&pif->mode.clr_bkg, GDI_ATTR_RGB_WHITE);
-	parse_xcolor(&pif->mode.clr_frg, GDI_ATTR_RGB_GRAY);
-	parse_xcolor(&pif->mode.clr_txt, GDI_ATTR_RGB_BLACK);
-	parse_xcolor(&pif->mode.clr_msk, GDI_ATTR_RGB_WHITE);
-	parse_xcolor(&pif->mode.clr_ico, GDI_ATTR_RGB_BLACK);
 }
 
 void svg_get_visual_interface(visual_t visual, drawing_interface* pif)
@@ -106,6 +102,8 @@ void svg_get_visual_interface(visual_t visual, drawing_interface* pif)
 	pif->pf_draw_equilagon = (PF_DRAW_EQUILAGON)svg_draw_equilagon_raw;
 	pif->pf_draw_path = (PF_DRAW_PATH)svg_draw_path_raw;
 
+	pif->pf_set_xfont = (PF_SET_XFONT)svg_set_xfont_raw;
+	pif->pf_get_xfont = (PF_GET_XFONT)svg_get_xfont_raw;
 	pif->pf_font_size = (PF_FONT_SIZE)svg_font_size_raw;
 	pif->pf_text_size = (PF_TEXT_SIZE)svg_text_size_raw;
 	pif->pf_draw_text = (PF_DRAW_TEXT)svg_draw_text_raw;
@@ -120,7 +118,8 @@ void svg_get_visual_measure(visual_t view, measure_interface* pim)
 {
 	pim->ctx = (void*)view;
 
-	pim->pf_measure_pixel = (PF_MEASURE_PIXEL)svg_pixel_size_raw;
+	pim->pf_set_xfont = (PF_SET_XFONT)svg_set_xfont_raw;
+	pim->pf_get_xfont = (PF_GET_XFONT)svg_get_xfont_raw;
 	pim->pf_measure_font = (PF_MEASURE_FONT)svg_font_size_raw;
 	pim->pf_measure_size = (PF_MEASURE_SIZE)svg_text_size_raw;
 	pim->pf_measure_rect = (PF_MEASURE_RECT)svg_text_rect_raw;
@@ -130,7 +129,8 @@ void svg_get_canvas_measure(canvas_t canv, measure_interface* pim)
 {
 	pim->ctx = (void*)canv;
 
-	pim->pf_measure_pixel = (PF_MEASURE_PIXEL)svg_pixel_size;
+	pim->pf_set_xfont = (PF_SET_XFONT)svg_set_xfont;
+	pim->pf_get_xfont = (PF_GET_XFONT)svg_get_xfont;
 	pim->pf_measure_font = (PF_MEASURE_FONT)svg_font_size;
 	pim->pf_measure_size = (PF_MEASURE_SIZE)svg_text_size;
 	pim->pf_measure_rect = (PF_MEASURE_RECT)svg_text_rect;

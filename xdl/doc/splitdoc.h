@@ -194,11 +194,11 @@ EXP_API void unsplit_item(link_t_ptr ilk);
 /*
 @FUNCTION enum_split_item: enm the items in splitor document.
 @INPUT link_t_ptr ptr: the splitor link component.
-@INPUT CALLBACK_ENUMLINK pf: the enumeration callback function, if the function return zero, enumeration will be breaked.
+@INPUT PF_ENUMLINK pf: the enumeration callback function, if the function return zero, enumeration will be breaked.
 @INPUT void* param: the parameter translate into callback function.
 @RETURN link_t_ptr: return the splitor item link component breaked at.
 */
-EXP_API link_t_ptr enum_split_item(link_t_ptr ptr, CALLBACK_ENUMLINK pf, void* param);
+EXP_API link_t_ptr enum_split_item(link_t_ptr ptr, PF_ENUMLINK pf, void* param);
 
 /*
 @FUNCTION get_split_first_child_item: get the first child item.

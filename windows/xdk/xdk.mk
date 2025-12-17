@@ -10,7 +10,7 @@
 !include xdk.txt
 !endif
 
-ARCH = x64
+ARCH = x86
 MODULE = xdk
 
 INC_PATH = ../../include
@@ -62,7 +62,7 @@ ASMS = $(patsubsti %.obj,%.asm,$(OBJS))
 {$(SRC_PATH)/enc}.c{$(OBJ_PATH)}.obj::
 	$(CC) $(CFLAGS) /I $(INC_PATH) $<
 
-{$(SRC_PATH)/maa}.c{$(OBJ_PATH)}.obj::
+{$(SRC_PATH)/aob}.c{$(OBJ_PATH)}.obj::
 	$(CC) $(CFLAGS) /I $(INC_PATH) $<
 
 {$(SRC_PATH)/util}.c{$(OBJ_PATH)}.obj::
@@ -78,6 +78,9 @@ ASMS = $(patsubsti %.obj,%.asm,$(OBJS))
 	$(CC) $(CFLAGS) /I $(INC_PATH) $<
 
 {$(SRC_PATH)/dob}.c{$(OBJ_PATH)}.obj::
+	$(CC) $(CFLAGS) /I $(INC_PATH) $<
+
+{$(SRC_PATH)/vob}.c{$(OBJ_PATH)}.obj::
 	$(CC) $(CFLAGS) /I $(INC_PATH) $<
 
 {$(SRC_PATH)/net}.c{$(OBJ_PATH)}.obj::
@@ -113,11 +116,12 @@ test:
 	for %i in ($(SRC_PATH)/acp/*.c) do @echo $(OBJ_PATH)/%i \>>$(MODULE).txt
 	for %i in ($(SRC_PATH)/str/*.c) do @echo $(OBJ_PATH)/%i \>>$(MODULE).txt
 	for %i in ($(SRC_PATH)/enc/*.c) do @echo $(OBJ_PATH)/%i \>>$(MODULE).txt
-	for %i in ($(SRC_PATH)/maa/*.c) do @echo $(OBJ_PATH)/%i \>>$(MODULE).txt
+	for %i in ($(SRC_PATH)/aob/*.c) do @echo $(OBJ_PATH)/%i \>>$(MODULE).txt
 	for %i in ($(SRC_PATH)/util/*.c) do @echo $(OBJ_PATH)/%i \>>$(MODULE).txt
 	for %i in ($(SRC_PATH)/bar/*.c) do @echo $(OBJ_PATH)/%i \>>$(MODULE).txt
 	for %i in ($(SRC_PATH)/zip/*.c) do @echo $(OBJ_PATH)/%i \>>$(MODULE).txt
 	for %i in ($(SRC_PATH)/mob/*.c) do @echo $(OBJ_PATH)/%i \>>$(MODULE).txt
+	for %i in ($(SRC_PATH)/vob/*.c) do @echo $(OBJ_PATH)/%i \>>$(MODULE).txt
 	for %i in ($(SRC_PATH)/dob/*.c) do @echo $(OBJ_PATH)/%i \>>$(MODULE).txt
 	for %i in ($(SRC_PATH)/net/*.c) do @echo $(OBJ_PATH)/%i \>>$(MODULE).txt
 	for %i in ($(SRC_PATH)/stm/*.c) do @echo $(OBJ_PATH)/%i \>>$(MODULE).txt

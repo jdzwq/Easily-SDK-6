@@ -2,6 +2,12 @@
 #ifndef _XDKOBJ_H
 #define _XDKOBJ_H
 
+#include "aob/bytearray.h"
+#include "aob/wordarray.h"
+#include "aob/integerarray.h"
+#include "aob/numericarray.h"
+#include "aob/stringarray.h"
+
 #include "mob/set.h"
 #include "mob/vector.h"
 #include "mob/matrix.h"
@@ -10,9 +16,10 @@
 #include "mob/variant.h"
 #include "mob/varstr.h"
 #include "mob/message.h"
-#include "mob/queue.h"
-#include "mob/linear.h"
-#include "mob/spinlock.h"
+
+#include "vob/queue.h"
+#include "vob/sequence.h"
+#include "vob/spinlock.h"
 
 #include "dob/multitree.h"
 #include "dob/bplustree.h"

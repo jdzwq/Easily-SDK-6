@@ -28,8 +28,7 @@ LICENSE.GPL3 for more details.
 #ifndef _XDKDEF_H
 #define	_XDKDEF_H
 
-
-#if defined(_WIN32) || defined(WIN32) || defined(WINCE)
+#if defined(WIN32) || defined(WINCE)
 #define _OS_WINDOWS
 #elif defined(LINUX) || defined(__LINUX__) || defined(__linux__)
 #define _OS_LINUX
@@ -39,9 +38,9 @@ LICENSE.GPL3 for more details.
 #define _OS_UNKNOW
 #endif
 
-#if defined(_WIN64) || defined(__x86_64__) || defined(__amd64__) || defined(__aarch64__)
+#if defined(_WIN64) || defined(__x64__) || defined(__x86_64__) || defined(__amd64__) || defined(__aarch64__)
 #define _OS_64
-#elif defined(_WIN32) || defined(__i386__) || defined(__arm__)
+#elif defined(_WIN32) || defined(__x86__) || defined(__x64_86__) || defined(__i386__) || defined(i386) || defined(__arm__)
 #define _OS_32
 #endif
 
@@ -103,6 +102,8 @@ LICENSE.GPL3 for more details.
 #define CALLBACK
 #endif
 #endif
+
+#define INFCALL
 
 #ifndef _OS_WINDOWS
 #if defined(_UNICODE) || defined(UNICODE)

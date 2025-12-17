@@ -33,205 +33,211 @@ LICENSE.GPL3 for more details.
 extern "C" {
 #endif
 
-/*
-@FUNCTION string_alloc: alloc a string object.
-@RETURN string_t: return the string object
-*/
+/**********************************************************************
+@FUNCTION: alloc a empty string object.
+@RETURN: string object.
+***********************************************************************/
 EXP_API string_t string_alloc(void);
 
-/*
-@FUNCTION string_free: free a string object.
-@INPUT string_t vs: the string object.
-@RETURN void: none.
-*/
+/**********************************************************************
+@FUNCTION: free a string object.
+@INPUT: the string object.
+@RETURN: none.
+***********************************************************************/
 EXP_API void string_free(string_t vs);
 
-/*
-@FUNCTION string_attach: attach string data buffer.
-@INPUT string_t vs: the string object.
-@INPUT tchar_t* data: the data buffer.
-@RETURN void*: the data buffer.
-*/
+/**********************************************************************
+@FUNCTION: attach outer characters buffer to string.
+@INPUT: the string object.
+@INPUT: the characters buffer.
+@RETURN: none.
+***********************************************************************/
 EXP_API void string_attach(string_t vs, tchar_t* data);
 
-/*
-@FUNCTION string_detach: detach string data buffer.
-@INPUT string_t vs: the string object.
-@RETURN tchar_t*: the data buffer.
-*/
+/**********************************************************************
+@FUNCTION: detach string characters buffer.
+@INPUT: the string object.
+@RETURN: the characters buffer.
+***********************************************************************/
 EXP_API tchar_t* string_detach(string_t vs);
 
-/*
-@FUNCTION string_incre: increase string object buffer size.
-@INPUT string_t vs: the string object.
-@INPUT int len: length in characters to increased.
-@RETURN void: none.
-*/
+/**********************************************************************
+@FUNCTION: increase string object buffer size.
+@INPUT: the string object.
+@INPUT: length in characters to increased.
+@RETURN: none.
+***********************************************************************/
 EXP_API void string_incre(string_t vs, int len);
 
-/*
-@FUNCTION string_cat: cat a string token to string object.
-@INPUT string_t vs: the string object.
-@INPUT const tchar_t* str: the string token.
-@INPUT int len: length in characters of string token.
-@RETURN int: return total string length in characters in string object.
-*/
+/**********************************************************************
+@FUNCTION: cat a string token to string object.
+@INPUT: the string object.
+@INPUT: the string token.
+@INPUT: length in characters of string token.
+@RETURN: now string length in characters after catting.
+***********************************************************************/
 EXP_API int	string_cat(string_t vs, const tchar_t* str, int len);
 
-/*
-@FUNCTION string_cpy: copy a string token to string object.
-@INPUT string_t vs: the string object.
-@INPUT const tchar_t* str: the string token.
-@INPUT int len: length in characters of string token.
-@RETURN int: return total string length in characters in the string object.
-*/
+/**********************************************************************
+@FUNCTION: copy a string token to string object.
+@INPUT: the string object.
+@INPUT: the string token.
+@INPUT: length in characters of string token.
+@RETURN: now string length in characters after copying.
+***********************************************************************/
 EXP_API int	string_cpy(string_t vs, const tchar_t* str, int len);
 
-/*
-@FUNCTION string_printf: fill string object using printf.
-@INPUT string_t vs: the string object.
-@INPUT const tchar_t* fmt: the format token.
-@INPUT ...: variable parameters.
-@RETURN int: return total string length in characters in the string object.
-*/
+/**********************************************************************
+@FUNCTION: fill string object using printf.
+@INPUT: the string object.
+@INPUT: the format token.
+@INPUT: some variable parameters.
+@RETURN: now string length in characters after filling.
+***********************************************************************/
 EXP_API int string_printf(string_t vs, const tchar_t* fmt, ...);
 
-/*
-@FUNCTION string_append: append string object using printf.
-@INPUT string_t vs: the string object.
-@INPUT const tchar_t* fmt: the format token.
-@INPUT ...: variable parameters.
-@RETURN int: return total string length in characters in the string object.
-*/
+/**********************************************************************
+@FUNCTION: append token to string object using printf.
+@INPUT: the string object.
+@INPUT: the format token.
+@INPUT: some variable parameters.
+@RETURN: now string length in characters after appending.
+***********************************************************************/
 EXP_API int string_append(string_t vs, const tchar_t* fmt, ...);
 
-/*
-@FUNCTION string_ptr: get string object buffer pointer.
-@INPUT string_t vs: the string object.
-@RETURN const tchar_t*: return the buffer pointer.
-*/
+/**********************************************************************
+@FUNCTION: get string object inner buffer.
+@INPUT: the string object.
+@RETURN: inner string buffer.
+@NOTE: the buffer can used for reading, but must not write it.
+***********************************************************************/
 EXP_API const tchar_t* string_ptr(string_t vs);
 
-/*
-@FUNCTION string_len: get string token length of the string object.
-@INPUT string_t vs: the string object.
-@RETURN int*: return the string token length in characters.
-*/
+/**********************************************************************
+@FUNCTION: get string length of the string object.
+@INPUT: the string object.
+@RETURN: length in characters.
+***********************************************************************/
 EXP_API int string_len(string_t vs);
 
-/*
-@FUNCTION string_empty: empty string buffer of the string object.
-@INPUT string_t vs: the string object.
-@RETURN void: none.
-*/
+/**********************************************************************
+@FUNCTION: empty string object.
+@INPUT: the string object.
+@RETURN: none.
+***********************************************************************/
 EXP_API void string_empty(string_t vs);
 
-/*
-@FUNCTION string_is_empty: test string buffer is empty.
-@INPUT string_t vs: the string object.
-@RETURN bool_t: nonezero for the buffer of string object is empty, otherwise return zero.
-*/
+/**********************************************************************
+@FUNCTION: test string object is empty.
+@INPUT: the string object.
+@RETURN: nonezero for empty string object, otherwise return zero.
+***********************************************************************/
 EXP_API bool_t string_is_empty(string_t vs);
 
-/*
-@FUNCTION string_clone: clone a new string object.
-@INPUT string_t vs: the string object.
-@RETURN string_t: the new string object.
-*/
+/**********************************************************************
+@FUNCTION: clone a new string object.
+@INPUT: the string object.
+@RETURN: the new string object cloned.
+***********************************************************************/
 EXP_API string_t string_clone(string_t vs);
 
-/*
-@FUNCTION string_resize: resize string buffer size of the string object.
-@INPUT string_t vs: the string object.
-@INPUT len: the new size in characters, not include terminate character.
-@RETURN int: the new size.
-*/
+/**********************************************************************
+@FUNCTION: resize string inner buffer size.
+@INPUT: the string object.
+@INPUT: the new size in characters.
+@RETURN: the string inner buffer size.
+@NOTE: the inner buffer size not always equal to string token length.
+***********************************************************************/
 EXP_API int string_resize(string_t vs, int len);
 
-/*
-@FUNCTION string_encode: encode the string object and output to buffer.
-@INPUT string_t vs: the string object.
-@INPUT int encode: the code type, it can be _UTF8, _UTF16_BIG, _UTF16_LIT, _GB2312.
-@OUTPUT buf: the bytes buffer for outputing.
-@INPUT dword_t max: the buffer size.
-@RETURN dword_t: return the outputed byte size.
-*/
-EXP_API dword_t string_encode(string_t vs, int encode, byte_t* buf, dword_t max);
-
-/*
-@FUNCTION string_decode: decode buffer into the string object.
-@INPUT string_t vs: the string object.
-@INPUT int encode: the code type, it can be _UTF8, _UTF16_BIG, _UTF16_LIT, _GB2312.
-@INPUT const buf: the bytes buffer to decoding.
-@INPUT dword_t size: the buffer content size.
-@RETURN int: return string token length in characters in string object.
-*/
-EXP_API int string_decode(string_t vs, int encode, const byte_t* buf, dword_t size);
-
-/*
-@FUNCTION string_ensure_buf: expand buffer size of the string object 
-@INPUT string_t vs: the string object.
-@INPUT int len: the string buffer size in characters, not include terminate character.
-@RETURN tchar_t: return string buffer pointer.
-*/
+/**********************************************************************
+@FUNCTION: ensure string inner buffer size matching the need, then return the buffer fro operating. 
+@INPUT: the string object.
+@INPUT: the need buffer size in characters, not include terminate character.
+@RETURN: inner buffer.
+@NOTE: expose the inner buffer for direct writing.
+***********************************************************************/
 EXP_API tchar_t* string_ensure_buf(string_t vs, int len);
 
-/*
-@FUNCTION string_get_char: get a character at position of the string object.
-@INPUT string_t vs: the string object.
-@INPUT int pos: the zero based position.
-@RETURN tchar_t: return the character if exists, otherwise return zero.
-*/
+/**********************************************************************
+@FUNCTION: get a character at position of the string object.
+@INPUT: the string object.
+@INPUT: the zero based position.
+@RETURN: the character if position in inner length range, otherwise return zero.
+***********************************************************************/
 EXP_API tchar_t string_get_char(string_t vs, int pos);
 
-/*
-@FUNCTION string_set_char: set a character at position of the string object.
-@INPUT string_t vs: the string object.
-@INPUT int pos: the zero based position.
-@INPUT tchar_t ch: the character.
-@RETURN bool_t: if position in the buffer size range return nonzero, otherwise return zero.
-*/
+/**********************************************************************
+@FUNCTION: set a character at position of the string object.
+@INPUT: the string object.
+@INPUT: the zero based position.
+@INPUT: the character to set.
+@RETURN: if position in inner length range return nonzero, otherwise return zero.
+***********************************************************************/
 EXP_API bool_t string_set_char(string_t vs, int pos, tchar_t ch);
 
-/*
-@FUNCTION string_get_chars: get some characters from the position in string object.
-@INPUT string_t vs: the string object.
-@INPUT int pos: the zero based start position.
-@OUTPUT tchar_t* pch: the characters buffer.
-@INPUT int n: the characters count want to get.
-@RETURN int: return the characters count copyed.
-*/
+/**********************************************************************
+@FUNCTION: get some characters from the position in string object.
+@INPUT: the string object.
+@INPUT: the zero based start position.
+@OUTPUT: the characters buffer.
+@INPUT: the characters need to read.
+@RETURN: the characters copyed.
+***********************************************************************/
 EXP_API int string_get_chars(string_t vs, int pos, tchar_t* pch, int n);
 
-/*
-@FUNCTION string_set_chars: set some characters from the position in string object.
-@INPUT string_t vs: the string object.
-@INPUT int pos: the zero based start position.
-@INPUT cont tchar_t* pch: the characters buffer.
-@INPUT int n: the characters count want to set.
-@RETURN void: none.
-*/
+/**********************************************************************
+@FUNCTION: set some characters from the position in string object.
+@INPUT: the string object.
+@INPUT: the zero based start position.
+@INPUT: the string token.
+@INPUT: the characters need to write.
+@RETURN: none.
+@NOTE: the string inner buffer may be expanded.
+***********************************************************************/
 EXP_API void string_set_chars(string_t vs, int pos, const tchar_t* pch, int n);
 
-/*
-@FUNCTION string_ins_chars: insert some characters from the position in string object.
-@INPUT string_t vs: the string object.
-@INPUT int pos: the zero based start position.
-@INPUT cont tchar_t* pch: the characters buffer.
-@INPUT int n: the characters count want to set.
-@RETURN void: none.
-*/
+/**********************************************************************
+@FUNCTION: insert some characters from the position in string object.
+@INPUT: the string object.
+@INPUT: the zero based start position.
+@INPUT: the string token.
+@INPUT: the characters need to insert.
+@RETURN: none.
+@NOTE: the string inner buffer may be expanded.
+***********************************************************************/
 EXP_API void string_ins_chars(string_t vs, int pos, const tchar_t* pch, int n);
 
-/*
-@FUNCTION string_del_chars: delete some characters from the position in string object.
-@INPUT string_t vs: the string object.
-@INPUT int pos: the zero based start position.
-@INPUT cont tchar_t* pch: the characters buffer.
-@INPUT int n: the characters count want to delete.
-@RETURN void: none.
-*/
+/**********************************************************************
+@FUNCTION: delete some characters from the position in string object.
+@INPUT: the string object.
+@INPUT: the zero based start position.
+@INPUT: the characters need to delete.
+@RETURN: none.
+@NOTE: the string inner buffer may be truncted.
+***********************************************************************/
 EXP_API void string_del_chars(string_t vs, int pos, int n);
+
+/**********************************************************************
+@FUNCTION: encode string object to bytes sequence.
+@INPUT: the string object.
+@INPUT: the encode type, eg: _GB2312, _UTF8_BOM, _UTF16LIT, _UTF16BIG.
+@INPUT: the bytes buffer for encoding.
+@RETURN: bytes encoded, zero for failed.
+@NOTE: buffer can be NULL for testing how many bytes will be encoded.
+***********************************************************************/
+EXP_API dword_t string_encode(string_t vs, int encode, byte_t* buf, dword_t max);
+
+/**********************************************************************
+@FUNCTION: decode string object from bytes sequence.
+@INPUT: the string object.
+@INPUT: the encode type, eg: _GB2312, _UTF8_BOM, _UTF16LIT, _UTF16BIG.
+@INPUT: the bytes sequence for decoding.
+@RETURN: bytes decoded, zero for failed.
+@NOTE: vs can be NULL for testing how many bytes will be decoded.
+***********************************************************************/
+EXP_API int string_decode(string_t vs, int encode, const byte_t* buf, dword_t size);
+
 
 #ifdef	__cplusplus
 }

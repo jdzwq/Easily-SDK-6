@@ -80,6 +80,24 @@ visual_t svg_get_canvas_visual(canvas_t canv)
 	return pcanv->view;
 }
 
+void svg_set_xfont(canvas_t canv, const xfont_t* pxf)
+{
+	svg_canvas_t* pcanv = TypePtrFromHead(svg_canvas_t, canv);
+
+	XDK_ASSERT(canv && canv->tag == _CANVAS_PRINTER);
+
+	svg_set_xfont_raw(pcanv->view, pxf);
+}
+
+void svg_get_xfont(canvas_t canv, xfont_t* pxf)
+{
+	svg_canvas_t* pcanv = TypePtrFromHead(svg_canvas_t, canv);
+
+	XDK_ASSERT(canv && canv->tag == _CANVAS_PRINTER);
+
+	svg_get_xfont_raw(pcanv->view, pxf);
+}
+
 float svg_pt_per_in(canvas_t canv, bool_t horz)
 {
 	svg_canvas_t* pcanv = TypePtrFromHead(svg_canvas_t, canv);
@@ -281,11 +299,6 @@ void svg_span_pt_to_mm(canvas_t canv, xspan_t* ppn)
 	ppn->fs = svg_pt_to_mm(canv, ppn->s, 1) - svg_pt_to_mm(canv, 0, 1);
 }
 
-typedef struct _svg_visual_t{
-	handle_head head;
-
-	link_t_ptr g;
-}svg_visual_t;
 
 visual_t create_svg_visual(link_t_ptr g)
 {
@@ -297,6 +310,7 @@ visual_t create_svg_visual(link_t_ptr g)
 
 	pview->g = g;
 	pview->head.tag = _VISUAL_SCRIPT;
+	default_xfont(&(pview->xf));
 
 	svg = svg_doc_from_node(g);
 	get_svg_viewbox(svg, &vb);
@@ -320,6 +334,24 @@ link_t_ptr svg_get_visual_doc(visual_t view)
 	XDK_ASSERT(view && view->tag == _VISUAL_SCRIPT);
 
 	return pview->g;
+}
+
+void svg_set_xfont_raw(visual_t view, const xfont_t* pxf)
+{
+	svg_visual_t* pview = TypePtrFromHead(svg_visual_t, view);
+
+	XDK_ASSERT(view && view->tag == _VISUAL_SCRIPT);
+
+	xmem_copy((void*)&(pview->xf), (void*)pxf, sizeof(xfont_t));
+}
+
+void svg_get_xfont_raw(visual_t view, xfont_t* pxf)
+{
+	svg_visual_t* pview = TypePtrFromHead(svg_visual_t, view);
+
+	XDK_ASSERT(view && view->tag == _VISUAL_SCRIPT);
+
+	xmem_copy((void*)pxf, (void*)&(pview->xf), sizeof(xfont_t));
 }
 
 float svg_pt_to_mm_raw(visual_t view, int pt, bool_t horz)
@@ -371,4 +403,3 @@ int svg_mm_to_pt_raw(visual_t view, float tm, bool_t horz)
 		return ROUNDINT(tm * vtpermm);
 	}
 }
-

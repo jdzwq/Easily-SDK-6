@@ -34,275 +34,212 @@ LICENSE.GPL3 for more details.
 extern "C" {
 #endif
 
-/*
-@FUNCTION object_alloc: alloc a object.
-@RETURN object_t: return the object.
-*/
+/**********************************************************************
+@FUNCTION: alloc a empty object.
+@RETURN: object struct.
+***********************************************************************/
 EXP_API object_t object_alloc(void);
 
-/*
-@FUNCTION object_free: free a object.
-@INPUT object_t obj: the object.
-@RETURN void: none.
-*/
+/**********************************************************************
+@FUNCTION: free a object.
+@INPUT: the object.
+@RETURN: none.
+***********************************************************************/
 EXP_API void object_free(object_t obj);
 
-/*
-@FUNCTION object_clone: clone a new object.
-@INPUT object_t obj: the object for copying.
-@RETURN object_t: the new object.
-*/
+/**********************************************************************
+@FUNCTION: clone a new object.
+@INPUT: the object for copying.
+@RETURN: the new object.
+***********************************************************************/
 EXP_API object_t object_clone(object_t obj);
 
-/*
-@FUNCTION object_copy: copy source object to destination object.
-@INPUT object_t dst: the destination object.
-@INPUT object_t src: the source object.
-@RETURN void: none.
-*/
+/**********************************************************************
+@FUNCTION: copy a new object from source.
+@INPUT: the destination object.
+@INPUT: the source object.
+@RETURN: none.
+***********************************************************************/
 EXP_API void object_copy(object_t dst, object_t src);
 
-/*
-@FUNCTION object_empty: empty the object.
-@INPUT object_t obj: the object.
-@RETURN void: none.
-*/
-EXP_API void object_empty(object_t obj);
+/**********************************************************************
+@FUNCTION: empty the object.
+@INPUT: the object.
+@RETURN: none.
+***********************************************************************/
+EXP_API void object_clear(object_t obj);
 
-/*
-@FUNCTION object_size: get object size in bytes.
-@INPUT object_t obj: the object.
-@RETURN dword_t: bites.
-*/
+/**********************************************************************
+@FUNCTION: get object data uncompressed size in bytes.
+@INPUT: the object.
+@RETURN: data bytes.
+***********************************************************************/
 EXP_API dword_t object_size(object_t obj);
 
-/*
-@FUNCTION object_get_type: get the object type, it can be _OBJECT_UNKNOWN, _OBJECT_STRING, _OBJECT_VARIANT, _OBJECT_DOMDOC, _OBJECT_BINARY.
-@INPUT object_t obj: the object.
-@RETURN int: return the object type, default is _OBJECT_UNKNOWN.
-*/
+/**********************************************************************
+@FUNCTION: get the object type, as the defined _OBJECT_*.
+@INPUT: the object.
+@RETURN: the object type.
+***********************************************************************/
 EXP_API int object_get_type(object_t obj);
 
-/*
-@FUNCTION object_get_commpress: test the object is compressed.
-@INPUT object_t obj: the object.
-@RETURN boo_t: return nonzero if compressed, otherwise return zero.
-*/
+/**********************************************************************
+@FUNCTION: test the object is compressed.
+@INPUT: the object.
+@RETURN: return nonzero if compressed, otherwise return zero.
+***********************************************************************/
 EXP_API bool_t object_get_commpress(object_t obj);
 
-/*
-@FUNCTION object_set_commpress: compress or decompress object.
-@INPUT object_t obj: the object.
-@INPUT bool_t b: nonzero for compressing, zero for decompressing.
+/**********************************************************************
+@FUNCTION: compress or decompress the object.
+@INPUT: the object.
+@INPUT: nonzero for compressing, zero for decompressing.
 @RETURN void: none.
-*/
+***********************************************************************/
 EXP_API void object_set_commpress(object_t obj, bool_t b);
 
-/*
-@FUNCTION object_set_message: save message to object.
-@INPUT object_t obj: the object.
-@INPUT message_t val: the message object.
-@RETURN void: none.
-*/
-EXP_API void object_set_message(object_t obj, message_t val);
+/**********************************************************************
+@FUNCTION: encode a message into object as data content.
+@INPUT: the object.
+@INPUT: the message object.
+@RETURN: none.
+***********************************************************************/
+EXP_API void object_encode_message(object_t obj, message_t val);
 
-/*
-@FUNCTION object_get_message: get message from object.
-@INPUT object_t obj: the object.
-@OUTPUT message_t val: the message object.
-@RETURN bool_t: return nonzero if succeed
-*/
-EXP_API bool_t object_get_message(object_t obj, message_t val);
+/**********************************************************************
+@FUNCTION: decode message from object data content.
+@INPUT: the object.
+@OUTPUT: the message object.
+@RETURN: nonzero if succeed, otherwise zero returned.
+***********************************************************************/
+EXP_API bool_t object_decode_message(object_t obj, message_t val);
 
-/*
-@FUNCTION object_set_queue: save queue to object.
-@INPUT object_t obj: the object.
-@INPUT queue_t val: the queue object.
-@RETURN void: none.
-*/
-EXP_API void object_set_queue(object_t obj, queue_t val);
+/**********************************************************************
+@FUNCTION: encode a vector into object as data content.
+@INPUT: the object.
+@INPUT: the vector object.
+@RETURN: none.
+***********************************************************************/
+EXP_API void object_encode_vector(object_t obj, vector_t val);
 
-/*
-@FUNCTION object_get_queue: get queue from object.
-@INPUT object_t obj: the object.
-@OUTPUT queue_t val: the queue object.
-@RETURN bool_t: return nonzero if succeed.
-*/
-EXP_API bool_t object_get_queue(object_t obj, queue_t val);
+/**********************************************************************
+@FUNCTION: decode vector from object data content.
+@INPUT: the object.
+@OUTPUT: the vector object.
+@RETURN: nonzero if succeed, otherwise zero returned.
+***********************************************************************/
+EXP_API bool_t object_decode_vector(object_t obj, vector_t val);
 
-/*
-@FUNCTION object_set_vector: save vector to object.
-@INPUT object_t obj: the object.
-@INPUT vector_t val: the vector object.
-@RETURN void: none.
-*/
-EXP_API void object_set_vector(object_t obj, vector_t val);
+/**********************************************************************
+@FUNCTION: encode a matrix into object as data content.
+@INPUT: the object.
+@INPUT: the matrix object.
+@RETURN: none.
+***********************************************************************/
+EXP_API void object_encode_matrix(object_t obj, matrix_t val);
 
-/*
-@FUNCTION object_get_vector: get vector from object.
-@INPUT object_t obj: the object.
-@OUTPUT vector_t val: the vector object.
-@RETURN bool_t: return nonzero if succeeded.
-*/
-EXP_API bool_t object_get_vector(object_t obj, vector_t val);
+/**********************************************************************
+@FUNCTION: decode matrix from object data content.
+@INPUT: the object.
+@OUTPUT: the matrix object.
+@RETURN: nonzero if succeed, otherwise zero returned.
+***********************************************************************/
+EXP_API bool_t object_decode_matrix(object_t obj, matrix_t val);
 
-/*
-@FUNCTION object_set_matrix: save matrix to object.
-@INPUT object_t obj: the object.
-@INPUT matrix_t val: the matrix object.
-@RETURN void: none.
-*/
-EXP_API void object_set_matrix(object_t obj, matrix_t val);
+/**********************************************************************
+@FUNCTION: encode a map into object as data content.
+@INPUT: the object.
+@INPUT: the map object.
+@RETURN: none.
+***********************************************************************/
+EXP_API void object_encode_map(object_t obj, map_t val);
 
-/*
-@FUNCTION object_get_matrix: get matrix from object.
-@INPUT object_t obj: the object.
-@OUTPUT matrix_t val: the matrix object.
-@RETURN bool_t: return nonzero if succeeded.
-*/
-EXP_API bool_t object_get_matrix(object_t obj, matrix_t val);
+/**********************************************************************
+@FUNCTION: decode map from object data content.
+@INPUT: the object.
+@OUTPUT: the map object.
+@RETURN: nonzero if succeed, otherwise zero returned.
+***********************************************************************/
+EXP_API bool_t object_decode_map(object_t obj, map_t val);
 
-/*
-@FUNCTION object_set_map: save map to object.
-@INPUT object_t obj: the object.
-@INPUT map_t val: the map object.
-@RETURN void: none.
-*/
-EXP_API void object_set_map(object_t obj, map_t val);
+/**********************************************************************
+@FUNCTION: encode a string into object as data content.
+@INPUT: the object.
+@INPUT: the string object.
+@RETURN: none.
+***********************************************************************/
+EXP_API void object_encode_string(object_t obj, string_t val);
 
-/*
-@FUNCTION object_get_map: get map from object.
-@INPUT object_t obj: the object.
-@OUTPUT map_t val: the map object.
-@RETURN bool_t: return nonzero if succeeded.
-*/
-EXP_API bool_t object_get_map(object_t obj, map_t val);
+/**********************************************************************
+@FUNCTION: decode string from object data content.
+@INPUT: the object.
+@OUTPUT: the string object.
+@RETURN: nonzero if succeed, otherwise zero returned.
+***********************************************************************/
+EXP_API bool_t object_decode_string(object_t obj, string_t val);
 
-/*
-@FUNCTION object_set_string: save string to object.
-@INPUT object_t obj: the object.
-@INPUT string_t val: the string object.
-@RETURN void: none.
-*/
-EXP_API void object_set_string(object_t obj, string_t val);
+/**********************************************************************
+@FUNCTION: encode a variant into object as data content.
+@INPUT: the object.
+@INPUT: the variant object.
+@RETURN: none.
+***********************************************************************/
+EXP_API void object_encode_variant(object_t obj, variant_t val);
 
-/*
-@FUNCTION object_get_string: get string from object.
-@INPUT object_t obj: the object.
-@OUTPUT string_t val: the string object.
-@RETURN bool_t: return nonzero if succeeded.
-*/
-EXP_API bool_t object_get_string(object_t obj, string_t val);
+/**********************************************************************
+@FUNCTION: decode variant from object data content.
+@INPUT: the object.
+@OUTPUT: the variant object.
+@RETURN: nonzero if succeed, otherwise zero returned.
+***********************************************************************/
+EXP_API bool_t object_decode_variant(object_t obj, variant_t val);
 
-/*
-@FUNCTION object_set_variant: save variant to object.
-@INPUT object_t obj: the object.
-@INPUT variant_t val: the variant object.
-@RETURN void: none.
-*/
-EXP_API void object_set_variant(object_t obj, variant_t val);
-
-/*
-@FUNCTION object_get_variant: get variant from object.
-@INPUT object_t obj: the object.
-@OUTPUT variant_t val: the variant object.
-@RETURN bool_t: return nonzero if succeeded.
-*/
-EXP_API bool_t object_get_variant(object_t obj, variant_t val);
-
-#if defined(XDM_SUPPORT_DOC)
-/*
-@FUNCTION object_set_domdoc: save dom document to object.
-@INPUT object_t obj: the object.
-@INPUT link_t_ptr dom: the dom document.
-@RETURN void: none.
-*/
-EXP_API void object_set_domdoc(object_t obj, link_t_ptr dom);
-
-/*
-@FUNCTION object_get_domdoc: get dom document from object.
-@INPUT object_t obj: the object.
-@OUTPUT link_t_ptr dom: the dom document.
-@RETURN bool_t: return nonzero if succeeded.
-*/
-EXP_API bool_t object_get_domdoc(object_t obj, link_t_ptr dom);
-#endif
-
-/*
-@FUNCTION object_set_bytes: save bytes to object.
-@INPUT object_t obj: the object.
-@INPUT const byte_t* buf: the bytes buffer.
-@INPUT dword_t len: the buffer size in bytes.
-@RETURN void: none.
-*/
-EXP_API void object_set_bytes(object_t obj, const byte_t* buf, dword_t len);
-
-/*
-@FUNCTION object_add_bytes: append bytes to object.
-@INPUT object_t obj: the object.
-@INPUT const byte_t* buf: the bytes buffer.
-@INPUT dword_t len: the buffer size in bytes.
-@RETURN void: none.
-*/
-EXP_API void object_add_bytes(object_t obj, const byte_t* buf, dword_t len);
-
-/*
-@FUNCTION object_add_bytes: delete followed bytes from object.
-@INPUT object_t obj: the object.
-@INPUT dword_t off: the zero based posotin.
-@RETURN void: none.
-*/
-EXP_API void object_del_bytes(object_t obj, dword_t off);
-
-/*
-@FUNCTION object_get_bytes: load bytes from object.
-@INPUT object_t obj: the object.
-@OUTPUT byte_t* buf: the bytes buffer.
-@INPUT dword_t max: the buffer size in bytes.
-@RETURN dword_t: return the bytes loaded.
-*/
-EXP_API dword_t object_get_bytes(object_t obj, byte_t* buf, dword_t max);
-
-/*
-@FUNCTION object_encode: encode a object to bytes buffer.
-@INPUT object_t obj: the object.
-@OUTPUT byte_t* buf: the bytes buffer.
-@INPUT dword_t max: the buffer size in bytes.
-@RETURN dword_t: return the bytes encoded.
-*/
-EXP_API dword_t object_encode(object_t obj, byte_t* buf, dword_t max);
-
-/*
-@FUNCTION object_decode: decode a object from bytes buffer.
-@INPUT object_t obj: the object.
-@INPUT const byte_t* data: the bytes buffer.
-@RETURN dword_t: return the bytes decoded.
-*/
-EXP_API dword_t object_decode(object_t obj, const byte_t* data);
-
-/*
-@FUNCTION object_hash32: get object object 32bits hash code.
-@INPUT object var: the object object.
-@OUTPUT key32_t* pkey: the 32bits key buffer.
-@RETURN void: none.
-*/
+/**********************************************************************
+@FUNCTION: get object 32 bytes hash code.
+@INPUT: the object.
+@OUTPUT: the bytes buffer.
+@RETURN: none.
+***********************************************************************/
 EXP_API void object_hash32(object_t obj, key32_t* pkey);
 
-/*
-@FUNCTION object_hash64: get object object 64bits hash code.
-@INPUT object var: the object object.
-@OUTPUT key64_t* pkey: the 64bits key buffer.
-@RETURN void: none.
-*/
+/**********************************************************************
+@FUNCTION: get object 64 bytes hash code.
+@INPUT: the object.
+@OUTPUT: the bytes buffer.
+@RETURN: none.
+***********************************************************************/
 EXP_API void object_hash64(object_t obj, key64_t* pkey);
 
-/*
-@FUNCTION object_hash128: get object object 128bits hash code.
-@INPUT object var: the object object.
-@OUTPUT key128_t* pkey: the 128bits key buffer.
-@RETURN void: none.
-*/
+/**********************************************************************
+@FUNCTION: get object 128 bytes hash code.
+@INPUT: the object.
+@OUTPUT: the bytes buffer.
+@RETURN: none.
+***********************************************************************/
 EXP_API void object_hash128(object_t obj, key128_t* pkey);
+
+/**********************************************************************
+@FUNCTION: encode object to bytes sequence.
+@INPUT: the object.
+@INPUT: the bytes buffer for encoding.
+@RETURN: bytes encoded, zero for failed.
+@NOTE: buffer can be NULL for testing how many bytes will be encoded.
+***********************************************************************/
+EXP_API dword_t object_encode(object_t obj, byte_t* buf);
+
+/**********************************************************************
+@FUNCTION: decode object from bytes sequence.
+@INPUT: the object.
+@INPUT: the bytes buffer with encoded data.
+@RETURN: bytes decoded, zero for failed.
+@NOTE: var can be NULL for testing how many bytes will be decoded.
+***********************************************************************/
+EXP_API dword_t object_decode(object_t obj, const byte_t* data);
+
+
+#if defined (DEBUG) || defined (_DEBUG)
+EXP_API void object_self_test(void);
+#endif
 
 #ifdef	__cplusplus
 }

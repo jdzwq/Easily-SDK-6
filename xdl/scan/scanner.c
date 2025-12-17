@@ -27,13 +27,16 @@ LICENSE.GPL3 for more details.
 #include "scanner.h"
 
 
-void scan_object_text(const measure_interface* pif, const xfont_t* pxf, const xface_t* pxa, int bx, int by, int bw, int bh, wordscan_interface* pit, PF_SCAN_TEXTOR_CALLBACK pf, void* pp)
+void scan_object_text(const measure_interface* pif, const viewbox_t* pvb, words_scan_interface* pit, PF_SCAN_TEXTOR_CALLBACK pf, void* pp)
 {
-	float line_rati;
+	float line_rati = 1.0f;
 	bool_t b_wordbreak = 0;
-	xsize_t xs = { 0 };
-	xfont_t xf_bold = { 0 };
-	xfont_t xf_under = { 0 };
+
+	object_attr_t attr = {0};
+	xpen_t* pxp = NULL;
+	xbrush_t* pxb = NULL;
+	xfont_t* pxf = NULL;
+	xface_t* pxa = NULL;
 
 	tchar_t sch[4] = { 0 };
 	tchar_t* pch = NULL;
@@ -56,39 +59,47 @@ void scan_object_text(const measure_interface* pif, const xfont_t* pxf, const xf
 	int page = 0;
 
 	word_place_t tm = { 0 };
+	xsize_t xs;
 
-	b_wordbreak = (compare_text(pxa->text_wrap, -1, GDI_ATTR_TEXT_WRAP_WORDBREAK, -1, 0) == 0) ? 1 : 0;
+	(*pit->pf_cur_object)(pit->ctx, &obj);
 
-	xmem_copy((void*)&xf_bold, (void*)pxf, sizeof(xfont_t));
-	xscpy(xf_bold.weight, GDI_ATTR_FONT_WEIGHT_BOLD);
+	attr.ppxp = &pxp; attr.ppxb = &pxb; attr.ppxf = &pxf; attr.ppxa = &pxa;
+	attr.ret = OBJECT_ATTR_XFONT | OBJECT_ATTR_XFACE;
+	(*pit->pf_object_attr)(pit->ctx, obj, &attr);
 
-	xmem_copy((void*)&xf_under, (void*)pxf, sizeof(xfont_t));
-	xscpy(xf_under.weight, GDI_ATTR_FONT_WEIGHT_BOLD);
-	xscpy(xf_under.decorate, GDI_ATTR_FONT_DECORATE_UNDERLINE);
+	if(pxa)
+	{
+		b_wordbreak = (compare_text(pxa->text_wrap, -1, GDI_ATTR_TEXT_WRAP_WORDBREAK, -1, 0) == 0) ? 1 : 0;
 
-	if (is_null(pxa->line_height))
-		line_rati = xstof(DEF_GDI_TEXT_LINE_HEIGHT);
-	else
-		line_rati = xstof(pxa->line_height);
+		if (is_null(pxa->line_height))
+			line_rati = xstof(DEF_GDI_TEXT_LINE_HEIGHT);
+		else
+			line_rati = xstof(pxa->line_height);
 
-	if (line_rati < 1)
-		line_rati = 1.0;
+		if (line_rati < 1)
+			line_rati = 1.0;
+	}
 
-	(*pif->pf_measure_font)(pif->ctx, pxf, &xs);
+	if(pxf)
+	{
+		(*pif->pf_set_xfont)(pif->ctx, pxf);
+	}
 
-	tm.char_w = (xs.w + 4) / 4;
+	(*pif->pf_measure_font)(pif->ctx, &xs);
+
+	tm.char_w = xs.w;
 	tm.char_h = xs.h;
 	tm.line_h = (int)((float)xs.h * (line_rati - 1.0));
-	tm.min_x = bx;
-	tm.min_y = by;
-	tm.max_x = bx + bw;
-	tm.max_y = by + bh;
+	tm.min_x = pvb->px;
+	tm.min_y = pvb->py;
+	tm.max_x = pvb->px + pvb->pw;
+	tm.max_y = pvb->py + pvb->ph;
 	tm.cur_x = tm.min_x + tm.char_w;
 	tm.cur_y = tm.min_y + tm.line_h;
 
 	b_paging = (*pit->pf_is_paging)(pit->ctx);
 
-	to = (*pf)(_SCANNER_STATE_BEGIN, NULL, 0, 0, 0, 0, NULL, 0, NULL, 0, -1, 0, &tm, pxf, pxa, pp);
+	to = (*pf)(_SCANNER_STATE_BEGIN, NULL, &attr, 0, 0, 0, 0, NULL, 0, NULL, 0, -1, 0, &tm, pp);
 
 	if (to != _SCANNER_OPERA_STOP)
 	{
@@ -112,7 +123,7 @@ void scan_object_text(const measure_interface* pif, const xfont_t* pxf, const xf
 					break;
 				}
 
-				to = (*pf)(_SCANNER_STATE_CATOR, NULL, 0, 0, 0, 0, NULL, 0, NULL, page, 0, 0, &tm, pxf, pxa, pp);
+				to = (*pf)(_SCANNER_STATE_CATOR, NULL, &attr, 0, 0, 0, 0, NULL, 0, NULL, page, 0, 0, &tm, pp);
 			}	
 			continue;
 
@@ -265,20 +276,20 @@ void scan_object_text(const measure_interface* pif, const xfont_t* pxf, const xf
 		case _SCANNER_STATE_LINEBREAK:
 		case _SCANNER_STATE_PAGEBREAK:
 			if (b_atom == 1)
-				to = (*pf)(ts, obj, b_atom, b_ins, b_del, b_sel, pch, chs, sch, page, row_at, col_at, &tm, &xf_bold, pxa, pp);
+				to = (*pf)(ts, obj, &attr, b_atom, b_ins, b_del, b_sel, pch, chs, sch, page, row_at, col_at, &tm, pp);
 			else if (b_atom == 2)
-				to = (*pf)(ts, obj, b_atom, b_ins, b_del, b_sel, pch, chs, sch, page, row_at, col_at, &tm, &xf_under, pxa, pp);
+				to = (*pf)(ts, obj, &attr, b_atom, b_ins, b_del, b_sel, pch, chs, sch, page, row_at, col_at, &tm, pp);
 			else
-				to = (*pf)(ts, obj, b_atom, b_ins, b_del, b_sel, pch, chs, sch, page, row_at, col_at, &tm, pxf, pxa, pp);
+				to = (*pf)(ts, obj, &attr, b_atom, b_ins, b_del, b_sel, pch, chs, sch, page, row_at, col_at, &tm, pp);
 			break;
 		case _SCANNER_STATE_NEWLINE:
-			to = (*pf)(ts, obj, 0, 0, 0, 0, NULL, chs, NULL, page, row_at, col_at, &tm, pxf, pxa, pp);
+			to = (*pf)(ts, obj, &attr, 0, 0, 0, 0, NULL, chs, NULL, page, row_at, col_at, &tm, pp);
 			break;
 		case _SCANNER_STATE_NEWPAGE:
-			to = (*pf)(ts, obj, 0, 0, 0, 0, NULL, chs, NULL, page, row_at, col_at, &tm, pxf, pxa, pp);
+			to = (*pf)(ts, obj, &attr, 0, 0, 0, 0, NULL, chs, NULL, page, row_at, col_at, &tm, pp);
 			break;
 		case _SCANNER_STATE_END:
-			to = (*pf)(ts, obj, b_atom, b_ins, b_del, b_sel, NULL, chs, sch, page, row_at, col_at, &tm, pxf, pxa, pp);
+			to = (*pf)(ts, obj, &attr, b_atom, b_ins, b_del, b_sel, NULL, chs, sch, page, row_at, col_at, &tm, pp);
 			if (to != _SCANNER_OPERA_INS)
 				to = _SCANNER_OPERA_STOP;
 			break;
@@ -323,7 +334,7 @@ void scan_object_text(const measure_interface* pif, const xfont_t* pxf, const xf
 				xsncpy(sch, _T("\v"), 1);
 				pch = sch;
 			}
-			else if (!is_null(pxa->text_wrap))
+			else if (b_wordbreak)
 			{
 				ts = _SCANNER_STATE_NEWLINE;
 				b_newline = 1;
@@ -362,7 +373,7 @@ void scan_object_text(const measure_interface* pif, const xfont_t* pxf, const xf
 				row_at = 0;
 				col_at = 0;
 
-				to = (*pf)(_SCANNER_STATE_CATOR, NULL, 0, 0, 0, 0, NULL, 0, NULL, page, row_at, col_at, &tm, pxf, pxa, pp);
+				to = (*pf)(_SCANNER_STATE_CATOR, NULL, &attr, 0, 0, 0, 0, NULL, 0, NULL, page, row_at, col_at, &tm, pp);
 			}
 			break;
 		}

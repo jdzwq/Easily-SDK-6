@@ -1438,7 +1438,7 @@ void sort_grid_col(link_t_ptr ptr,link_t_ptr clk)
 
 	nlk = get_grid_rowset(ptr);
 
-	heap_sort_link(get_dom_child_node_root(nlk),(CALLBACK_SORTLINK)_row_compare_func,decs,(void*)clk);
+	heap_sort_link(get_dom_child_node_root(nlk),(PF_SORTLINK)_row_compare_func,decs,(void*)clk);
 
 	if(decs)
 		set_dom_node_mask(clk,(get_dom_node_mask(clk) & ~MSK_SORTED));

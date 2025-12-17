@@ -292,10 +292,11 @@ void draw_images(const drawing_interface* pif, link_t_ptr ptr)
 
 	if (!b_print)
 	{
-		format_xcolor(&pif->mode.clr_txt, xf.color);
+		format_xcolor(&pif->clrs->clr_txt, xa.text_color);
+		(*pif->pf_set_xfont)(pif->ctx, &xf);
 	}
 
-	parse_xcolor(&xc, xf.color);
+	parse_xcolor(&xc, xa.text_color);
 
 	iw = get_images_item_width(ptr);
 	ih = get_images_item_height(ptr);
@@ -310,7 +311,7 @@ void draw_images(const drawing_interface* pif, link_t_ptr ptr)
 
 	if (!b_print)
 	{
-		format_xcolor(&pif->mode.clr_msk, xi.color);
+		format_xcolor(&pif->clrs->clr_msk, xi.color);
 	}
 
 	xr.fx = px;
@@ -350,7 +351,7 @@ void draw_images(const drawing_interface* pif, link_t_ptr ptr)
 		xr_box.fw = xr.fw;
 		xr_box.fh = ic;
 
-		(*pif->pf_draw_text)(pif->ctx, &xf, &xa, &xr_box, get_images_item_alt_ptr(nlk), -1);
+		(*pif->pf_draw_text)(pif->ctx, &xa, &xr_box, get_images_item_alt_ptr(nlk), -1);
 			
 		if (get_images_item_checked(nlk))
 		{

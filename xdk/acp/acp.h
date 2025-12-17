@@ -94,29 +94,18 @@ typedef struct _acp_table_t{
 extern xhand_t acp_gb2312;
 extern xhand_t acp_unicode;
 
-#ifdef XDK_SUPPORT_ACP_TABLE
-LOC_API int table_unicode_seek_help(unsigned short ucs, unsigned short* hlp);
-LOC_API int table_gb2312_seek_help(const unsigned char* mbs, unsigned char* hlp);
-LOC_API int table_unicode_seek_gb2312(unsigned short ucs, unsigned char* mbs);
-LOC_API int table_gb2312_seek_unicode(unsigned char* mbs, unsigned short* ucs);
+LOC_API bool_t share_unicode_seek_help(unsigned short ucs, unsigned short* hlp);
+LOC_API bool_t share_gb2312_seek_help(unsigned short gbk, unsigned short* hlp);
+LOC_API bool_t share_unicode_seek_gb2312(unsigned short ucs, unsigned short* gbk);
+LOC_API bool_t share_gb2312_seek_unicode(unsigned short gbk, unsigned short* ucs);
 
-EXP_API void unicode_gb2312_code(int index, unsigned short* code, unsigned short* val, unsigned short* key);
-EXP_API void gb2312_unicode_code(int index, unsigned short* code, unsigned short* val, unsigned short* key);
-EXP_API bool_t save_gb2312_table(const tchar_t* fname);
-EXP_API bool_t save_unicode_table(const tchar_t* fname);
-#else
-LOC_API int share_unicode_seek_help(unsigned short ucs, unsigned short* hlp);
-LOC_API int share_gb2312_seek_help(const unsigned char* mbs, unsigned char* hlp);
-LOC_API int share_unicode_seek_gb2312(unsigned short ucs, unsigned char* mbs);
-LOC_API int share_gb2312_seek_unicode(unsigned char* mbs, unsigned short* ucs);
-
-LOC_API vword_t share_get_gb2312_code_addr(const byte_t* pch);
-LOC_API bool_t share_set_gb2312_code_addr(const byte_t* pch, vword_t addr);
+LOC_API vword_t share_get_gb2312_code_addr(unsigned short gbk);
+LOC_API bool_t share_set_gb2312_code_addr(unsigned short gbk, vword_t addr);
 LOC_API vword_t share_get_unicode_code_addr(unsigned short ucs);
 LOC_API bool_t share_set_unicode_code_addr(unsigned short ucs, vword_t addr);
+
 LOC_API bool_t share_acp_init(void);
 LOC_API void share_acp_uninit(void);
-#endif
 
 LOC_API int acp_gb2312_code_sequence(byte_t b);
 
@@ -201,18 +190,18 @@ EXP_API bool_t acp_next_unicode_char(byte_t *pch);
 EXP_API int w_acp_help_code(const wchar_t* src, int len, wchar_t* buf, int max);
 EXP_API int a_acp_help_code(const schar_t* src, int len, schar_t* buf, int max);
 
-#if defined (DEBUG) || defined (_DEBUG)
-	EXP_API void share_acp_dump(void);
-#endif
-
-#ifdef __cplusplus
-}
-#endif
-
 #if defined(_UNICODE) || defined(UNICODE)
 #define acp_help_code	w_acp_help_code
 #else
 #define acp_help_code	a_acp_help_code
+#endif
+
+#if defined (DEBUG) || defined (_DEBUG)
+	EXP_API void acp_self_test(void);
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 

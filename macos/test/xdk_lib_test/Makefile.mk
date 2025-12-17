@@ -29,13 +29,17 @@ $(OBJ_PATH)%.o : $(SRC_PATH)/%.cc
 
 all : $(OBJS)
 	rm -f $@
-	$(CC) -o $(OUT_PATH)/$(MODULE) $(OBJS) -L $(LIB_PATH) -lxdk
-#	rm -f $(OBJS)
+	$(CC) -o $(OUT_PATH)/$(MODULE) $(OBJS) -L $(LIB_PATH) -lxdk \
+	-Wl,-rpath $(LIB_PATH)
 
 test:
 	if ! test -d $(OBJ_PATH); then \
 	mkdir -p $(OBJ_PATH); \
 	chmod 755 $(OBJ_PATH); \
+	fi
+	if ! test -d $(OUT_PATH); then \
+	mkdir -p $(OUT_PATH); \
+	chmod 755 $(OUT_PATH); \
 	fi
 	@echo $(DIRS)
 	@echo $(SRCS)

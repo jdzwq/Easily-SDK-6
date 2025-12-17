@@ -30,243 +30,316 @@ LICENSE.GPL3 for more details.
 #include "../xdkstd.h"
 #include "../xdkimp.h"
 
-/*
-struct{
-	struct{
-		byte[1]: tag
-		byte[3]: len = 16 + msglen
-	}memobj_head
-	byte[4]: ver
-	byte[1]: qos
-	byte[3]: seq
-	byte[8]: utc
-	byte[msglen]: msg
-}message
-*/
+typedef struct _message_context{
+	memo_head head;
 
-#define MESSAGE_HEAD_SIZE		(sizeof(memobj_head) + 16)
+	dword_t ver;
+	byte_t qos;
+	dword_t seq;
+	lword_t utc;
 
-#define MESSAGE_GET_TYPE(msg)	GET_BYTE((msg),0)
-#define MESSAGE_SET_TYPE(msg,n)	PUT_BYTE((msg),0,n)
+	dword_t size;
+	byte_t* data;
+}message_context;
 
-#define MESSAGE_SET_SIZE(msg,n)	PUT_THREEBYTE_LOC((msg),1,(n + 16))
-#define MESSAGE_GET_SIZE(msg)	(GET_THREEBYTE_LOC((msg),1) - 16)
+#define MESSAGE_HEAD_SIZE	16
 
-#define MESSAGE_SET_VER(msg,n)	PUT_DWORD_LOC((msg),(sizeof(memobj_head)),n)
-#define MESSAGE_GET_VER(msg)	GET_DWORD_LOC((msg),(sizeof(memobj_head)))
+#define MESSAGE_SET_VER(hdr,n)	PUT_DWORD_NET((hdr),0,n)
+#define MESSAGE_GET_VER(hdr)	GET_DWORD_NET((hdr),0)
 
-#define MESSAGE_GET_QOS(msg)	GET_BYTE((msg), (sizeof(memobj_head) + 4))
-#define MESSAGE_SET_QOS(msg, b)	PUT_BYTE((msg),(sizeof(memobj_head) + 4),(byte_t)b)
+#define MESSAGE_GET_QOS(hdr)	GET_BYTE((hdr),4)
+#define MESSAGE_SET_QOS(hdr, b)	PUT_BYTE((hdr),4,(byte_t)b)
 
-#define MESSAGE_SET_SEQ(msg,n)	PUT_THREEBYTE_LOC((msg),(sizeof(memobj_head) + 5),n)
-#define MESSAGE_GET_SEQ(msg)	GET_THREEBYTE_LOC((msg),(sizeof(memobj_head) + 5))
+#define MESSAGE_SET_SEQ(hdr,n)	PUT_THREEBYTE_NET((hdr),5,n)
+#define MESSAGE_GET_SEQ(hdr)	GET_THREEBYTE_NET((hdr),5)
 
-#define MESSAGE_SET_UTC(msg,n)	PUT_LWORD_LOC((msg),(sizeof(memobj_head) + 8),n)
-#define MESSAGE_GET_UTC(msg)	GET_LWORD_LOC((msg),(sizeof(memobj_head) + 8))
+#define MESSAGE_SET_UTC(hdr,n)	PUT_LWORD_NET((hdr),8,n)
+#define MESSAGE_GET_UTC(hdr)	GET_LWORD_NET((hdr),8)
 
 #define MESSAGE_GET_BUF(msg)		(msg + MESSAGE_HEAD_SIZE)
 
 message_t message_alloc()
 {
-	byte_t** pmsg;
+	message_context* pmsg;
 
-	pmsg = bytes_alloc();
-	bytes_realloc(pmsg, MESSAGE_HEAD_SIZE);
+	pmsg = (message_context*)xmem_alloc(sizeof(message_context));
+	pmsg->head.tag = MEM_MESSAGE;
 
-	MESSAGE_SET_TYPE(*pmsg, MEM_MESSAGE);
-	MESSAGE_SET_SIZE(*pmsg, 0);
-	MESSAGE_SET_VER(*pmsg, 0);
-	MESSAGE_SET_QOS(*pmsg, 0);
-	MESSAGE_SET_SEQ(*pmsg, 0);
-	MESSAGE_SET_UTC(*pmsg, 0);
-
-	return (message_t)pmsg;
+	return (message_t)&(pmsg->head);
 }
 
 void message_free(message_t msg)
 {
-	byte_t** pmsg = (byte_t**)msg;
-	byte_t type;
+	message_context* pmsg = TypePtrFromHead(message_context, msg);
 
-	XDK_ASSERT(msg != NULL);
+	XDK_ASSERT(msg && msg->tag == MEM_MESSAGE);
 
-	type = MESSAGE_GET_TYPE(*pmsg);
+	if(pmsg->data) xmem_free(pmsg->data);
 
-	XDK_ASSERT(type == MEM_MESSAGE);
+	xmem_free(pmsg);
+}
 
-	bytes_free(pmsg);
+void message_clear(message_t msg)
+{
+	message_context* pmsg = TypePtrFromHead(message_context, msg);
+
+	XDK_ASSERT(msg && msg->tag == MEM_MESSAGE);
+
+	pmsg->ver = 0;
+	pmsg->qos = 0;
+	pmsg->seq = 0;
+	pmsg->utc = 0;
+
+	if(pmsg->data) xmem_free(pmsg->data);
+
+	pmsg->data = NULL;
+	pmsg->size = 0;
 }
 
 dword_t message_size(message_t msg)
 {
-	byte_t** pmsg = (byte_t**)msg;
-	dword_t size;
-	byte_t type;
+	message_context* pmsg = TypePtrFromHead(message_context, msg);
 
-	XDK_ASSERT(msg != NULL);
+	XDK_ASSERT(msg && msg->tag == MEM_MESSAGE);
 
-	type = MESSAGE_GET_TYPE(*pmsg);
-
-	XDK_ASSERT(type == MEM_MESSAGE);
-
-	size = MESSAGE_GET_SIZE(*pmsg);
-
-	return size;
+	return pmsg->size;
 }
 
-void message_copy(message_t dst, message_t src)
+void message_borrow(message_t msg, byte_t* buf, dword_t size)
 {
-	byte_t** psrc = (byte_t**)src;
-	byte_t** pdst = (byte_t**)dst;
+	message_context* pmsg = TypePtrFromHead(message_context, msg);
 
-	byte_t t1,t2;
+	XDK_ASSERT(msg && msg->tag == MEM_MESSAGE);
 
-	t1 = MESSAGE_GET_TYPE(*psrc);
-	t2 = MESSAGE_GET_TYPE(*pdst);
-
-	XDK_ASSERT(src != NULL && t1 == MEM_MESSAGE);
-	XDK_ASSERT(dst != NULL && t2 == MEM_MESSAGE);
-
-	bytes_realloc(pdst, MESSAGE_GET_SIZE(*psrc) + MESSAGE_HEAD_SIZE);
-	xmem_copy((void*)(*pdst), (void*)(*psrc), MESSAGE_GET_SIZE(*psrc) + MESSAGE_HEAD_SIZE);
-}
-
-void message_borrow(message_t msg, byte_t* buf)
-{
-	byte_t** pmsg = (byte_t**)msg;
-	byte_t type;
-
-	XDK_ASSERT(msg != NULL);
-
-	type = MESSAGE_GET_TYPE(*pmsg);
-
-	XDK_ASSERT(type == MEM_MESSAGE);
-
-	bytes_attach(pmsg, buf, 0);
+	pmsg->data = buf;
+	pmsg->size = size;
 }
 
 byte_t* message_revert(message_t msg)
 {
-	byte_t** pmsg = (byte_t**)msg;
-	byte_t type;
+	message_context* pmsg = TypePtrFromHead(message_context, msg);
 	byte_t* buf;
 
-	XDK_ASSERT(msg != NULL);
+	XDK_ASSERT(msg && msg->tag == MEM_MESSAGE);
 
-	type = MESSAGE_GET_TYPE(*pmsg);
-
-	XDK_ASSERT(type == MEM_MESSAGE);
-
-	buf = bytes_detach(pmsg);
-
-	bytes_realloc(pmsg, MESSAGE_HEAD_SIZE);
-
-	MESSAGE_SET_TYPE(*pmsg, MEM_MESSAGE);
-	MESSAGE_SET_SIZE(*pmsg, 0);
-	MESSAGE_SET_VER(*pmsg, 0);
-	MESSAGE_SET_QOS(*pmsg, 0);
-	MESSAGE_SET_SEQ(*pmsg, 0);
-	MESSAGE_SET_UTC(*pmsg, 0);
+	buf = pmsg->data;
+	pmsg->data = NULL;
+	pmsg->size = 0;
 
 	return buf;
 }
 
-dword_t message_write(message_t msg, const msg_hdr_t* phr, const byte_t* buf, dword_t len)
+dword_t message_write(message_t msg, const msg_hdr_t* phr, const byte_t* data, dword_t bys)
 {
-	byte_t** pmsg = (byte_t**)msg;
-	byte_t type;
+	message_context* pmsg = TypePtrFromHead(message_context, msg);
 
-	XDK_ASSERT(msg != NULL);
+	XDK_ASSERT(msg && msg->tag == MEM_MESSAGE);
 
-	type = MESSAGE_GET_TYPE(*pmsg);
-
-	XDK_ASSERT(type == MEM_MESSAGE);
-
-	bytes_realloc(pmsg, MESSAGE_HEAD_SIZE + len);
-
-	MESSAGE_SET_TYPE(*pmsg, MEM_MESSAGE);
-	MESSAGE_SET_SIZE(*pmsg, len);
-	MESSAGE_SET_VER(*pmsg, phr->ver);
-	MESSAGE_SET_QOS(*pmsg, phr->qos);
-	MESSAGE_SET_SEQ(*pmsg, phr->seq);
-	MESSAGE_SET_UTC(*pmsg, phr->utc);
-
-	xmem_copy((void*)MESSAGE_GET_BUF(*pmsg), (void*)buf, len);
-
-	return len;
-}
-
-dword_t message_read(message_t msg, msg_hdr_t* phr, byte_t* buf, dword_t max)
-{
-	byte_t** pmsg = (byte_t**)msg;
-	byte_t type;
-	dword_t len;
-
-	XDK_ASSERT(msg != NULL);
-
-	type = MESSAGE_GET_TYPE(*pmsg);
-
-	XDK_ASSERT(type == MEM_MESSAGE);
-
-	len = MESSAGE_GET_SIZE(*pmsg);
 	if (phr)
 	{
-		phr->ver = MESSAGE_GET_VER(*pmsg);
-		phr->qos = MESSAGE_GET_QOS(*pmsg);
-		phr->seq = MESSAGE_GET_SEQ(*pmsg);
-		phr->utc = MESSAGE_GET_UTC(*pmsg);
+		pmsg->ver = phr->ver;
+		pmsg->qos = phr->qos;
+		pmsg->seq = phr->seq;
+		pmsg->utc = phr->utc;
 	}
 
-	len = (len < max) ? len : max;
+	if(pmsg->data) xmem_free(pmsg->data);
+	pmsg->data = NULL;
+	pmsg->size = 0;
 
-	if (buf)
+	if(data)
 	{
-		xmem_copy((void*)(buf), (void*)MESSAGE_GET_BUF(*pmsg), len);
+		pmsg->data = (byte_t*)xmem_clone((void*)data, bys);
+		pmsg->size = bys;
 	}
 
-	return len;
+	return pmsg->size;
 }
 
-dword_t message_decode(message_t msg, const byte_t* data)
+dword_t message_read(message_t msg, msg_hdr_t* phr, byte_t* buff, dword_t max)
 {
-	byte_t** pmsg = (byte_t**)msg;
-	byte_t type;
-	dword_t len;
+	message_context* pmsg = TypePtrFromHead(message_context, msg);
 
-	type = MESSAGE_GET_TYPE(data);
+	XDK_ASSERT(msg && msg->tag == MEM_MESSAGE);
 
-	XDK_ASSERT(type == MEM_MESSAGE);
+	if (phr)
+	{
+		phr->ver = pmsg->ver;
+		phr->qos = pmsg->qos;
+		phr->seq = pmsg->qos;
+		phr->utc = pmsg->utc;
+	}
 
-	len = MESSAGE_HEAD_SIZE + MESSAGE_GET_SIZE(data);
+	max = (max < pmsg->size)? max : pmsg->size;
+	if(buff)
+	{
+		xmem_copy((void*)buff, (void*)pmsg->data, max);
+	}
+
+	return max;
+}
+
+/**********************************************************************
+ASN.1 CER ENCODING
+Message::=SEQUENCE{
+	MemoHead: BYTE[4]
+	MsgHead: BYTE[16]
+	MsgData: BYTE[]
+}
+**********************************************************************/
+
+dword_t message_encode(message_t msg, byte_t* buf)
+{
+	message_context* pmsg = TypePtrFromHead(message_context, msg);
+	dword_t len, n, total = 0;
+	byte_t* pos = NULL;
+	byte_t hdr[MESSAGE_HEAD_SIZE] = {0};
+
+	XDK_ASSERT(msg && msg->tag == MEM_MESSAGE);
+
+	MESSAGE_SET_VER(hdr, pmsg->ver);
+	MESSAGE_SET_QOS(hdr, pmsg->qos);
+	MESSAGE_SET_SEQ(hdr, pmsg->seq);
+	MESSAGE_SET_UTC(hdr, pmsg->utc);
+
+	n = ver_write_sequence(((buf)? (buf + total) : NULL), &pos);
+	if(!n)
+	{
+		set_last_error(_T("message_encode"), _T("ver_write_sequence"), -1);
+		return 0;
+	} 
+	total += n;
+
+	len = MESSAGE_HEAD_SIZE;
+	n = ver_write_byte_array(((buf)? (buf + total) : NULL), hdr, len);
+	if(!n)
+	{
+		set_last_error(_T("message_encode"), _T("ver_write_byte_array"), -1);
+		return 0;
+	} 
+	total += n;
+	
+	len = pmsg->size;
+	n = ver_write_int(((buf)? (buf + total) : NULL), len);
+	if(!n)
+	{
+		set_last_error(_T("message_encode"), _T("ver_write_integer"), -1);
+		return 0;
+	} 
+	total += n;
+
+	n = ver_write_byte_array(((buf)? (buf + total) : NULL), pmsg->data, pmsg->size);
+	if(!n)
+	{
+		set_last_error(_T("message_encode"), _T("ver_write_byte_array"), -1);
+		return 0;
+	} 
+	total += n;
+
+	if(pos) ver_write_sequence_length(pos, total);
+	
+	return total;
+}
+
+dword_t message_decode(message_t msg, const byte_t* buf)
+{
+	message_context* pmsg = TypePtrFromHead(message_context, msg);
+	dword_t len, n, total = 0;
+	byte_t hdr[MESSAGE_HEAD_SIZE] = {0};
+
+	if(!buf) return 0;
+
+	n = ver_read_sequence((buf + total), &len);
+	if(!n)
+	{
+		set_last_error(_T("message_decode"), _T("ver_read_sequence"), -1);
+		return 0;
+	}
+	total += n;
+
+	len = MESSAGE_HEAD_SIZE;
+	n = ver_read_byte_array((buf + total), hdr, len);
+	if(!n)
+	{
+		set_last_error(_T("message_decode"), _T("ver_read_byte_array"), -1);
+		return 0;
+	} 
+	total += n;
 
 	if (pmsg)
 	{
-		bytes_realloc(pmsg, len);
-		xmem_copy((void*)(*pmsg), (void*)data, len);
+		pmsg->ver = MESSAGE_GET_VER(hdr);
+		pmsg->qos = MESSAGE_GET_QOS(hdr);
+		pmsg->seq = MESSAGE_GET_SEQ(hdr);
+		pmsg->utc = MESSAGE_GET_UTC(hdr);
 	}
 
-	return len;
-}
-
-dword_t message_encode(message_t msg, byte_t* buf, dword_t max)
-{
-	byte_t** pmsg = (byte_t**)msg;
-	dword_t len;
-	byte_t type;
-
-	XDK_ASSERT(msg != NULL);
-
-	type = MESSAGE_GET_TYPE(*pmsg);
-
-	XDK_ASSERT(type == MEM_MESSAGE);
-
-	len = MESSAGE_HEAD_SIZE + MESSAGE_GET_SIZE(*pmsg);
-	len = (len < max) ? len : max;
-
-	if (buf)
+	n = ver_read_int((buf + total), (int*)&len);
+	if(!n)
 	{
-		xmem_copy((void*)buf, (void*)(*pmsg), len);
+		set_last_error(_T("message_decode"), _T("ver_read_int"), -1);
+		return 0;
+	} 
+	total += n;
+
+	if(pmsg) pmsg->size = len;
+
+	n = ver_read_byte_array((buf + total), ((pmsg)? pmsg->data : NULL), ((pmsg)? pmsg->size : 0));
+	if(!n)
+	{
+		set_last_error(_T("message_decode"), _T("ver_read_int"), -1);
+		return 0;
+	} 
+	total += n;
+
+	return total;
+}
+
+/**********************************************************************/
+#if defined (DEBUG) || defined (_DEBUG)
+void message_self_test(void)
+{
+	printf("test message...\n");
+
+	byte_t buf[] = "hello world!";
+
+	msg_hdr_t hdr = { 0 };
+
+	message_t msg = message_alloc();
+
+	hdr.ver = MSGVER_SENSOR;
+	hdr.qos = 0x02;
+	
+	byte_t tmp[100] = { 0 };
+	int i;
+
+	byte_t* pb;
+	dword_t bys;
+
+	for (i = 0; i < 10; i++)
+	{
+		message_borrow(msg, tmp, 100);
+
+		hdr.seq = i;
+		hdr.utc = get_timestamp();
+
+		message_write(msg, &hdr, buf, a_xslen((schar_t*)buf));
+		message_read(msg, &hdr, NULL, MAX_LONG);
+		printf("encodd: ver:0x%08x qos:%c seq:%d utc:%llu msg:%s\n", hdr.ver, hdr.qos, hdr.seq, hdr.utc,tmp);
+
+		bys = message_encode(msg, NULL);
+		pb = (byte_t*)xmem_alloc(bys);
+		message_encode(msg, pb);
+		message_decode(msg, pb);
+		xmem_free(pb);
+		message_read(msg, &hdr, NULL, MAX_LONG);
+		printf("decode: ver:0x%08x qos:%c seq:%d utc:%llu msg:%s\n", hdr.ver, hdr.qos, hdr.seq, hdr.utc,tmp);
+
+		message_revert(msg);
 	}
 
-	return len;
+	message_free(msg);
+
+	printf("test message end\n");
 }
+#endif

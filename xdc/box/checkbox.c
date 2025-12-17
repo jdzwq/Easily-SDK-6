@@ -32,7 +32,6 @@ LICENSE.GPL3 for more details.
 typedef struct _checkbox_delta_t{
 	bool_t on;
 
-	xfont_t xf;
 }checkbox_delta_t;
 
 #define GETCHECKBOXDELTA(ph) 	(checkbox_delta_t*)widget_get_user_delta(ph)
@@ -148,13 +147,6 @@ void hand_checkbox_size(widget_t widget, int code, const xsize_t* prs)
 	}
 }
 
-void hand_checkbox_xfont(widget_t widget, const xfont_t* pxf)
-{
-	checkbox_delta_t* ptd = GETCHECKBOXDELTA(widget);
-	
-	xmem_copy((void*)&ptd->xf, (void*)pxf, sizeof(xfont_t));
-}
-
 void hand_checkbox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 {
 	checkbox_delta_t* ptd = GETCHECKBOXDELTA(widget);
@@ -184,7 +176,7 @@ void hand_checkbox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 
 	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
 
-	draw_checkbox(pif, &ptd->xf, ptd->on);
+	draw_checkbox(pif, ptd->on);
 
 	end_canvas_paint(canv, dc, pxr);
 }
@@ -208,10 +200,6 @@ widget_t checkbox_create(widget_t widget, dword_t style, const xrect_t* pxr)
 		EVENT_ON_LBUTTON_DOWN(hand_checkbox_lbutton_down)
 		EVENT_ON_LBUTTON_UP(hand_checkbox_lbutton_up)
 		
-		EVENT_ON_XFONT(hand_checkbox_xfont)
-
-		
-
 	EVENT_END_DISPATH
 
 	return widget_create(NULL, style, pxr, widget, &ev);
@@ -226,7 +214,7 @@ void checkbox_popup_size(widget_t widget, xsize_t* pxs)
 
 	get_canvas_measure(widget_get_canvas(widget), &im);
 
-	calc_checkbox_size(&im, &ptd->xf, pxs);
+	calc_checkbox_size(&im, pxs);
 
 	widget_size_to_pt(widget, pxs);
 

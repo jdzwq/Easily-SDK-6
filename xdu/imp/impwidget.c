@@ -758,42 +758,6 @@ void widget_kill_timer(widget_t wt, vword_t tid)
 	(pif->pf_widget_kill_timer)(wt, tid);
 }
 
-void  widget_noti_xfont(widget_t wt, const xfont_t* pxf)
-{
-	if_widget_t* pif;
-
-	pif = PROCESS_WIDGET_INTERFACE;
-
-	(pif->pf_widget_noti_xfont)(wt, pxf);
-}
-
-void widget_noti_xface(widget_t wt, const xface_t* pxa)
-{
-	if_widget_t* pif;
-
-	pif = PROCESS_WIDGET_INTERFACE;
-
-	(pif->pf_widget_noti_xface)(wt, pxa);
-}
-
-void  widget_noti_xbrush(widget_t wt, const xbrush_t* pxb)
-{
-	if_widget_t* pif;
-
-	pif = PROCESS_WIDGET_INTERFACE;
-
-	(pif->pf_widget_noti_xbrush)(wt, pxb);
-}
-
-void  widget_noti_xpen(widget_t wt, const xpen_t* pxp)
-{
-	if_widget_t* pif;
-
-	pif = PROCESS_WIDGET_INTERFACE;
-
-	(pif->pf_widget_noti_xpen)(wt, pxp);
-}
-
 void widget_set_color_mode(widget_t wt, const color_mod_t* pclr)
 {
 	if_widget_t* pif;
@@ -810,6 +774,15 @@ void widget_get_color_mode(widget_t wt, color_mod_t* pclr)
 	pif = PROCESS_WIDGET_INTERFACE;
 
 	(pif->pf_widget_get_color_mode)(wt, pclr);
+}
+
+const color_mod_t* widget_get_color_mode_ptr(widget_t wt)
+{
+		if_widget_t* pif;
+
+	pif = PROCESS_WIDGET_INTERFACE;
+
+	return (pif->pf_widget_get_color_mode_ptr)(wt);
 }
 
 void widget_set_diaph(widget_t wt, float b)

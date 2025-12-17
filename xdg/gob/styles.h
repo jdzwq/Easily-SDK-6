@@ -79,7 +79,7 @@ EXP_API int compare_xfont(xfont_t *pxf1, const xfont_t *pxf2);
 
 EXP_API void lighten_xbrush(xbrush_t* pxb, int n);
 
-EXP_API void lighten_xfont(xfont_t* pxf, int n);
+EXP_API void lighten_xface(xface_t* pxa, int n);
 
 EXP_API void parse_xpen_from_style(xpen_t* pxp, const tchar_t* token);
 

@@ -120,7 +120,7 @@ void noti_splitor_item_sized(splitor_t* ptd, const xpoint_t* pxp)
 	calc_split_item_rect(ptd->split, ilk, &xr);
 	widget_rect_to_pt(ptd->widget, &xr);
 
-	enum_split_item(ilk, (CALLBACK_ENUMLINK)_splitor_item_resize, (void*)ptd->widget);
+	enum_split_item(ilk, (PF_ENUMLINK)_splitor_item_resize, (void*)ptd->widget);
 
 	widget_erase(ptd->widget, &xr);
 }
@@ -222,7 +222,7 @@ void hand_splitor_size(splitor_t* ptd, const xrect_t* pxr)
 	set_split_item_height(ptd->split, xr.fh);
 
 	resize_split_item(ptd->split);
-	enum_split_item(ptd->split, (CALLBACK_ENUMLINK)_splitor_item_resize, (void*)ptd->widget);
+	enum_split_item(ptd->split, (PF_ENUMLINK)_splitor_item_resize, (void*)ptd->widget);
 
 	widget_erase(ptd->widget, pxr);
 }

@@ -33,7 +33,6 @@ typedef struct _staticbox_delta_t{
 	tchar_t* text;
 	int bw,bh;
 
-	xfont_t xf;
 }staticbox_delta_t;
 
 #define GETSTATICBOXDELTA(ph) 	(staticbox_delta_t*)widget_get_user_delta(ph)
@@ -49,8 +48,6 @@ int hand_staticbox_create(widget_t widget, void* data)
 
 	ptd = (staticbox_delta_t*)xmem_alloc(sizeof(staticbox_delta_t));
 	xmem_zero((void*)ptd, sizeof(staticbox_delta_t));
-
-	default_widget_xfont(&ptd->xf);
 
 	SETSTATICBOXDELTA(widget, ptd);
 
@@ -112,15 +109,6 @@ void hand_staticbox_size(widget_t widget, int code, const xsize_t* prs)
 	}
 }
 
-void hand_staticbox_xfont(widget_t widget, const xfont_t* pxf)
-{
-	staticbox_delta_t* ptd = GETSTATICBOXDELTA(widget);
-
-	XDK_ASSERT(ptd != NULL);
-
-	xmem_copy((void*)&ptd->xf, (void*)pxf, sizeof(xfont_t));
-}
-
 void hand_staticbox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 {
 	staticbox_delta_t* ptd = GETSTATICBOXDELTA(widget);
@@ -149,7 +137,7 @@ void hand_staticbox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 
 	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
 
-	(*ifv.pf_draw_text)(ifv.ctx, &ptd->xf, &xa, &xr, ptd->text, -1);
+	(*ifv.pf_draw_text)(ifv.ctx, &xa, &xr, ptd->text, -1);
 
 	end_canvas_paint(canv, dc, pxr);
 }
@@ -170,10 +158,6 @@ widget_t staticbox_create(widget_t widget, dword_t style, const xrect_t* pxr)
 
 		EVENT_ON_LBUTTON_DOWN(hand_staticbox_lbutton_down)
 		EVENT_ON_LBUTTON_UP(hand_staticbox_lbutton_up)
-
-		EVENT_ON_XFONT(hand_staticbox_xfont)
-
-		
 
 	EVENT_END_DISPATH
 

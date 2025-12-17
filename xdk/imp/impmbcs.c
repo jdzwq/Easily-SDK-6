@@ -176,4 +176,48 @@ int sys_ucs_to_utf(const wchar_t* src, int slen, byte_t* dest, dword_t dlen)
 	return (*pif->pf_ucs_to_utf)(src, slen, dest, dlen);
 }
 
-#endif //XDK_SUPPORT_MBCS
+#if defined (DEBUG) || defined (_DEBUG)
+void mbcs_self_test()
+{
+	printf("test mbcs converting...\n");
+
+	char chs[4];
+	wchar_t wc = L'中';
+	int s;
+
+#if DEF_MBS == _GB2312
+	s = sys_ucs_byte_to_gbk(wc, (byte_t*)chs);
+	printf("gb2312 characterset: %s, %dbytes\n", chs, s);
+#else
+	s = sys_ucs_byte_to_utf(wc, (byte_t*)chs);
+	printf("utf8 characterset: %s, %dbytes\n", chs, s);
+#endif
+
+	schar_t* mbs_token = "A多BC字节中文";
+	wchar_t* ucs_token = L"A宽字B节C中文";
+
+	byte_t utf_buf[100] = {0};
+	schar_t mbs_buf[100] = {0};
+	wchar_t ucs_buf[100] = {0};
+
+#if DEF_MBS == _GB2312
+	s = sys_ucs_to_gbk(ucs_token, -1, utf_buf, 100);
+	printf("unicode to utf8: %s, %dbytes\n", utf_buf, s);
+#else
+	s = sys_ucs_to_utf(ucs_token, -1, utf_buf, 100);
+	printf("unicode to utf8: %s, %dbytes\n", utf_buf, s);
+#endif
+
+#if DEF_MBS == _GB2312
+	s = a_xslen(mbs_token);
+	s = sys_gbk_to_ucs(mbs_token, s, ucs_buf, 100);
+	wprintf(L"gb2312 to unicode: %s, %dbytes\n", ucs_buf, s);
+#else
+	s = a_xslen(mbs_token);
+	s = sys_utf_to_ucs(mbs_token, s, ucs_buf, 100);
+	wprintf(L"utf8 to unicode: %S, %dbytes\n", ucs_buf, s);
+#endif
+}
+#endif
+
+#endif /*XDK_SUPPORT_MBCS*/

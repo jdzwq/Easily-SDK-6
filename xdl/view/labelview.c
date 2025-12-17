@@ -257,23 +257,23 @@ void draw_label(const drawing_interface* pif, link_t_ptr ptr, int page)
 	style = get_label_style_ptr(ptr);
 
 	parse_xface_from_style(&xa, style);
-
 	parse_xfont_from_style(&xf, style);
 	if (!b_print)
 	{
-		format_xcolor(&pif->mode.clr_txt, xf.color);
+		format_xcolor(&pif->clrs->clr_txt, xa.text_color);
+		(*pif->pf_set_xfont)(pif->ctx, &xf);
 	}
 
 	/*parse_xpen_from_style(&xp, style);
 	if (!b_print)
 	{
-		format_xcolor(&pif->mode.clr_frg, xp.color);
+		format_xcolor(&pif->clrs->clr_frg, xp.color);
 	}*/
 
 	parse_xbrush_from_style(&xb, style);
 	if (!b_print)
 	{
-		format_xcolor(&pif->mode.clr_bkg, xb.color);
+		format_xcolor(&pif->clrs->clr_bkg, xb.color);
 	}
 
 	xscpy(xp.color, xb.color);
@@ -282,17 +282,17 @@ void draw_label(const drawing_interface* pif, link_t_ptr ptr, int page)
 
 	if (!b_print)
 	{
-		format_xcolor(&pif->mode.clr_msk, xi.color);
-		format_xcolor(&pif->mode.clr_msk, xi_ico.color);
+		format_xcolor(&pif->clrs->clr_msk, xi.color);
+		format_xcolor(&pif->clrs->clr_msk, xi_ico.color);
 	}
 
 	if (!b_print)
 	{
-		xmem_copy((void*)&xc, (void*)&pif->mode.clr_ico, sizeof(xcolor_t));
+		xmem_copy((void*)&xc, (void*)&pif->clrs->clr_ico, sizeof(xcolor_t));
 	}
 	else
 	{
-		parse_xcolor(&xc, xf.color);
+		parse_xcolor(&xc, xa.text_color);
 	}
 
 	xmem_copy((void*)&xa_title, (void*)&xa, sizeof(xface_t));
@@ -300,7 +300,7 @@ void draw_label(const drawing_interface* pif, link_t_ptr ptr, int page)
 	xmem_copy((void*)&xb_shape, (void*)&xb, sizeof(xbrush_t));
 	lighten_xbrush(&xb_shape, DEF_SOFT_DARKEN);
 
-	(*pif->pf_font_size)(pif->ctx, &xf, &xs);
+	(*pif->pf_font_size)(pif->ctx, &xs);
 
 	iw = get_label_item_width(ptr);
 	ih = get_label_item_height(ptr);
@@ -328,7 +328,7 @@ void draw_label(const drawing_interface* pif, link_t_ptr ptr, int page)
 		xr_text.fy = xr.fy + SHAPE_FEED;
 		xr_text.fw = xr.fw - 2 * eh - 2 * SHAPE_FEED;
 		xr_text.fh = eh;
-		(*pif->pf_draw_text)(pif->ctx, &xf, &xa_title, &xr_text, get_label_item_title_ptr(nlk), -1);
+		(*pif->pf_draw_text)(pif->ctx, &xa_title, &xr_text, get_label_item_title_ptr(nlk), -1);
 
 		xr_text.fx = xr.fx + xr.fw - SHAPE_FEED - eh;
 		xr_text.fy = xr.fy + SHAPE_FEED;
@@ -358,7 +358,7 @@ void draw_label(const drawing_interface* pif, link_t_ptr ptr, int page)
 			vs_text = string_alloc();
 			string_cpy(vs_text, get_label_item_text_ptr(nlk), -1);
 
-			draw_var_text(pif, &xf, &xa, &xr_text, vs_text);
+			draw_var_text(pif, &xa, &xr_text, vs_text);
 
 			string_free(vs_text);
 		}
@@ -388,7 +388,7 @@ void draw_label(const drawing_interface* pif, link_t_ptr ptr, int page)
 				xr_text.fw = iw - 2 * SHAPE_FEED;
 				xr_text.fh = eh;
 
-				(*pif->pf_draw_text)(pif->ctx, &xf, &xa, &xr_text, get_words_item_text_ptr(ilk), -1);
+				(*pif->pf_draw_text)(pif->ctx, &xa, &xr_text, get_words_item_text_ptr(ilk), -1);
 
 				xr_text.fy += eh;
 				ilk = get_words_next_item(st_array, ilk);
@@ -412,13 +412,13 @@ void draw_label(const drawing_interface* pif, link_t_ptr ptr, int page)
 				xr_text.fw = ew;
 				xr_text.fh = eh;
 
-				(*pif->pf_draw_text)(pif->ctx, &xf, &xa, &xr_text, get_string_entity_key_ptr(ilk), -1);
+				(*pif->pf_draw_text)(pif->ctx, &xa, &xr_text, get_string_entity_key_ptr(ilk), -1);
 
 				xr_text.fx = xr.fx + SHAPE_FEED + ew;
 				xr_text.fw = ew;
 				xr_text.fh = eh;
 
-				(*pif->pf_draw_text)(pif->ctx, &xf, &xa_title, &xr_text, get_string_entity_val_ptr(ilk), -1);
+				(*pif->pf_draw_text)(pif->ctx, &xa_title, &xr_text, get_string_entity_val_ptr(ilk), -1);
 
 				xr_text.fy += eh;
 				ilk = get_string_next_entity(st_table, ilk);

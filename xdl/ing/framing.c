@@ -140,7 +140,6 @@ void draw_ruler(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t
 	int i, j;
 	int vm, hm;
 	xpen_t xp;
-	xfont_t xf;
 	xface_t xa;
 	tchar_t sz[NUM_LEN + 1];
 
@@ -151,11 +150,6 @@ void draw_ruler(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t
 
 	default_xpen(&xp);
 	format_xcolor(pxc, xp.color);
-
-	default_xfont(&xf);
-	xscpy(xf.size, _T("7"));
-	xscpy(xf.weight, _T("100"));
-	xscpy(xf.color, xp.color);
 
 	default_xface(&xa);
 	xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_NEAR);
@@ -207,7 +201,7 @@ void draw_ruler(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t
 		xr.fw = MAX_SPAN;
 		xr.fh = (float)(MAX_SPAN / 2 + 0.5);
 		xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_NEAR);
-		(*pif->pf_draw_text)(pif->ctx, &xf, &xa, &xr, sz, -1);
+		(*pif->pf_draw_text)(pif->ctx, &xa, &xr, sz, -1);
 
 		if (i == vm - 1)
 		{
@@ -224,7 +218,7 @@ void draw_ruler(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t
 			xr.fw = MAX_SPAN;
 			xr.fh = (float)(MAX_SPAN / 2 + 0.5);
 			xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_NEAR);
-			(*pif->pf_draw_text)(pif->ctx, &xf, &xa, &xr, sz, -1);
+			(*pif->pf_draw_text)(pif->ctx, &xa, &xr, sz, -1);
 		}
 	}
 
@@ -268,7 +262,7 @@ void draw_ruler(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t
 		xr.fw = MAX_SPAN;
 		xr.fh = (float)(MAX_SPAN / 2 + 0.5);
 		xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_FAR);
-		(*pif->pf_draw_text)(pif->ctx, &xf, &xa, &xr, sz, -1);
+		(*pif->pf_draw_text)(pif->ctx, &xa, &xr, sz, -1);
 
 		if (i == vm - 1)
 		{
@@ -285,7 +279,7 @@ void draw_ruler(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t
 			xr.fw = MAX_SPAN;
 			xr.fh = (float)(MAX_SPAN / 2 + 0.5);
 			xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_FAR);
-			(*pif->pf_draw_text)(pif->ctx, &xf, &xa, &xr, sz, -1);
+			(*pif->pf_draw_text)(pif->ctx, &xa, &xr, sz, -1);
 		}
 	}
 
@@ -328,7 +322,7 @@ void draw_ruler(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t
 		xr.fw = (float)(MAX_SPAN - 0.5);
 		xr.fh = (float)(MAX_SPAN / 2 + 0.5);
 		xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_NEAR);
-		(*pif->pf_draw_text)(pif->ctx, &xf, &xa, &xr, sz, -1);
+		(*pif->pf_draw_text)(pif->ctx, &xa, &xr, sz, -1);
 
 		if (i == hm - 1)
 		{
@@ -345,7 +339,7 @@ void draw_ruler(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t
 			xr.fw = (float)(MAX_SPAN - 0.5);
 			xr.fh = (float)(MAX_SPAN / 2 + 0.5);
 			xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_NEAR);
-			(*pif->pf_draw_text)(pif->ctx, &xf, &xa, &xr, sz, -1);
+			(*pif->pf_draw_text)(pif->ctx, &xa, &xr, sz, -1);
 		}
 	}
 
@@ -388,7 +382,7 @@ void draw_ruler(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t
 		xr.fw = MAX_SPAN;
 		xr.fh = (float)(MAX_SPAN / 2 + 0.5);
 		xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_NEAR);
-		(*pif->pf_draw_text)(pif->ctx, &xf, &xa, &xr, sz, -1);
+		(*pif->pf_draw_text)(pif->ctx, &xa, &xr, sz, -1);
 
 		if (i == hm - 1)
 		{
@@ -405,7 +399,7 @@ void draw_ruler(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t
 			xr.fw = MAX_SPAN;
 			xr.fh = (float)(MAX_SPAN / 2 + 0.5);
 			xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_NEAR);
-			(*pif->pf_draw_text)(pif->ctx, &xf, &xa, &xr, sz, -1);
+			(*pif->pf_draw_text)(pif->ctx, &xa, &xr, sz, -1);
 		}
 	}
 }

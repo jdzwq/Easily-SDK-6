@@ -85,7 +85,7 @@ static bina_node_t* _alloc_bina_node(variant_t key, byte_t clr, byte_t pos)
 	pbn->mask = (byte_t)pos;
 	pbn->mask |= clr;
 
-	pbn->key = variant_alloc(VV_NULL);
+	pbn->key = variant_clone(key);
 	pbn->val = object_alloc();
 
 	return pbn;
@@ -547,7 +547,7 @@ bool_t is_bina_leaf(link_t_ptr ilk)
 	return (ilk && !get_bina_left_child_node(ilk) && !get_bina_right_child_node(ilk)) ? 1 : 0;
 }
 
-link_t_ptr traver_bina_tree_preorder(link_t_ptr ptr,CALLBACK_ENUMLINK pf,void* param)
+link_t_ptr traver_bina_tree_preorder(link_t_ptr ptr,PF_ENUMLINK pf,void* param)
 {
 	bina_tree_t* pbt;
 
@@ -621,7 +621,7 @@ link_t_ptr traver_bina_tree_preorder(link_t_ptr ptr,CALLBACK_ENUMLINK pf,void* p
 	return nlk;
 }
 
-link_t_ptr traver_bina_tree_inorder(link_t_ptr ptr, CALLBACK_ENUMLINK pf, void* param)
+link_t_ptr traver_bina_tree_inorder(link_t_ptr ptr, PF_ENUMLINK pf, void* param)
 {
 	bina_tree_t* pbt;
 
@@ -698,7 +698,7 @@ link_t_ptr traver_bina_tree_inorder(link_t_ptr ptr, CALLBACK_ENUMLINK pf, void* 
 	return nlk;
 }
 
-link_t_ptr traver_bina_tree_postorder(link_t_ptr ptr, CALLBACK_ENUMLINK pf, void* param)
+link_t_ptr traver_bina_tree_postorder(link_t_ptr ptr, PF_ENUMLINK pf, void* param)
 {
 	bina_tree_t* pbt;
 
@@ -781,7 +781,7 @@ link_t_ptr traver_bina_tree_postorder(link_t_ptr ptr, CALLBACK_ENUMLINK pf, void
 	return nlk;
 }
 
-link_t_ptr traver_bina_tree_levelorder(link_t_ptr ptr, CALLBACK_ENUMLINK pf, void* param)
+link_t_ptr traver_bina_tree_levelorder(link_t_ptr ptr, PF_ENUMLINK pf, void* param)
 {
 	bina_tree_t* pbt;
 	bina_node_t* pbn;
@@ -844,7 +844,7 @@ link_t_ptr find_bina_node(link_t_ptr ptr, variant_t key, object_t val)
 
 	link_t_ptr nlk;
 	bina_node_t* pbn;
-	int rt;
+	int rt, step = 0;
 
 	XDK_ASSERT(ptr && ptr->tag == lkBinaTree);
 
@@ -853,12 +853,13 @@ link_t_ptr find_bina_node(link_t_ptr ptr, variant_t key, object_t val)
 	nlk = pbt->node;
 	while (nlk)
 	{
+		step ++;
 		pbn = BinaNodeFromLink(nlk);
 
 		rt = variant_comp(key, pbn->key);
-
 		if (!rt)
 		{
+			PUT_THREEBYTE_LOC(nlk->lru,0,step);
 			if (val)
 			{
 				object_copy(val, pbn->val);
@@ -947,7 +948,7 @@ link_t_ptr insert_bina_node(link_t_ptr ptr, variant_t key, object_t val)
 	if (val)
 		object_copy(pbn->val, val);
 	else
-		object_empty(pbn->val);
+		object_clear(pbn->val);
 	
 	return nlk;
 }
@@ -1108,3 +1109,102 @@ bool_t delete_bina_node(link_t_ptr ptr, variant_t key)
 
 	return 1;
 }
+
+/**********************************************************************/
+#if defined (DEBUG) || defined (_DEBUG)
+static int calc_bina_step(link_t_ptr ilk)
+{
+	int n = 0;
+
+	while (ilk)
+	{
+		ilk = get_bina_parent_node(ilk);
+		n++;
+	}
+
+	return n;
+}
+
+void bina_tree_self_test()
+{
+	printf("test binary tree...\n");
+
+	int sum_0 = 0;
+	int sum_1 = 0;
+	int count_0 = 0;
+	int count_1 = 0;
+	float max_0 = 0;
+	float max_1 = 0;
+
+	variant_t key = variant_alloc(VV_INT);
+
+	object_t val = object_alloc();
+
+	int i, j = 100;
+	while (j--)
+	{
+		link_t_ptr ptr_0 = create_bina_tree(0);
+		link_t_ptr ptr_1 = create_bina_tree(1);
+
+		link_t_ptr nlk;
+		int total_0 = 0;
+		int total_1 = 0;
+		float max;
+		int n0, n1, n = 1000;
+
+		for (i = 0; i < n; i++)
+		{
+			variant_set_int(key, i);
+
+			object_encode_variant(val, key);
+
+			insert_bina_node(ptr_0, key, val);
+
+			insert_bina_node(ptr_1, key, val);
+		}
+
+		n0 = n1 = 0;
+		for (i = 0; i < n; i++)
+		{
+			variant_set_int(key, i);
+
+			nlk = find_bina_node(ptr_0, key, val);
+			if (nlk)
+			{
+				n0++;
+				total_0 += calc_bina_step(nlk);
+			}
+
+			nlk = find_bina_node(ptr_1, key, val);
+			if (nlk)
+			{
+				n1++;
+				total_1 += calc_bina_step(nlk);
+			}
+		}
+
+		max = (float)total_0 / n0;
+		max_0 = (max_0 < max) ? max : max_0;
+
+		max = (float)total_1 / n1;
+		max_1 = (max_1 < max) ? max : max_1;
+
+		_tprintf(_T("nm total step %d, total node %d, aveage step %.4f\n"), total_0, n0, (float)total_0 / n0);
+		_tprintf(_T("bd total step %d, total node %d, aveage step %.4f\n"), total_1, n1, (float)total_1 / n1);
+
+		destroy_bina_tree(ptr_0);
+		destroy_bina_tree(ptr_1);
+
+		sum_0 += total_0;
+		sum_1 += total_1;
+		count_0 += n0;
+		count_1 += n1;
+	}
+
+	_tprintf(_T("nm total step %d, count node %d, max step %.2f, aveage step %.4f\n"), sum_0, count_0, max_0, (float)sum_0 / count_0);
+	_tprintf(_T("bd total step %d, count node %d, max step %.2f, aveage step %.4f\n"), sum_1, count_1, max_1, (float)sum_1 / count_1);
+
+	variant_free(key);
+	object_free(val);
+}
+#endif

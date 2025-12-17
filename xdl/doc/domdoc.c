@@ -131,7 +131,7 @@ void destroy_dom_doc(link_t_ptr ptr)
 }
 
 
-link_t_ptr enum_dom_node(link_t_ptr ptr,CALLBACK_ENUMLINK pf,void* param)
+link_t_ptr enum_dom_node(link_t_ptr ptr,PF_ENUMLINK pf,void* param)
 {
 	link_t_ptr nlk;
 	link_t_ptr st = NULL;
@@ -169,7 +169,7 @@ link_t_ptr enum_dom_node(link_t_ptr ptr,CALLBACK_ENUMLINK pf,void* param)
 	return nlk;
 }
 
-link_t_ptr enum_dom_node_deep(link_t_ptr ptr, CALLBACK_ENUMLINK pf, void* param)
+link_t_ptr enum_dom_node_deep(link_t_ptr ptr, PF_ENUMLINK pf, void* param)
 {
 	link_t_ptr nlk;
 	link_t_ptr st = NULL;
@@ -242,7 +242,7 @@ bool_t is_dom_child_node(link_t_ptr ilk,link_t_ptr plk)
 	if (!plk)
 		return 0;
 
-	return (enum_dom_node(ilk, (CALLBACK_ENUMLINK)_compare_dom_node_proc, (void*)plk)) ? 1 : 0;
+	return (enum_dom_node(ilk, (PF_ENUMLINK)_compare_dom_node_proc, (void*)plk)) ? 1 : 0;
 }
 
 bool_t is_dom_node_attr(link_t_ptr ilk,const tchar_t* key,int len)
@@ -885,7 +885,7 @@ int get_dom_child_node_mask_check_count(link_t_ptr ilk,dword_t ul)
 	NODE_MASK_COUNT nd = { 0 };
 
 	nd.mask = ul;
-	enum_dom_node(ilk, (CALLBACK_ENUMLINK)_count_check_node, (void*)&nd);
+	enum_dom_node(ilk, (PF_ENUMLINK)_count_check_node, (void*)&nd);
 
 	return nd.count;
 }
@@ -914,7 +914,7 @@ int set_dom_child_node_mask_check(link_t_ptr ilk,dword_t ul, bool_t b)
 
 	nd.mask = ul;
 	nd.check = b;
-	enum_dom_node(ilk, (CALLBACK_ENUMLINK)_reset_check_node, (void*)&nd);
+	enum_dom_node(ilk, (PF_ENUMLINK)_reset_check_node, (void*)&nd);
 
 	return nd.count;
 }
@@ -1236,7 +1236,7 @@ link_t_ptr find_dom_node_by_attr(link_t_ptr pos,bool_t deep,const tchar_t* key,i
 		ep.val = val;
 		ep.vlen = vlen;
 
-		return enum_dom_node(pos, (CALLBACK_ENUMLINK)_compare_dom_node_attr_proc, (void*)&ep);
+		return enum_dom_node(pos, (PF_ENUMLINK)_compare_dom_node_attr_proc, (void*)&ep);
 	}
 	else
 	{
@@ -1274,7 +1274,7 @@ link_t_ptr find_dom_node_by_name(link_t_ptr pos,bool_t deep,const tchar_t* sz_na
 		tp.token = sz_name;
 		tp.len = len;
 
-		return enum_dom_node(pos, (CALLBACK_ENUMLINK)_compare_dom_node_name_proc, (void*)&tp);
+		return enum_dom_node(pos, (PF_ENUMLINK)_compare_dom_node_name_proc, (void*)&tp);
 	}
 	else
 	{
@@ -1312,7 +1312,7 @@ link_t_ptr find_dom_node_by_text(link_t_ptr pos, bool_t deep, const tchar_t* sz_
 		tp.token = sz_text;
 		tp.len = len;
 
-		return enum_dom_node(pos, (CALLBACK_ENUMLINK)_compare_dom_node_text_proc, (void*)&tp);
+		return enum_dom_node(pos, (PF_ENUMLINK)_compare_dom_node_text_proc, (void*)&tp);
 	}
 	else
 	{
@@ -1341,7 +1341,7 @@ void sort_dom_child_node_by_name(link_t_ptr ilk,int desc)
 	XDK_ASSERT(ilk && ilk->tag == lkNode);
 
 	ptt = DomItemFromLink(ilk);
-	bubble_sort_link(&ptt->lkChild, (CALLBACK_SORTLINK)_sorting_dom_node_name_proc, desc, NULL);
+	bubble_sort_link(&ptt->lkChild, (PF_SORTLINK)_sorting_dom_node_name_proc, desc, NULL);
 }
 
 int _sorting_dom_node_text_proc(link_t_ptr plk1, link_t_ptr plk2, void* param)
@@ -1356,7 +1356,7 @@ void sort_dom_child_node_by_text(link_t_ptr ilk,int desc)
 	XDK_ASSERT(ilk && ilk->tag == lkNode);
 
 	ptt = DomItemFromLink(ilk);
-	bubble_sort_link(&ptt->lkChild, (CALLBACK_SORTLINK)_sorting_dom_node_text_proc, desc, NULL);
+	bubble_sort_link(&ptt->lkChild, (PF_SORTLINK)_sorting_dom_node_text_proc, desc, NULL);
 }
 
 int _sorting_dom_node_attr_proc(link_t_ptr plk1, link_t_ptr plk2, void* param)
@@ -1371,7 +1371,7 @@ void sort_dom_child_node_by_attr(link_t_ptr ilk, const tchar_t* attr,int desc)
 	XDK_ASSERT(ilk && ilk->tag == lkNode);
 
 	ptt = DomItemFromLink(ilk);
-	bubble_sort_link(&ptt->lkChild, (CALLBACK_SORTLINK)_sorting_dom_node_attr_proc, desc, (void*)attr);
+	bubble_sort_link(&ptt->lkChild, (PF_SORTLINK)_sorting_dom_node_attr_proc, desc, (void*)attr);
 }
 
 void merge_dom_child_nodes(link_t_ptr dst, link_t_ptr src)

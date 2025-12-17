@@ -31,6 +31,7 @@ LICENSE.GPL3 for more details.
 #include "mdev.h"
 #include "mfnt.h"
 
+
 #ifdef	__cplusplus
 extern "C" {
 #endif
@@ -41,7 +42,7 @@ EXP_API void destroy_mgc_visual(visual_t mgc);
 
 EXP_API mem_device_ptr mgc_get_device_interface(visual_t mgc, device_t* phand);
 
-EXP_API mem_font_ptr mgc_get_font_interface(visual_t mgc, const xfont_t* pxf, fontset_t* phand);
+EXP_API mem_font_ptr mgc_get_font_interface(visual_t mgc, fontset_t* phand);
 
 EXP_API void mgc_get_device_caps(visual_t mgc, dev_cap_t* pcap);
 
@@ -53,7 +54,7 @@ EXP_API dword_t mgc_save_bytes(visual_t mgc, byte_t *buf, dword_t max);
 
 EXP_API float mgc_pixel_metric(visual_t mgc);
 
-EXP_API float mgc_font_metric(visual_t mgc, const xfont_t* pxf);
+EXP_API float mgc_font_metric(visual_t mgc, const tchar_t* xf_size);
 
 #ifdef	__cplusplus
 }

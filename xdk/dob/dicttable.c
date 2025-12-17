@@ -239,7 +239,7 @@ int get_dict_entity_count(link_t_ptr ptr)
 	return count;
 }
 
-link_t_ptr get_dict_entity_at(link_t_ptr ptr, int index)
+static link_t_ptr get_dict_entity_at(link_t_ptr ptr, int index)
 {
 	dict_table_t* pht;
 	link_t_ptr plk;
@@ -265,7 +265,7 @@ link_t_ptr get_dict_entity_at(link_t_ptr ptr, int index)
 	return NULL;
 }
 
-int get_dict_entity_index(link_t_ptr ptr, link_t_ptr elk)
+static int get_dict_entity_index(link_t_ptr ptr, link_t_ptr elk)
 {
 	dict_table_t* pht;
 	link_t_ptr plk;
@@ -426,7 +426,7 @@ link_t_ptr	write_dict_entity(link_t_ptr ptr, variant_t key, object_t val)
 		if (val)
 			object_copy(phe->val, val);
 		else
-			object_empty(phe->val);
+			object_clear(phe->val);
 	}
 	else	/*if not exist then to add new entity with key and value*/
 	{
@@ -470,6 +470,7 @@ link_t_ptr get_dict_entity(link_t_ptr ptr, variant_t key)
 	dict_entity_t* phe;
 	dict_table_t* pht;
 	link_t_ptr plk;
+	int step = 0;
 
 	XDK_ASSERT(ptr && ptr->tag == lkDictTable);
 
@@ -484,10 +485,14 @@ link_t_ptr get_dict_entity(link_t_ptr ptr, variant_t key)
 	plk = get_first_link(&((pht->pp)[DICTINDEX(code, pht->size)]));
 	while (plk != NULL)
 	{
+		step ++;
 		phe = DictEntityFromLink(plk);
 		
 		if (phe->code == code)
+		{
+			PUT_THREEBYTE_LOC(plk->lru,0,step);
 			return plk;
+		}
 		
 		plk = get_next_link(plk);
 	}
@@ -587,12 +592,13 @@ void set_dict_entity_val(link_t_ptr elk, object_t val)
 	if (phe->val && val)
 		object_copy(phe->val, val);
 	else if (val)
-		object_empty(phe->val);
+		object_clear(phe->val);
 }
 
-void attach_dict_entity_val(link_t_ptr elk, object_t val)
+object_t attach_dict_entity_val(link_t_ptr elk, object_t val)
 {
 	dict_entity_t* phe;
+	object_t org;
 
 	XDK_ASSERT(elk && elk->tag == lkDictEntity);
 
@@ -600,25 +606,14 @@ void attach_dict_entity_val(link_t_ptr elk, object_t val)
 
 	phe = DictEntityFromLink(elk);
 
-	object_free(phe->val);
+	org = phe->val;
 
-	phe->val = val;
-}
+	if(val)
+		phe->val = val;
+	else
+		phe->val = object_alloc();
 
-object_t detach_dict_entity_val(link_t_ptr elk)
-{
-	dict_entity_t* phe;
-	object_t val;
-
-	XDK_ASSERT(elk && elk->tag == lkDictEntity);
-
-	phe = DictEntityFromLink(elk);
-
-	val = phe->val;
-
-	phe->val = object_alloc();
-
-	return val;
+	return org;
 }
 
 vword_t get_dict_entity_delta(link_t_ptr elk)
@@ -678,3 +673,55 @@ link_t_ptr enum_dict_entity(link_t_ptr ptr, ENUM_DICTTABLE_ENTITY pf, void* pv)
 
 	return plk;
 }
+
+/**********************************************************************/
+#if defined (DEBUG) || defined (_DEBUG)
+void dict_table_self_test()
+{
+	printf("test dict table...\n");
+
+	dword_t i;
+	int min, max,step,zero = 0,total = 0;
+	link_t_ptr plk, ptr;
+
+	ptr = create_dict_table();
+
+	variant_t key = variant_alloc(VV_INT);
+	object_t val = object_alloc();
+
+	for (i = 0x4E00; i <= 0x9FA5; i++)
+	{
+		variant_set_int(key, i);
+		object_encode_variant(val, key);
+		
+		write_dict_entity(ptr, key, val);
+	}
+
+	min = MAX_LONG;
+	max = 0;
+	for (i = 0x4E00; i <= 0x9FA5; i++)
+	{
+		variant_set_int(key, i);
+		plk = get_dict_entity(ptr, key);
+		if(plk)
+		{
+			step = GET_THREEBYTE_LOC(plk->lru, 0);
+			total += step;
+			if(min > step) min = step;
+			if(max < step) max = step;
+		}
+		else
+		{
+			zero ++;
+		}
+	}
+	
+	destroy_dict_table(ptr);
+
+	variant_free(key);
+	object_free(val);
+
+	printf("table size is:%d, total step is:%d, average step is:%.2f\n", i, total, (float)total / i);
+	printf("min step is:%d, max step is:%d, not find is:%d\n", min, max, zero);
+}
+#endif

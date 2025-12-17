@@ -232,7 +232,7 @@ void previewdlg_on_printsel(widget_t widget)
 
 	pa.b_sel = 1;
 	pa.widget = widget;
-	enum_dom_node(tree, (CALLBACK_ENUMLINK)_enum_tree_item, (void*)&pa);
+	enum_dom_node(tree, (PF_ENUMLINK)_enum_tree_item, (void*)&pa);
 }
 
 void previewdlg_on_printall(widget_t widget)
@@ -247,7 +247,7 @@ void previewdlg_on_printall(widget_t widget)
 
 	pa.b_sel = 0;
 	pa.widget = widget;
-	enum_dom_node(tree, (CALLBACK_ENUMLINK)_enum_tree_item, (void*)&pa);
+	enum_dom_node(tree, (PF_ENUMLINK)_enum_tree_item, (void*)&pa);
 }
 
 void previewdlg_on_setup(widget_t widget)

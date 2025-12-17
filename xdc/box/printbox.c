@@ -39,9 +39,6 @@ typedef struct _print_delta_t{
 
 	widget_t hsc;
 	widget_t vsc;
-
-	xfont_t xf;
-	xface_t xa;
 }print_delta_t;
 
 #define GETPRINTDELTA(ph) 		(print_delta_t*)widget_get_user_delta(ph)
@@ -54,6 +51,7 @@ static int _printbox_calc_pages(widget_t widget)
 
 	xrect_t xr;
 	int pages = 0;
+	xface_t xa = {0};
 
 	canvas_t canv;
 	const drawing_interface* pif = NULL;
@@ -75,11 +73,15 @@ static int _printbox_calc_pages(widget_t widget)
 	}
 	else if (is_rich_doc(ptd->sheet))
 	{
-		pages = calc_rich_pages(pif, &ptd->xf, &ptd->xa, &xr, ptd->sheet);
+		default_xface(&xa);
+		xscpy(xa.text_wrap, GDI_ATTR_TEXT_WRAP_WORDBREAK);
+		pages = calc_rich_pages(pif, &xa, &xr, ptd->sheet);
 	}
 	else if (is_memo_doc(ptd->sheet))
 	{
-		pages = calc_rich_pages(pif, &ptd->xf, &ptd->xa, &xr, ptd->sheet);
+		default_xface(&xa);
+		xscpy(xa.text_wrap, GDI_ATTR_TEXT_WRAP_WORDBREAK);
+		pages = calc_rich_pages(pif, &xa, &xr, ptd->sheet);
 	}
 
 	return pages;
@@ -169,9 +171,6 @@ int hand_print_create(widget_t widget, void* data)
 
 	ptd = (print_delta_t*)xmem_alloc(sizeof(print_delta_t));
 	xmem_zero((void*)ptd, sizeof(print_delta_t));
-
-	default_widget_xfont(&ptd->xf);
-	default_widget_xface(&ptd->xa);
 
 	SETPRINTDELTA(widget, ptd);
 
@@ -321,24 +320,6 @@ void hand_print_wheel(widget_t widget, bool_t bHorz, int nDelta)
 	}
 }
 
-void hand_print_xfont(widget_t widget, const xfont_t* pxf)
-{
-	print_delta_t* ptd = GETPRINTDELTA(widget);
-
-	XDK_ASSERT(ptd != NULL);
-
-	xmem_copy((void*)&ptd->xf, (void*)pxf, sizeof(xfont_t));
-}
-
-void hand_print_xface(widget_t widget, const xface_t* pxa)
-{
-	print_delta_t* ptd = GETPRINTDELTA(widget);
-
-	XDK_ASSERT(ptd != NULL);
-
-	xmem_copy((void*)&ptd->xa, (void*)pxa, sizeof(xface_t));
-}
-
 void hand_print_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 {
 	print_delta_t* ptd = GETPRINTDELTA(widget);
@@ -353,6 +334,7 @@ void hand_print_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	color_mod_t clrs;
 	xbrush_t xb;
 	xcolor_t xc;
+	xface_t xa;
 
 	if (!ptd->sheet) return;
 
@@ -360,6 +342,9 @@ void hand_print_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	default_xbrush(&xb);
 	format_xcolor(&clrs.clr_bkg, xb.color);
 	xmem_copy((void*)&xc, (void*)&clrs.clr_frg, sizeof(xcolor_t));
+
+	default_xface(&xa);
+	xscpy(xa.text_wrap, GDI_ATTR_TEXT_WRAP_WORDBREAK);
 
 	canv = widget_get_canvas(widget);
 
@@ -396,11 +381,11 @@ void hand_print_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 		}
 		else if (is_rich_doc(ptd->sheet))
 		{
-			draw_rich_text(pif, &ptd->xf, &ptd->xa, (xrect_t*)&(pif->rect), ptd->sheet, ptd->page);
+			draw_rich_text(pif, &xa, (xrect_t*)&(pif->rect), ptd->sheet, ptd->page);
 		}
 		else if (is_memo_doc(ptd->sheet))
 		{
-			draw_memo_text(pif, &ptd->xf, &ptd->xa, (xrect_t*)&(pif->rect), ptd->sheet, ptd->page);
+			draw_memo_text(pif, &xa, (xrect_t*)&(pif->rect), ptd->sheet, ptd->page);
 		}
 	}
 
@@ -430,11 +415,6 @@ widget_t printbox_create(widget_t widget, dword_t style, const xrect_t* pxr)
 		EVENT_ON_LBUTTON_UP(hand_print_lbutton_up)
 		EVENT_ON_RBUTTON_DOWN(hand_print_rbutton_down)
 		EVENT_ON_RBUTTON_UP(hand_print_rbutton_up)
-
-		EVENT_ON_XFONT(hand_print_xfont)
-		EVENT_ON_XFACE(hand_print_xface)
-
-		
 
 	EVENT_END_DISPATH
 

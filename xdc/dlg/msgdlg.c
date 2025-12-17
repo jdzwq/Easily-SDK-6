@@ -48,9 +48,6 @@ LICENSE.GPL3 for more details.
 typedef struct _msgdlg_delta_t{
 	dword_t btn;
 	const tchar_t* text;
-
-	xfont_t xf;
-	xface_t xa;
 }msgdlg_delta_t;
 
 typedef struct _MSGDLGDATA{
@@ -80,12 +77,6 @@ int hand_msgdlg_create(widget_t widget, void* data)
 
 	ptd->btn = pm->btn;
 	ptd->text = pm->text;
-
-	default_xfont(&ptd->xf);
-	default_xface(&ptd->xa);
-	xscpy(ptd->xa.text_align, GDI_ATTR_TEXT_ALIGN_CENTER);
-	xscpy(ptd->xa.line_align, GDI_ATTR_TEXT_ALIGN_CENTER);
-	xscpy(ptd->xa.text_wrap, GDI_ATTR_TEXT_WRAP_WORDBREAK);
 
 	xs.fw = MSGDLG_TITLE_WIDTH;
 	xs.fh = MSGDLG_TITLE_HEIGHT;
@@ -463,20 +454,6 @@ void hand_msgdlg_keydown(widget_t widget, dword_t ks, int key)
 	}
 }
 
-void hand_msgdlg_xfont(widget_t widget, const xfont_t* pxf)
-{
-	msgdlg_delta_t* ptd = GETMSGDLGDELTA(widget);
-
-	xmem_copy((void*)&ptd->xf, (void*)pxf, sizeof(xfont_t));
-}
-
-void hand_msgdlg_xface(widget_t widget, const xface_t* pxa)
-{
-	msgdlg_delta_t* ptd = GETMSGDLGDELTA(widget);
-
-	xmem_copy((void*)&ptd->xa, (void*)pxa, sizeof(xface_t));
-}
-
 void hand_msgdlg_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 {
 	msgdlg_delta_t* ptd = GETMSGDLGDELTA(widget);
@@ -492,6 +469,12 @@ void hand_msgdlg_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	color_mod_t clrs;
 	xbrush_t xb;
 	xpen_t xp;
+	xface_t xa;
+
+	default_xface(&xa);
+	xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_CENTER);
+	xscpy(xa.line_align, GDI_ATTR_TEXT_ALIGN_CENTER);
+	xscpy(xa.text_wrap, GDI_ATTR_TEXT_WRAP_WORDBREAK);
 
 	widget_get_color_mode(widget, &clrs);
 	default_xbrush(&xb);
@@ -535,7 +518,7 @@ void hand_msgdlg_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	xr_txt.w = xr.w - 2 * xs.w;
 	xr_txt.h = xr.h - xs.h;
 
-	(*ifv.pf_draw_text)(ifv.ctx, &ptd->xf, &ptd->xa, &xr_txt, ptd->text, -1);
+	(*ifv.pf_draw_text)(ifv.ctx, &xa, &xr_txt, ptd->text, -1);
 
 	end_canvas_paint(canv, dc, pxr);
 }
@@ -566,9 +549,6 @@ widget_t msgdlg_create(const tchar_t* text, dword_t button, widget_t owner)
 		EVENT_ON_KEYDOWN(hand_msgdlg_keydown)
 
 		EVENT_ON_MENU_COMMAND(hand_msgdlg_menu_command)
-
-		EVENT_ON_XFONT(hand_msgdlg_xfont)
-		EVENT_ON_XFACE(hand_msgdlg_xface)
 
 	EVENT_END_DISPATH
 

@@ -1,0 +1,60 @@
+﻿/***********************************************************************
+	Easily SDK v6.0
+
+	(c) 2013-2016 JianDe LiFang Technology Corporation.  All Rights Reserved.
+
+	@author ZhangWenQuan, JianDe HangZhou ZheJiang China, Mail: powersuite@hotmaol.com
+
+	@doc notes view
+
+	@module	notesview.h | interface file
+
+	@devnote 张文权 2021.01 - 2021.12	v6.0
+***********************************************************************/
+
+/**********************************************************************
+This program is free software : you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
+LICENSE.GPL3 for more details.
+***********************************************************************/
+
+#ifndef _NOTESVIEW_H
+#define _NOTESVIEW_H
+
+#include "../xdldef.h"
+
+
+typedef enum{
+	_NOTES_HINT_NONE = 0,
+	_NOTES_HINT_TITLE = 1,
+	_NOTES_HINT_ITEM = 2,
+	_NOTES_HINT_TIME = 3,
+	_NOTES_HINT_CLOSE = 5
+}NOTES_HINT_CODE;
+
+#ifdef	__cplusplus
+extern "C" {
+#endif
+
+	EXP_API float calc_notes_height(const measure_interface* pif, link_t_ptr ptr);
+
+	EXP_API float calc_notes_width(const measure_interface* pif, link_t_ptr ptr);
+
+	EXP_API void calc_notes_item_rect(const measure_interface* pif, link_t_ptr ptr, link_t_ptr plk, xrect_t* pxr);
+
+	EXP_API int	calc_notes_hint(const measure_interface* pif, const xpoint_t* ppt, link_t_ptr ptr, link_t_ptr* pplk);
+
+	EXP_API void draw_notes(const drawing_interface* pif, const xpen_t* pxp, const xbrush_t* pxb, link_t_ptr ptr, link_t_ptr plk);
+
+#ifdef	__cplusplus
+}
+#endif
+
+
+#endif /*NOTESVIEW_H*/

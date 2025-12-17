@@ -199,7 +199,6 @@ void hand_numbox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	drawing_interface ifv = {0};
 
 	color_mod_t clrs;
-	xfont_t xf_bark, xf_focus;
 	xface_t xa;
 	xbrush_t xb_bark, xb_focus;
 
@@ -212,10 +211,7 @@ void hand_numbox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	format_xcolor(&clrs.clr_bkg, xb_bark.color);
 	lighten_xbrush(&xb_bark, DEF_MIDD_DARKEN);
 
-	default_widget_xfont(&xf_bark);
-	format_xcolor(&clrs.clr_txt, xf_bark.color);
-	xmem_copy((void*)&xf_focus, (void*)&xf_bark, sizeof(xfont_t));
-	ltoxs(xstol(xf_bark.size) + 2, xf_focus.size, INT_LEN);
+	format_xcolor(&clrs.clr_txt, xa.text_color);
 
 	default_xface(&xa);
 	xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_CENTER);
@@ -260,15 +256,15 @@ void hand_numbox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 		tk[0] = NUMBOX_DATA[i];
 
 		if (tk[0] == _T('\n'))
-			(*ifv.pf_draw_text)(ifv.ctx, &xf_bark, &xa, &xr, _T("√"), -1);
+			(*ifv.pf_draw_text)(ifv.ctx, &xa, &xr, _T("√"), -1);
 		else if (tk[0] == _T('-'))
-			(*ifv.pf_draw_text)(ifv.ctx, &xf_bark, &xa, &xr, _T("CE"), -1);
+			(*ifv.pf_draw_text)(ifv.ctx, &xa, &xr, _T("CE"), -1);
 		else
 		{
 			if (ptd->index == i)
-				(*ifv.pf_draw_text)(ifv.ctx, &xf_focus, &xa, &xr, tk, -1);
+				(*ifv.pf_draw_text)(ifv.ctx, &xa, &xr, tk, -1);
 			else
-				(*ifv.pf_draw_text)(ifv.ctx, &xf_bark, &xa, &xr, tk, -1);
+				(*ifv.pf_draw_text)(ifv.ctx, &xa, &xr, tk, -1);
 		}
 	}
 

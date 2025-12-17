@@ -62,11 +62,11 @@ LICENSE.GPL3 for more details.
 
 /*define max numeric precision*/
 #define MAX_DOUBLE_PREC	18
-#define MAX_DOUBLE_DIGI	10
-#define DEF_DOUBLE_DIGI 8
+#define MAX_DOUBLE_DIGI	9	// 0.000000001
+#define DEF_DOUBLE_DIGI 6
 #define MAX_FLOAT_PREC	12
-#define MAX_FLOAT_DIGI	6
-#define DEF_FLOAT_DIGI	4
+#define MAX_FLOAT_DIGI	4	// 0.0001
+#define DEF_FLOAT_DIGI	2
 
 #define SYS_MINDATE		_T("1970-01-01")
 #define ISO_MINDATE		_T("1901-12-13")

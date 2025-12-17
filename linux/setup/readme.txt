@@ -19,6 +19,7 @@ vi ~/.bashrc
 export XSERVICE_ROOT="/usr/local/Easily/sbin"
 export XSERVICE_DATA="/usr/local/Easily/sbin/nfs"
 export PATH="/usr/local/Easily/sbin/api:$PATH"
+
 source ~/.bashrc
 
 sudo vi /etc/ld.so.conf

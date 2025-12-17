@@ -35,7 +35,7 @@ typedef struct _FIXTEXT_SCAN{
 	xrect_t xr;
 }FIXTEXT_SCAN;
 
-static int _fix_text_calc_rect(int scan, void* object, bool_t b_atom, bool_t b_ins, bool_t b_del, bool_t b_sel, const tchar_t* cur_char, int cur_count, tchar_t* ret_char, int page, int cur_row, int cur_col, const word_place_t* ptm, const xfont_t* pxf, const xface_t* pxa, void* pp)
+static int CALLBACK _fix_text_calc_rect(int scan, void* object, object_attr_t* attr, bool_t b_atom, bool_t b_ins, bool_t b_del, bool_t b_sel, const tchar_t* cur_char, int cur_count, tchar_t* ret_char, int page, int cur_row, int cur_col, const word_place_t* ptm, void* pp)
 {
 	FIXTEXT_SCAN* ptt = (FIXTEXT_SCAN*)pp;
 
@@ -50,10 +50,11 @@ static int _fix_text_calc_rect(int scan, void* object, bool_t b_atom, bool_t b_i
 	return _SCANNER_OPERA_NEXT;
 }
 
-void calc_text_rect_raw(const drawing_interface* piv, const xfont_t* pxf, const xface_t* pxa, const tchar_t* sz_text, int sz_len, xrect_t* pxr)
+void calc_text_rect_raw(const drawing_interface* piv, const xface_t* pxa, const tchar_t* sz_text, int sz_len, xrect_t* pxr)
 {
 	FIXTEXT_SCAN tt = { 0 };
 	measure_interface im = { 0 };
+	viewbox_t vb;
 
 	xmem_copy((void*)&tt.xr, (void*)pxr, sizeof(xrect_t));
 
@@ -64,12 +65,13 @@ void calc_text_rect_raw(const drawing_interface* piv, const xfont_t* pxf, const 
 
 	(*piv->pf_get_measure)(piv->ctx, &im);
 
-	scan_fix_text((tchar_t*)sz_text, sz_len, &im, pxf, pxa, pxr->x, pxr->y, pxr->w, MAX_LONG, 0, _fix_text_calc_rect, (void*)&tt);
+	vb.px = pxr->x;vb.py = pxr->y;vb.pw = pxr->w;vb.ph = pxr->h;
+	scan_fix_text((tchar_t*)sz_text, sz_len, &im, &vb, pxa, 0, _fix_text_calc_rect, (void*)&tt);
 
 	xmem_copy((void*)pxr, (void*)&tt.xr, sizeof(xrect_t));
 }
 
-void calc_text_rect(const drawing_interface* pif, const xfont_t* pxf, const xface_t* pxa, const tchar_t* txt, int len, xrect_t* pxr)
+void calc_text_rect(const drawing_interface* pif, const xface_t* pxa, const tchar_t* txt, int len, xrect_t* pxr)
 {
 	xrect_t xr = { 0 };
 	visual_t visu;
@@ -78,7 +80,7 @@ void calc_text_rect(const drawing_interface* pif, const xfont_t* pxf, const xfac
 	visu = (*pif->pf_get_visual_handle)(pif->ctx);
 	(*pif->pf_get_visual_interface)(visu, &iv);
 
-	calc_text_rect_raw(&iv, pxf, pxa, txt, len, &xr);
+	calc_text_rect_raw(&iv, pxa, txt, len, &xr);
 
 	(pif->pf_rect_pt_to_mm)(pif->ctx, &xr);
 
@@ -90,10 +92,11 @@ typedef struct _VARTEXT_DRAW{
 	int page;
 }VARTEXT_DRAW;
 
-static int _var_text_calc_draw(int scan, void* object, bool_t b_atom, bool_t b_ins, bool_t b_del, bool_t b_sel, const tchar_t* cur_char, int cur_count, tchar_t* ret_char, int page, int cur_row, int cur_col, const word_place_t* ptm, const xfont_t* pxf, const xface_t* pxa, void* pp)
+static int CALLBACK _var_text_calc_draw(int scan, void* object, object_attr_t* attr, bool_t b_atom, bool_t b_ins, bool_t b_del, bool_t b_sel, const tchar_t* cur_char, int cur_count, tchar_t* ret_char, int page, int cur_row, int cur_col, const word_place_t* ptm, void* pp)
 {
 	VARTEXT_DRAW* ptt = (VARTEXT_DRAW*)pp;
 	xpoint_t pt;
+	const xface_t* pxa = *(attr->ppxa);
 
 	switch (scan)
 	{
@@ -101,7 +104,7 @@ static int _var_text_calc_draw(int scan, void* object, bool_t b_atom, bool_t b_i
 		pt.x = ptm->cur_x;
 		pt.y = ptm->cur_y;
 
-		(*(ptt->piv->pf_text_out))(ptt->piv->ctx, pxf, &pt, cur_char, cur_count);
+		(*(ptt->piv->pf_text_out))(ptt->piv->ctx, pxa, &pt, cur_char, cur_count);
 		break;
 	case _SCANNER_STATE_END:
 		return _SCANNER_OPERA_STOP;
@@ -110,20 +113,22 @@ static int _var_text_calc_draw(int scan, void* object, bool_t b_atom, bool_t b_i
 	return _SCANNER_OPERA_NEXT;
 }
 
-void draw_var_text_raw(const drawing_interface* piv, const xfont_t* pxf, const xface_t* pxa, const xrect_t* pxr, string_t data)
+void draw_var_text_raw(const drawing_interface* piv, const xface_t* pxa, const xrect_t* pxr, string_t data)
 {
 	VARTEXT_DRAW tt = { 0 };
 	measure_interface im = { 0 };
+	viewbox_t vb;
 
 	tt.piv = piv;
 	tt.page = 0;
 
 	(*piv->pf_get_measure)(piv->ctx, &im);
 
-	scan_var_text(data, &im, pxf, pxa, pxr->x, pxr->y, pxr->w, pxr->h, 0, _var_text_calc_draw, (void*)&tt);
+	vb.px = pxr->x;vb.py = pxr->y;vb.pw = pxr->w;vb.ph = pxr->h;
+	scan_var_text(data, &im, &vb, pxa, 0, _var_text_calc_draw, (void*)&tt);
 }
 
-void draw_var_text(const drawing_interface* pif, const xfont_t* pxf, const xface_t* pxa, const xrect_t* pxr, string_t var)
+void draw_var_text(const drawing_interface* pif, const xface_t* pxa, const xrect_t* pxr, string_t var)
 {
 	xrect_t xr;
 	visual_t visu;
@@ -135,7 +140,7 @@ void draw_var_text(const drawing_interface* pif, const xfont_t* pxf, const xface
 	visu = (*pif->pf_get_visual_handle)(pif->ctx);
 	(*pif->pf_get_visual_interface)(visu, &iv);
 
-	draw_var_text_raw(&iv, pxf, pxa, &xr, var);
+	draw_var_text_raw(&iv, pxa, &xr, var);
 }
 
 typedef struct _TAGTEXT_DRAW{
@@ -143,10 +148,11 @@ typedef struct _TAGTEXT_DRAW{
 	int page;
 }TAGTEXT_DRAW;
 
-static int _tag_text_calc_draw(int scan, void* object, bool_t b_atom, bool_t b_ins, bool_t b_del, bool_t b_sel, const tchar_t* cur_char, int cur_count, tchar_t* ret_char, int page, int cur_row, int cur_col, const word_place_t* ptm, const xfont_t* pxf, const xface_t* pxa, void* pp)
+static int CALLBACK _tag_text_calc_draw(int scan, void* object, object_attr_t* attr, bool_t b_atom, bool_t b_ins, bool_t b_del, bool_t b_sel, const tchar_t* cur_char, int cur_count, tchar_t* ret_char, int page, int cur_row, int cur_col, const word_place_t* ptm, void* pp)
 {
 	TAGTEXT_DRAW* ptt = (TAGTEXT_DRAW*)pp;
 	xpoint_t pt;
+	const xface_t* pxa = *(attr->ppxa);
 
 	if (page < ptt->page)
 		return _SCANNER_OPERA_PAGED;
@@ -159,7 +165,7 @@ static int _tag_text_calc_draw(int scan, void* object, bool_t b_atom, bool_t b_i
 		pt.x = ptm->cur_x;
 		pt.y = ptm->cur_y;
 
-		(*(ptt->piv->pf_text_out))(ptt->piv->ctx, pxf, &pt, cur_char, cur_count);
+		(*(ptt->piv->pf_text_out))(ptt->piv->ctx, pxa, &pt, cur_char, cur_count);
 		break;
 	case _SCANNER_STATE_NEWPAGE:
 	case _SCANNER_STATE_END:
@@ -169,20 +175,22 @@ static int _tag_text_calc_draw(int scan, void* object, bool_t b_atom, bool_t b_i
 	return _SCANNER_OPERA_NEXT;
 }
 
-void draw_tag_text_raw(const drawing_interface* piv, const xfont_t* pxf, const xface_t* pxa, const xrect_t* pxr, link_t_ptr data, int page)
+void draw_tag_text_raw(const drawing_interface* piv, const xface_t* pxa, const xrect_t* pxr, link_t_ptr data, int page)
 {
 	TAGTEXT_DRAW tt = { 0 };
 	measure_interface im = { 0 };
+	viewbox_t vb;
 
 	tt.piv = piv;
 	tt.page = page;
 
 	(*piv->pf_get_measure)(piv->ctx, &im);
 
-	scan_tag_text(data, &im, pxf, pxa, pxr->x, pxr->y, pxr->w, pxr->h, 1, _tag_text_calc_draw, (void*)&tt);
+	vb.px = pxr->x;vb.py = pxr->y;vb.pw = pxr->w;vb.ph = pxr->h;
+	scan_tag_text(data, &im, &vb, pxa, 1, _tag_text_calc_draw, (void*)&tt);
 }
 
-void draw_tag_text(const drawing_interface* pif, const xfont_t* pxf, const xface_t* pxa, const xrect_t* pxr, link_t_ptr tag, int page)
+void draw_tag_text(const drawing_interface* pif, const xface_t* pxa, const xrect_t* pxr, link_t_ptr tag, int page)
 {
 	xrect_t xr;
 	visual_t visu;
@@ -194,14 +202,14 @@ void draw_tag_text(const drawing_interface* pif, const xfont_t* pxf, const xface
 	visu = (*pif->pf_get_visual_handle)(pif->ctx);
 	(*pif->pf_get_visual_interface)(visu, &iv);
 
-	draw_tag_text_raw(&iv, pxf, pxa, &xr, tag, page);
+	draw_tag_text_raw(&iv, pxa, &xr, tag, page);
 }
 
 typedef struct _TAGTEXT_PAGE{
 	int pages;
 }TAGTEXT_PAGE;
 
-static int _tag_text_calc_pages(int scan, void* object, bool_t b_atom, bool_t b_ins, bool_t b_del, bool_t b_sel, const tchar_t* cur_char, int cur_count, tchar_t* ret_char, int page, int cur_row, int cur_col, const word_place_t* ptm, const xfont_t* pxf, const xface_t* pxa, void* pp)
+static int CALLBACK _tag_text_calc_pages(int scan, void* object, object_attr_t* attr, bool_t b_atom, bool_t b_ins, bool_t b_del, bool_t b_sel, const tchar_t* cur_char, int cur_count, tchar_t* ret_char, int page, int cur_row, int cur_col, const word_place_t* ptm, void* pp)
 {
 	TAGTEXT_PAGE* ptt = (TAGTEXT_PAGE*)pp;
 
@@ -215,21 +223,23 @@ static int _tag_text_calc_pages(int scan, void* object, bool_t b_atom, bool_t b_
 	return _SCANNER_OPERA_NEXT;
 }
 
-int calc_tag_pages_raw(const drawing_interface* piv, const xfont_t* pxf, const xface_t* pxa, const xrect_t* pxr, link_t_ptr data)
+int calc_tag_pages_raw(const drawing_interface* piv, const xface_t* pxa, const xrect_t* pxr, link_t_ptr data)
 {
 	TAGTEXT_PAGE tt = { 0 };
 	measure_interface im = { 0 };
+	viewbox_t vb;
 
 	tt.pages = 1;
 
 	(*piv->pf_get_measure)(piv->ctx, &im);
 
-	scan_tag_text(data, &im, pxf, pxa, pxr->x, pxr->y, pxr->w, pxr->h, 1, _tag_text_calc_pages, (void*)&tt);
+	vb.px = pxr->x;vb.py = pxr->y;vb.pw = pxr->w;vb.ph = pxr->h;
+	scan_tag_text(data, &im, &vb, pxa, 1, _tag_text_calc_pages, (void*)&tt);
 
 	return tt.pages;
 }
 
-int calc_tag_pages(const drawing_interface* pif, const xfont_t* pxf, const xface_t* pxa, const xrect_t* pxr, link_t_ptr tag)
+int calc_tag_pages(const drawing_interface* pif, const xface_t* pxa, const xrect_t* pxr, link_t_ptr tag)
 {
 	xrect_t xr;
 	visual_t visu;
@@ -241,7 +251,7 @@ int calc_tag_pages(const drawing_interface* pif, const xfont_t* pxf, const xface
 	visu = (*pif->pf_get_visual_handle)(pif->ctx);
 	(*pif->pf_get_visual_interface)(visu, &iv);
 
-	return calc_tag_pages_raw(&iv, pxf, pxa, &xr, tag);
+	return calc_tag_pages_raw(&iv, pxa, &xr, tag);
 }
 
 typedef struct _MEMOTEXT_DRAW{
@@ -249,10 +259,11 @@ typedef struct _MEMOTEXT_DRAW{
 	int page;
 }MEMOTEXT_DRAW;
 
-static int _memo_text_calc_draw(int scan, void* object, bool_t b_atom, bool_t b_ins, bool_t b_del, bool_t b_sel, const tchar_t* cur_char, int cur_count, tchar_t* ret_char, int page, int cur_row, int cur_col, const word_place_t* ptm, const xfont_t* pxf, const xface_t* pxa, void* pp)
+static int CALLBACK _memo_text_calc_draw(int scan, void* object, object_attr_t* attr, bool_t b_atom, bool_t b_ins, bool_t b_del, bool_t b_sel, const tchar_t* cur_char, int cur_count, tchar_t* ret_char, int page, int cur_row, int cur_col, const word_place_t* ptm, void* pp)
 {
 	MEMOTEXT_DRAW* ptt = (MEMOTEXT_DRAW*)pp;
 	xpoint_t pt;
+	const xface_t* pxa = *(attr->ppxa);
 
 	if (page < ptt->page)
 		return _SCANNER_OPERA_PAGED;
@@ -265,7 +276,7 @@ static int _memo_text_calc_draw(int scan, void* object, bool_t b_atom, bool_t b_
 		pt.x = ptm->cur_x;
 		pt.y = ptm->cur_y;
 
-		(*(ptt->piv->pf_text_out))(ptt->piv->ctx, pxf, &pt, cur_char, cur_count);
+		(*(ptt->piv->pf_text_out))(ptt->piv->ctx, pxa, &pt, cur_char, cur_count);
 		break;
 	case _SCANNER_STATE_NEWPAGE:
 	case _SCANNER_STATE_END:
@@ -275,20 +286,22 @@ static int _memo_text_calc_draw(int scan, void* object, bool_t b_atom, bool_t b_
 	return _SCANNER_OPERA_NEXT;
 }
 
-void draw_memo_text_raw(const drawing_interface* piv, const xfont_t* pxf, const xface_t* pxa, const xrect_t* pxr, link_t_ptr data, int page)
+void draw_memo_text_raw(const drawing_interface* piv, const xface_t* pxa, const xrect_t* pxr, link_t_ptr data, int page)
 {
 	MEMOTEXT_DRAW tt = { 0 };
 	measure_interface im = { 0 };
+	viewbox_t vb;
 
 	tt.piv = piv;
 	tt.page = page;
 
 	(*piv->pf_get_measure)(piv->ctx, &im);
 
-	scan_memo_text(data, &im, pxf, pxa, pxr->x, pxr->y, pxr->w, pxr->h, 1, _memo_text_calc_draw, (void*)&tt);
+	vb.px = pxr->x;vb.py = pxr->y;vb.pw = pxr->w;vb.ph = pxr->h;
+	scan_memo_text(data, &im, &vb, pxa, 1, _memo_text_calc_draw, (void*)&tt);
 }
 
-void draw_memo_text(const drawing_interface* pif, const xfont_t* pxf, const xface_t* pxa, const xrect_t* pxr, link_t_ptr memo, int page)
+void draw_memo_text(const drawing_interface* pif, const xface_t* pxa, const xrect_t* pxr, link_t_ptr memo, int page)
 {
 	xrect_t xr;
 	visual_t visu;
@@ -300,14 +313,14 @@ void draw_memo_text(const drawing_interface* pif, const xfont_t* pxf, const xfac
 	visu = (*pif->pf_get_visual_handle)(pif->ctx);
 	(*pif->pf_get_visual_interface)(visu, &iv);
 
-	draw_memo_text_raw(&iv, pxf, pxa, &xr, memo, page);
+	draw_memo_text_raw(&iv, pxa, &xr, memo, page);
 }
 
 typedef struct _MEMOTEXT_PAGE{
 	int pages;
 }MEMOTEXT_PAGE;
 
-static int _memo_text_calc_pages(int scan, void* object, bool_t b_atom, bool_t b_ins, bool_t b_del, bool_t b_sel, const tchar_t* cur_char, int cur_count, tchar_t* ret_char, int page, int cur_row, int cur_col, const word_place_t* ptm, const xfont_t* pxf, const xface_t* pxa, void* pp)
+static int CALLBACK _memo_text_calc_pages(int scan, void* object, object_attr_t* attr, bool_t b_atom, bool_t b_ins, bool_t b_del, bool_t b_sel, const tchar_t* cur_char, int cur_count, tchar_t* ret_char, int page, int cur_row, int cur_col, const word_place_t* ptm, void* pp)
 {
 	MEMOTEXT_PAGE* ptt = (MEMOTEXT_PAGE*)pp;
 
@@ -321,21 +334,23 @@ static int _memo_text_calc_pages(int scan, void* object, bool_t b_atom, bool_t b
 	return _SCANNER_OPERA_NEXT;
 }
 
-int calc_memo_pages_raw(const drawing_interface* piv, const xfont_t* pxf, const xface_t* pxa, const xrect_t* pxr, link_t_ptr data)
+int calc_memo_pages_raw(const drawing_interface* piv, const xface_t* pxa, const xrect_t* pxr, link_t_ptr data)
 {
 	MEMOTEXT_PAGE tt = { 0 };
 	measure_interface im = { 0 };
+	viewbox_t vb;
 
 	tt.pages = 1;
 
 	(*piv->pf_get_measure)(piv->ctx, &im);
 
-	scan_memo_text(data, &im, pxf, pxa, pxr->x, pxr->y, pxr->w, pxr->h, 1, _memo_text_calc_pages, (void*)&tt);
+	vb.px = pxr->x;vb.py = pxr->y;vb.pw = pxr->w;vb.ph = pxr->h;
+	scan_memo_text(data, &im, &vb, pxa, 1, _memo_text_calc_pages, (void*)&tt);
 
 	return tt.pages;
 }
 
-int calc_memo_pages(const drawing_interface* pif, const xfont_t* pxf, const xface_t* pxa, const xrect_t* pxr, link_t_ptr memo)
+int calc_memo_pages(const drawing_interface* pif, const xface_t* pxa, const xrect_t* pxr, link_t_ptr memo)
 {
 	xrect_t xr;
 	visual_t visu;
@@ -347,7 +362,7 @@ int calc_memo_pages(const drawing_interface* pif, const xfont_t* pxf, const xfac
 	visu = (*pif->pf_get_visual_handle)(pif->ctx);
 	(*pif->pf_get_visual_interface)(visu, &iv);
 
-	return calc_memo_pages_raw(&iv, pxf, pxa, &xr, memo);
+	return calc_memo_pages_raw(&iv, pxa, &xr, memo);
 }
 
 typedef struct _RICHTEXT_DRAW{
@@ -355,10 +370,11 @@ typedef struct _RICHTEXT_DRAW{
 	int page;
 }RICHTEXT_DRAW;
 
-static int _rich_text_calc_draw(int scan, void* object, bool_t b_atom, bool_t b_ins, bool_t b_del, bool_t b_sel, const tchar_t* cur_char, int cur_count, tchar_t* ret_char, int page, int cur_row, int cur_col, const word_place_t* ptm, const xfont_t* pxf, const xface_t* pxa, void* pp)
+static int CALLBACK _rich_text_calc_draw(int scan, void* object, object_attr_t* attr, bool_t b_atom, bool_t b_ins, bool_t b_del, bool_t b_sel, const tchar_t* cur_char, int cur_count, tchar_t* ret_char, int page, int cur_row, int cur_col, const word_place_t* ptm, void* pp)
 {
 	RICHTEXT_DRAW* ptt = (RICHTEXT_DRAW*)pp;
 	xpoint_t pt;
+	const xface_t* pxa = *(attr->ppxa);
 
 	if (page < ptt->page)
 		return _SCANNER_OPERA_PAGED;
@@ -374,7 +390,7 @@ static int _rich_text_calc_draw(int scan, void* object, bool_t b_atom, bool_t b_
 		pt.x = ptm->cur_x;
 		pt.y = ptm->cur_y;
 
-		(*(ptt->piv->pf_text_out))(ptt->piv->ctx, pxf, &pt, cur_char, cur_count);
+		(*(ptt->piv->pf_text_out))(ptt->piv->ctx, pxa, &pt, cur_char, cur_count);
 		break;
 	case _SCANNER_STATE_NEWPAGE:
 	case _SCANNER_STATE_END:
@@ -384,20 +400,22 @@ static int _rich_text_calc_draw(int scan, void* object, bool_t b_atom, bool_t b_
 	return _SCANNER_OPERA_NEXT;
 }
 
-void draw_rich_text_raw(const drawing_interface* piv, const xfont_t* pxf, const xface_t* pxa, const xrect_t* pxr, link_t_ptr data, int page)
+void draw_rich_text_raw(const drawing_interface* piv, const xface_t* pxa, const xrect_t* pxr, link_t_ptr data, int page)
 {
 	RICHTEXT_DRAW tt = { 0 };
 	measure_interface im = { 0 };
+	viewbox_t vb;
 
 	tt.piv = piv;
 	tt.page = page;
 
 	(*piv->pf_get_measure)(piv->ctx, &im);
 
-	scan_rich_text(data, &im, pxf, pxa, pxr->x, pxr->y, pxr->w, pxr->h, 1, _rich_text_calc_draw, (void*)&tt);
+	vb.px = pxr->x;vb.py = pxr->y;vb.pw = pxr->w;vb.ph = pxr->h;
+	scan_rich_text(data, &im, &vb, pxa, 1, _rich_text_calc_draw, (void*)&tt);
 }
 
-void draw_rich_text(const drawing_interface* pif, const xfont_t* pxf, const xface_t* pxa, const xrect_t* pxr, link_t_ptr rich, int page)
+void draw_rich_text(const drawing_interface* pif, const xface_t* pxa, const xrect_t* pxr, link_t_ptr rich, int page)
 {
 	xrect_t xr;
 	visual_t visu;
@@ -409,14 +427,14 @@ void draw_rich_text(const drawing_interface* pif, const xfont_t* pxf, const xfac
 	visu = (*pif->pf_get_visual_handle)(pif->ctx);
 	(*pif->pf_get_visual_interface)(visu, &iv);
 
-	draw_rich_text_raw(&iv, pxf, pxa, &xr, rich, page);
+	draw_rich_text_raw(&iv, pxa, &xr, rich, page);
 }
 
 typedef struct _RICHTEXT_PAGE{
 	int pages;
 }RICHTEXT_PAGE;
 
-static int _rich_text_calc_pages(int scan, void* object, bool_t b_atom, bool_t b_ins, bool_t b_del, bool_t b_sel, const tchar_t* cur_char, int cur_count, tchar_t* ret_char, int page, int cur_row, int cur_col, const word_place_t* ptm, const xfont_t* pxf, const xface_t* pxa, void* pp)
+static int CALLBACK _rich_text_calc_pages(int scan, void* object, object_attr_t* attr, bool_t b_atom, bool_t b_ins, bool_t b_del, bool_t b_sel, const tchar_t* cur_char, int cur_count, tchar_t* ret_char, int page, int cur_row, int cur_col, const word_place_t* ptm, void* pp)
 {
 	RICHTEXT_PAGE* ptt = (RICHTEXT_PAGE*)pp;
 
@@ -430,21 +448,23 @@ static int _rich_text_calc_pages(int scan, void* object, bool_t b_atom, bool_t b
 	return _SCANNER_OPERA_NEXT;
 }
 
-int calc_rich_pages_raw(const drawing_interface* piv, const xfont_t* pxf, const xface_t* pxa, const xrect_t* pxr, link_t_ptr data)
+int calc_rich_pages_raw(const drawing_interface* piv, const xface_t* pxa, const xrect_t* pxr, link_t_ptr data)
 {
 	RICHTEXT_PAGE tt = { 0 };
 	measure_interface im = { 0 };
+	viewbox_t vb;
 
 	tt.pages = 1;
 
 	(*piv->pf_get_measure)(piv->ctx, &im);
 
-	scan_rich_text(data, &im, pxf, pxa, pxr->x, pxr->y, pxr->w, pxr->h, 1, _rich_text_calc_pages, (void*)&tt);
+	vb.px = pxr->x;vb.py = pxr->y;vb.pw = pxr->w;vb.ph = pxr->h;
+	scan_rich_text(data, &im, &vb, pxa, 1, _rich_text_calc_pages, (void*)&tt);
 
 	return tt.pages;
 }
 
-int calc_rich_pages(const drawing_interface* pif, const xfont_t* pxf, const xface_t* pxa, const xrect_t* pxr, link_t_ptr rich)
+int calc_rich_pages(const drawing_interface* pif, const xface_t* pxa, const xrect_t* pxr, link_t_ptr rich)
 {
 	xrect_t xr;
 	visual_t visu;
@@ -456,6 +476,5 @@ int calc_rich_pages(const drawing_interface* pif, const xfont_t* pxf, const xfac
 	visu = (*pif->pf_get_visual_handle)(pif->ctx);
 	(*pif->pf_get_visual_interface)(visu, &iv);
 
-	return calc_rich_pages_raw(&iv, pxf, pxa, &xr, rich);
+	return calc_rich_pages_raw(&iv, pxa, &xr, rich);
 }
-

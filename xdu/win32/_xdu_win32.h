@@ -123,6 +123,9 @@ typedef COLORREF	pixel_t;
 
 #ifdef XDU_SUPPORT_CONTEXT
 
+//global fonstset cache
+extern fontset_t g_fontset;
+
 typedef struct _win32_context_t{
 	handle_head head;
 
@@ -133,7 +136,15 @@ typedef struct _win32_context_t{
 		HWND window;
 	}device;
 	int type;
+
+	fontset_t fontset;
 }win32_context_t;
+
+typedef struct _win32_fontset_t{
+	handle_head head;
+
+    void* font_object;
+}win32_fontset_t;
 
 #ifdef XDU_SUPPORT_CONTEXT_BITMAP
 typedef struct _win32_bitmap_t{
@@ -142,12 +153,6 @@ typedef struct _win32_bitmap_t{
 	HBITMAP bitmap;
 }win32_bitmap_t;
 #endif
-
-typedef struct _win32_fontset_t{
-	handle_head head;
-
-    void* font_set;
-}win32_fontset_t;
 
 #ifdef XDU_SUPPORT_CONTEXT_OPENGL
 typedef struct _win32_glrc_t{

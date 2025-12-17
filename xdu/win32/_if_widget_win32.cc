@@ -195,6 +195,7 @@ LRESULT CALLBACK XdcWidgetProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 	if_dispatch_t* pev;
 	win32_context_t wct = { 0 };
 	TRACKMOUSEEVENT te = { 0 };
+	COLORREF clrref;
 
 #ifdef XDU_SUPPORT_WIDGET_NC
 	xrect_t xr;
@@ -399,7 +400,20 @@ LRESULT CALLBACK XdcWidgetProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 		pws->parent = lpcs->hwndParent;
 		pws->accel = NULL;
 
-		default_widget_color_mode(&(pws->clrs));
+		clrref = GetSysColor(COLOR_WINDOW);
+		pws->clrs.clr_bkg.r = GetRValue(clrref);
+		pws->clrs.clr_bkg.g = GetGValue(clrref);
+		pws->clrs.clr_bkg.b = GetBValue(clrref);
+
+		clrref = GetSysColor(COLOR_WINDOWFRAME);
+		pws->clrs.clr_frg.r = GetRValue(clrref);
+		pws->clrs.clr_frg.g = GetGValue(clrref);
+		pws->clrs.clr_frg.b = GetBValue(clrref);
+
+		clrref = GetSysColor(COLOR_WINDOWTEXT);
+		pws->clrs.clr_txt.r = GetRValue(clrref);
+		pws->clrs.clr_txt.g = GetGValue(clrref);
+		pws->clrs.clr_txt.b = GetBValue(clrref);
 
 		SETXDUSTRUCT(hWnd, pws);
 		widget = &(pws->head);
@@ -1782,6 +1796,7 @@ visual_t _widget_client_context(widget_t wt)
 	pct->context = GetDC(pws->self);
 	pct->device.window = pws->self;
 	pct->type = CONTEXT_WIDGET;
+	pct->fontset = g_fontset;
 	
 	return (visual_t)pct;
 }
@@ -1798,6 +1813,7 @@ visual_t _widget_window_context(widget_t wt)
 	pct->context = GetWindowDC(pws->self);
 	pct->device.window = pws->self;
 	pct->type = CONTEXT_WIDGET;
+	pct->fontset = g_fontset;
 
 	return (visual_t)pct;
 }
@@ -2604,6 +2620,13 @@ void _widget_get_color_mode(widget_t wt, color_mod_t* pclr)
 	if (!pws) return;
 
 	CopyMemory((void*)pclr, (void*)&(pws->clrs), sizeof(color_mod_t));
+}
+
+const color_mod_t* _widget_get_color_mode_ptr(widget_t wt)
+{
+	win32_widget_t* pws = (win32_widget_t*)wt;
+
+	return (pws)? &(pws->clrs) : NULL;
 }
 
 void _widget_noti_xfont(widget_t wt, const xfont_t* pxf)

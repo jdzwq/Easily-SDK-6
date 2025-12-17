@@ -53,17 +53,33 @@ typedef struct _word_place_t
 	int min_x, min_y, max_x, max_y;
 }word_place_t;
 
-typedef int(*PF_SCAN_TEXTOR_CALLBACK)(int scan, void* object, bool_t b_atom, bool_t b_ins, bool_t b_del, bool_t b_sel, const tchar_t* cur_word, int cur_count, tchar_t* ret_word, int page, int cur_row, int cur_col, const word_place_t* ptm, const xfont_t* pxf, const xface_t* pxa, void* pp);
+#define OBJECT_ATTR_XFONT	0x00000001
+#define OBJECT_ATTR_XFACE	0x00000002
+#define OBJECT_ATTR_XBRUSH	0x00000004
+#define OBJECT_ATTR_XPEN	0x00000008
 
-typedef bool_t(*PF_SCAN_IS_PAGING)(void* ctx);
-typedef bool_t(*PF_SCAN_BREAK_PAGE)(void* ctx);
-typedef int(*PF_SCAN_NEXT_PAGE)(void* ctx);
-typedef int(*PF_SCAN_NEXT_WORD)(void* ctx, tchar_t** ppch, xsize_t* pse, bool_t* pins, bool_t* pdel, bool_t* psel, bool_t* patom);
-typedef int(*PF_SCAN_INSERT_WORD)(void* ctx, tchar_t* pch, xsize_t* pse);
-typedef int(*PF_SCAN_DELETE_WORD)(void* ctx);
-typedef void(*PF_SCAN_CUR_OBJECT)(void* ctx, void** pobj);
+typedef struct _object_attr_t
+{
+	dword_t ret;
 
-typedef struct _wordscan_interface{
+	xfont_t** ppxf;
+	xface_t** ppxa;
+	xbrush_t** ppxb;
+	xpen_t** ppxp;
+}object_attr_t;
+
+typedef int(CALLBACK *PF_SCAN_TEXTOR_CALLBACK)(int scan, void* object, object_attr_t* attr, bool_t b_atom, bool_t b_ins, bool_t b_del, bool_t b_sel, const tchar_t* cur_word, int cur_count, tchar_t* ret_word, int page, int cur_row, int cur_col, const word_place_t* ptm, void* pp);
+
+typedef bool_t(INFCALL *PF_SCAN_IS_PAGING)(void* ctx);
+typedef bool_t(INFCALL *PF_SCAN_BREAK_PAGE)(void* ctx);
+typedef int(INFCALL *PF_SCAN_NEXT_PAGE)(void* ctx);
+typedef int(INFCALL *PF_SCAN_NEXT_WORD)(void* ctx, tchar_t** ppch, xsize_t* pse, bool_t* pins, bool_t* pdel, bool_t* psel, bool_t* patom);
+typedef int(INFCALL *PF_SCAN_INSERT_WORD)(void* ctx, tchar_t* pch, xsize_t* pse);
+typedef int(INFCALL *PF_SCAN_DELETE_WORD)(void* ctx);
+typedef void(INFCALL *PF_SCAN_CUR_OBJECT)(void* ctx, void** pobj);
+typedef void(INFCALL *PF_SCAN_OBJECT_ATTR)(void* ctx, void* pobj, object_attr_t* pret);
+
+typedef struct _words_scan_interface{
 	void* ctx;
 
 	PF_SCAN_IS_PAGING	pf_is_paging;
@@ -73,7 +89,8 @@ typedef struct _wordscan_interface{
 	PF_SCAN_INSERT_WORD	pf_insert_word;
 	PF_SCAN_DELETE_WORD	pf_delete_word;
 	PF_SCAN_CUR_OBJECT	pf_cur_object;
-}wordscan_interface;
+	PF_SCAN_OBJECT_ATTR	pf_object_attr;
+}words_scan_interface;
 
 
 

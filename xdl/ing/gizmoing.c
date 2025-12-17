@@ -2179,13 +2179,14 @@ void draw_numeric_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const
 	default_xfont(&xf);
 	xscpy(xf.family, GDI_ATTR_FONT_FAMILY_ARIA);
 	ftoxs(fs, xf.size, INT_LEN);
-	xscpy(xf.color, GDI_ATTR_RGB_WHITE);
+	(*pif->pf_set_xfont)(pif->ctx, &xf);
 
 	default_xface(&xa);
+	xscpy(xa.text_color, GDI_ATTR_RGB_WHITE);
 	xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_CENTER);
 	xscpy(xa.line_align, GDI_ATTR_TEXT_ALIGN_CENTER);
 
-	//(*pif->pf_draw_text)(pif->ctx, &xf, &xa, prt, no, -1);
+	//(*pif->pf_draw_text)(pif->ctx, &xa, prt, no, -1);
 }
 
 void draw_omit_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
@@ -2236,13 +2237,14 @@ void draw_omit_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xr
 	default_xfont(&xf);
 	xscpy(xf.family, GDI_ATTR_FONT_FAMILY_ARIA);
 	ftoxs(fs, xf.size, INT_LEN);
-	xscpy(xf.color, GDI_ATTR_RGB_WHITE);
+	(*pif->pf_set_xfont)(pif->ctx, &xf);
 
 	default_xface(&xa);
+	xscpy(xa.text_color, GDI_ATTR_RGB_WHITE);
 	xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_CENTER);
 	xscpy(xa.line_align, GDI_ATTR_TEXT_ALIGN_CENTER);
 
-	(*pif->pf_draw_text)(pif->ctx, &xf, &xa, prt, _T("..."), -1);
+	(*pif->pf_draw_text)(pif->ctx, &xa, prt, _T("..."), -1);
 }
 
 void draw_doc_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
@@ -3927,8 +3929,9 @@ void draw_fontname_gizmo(const drawing_interface* pif, const xcolor_t* pxc, cons
 
 	default_xfont(&xf);
 	default_xface(&xa);
-	format_xcolor(pxc, xf.color);
+	format_xcolor(pxc, xa.text_color);
 	xscpy(xf.weight, GDI_ATTR_FONT_WEIGHT_BOLD);
+	(*pif->pf_set_xfont)(pif->ctx, &xf);
 
 	default_xpen(&xp);
 	format_xcolor(pxc, xp.color);
@@ -3971,14 +3974,14 @@ void draw_fontname_gizmo(const drawing_interface* pif, const xcolor_t* pxc, cons
 	xr.w = prt->w / 2;
 	xr.h = prt->h / 2;
 
-	(*pif->pf_draw_text)(pif->ctx, &xf, &xa, &xr, _T("A"), 1);
+	(*pif->pf_draw_text)(pif->ctx, &xa, &xr, _T("A"), 1);
 
 	xr.x = prt->x + prt->w / 2;
 	xr.y = prt->y + prt->h / 2;
 	xr.w = prt->w / 2;
 	xr.h = prt->h / 2;
 
-	(*pif->pf_draw_text)(pif->ctx, &xf, &xa, &xr, _T("A"), 1);
+	(*pif->pf_draw_text)(pif->ctx, &xa, &xr, _T("A"), 1);
 }
 
 void draw_fontsize_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
@@ -3993,7 +3996,8 @@ void draw_fontsize_gizmo(const drawing_interface* pif, const xcolor_t* pxc, cons
 
 	default_xfont(&xf);
 	default_xface(&xa);
-	format_xcolor(pxc, xf.color);
+	format_xcolor(pxc, xa.text_color);
+	(*pif->pf_set_xfont)(pif->ctx, &xf);
 
 	default_xpen(&xp);
 	format_xcolor(pxc, xp.color);
@@ -4054,7 +4058,7 @@ void draw_fontsize_gizmo(const drawing_interface* pif, const xcolor_t* pxc, cons
 
 	xscpy(xf.weight, GDI_ATTR_FONT_WEIGHT_BOLD);
 	xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_CENTER);
-	(*pif->pf_draw_text)(pif->ctx, &xf, &xa, &xr, _T("A"), 1);
+	(*pif->pf_draw_text)(pif->ctx, &xa, &xr, _T("A"), 1);
 }
 
 void draw_fontweight_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
@@ -4068,8 +4072,9 @@ void draw_fontweight_gizmo(const drawing_interface* pif, const xcolor_t* pxc, co
 
 	default_xfont(&xf);
 	default_xface(&xa);
-	format_xcolor(pxc, xf.color);
+	format_xcolor(pxc, xa.text_color);
 	xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_CENTER);
+	(*pif->pf_set_xfont)(pif->ctx, &xf);
 
 	default_xpen(&xp);
 	format_xcolor(pxc, xp.color);
@@ -4112,7 +4117,7 @@ void draw_fontweight_gizmo(const drawing_interface* pif, const xcolor_t* pxc, co
 	xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_CENTER);
 	xscpy(xf.weight, GDI_ATTR_FONT_WEIGHT_BOLD);
 
-	(*pif->pf_draw_text)(pif->ctx, &xf, &xa, &xr, _T("B"), 1);
+	(*pif->pf_draw_text)(pif->ctx, &xa, &xr, _T("B"), 1);
 }
 
 void draw_fontcolor_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
@@ -4127,7 +4132,8 @@ void draw_fontcolor_gizmo(const drawing_interface* pif, const xcolor_t* pxc, con
 
 	default_xfont(&xf);
 	default_xface(&xa);
-	format_xcolor(pxc, xf.color);
+	format_xcolor(pxc, xa.text_color);
+	(*pif->pf_set_xfont)(pif->ctx, &xf);
 
 	default_xpen(&xp);
 	format_xcolor(pxc, xp.color);
@@ -4173,7 +4179,7 @@ void draw_fontcolor_gizmo(const drawing_interface* pif, const xcolor_t* pxc, con
 	xscpy(xf.weight, GDI_ATTR_FONT_WEIGHT_BOLD);
 	xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_CENTER);
 
-	(*pif->pf_draw_text)(pif->ctx, &xf, &xa, &xr, _T("A"), 1);
+	(*pif->pf_draw_text)(pif->ctx, &xa, &xr, _T("A"), 1);
 
 	xr.x = prt->x + ps;
 	xr.y = prt->y + prt->h / 4 * 3 + ps;
@@ -4195,8 +4201,9 @@ void draw_fontstyle_gizmo(const drawing_interface* pif, const xcolor_t* pxc, con
 
 	default_xfont(&xf);
 	default_xface(&xa);
-	format_xcolor(pxc, xf.color);
+	format_xcolor(pxc, xa.text_color);
 	xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_CENTER);
+	(*pif->pf_set_xfont)(pif->ctx, &xf);
 
 	default_xpen(&xp);
 	format_xcolor(pxc, xp.color);
@@ -4247,7 +4254,7 @@ void draw_fontstyle_gizmo(const drawing_interface* pif, const xcolor_t* pxc, con
 	xscpy(xf.decorate, GDI_ATTR_FONT_DECORATE_UNDERLINE);
 	xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_CENTER);
 
-	(*pif->pf_draw_text)(pif->ctx, &xf, &xa, &xr, _T("U"), 1);
+	(*pif->pf_draw_text)(pif->ctx, &xa, &xr, _T("U"), 1);
 }
 
 void draw_foreground_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
@@ -5425,9 +5432,10 @@ void draw_label_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const x
 	xrect_t rt, xr;
 
 	default_xfont(&xf);
-	format_xcolor(pxc, xf.color);
+	format_xcolor(pxc, xa.text_color);
 	xscpy(xf.style, GDI_ATTR_FONT_STYLE_ITALIC);
 	xscpy(xf.weight, GDI_ATTR_FONT_WEIGHT_BOLD);
+	(*pif->pf_set_xfont)(pif->ctx, &xf);
 
 	default_xface(&xa);
 	xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_CENTER);
@@ -5461,7 +5469,7 @@ void draw_label_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const x
 	xr.w = prt->w;
 	xr.h = prt->h;
 
-	(*pif->pf_draw_text)(pif->ctx, &xf, &xa, &xr, _T("Aa"), -1);
+	(*pif->pf_draw_text)(pif->ctx, &xa, &xr, _T("Aa"), -1);
 }
 
 void draw_check_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
@@ -5655,7 +5663,8 @@ void draw_tag_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xre
 	xface_t xa;
 
 	default_xfont(&xf);
-	format_xcolor(pxc, xf.color);
+	format_xcolor(pxc, xa.text_color);
+	(*pif->pf_set_xfont)(pif->ctx, &xf);
 
 	default_xface(&xa);
 	xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_CENTER);
@@ -5707,7 +5716,7 @@ void draw_tag_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xre
 
 	xscpy(xf.weight, GDI_ATTR_FONT_WEIGHT_BOLD);
 
-	(*pif->pf_draw_text)(pif->ctx, &xf, &xa, &xr, _T("</>"), -1);
+	(*pif->pf_draw_text)(pif->ctx, &xa, &xr, _T("</>"), -1);
 }
 
 void draw_memo_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
@@ -6593,8 +6602,9 @@ void draw_helpc_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const x
 
 	default_xfont(&xf);
 	default_xface(&xa);
-	format_xcolor(pxc, xf.color);
+	format_xcolor(pxc, xa.text_color);
 	xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_CENTER);
+	(*pif->pf_set_xfont)(pif->ctx, &xf);
 
 	default_xpen(&xp);
 	format_xcolor(pxc, xp.color);
@@ -6639,7 +6649,7 @@ void draw_helpc_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const x
 	xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_CENTER);
 	xscpy(xf.weight, GDI_ATTR_FONT_WEIGHT_BOLD);
 
-	(*pif->pf_draw_text)(pif->ctx, &xf, &xa, &xr, _T("C"), 1);
+	(*pif->pf_draw_text)(pif->ctx, &xa, &xr, _T("C"), 1);
 }
 
 void draw_helpp_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
@@ -6653,8 +6663,9 @@ void draw_helpp_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const x
 
 	default_xfont(&xf);
 	default_xface(&xa);
-	format_xcolor(pxc, xf.color);
+	format_xcolor(pxc, xa.text_color);
 	xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_CENTER);
+	(*pif->pf_set_xfont)(pif->ctx, &xf);
 
 	default_xpen(&xp);
 	format_xcolor(pxc, xp.color);
@@ -6699,7 +6710,7 @@ void draw_helpp_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const x
 	xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_CENTER);
 	xscpy(xf.weight, GDI_ATTR_FONT_WEIGHT_BOLD);
 
-	(*pif->pf_draw_text)(pif->ctx, &xf, &xa, &xr, _T("P"), 1);
+	(*pif->pf_draw_text)(pif->ctx, &xa, &xr, _T("P"), 1);
 }
 
 void draw_start_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
@@ -7545,9 +7556,10 @@ void draw_static_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const 
 
 	default_xfont(&xf);
 	default_xface(&xa);
-	format_xcolor(pxc, xf.color);
+	format_xcolor(pxc, xa.text_color);
 	xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_CENTER);
 	xscpy(xf.weight, GDI_ATTR_FONT_WEIGHT_BOLD);
+	(*pif->pf_set_xfont)(pif->ctx, &xf);
 
 	rt.x = prt->x;
 	rt.y = prt->y;
@@ -7578,7 +7590,7 @@ void draw_static_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const 
 	xr.w = prt->w;
 	xr.h = prt->h;
 
-	(*pif->pf_draw_text)(pif->ctx, &xf, &xa, &xr, _T("T"), -1);
+	(*pif->pf_draw_text)(pif->ctx, &xa, &xr, _T("T"), -1);
 }
 
 void draw_list_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
@@ -7744,8 +7756,9 @@ void draw_spin_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xr
 
 	default_xfont(&xf);
 	default_xface(&xa);
-	format_xcolor(pxc, xf.color);
+	format_xcolor(pxc, xa.text_color);
 	xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_CENTER);
+	(*pif->pf_set_xfont)(pif->ctx, &xf);
 
 	rt.x = prt->x;
 	rt.y = prt->y;
@@ -7785,7 +7798,7 @@ void draw_spin_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xr
 
 	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
 
-	(*pif->pf_draw_text)(pif->ctx, &xf, &xa, &xr, _T("2"), -1);
+	(*pif->pf_draw_text)(pif->ctx, &xa, &xr, _T("2"), -1);
 
 	pt[0].x = prt->x + prt->w / 4 * 3 - ps;
 	pt[0].y = prt->y + prt->h / 2 - SINGLE_SPAN;
@@ -7929,8 +7942,9 @@ void draw_date_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xr
 
 	default_xfont(&xf);
 	default_xface(&xa);
-	format_xcolor(pxc, xf.color);
+	format_xcolor(pxc, xa.text_color);
 	xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_CENTER);
+	(*pif->pf_set_xfont)(pif->ctx, &xf);
 
 	rt.x = prt->x;
 	rt.y = prt->y;
@@ -7989,7 +8003,7 @@ void draw_date_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xr
 
 	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
 
-	(*pif->pf_draw_text)(pif->ctx, &xf, &xa, &xr, _T("23"), -1);
+	(*pif->pf_draw_text)(pif->ctx, &xa, &xr, _T("23"), -1);
 }
 
 void draw_time_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
@@ -8599,8 +8613,9 @@ void draw_counter_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const
 
 	default_xfont(&xf);
 	default_xface(&xa);
-	format_xcolor(pxc, xf.color);
+	format_xcolor(pxc, xa.text_color);
 	xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_CENTER);
+	(*pif->pf_set_xfont)(pif->ctx, &xf);
 
 	rt.x = prt->x;
 	rt.y = prt->y;
@@ -8638,7 +8653,7 @@ void draw_counter_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const
 
 	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
 
-	(*pif->pf_draw_text)(pif->ctx, &xf, &xa, &xr, _T("0"), -1);
+	(*pif->pf_draw_text)(pif->ctx, &xa, &xr, _T("0"), -1);
 }
 
 void draw_process_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
@@ -8716,8 +8731,9 @@ void draw_judge_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const x
 
 	default_xfont(&xf);
 	default_xface(&xa);
-	format_xcolor(pxc, xf.color);
+	format_xcolor(pxc, xa.text_color);
 	xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_CENTER);
+	(*pif->pf_set_xfont)(pif->ctx, &xf);
 
 	rt.x = prt->x;
 	rt.y = prt->y;
@@ -8764,7 +8780,7 @@ void draw_judge_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const x
 	xr.w = prt->w;
 	xr.h = prt->h;
 
-	(*pif->pf_draw_text)(pif->ctx, &xf, &xa, &xr, _T("?"), -1);
+	(*pif->pf_draw_text)(pif->ctx, &xa, &xr, _T("?"), -1);
 }
 
 void draw_lock_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
@@ -9184,6 +9200,7 @@ void draw_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t
 void test_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* pxr)
 {
 	xfont_t xf;
+	xface_t xa;
 	xrect_t xr;
 
 	int i, j, k;
@@ -9199,7 +9216,9 @@ void test_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t
 	k = sizeof(g_gizmo_table) / sizeof(GIZMO_DRAW_TABLE);
 
 	default_xfont(&xf);
-	format_xcolor(pxc, xf.color);
+	(*pif->pf_set_xfont)(pif->ctx, &xf);
+	default_xface(&xa);
+	format_xcolor(pxc, xa.text_color);
 
 	j = 0;
 	for (i = 0; k--; i++)
@@ -9230,7 +9249,7 @@ void test_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t
 		xr.w = SMALL_GIZMO + MIDD_GIZMO + LARGE_GIZMO;
 		xr.h = LARGE_GIZMO - MIDD_GIZMO;
 
-		(*it.pf_text_out)(it.ctx, &xf, RECTPOINT(&xr), g_gizmo_table[k].gizmo_name, -1);
+		(*it.pf_text_out)(it.ctx, &xa, RECTPOINT(&xr), g_gizmo_table[k].gizmo_name, -1);
 
 		if (i > 11)
 		{
@@ -9244,6 +9263,7 @@ void test_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t
 void test_color(const drawing_interface* pif, const xrect_t* pxr)
 {
 	xfont_t xf;
+	xface_t xa;
 	xpen_t xp;
 	xbrush_t xb;
 	xrect_t xr;
@@ -9264,6 +9284,9 @@ void test_color(const drawing_interface* pif, const xrect_t* pxr)
 	(*pif->pf_get_visual_interface)(visu, &it);
 
 	default_xfont(&xf);
+	(*pif->pf_set_xfont)(pif->ctx, &xf);
+	default_xface(&xa);
+
 	default_xpen(&xp);
 	default_xbrush(&xb);
 
@@ -9283,7 +9306,7 @@ void test_color(const drawing_interface* pif, const xrect_t* pxr)
 		(*(it.pf_draw_rect))(it.ctx, &xp, &xb, &xr);
 
 		xr.x += xr.w;
-		(*it.pf_text_out)(it.ctx, &xf, RECTPOINT(&xr), cn_clr, -1);
+		(*it.pf_text_out)(it.ctx, &xa, RECTPOINT(&xr), cn_clr, -1);
 
 		if (++i > 15)
 		{

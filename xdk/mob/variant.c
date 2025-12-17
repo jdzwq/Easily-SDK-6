@@ -32,7 +32,7 @@ LICENSE.GPL3 for more details.
 #include "../xdkimp.h"
 
 typedef struct _variant_context{
-	memobj_head head;
+	memo_head head;
 
 	int type;
 	int count;
@@ -183,38 +183,13 @@ int variant_get_count(variant_t var)
 	return pvar->count;
 }
 
-void* variant_data(variant_t var)
+const void* variant_data(variant_t var)
 {
 	variant_context* pvar = TypePtrFromHead(variant_context, var);
 
 	XDK_ASSERT(var != NULL && var->tag == MEM_VARIANT);
 
 	return pvar->data;
-}
-
-void variant_attach(variant_t var, void* data)
-{
-	variant_context* pvar = TypePtrFromHead(variant_context, var);
-
-	XDK_ASSERT(var != NULL && var->tag == MEM_VARIANT);
-
-	if (pvar->data)
-		xmem_free(pvar->data);
-
-	pvar->data = data;
-}
-
-const void* variant_detach(variant_t var)
-{
-	variant_context* pvar = TypePtrFromHead(variant_context, var);
-	void* d;
-
-	XDK_ASSERT(var != NULL && var->tag == MEM_VARIANT);
-
-	d = pvar->data;
-	pvar->data = NULL;
-
-	return d;
 }
 
 void variant_to_null(variant_t var, int type)
@@ -1028,306 +1003,6 @@ double variant_get_double(variant_t var)
 	return (*((double*)d));
 }
 
-/*
-struct{
-	byte[1]: type
-	byte[3]: count
-	byte[]: data
-*/
-
-dword_t variant_encode(variant_t var, byte_t* buf, dword_t max)
-{
-	variant_context* pvar = TypePtrFromHead(variant_context, var);
-	dword_t total = 0;
-	int i;
-	bool_t b;
-	byte_t c;
-	short s;
-	int l;
-	long long ll;
-	float f;
-	double d;
-
-	XDK_ASSERT(var != NULL && var->tag == MEM_VARIANT);
-
-	if (total + 1 > max) return total;
-	if (buf)
-	{
-		PUT_BYTE(buf, total, (byte_t)pvar->type);
-	}
-	total++;
-
-	if (total + 3 > max) return total;
-	if (buf)
-	{
-		PUT_THREEBYTE_LIT(buf, total, pvar->count);
-	}
-	total += 3;
-
-	switch (pvar->type & 0x7F)
-	{
-	case VV_BOOL:
-		pvar->count = 1;
-	case VV_BOOL_ARRAY:
-		for (i = 0; i < pvar->count; i++)
-		{
-			if (total + 1 > max) return total;
-			if (buf)
-			{
-				b = *((bool_t*)pvar->data + i);
-				PUT_BYTE(buf, total, (byte_t)b);
-			}
-			total ++;
-		}
-		break;
-	case VV_BYTE:
-		pvar->count = 1;
-	case VV_BYTE_ARRAY:
-		for (i = 0; i < pvar->count; i++)
-		{
-			if (total + 1 > max) return total;
-			if (buf)
-			{
-				c = *((byte_t*)pvar->data + i);
-				PUT_BYTE(buf, total, c);
-			}
-			total++;
-		}
-		break;
-	case VV_SHORT:
-		pvar->count = 1;
-	case VV_SHORT_ARRAY:
-		for (i = 0; i < pvar->count; i++)
-		{
-			if (total + 2 > max) return total;
-			if (buf)
-			{
-				s = *((short*)pvar->data + i);
-				PUT_SWORD_LOC(buf, total, s);
-			}
-			total += 2;
-		}
-		break;
-	case VV_INT:
-		pvar->count = 1;
-	case VV_INT_ARRAY:
-		for (i = 0; i < pvar->count; i++)
-		{
-			if (total + 4 > max) return total;
-			if (buf)
-			{
-				l = *((int*)pvar->data + i);
-				PUT_DWORD_LOC(buf, total, l);
-			}
-			total += 4;
-		}
-		break;
-	case VV_LONG:
-		pvar->count = 1;
-	case VV_LONG_ARRAY:
-		for (i = 0; i < pvar->count; i++)
-		{
-			if (total + 8 > max) return total;
-			if (buf)
-			{
-				ll = *((long long*)pvar->data + i);
-				PUT_LWORD_LOC(buf, total, ll);
-			}
-			total += 8;
-		}
-		break;
-	case VV_FLOAT:
-		pvar->count = 1;
-	case VV_FLOAT_ARRAY:
-		for (i = 0; i < pvar->count; i++)
-		{
-			if (total + 4 > max) return total;
-			if (buf)
-			{
-				f = *((float*)pvar->data + i);
-				PUT_DWORD_LOC(buf, total, (dword_t)f);
-			}
-			total += 4;
-		}
-		break;
-	case VV_DOUBLE:
-		pvar->count = 1;
-	case VV_DOUBLE_ARRAY:
-		for (i = 0; i < pvar->count; i++)
-		{
-			if (total + 8 > max) return total;
-			if (buf)
-			{
-				d = *((double*)pvar->data + i);
-				PUT_LWORD_LOC(buf, total, (lword_t)d);
-			}
-			total += 8;
-		}
-		break;
-	case VV_STRING_GB2312:
-	case VV_STRING_UTF8:
-	case VV_STRING_UTF16LIT:
-	case VV_STRING_UTF16BIG:
-		if (total + pvar->count > max) return total;
-		if (buf)
-		{
-			xmem_copy((void*)(buf+ total), (void*)(pvar->data), pvar->count);
-		}
-		total += pvar->count;
-		break;
-	default:
-		break;
-	}
-
-	return total;
-}
-
-dword_t variant_decode(variant_t var, const byte_t* buf)
-{
-	variant_context* pvar = TypePtrFromHead(variant_context, var);
-	dword_t total = 0;
-	int i, n, t;
-	bool_t b;
-	byte_t c;
-	short s;
-	int l;
-	long long ll;
-	float f;
-	double d;
-
-	if (!buf)
-	{
-		if (var)
-		{
-			t = variant_get_type(var);
-			variant_to_null(var, t);
-			return 0;
-		}
-	}
-
-	t = GET_BYTE(buf, total);
-	total++;
-
-	if (!IS_VARIANT_TYPE(t))
-		return 0;
-
-	n = GET_THREEBYTE_LOC(buf, total);
-	total += 3;
-
-	if (var)
-	{
-		variant_realloc(var, t, n);
-	}
-
-	switch (t & 0x7F)
-	{
-	case VV_BOOL:
-		n = 1;
-	case VV_BOOL_ARRAY:
-		for (i = 0; i < n; i++)
-		{
-			if (var)
-			{
-				b = GET_BYTE(buf, total);
-				*((bool_t*)pvar->data + i) = b;
-			}
-			total++;
-		}
-		break;
-	case VV_BYTE:
-		n = 1;
-	case VV_BYTE_ARRAY:
-		for (i = 0; i < n; i++)
-		{
-			if (var)
-			{
-				c = GET_BYTE(buf, total);
-				*((byte_t*)pvar->data + i) = c;
-			}
-			total++;
-		}
-		break;
-	case VV_SHORT:
-		n = 1;
-	case VV_SHORT_ARRAY:
-		for (i = 0; i < n; i++)
-		{
-			if (var)
-			{
-				s = GET_SWORD_LOC(buf, total);
-				*((short*)pvar->data + i) = s;
-			}
-			total += 2;
-			}
-		break;
-	case VV_INT:
-		n = 1;
-	case VV_INT_ARRAY:
-		for (i = 0; i < n; i++)
-		{
-			if (var)
-			{
-				l = GET_DWORD_LOC(buf, total);
-				*((int*)pvar->data + i) = l;
-			}
-			total += 4;
-			}
-		break;
-	case VV_LONG:
-		n = 1;
-	case VV_LONG_ARRAY:
-		for (i = 0; i < n; i++)
-		{
-			if (var)
-			{
-				ll = GET_LWORD_LOC(buf, total);
-				*((long long*)pvar->data + i) = ll;
-			}
-			total += 8;
-		}
-		break;
-	case VV_FLOAT:
-		n = 1;
-	case VV_FLOAT_ARRAY:
-		for (i = 0; i < n; i++)
-		{
-			if (var)
-			{
-				f = (float)GET_DWORD_LOC(buf, total);
-				*((float*)pvar->data + i) = f;
-			}
-			total += 4;
-		}
-		break;
-	case VV_DOUBLE:
-		n = 1;
-	case VV_DOUBLE_ARRAY:
-		for (i = 0; i < n; i++)
-		{
-			if (var)
-			{
-				d = (double)GET_LWORD_LOC(buf, total);
-				*((double*)pvar->data + i) = d;
-			}
-			total += 8;
-		}
-		break;
-	case VV_STRING_GB2312:
-	case VV_STRING_UTF8:
-	case VV_STRING_UTF16LIT:
-	case VV_STRING_UTF16BIG:
-		if (var)
-		{
-			xmem_copy((void*)(pvar->data), (void*)(buf + total), n);
-		}
-		total += n;
-		break;
-	default:
-		break;
-	}
-
-	return total;
-}
 
 void variant_hash32(variant_t var, key32_t* pkey)
 {
@@ -1547,3 +1222,360 @@ void variant_hash128(variant_t var, key128_t* pkey)
 	else
 		xmem_zero((void*)pkey, sizeof(key128_t));
 }
+
+/**********************************************************************
+ASN.1 CER ENCODING
+Variant::=SEQUENCE{
+	Type: BYTE
+	Count: BYTE[3]
+	Data: BYTE[]
+}
+**********************************************************************/
+
+dword_t variant_encode(variant_t var, byte_t* buf)
+{
+	variant_context* pvar = TypePtrFromHead(variant_context, var);
+	dword_t n, total = 0;
+
+	int i;
+	bool_t b;
+	byte_t c;
+	short s;
+	int l;
+	long long ll;
+	float f;
+	double d;
+
+	XDK_ASSERT(var != NULL && var->tag == MEM_VARIANT);
+
+	switch (pvar->type & 0x7F)
+	{
+	case VV_NULL:
+		n = ver_write_null(((buf)? (buf + total) : NULL));
+		total += n;
+		break;
+	case VV_BOOL:
+		b = *((bool_t*)pvar->data);
+		n = ver_write_bool(((buf)? (buf + total) : NULL), b);
+		total += n;
+		break;
+	case VV_BOOL_ARRAY:
+		n = ver_write_bool_array(((buf)? (buf + total) : NULL), (bool_t*)(pvar->data), pvar->count);
+		total += n;
+		break;
+	case VV_BYTE:
+		n = ver_write_byte(((buf)? (buf + total) : NULL), (*(byte_t*)(pvar->data)));
+		total += n;
+		break;
+	case VV_BYTE_ARRAY:
+		n = ver_write_byte_array(((buf)? (buf + total) : NULL), (byte_t*)(pvar->data), pvar->count);
+		total += n;
+		break;
+	case VV_SHORT:
+		n = ver_write_short(((buf)? (buf + total) : NULL), (*(short*)(pvar->data)));
+		total += n;
+		break;
+	case VV_SHORT_ARRAY:
+		n = ver_write_short_array(((buf)? (buf + total) : NULL), (short*)(pvar->data), pvar->count);
+		total += n;
+		break;
+	case VV_INT:
+		n = ver_write_int(((buf)? (buf + total) : NULL), (*(int*)(pvar->data)));
+		total += n;
+		break;
+	case VV_INT_ARRAY:
+		n = ver_write_int_array(((buf)? (buf + total) : NULL), (int*)(pvar->data), pvar->count);
+		total += n;
+		break;
+	case VV_LONG:
+		n = ver_write_long(((buf)? (buf + total) : NULL), (*(long long*)(pvar->data)));
+		total += n;
+		break;
+	case VV_LONG_ARRAY:
+		n = ver_write_long_array(((buf)? (buf + total) : NULL), (long long*)(pvar->data), pvar->count);
+		total += n;
+		break;
+	case VV_FLOAT:
+		n = ver_write_float(((buf)? (buf + total) : NULL), (*(float*)(pvar->data)));
+		total += n;
+		break;
+	case VV_FLOAT_ARRAY:
+		n = ver_write_float_array(((buf)? (buf + total) : NULL), (float*)(pvar->data), pvar->count);
+		total += n;
+		break;
+	case VV_DOUBLE:
+		n = ver_write_double(((buf)? (buf + total) : NULL), (*(double*)(pvar->data)));
+		total += n;
+		break;
+	case VV_DOUBLE_ARRAY:
+		n = ver_write_double_array(((buf)? (buf + total) : NULL), (double*)(pvar->data), pvar->count);
+		total += n;
+		break;
+	case VV_DATETIME:
+		n = ver_write_datetime(((buf)? (buf + total) : NULL), (xdate_t*)(pvar->data));
+		total += n;
+		break;
+	case VV_DATETIME_ARRAY:
+		n = ver_write_datetime_array(((buf)? (buf + total) : NULL), (xdate_t*)(pvar->data), pvar->count);
+		total += n;
+		break;
+	case VV_STRING_GB2312:
+		n = ver_write_gb2312_string(((buf)? (buf + total) : NULL), (byte_t*)(pvar->data), pvar->count);
+		total += n;
+		break;
+	case VV_STRING_UTF8:
+		n = ver_write_utf8_string(((buf)? (buf + total) : NULL), (byte_t*)(pvar->data), pvar->count);
+		total += n;
+		break;
+	case VV_STRING_UTF16LIT:
+		n = ver_write_utf16lit_string(((buf)? (buf + total) : NULL), (byte_t*)(pvar->data), pvar->count);
+		total += n;
+		break;
+	case VV_STRING_UTF16BIG:
+		n = ver_write_utf16big_string(((buf)? (buf + total) : NULL), (byte_t*)(pvar->data), pvar->count);
+		total += n;
+		break;
+	default:
+		break;
+	}
+
+	return total;
+}
+
+dword_t variant_decode(variant_t var, const byte_t* buf)
+{
+	variant_context* pvar = TypePtrFromHead(variant_context, var);
+	dword_t n, total = 0;
+	dword_t cnt;
+	byte_t tag;
+	int t;
+
+	if (!buf)
+	{
+		if (var)
+		{
+			t = variant_get_type(var);
+			variant_to_null(var, t);
+		}
+		return 0;
+	}
+
+	ver_read_tag(buf, NULL, &tag, &cnt);
+	tag &= 0x7F;
+	cnt &= 0x00FFFFFF;
+
+	if (!IS_VARIANT_TYPE(tag)) return total;
+
+	if (var)
+	{
+		variant_realloc(var, tag, cnt);
+	}
+
+	switch (tag)
+	{
+	case VV_NULL:
+		n = ver_read_null((buf + total));
+		total += n;
+		if(var)
+		{
+			variant_to_null(var, VV_NULL);
+		}
+		break;
+	case VV_BOOL:
+		n = ver_read_bool((buf + total), ((var)? (bool_t*)(pvar->data) : NULL));
+		total += n;
+		break;
+	case VV_BOOL_ARRAY:
+		n = ver_read_bool_array((buf + total), ((var)? (bool_t*)(pvar->data) : NULL), ((var)? (dword_t)(pvar->count) : MAX_LONG));
+		total += n;
+		break;
+	case VV_BYTE:
+		n = ver_read_byte((buf + total), ((var)? (byte_t*)(pvar->data) : NULL));
+		total += n;
+		break;
+	case VV_BYTE_ARRAY:
+		n = ver_read_byte_array((buf + total), ((var)? (byte_t*)(pvar->data) : NULL), ((var)? (dword_t)(pvar->count) : MAX_LONG));
+		total += n;
+		break;
+	case VV_SHORT:
+		n = ver_read_short((buf + total), ((var)? (short*)(pvar->data) : NULL));
+		total += n;
+		break;
+	case VV_SHORT_ARRAY:
+		n = ver_read_short_array((buf + total), ((var)? (short*)(pvar->data) : NULL), ((var)? (dword_t)(pvar->count) : MAX_LONG));
+		total += n;
+		break;
+	case VV_INT:
+		n = ver_read_int((buf + total), ((var)? (int*)(pvar->data) : NULL));
+		total += n;
+		break;
+	case VV_INT_ARRAY:
+		n = ver_read_int_array((buf + total), ((var)? (int*)(pvar->data) : NULL), ((var)? (dword_t)(pvar->count) : MAX_LONG));
+		total += n;
+		break;
+	case VV_LONG:
+		n = ver_read_long((buf + total), ((var)? (long long*)(pvar->data) : NULL));
+		total += n;
+		break;
+	case VV_LONG_ARRAY:
+		n = ver_read_long_array((buf + total), ((var)? (long long*)(pvar->data) : NULL), ((var)? (dword_t)(pvar->count) : MAX_LONG));
+		total += n;
+		break;
+	case VV_FLOAT:
+		n = ver_read_float((buf + total), ((var)? (float*)(pvar->data) : NULL));
+		total += n;
+		break;
+	case VV_FLOAT_ARRAY:
+		n = ver_read_float_array((buf + total), ((var)? (float*)(pvar->data) : NULL), ((var)? (dword_t)(pvar->count) : MAX_LONG));
+		total += n;
+		break;
+	case VV_DOUBLE:
+		n = ver_read_double((buf + total), ((var)? (double*)(pvar->data) : NULL));
+		total += n;
+		break;
+	case VV_DOUBLE_ARRAY:
+		n = ver_read_double_array((buf + total), ((var)? (double*)(pvar->data) : NULL), ((var)? (dword_t)(pvar->count) : MAX_LONG));
+		total += n;
+		break;
+	case VV_STRING_GB2312:
+		n = ver_read_gb2312_string((buf + total), ((var)? (byte_t*)(pvar->data) : NULL), ((var)? (dword_t)(pvar->count) : MAX_LONG));
+		total += n;
+		break;
+	case VV_STRING_UTF8:
+		n = ver_read_utf8_string((buf + total), ((var)? (byte_t*)(pvar->data) : NULL), ((var)? (dword_t)(pvar->count) : MAX_LONG));
+		total += n;
+		break;
+	case VV_STRING_UTF16LIT:
+		n = ver_read_utf16lit_string((buf + total), ((var)? (byte_t*)(pvar->data) : NULL), ((var)? (dword_t)(pvar->count) : MAX_LONG));
+		total += n;
+		break;
+	case VV_STRING_UTF16BIG:
+		n = ver_read_utf16big_string((buf + total), ((var)? (byte_t*)(pvar->data) : NULL), ((var)? (dword_t)(pvar->count) : MAX_LONG));
+		total += n;
+		break;
+	default:
+		break;
+	}
+
+	return total;
+}
+
+/**********************************************************************/
+#if defined (DEBUG) || defined (_DEBUG)
+void variant_self_test()
+{
+	variant_t v1, v2;
+	byte_t* pb;
+	dword_t n;
+
+	printf("test variant...\n");
+
+	printf("test variant null\n");
+	v1 = variant_alloc(VV_NULL);
+	v2 = variant_alloc(VV_NULL);
+	XDK_ASSERT(variant_comp(v1, v2) == 0);
+
+	n = variant_encode(v1, NULL);
+	pb = (byte_t*)xmem_alloc(n);
+	variant_encode(v1, pb);
+	variant_to_null(v2, VV_NULL);
+	variant_decode(v2, pb);
+	xmem_free(pb);
+	XDK_ASSERT(variant_comp(v1, v2) == 0);
+
+	variant_free(v1);
+	variant_free(v2);
+
+	printf("test variant bool\n");
+	v1 = variant_alloc(VV_BOOL);
+	variant_set_bool(v1, 1);
+	v2 = variant_alloc(VV_BOOL);
+	variant_set_bool(v2, 2);
+	XDK_ASSERT(variant_comp(v1, v2) == 0);
+
+	n = variant_encode(v1, NULL);
+	pb = (byte_t*)xmem_alloc(n);
+	variant_encode(v1, pb);
+	variant_to_null(v2, VV_NULL);
+	variant_decode(v2, pb);
+	xmem_free(pb);
+	XDK_ASSERT(variant_comp(v1, v2) == 0);
+
+	variant_free(v1);
+	variant_free(v2);
+
+	printf("test variant long\n");
+	v1 = variant_alloc(VV_LONG);
+	variant_set_long(v1, MAX_LONGLONG);
+	v2 = variant_alloc(VV_LONG);
+	variant_set_long(v2, MAX_LONGLONG);
+	XDK_ASSERT(variant_comp(v1, v2) == 0);
+
+	n = variant_encode(v1, NULL);
+	pb = (byte_t*)xmem_alloc(n);
+	variant_encode(v1, pb);
+	variant_to_null(v2, VV_NULL);
+	variant_decode(v2, pb);
+	xmem_free(pb);
+	XDK_ASSERT(variant_comp(v1, v2) == 0);
+
+	variant_free(v1);
+	variant_free(v2);
+
+	printf("test variant float\n");
+	v1 = variant_alloc(VV_FLOAT);
+	variant_set_float(v1, 0.0001);
+	v2 = variant_alloc(VV_FLOAT);
+	variant_set_float(v2, 0.0001);
+	XDK_ASSERT(variant_comp(v1, v2) == 0);
+
+	n = variant_encode(v1, NULL);
+	pb = (byte_t*)xmem_alloc(n);
+	variant_encode(v1, pb);
+	variant_to_null(v2, VV_NULL);
+	variant_decode(v2, pb);
+	xmem_free(pb);
+	XDK_ASSERT(variant_comp(v1, v2) == 0);
+
+	variant_free(v1);
+	variant_free(v2);
+
+	printf("test variant double\n");
+	v1 = variant_alloc(VV_DOUBLE);
+	variant_set_double(v1, 0.000000001);
+	v2 = variant_alloc(VV_DOUBLE);
+	variant_set_double(v2, 0.000000001);
+	XDK_ASSERT(variant_comp(v1, v2) == 0);
+
+	n = variant_encode(v1, NULL);
+	pb = (byte_t*)xmem_alloc(n);
+	variant_encode(v1, pb);
+	variant_to_null(v2, VV_NULL);
+	variant_decode(v2, pb);
+	xmem_free(pb);
+	XDK_ASSERT(variant_comp(v1, v2) == 0);
+
+	variant_free(v1);
+	variant_free(v2);
+
+	printf("test variant string\n");
+	v1 = variant_alloc(VV_STRING_GB2312);
+	variant_from_string(v1, _T("您好，世界！"), -1);
+	v2 = variant_alloc(VV_STRING_GB2312);
+	variant_from_string(v2, _T("您好，世界！"), -1);
+	XDK_ASSERT(variant_comp(v1, v2) == 0);
+
+	n = variant_encode(v1, NULL);
+	pb = (byte_t*)xmem_alloc(n);
+	variant_encode(v1, pb);
+	variant_to_null(v2, VV_NULL);
+	variant_decode(v2, pb);
+	xmem_free(pb);
+	XDK_ASSERT(variant_comp(v1, v2) == 0);
+
+	variant_free(v1);
+	variant_free(v2);
+
+	printf("test variant end...\n");
+}
+#endif

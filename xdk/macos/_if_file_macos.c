@@ -247,8 +247,8 @@ bool_t _file_read_range(res_file_t fh, dword_t hoff, dword_t loff, void* buf, dw
     dword_t poff;
     size_t dlen;
     
-    poff = (loff % PAGE_GRAN);
-    loff = (loff / PAGE_GRAN) * PAGE_GRAN;
+    poff = (loff % PAGE_SIZE);
+    loff = (loff / PAGE_SIZE) * PAGE_SIZE;
     dlen = poff + size;
     
     pBase = mmap(NULL, dlen, PROT_WRITE | PROT_READ, MAP_SHARED, fh, MAKESIZE(loff, hoff));
@@ -274,6 +274,7 @@ bool_t _file_write_range(res_file_t fh, dword_t hoff, dword_t loff, void* buf, d
     
     flen = MAKESIZE(loff, hoff) + size;
     
+    //expand file first for writing
     if(MAKESIZE(dwl,dwh) < flen)
     {
         if(ftruncate(fh, flen) < 0)
@@ -282,8 +283,8 @@ bool_t _file_write_range(res_file_t fh, dword_t hoff, dword_t loff, void* buf, d
         }
     }
     
-    poff = (loff % PAGE_GRAN);
-    loff = (loff / PAGE_GRAN) * PAGE_GRAN;
+    poff = (loff % PAGE_SIZE);
+    loff = (loff / PAGE_SIZE) * PAGE_SIZE;
     dlen = poff + size;
     
     pBase = mmap(NULL, dlen, PROT_WRITE | PROT_READ, MAP_SHARED, fh, MAKESIZE(loff, hoff));
@@ -314,6 +315,7 @@ void* _file_lock_range(res_file_t fh, dword_t hoff, dword_t loff, dword_t size, 
     
     flen = MAKESIZE(loff, hoff) + size;
     
+    //expand file first for writing
     if(MAKESIZE(dwl,dwh) < flen)
     {
         if(!write)
@@ -326,8 +328,8 @@ void* _file_lock_range(res_file_t fh, dword_t hoff, dword_t loff, dword_t size, 
         }
     }
     
-    poff = (loff % PAGE_GRAN);
-    loff = (loff / PAGE_GRAN) * PAGE_GRAN;
+    poff = (loff % PAGE_SIZE);
+    loff = (loff / PAGE_SIZE) * PAGE_SIZE;
     dlen = poff + size;
     
     prot = (write)? (PROT_WRITE | PROT_READ) : PROT_READ;
@@ -348,13 +350,13 @@ void _file_unlock_range(res_file_t mh, dword_t hoff, dword_t loff, dword_t size,
     dword_t poff;
     size_t dlen;
     
-    poff = (loff % PAGE_GRAN);
-    loff = (loff / PAGE_GRAN) * PAGE_GRAN;
+    poff = (loff % PAGE_SIZE);
+    loff = (loff / PAGE_SIZE) * PAGE_SIZE;
     dlen = poff + size;
 
     pBase = (void*)((char*)p - poff);
     
-    msync(pBase, dlen, MS_SYNC);
+    msync(pBase, dlen, MS_ASYNC);
     
     munmap(pBase, dlen);
 }

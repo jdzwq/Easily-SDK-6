@@ -29,17 +29,89 @@ LICENSE.GPL3 for more details.
 #ifdef XDU_SUPPORT_CLIPBOARD
 
 bool_t _clipboard_put(widget_t wt, int fmt, const byte_t* data, dword_t size)
-{
-	NOP;
+{@autoreleasepool {
+	NSString *nsString;
+	NSPasteboard *nsBoard;
+	NSData *nsData;
+	NSPasteboardItem *nsItem;
 
-	return bool_true;
-}
+	switch(fmt)
+	{
+	case CB_FORMAT_MBS:
+		nsString = [[NSString alloc] initWithBytes:data length:(NSUInteger)size encoding:NSUTF8StringEncoding];
+		nsBoard = [NSPasteboard generalPasteboard];
+        [nsBoard clearContents];
+        return (YES == [nsBoard setString:nsString forType:NSPasteboardTypeString])? bool_true : bool_false;
+	case CB_FORMAT_UCS:
+        nsString = [[NSString alloc] initWithCharacters:(const unichar*)data length:(size / 2)];
+        nsBoard = [NSPasteboard generalPasteboard];
+        [nsBoard clearContents];
+        return (YES == [nsBoard setString:nsString forType:NSPasteboardTypeString])? bool_true : bool_false;
+	case CB_FORMAT_DIB:
+		nsData = [NSData dataWithBytes:data length:(NSUInteger)size];
+        nsItem = [[NSPasteboardItem alloc] init];
+        if(YES != [nsItem setData:nsData forType:(NSPasteboardType)@"public.data"])
+		{
+			return bool_false;
+		}
+        nsBoard = [NSPasteboard generalPasteboard];
+        [nsBoard clearContents];
+        return (YES == [nsBoard writeObjects:@[nsItem]])? bool_true : bool_false;
+	}
+}}
 
 dword_t _clipboard_get(widget_t wt, int fmt, byte_t* buf, dword_t max)
-{
-	NOP;
-	
-	return bool_false;
-}
+{@autoreleasepool {
+	NSArray<NSPasteboardType> *nsPreferred = @[
+        NSPasteboardTypeString,
+        (NSPasteboardType)@"public.data"
+    ];
+	NSPasteboard *nsBoard = [NSPasteboard generalPasteboard];
+	NSPasteboardType nsType = [nsBoard availableTypeFromArray:nsPreferred];
+	if(!nsType) return 0;
+
+	NSString *nsString;
+	NSData *nsData;
+	NSPasteboardItem *nsItem;
+
+	switch(fmt)
+	{
+	case CB_FORMAT_MBS:
+		if (![nsType isEqualToString:NSPasteboardTypeString]) return 0;
+
+		nsString = [nsBoard stringForType:NSPasteboardTypeString];
+        if (!nsString) return 0;
+
+        nsData = [nsString dataUsingEncoding:NSUTF8StringEncoding];
+		max = (max < (dword_t)nsData.length)? max : (dword_t)nsData.length;
+        if(buf) xmem_copy((void*)buf, nsData.bytes, max);
+        
+		return max;
+	case CB_FORMAT_UCS:
+		if (![nsType isEqualToString:NSPasteboardTypeString]) return 0;
+
+		nsString = [nsBoard stringForType:NSPasteboardTypeString];
+        if (!nsString) return 0;
+
+        CFIndex ulen = CFStringGetLength((CFStringRef)nsString);
+		max = (max < 2 * ulen)? max : (2 * ulen);
+        if(buf) CFStringGetCharacters((CFStringRef)nsString, CFRangeMake(0, max / 2), (UniChar*)buf);
+        
+		return max;
+	case CB_FORMAT_DIB:
+		if (![nsType isEqualToString:(NSPasteboardType)@"public.data"]) return 0;
+
+		nsItem = nsBoard.pasteboardItems.firstObject;
+        if (!nsItem) return 0;
+
+        nsData = [nsItem dataForType:(NSPasteboardType)@"public.data"];
+        if (!nsData) return 0;
+
+		max = (max < (dword_t)nsData.length)? max : (dword_t)nsData.length;
+        if(buf) xmem_copy((void*)buf, nsData.bytes, max);
+
+		return max;
+	}
+}}
 
 #endif //XDU_SUPPORT_CLIPBOARD

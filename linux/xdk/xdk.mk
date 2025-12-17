@@ -32,11 +32,12 @@ DIRS = $(wildcard \
 		$(SRC_PATH)/acp/*.c \
 		$(SRC_PATH)/str/*.c \
 		$(SRC_PATH)/enc/*.c \
-		$(SRC_PATH)/maa/*.c \
 		$(SRC_PATH)/util/*.c \
 		$(SRC_PATH)/bar/*.c \
 		$(SRC_PATH)/zip/*.c \
+		$(SRC_PATH)/aob/*.c \
 		$(SRC_PATH)/mob/*.c \
+		$(SRC_PATH)/vob/*.c \
 		$(SRC_PATH)/dob/*.c \
 		$(SRC_PATH)/net/*.c \
 		$(SRC_PATH)/stm/*.c \
@@ -62,7 +63,7 @@ $(OBJ_PATH)/%.o : $(SRC_PATH)/str/%.c
 $(OBJ_PATH)/%.o : $(SRC_PATH)/enc/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
 
-$(OBJ_PATH)/%.o : $(SRC_PATH)/maa/%.c
+$(OBJ_PATH)/%.o : $(SRC_PATH)/aob/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
 
 $(OBJ_PATH)/%.o : $(SRC_PATH)/util/%.c
@@ -75,6 +76,9 @@ $(OBJ_PATH)/%.o : $(SRC_PATH)/zip/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
 
 $(OBJ_PATH)/%.o : $(SRC_PATH)/mob/%.c
+	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
+
+$(OBJ_PATH)/%.o : $(SRC_PATH)/vob/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
 
 $(OBJ_PATH)/%.o : $(SRC_PATH)/dob/%.c

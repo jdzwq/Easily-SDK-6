@@ -31,7 +31,7 @@ LICENSE.GPL3 for more details.
 #include "../xdkimp.h"
 
 typedef struct _vector_context{
-	memobj_head head;
+	memo_head head;
 
 	int count;
 	int dimen;
@@ -39,6 +39,11 @@ typedef struct _vector_context{
 }vector_context;
 
 #define VECTOR_CALC_SIZE(count, dimen)		(count * dimen * sizeof(double))
+
+dword_t vector_need_size(int count, int dimen)
+{
+	return (count * dimen * sizeof(double));
+}
 
 vector_t vector_alloc(int count, int dimen)
 {
@@ -62,45 +67,9 @@ void vector_free(vector_t vec)
 	vector_context* pmv = TypePtrFromHead(vector_context, vec);
 	
 	XDK_ASSERT(pmv && pmv->head.tag == MEM_VECTOR);
-
-	if (pmv->data)
-		xmem_free(pmv->data);
+	XDK_ASSERT(pmv->data == NULL);
 
 	xmem_free(pmv);
-}
-
-vector_t vector_clone(vector_t vec)
-{
-	vector_context* pmv = TypePtrFromHead(vector_context, vec);
-	vector_context* pnew;
-	int n;
-
-	XDK_ASSERT(pmv && pmv->head.tag == MEM_VECTOR);
-
-	pnew = (vector_context*)vector_alloc(pmv->count, pmv->dimen);
-
-	if (pmv->data)
-	{
-		n = VECTOR_CALC_SIZE(pmv->count, pmv->dimen);
-		pnew->data = xmem_realloc(pnew->data, n);
-		xmem_copy(pnew->data, pmv->data, n);
-	}
-
-	return (vector_t)&(pnew->head);
-}
-
-void vector_reset(vector_t vec, int count, int dimen)
-{
-	vector_context* pmv = TypePtrFromHead(vector_context, vec);
-
-	XDK_ASSERT(pmv && pmv->head.tag == MEM_VECTOR);
-
-	if (pmv->data)
-		xmem_free(pmv->data);
-
-	pmv->data = NULL;
-	pmv->count = count;
-	pmv->dimen = dimen;
 }
 
 const void* vector_data(vector_t vec)
@@ -117,9 +86,7 @@ void vector_attach(vector_t vec, void* data)
 	vector_context* pmv = TypePtrFromHead(vector_context, vec);
 
 	XDK_ASSERT(pmv && pmv->head.tag == MEM_VECTOR);
-
-	if (pmv->data)
-		xmem_free(pmv->data);
+	XDK_ASSERT(pmv->data == NULL);
 
 	pmv->data = data;
 }
@@ -144,12 +111,12 @@ void vector_copy(vector_t dst, vector_t src)
 	int n;
 
 	XDK_ASSERT(psrc && psrc->head.tag == MEM_VECTOR && pdst && pdst->head.tag == MEM_VECTOR);
+	XDK_ASSERT(psrc->count == pdst->count && psrc->dimen == pdst->dimen);
 
-	vector_reset(dst, psrc->count, psrc->dimen);
 	if (psrc->data)
 	{
+		XDK_ASSERT(pdst->data != NULL);
 		n = VECTOR_CALC_SIZE(psrc->count, psrc->dimen);
-		pdst->data = xmem_realloc(pdst->data, n);
 		xmem_copy(pdst->data, psrc->data, n);
 	}
 }
@@ -181,30 +148,22 @@ void vector_zero(vector_t vec)
 
 	n = VECTOR_CALC_SIZE(pmv->count, pmv->dimen);
 
-	if (!pmv->data)
+	if (pmv->data)
 	{
-		pmv->data = xmem_alloc(n);
+		xmem_zero(pmv->data, n);
 	}
-
-	xmem_zero(pmv->data, n);
 }
 
 void vector_unit(vector_t vec)
 {
 	vector_context* pmv = TypePtrFromHead(vector_context, vec);
 	double* pd;
-	int n, i;
+	int i;
 
 	XDK_ASSERT(pmv && pmv->head.tag == MEM_VECTOR);
-
-	if (!pmv->data)
-	{
-		n = VECTOR_CALC_SIZE(pmv->count, pmv->dimen);
-		pmv->data = xmem_alloc(n);
-	}
+	XDK_ASSERT(pmv->data != NULL);
 
 	pd = (double*)pmv->data;
-
 	i = pmv->count * pmv->dimen;
 	while (i--)
 	{
@@ -220,14 +179,8 @@ void vector_set_value(vector_t vec, int i, ...)
 	va_list arg;
 
 	XDK_ASSERT(pmv && pmv->head.tag == MEM_VECTOR);
-
 	XDK_ASSERT(i >= 0 && i < pmv->count);
-
-	if (!pmv->data)
-	{
-		n = VECTOR_CALC_SIZE(pmv->count, pmv->dimen);
-		pmv->data = xmem_alloc(n);
-	}
+	XDK_ASSERT(pmv->data != NULL);
 
 	va_start(arg, i);
 
@@ -251,11 +204,7 @@ void vector_get_value(vector_t vec, int i, ...)
 	va_list arg;
 
 	XDK_ASSERT(pmv && pmv->head.tag == MEM_VECTOR);
-
-	if (!pmv->data)
-	{
-		return;
-	}
+	XDK_ASSERT(pmv->data != NULL);
 
 	va_start(arg, i);
 
@@ -278,170 +227,165 @@ void vector_get_value(vector_t vec, int i, ...)
 
 //x'= x * ShiftX
 //y'= y * ShiftY
-vector_t vector_shift(vector_t vec, ...)
+void vector_shift(vector_t dst, vector_t src, ...)
 {
-	vector_context* pmv = TypePtrFromHead(vector_context, vec);
+	vector_context* psrc = TypePtrFromHead(vector_context, src);
+	vector_context* pdst = TypePtrFromHead(vector_context, dst);
 	double *pd;
 	int i, j;
 	bool_t b = 0;
 	double *pb;
-	vector_context* pnew;
 	va_list arg;
 
-	XDK_ASSERT(pmv && pmv->head.tag == MEM_VECTOR);
+	XDK_ASSERT(psrc && psrc->head.tag == MEM_VECTOR);
+	XDK_ASSERT(pdst && pdst->head.tag == MEM_VECTOR);
+	XDK_ASSERT(psrc->data && pdst->data);
 
-	if (!pmv->data)
-	{
-		return NULL;
-	}
+	pb = (double*)xmem_alloc(psrc->dimen * sizeof(double));
 
-	pb = (double*)xmem_alloc(pmv->dimen * sizeof(double));
+	va_start(arg, dst);
 
-	va_start(arg, vec);
-
-	for (i = 0; i < pmv->dimen; i++)
+	for (i = 0; i < psrc->dimen; i++)
 	{
 		pb[i] = va_arg(arg, double);
 	}
 
 	va_end(arg);
 
-	pnew = (vector_context*)vector_clone(vec);
+	pd = (double*)pdst->data;
 
-	pd = (double*)pnew->data;
-
-	for (i = 0; i < pmv->count; i++)
+	for (i = 0; i < psrc->count; i++)
 	{
-		for (j = 0; j < pmv->dimen; j++)
+		for (j = 0; j < psrc->dimen; j++)
 		{
-			pd[i * pmv->dimen + j] += pb[j];
+			pd[i * psrc->dimen + j] += pb[j];
 		}
 	}
 
 	xmem_free(pb);
-
-	return (vector_t)&(pnew->head);
 }
 
 //x'= x * cosα+ y * sinα
 //y'= x * sinα+ y * cosα
-vector_t vector_rotate(vector_t vec, double ang)
+void vector_rotate(vector_t dst, vector_t src, double ang)
 {
-	vector_context* pmv = TypePtrFromHead(vector_context, vec);
+	vector_context* psrc = TypePtrFromHead(vector_context, src);
+	vector_context* pdst = TypePtrFromHead(vector_context, dst);
 	int i;
 	matrix_t mat;
-	vector_t pnew;
+	void* buff;
 
-	XDK_ASSERT(pmv && pmv->head.tag == MEM_VECTOR);
-
-	if (!pmv->data)
-	{
-		return NULL;
-	}
-
-	mat = matrix_alloc(pmv->dimen, pmv->dimen);
+	XDK_ASSERT(psrc && psrc->head.tag == MEM_VECTOR);
+	XDK_ASSERT(pdst && pdst->head.tag == MEM_VECTOR);
+	XDK_ASSERT(psrc->data && pdst->data);
+	
+	mat = matrix_alloc(psrc->dimen, psrc->dimen);
+	buff = xmem_alloc(matrix_need_size(psrc->dimen, psrc->dimen));
+	matrix_attach(mat, buff);
 
 	matrix_set_value(mat, 0, 0, cos(ang));
 	matrix_set_value(mat, 0, 1, sin(ang));
 	matrix_set_value(mat, 1, 0, -sin(ang));
 	matrix_set_value(mat, 1, 1, cos(ang));
 
-	for (i = 2; i < pmv->dimen; i++)
+	for (i = 2; i < psrc->dimen; i++)
 	{
 		matrix_set_value(mat, i, i, 1.0);
 	}
 
-	pnew = (vector_t)matrix_mul((matrix_t)vec, mat);
+	matrix_mul((matrix_t)dst, (matrix_t)src, mat);
 
+	buff = matrix_detach(mat);
+	xmem_free(buff);
 	matrix_free(mat);
-
-	return pnew;
 }
 
 //x'= x * ScallX
 //y'= y * ScallY
-vector_t vector_scale(vector_t vec, ...)
+void vector_scale(vector_t dst, vector_t src, ...)
 {
-	vector_context* pmv = TypePtrFromHead(vector_context, vec);
+	vector_context* psrc = TypePtrFromHead(vector_context, src);
+	vector_context* pdst = TypePtrFromHead(vector_context, dst);
+
 	int i;
 	bool_t b = 0;
 	double *pb;
-	vector_t pnew;
+	void* buff;
 	matrix_t mat;
 	va_list arg;
 
-	XDK_ASSERT(pmv && pmv->head.tag == MEM_VECTOR);
+	XDK_ASSERT(psrc && psrc->head.tag == MEM_VECTOR);
+	XDK_ASSERT(pdst && pdst->head.tag == MEM_VECTOR);
+	XDK_ASSERT(psrc->data && pdst->data);
 
-	if (!pmv->data)
-	{
-		return NULL;
-	}
+	pb = (double*)xmem_alloc(psrc->dimen * sizeof(double));
 
-	pb = (double*)xmem_alloc(pmv->dimen * sizeof(double));
+	va_start(arg, dst);
 
-	va_start(arg, vec);
-
-	for (i = 0; i < pmv->dimen; i++)
+	for (i = 0; i < psrc->dimen; i++)
 	{
 		pb[i] = va_arg(arg, double);
 	}
 
 	va_end(arg);
 
-	mat = matrix_alloc(pmv->dimen, pmv->dimen);
+	mat = matrix_alloc(psrc->dimen, psrc->dimen);
+	buff = xmem_alloc(matrix_need_size(psrc->dimen, psrc->dimen));
+	matrix_attach(mat, buff);
 
-	for (i = 0; i < pmv->dimen; i++)
+	for (i = 0; i < psrc->dimen; i++)
 	{
 		matrix_set_value(mat, i, i, pb[i]);
 	}
 
 	xmem_free(pb);
 
-	pnew = (vector_t)matrix_mul((matrix_t)vec, mat);
+	matrix_mul((matrix_t)dst, (matrix_t)src, mat);
 
+	buff = matrix_detach(mat);
+	xmem_free(buff);
 	matrix_free(mat);
-
-	return pnew;
 }
 
 //x' = x + y * ShearX
 //y' = y + x * ShearY
-vector_t vector_shear(vector_t vec, double sx, double sy)
+void vector_shear(vector_t dst, vector_t src, double sx, double sy)
 {
-	vector_context* pmv = TypePtrFromHead(vector_context, vec);
+	vector_context* psrc = TypePtrFromHead(vector_context, src);
+	vector_context* pdst = TypePtrFromHead(vector_context, dst);
+
 	int i;
 	matrix_t mat;
-	vector_t pnew;
+	void* buff;
 
-	XDK_ASSERT(pmv && pmv->head.tag == MEM_VECTOR);
+	XDK_ASSERT(psrc && psrc->head.tag == MEM_VECTOR);
+	XDK_ASSERT(pdst && pdst->head.tag == MEM_VECTOR);
+	XDK_ASSERT(psrc->data && pdst->data);
 
-	if (!pmv->data)
-	{
-		return NULL;
-	}
-
-	mat = matrix_alloc(pmv->dimen, pmv->dimen);
+	mat = matrix_alloc(psrc->dimen, psrc->dimen);
+	buff = xmem_alloc(matrix_need_size(psrc->dimen, psrc->dimen));
+	matrix_attach(mat, buff);
 
 	matrix_set_value(mat, 0, 0, 1.0);
 	matrix_set_value(mat, 0, 1, sy);
 	matrix_set_value(mat, 1, 0, sx);
 	matrix_set_value(mat, 1, 1, 1.0);
 
-	for (i = 2; i < pmv->dimen; i++)
+	for (i = 2; i < psrc->dimen; i++)
 	{
 		matrix_set_value(mat, i, i, 1.0);
 	}
 
-	pnew = (vector_t)matrix_mul((matrix_t)vec, mat);
+	matrix_mul((matrix_t)dst, (matrix_t)src, mat);
 
+	buff = matrix_detach(mat);
+	xmem_free(buff);
 	matrix_free(mat);
-
-	return pnew;
 }
 
-vector_t vector_trans(vector_t vec, matrix_t mat)
+void vector_trans(vector_t dst, vector_t src, matrix_t mat)
 {
-	return (vector_t)matrix_mul((matrix_t)vec, mat);
+	matrix_mul((matrix_t)dst, (matrix_t)src, mat);
 }
 
 void vector_parse(vector_t vec, const tchar_t* str, int len)
@@ -452,18 +396,13 @@ void vector_parse(vector_t vec, const tchar_t* str, int len)
 	const tchar_t* token;
 
 	XDK_ASSERT(pmv && pmv->head.tag == MEM_VECTOR);
+	XDK_ASSERT(pmv->data != NULL);
 
 	if (len < 0)
 		len = xslen(str);
 
 	if (!len)
 		return;
-
-	if (!pmv->data)
-	{
-		n = VECTOR_CALC_SIZE(pmv->count, pmv->dimen);
-		pmv->data = xmem_alloc(n);
-	}
 
 	pd = (double*)pmv->data;
 
@@ -610,57 +549,244 @@ int vector_format(vector_t vec, tchar_t* buf, int max)
 	return total;
 }
 
-/*
-struct{
-byte[2]: count
-byte[2]: dimen
-byte[]: data
-}vector_dump
-*/
-dword_t vector_encode(vector_t vec, byte_t* buf, dword_t max)
+
+/**********************************************************************
+ASN.1 CER ENCODING
+Vector::=SEQUENCE{
+	Count: BER_INTEGERS
+	Dimen: BER_INTEGERS
+	Data: BER_OCTET_STRING
+}
+**********************************************************************/
+dword_t vector_encode(vector_t vec, byte_t* buf)
 {
 	vector_context* pmv = TypePtrFromHead(vector_context, vec);
-	dword_t n = 0;
+	dword_t n, total = 0;
+	dword_t mn, hn;
+	byte_t* pos = NULL;
 
 	XDK_ASSERT(vec != NULL && vec->tag == MEM_VECTOR);
 
-	if (buf)
+	n = ver_write_sequence(((buf)? buf + total : NULL), &pos);
+	if(!n)
 	{
-		PUT_SWORD_LOC(buf, 0, pmv->count);
-		PUT_SWORD_LOC(buf, 2, pmv->dimen);
-	}
+		set_last_error(_T("vector_encode"), _T("ver_write_sequence"), -1);
+		return 0;
+	} 
+	total += n;
 
-	n = VECTOR_CALC_SIZE(pmv->count, pmv->dimen);
-	n = (n < max) ? n : max;
-	if (buf && pmv->data)
+	n = ver_write_int(((buf)? buf + total : NULL), (int)pmv->count);
+	if(!n)
 	{
-		xmem_copy((void*)(buf + 4), (void*)pmv->data, n);
-	}
+		set_last_error(_T("vector_encode"), _T("ver_write_int"), -1);
+		return 0;
+	} 
+	total += n;
 
-	return (n + 4);
+	n = ver_write_int(((buf)? buf + total : NULL), (int)pmv->dimen);
+	if(!n)
+	{
+		set_last_error(_T("vector_encode"), _T("ver_write_int"), -1);
+		return 0;
+	} 
+	total += n;
+
+	mn = VECTOR_CALC_SIZE(pmv->count, pmv->dimen);
+
+	if(pmv->data)
+	{
+		n = ver_write_byte_array(((buf) ? buf + total : NULL), (byte_t *)pmv->data, mn);
+	}else
+	{
+		n = ver_write_byte_array(((buf) ? buf + total : NULL), NULL, 0);
+	}
+	if(!n)
+	{
+		set_last_error(_T("vector_encode"), _T("ver_write_byte_array"), -1);
+		return 0;
+	} 
+	total += n;
+
+	if(pos) ver_write_sequence_length(pos, total);
+
+	return total;
 }
 
 dword_t vector_decode(vector_t vec, const byte_t* buf)
 {
 	vector_context* pmv = TypePtrFromHead(vector_context, vec);
-	dword_t n = 0;
-	int count, dimen;
+	dword_t len, n, total = 0;
 
-	if (!buf)
+	if (!buf) return 0;
+
+	n = ver_read_sequence(buf + total, &len);
+	if(!n)
 	{
+		set_last_error(_T("vector_decode"), _T("ver_read_sequence"), -1);
 		return 0;
-	}
+	} 
+	total += n;
 
-	count = GET_SWORD_LOC(buf, 0);
-	dimen = GET_SWORD_LOC(buf, 2);
-
-	n = VECTOR_CALC_SIZE(count, dimen);
-	if (vec)
+	n = ver_read_int(buf + total, (int*)&len);
+	if(!n)
 	{
-		vector_reset(vec, count, dimen);
-		pmv->data = xmem_realloc(pmv->data, n);
-		xmem_copy((void*)pmv->data, (void*)(buf + 4), n);
-	}
+		set_last_error(_T("vector_decode"), _T("ver_read_int"), -1);
+		return 0;
+	} 
+	total += n;
 
-	return (n + 4);
+	if(pmv) pmv->count = len;
+	
+	n = ver_read_int(buf + total, (int*)&len);
+	if(!n)
+	{
+		set_last_error(_T("vector_decode"), _T("ver_read_int"), -1);
+		return 0;
+	} 
+	total += n;
+
+	if(pmv) pmv->dimen = len;
+
+	len = VECTOR_CALC_SIZE(pmv->count, pmv->dimen);
+
+	n = ver_read_byte_array(buf + total, ((pmv)? pmv->data : NULL), ((pmv)? len : 0));
+	if(!n)
+	{
+		set_last_error(_T("vector_decode"), _T("ver_read_byte_array"), -1);
+		return 0;
+	} 
+	total += n;
+
+	return total;
 }
+
+/**********************************************************************/
+#if defined (DEBUG) || defined (_DEBUG)
+void vector_self_test()
+{
+	tchar_t* buf;
+	int len;
+
+	vector_t vec, vec2;
+	void* buff;
+	void* buff2;
+
+	void* mb;
+	dword_t bys;
+
+	printf("test vector...\n");
+
+	buff = xmem_alloc(vector_need_size(10,1));
+	vec = vector_alloc(10, 1);
+	vector_attach(vec, buff);
+	vector_parse(vec, _T("{(0),(1), (2),(3), (4) ,(5)(6), (7) ,(8),(9)}"), -1);
+	len = vector_format(vec, NULL, MAX_LONG);
+	buf = xsalloc(len + 1);
+	vector_format(vec, buf, len);
+	_tprintf(_T("%s\n"), buf);
+	xsfree(buf);
+	buff = vector_detach(vec);
+	xmem_free(buff);
+	vector_free(vec);
+
+	buff = xmem_alloc(vector_need_size(5,2));
+	vec = vector_alloc(5,2);
+	vector_attach(vec, buff);
+	vector_parse(vec, _T(" {(0,1) ,(2,3),(4, 5) ,(6, 7) ,(8,9)}"), -1);
+	len = vector_format(vec, NULL, MAX_LONG);
+	buf = xsalloc(len + 1);
+	vector_format(vec, buf, len);
+	_tprintf(_T("%s\n"), buf);
+	xsfree(buf);
+	buff = vector_detach(vec);
+	xmem_free(buff);
+	vector_free(vec);
+
+	buff = xmem_alloc(vector_need_size(4,3));
+	vec = vector_alloc(4,3);
+	vector_attach(vec, buff);
+	vector_parse(vec, _T(" {(0,1, 2), (3,4,5),(6,7), (8))}"), -1);
+	len = vector_format(vec, NULL, MAX_LONG);
+	buf = xsalloc(len + 1);
+	vector_format(vec, buf, len);
+	_tprintf(_T("%s\n"), buf);
+	xsfree(buf);
+
+	buff2 = xmem_alloc(vector_need_size(4,3));
+	vec2 = vector_alloc(4,3);
+	vector_attach(vec2, buff2);
+	vector_shift(vec2, vec, (double)1, (double)2, (double)3);
+	len = vector_format(vec2, NULL, MAX_LONG);
+	buf = xsalloc(len + 1);
+	vector_format(vec2, buf, len);
+	_tprintf(_T("%s\n"), buf);
+	xsfree(buf);
+	buff2 = vector_detach(vec2);
+	xmem_free(buff2);
+	vector_free(vec2);
+	buff = vector_detach(vec);
+	xmem_free(buff);
+	vector_free(vec);
+
+	buff = xmem_alloc(vector_need_size(4,2));
+	vec = vector_alloc(4,2);
+	vector_attach(vec, buff);
+	vector_parse(vec, _T(" {(1,1) ,(-1,1),(-1, -1) ,(1, -1)}"), -1);
+	len = vector_format(vec, NULL, MAX_LONG);
+	buf = xsalloc(len + 1);
+	vector_format(vec, buf, len);
+	_tprintf(_T("%s\n"), buf);
+	xsfree(buf);
+
+	buff2 = xmem_alloc(vector_need_size(4,2));
+	vec2 = vector_alloc(4,2);
+	vector_attach(vec2, buff2);
+	vector_rotate(vec2, vec, XPI / 4);
+	len = vector_format(vec2, NULL, MAX_LONG);
+	buf = xsalloc(len + 1);
+	vector_format(vec2, buf, len);
+	_tprintf(_T("%s\n"), buf);
+	xsfree(buf);
+	buff2 = vector_detach(vec2);
+	xmem_free(buff2);
+	vector_free(vec2);
+
+	buff2 = xmem_alloc(vector_need_size(4,2));
+	vec2 = vector_alloc(4,2);
+	vector_attach(vec2, buff2);
+	vector_scale(vec2, vec, 2.0, 0.5);
+	len = vector_format(vec2, NULL, MAX_LONG);
+	buf = xsalloc(len + 1);
+	vector_format(vec2, buf, len);
+	_tprintf(_T("%s\n"), buf);
+	xsfree(buf);
+	buff2 = vector_detach(vec2);
+	xmem_free(buff2);
+	vector_free(vec2);
+
+	buff2 = xmem_alloc(vector_need_size(4,2));
+	vec2 = vector_alloc(4,2);
+	vector_attach(vec2, buff2);
+	vector_shear(vec2, vec, 1.0, 0.5);
+	len = vector_format(vec2, NULL, MAX_LONG);
+	buf = xsalloc(len + 1);
+	vector_format(vec2, buf, len);
+	_tprintf(_T("%s\n"), buf);
+	xsfree(buf);
+	buff2 = vector_detach(vec2);
+	xmem_free(buff2);
+	vector_free(vec2);
+
+	bys = vector_encode(vec, NULL);
+	mb = xmem_alloc(bys);
+	vector_encode(vec, mb);
+	bys = vector_decode(vec, mb);
+	xmem_free(mb);
+
+	buff = vector_detach(vec);
+	xmem_free(buff);
+	vector_free(vec);
+
+	printf("test vector end\n");
+}
+#endif

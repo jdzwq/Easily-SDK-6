@@ -122,6 +122,10 @@ EXP_API void default_calendar(calendar_t* pca);
 
 EXP_API void fill_calendar(calendar_t* pca, const xdate_t* pdt);
 
+#if defined (DEBUG) || defined (_DEBUG)
+EXP_API void test_time_hint(void);
+#endif
+
 #ifdef	__cplusplus
 }
 #endif

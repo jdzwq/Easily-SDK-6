@@ -3129,6 +3129,9 @@ EXP_API void curvectrl_set_vector(widget_t widget, vector_t vt);
 
 EXP_API void curvectrl_get_vector(widget_t widget, vector_t vt);
 
+EXP_API void curvectrl_set_xpen(widget_t widget, const xpen_t* pxp);
+EXP_API void curvectrl_get_xpen(widget_t widget, xpen_t* pxp);
+
 /*************************************title control***********************************************************/
 
 typedef struct _NOTICE_TITLE{

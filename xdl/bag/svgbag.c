@@ -224,12 +224,13 @@ void svg_print_plot(link_t_ptr svg, link_t_ptr plot)
 	
 }
 
-void svg_print_memo(link_t_ptr svg, const xfont_t* pxf, const xface_t* pxa, link_t_ptr memo, int page)
+void svg_print_memo(link_t_ptr svg, link_t_ptr memo, int page)
 {
 	visual_t view;
 	canvas_t canv;
 	drawing_interface ifd = {0};
 	xrect_t xr = { 0 };
+	xface_t xa = {0};
 
 	view = create_svg_visual(svg);
 
@@ -244,19 +245,22 @@ void svg_print_memo(link_t_ptr svg, const xfont_t* pxf, const xface_t* pxa, link
 	set_svg_height(svg, xr.fh);
 	reset_svg_viewbox(svg);
 
-	draw_memo_text(&ifd, pxf, pxa, &xr, memo, page);
+	default_xface(&xa);
+	xscpy(xa.text_wrap, GDI_ATTR_TEXT_WRAP_WORDBREAK);
+	draw_memo_text(&ifd, &xa, &xr, memo, page);
 
 	destroy_svg_canvas(canv);
 	destroy_svg_visual(view);
 	
 }
 
-void svg_print_rich(link_t_ptr svg, const xfont_t* pxf, const xface_t* pxa, link_t_ptr rich, int page)
+void svg_print_rich(link_t_ptr svg, link_t_ptr rich, int page)
 {
 	visual_t view;
 	canvas_t canv;
 	drawing_interface ifd = {0};
 	xrect_t xr = { 0 };
+	xface_t xa = {0};
 
 	view = create_svg_visual(svg);
 
@@ -271,7 +275,9 @@ void svg_print_rich(link_t_ptr svg, const xfont_t* pxf, const xface_t* pxa, link
 	set_svg_height(svg, xr.fh);
 	reset_svg_viewbox(svg);
 
-	draw_rich_text(&ifd, pxf, pxa, &xr, rich, page);
+	default_xface(&xa);
+	xscpy(xa.text_wrap, GDI_ATTR_TEXT_WRAP_WORDBREAK);
+	draw_rich_text(&ifd, &xa, &xr, rich, page);
 
 	destroy_svg_canvas(canv);
 	destroy_svg_visual(view);

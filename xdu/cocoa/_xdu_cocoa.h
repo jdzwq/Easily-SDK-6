@@ -50,6 +50,9 @@ typedef void* id;
 
 #define XRGB(ch) (unsigned short)((double)ch * 65535.0 / 256.0)
 
+//global fonstset cache
+extern fontset_t g_fontset;
+
 typedef id  res_clrmap_t;
 
 #ifdef XDU_SUPPORT_CONTEXT_BITMAP
@@ -69,12 +72,15 @@ typedef struct _cocoa_context_t{
 	void* bitmap;
 	
 	int type;
+
+	fontset_t fontset;
 }cocoa_context_t;
 
 typedef struct _cocoa_fontset_t{
 	handle_head head;
 
-    id font_set;
+    id font_object;
+	xcolor_t font_color;
 }cocoa_fontset_t;
 
 #endif /*XDU_SUPPORT_CONTEXT*/
@@ -83,8 +89,8 @@ typedef struct _cocoa_fontset_t{
 
 /*clipboard format*/
 #define CB_FORMAT_MBS		1
-#define CB_FORMAT_UCS		13
-#define CB_FORMAT_DIB		8
+#define CB_FORMAT_UCS		2
+#define CB_FORMAT_DIB		3
 
 #ifdef _UNICODE
 #define DEF_CB_FORMAT		CB_FORMAT_UCS

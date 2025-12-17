@@ -35,6 +35,7 @@ LICENSE.GPL3 for more details.
 #include "../xdgobj.h"
 #include "../xdgutil.h"
 
+
 typedef struct _memo_context_t
 {
 	handle_head head;
@@ -69,26 +70,6 @@ static const mem_device_ptr select_device(const tchar_t *devName)
 		set_last_error(_T("select_device"), _T("unknown memory device"), -1);
 		return NULL;
 	}
-}
-
-static void alloc_font_cache(memo_context_t *pmgc, const xfont_t* pxf)
-{
-	mem_font_ptr pmf;
-
-	pmf = pmgc->font_inf;
-	if (!pmf) return;
-
-	if(!pxf) return;
-	if(compare_xfont(&(pmgc->xf), pxf) == 0) return;
-
-	xmem_copy((void *)&(pmgc->xf), (void*)pxf, sizeof(xfont_t));
-
-	if(pmgc->ft)
-	{
-		(*pmf->destroyFontSet)(pmgc->ft);
-	}
-
-	pmgc->ft = (*pmf->createFontSet)(&(pmgc->xf));
 }
 
 visual_t create_mgc_visual(const tchar_t *devName, const tchar_t *formName, int width, int height, int dpi)
@@ -132,7 +113,7 @@ visual_t create_mgc_visual(const tchar_t *devName, const tchar_t *formName, int 
 	pmgc->font_inf = &font_Internal;
 
 	default_xfont(&xf);
-	alloc_font_cache(pmgc, &xf);
+	mgc_set_xfont(&(pmgc->head), &xf);
 
 	END_CATCH;
 
@@ -168,6 +149,39 @@ void destroy_mgc_visual(visual_t mgc)
 	xmem_free(pmgc);
 }
 
+void mgc_set_xfont_raw(visual_t mgc, const xfont_t* pxf)
+{
+	memo_context_t *pmgc = TypePtrFromHead(memo_context_t, mgc);
+
+	XDK_ASSERT(mgc && mgc->tag == _VISUAL_MEMORY);
+
+	mem_font_ptr pmf;
+
+	pmf = pmgc->font_inf;
+	if (!pmf) return;
+
+	if(!pxf) return;
+	if(compare_xfont(&(pmgc->xf), pxf) == 0) return;
+
+	xmem_copy((void *)&(pmgc->xf), (void*)pxf, sizeof(xfont_t));
+
+	if(pmgc->ft)
+	{
+		(*pmf->destroyFontSet)(pmgc->ft);
+	}
+
+	pmgc->ft = (*pmf->createFontSet)(&(pmgc->xf));
+}
+
+void mgc_get_xfont_raw(visual_t mgc, xfont_t* pxf)
+{
+	memo_context_t *pmgc = TypePtrFromHead(memo_context_t, mgc);
+
+	XDK_ASSERT(mgc && mgc->tag == _VISUAL_MEMORY);
+
+	xmem_copy((void*)pxf, (void *)&(pmgc->xf), sizeof(xfont_t));
+}
+
 void mgc_set_rop(visual_t mgc, int rop)
 {
 	memo_context_t *pmgc = TypePtrFromHead(memo_context_t, mgc);
@@ -197,14 +211,12 @@ mem_device_ptr mgc_get_device_interface(visual_t mgc, device_t* phand)
 	return (pmgc->device);
 }
 
-mem_font_ptr mgc_get_font_interface(visual_t mgc, const xfont_t* pxf, fontset_t* phand)
+mem_font_ptr mgc_get_font_interface(visual_t mgc, fontset_t* phand)
 {
 	memo_context_t *pmgc = TypePtrFromHead(memo_context_t, mgc);
 
 	XDK_ASSERT(mgc && mgc->tag == _VISUAL_MEMORY);
 
-	alloc_font_cache(pmgc, pxf);
-	
 	if(phand) *phand = pmgc->ft;
 
 	return (pmgc->font_inf);
@@ -227,12 +239,23 @@ float mgc_pixel_metric(visual_t mgc)
 	return LOGMMPERPT;
 }
 
-float mgc_font_metric(visual_t mgc, const xfont_t* pxf)
+float mgc_font_metric(visual_t mgc, const tchar_t* xf_size)
 {
-	float pt = xstof(pxf->size);
-	float pm = 0.0f;
+	const tchar_t* tk;
+	int len;
+	float pt, pm = 0.0f;
 
-	font_metric_by_pt(pt, &pm, NULL);
+	tk = xsistr(xf_size, _T("px"));
+	if(tk)
+	{
+		pt = xsntof(xf_size, (int)(tk - xf_size));
+		font_metric_by_px(pt, &pm, NULL);
+	}
+	else
+	{
+		pt = xstof(xf_size);
+		font_metric_by_pt(pt, &pm, NULL);
+	}
 
 	return pm;
 }

@@ -10,7 +10,7 @@
 !include crypt.txt
 !endif
 
-ARCH = x64
+ARCH = x86
 MODULE = crypt
 
 INC_PATH = ../../include

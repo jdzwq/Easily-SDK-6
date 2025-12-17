@@ -33,7 +33,6 @@ typedef struct _dropbox_delta_t{
 	link_t_ptr table;
 	link_t_ptr entity;
 
-	xfont_t xf;
 }dropbox_delta_t;
 
 #define GETDROPBOXDELTA(ph) 	(dropbox_delta_t*)widget_get_user_delta(ph)
@@ -47,7 +46,7 @@ static void _dropbox_item_rect(widget_t widget, link_t_ptr plk, xrect_t* pxr)
 	measure_interface im = { 0 };
 
 	get_canvas_measure(widget_get_canvas(widget), &im);
-	calc_dropbox_item_rect(&im, &ptd->xf, ptd->table, plk, pxr);
+	calc_dropbox_item_rect(&im, ptd->table, plk, pxr);
 	widget_rect_to_pt(widget, pxr);
 
 	widget_get_client_rect(widget, &xr);
@@ -70,13 +69,13 @@ static void _dropbox_reset_page(widget_t widget)
 	pif = widget_get_canvas_interface(widget);
 
 	(pif->pf_get_measure)(pif->ctx, &im);
-	(pif->pf_font_size)(pif->ctx, &ptd->xf, &xs);
+	(pif->pf_font_size)(pif->ctx, &xs);
 
 	widget_size_to_pt(widget, &xs);
 	lw = xs.w;
 	lh = xs.h;
 
-	calc_dropbox_size(&im, &ptd->xf, ptd->table, &xs);
+	calc_dropbox_size(&im, ptd->table, &xs);
 	widget_size_to_pt(widget, &xs);
 	vw = xs.w;
 	vh = xs.h;
@@ -213,8 +212,6 @@ int hand_dropbox_create(widget_t widget, void* data)
 	ptd->table = NULL;
 	ptd->entity = NULL;
 
-	default_widget_xfont(&ptd->xf);
-
 	SETDROPBOXDELTA(widget, ptd);
 
 	return 0;
@@ -289,7 +286,7 @@ void hand_dropbox_lbutton_up(widget_t widget, const xpoint_t* pxp)
 	pt.y = pxp->y;
 	widget_point_to_mm(widget, &pt);
 
-	hint = calc_dropbox_hint(&im, &ptd->xf, &pt, ptd->table, &ilk);
+	hint = calc_dropbox_hint(&im, &pt, ptd->table, &ilk);
 
 	if (ilk != ptd->entity)
 	{
@@ -333,13 +330,6 @@ void hand_dropbox_scroll(widget_t widget, bool_t bHorz, int nLine)
 	widget_hand_scroll(widget, bHorz, nLine);
 }
 
-void hand_dropbox_xfont(widget_t widget, const xfont_t* pxf)
-{
-	dropbox_delta_t* ptd = GETDROPBOXDELTA(widget);
-
-	xmem_copy((void*)&ptd->xf, (void*)pxf, sizeof(xfont_t));
-}
-
 void hand_dropbox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 {
 	dropbox_delta_t* ptd = GETDROPBOXDELTA(widget);
@@ -372,7 +362,7 @@ void hand_dropbox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 
 	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
 	
-	draw_dropbox(pif, &ptd->xf, ptd->table);
+	draw_dropbox(pif, ptd->table);
 
 	//draw focus
 	if (ptd->entity)
@@ -406,10 +396,6 @@ widget_t dropbox_create(widget_t widget, dword_t style, const xrect_t* pxr)
 
 		EVENT_ON_LBUTTON_DOWN(hand_dropbox_lbutton_down)
 		EVENT_ON_LBUTTON_UP(hand_dropbox_lbutton_up)
-
-		EVENT_ON_XFONT(hand_dropbox_xfont)
-
-		
 
 	EVENT_END_DISPATH
 
@@ -541,7 +527,7 @@ void dropbox_popup_size(widget_t widget, xsize_t* pxs)
 
 	get_canvas_measure(widget_get_canvas(widget), &im);
 
-	calc_dropbox_size(&im, &ptd->xf, ptd->table, pxs);
+	calc_dropbox_size(&im, ptd->table, pxs);
 
 	if (pxs->fh > 7 * DEF_TOUCH_SPAN)
 		pxs->fh = 7 * DEF_TOUCH_SPAN;

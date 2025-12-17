@@ -98,20 +98,6 @@ void hand_shapebox_size(widget_t widget, int code, const xsize_t* prs)
 	}
 }
 
-void hand_shapebox_xbrush(widget_t widget, const xbrush_t* pxb)
-{
-	shapebox_delta_t* ptd = GETSHAPEBOXDELTA(widget);
-	
-	xmem_copy((void*)&ptd->xb, (void*)pxb, sizeof(xbrush_t));
-}
-
-void hand_shapebox_xpen(widget_t widget, const xpen_t* pxp)
-{
-	shapebox_delta_t* ptd = GETSHAPEBOXDELTA(widget);
-	
-	xmem_copy((void*)&ptd->xp, (void*)pxp, sizeof(xpen_t));
-}
-
 void hand_shapebox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 {
 	shapebox_delta_t* ptd = GETSHAPEBOXDELTA(widget);
@@ -156,11 +142,6 @@ widget_t shapebox_create(widget_t widget, dword_t style, const xrect_t* pxr)
 		EVENT_ON_LBUTTON_DOWN(hand_shapebox_lbutton_down)
 		EVENT_ON_LBUTTON_UP(hand_shapebox_lbutton_up)
 
-		EVENT_ON_XPEN(hand_shapebox_xpen)
-		EVENT_ON_XBRUSH(hand_shapebox_xbrush)
-
-		
-
 	EVENT_END_DISPATH
 
 	return widget_create(NULL, style, pxr, widget, &ev);
@@ -190,4 +171,44 @@ int shapebox_get_shape(widget_t widget, tchar_t* buf)
 		xscpy(buf, ptd->shape);
 
 	return len;
+}
+
+void shapebox_set_xbrush(widget_t widget, const xbrush_t* pxb)
+{
+	shapebox_delta_t* ptd = GETSHAPEBOXDELTA(widget);
+
+	XDK_ASSERT(ptd != NULL);
+
+	xmem_copy((void*)&(ptd->xb), (void*)pxb, sizeof(xbrush_t));
+
+	widget_erase(widget, NULL);
+}
+
+void shapebox_get_xbrush(widget_t widget, xbrush_t* pxb)
+{
+	shapebox_delta_t* ptd = GETSHAPEBOXDELTA(widget);
+
+	XDK_ASSERT(ptd != NULL);
+
+	xmem_copy((void*)pxb, (void*)&(ptd->xb), sizeof(xbrush_t));
+}
+
+void shapebox_set_xpen(widget_t widget, const xpen_t* pxp)
+{
+	shapebox_delta_t* ptd = GETSHAPEBOXDELTA(widget);
+
+	XDK_ASSERT(ptd != NULL);
+
+	xmem_copy((void*)&(ptd->xp), (void*)pxp, sizeof(xpen_t));
+
+	widget_erase(widget, NULL);
+}
+
+void shapebox_get_xpen(widget_t widget, xpen_t* pxp)
+{
+	shapebox_delta_t* ptd = GETSHAPEBOXDELTA(widget);
+
+	XDK_ASSERT(ptd != NULL);
+
+	xmem_copy((void*)pxp, (void*)&(ptd->xp), sizeof(xpen_t));
 }

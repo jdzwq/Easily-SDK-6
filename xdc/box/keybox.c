@@ -34,8 +34,6 @@ typedef struct _keybox_delta_t{
 	int ca;
 	int bw, bh;
 	int org_x, org_y;
-
-	xfont_t xf;
 }keybox_delta_t;
 
 
@@ -208,8 +206,6 @@ int hand_keybox_create(widget_t widget, void* data)
 	ptd->bh = xs.h;
 
 	ptd->index = -1;
-
-	default_widget_xfont(&ptd->xf);
 
 	SETKEYBOXDELTA(widget, ptd);
 
@@ -390,13 +386,6 @@ void hand_keybox_size(widget_t widget, int code, const xsize_t* prs)
 	}
 }
 
-void hand_keybox_xfont(widget_t widget, const xfont_t* pxf)
-{
-	keybox_delta_t* ptd = GETKEYBOXDELTA(widget);
-
-	xmem_copy((void*)&ptd->xf, (void*)pxf, sizeof(xfont_t));
-}
-
 void hand_keybox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 {
 	keybox_delta_t* ptd = GETKEYBOXDELTA(widget);
@@ -439,13 +428,13 @@ void hand_keybox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	xr.w = ptd->bw;
 	xr.y = 0;
 	xr.h = ptd->bh;
-	(*ifv.pf_draw_text)(ifv.ctx, &ptd->xf, &xa, &xr, _T("×"), -1);
+	(*ifv.pf_draw_text)(ifv.ctx, &xa, &xr, _T("×"), -1);
 
 	xr.x = 0;
 	xr.w = ptd->bw;
 	xr.y = 0;
 	xr.h = ptd->bh;
-	(*ifv.pf_draw_text)(ifv.ctx, &ptd->xf, &xa, &xr, _T("Esc"), -1);
+	(*ifv.pf_draw_text)(ifv.ctx, &xa, &xr, _T("Esc"), -1);
 
 	for (i = 0; i < KEYBOX_COUNT; i++)
 	{
@@ -472,29 +461,29 @@ void hand_keybox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 			tk[0] = KEYBOX_SCA[i];
 
 		if (tk[0] == _T('\n'))
-			(*ifv.pf_draw_text)(ifv.ctx, &ptd->xf, &xa, &xr, _T("Ent"), -1);
+			(*ifv.pf_draw_text)(ifv.ctx, &xa, &xr, _T("Ent"), -1);
 		else if (tk[0] == _T('\b'))
-			(*ifv.pf_draw_text)(ifv.ctx, &ptd->xf, &xa, &xr, _T("CE"), -1);
+			(*ifv.pf_draw_text)(ifv.ctx, &xa, &xr, _T("CE"), -1);
 		else if (tk[0] == _T('\0'))
-			(*ifv.pf_draw_text)(ifv.ctx, &ptd->xf, &xa, &xr, _T("FN"), -1);
+			(*ifv.pf_draw_text)(ifv.ctx, &xa, &xr, _T("FN"), -1);
 		else if (tk[0] == 0x1)
-			(*ifv.pf_draw_text)(ifv.ctx, &ptd->xf, &xa, &xr, _T("↑"), -1);
+			(*ifv.pf_draw_text)(ifv.ctx, &xa, &xr, _T("↑"), -1);
 		else if (tk[0] == 0x3)
-			(*ifv.pf_draw_text)(ifv.ctx, &ptd->xf, &xa, &xr, _T("←"), -1);
+			(*ifv.pf_draw_text)(ifv.ctx, &xa, &xr, _T("←"), -1);
 		else if (tk[0] == _T('\a'))
-			(*ifv.pf_draw_text)(ifv.ctx, &ptd->xf, &xa, &xr, _T("复制"), -1);
+			(*ifv.pf_draw_text)(ifv.ctx, &xa, &xr, _T("复制"), -1);
 		else if (tk[0] == _T('\r'))
-			(*ifv.pf_draw_text)(ifv.ctx, &ptd->xf, &xa, &xr, _T("剪切"), -1);
+			(*ifv.pf_draw_text)(ifv.ctx, &xa, &xr, _T("剪切"), -1);
 		else if (tk[0] == _T('\f'))
-			(*ifv.pf_draw_text)(ifv.ctx, &ptd->xf, &xa, &xr, _T("粘贴"), -1);
+			(*ifv.pf_draw_text)(ifv.ctx, &xa, &xr, _T("粘贴"), -1);
 		else if (tk[0] == _T('\v'))
-			(*ifv.pf_draw_text)(ifv.ctx, &ptd->xf, &xa, &xr, _T("撤销"), -1);
+			(*ifv.pf_draw_text)(ifv.ctx, &xa, &xr, _T("撤销"), -1);
 		else if (tk[0] == 0x2)
-			(*ifv.pf_draw_text)(ifv.ctx, &ptd->xf, &xa, &xr, _T("↓"), -1);
+			(*ifv.pf_draw_text)(ifv.ctx, &xa, &xr, _T("↓"), -1);
 		else if (tk[0] == 0x4)
-			(*ifv.pf_draw_text)(ifv.ctx, &ptd->xf, &xa, &xr, _T("→"), -1);
+			(*ifv.pf_draw_text)(ifv.ctx, &xa, &xr, _T("→"), -1);
 		else
-			(*ifv.pf_draw_text)(ifv.ctx, &ptd->xf, &xa, &xr, tk, -1);
+			(*ifv.pf_draw_text)(ifv.ctx, &xa, &xr, tk, -1);
 	}
 
 	end_canvas_paint(canv, dc, pxr);
@@ -518,10 +507,6 @@ widget_t keybox_create(widget_t widget, dword_t style, const xrect_t* pxr)
 
 		EVENT_ON_LBUTTON_DOWN(hand_keybox_lbutton_down)
 		EVENT_ON_LBUTTON_UP(hand_keybox_lbutton_up)
-
-		EVENT_ON_XFONT(hand_keybox_xfont)
-
-		
 
 	EVENT_END_DISPATH
 

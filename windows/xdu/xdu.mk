@@ -10,7 +10,7 @@
 !include xdu.txt
 !endif
 
-ARCH = x64
+ARCH = x86
 MODULE = xdu
 
 INC_PATH = ../../include

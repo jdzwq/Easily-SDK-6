@@ -86,13 +86,13 @@ float pixel_metric(visual_t rdc)
 	return (pif->pf_pixel_metric)(rdc);
 }
 
-float font_metric(visual_t rdc, const xfont_t* pxf)
+float font_metric(visual_t rdc, const tchar_t* xf_size)
 {
 	if_context_t* pif;
 
 	pif = PROCESS_CONTEXT_INTERFACE;
 
-	return (pif->pf_font_metric)(rdc, pxf);
+	return (pif->pf_font_metric)(rdc, xf_size);
 }
 
 #ifdef XDU_SUPPORT_CONTEXT_PRINTER

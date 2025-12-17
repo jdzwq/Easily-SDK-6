@@ -40,9 +40,6 @@ typedef struct _memoctrl_delta_t{
 
 	int chs;
 	tchar_t pch[CHS_LEN + 1];
-
-	xfont_t xf;
-	xface_t xa;
 }memoctrl_delta_t;
 
 #define GETMEMOCTRLDELTA(ph) 	(memoctrl_delta_t*)widget_get_user_delta(ph)
@@ -138,9 +135,6 @@ int hand_memoctrl_create(widget_t widget, void* data)
 	ptd = (memoctrl_delta_t*)xmem_alloc(sizeof(memoctrl_delta_t));
 	xmem_zero((void*)ptd, sizeof(memoctrl_delta_t));
 
-	default_textor_xfont(&ptd->xf);
-	default_textor_xface(&ptd->xa);
-	
 	SETMEMOCTRLDELTA(widget, ptd);
 
 	ptd->textor.widget = widget;
@@ -151,9 +145,6 @@ int hand_memoctrl_create(widget_t widget, void* data)
 	ptd->textor.pf_set_text = _memoctrl_set_text;
 	ptd->textor.pf_get_paging = _memoctrl_get_paging;
 	ptd->textor.max_undo = 1024;
-
-	ptd->textor.pxf = &ptd->xf;
-	ptd->textor.pxa = &ptd->xa;
 
 	ptd->b_lock = 1;
 
@@ -707,20 +698,6 @@ void hand_memoctrl_menu_command(widget_t widget, int code, int cid, vword_t data
 	}
 }
 
-void hand_memoctrl_xfont(widget_t widget, const xfont_t* pxf)
-{
-	memoctrl_delta_t* ptd = GETMEMOCTRLDELTA(widget);
-
-	xmem_copy((void*)&ptd->xf, (void*)pxf, sizeof(xfont_t));
-}
-
-void hand_memoctrl_xface(widget_t widget, const xface_t* pxa)
-{
-	memoctrl_delta_t* ptd = GETMEMOCTRLDELTA(widget);
-
-	xmem_copy((void*)&ptd->xa, (void*)pxa, sizeof(xface_t));
-}
-
 void hand_memoctrl_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 {
 	memoctrl_delta_t* ptd = GETMEMOCTRLDELTA(widget);
@@ -739,7 +716,6 @@ widget_t memoctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* px
 {
 	if_dispatch_t ev = { 0 };
 	widget_t wt;
-	xface_t xa;
 
 	EVENT_BEGIN_DISPATH(&ev)
 
@@ -768,17 +744,10 @@ widget_t memoctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* px
 		EVENT_ON_SET_FOCUS(hand_memoctrl_set_focus)
 		EVENT_ON_KILL_FOCUS(hand_memoctrl_kill_focus)
 
-		EVENT_ON_XFONT(hand_memoctrl_xfont)
-		EVENT_ON_XFACE(hand_memoctrl_xface)
-
 	EVENT_END_DISPATH
 
 	wt = widget_create(wname, wstyle, pxr, wparent, &ev);
 	if (!wt) return (widget_t)0;
-
-	default_xface(&xa);
-	xscpy(xa.text_wrap, GDI_ATTR_TEXT_WRAP_WORDBREAK);
-	widget_noti_xface(wt, &xa);
 
 	return wt;
 }

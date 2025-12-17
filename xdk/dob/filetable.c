@@ -24,6 +24,18 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
 LICENSE.GPL3 for more details.
 ***********************************************************************/
 
+/**********************************************************************
+file table: { {head area: one page} {table area: one more pages} }
+head area: { {file guid: 36 bytes}
+			{page size: 2 bytes}
+			{map bits: 2 bytes} 
+			{block size: 2 bytes} 
+			{file maps: 2 bytes}
+			{file root: 4 bytes} }
+table area: { {map area: one page} {data area: (pagesize / map bits) * block size} 
+			{ {map area} {data area} }
+			{ ... } }
+***********************************************************************/
 #include "filetable.h"
 
 #include "../xdkstd.h"
@@ -32,72 +44,34 @@ LICENSE.GPL3 for more details.
 
 #define FILETABLE_MAPBITS		1
 
-#define FILETABLE_ALLOCED		0x01
-#define FILETABLE_RELEASED		0x00
+#define FILETABLE_ALLOCED_BIT	1
+#define FILETABLE_UNALLOCED_BIT	0
+
+#define FILETABLE_UNALLOCED_BYTE	0x00
 
 #define IS_FILETABLE_MAPBITS(n)		((n == 1 || n == 2 || n == 4 || n == 8)? 1 : 0)
-#define IS_FILETABLE_PAGESIZE(n)	((n == 4096 || n == 8192)? 1 : 0)
-#define IS_FILETABLE_BLOCKSIZE(n)	((n == 512 || n == 1024 || n == 2048 || n == 4096)? 1 : 0)
-
-typedef struct _block_map_t{
-	int tag; //map is loaded
-	int pos; //map index
-	int inc; //page counter
-	map_t map;
-}block_map_t;
+#define IS_FILETABLE_PAGESIZE(n)	((n == 4096 || n == 8192 || n == 16384)? 1 : 0)
+#define IS_FILETABLE_BLOCKSIZE(n)	((n == 64 || n == 128 || n == 256 || n == 512)? 1 : 0)
 
 typedef struct _file_table_context{
 	link_t lk;
 
 	xhand_t block;
-	spinlock_t slock;
 	dword_t mask;
 
 	tchar_t file_guid[NUID_TOKEN_SIZE + 1];
 
-	dword_t file_root;
-	sword_t page_size;
-	sword_t mask_bits;
-	sword_t block_size;
-	sword_t file_maps;
-
-	block_map_t* block_table;
+	dword_t page_size;
+	dword_t mask_bits;
+	dword_t block_size;
+	dword_t file_maps;
+	lword_t file_root;
 }file_table_context;
 
 #define PageTableFromLink(p) TypePtrFromLink(file_table_context,p)
 
 #define BLOCKS_PERMAP(pagesize, maskbits)	(pagesize * (8 / maskbits))
 
-static void _alloc_block_map(block_map_t* pmt, int page_size, int mask_bits)
-{
-	pmt->tag = 0; //map have not persisted
-	pmt->inc = BLOCKS_PERMAP(page_size, mask_bits);
-	pmt->map = map_alloc(pmt->inc, mask_bits);
-}
-
-static bool_t _init_block_map(block_map_t* pmt, int block_size, bool_t write)
-{
-	int n;
-
-	//blocks used for map
-	n = map_size(pmt->map) / block_size;
-	pmt->tag = n;
-	pmt->pos = n;
-	while (n--)
-	{
-		if (write)
-		{
-			map_set_bit(pmt->map, n, FILETABLE_ALLOCED);
-		}
-		else
-		{
-			if (map_get_bit(pmt->map, n) != FILETABLE_ALLOCED)
-				return 0;
-		}		
-	}
-
-	return 1;
-}
 
 static bool_t _flush_file_head(file_table_context* ppt, bool_t b_save)
 {
@@ -110,11 +84,11 @@ static bool_t _flush_file_head(file_table_context* ppt, bool_t b_save)
 #else
 		mbs_to_utf8(ppt->file_guid, NUID_TOKEN_SIZE, head, NUID_TOKEN_SIZE);
 #endif
-		PUT_DWORD_LOC(head, NUID_TOKEN_SIZE, ppt->file_root);
-		PUT_SWORD_LOC(head, (NUID_TOKEN_SIZE + 4), ppt->page_size);
-		PUT_SWORD_LOC(head, (NUID_TOKEN_SIZE + 6), ppt->mask_bits);
-		PUT_SWORD_LOC(head, (NUID_TOKEN_SIZE + 8), ppt->block_size);
-		PUT_SWORD_LOC(head, (NUID_TOKEN_SIZE + 10), ppt->file_maps);
+		PUT_DWORD_LOC(head, (NUID_TOKEN_SIZE), ppt->page_size);
+		PUT_DWORD_LOC(head, (NUID_TOKEN_SIZE + 4), ppt->mask_bits);
+		PUT_DWORD_LOC(head, (NUID_TOKEN_SIZE + 8), ppt->block_size);
+		PUT_DWORD_LOC(head, (NUID_TOKEN_SIZE + 12), ppt->file_maps);
+		PUT_LWORD_LOC(head, (NUID_TOKEN_SIZE + 16), ppt->file_root);
 
 		return xuncf_write_file_range(ppt->block, 0, 0, head, ppt->page_size);
 	}
@@ -128,216 +102,111 @@ static bool_t _flush_file_head(file_table_context* ppt, bool_t b_save)
 #else
 		utf8_to_mbs(head, NUID_TOKEN_SIZE, ppt->file_guid, NUID_TOKEN_SIZE);
 #endif
-		ppt->file_root = GET_DWORD_LOC(head, NUID_TOKEN_SIZE);
-		ppt->page_size = GET_SWORD_LOC(head, (NUID_TOKEN_SIZE + 4));
-		ppt->mask_bits = GET_SWORD_LOC(head, (NUID_TOKEN_SIZE + 6));
-		ppt->block_size = GET_SWORD_LOC(head, (NUID_TOKEN_SIZE + 8));
-		ppt->file_maps = GET_SWORD_LOC(head, (NUID_TOKEN_SIZE + 10));
+		ppt->page_size = GET_DWORD_LOC(head, (NUID_TOKEN_SIZE));
+		ppt->mask_bits = GET_DWORD_LOC(head, (NUID_TOKEN_SIZE + 4));
+		ppt->block_size = GET_DWORD_LOC(head, (NUID_TOKEN_SIZE + 8));
+		ppt->file_maps = GET_DWORD_LOC(head, (NUID_TOKEN_SIZE + 12));
+		ppt->file_root = GET_LWORD_LOC(head, (NUID_TOKEN_SIZE + 16));
 
-		return (IS_FILETABLE_PAGESIZE(ppt->page_size) &&  IS_FILETABLE_MAPBITS(ppt->mask_bits) && IS_FILETABLE_BLOCKSIZE(ppt->block_size)) ? 1 : 0;
+		return (IS_FILETABLE_PAGESIZE(ppt->page_size) 
+			&&  IS_FILETABLE_MAPBITS(ppt->mask_bits) 
+			&& IS_FILETABLE_BLOCKSIZE(ppt->block_size)) ? bool_true : bool_false;
 	}
 }
 
-static res_file_t _lock_file_map(file_table_context* ppt, int map_ind)
+static res_file_t _lock_file_table_map(file_table_context* ppt, dword_t map_ind, map_t map)
 {
+	dword_t map_bytes, map_blocks;
 	lword_t ll;
 	dword_t hoff, loff;
-	void* buff;
-	sword_t bytes;
-	int j;
-	dword_t incr;
 	res_file_t mh = 0;
+	void* buff;
 
-	XDK_ASSERT(map_ind >= 0 && map_ind < ppt->file_maps);
+	//if map_ind equal file table maps count, the file table to be expanding
+	XDK_ASSERT(map_ind >= 0 && map_ind <= ppt->file_maps);
 
-	//skip the file table head (one-page size)
-	incr = ppt->page_size / ppt->block_size;
-	for (j = 0; j < map_ind; j++)
-	{
-		incr += ppt->block_table[j].inc;
-	}
+	map_blocks = BLOCKS_PERMAP(ppt->page_size, ppt->mask_bits);
+	map_bytes = map_need_size(map_blocks, ppt->mask_bits);
 
-	ll = (lword_t)incr * (lword_t)(ppt->block_size);
+	//the file table map position is: head bytes + map index * (map bytes + blocks bytes)
+	ll = ppt->page_size + map_ind * (map_bytes + map_blocks * ppt->block_size);
 	hoff = GETHDWORD(ll);
 	loff = GETLDWORD(ll);
 
-	if (ppt->slock)
+	buff = xuncf_lock_file_range(ppt->block, hoff, loff, map_bytes, bool_true, &mh);
+	if(!buff)
 	{
-		while (!enter_spinlock(ppt->slock, map_ind, 0))
-		{
-			thread_yield();
-		}
-	}
-
-	bytes = map_size(ppt->block_table[map_ind].map);
-
-	if (ppt->mask & FILETABLE_DIRECT)
-	{
-		buff = xuncf_lock_file_range(ppt->block, hoff, loff, bytes, 1, &mh);
-	}
-	else
-	{
-		buff = xmem_alloc(bytes);
-		xuncf_read_file_range(ppt->block, hoff, loff, (byte_t*)buff, bytes);
-		mh = (res_file_t)0;
-	}
-
-	if (!buff)
-	{
-		if (ppt->slock)
-		{
-			leave_spinlock(ppt->slock, map_ind, 0);
-		}
-
 		return INVALID_FILE;
 	}
 
-	map_attach(ppt->block_table[map_ind].map, buff);
+	//init the new map alloced
+	if (map_ind == ppt->file_maps)
+	{
+		xmem_set((void *)buff, FILETABLE_UNALLOCED_BYTE, map_bytes);
+	}
+
+	map_attach(map, buff);
 
 	return mh;
 }
 
-static void _unlock_file_map(file_table_context* ppt, int map_ind, res_file_t mh)
+static void _unlock_file_table_map(file_table_context* ppt, dword_t map_ind, res_file_t mh, map_t map)
 {
+	dword_t map_bytes, map_blocks;
 	lword_t ll;
 	dword_t hoff, loff;
 	void* buff;
-	sword_t bytes;
-	int j;
-	dword_t incr;
 
-	XDK_ASSERT(map_ind >= 0 && map_ind < ppt->file_maps);
+	map_blocks = BLOCKS_PERMAP(ppt->page_size, ppt->mask_bits);
+	map_bytes = map_need_size(map_blocks, ppt->mask_bits);
 
-	//skip the file table head (one-page size)
-	incr = ppt->page_size / ppt->block_size;
-	for (j = 0; j < map_ind; j++)
-	{
-		incr += ppt->block_table[j].inc;
-	}
-
-	ll = (lword_t)incr * (lword_t)(ppt->block_size);
+	//the file table map position is: head bytes + map index * (map bytes + blocks bytes)
+	ll = ppt->page_size + map_ind * (map_bytes + map_blocks * ppt->block_size);
 	hoff = GETHDWORD(ll);
 	loff = GETLDWORD(ll);
 
-	bytes = map_size(ppt->block_table[map_ind].map);
-	buff = map_detach(ppt->block_table[map_ind].map);
-
+	buff = map_detach(map);
 	XDK_ASSERT(buff != NULL);
 
-	if (ppt->mask & FILETABLE_DIRECT)
-	{
-		xuncf_unlock_file_range(ppt->block, hoff, loff, bytes, mh, buff);
-	}
-	else
-	{
-		xuncf_write_file_range(ppt->block, hoff, loff, (byte_t*)buff, bytes);
-		xmem_free(buff);
-	}
-
-	if (ppt->slock)
-	{
-		leave_spinlock(ppt->slock, map_ind, 0);
-	}
+	xuncf_unlock_file_range(ppt->block, hoff, loff, map_bytes, mh, buff);
 }
 
-static bool_t _lock_file_table_block(file_table_context* ppt, int map_ind, int map_pos, dword_t size, bool_t write, res_file_t* pmh, void** pbuf)
+static void* _lock_file_table_block(file_table_context* ppt, dword_t map_ind, dword_t map_pos, dword_t size, bool_t write, res_file_t* pmh)
 {
+	dword_t map_bytes, map_blocks;
 	lword_t ll;
 	dword_t hoff, loff;
-	dword_t incr;
-	int j;
-
+	bool_t b_write;
 	void* buff;
-	bool_t rt;
 
-	//skip the file table head (one-page size)
-	incr = ppt->page_size / ppt->block_size;
-	for (j = 0; j < map_ind; j++)
-	{
-		incr += ppt->block_table[j].inc;
-	}
+	map_blocks = BLOCKS_PERMAP(ppt->page_size, ppt->mask_bits);
+	map_bytes = map_need_size(map_blocks, ppt->mask_bits);
 
-	ll = (lword_t)(incr + map_pos) * (lword_t)(ppt->block_size);
+	//the file table block position is: head bytes + map index * (map bytes + blocks bytes) + map bytes + block index * blocks bytes
+	ll = ppt->page_size + map_ind * (map_bytes + map_blocks * ppt->block_size) + (map_bytes + map_pos * ppt->block_size);
 	hoff = GETHDWORD(ll);
 	loff = GETLDWORD(ll);
 
-	if (ppt->slock)
-	{
-		while (!enter_spinlock(ppt->slock, map_ind, map_pos))
-		{
-			thread_yield();
-		}
-	}
-
-	if (ppt->mask & FILETABLE_DIRECT)
-	{
-		*pbuf = xuncf_lock_file_range(ppt->block, hoff, loff, size, write, pmh);
-	}
-	else
-	{
-		buff = xmem_alloc(size);
-
-		if (write)
-		{
-			rt = xuncf_write_file_range(ppt->block, hoff, loff, (byte_t*)buff, size);
-		}
-		else
-		{
-			rt = xuncf_read_file_range(ppt->block, hoff, loff, (byte_t*)buff, size);
-		}
-		if (!rt)
-		{
-			xmem_free(buff);
-			buff = NULL;
-		}
-
-		*pbuf = buff;
-	}
-
-	return (*pbuf == NULL) ? 0 : 1;
+	return xuncf_lock_file_range(ppt->block, hoff, loff, size, write, pmh);
 }
 
-static bool_t _unlock_file_table_block(file_table_context* ppt, int map_ind, int map_pos, dword_t size, bool_t write, res_file_t mh, void* buf)
+static void _unlock_file_table_block(file_table_context* ppt, dword_t map_ind, dword_t map_pos, dword_t size, bool_t write, res_file_t mh, void* buf)
 {
+	dword_t map_bytes, map_blocks;
 	lword_t ll;
 	dword_t hoff, loff;
-	dword_t incr;
-	int j;
+	bool_t b_write;
+	void* buff;
 
-	bool_t rt;
+	map_blocks = BLOCKS_PERMAP(ppt->page_size, ppt->mask_bits);
+	map_bytes = map_need_size(map_blocks, ppt->mask_bits);
 
-	//skip the file table head (one-page size)
-	incr = ppt->page_size / ppt->block_size;
-	for (j = 0; j < map_ind; j++)
-	{
-		incr += ppt->block_table[j].inc;
-	}
-
-	ll = (lword_t)(incr + map_pos) * (lword_t)(ppt->block_size);
+	//the file table block position is: head bytes + map index * (map bytes + blocks bytes) + map bytes + block index * blocks bytes
+	ll = ppt->page_size + map_ind * (map_bytes + map_blocks * ppt->block_size) + (map_bytes + map_pos * ppt->block_size);
 	hoff = GETHDWORD(ll);
 	loff = GETLDWORD(ll);
 
-	if (ppt->mask & FILETABLE_DIRECT)
-	{
-		xuncf_unlock_file_range(ppt->block, hoff, loff, size, mh, buf);
-		rt = 1;
-	}
-	else
-	{
-		if (write)
-			rt = xuncf_write_file_range(ppt->block, hoff, loff, (byte_t*)buf, size);
-		else
-			rt = 1;
-
-		xmem_free(buf);
-	}
-
-	if (ppt->slock)
-	{
-		leave_spinlock(ppt->slock, map_ind, map_pos);
-	}
-
-	return rt;
+	xuncf_unlock_file_range(ppt->block, hoff, loff, size, mh, buf);
 }
 
 /************************************************************************************/
@@ -346,13 +215,15 @@ link_t_ptr create_file_table(const tchar_t* fname, int block, dword_t mask)
 {
 	file_table_context* ppt = NULL;
 
+	lword_t ll;
 	dword_t dwh = 0,dwl = 0;
-	int i;
+	dword_t i, map_blocks;
 
 	lword_t tms;
 	nuid_t nuid = { 0 };
 
-	res_file_t mh;
+	res_file_t mh = 0;
+	map_t map = NULL;
 
 	TRY_CATCH;
 
@@ -366,123 +237,75 @@ link_t_ptr create_file_table(const tchar_t* fname, int block, dword_t mask)
 	}
 
 	xuncf_file_size(ppt->block, &dwh, &dwl);
+	ll = MAKELWORD(dwl, dwh);
 
-	if (dwl && dwl < PAGE_SIZE)
+	if (ll && ll < (lword_t)PAGE_SIZE)
 	{
 		raise_user_error(_T("open_file_table"), _T("invalid file size"));
 	}
 
-	if (dwl || dwh)
-	{
+	ppt->mask = mask;
+
+	if (ll)
+	{	//open table file
 		//load file table header
 		if (!_flush_file_head(ppt, 0))
 		{
 			raise_user_error(_T("open_file_table"), _T("invalid file header"));
 		}
 
-		ppt->mask = mask;
-
-		if (ppt->mask & FILETABLE_SHARE)
-		{
-			ppt->slock = alloc_spinlock(ppt->file_guid, BLOCKS_PERMAP(ppt->page_size, ppt->mask_bits));
-			if (!ppt->slock)
-			{
-				raise_user_error(_T("open_file_table"), _T("create lock table failed"));
-			}
-		}
-
-		ppt->block_table = (block_map_t*)xmem_alloc((ppt->file_maps) * sizeof(block_map_t));
-		
+		map_blocks = BLOCKS_PERMAP(ppt->page_size, ppt->mask_bits);
+		map = map_alloc(map_blocks, ppt->mask_bits);
+		//test file table maps
 		for (i = 0; i < ppt->file_maps; i++)
 		{
-			_alloc_block_map(&(ppt->block_table[i]), ppt->page_size, ppt->mask_bits);
-
-			if ((mh = _lock_file_map(ppt, i)) == INVALID_FILE)
+			mh = _lock_file_table_map(ppt, i, map);
+			if(mh == INVALID_FILE)
 			{
 				raise_user_error(_T("open_file_table"), _T("load file map failed"));
 			}
 
-			if (!_init_block_map(&(ppt->block_table[i]), ppt->block_size, 0))
-			{
-				raise_user_error(_T("open_file_table"), _T("read file map failed"));
-			}
-
-			_unlock_file_map(ppt, i, mh);
+			_unlock_file_table_map(ppt, i, mh, map);
 		}
+
+		map_free(map);
+		map = NULL;
 	}
 	else
 	{
+		//create table file
 		if (!IS_FILETABLE_BLOCKSIZE(block))
 		{
 			raise_user_error(_T("open_file_table"), _T("invalid block size"));
 		}
 
 		//set default header
-		ppt->file_root = 0;
 		ppt->page_size = PAGE_SIZE;
 		ppt->mask_bits = FILETABLE_MAPBITS;
 		ppt->block_size = block;
-		ppt->file_maps = 1;
+		ppt->file_maps = 0;
+		ppt->file_root = INVALID_INDEX;
 
 		tms = get_timestamp();
 		nuid_from_timestamp(&nuid, tms);
-		nuid_format_string(&nuid, ppt->file_guid);
-
-		ppt->mask = mask;
+		nuid_format_hash(&nuid, ppt->file_guid);
 
 		//save file table header
 		if (!_flush_file_head(ppt, 1))
 		{
 			raise_user_error(_T("open_file_table"), _T("save file header failed"));
 		}
-
-		if (ppt->mask & FILETABLE_SHARE)
-		{
-			ppt->slock = alloc_spinlock(ppt->file_guid, BLOCKS_PERMAP(ppt->page_size, ppt->mask_bits));
-			if (!ppt->slock)
-			{
-				raise_user_error(_T("open_file_table"), _T("create lock table failed"));
-			}
-		}
-
-		ppt->block_table = (block_map_t*)xmem_alloc((ppt->file_maps) * sizeof(block_map_t));
-		_alloc_block_map(&(ppt->block_table[0]), ppt->page_size, ppt->mask_bits);
-
-		if ((mh = _lock_file_map(ppt, 0)) == INVALID_FILE)
-		{
-			raise_user_error(_T("open_file_table"), _T("load file map failed"));
-		}
-
-		if(!_init_block_map(&(ppt->block_table[0]), ppt->block_size, 1))
-		{
-			raise_user_error(_T("open_file_table"), _T("write file map failed"));
-		}
-
-		_unlock_file_map(ppt, 0, mh);
 	}
 
 	END_CATCH;
 
 	return &ppt->lk;
 ONERROR:
+	if(map)
+		map_free(map);
 
 	if (ppt->block)
 		xuncf_close_file(ppt->block);
-
-	if (ppt->slock)
-		free_spinlock(ppt->slock);
-
-	if (ppt->block_table)
-	{
-		for (i = 0; i < ppt->file_maps; i++)
-		{
-			if (ppt->block_table[i].map)
-			{
-				map_free(ppt->block_table[i].map);
-			}
-		}
-		xmem_free(ppt->block_table);
-	}
 
 	if (ppt)
 		xmem_free(ppt);
@@ -490,102 +313,131 @@ ONERROR:
 	return NULL;
 }
 
-void destroy_file_table(link_t_ptr pt)
+void destroy_file_table(link_t_ptr ptr)
 {
-	file_table_context* ppt = PageTableFromLink(pt);
+	file_table_context* ppt = PageTableFromLink(ptr);
 	int i;
 
-	XDK_ASSERT(pt && pt->tag == lkFileTable);
+	XDK_ASSERT(ptr && ptr->tag == lkFileTable);
 
 	xuncf_close_file(ppt->block);
-
-	if (ppt->slock)
-	{
-		free_spinlock(ppt->slock);
-	}
-
-	for (i = 0; i < ppt->file_maps; i++)
-	{
-		map_free(ppt->block_table[i].map);
-	}
-
-	xmem_free(ppt->block_table);
 
 	xmem_free(ppt);
 }
 
-int get_file_table_block(link_t_ptr pt)
+int get_file_table_page_size(link_t_ptr ptr)
 {
-	file_table_context* ppt = PageTableFromLink(pt);
+	file_table_context* ppt = PageTableFromLink(ptr);
+
+	return ppt->page_size;
+}
+
+int get_file_table_block_size(link_t_ptr ptr)
+{
+	file_table_context* ppt = PageTableFromLink(ptr);
 
 	return ppt->block_size;
 }
 
-dword_t get_file_table_mask(link_t_ptr pt)
+dword_t get_file_table_mask(link_t_ptr ptr)
 {
-	file_table_context* ppt = PageTableFromLink(pt);
+	file_table_context* ppt = PageTableFromLink(ptr);
 
 	return ppt->mask;
 }
 
-bool_t set_file_table_root(link_t_ptr pt, dword_t pos)
+bool_t set_file_table_root(link_t_ptr ptr, lword_t bid)
 {
-	file_table_context* ppt = PageTableFromLink(pt);
+	file_table_context* ppt = PageTableFromLink(ptr);
 
-	if (pos)
+	if (bid != INVALID_INDEX)
 	{
-		if (!get_file_table_block_alloced(pt, pos))
-			return 0;
+		if (!get_file_table_block_alloced(ptr, bid))
+			return bool_false;
 	}
 
-	ppt->file_root = pos;
+	ppt->file_root = bid;
 
 	return _flush_file_head(ppt, 1);
 }
 
-dword_t get_file_table_root(link_t_ptr pt)
+lword_t get_file_table_root(link_t_ptr ptr)
 {
-	file_table_context* ppt = PageTableFromLink(pt);
+	file_table_context* ppt = PageTableFromLink(ptr);
 
-	if (ppt->file_root)
+	if (ppt->file_root != INVALID_INDEX)
 	{
-		if (!get_file_table_block_alloced(pt, ppt->file_root))
-			return 0;
+		if (!get_file_table_block_alloced(ptr, ppt->file_root))
+			return INVALID_INDEX;
 	}
 
 	return ppt->file_root;
 }
 
-dword_t alloc_file_table_block(link_t_ptr pt, dword_t size)
+bool_t get_file_table_block_alloced(link_t_ptr ptr, lword_t bid)
 {
-	file_table_context* ppt = PageTableFromLink(pt);
-	int k, n, pos = 0;
-	sword_t i;
+	file_table_context* ppt = PageTableFromLink(ptr);
+	dword_t ind, pos;
+	dword_t map_blocks;
+	res_file_t mh;
+	map_t map;
+	bool_t rt;
+
+	XDK_ASSERT(ptr && ptr->tag == lkFileTable);
+	XDK_ASSERT(bid != INVALID_INDEX);
+
+	ind = GETHDWORD(bid);
+	pos = GETLDWORD(bid);
+
+	map_blocks = BLOCKS_PERMAP(ppt->page_size, ppt->mask_bits);
+	XDK_ASSERT(ind < ppt->file_maps && pos < map_blocks);
+
+	map = map_alloc(map_blocks, ppt->mask_bits);
+
+	mh = _lock_file_table_map(ppt, ind, map);
+	XDK_ASSERT(mh != INVALID_FILE);
+
+	rt = (map_get_bit(map, pos) == FILETABLE_ALLOCED_BIT)? bool_true : bool_false;
+
+	_unlock_file_table_map(ppt, ind, mh, map);
+
+	map_free(map);
+
+	return rt;
+}
+
+lword_t alloc_file_table_block(link_t_ptr ptr, dword_t size)
+{
+	file_table_context* ppt = PageTableFromLink(ptr);
+	dword_t k, n, ind, pos = 0;
 	bool_t tag = 0;
 	res_file_t mh;
+	map_t map = NULL;
+	dword_t map_blocks;
 
-	XDK_ASSERT(pt && pt->tag == lkFileTable);
+	XDK_ASSERT(ptr && ptr->tag == lkFileTable);
+
+	TRY_CATCH;
 
 	n = size / ppt->block_size;
 	if (size % ppt->block_size)
 		n++;
 
-	XDK_ASSERT(n > 0);
+	map_blocks = BLOCKS_PERMAP(ppt->page_size, ppt->mask_bits);
+	XDK_ASSERT(n <= map_blocks);
 
-	for (i = 0; i < ppt->file_maps; i++)
+	map = map_alloc(map_blocks, ppt->mask_bits);
+
+	for (ind = 0; ind < ppt->file_maps; ind++)
 	{
-		if ((mh = _lock_file_map(ppt, i)) == INVALID_FILE)
+		if ((mh = _lock_file_table_map(ppt, ind, map)) == INVALID_FILE)
 			continue;
 		
-		XDK_ASSERT(n <= (ppt->block_table[i].inc - ppt->block_table[i].tag));
-
-		//skip map-used blocks
-		pos = (n > 1) ? ppt->block_table[i].pos : ppt->block_table[i].tag;
-
+		pos = 0;
 		while (n)
 		{
-			pos = map_find_bit(ppt->block_table[i].map, pos, FILETABLE_RELEASED);
-			if (pos == C_ERR)
+			pos = map_find_bit(map, pos, FILETABLE_UNALLOCED_BIT);
+			if (pos == INVALID_BLOCK)
 				break;
 
 			if (n == 1)
@@ -594,8 +446,8 @@ dword_t alloc_file_table_block(link_t_ptr pt, dword_t size)
 				break;
 			}
 
-			k = map_test_bit(ppt->block_table[i].map, pos, FILETABLE_RELEASED, n);
-			if (k == C_ERR)
+			k = map_test_bit(map, pos, FILETABLE_UNALLOCED_BIT, n);
+			if (k == INVALID_BLOCK)
 				break;
 
 			if (k == n)
@@ -607,158 +459,276 @@ dword_t alloc_file_table_block(link_t_ptr pt, dword_t size)
 			pos += (k + 1);
 		}
 
-		_unlock_file_map(ppt, i, mh);
+		if(tag)
+		{
+			while (n--)
+			{
+				map_set_bit(map, pos + n, FILETABLE_ALLOCED_BIT);
+			}
+		}
+
+		_unlock_file_table_map(ppt, ind, mh, map);
 
 		if (tag) break;
 	}
 
-	if (i == ppt->file_maps)
+	if (ind == ppt->file_maps)
 	{
-		ppt->file_maps++;
-		ppt->block_table = (block_map_t*)xmem_realloc(ppt->block_table, (ppt->file_maps) * sizeof(block_map_t));
-		_alloc_block_map(&(ppt->block_table[i]), ppt->page_size, ppt->mask_bits);
-
-		mh = _lock_file_map(ppt, i);
+		//expand file table map
+		mh = _lock_file_table_map(ppt, ind, map);
 		XDK_ASSERT(mh != INVALID_FILE);
 
-		_init_block_map(&(ppt->block_table[i]), ppt->block_size, 1);
+		ppt->file_maps++;
+		
+		pos = 0;
+		while (n--)
+		{
+			map_set_bit(map, pos + n, FILETABLE_ALLOCED_BIT);
+		}
 
-		_unlock_file_map(ppt, i, mh);
-
-		pos = ppt->block_table[i].pos;
+		_unlock_file_table_map(ppt, ind, mh, map);
 
 		if (!_flush_file_head(ppt, 1))
-			return 0;
+		{
+			raise_user_error(_T("alloc_file_table_block"), _T("save file header failed"));
+		}
 	}
 
-	XDK_ASSERT(pos > 0);
+	map_free(map);
+	map = NULL;
 
-	//rotate the map pos
-	ppt->block_table[i].pos = (pos + n) % (ppt->block_table[i].inc);
-	if (ppt->block_table[i].pos == 0)
-	{
-		ppt->block_table[i].pos = ppt->block_table[i].tag;
-	}
+	END_CATCH;
 
-	mh = _lock_file_map(ppt, i);
-	XDK_ASSERT(mh != INVALID_FILE);
+	return MAKELWORD(pos, ind);
+ONERROR:
 
-	while (n--)
-	{
-		map_set_bit(ppt->block_table[i].map, pos + n, FILETABLE_ALLOCED);
-	}
+	if(map) map_free(map);
 
-	_unlock_file_map(ppt, i, mh);
-
-	return (dword_t)((pos & 0xFFFF) | (i << 16));
+	return INVALID_INDEX;
 }
 
-void free_file_table_block(link_t_ptr pt, dword_t pos, dword_t size)
+void free_file_table_block(link_t_ptr ptr, lword_t bid, dword_t size)
 {
-	file_table_context* ppt = PageTableFromLink(pt);
-	int n;
-	sword_t i;
+	file_table_context* ppt = PageTableFromLink(ptr);
+	dword_t n, map_blocks;
+	dword_t ind, pos;
 	res_file_t mh;
+	map_t map;
+	byte_t bit;
 
-	XDK_ASSERT(pt && pt->tag == lkFileTable);
+	XDK_ASSERT(ptr && ptr->tag == lkFileTable);
 
-	i = (sword_t)((pos & 0xFFFF0000) >> 16);
-	pos &= 0x0000FFFF;
+	ind = GETHDWORD(bid);
+	pos = GETLDWORD(bid);
 
-	XDK_ASSERT(pos >= ppt->block_table[i].tag && i < ppt->file_maps);
+	map_blocks = BLOCKS_PERMAP(ppt->page_size, ppt->mask_bits);
+	XDK_ASSERT(pos < map_blocks && ind < ppt->file_maps);
 
 	n = size / ppt->block_size;
 	if (size % ppt->block_size)
 		n++;
 
-	mh = _lock_file_map(ppt, i);
+	map = map_alloc(map_blocks, ppt->mask_bits);
+	mh = _lock_file_table_map(ppt, ind, map);
 	XDK_ASSERT(mh != INVALID_FILE);
 
 	while (n--)
 	{
-		XDK_ASSERT(map_get_bit(ppt->block_table[i].map, pos + n) != FILETABLE_RELEASED);
+		bit = map_get_bit(map, pos + n);
+		XDK_ASSERT(bit != FILETABLE_UNALLOCED_BIT);
 		
-		map_set_bit(ppt->block_table[i].map, pos + n, FILETABLE_RELEASED);
+		map_set_bit(map, pos + n, FILETABLE_UNALLOCED_BIT);
 	}
 
-	//cache the map pos
-	ppt->block_table[i].pos = pos;
+	_unlock_file_table_map(ppt, ind, mh, map);
 
-	_unlock_file_map(ppt, i, mh);
+	map_free(map);
 }
 
-bool_t get_file_table_block_alloced(link_t_ptr pt, dword_t pos)
+void* lock_file_table_block(link_t_ptr ptr, lword_t bid, dword_t size, bool_t write, res_file_t* pmh)
 {
-	file_table_context* ppt = PageTableFromLink(pt);
-	sword_t i;
-	bool_t rt;
-	res_file_t mh;
+	file_table_context* ppt = PageTableFromLink(ptr);
+	dword_t ind, pos;
 
-	XDK_ASSERT(pt && pt->tag == lkFileTable);
+	XDK_ASSERT(ptr && ptr->tag == lkFileTable);
 
-	i = (sword_t)((pos & 0xFFFF0000) >> 16);
-	pos &= 0x0000FFFF;
+	ind = GETHDWORD(bid);
+	pos = GETLDWORD(bid);
 
-	XDK_ASSERT(pos >= ppt->block_table[i].tag && i < ppt->file_maps);
-
-	mh = _lock_file_map(ppt, i);
-	XDK_ASSERT(mh != INVALID_FILE);
-
-	rt = (map_get_bit(ppt->block_table[i].map, pos) == FILETABLE_RELEASED)? 0 : 1;
-
-	_unlock_file_map(ppt, i, mh);
-
-	return rt;
+	return _lock_file_table_block(ppt, ind, pos, size, write, pmh);
 }
 
-bool_t lock_file_table_block(link_t_ptr pt, dword_t pos, dword_t size, bool_t write, res_file_t* pmh, void** pbuf)
+void unlock_file_table_block(link_t_ptr ptr, lword_t bid, dword_t size, bool_t write, res_file_t mh, void* buf)
 {
-	file_table_context* ppt = PageTableFromLink(pt);
-	int i, j;
+	file_table_context* ppt = PageTableFromLink(ptr);
+	dword_t ind, pos;
+
+	XDK_ASSERT(ptr && ptr->tag == lkFileTable);
+
+	ind = GETHDWORD(bid);
+	pos = GETLDWORD(bid);
+
+	_unlock_file_table_block(ppt, ind, pos, size, write, mh, buf);
+}
+
+void trunc_file_table(link_t_ptr ptr)
+{
+	file_table_context* ppt = PageTableFromLink(ptr);
+	dword_t ind, pos = 0;
+	bool_t tag = 0;
 	res_file_t mh;
+	map_t map = NULL;
+	dword_t map_blocks, map_bytes;
+	lword_t ll;
+	dword_t hoff, loff;
 
-	XDK_ASSERT(pt && pt->tag == lkFileTable);
+	XDK_ASSERT(ptr && ptr->tag == lkFileTable);
 
-	i = (int)((pos & 0xFFFF0000) >> 16);
-	j = (int)(pos & 0x0000FFFF);
+	TRY_CATCH;
 
-	XDK_ASSERT(j >= ppt->block_table[i].tag && i < ppt->file_maps);
-	XDK_ASSERT((ppt->block_table[i].tag) != 0);
+	map_blocks = BLOCKS_PERMAP(ppt->page_size, ppt->mask_bits);
+	map_bytes = map_need_size(map_blocks, ppt->mask_bits);
 
-#ifdef XDK_SUPPORT_TEST
-	mh = _lock_file_map(ppt, i);
-	XDK_ASSERT(mh != INVALID_FILE);
-	
-	XDK_ASSERT(map_get_bit(ppt->block_table[i].map, j) != FILETABLE_RELEASED);
+	map = map_alloc(map_blocks, ppt->mask_bits);
 
-	_unlock_file_map(ppt, i, mh);
+	for (ind = ppt->file_maps - 1; (int)ind >= 0; ind--)
+	{
+		if ((mh = _lock_file_table_map(ppt, ind, map)) == INVALID_FILE)
+			break;
+		
+		pos = map_blocks;
+		while (pos--)
+		{
+			if(FILETABLE_UNALLOCED_BIT != map_get_bit(map, pos))
+				break;
+		}
+		pos ++;
+
+		//trunc file table blocks
+		if(pos < map_blocks - 1)
+		{
+			ll = ppt->page_size + ind * (map_bytes + map_blocks * ppt->block_size) + (map_bytes + pos * ppt->block_size);
+			hoff = GETHDWORD(ll);
+			loff = GETLDWORD(ll);
+
+			xuncf_truncate(ppt->block, hoff, loff);
+		}
+
+		_unlock_file_table_map(ppt, ind, mh, map);
+
+		if (pos) break;
+
+		ppt->file_maps--;
+
+		//trunc file table map
+		ll = ppt->page_size + ppt->file_maps * (map_bytes + map_blocks * ppt->block_size);
+		hoff = GETHDWORD(ll);
+		loff = GETLDWORD(ll);
+
+		xuncf_truncate(ppt->block, hoff, loff);
+
+		//save file table maps changed
+		if (!_flush_file_head(ppt, 1))
+		{
+			raise_user_error(_T("trunc_file_table"), _T("save file header failed"));
+		}
+	}
+
+	map_free(map);
+	map = NULL;
+
+	END_CATCH;
+
+	return;
+ONERROR:
+
+	if(map) map_free(map);
+
+	return;
+}
+
+/**********************************************************************/
+#if defined (DEBUG) || defined (_DEBUG)
+void file_table_self_test()
+{
+	printf("test file table...\n");
+
+	tchar_t fname[PATH_LEN];
+
+	get_curpath(fname, PATH_LEN);
+	xscat(fname, _T("/filetable"));
+
+	#define BLOCK_SIZE BLOCK_SIZE_512
+
+	link_t_ptr ptr = create_file_table(fname, BLOCK_SIZE, FILETABLE_PRIVATE);
+
+	system_srand();
+
+	#define ARS 1000
+	lword_t bid[ARS] = { 0 };
+	dword_t ext[ARS] = { 0 };
+	dword_t ind, pos, bytes;
+	int i, k, b;
+	void* buff;
+	res_file_t mh;
+	byte_t c = 0xFF;
+
+	for (k = 0; k < 1; k++)
+	{
+		_tprintf(_T("test block alloc[map-block-size-tag]...\n"));
+
+		for (i = 0; i < ARS; i++)
+		{
+			while (ext[i] == 0) ext[i] = system_rand32() % 1024;
+			bytes = ext[i] * BLOCK_SIZE;
+
+			bid[i] = alloc_file_table_block(ptr, bytes);
+			XDK_ASSERT(bid[i] != INVALID_INDEX);
+
+			b = (int)get_file_table_block_alloced(ptr, bid[i]);
+			ind = GETHDWORD(bid[i]);
+			pos = GETLDWORD(bid[i]);
+
+			_tprintf(_T("%d-%d-%d-%d\t"), ind, pos, ext[i], b);
+
+			if(pos && ind == GETHDWORD(bid[i-1]))
+			{
+				XDK_ASSERT(pos == GETLDWORD(bid[i-1] + ext[i-1]));
+			}
+
+			buff = lock_file_table_block(ptr, bid[i], bytes, 1, &mh);
+			XDK_ASSERT(buff != NULL);
+			xmem_set(buff, c, bytes);
+
+			unlock_file_table_block(ptr, bid[i], bytes, 1, mh, buff);
+		}
+
+		_tprintf(_T("\ntest block free[map-block-size-tag]...\n"));
+
+		for (i = 0; i < ARS; i++)
+		{
+			bytes = ext[i] * BLOCK_SIZE;
+
+			buff = lock_file_table_block(ptr, bid[i], bytes, 0, &mh);
+			XDK_ASSERT(buff != NULL);
+			XDK_ASSERT(c == *((byte_t*)buff) && c == *((byte_t*)buff + bytes - 1));
+
+			free_file_table_block(ptr, bid[i], bytes);
+
+			b = (int)get_file_table_block_alloced(ptr, bid[i]);
+			ind = GETHDWORD(bid[i]);
+			pos = GETLDWORD(bid[i]);
+
+			_tprintf(_T("%d-%d-%d-%d\t"), ind, pos, ext[i], b);
+
+			ext[i] = 0;
+		}
+
+		_tprintf(_T("\ntest block end\n"));
+	}
+
+	trunc_file_table(ptr);
+
+	destroy_file_table(ptr);
+}
 #endif
-
-	return _lock_file_table_block(ppt, i, j, size, write, pmh, pbuf);
-}
-
-bool_t unlock_file_table_block(link_t_ptr pt, dword_t pos, dword_t size, bool_t write, res_file_t hh, void* buf)
-{
-	file_table_context* ppt = PageTableFromLink(pt);
-	int i, j;
-	res_file_t mh;
-
-	XDK_ASSERT(pt && pt->tag == lkFileTable);
-
-	i = (int)((pos & 0xFFFF0000) >> 16);
-	j = (int)(pos & 0x0000FFFF);
-
-	XDK_ASSERT(j >= ppt->block_table[i].tag && i < ppt->file_maps);
-	XDK_ASSERT((ppt->block_table[i].tag) != 0);
-
-#ifdef XDK_SUPPORT_TEST
-	mh = _lock_file_map(ppt, i);
-	XDK_ASSERT(mh != INVALID_FILE);
-
-	XDK_ASSERT(map_get_bit(ppt->block_table[i].map, j) != FILETABLE_RELEASED);
-
-	_unlock_file_map(ppt, i, mh);
-#endif
-
-	return _unlock_file_table_block(ppt, i, j, size, write, hh, buf);
-}

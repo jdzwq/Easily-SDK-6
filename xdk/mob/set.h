@@ -49,93 +49,130 @@ typedef struct _set_t{
 extern "C" {
 #endif
 
-/*
-@FUNCTION set_alloc: alloc a set.
-@RETURN set_t*: return the set struct
-*/
+/**********************************************************************
+@FUNCTION: alloc a empty set.
+@RETURN: set object.
+***********************************************************************/
 EXP_API set_t* set_alloc(void);
 
-/*
-@FUNCTION set_free: free a set.
-@INPUT set_t* pset: the set struct
-@RETURN void: none.
-*/
+/**********************************************************************
+@FUNCTION: free the set.
+@INPUT: the set object.
+@RETURN: none.
+***********************************************************************/
 EXP_API void set_free(set_t* pset);
 
-/*
-@FUNCTION set_copy: copy source set elements to destination.
-@OUTPUT set_t* pdst: the destination set struct.
-@INPUT const set_t* psrc: the source set struct.
-@RETURN void: none.
-*/
+/**********************************************************************
+@FUNCTION: test set is empty.
+@INPUT: the set object.
+@RETURN: none zero if empty set, otherwise return zero.
+***********************************************************************/
+EXP_API bool_t set_is_empty(set_t* pset);
+
+/**********************************************************************
+@FUNCTION: copy set from source set.
+@INPUT: the destination set object.
+@INPUT: the source set object.
+@RETURN: none.
+***********************************************************************/
 EXP_API void set_copy(set_t* pdst, const set_t* psrc);
 
-/*
-@FUNCTION set_comp: compare two set.
-@INPUT const set_t* p1: the set struct.
-@INPUT const set_t* p2: the set struct.
-@RETURN int: if p1 equla to p2 return zero, else if p1 less than p2 return -1, else return 1.
-*/
+/**********************************************************************
+@FUNCTION: compare two set.
+@INPUT: the set object.
+@INPUT: the set object.
+@RETURN: -1 for p1 < p2, 0 for p1 = p2, 1 for p1 > p2.
+@NOTE: equal if two set have same elements and child sets.
+***********************************************************************/
 EXP_API int set_comp(const set_t* p1, const set_t* p2);
 
-/*
-@FUNCTION set_reset: empty the set elements.
-@OUTPUT set_t* pset: the set struct.
-@RETURN void: none.
-*/
-EXP_API void set_reset(set_t* pset);
+/**********************************************************************
+@FUNCTION: clear set contents.
+@INPUT: the set object.
+@RETURN: none.
+***********************************************************************/
+EXP_API void set_clear(set_t* pset);
 
-/*
-@FUNCTION set_add: append set to a set as its sub element.
-@INOUTPUT set_t* pset: the set struct.
-@INPUT const set_t* psub: the sub set struct.
-@RETURN void: none.
-*/
+/**********************************************************************
+@FUNCTION: merge two set contents.
+@INPUT: the destination set object.
+@INPUT: the sub set object.
+@RETURN: none.
+@NOTE: if sub set in destination set, NOP.
+***********************************************************************/
 EXP_API void set_add(set_t* pset, const set_t* psub);
 
-/*
-@FUNCTION set_del: delete sub set from a set.
-@INOUTPUT set_t* pset: the set struct.
-@INPUT const set_t* psub: the sub set struct.
-@RETURN void: none.
-*/
+/**********************************************************************
+@FUNCTION: delete sub set from destination.
+@INPUT: the destination set object.
+@INPUT: the sub set object.
+@RETURN: none.
+@NOTE: if sub set not in destination set, NOP.
+***********************************************************************/
 EXP_API void set_del(set_t* pset, const set_t* psub);
 
-/*
-@FUNCTION set_in: test a sub set is in the set.
-@INPUT set_t* pset: the set struct.
-@INPUT const set_t* psub: the sub set struct.
-@RETURN bool_t: return nonzero if exists, otherwise return zero.
-*/
+/**********************************************************************
+@FUNCTION: test sub set if in destination.
+@INPUT: the destination set object.
+@INPUT: the sub set object.
+@RETURN: none zero for exists, otherwise return zero.
+***********************************************************************/
 EXP_API bool_t set_in(set_t* pset, const set_t* psub);
 
-/*
-@FUNCTION set_get: get a sub from the set by position.
-@INPUT set_t* pset: the set struct.
-@INPUT int index: the zero based position.
-@OUTPUT set_t* psub: the sub set struct.
-@RETURN bool_t: return nonzero if exists, otherwise return zero.
-*/
+/**********************************************************************
+@FUNCTION: get element count in set.
+@INPUT: the set object.
+@RETURN: elements.
+***********************************************************************/
+EXP_API int set_count(set_t* pset);
+
+/**********************************************************************
+@FUNCTION: get sub element or set.
+@INPUT: the set object.
+@INPUT: the zero-based index.
+@RETURN: none.
+***********************************************************************/
 EXP_API void set_get(set_t* pset, int index, set_t* psub);
 
-/*
-@FUNCTION set_parse: parse set element value from string.
-@INOUTPUT set_t* pset: the set struct.
-@INPUT const tchar_t* str: string token, eg: "{a, b, {c, d}}".
-@INPUT int len: length of string token.
-@RETURN void: none.
-*/
+/**********************************************************************
+@FUNCTION: parse set from string token.
+@INPUT: the set object.
+@INPUT: the string token.
+@INPUT: the string characters.
+@RETURN: none.
+***********************************************************************/
 EXP_API void set_parse(set_t* pset, const tchar_t* token, int len);
 
-/*
-@FUNCTION set_format: format set element to string.
-@INPUT const set_t* pset: the set struct.
-@OUTPUT tchar_t* buf: buffer for formating, eg: "{1, 2, {3, 4}}".
-@INPUT int max: the buffer size in characters, not include terminate character.
-@RETURN int: return the formated string token length.
-*/
+/**********************************************************************
+@FUNCTION: format set to string token.
+@INPUT: the set object.
+@INPUT: the string buffer.
+@INPUT: the buffer characters, not include zero-terminated.
+@RETURN: characters copied.
+***********************************************************************/
 EXP_API int set_format(const set_t* pset, tchar_t* buf, int max);
 
+/**********************************************************************
+@FUNCTION: encode set to bytes sequence.
+@INPUT: the set object.
+@INPUT: the bytes buffer for encoding.
+@RETURN: bytes encoded, zero for failed.
+@NOTE: buffer can be NULL for testing how many bytes will be encoded.
+***********************************************************************/
+EXP_API dword_t set_encode(const set_t* pset, byte_t* buf);
+
+/**********************************************************************
+@FUNCTION: decode set from bytes sequence.
+@INPUT: the set object.
+@INPUT: the bytes buffer.
+@RETURN: bytes decoded, zero for failed.
+@NOTE: set be NULL for testing how many bytes will be decoded.
+***********************************************************************/
+EXP_API dword_t set_decode(set_t* pset, const byte_t* buf);
+
+#if defined (DEBUG) || defined (_DEBUG)
+EXP_API void set_self_test();
+#endif
 
 #ifdef	__cplusplus
 }

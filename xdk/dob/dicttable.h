@@ -35,197 +35,182 @@ typedef struct _dict_enum_t{
 	link_t_ptr entity;
 }dict_enum_t;
 
-typedef bool_t (*ENUM_DICTTABLE_ENTITY)(variant_t key, link_t_ptr nlk, void* p);
+typedef bool_t (CALLBACK *ENUM_DICTTABLE_ENTITY)(variant_t key, link_t_ptr nlk, void* p);
 
 #ifdef	__cplusplus
 extern "C" {
 #endif
 
-/*
-@FUNCTION create_dict_table: create a dictionary table.
-@RETURN link_t_ptr: return the dictionary table link component.
-*/
+/***********************************************************************
+@FUNCTION: create dictionary table.
+@RETURN: the link component of dictionary table or NULL if failed.
+***********************************************************************/
 EXP_API link_t_ptr create_dict_table(void);
 
-/*
-@FUNCTION destroy_dict_table: destroy the dictionary table.
-@INPUT link_t_ptr ptr: the dictionary table link component.
-@RETURN void: none.
-*/
+/***********************************************************************
+@FUNCTION: destroy dictionary table.
+@INPUT: the link component of dictionary table.
+@RETURN: none.
+***********************************************************************/
 EXP_API void destroy_dict_table(link_t_ptr ptr);
 
-/*
-@FUNCTION copy_dict_table: copy source dictionary table to destination dictionary table.
-@INPUT link_t_ptr ptr_dst: the destination dictionary table link component.
-@INPUT link_t_ptr ptr_src: the source dictionary table link component.
-@RETURN void: none.
-*/
+/***********************************************************************
+@FUNCTION: copy source dictionary table to destination dictionary table.
+@INPUT: the destination dictionary table link component.
+@INPUT: the source dictionary table link component.
+@RETURN: none.
+***********************************************************************/
 EXP_API void copy_dict_table(link_t_ptr ptr_dst, link_t_ptr ptr_src);
 
-/*
-@FUNCTION clear_dict_table: clear the dictionary table.
-@INPUT link_t_ptr ptr: the dictionary table link component.
-@RETURN void: none.
-*/
+/***********************************************************************
+@FUNCTION: clear the dictionary table.
+@INPUT: the dictionary table link component.
+@RETURN: none.
+***********************************************************************/
 EXP_API void clear_dict_table(link_t_ptr ptr);
 
-/*
-@FUNCTION get_dict_entity: get the dictionary entity by key.
-@INPUT link_t_ptr ptr: the dictionary table link component.
-@INPUT variant_t key: the variant key.
-@RETURN link_t_ptr: return the entity link component if exists, otherwise return NULL.
-*/
+/***********************************************************************
+@FUNCTION: get the dictionary entity by key.
+@INPUT: the dictionary table link component.
+@INPUT: the variant key.
+@RETURN: the entity link component if exists, otherwise return NULL.
+***********************************************************************/
 EXP_API link_t_ptr get_dict_entity(link_t_ptr ptr, variant_t key);
 
-/*
-@FUNCTION get_dict_entity_key_ptr: get the dictionary entity key variant struct.
-@INPUT link_t_ptr elk: the dictionary entity link component.
-@RETURN const variant_t*: return the variant key struct.
-*/
+/***********************************************************************
+@FUNCTION: get the dictionary entity key reference.
+@INPUT: the dictionary entity link component.
+@RETURN: the variant key reference.
+***********************************************************************/
 EXP_API const variant_t get_dict_entity_key_ptr(link_t_ptr elk);
 
-/*
-@FUNCTION get_dict_entity_key: get the dictionary entity key.
-@INPUT link_t_ptr elk: the dictionary entity link component.
-@OUTPUT variant_t key: the variant struct for returning key.
-@RETURN void: none.
-*/
+/***********************************************************************
+@FUNCTION: copy the dictionary entity key variant.
+@INPUT: the dictionary entity link component.
+@OUTPUT: the variant for copying key variant.
+@RETURN: none.
+***********************************************************************/
 EXP_API void get_dict_entity_key(link_t_ptr elk, variant_t key);
 
-/*
-@FUNCTION set_dict_entity_key: set the dictionary entity key.
-@INPUT link_t_ptr elk: the dictionary entity link component.
-@INPUT variant_t key: the variant key.
-@RETURN void: none.
-*/
+/***********************************************************************
+@FUNCTION: replace the dictionary entity key variant.
+@INPUT: the dictionary entity link component.
+@INPUT: the new key variant.
+@RETURN: none.
+***********************************************************************/
 EXP_API void set_dict_entity_key(link_t_ptr elk, variant_t key);
 
-/*
-@FUNCTION get_dict_entity_val_ptr: get the dictionary entity value object struct.
+/***********************************************************************
+@FUNCTION: get the dictionary entity value object struct.
 @INPUT link_t_ptr elk: the dictionary entity link component.
 @RETURN const object_t*: return the value object struct if exists, otherwise return NULL.
-*/
+***********************************************************************/
 EXP_API const object_t get_dict_entity_val_ptr(link_t_ptr elk);
 
-/*
-@FUNCTION get_dict_entity_val: get the dictionary entity value.
-@INPUT link_t_ptr elk: the dictionary entity link component.
-@OUTPUT object_t val: the object for returning value.
-@RETURN void: none.
-*/
+/***********************************************************************
+@FUNCTION: copy the dictionary entity value.
+@INPUT: the dictionary entity link component.
+@OUTPUT: the object for copying value object.
+@RETURN: none.
+***********************************************************************/
 EXP_API void get_dict_entity_val(link_t_ptr elk, object_t val);
 
-/*
-@FUNCTION set_dict_entity_val: set the dictionary entity value.
-@INPUT link_t_ptr elk: the dictionary entity link component.
-@INPUT object_t val: the object value.
-@RETURN void: none.
-*/
+/***********************************************************************
+@FUNCTION: replace the dictionary entity value object.
+@INPUT: the dictionary entity link component.
+@INPUT: the new value object to be copied into entiry.
+@RETURN: none.
+***********************************************************************/
 EXP_API void set_dict_entity_val(link_t_ptr elk, object_t val);
 
-/*
-@FUNCTION attach_dict_entity_val: attach the dictionary entity value, then the original entity value will be freed and replaced.
-@INPUT link_t_ptr elk: the dictionary entity link component.
-@INPUT object_t val: the object value.
-@RETURN void: none.
-*/
-EXP_API void attach_dict_entity_val(link_t_ptr elk, object_t val);
+/***********************************************************************
+@FUNCTION: attach a value object to dictionary entity.
+@INPUT: the dictionary entity link component.
+@INPUT: the value object to be referenced by entity.
+@RETURN: the original entity value object.
+@NOTE: the val param can be NULL, the original entity value object returned,
+	and entity value object cleaned.
+***********************************************************************/
+EXP_API object_t attach_dict_entity_val(link_t_ptr elk, object_t val);
 
-/*
-@FUNCTION detach_dict_entity_val: detach the dictionary entity value, then the entity value will be empty.
-@INPUT link_t_ptr elk: the dictionary entity link component.
-@RETURN object_t: return entity object value detached if exists, otherwise return NULL.
-*/
-EXP_API object_t detach_dict_entity_val(link_t_ptr elk);
-
-/*
-@FUNCTION get_dict_entity_delta: get the dictionary entity extract value.
-@INPUT link_t_ptr elk: the dictionary entity link component.
-@RETURN vword_t: return extract value if exists, otherwise return zero.
-*/
+/***********************************************************************
+@FUNCTION: get the dictionary entity extract value.
+@INPUT: the dictionary entity link component.
+@RETURN: return extract value if exists, otherwise return zero.
+***********************************************************************/
 EXP_API vword_t get_dict_entity_delta(link_t_ptr elk);
 
-/*
-@FUNCTION set_dict_entity_delta: set the dictionary entity extract value.
-@INPUT link_t_ptr elk: the dictionary entity link component.
-@INPUT vword_t val: the extract value.
-@RETURN void: none.
-*/
+/***********************************************************************
+@FUNCTION: set the dictionary entity extract value.
+@INPUT: the dictionary entity link component.
+@INPUT: the extract value.
+@RETURN: none.
+***********************************************************************/
 EXP_API void set_dict_entity_delta(link_t_ptr elk, vword_t val);
 
-/*
-@FUNCTION enum_dict_entity: enum the dictionary entites.
-@INPUT link_t_ptr ptr: the dictionary table link component.
-@INPUT CALLBACK_ENUMLINK pf: the callback function.
-@INPUT void* pv: the parameter translate into callback function.
-@RETURN int: return the count of entites enumerated.
-*/
+/***********************************************************************
+@FUNCTION: enumerating the dictionary entites.
+@INPUT: the dictionary table link component.
+@INPUT: the callback function.
+@INPUT: the parameter translate into callback function.
+@RETURN: the entity link component breaking at, or NULL for not breaking.
+@NOTE: the enumerating will be breaked when callback function return none zero,
+	otherwise continue to all entites enumerated.
+***********************************************************************/
 EXP_API link_t_ptr	enum_dict_entity(link_t_ptr ptr, ENUM_DICTTABLE_ENTITY pf, void* pv);
 
-/*
-@FUNCTION get_dict_entity_count: get the dictionary entites count.
-@INPUT link_t_ptr ptr: the dictionary table link component.
-@RETURN int: return the count of entites.
-*/
+/***********************************************************************
+@FUNCTION: get the dictionary entites count.
+@INPUT: the dictionary table link component.
+@RETURN: return the count of entites.
+***********************************************************************/
 EXP_API int get_dict_entity_count(link_t_ptr ptr);
 
-/*
-@FUNCTION get_dict_entity_at: get the dictionary entity by position.
-@INPUT link_t_ptr ptr: the dictionary table link component.
-@INPUT int index: zero based position.
-@RETURN link_t_ptr: return entity link component if exists, otherwise return NULL.
-*/
-EXP_API link_t_ptr get_dict_entity_at(link_t_ptr ptr, int index);
-
-/*
-@FUNCTION get_dict_entity_index: get the dictionary entity position.
-@INPUT link_t_ptr ptr: the dictionary table link component.
-@INPUT link_t_ptr elk: the dictionary entity link component.
-@RETURN int: return the zero based position.
-*/
-EXP_API int get_dict_entity_index(link_t_ptr ptr, link_t_ptr elk);
-
-/*
-@FUNCTION get_dict_next_entity: get the dictionary next entity.
-@INOUTPUT dict_enum_t* pea: the dictionary eumeration struct.
-@RETURN link_t_ptr: return entity link component if exists, otherwise return NULL.
-*/
+/***********************************************************************
+@FUNCTION: route to next dictionary entity using enumeration indicator.
+@INOUTPUT: the dictionary eumeration indicator.
+@RETURN: entity link component if exists, otherwise return NULL.
+***********************************************************************/
 EXP_API link_t_ptr get_dict_next_entity(dict_enum_t* pea);
 
-/*
-@FUNCTION get_dict_prev_entity: get the dictionary previous entity.
-@INOUTPUT dict_enum_t* pea: the dictionary eumeration struct.
-@RETURN link_t_ptr: return entity link component if exists, otherwise return NULL.
-*/
+/***********************************************************************
+@FUNCTION: route to previous dictionary entity using enumeration indicator.
+@INOUTPUT: the dictionary eumeration indicator.
+@RETURN: entity link component if exists, otherwise return NULL.
+***********************************************************************/
 EXP_API link_t_ptr get_dict_prev_entity(dict_enum_t* pea);
 
-/*
-@FUNCTION delete_dict_item: delete the dictionary entity by key.
-@INPUT link_t_ptr ptr: the dictionary table link component.
-@INPUT variant_t key: the variant key.
-@RETURN void: none.
-*/
+/***********************************************************************
+@FUNCTION: delete the dictionary entity by key variant.
+@INPUT: the dictionary table link component.
+@INPUT: the key variant.
+@RETURN: none.
+***********************************************************************/
 EXP_API void delete_dict_entity(link_t_ptr ptr, variant_t key);
 
-/*
-@FUNCTION write_dict_item: write key and value into the dictionary table,
-if the entity indicated by key is exists, the value of entity will be overwrited, otherwise insert a new entity with the key and value.
-@INPUT link_t_ptr ptr: the dictionary table link component.
-@INPUT variant_t key: the variant key.
-@INPUT object_t val: the object value.
-@RETURN link_t_ptr: return the entity link component.
-*/
+/***********************************************************************
+@FUNCTION: write a key-value pair into the dictionary table.
+@INPUT: the dictionary table link component.
+@INPUT: the key variant.
+@INPUT: the value object.
+@RETURN: return the entity link component.
+@NOTE: if the entity indicated by key is exists, the value of entity will be overwrited, 
+	otherwise add a new entity with the key-value pair.
+***********************************************************************/
 EXP_API link_t_ptr write_dict_entity(link_t_ptr ptr, variant_t key, object_t val);
 
-/*
-@FUNCTION read_dict_item: read entity value by the key.
-@INPUT link_t_ptr ptr: the dictionary table link component.
-@INPUT variant_t key: the variant key.
-@OUTPUT object_t val: the object for return value.
-@RETURN bool_t: return nonzero if entity exists, otherwise return zero.
-*/
+/***********************************************************************
+@FUNCTION: read entity value object find by the key valiant.
+@INPUT: the dictionary table link component.
+@INPUT: the key variant.
+@OUTPUT: the object for copying value object.
+@RETURN: return nonzero if entity exists, otherwise return zero.
+***********************************************************************/
 EXP_API bool_t read_dict_entity(link_t_ptr ptr, variant_t key, object_t val);
 
+#if defined (DEBUG) || defined (_DEBUG)
+EXP_API void dict_table_self_test(void);
+#endif
 
 #ifdef	__cplusplus
 }

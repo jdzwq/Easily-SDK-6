@@ -28,6 +28,34 @@ LICENSE.GPL3 for more details.
 
 #include "../xdkstd.h"
 
+dword_t integer_bytes(int num)
+{
+	dword_t len;
+	byte_t c[4] = { 0 };
+
+	PUT_DWORD_NET(c, 0, (dword_t)num);
+
+	if (num < 0)
+	{
+		len = 4;
+	}
+	else
+	{
+		len = 0;
+		while (!c[len] && len < 4)
+			len++;
+
+		if (c[len] & 0x80 && len > 0)
+			len--;
+
+		len = 4 - len;
+	}
+
+	if (!len) len++;
+
+	return len;
+}
+
 void bytes_turn(byte_t* ba, int n)
 {
 	byte_t b;

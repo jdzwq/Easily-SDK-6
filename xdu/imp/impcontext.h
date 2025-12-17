@@ -83,7 +83,7 @@ EXP_API void get_device_caps(visual_t rdc, dev_cap_t* pcap);
 
 EXP_API float pixel_metric(visual_t rdc);
 
-EXP_API float font_metric(visual_t rdc, const xfont_t* pxf);
+EXP_API float font_metric(visual_t rdc, const tchar_t* xf_size);
 
 #ifdef XDU_SUPPORT_CONTEXT_PRINTER
 

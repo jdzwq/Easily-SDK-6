@@ -52,7 +52,7 @@ LOC_API void	_destroy_context(visual_t rdc);
 LOC_API void	_get_device_caps(visual_t rdc, dev_cap_t* pcap);
 LOC_API void	_render_context(visual_t src, int srcx, int srcy, visual_t dst, int dstx, int dsty, int dstw, int dsth);
 LOC_API float	_pixel_metric(visual_t rdc);
-LOC_API float	_font_metric(visual_t rdc, const xfont_t* pxf);
+LOC_API float	_font_metric(visual_t rdc, const tchar_t* xf_size);
 
 #ifdef XDU_SUPPORT_CONTEXT_BITMAP
 LOC_API bitmap_t _create_context_bitmap(visual_t rdc);
@@ -101,10 +101,13 @@ LOC_API void _gdi_draw_rect(visual_t rdc, const xpen_t* pxp, const xbrush_t*pxb,
 LOC_API void _gdi_draw_round(visual_t rdc, const xpen_t* pxp, const xbrush_t*pxb, const xrect_t* prt, const xsize_t* pxs);
 LOC_API void _gdi_draw_ellipse(visual_t rdc, const xpen_t* pxp, const xbrush_t*pxb, const xrect_t* prt);
 LOC_API void _gdi_draw_pie(visual_t rdc, const xpen_t* pxp, const xbrush_t*pxb, const xrect_t* prt, double arc_from, double arc_to);
-LOC_API void _gdi_draw_text(visual_t rdc, const xfont_t* pxf, const xface_t* pxa, const xrect_t* prt, const tchar_t* txt, int len);
-LOC_API void _gdi_text_out(visual_t rdc, const xfont_t* pxf, const xpoint_t* ppt, const tchar_t* txt, int len);
-LOC_API void _gdi_text_size(visual_t rdc, const xfont_t* pxf, const tchar_t* txt, int len, xsize_t* pxs);
-LOC_API void _gdi_font_size(visual_t rdc, const xfont_t* pxf, xsize_t* pxs);
+LOC_API void _gdi_draw_text(visual_t rdc, const xface_t* pxa, const xrect_t* prt, const tchar_t* txt, int len);
+LOC_API void _gdi_text_out(visual_t rdc, const xface_t* pxa, const xpoint_t* ppt, const tchar_t* txt, int len);
+LOC_API void _gdi_text_size(visual_t rdc, const tchar_t* txt, int len, xsize_t* pxs);
+LOC_API void _gdi_text_rect(visual_t rdc, const xface_t* pxa, const tchar_t* txt, int len, xrect_t* pxr);
+LOC_API void _gdi_set_xfont(visual_t rdc, const xfont_t* pxf);
+LOC_API void _gdi_get_xfont(visual_t rdc, xfont_t* pxf);
+LOC_API void _gdi_font_size(visual_t rdc, xsize_t* pxs);
 #ifdef XDU_SUPPORT_CONTEXT_BITMAP
 LOC_API void _gdi_draw_image(visual_t rdc, bitmap_t bmp, const xcolor_t* clr, const xrect_t* prt);
 LOC_API void _gdi_draw_bitmap(visual_t rdc, bitmap_t bmp, const xpoint_t* ppt);
@@ -114,15 +117,16 @@ LOC_API void _gdi_gradient_rect(visual_t rdc, const xcolor_t* xc_brim, const xco
 LOC_API void _gdi_alphablend_rect(visual_t rdc, const xcolor_t* pxc, const xrect_t* prt, int opacity);
 LOC_API void _gdi_exclude_rect(visual_t rdc, const xrect_t* pxr);
 LOC_API void _gdi_inclip_rect(visual_t rdc, const xrect_t* pxr);
+
+LOC_API fontset_t _gdi_get_fontset(visual_t rdc);
+LOC_API fontset_t _gdi_create_fontset(const xfont_t* pxf);
+LOC_API void 	_gdi_destroy_fontset(fontset_t ft);
+LOC_API void 	_gdi_word_size(fontset_t ft, const tchar_t* pch, int chs, xsize_t* pxs);
 #endif //XDU_SUPPORT_CONTEXT_GDI
 
 #ifdef XDU_SUPPORT_CONTEXT_OPENGL
 LOC_API res_glc_t	_widget_get_glctx(widget_t wt);
 #endif
-
-LOC_API fontset_t _gdi_create_fontset(const xfont_t* pxf);
-LOC_API void _gdi_destroy_fontset(fontset_t ft);
-LOC_API void _gdi_word_size(fontset_t ft, const tchar_t* pch, int chs, xsize_t* pxs);
 
 #endif /*XDU_SUPPORT_CONTEXT*/
 
@@ -216,11 +220,8 @@ LOC_API void	_widget_kill_timer(widget_t wt, vword_t tid);
 LOC_API void	_widget_scroll(widget_t wt, bool_t horz, int line);
 LOC_API void	_widget_get_scroll_info(widget_t wt, bool_t horz, scroll_t* psl);
 LOC_API void	_widget_set_scroll_info(widget_t wt, bool_t horz, const scroll_t* psl);
-LOC_API void	_widget_noti_xfont(widget_t wt, const xfont_t* pxf);
-LOC_API void	_widget_noti_xface(widget_t wt, const xface_t* pxa);
-LOC_API void	_widget_noti_xbrush(widget_t wt, const xbrush_t* pxb);
-LOC_API void	_widget_noti_xpen(widget_t wt, const xpen_t* pxp);
 LOC_API void	_widget_set_color_mode(widget_t wt, const color_mod_t* pclr);
+LOC_API const color_mod_t*	_widget_get_color_mode_ptr(widget_t wt);
 LOC_API void	_widget_get_color_mode(widget_t wt, color_mod_t* pclr);
 LOC_API void	_widget_set_diaph(widget_t, float a);
 LOC_API float	_widget_get_diaph(widget_t wt);

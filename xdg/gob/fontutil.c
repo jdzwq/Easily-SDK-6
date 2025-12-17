@@ -68,7 +68,7 @@ void font_metric_by_pt(float pt, float* pm, float* px)
 		
 		if (px) *px = font_map[i].px_font;
 
-		if (pt >= font_map[i].pt_font)
+		if (ROUNDINT(pt) >= ROUNDINT(font_map[i].pt_font))
 			break;
 	}
 }

@@ -464,7 +464,6 @@ bool_t stream_write_char(stream_t xs, const tchar_t* buf, dword_t* pch)
 
 #endif
 	}
-#if defined(XDM_SUPPORT_ACP) || defined(XDK_SUPPORT_MBCS)
 	else if (pxt->encode == _GB2312)
 	{
 #ifdef _UNICODE
@@ -473,7 +472,6 @@ bool_t stream_write_char(stream_t xs, const tchar_t* buf, dword_t* pch)
 		bs = mbs_byte_to_gb2312(buf, ba);
 #endif
 	}
-#endif
 	else if (pxt->encode == _UTF16_LIT)
 	{
 #ifdef _UNICODE
@@ -574,12 +572,10 @@ bool_t stream_read_char(stream_t xs, tchar_t* buf, dword_t* pb)
 	{
 		bs = utf8_sequence(ba[0]);
 	}
-#if defined(XDM_SUPPORT_ACP) || defined(XDK_SUPPORT_MBCS)
 	else if (pxt->encode == _GB2312)
 	{
 		bs = gb2312_sequence(ba[0]);
 	}
-#endif
 	else if (pxt->encode == _UTF16_LIT || pxt->encode == _UTF16_BIG)
 	{
 		bs = utf16_sequence(ba[0]);
@@ -609,7 +605,6 @@ bool_t stream_read_char(stream_t xs, tchar_t* buf, dword_t* pb)
 		pos = utf8_byte_to_mbs(ba, buf);
 #endif
 	}
-#if defined(XDM_SUPPORT_ACP) || defined(XDK_SUPPORT_MBCS)
 	else if (pxt->encode == _GB2312)
 	{
 #ifdef _UNICODE
@@ -618,7 +613,6 @@ bool_t stream_read_char(stream_t xs, tchar_t* buf, dword_t* pb)
 		pos = gb2312_byte_to_mbs(ba, buf);
 #endif
 	}
-#endif
 	else if (pxt->encode == _UTF16_LIT)
 	{
 #ifdef _UNICODE

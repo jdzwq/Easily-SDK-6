@@ -129,6 +129,8 @@ extern res_queue_t g_queue;
 
 extern XIM          g_xim;
 extern Display*     g_display;
+//global fonstset cache
+extern fontset_t    g_fontset;
 
 typedef Colormap    res_clrmap_t;
 #ifdef XDU_SUPPORT_CONTEXT_BITMAP
@@ -151,12 +153,14 @@ typedef struct _X11_context_t{
     Visual* visual;
     Colormap color;
     unsigned int depth;
+
+    fontset_t fontset;
 }X11_context_t;
 
 typedef struct _x11_fontset_t{
 	handle_head head;
 
-    void* font_set;
+    void* font_object;
 }X11_fontset_t;
 
 #endif /*XDU_SUPPORT_CONTEXT*/

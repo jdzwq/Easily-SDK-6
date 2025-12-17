@@ -38,8 +38,8 @@ typedef struct _editbox_delta_t{
 	bool_t b_lock;
 	bool_t b_auto;
 
-	xfont_t xf;
 	xface_t xa;
+	xfont_t xf;
 }editbox_delta_t;
 
 #define GETEDITBOXDELTA(ph) 	(editbox_delta_t*)widget_get_user_delta(ph)
@@ -78,6 +78,20 @@ static bool_t _editbox_get_paging(widget_t widget, xsize_t* pse)
 	return 0;
 }
 
+static const xfont_t* _editbox_get_xfont_ptr(widget_t widget)
+{
+	editbox_delta_t* ptd = GETEDITBOXDELTA(widget);
+
+	return &(ptd->xf);
+}
+
+static const xface_t* _editbox_get_xface_ptr(widget_t widget)
+{
+	editbox_delta_t* ptd = GETEDITBOXDELTA(widget);
+
+	return &(ptd->xa);
+}
+
 void _editbox_auto_resize(widget_t widget)
 {
 	editbox_delta_t* ptd = GETEDITBOXDELTA(widget);
@@ -95,9 +109,9 @@ void _editbox_auto_resize(widget_t widget)
 
 	get_visual_interface(ptd->textor.cdc, &ifv);
 
-	(*ifv.pf_font_size)(ifv.ctx, &ptd->xf, &xs);
+	(*ifv.pf_font_size)(ifv.ctx, &xs);
 	cx = xs.w;
-	(*ifv.pf_text_size)(ifv.ctx, &ptd->xf, string_ptr(vs), string_len(vs), &xs);
+	(*ifv.pf_text_size)(ifv.ctx, string_ptr(vs), string_len(vs), &xs);
 
 	if (xs.w + cx > xr.w)
 	{
@@ -123,14 +137,12 @@ void noti_editbox_command(widget_t widget, int code, vword_t data)
 int hand_editbox_create(widget_t widget, void* data)
 {
 	editbox_delta_t* ptd;
+	color_mod_t clrs;
 
 	widget_hand_create(widget);
 
 	ptd = (editbox_delta_t*)xmem_alloc(sizeof(editbox_delta_t));
 	xmem_zero((void*)ptd, sizeof(editbox_delta_t));
-
-	default_textor_xfont(&ptd->xf);
-	default_textor_xface(&ptd->xa);
 
 	ptd->textor.widget = widget;
 	ptd->textor.cdc = widget_client_context(widget);
@@ -139,11 +151,15 @@ int hand_editbox_create(widget_t widget, void* data)
 	ptd->textor.pf_get_text = _editbox_get_text;
 	ptd->textor.pf_set_text = _editbox_set_text;
 	ptd->textor.pf_get_paging = _editbox_get_paging;
+	ptd->textor.pf_get_xfont_ptr = _editbox_get_xfont_ptr;
+	ptd->textor.pf_get_xface_ptr = _editbox_get_xface_ptr;
 	ptd->textor.max_undo = 1024;
 	ptd->textor.page = 1;
 
-	ptd->textor.pxf = &ptd->xf;
-	ptd->textor.pxa = &ptd->xa;
+	widget_get_color_mode(widget, &clrs);
+	default_textor_xface(&ptd->xa);
+	format_xcolor(&(clrs.clr_txt), ptd->xa.text_color);
+	default_textor_xfont(&ptd->xf);
 
 	SETEDITBOXDELTA(widget, ptd);
 
@@ -320,33 +336,17 @@ void hand_editbox_keydown(widget_t widget, dword_t ks, int key)
 			}
 		}
 		break;
-	case _T('c'):
-	case _T('C'):
-		if (widget_key_state(widget, KS_WITH_CONTROL))
-		{
-			hand_editbox_copy(widget);
-		}
+	case KEY_COPY:
+		hand_editbox_copy(widget);
 		break;
-	case _T('x'):
-	case _T('X'):
-		if (widget_key_state(widget, KS_WITH_CONTROL))
-		{
-			hand_editbox_cut(widget);
-		}
+	case KEY_CUT:
+		hand_editbox_cut(widget);
 		break;
-	case _T('v'):
-	case _T('V'):
-		if (widget_key_state(widget, KS_WITH_CONTROL))
-		{
-			hand_editbox_paste(widget);
-		}
+	case KEY_PASTE:
+		hand_editbox_paste(widget);
 		break;
-	case _T('z'):
-	case _T('Z'):
-		if (widget_key_state(widget, KS_WITH_CONTROL))
-		{
-			hand_editbox_undo(widget);
-		}
+	case KEY_UNDO:
+		hand_editbox_undo(widget);
 		break;
 	}
 }
@@ -474,20 +474,6 @@ void hand_editbox_menu_command(widget_t widget, int code, int cid, vword_t data)
 	}
 }
 
-void hand_editbox_xfont(widget_t widget, const xfont_t* pxf)
-{
-	editbox_delta_t* ptd = GETEDITBOXDELTA(widget);
-
-	xmem_copy((void*)&ptd->xf, (void*)pxf, sizeof(xfont_t));
-}
-
-void hand_editbox_xface(widget_t widget, const xface_t* pxa)
-{
-	editbox_delta_t* ptd = GETEDITBOXDELTA(widget);
-
-	xmem_copy((void*)&ptd->xa, (void*)pxa, sizeof(xface_t));
-}
-
 void hand_editbox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 {
 	editbox_delta_t* ptd = GETEDITBOXDELTA(widget);
@@ -495,8 +481,6 @@ void hand_editbox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	xcolor_t xc;
 	drawing_interface ifv = {0};
 
-	widget_hand_paint(widget, dc, NULL);
-	
 	hand_textor_paint(&ptd->textor, dc, pxr);
 
 	if (ptd->b_auto)
@@ -543,19 +527,10 @@ widget_t editbox_create(widget_t widget, dword_t style, const xrect_t* pxr)
 		EVENT_ON_SET_FOCUS(hand_editbox_set_focus)
 		EVENT_ON_KILL_FOCUS(hand_editbox_kill_focus)
 
-		EVENT_ON_XFONT(hand_editbox_xfont)
-		EVENT_ON_XFACE(hand_editbox_xface)
-
-		
-
 	EVENT_END_DISPATH
 
 	wt = widget_create(NULL, style, pxr, widget, &ev);
 	if (!wt) return (widget_t)0;
-
-	/*widget_get_xface(wt, &xa);
-	xscpy(xa.text_wrap, GDI_ATTR_TEXT_WRAP_LINEBREAK);
-	widget_set_xface(wt, &xa);*/
 
 	return wt;
 }
@@ -660,6 +635,46 @@ void editbox_auto_size(widget_t widget, bool_t bSize)
 	{
 		_editbox_auto_resize(widget);
 	}
+}
+
+void editbox_set_xface(widget_t widget, const xface_t* pxa)
+{
+	editbox_delta_t* ptd = GETEDITBOXDELTA(widget);
+
+	XDK_ASSERT(ptd != NULL);
+
+	xmem_copy((void*)(&ptd->xa), (void*)pxa, sizeof(xface_t));
+
+	editbox_redraw(widget);
+}
+
+void editbox_get_xface(widget_t widget, xface_t* pxa)
+{
+	editbox_delta_t* ptd = GETEDITBOXDELTA(widget);
+
+	XDK_ASSERT(ptd != NULL);
+
+	xmem_copy((void*)pxa, (void*)(&ptd->xa), sizeof(xface_t));
+}
+
+void editbox_set_xfont(widget_t widget, const xfont_t* pxf)
+{
+	editbox_delta_t* ptd = GETEDITBOXDELTA(widget);
+
+	XDK_ASSERT(ptd != NULL);
+
+	xmem_copy((void*)(&ptd->xf), (void*)pxf, sizeof(xfont_t));
+
+	editbox_redraw(widget);
+}
+
+void editbox_get_xfont(widget_t widget, xfont_t* pxf)
+{
+	editbox_delta_t* ptd = GETEDITBOXDELTA(widget);
+
+	XDK_ASSERT(ptd != NULL);
+
+	xmem_copy((void*)pxf, (void*)(&ptd->xf), sizeof(xfont_t));
 }
 
 void editbox_set_lock(widget_t widget, bool_t bLock)

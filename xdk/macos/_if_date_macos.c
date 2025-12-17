@@ -201,20 +201,7 @@ bool_t _utc_date_to_loc(xdate_t* pxd)
 
 dword_t _get_times()
 {
-	struct tm t = { 0 };
-	time_t time1,time2;
-
-	t.tm_year = 1970;
-	t.tm_mon = 0;
-	t.tm_mday = 1;
-	t.tm_hour = 0;
-	t.tm_min = 0;
-	t.tm_sec = 0;
-
-	time1 = mktime(&t);
-	time2 = time(NULL);
-
-	return (dword_t)(difftime(time1, time2) * 1000.0);
+	return (dword_t)(time(NULL) * 1000.0);
 }
 
 clock_t _get_ticks()

@@ -234,7 +234,7 @@ link_t_ptr	get_string_entity(link_t_ptr ptr, const tchar_t* key, int keylen)
 	string_entity_t* phe;
 	string_table_t* pht;
 	link_t_ptr plk;
-	int rt;
+	int rt, step = 0;
 
 	XDK_ASSERT(ptr && ptr->tag == lkStringTable);
 
@@ -252,11 +252,15 @@ link_t_ptr	get_string_entity(link_t_ptr ptr, const tchar_t* key, int keylen)
 
 	while (plk)
 	{
+		step ++;
 		phe = StringEntityFromLink(plk);
 
 		rt = compare_text(phe->key, -1, key, keylen, 0);
 		if (rt == 0)
+		{
+			PUT_THREEBYTE_LOC(plk->lru,0,step);
 			return plk;
+		}
 		
 		if (rt < 0 && (pht->order != ORDER_NONE))
 			break;
@@ -277,7 +281,7 @@ link_t_ptr	find_string_entity(link_t_ptr ptr, const tchar_t* key, int keylen)
 	string_entity_t* phe;
 	string_table_t* pht;
 	link_t_ptr plk;
-	int rt;
+	int rt, step = 0;
 
 	XDK_ASSERT(ptr && ptr->tag == lkStringTable);
 
@@ -289,11 +293,15 @@ link_t_ptr	find_string_entity(link_t_ptr ptr, const tchar_t* key, int keylen)
 	plk = get_string_next_entity(ptr, LINK_FIRST);
 	while (plk)
 	{
+		step ++;
 		phe = StringEntityFromLink(plk);
 
 		rt = compare_text(phe->key, -1, key, keylen, 1);
 		if (rt == 0)
+		{
+			PUT_THREEBYTE_LOC(plk->lru,0,step);
 			return plk;
+		}
 
 		plk = get_string_next_entity(ptr, plk);
 	}
@@ -795,3 +803,59 @@ int string_table_format_options(link_t_ptr ptr, tchar_t* buf, int max, tchar_t i
 
 	return format_options(buf, max, itemfeed, linefeed, (void*)&fp, _on_format_token);
 }
+
+/**********************************************************************/
+#if defined (DEBUG) || defined (_DEBUG)
+void string_table_self_test()
+{
+	printf("test string table...\n");
+	
+	dword_t i;
+	int min, max,step,zero = 0,total = 0;
+	link_t_ptr plk, ptr;
+	tchar_t pch[CHS_LEN + 1] = {0};
+	int n;
+
+	ptr = create_string_table(ORDER_ASCEND);
+
+	for (i = 0x4E00; i <= 0x9FA5; i++)
+	{
+#if defined(_UNICODE) || defined(_UNICODE)
+		pch[0] = (wchar_t)i;
+		n = 1;
+#else
+		n = ucs_byte_to_mbs((wchar_t)i, pch);
+#endif
+		write_string_entity(ptr, pch, n, NULL, 0);
+	}
+
+	min = MAX_LONG;
+	max = 0;
+	for (i = 0x4E00; i <= 0x9FA5; i++)
+	{
+#if defined(_UNICODE) || defined(_UNICODE)
+		pch[0] = (wchar_t)i;
+		n = 1;
+#else
+		n = ucs_byte_to_mbs((wchar_t)i, pch);
+#endif
+		plk = get_string_entity(ptr, pch, n);
+		if(plk)
+		{
+			step = GET_THREEBYTE_LOC(plk->lru, 0);
+			total += step;
+			if(min > step) min = step;
+			if(max < step) max = step;
+		}
+		else
+		{
+			zero ++;
+		}
+	}
+
+	destroy_string_table(ptr);
+
+	printf("table size is:%d, total step is:%d, average step is:%.2f\n", i, total, (float)total / i);
+	printf("min step is:%d, max step is:%d, not find is:%d\n", min, max, zero);
+}
+#endif

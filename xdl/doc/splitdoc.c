@@ -58,7 +58,7 @@ bool_t is_split_item(link_t_ptr ptr,link_t_ptr ilk)
 	return is_dom_child_node(ptr,ilk);
 }
 
-link_t_ptr enum_split_item(link_t_ptr ptr, CALLBACK_ENUMLINK pf, void* param)
+link_t_ptr enum_split_item(link_t_ptr ptr, PF_ENUMLINK pf, void* param)
 {
 	return enum_dom_node(ptr, pf, param);
 }

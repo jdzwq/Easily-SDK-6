@@ -126,11 +126,14 @@ res_file_t _share_cli(const tchar_t* sname, dword_t size, dword_t fmode)
 		flag = O_RDONLY;
 
     sd = shm_open(sname, flag, S_IRWXU | S_IXGRP | S_IROTH | S_IXOTH);
-    
+    if(sd < 0)
+    {
+        return INVALID_FILE;
+    }
+
     if(fstat(sd, &st) < 0)
     {
-        close(sd);
-        
+        close(sd);  
         return INVALID_FILE;
     }
     

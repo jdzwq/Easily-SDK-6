@@ -66,8 +66,14 @@ typedef struct _handle_head	 *fontset_t;
 #define _HANDLE_BITMAP		0x52
 typedef struct _handle_head	 *bitmap_t;
 
+typedef enum{ 
+	NONE_BREAK = 0, 
+	WORD_BREAK = 1, 
+	LINE_BREAK = 2
+}WRAPMODE;
 
 #define UNIT_PT				_T("pt")
+#define UNIT_PX				_T("px")
 #define UNIT_MM				_T("mm")
 
 #define ZERO_WIDTH				0.0f

@@ -38,13 +38,14 @@ void nuid_from_timestamp(nuid_t* pu, lword_t tms)
 {
 	dword_t r, nh, nl;
 
+	system_srand();
 	//Srand48((dword_t)(GETLDWORD(tms)));
 	//r = Lrand48() >> 16;
 	//nh = r | 0x0100;
 	//nl = Lrand48();
-	system_random32(&r);
+	r = system_rand32();
 	nh = (r >> 16) | 0x0100;
-	system_random32(&r);
+	r = system_rand32();
 	nl = r;
 
 	pu->data1 = (dword_t)(tms & 0xffffffff);
@@ -170,6 +171,16 @@ int nuid_format_string(nuid_t* pu, tchar_t buf[36])
 	c = GET_DWORD_LOC(pu->data4, 0);
 
 	return xsprintf(buf, _T("%08x-%04x-%04x-%04x-%04x%08x"), (dword_t)pu->data1, (dword_t)pu->data2, (dword_t)pu->data3, a, b, c);
+}
+
+int nuid_format_hash(nuid_t* pu, tchar_t buf[24])
+{
+	dword_t h, l;
+
+	h = GET_DWORD_LOC(pu->data4, 4);
+	l = GET_DWORD_LOC(pu->data4, 0);
+
+	return xsprintf(buf, _T("%08x%04x%04x%04x%04x"), (dword_t)pu->data1, (dword_t)pu->data2, (dword_t)pu->data3, h, l);
 }
 
 #if defined(XDK_SUPPORT_TEST)

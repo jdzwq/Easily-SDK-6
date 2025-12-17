@@ -27,51 +27,58 @@ LICENSE.GPL3 for more details.
 #include "../xdkloc.h"
 
 #ifdef XDK_SUPPORT_RANDOM
-
-void _system_random32(dword_t* pn)
+void _system_srand()
 {
+	NOP;
+}
+
+dword_t _system_rand32()
+{
+	dword_t pn;
+
 	HCRYPTPROV provider;
 	BYTE buf[4];
 
 	if (CryptAcquireContext(&provider, NULL, NULL, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT) == FALSE)
 	{
-		*pn = 0;
-		return;
+		return 0;
 	}
 
 	if (CryptGenRandom(provider, 4, buf) == FALSE)
 	{
 		CryptReleaseContext(provider, 0);
-		*pn = 0;
-		return;
+		return 0;
 	}
 
-	*pn = GET_DWORD_LIT(buf, 0);
+	pn = GET_DWORD_LIT(buf, 0);
 
 	CryptReleaseContext(provider, 0);
+
+	return pn;
 }
 
-void _system_random64(lword_t* pn)
+lword_t _system_rand64()
 {
+	lword_t pn;
 	HCRYPTPROV provider;
 	BYTE buf[8];
 
 	if (CryptAcquireContext(&provider, NULL, NULL, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT) == FALSE)
 	{
-		*pn = 0;
-		return;
+		return 0;
 	}
 
 	if (CryptGenRandom(provider, 8, buf) == FALSE)
 	{
 		CryptReleaseContext(provider, 0);
-		*pn = 0;
-		return;
+		return 0;
 	}
 
-	*pn = GET_LWORD_LIT(buf, 0);
+	pn = GET_LWORD_LIT(buf, 0);
 
 	CryptReleaseContext(provider, 0);
+
+	return pn;
 }
 
 #endif //XDK_SUPPORT_RANDOM

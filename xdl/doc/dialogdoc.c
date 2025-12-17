@@ -205,7 +205,7 @@ void reset_dialog_taborder(link_t_ptr ptr)
 
 	root = get_dom_child_node_root(get_dialog_itemset(ptr));
 
-	heap_sort_link(root, (CALLBACK_SORTLINK)_dialog_item_compare_func, 0, NULL);
+	heap_sort_link(root, (PF_SORTLINK)_dialog_item_compare_func, 0, NULL);
 
 	ilk = get_dialog_next_item(ptr, LINK_FIRST);
 	while (ilk)

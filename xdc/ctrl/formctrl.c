@@ -912,8 +912,8 @@ void noti_form_begin_edit(widget_t widget)
 		widget_set_owner(ptd->editor, widget);
 
 		widget_set_color_mode(ptd->editor, &ob);
-		widget_noti_xfont(ptd->editor, &xf);
-		widget_noti_xface(ptd->editor, &xa);
+		editbox_set_xfont(ptd->editor, &xf);
+		editbox_set_xface(ptd->editor, &xa);
 
 		widget_show(ptd->editor, WS_SHOW_NORMAL);
 		widget_set_focus(ptd->editor);
@@ -947,7 +947,7 @@ void noti_form_begin_edit(widget_t widget)
 		widget_set_owner(ptd->editor, widget);
 
 		widget_set_color_mode(ptd->editor, &ob);
-		widget_noti_xfont(ptd->editor, &xf);
+		editbox_set_xfont(ptd->editor, &xf);
 
 		widget_show(ptd->editor, WS_SHOW_NORMAL);
 		widget_set_focus(ptd->editor);
@@ -967,7 +967,7 @@ void noti_form_begin_edit(widget_t widget)
 		widget_set_owner(ptd->editor, widget);
 
 		widget_set_color_mode(ptd->editor, &ob);
-		widget_noti_xfont(ptd->editor, &xf);
+		editbox_set_xfont(ptd->editor, &xf);
 
 		widget_show(ptd->editor, WS_SHOW_NORMAL);
 		widget_set_focus(ptd->editor);
@@ -987,7 +987,7 @@ void noti_form_begin_edit(widget_t widget)
 		widget_set_owner(ptd->editor, widget);
 
 		widget_set_color_mode(ptd->editor, &ob);
-		widget_noti_xfont(ptd->editor, &xf);
+		editbox_set_xfont(ptd->editor, &xf);
 
 		widget_show(ptd->editor, WS_SHOW_NORMAL);
 		widget_set_focus(ptd->editor);
@@ -1011,7 +1011,7 @@ void noti_form_begin_edit(widget_t widget)
 		widget_set_owner(ptd->editor, widget);
 
 		widget_set_color_mode(ptd->editor, &ob);
-		widget_noti_xfont(ptd->editor, &xf);
+		editbox_set_xfont(ptd->editor, &xf);
 
 		widget_show(ptd->editor, WS_SHOW_NORMAL);
 		widget_set_focus(ptd->editor);
@@ -1032,7 +1032,7 @@ void noti_form_begin_edit(widget_t widget)
 		widget_set_owner(ptd->editor, widget);
 
 		widget_set_color_mode(ptd->editor, &ob);
-		widget_noti_xfont(ptd->editor, &xf);
+		editbox_set_xfont(ptd->editor, &xf);
 
 		widget_show(ptd->editor, WS_SHOW_NORMAL);
 		widget_set_focus(ptd->editor);
@@ -1056,7 +1056,7 @@ void noti_form_begin_edit(widget_t widget)
 		widget_set_owner(ptd->editor, widget);
 
 		widget_set_color_mode(ptd->editor, &ob);
-		widget_noti_xfont(ptd->editor, &xf);
+		editbox_set_xfont(ptd->editor, &xf);
 
 		widget_show(ptd->editor, WS_SHOW_NORMAL);
 		widget_set_focus(ptd->editor);
@@ -1082,8 +1082,8 @@ void noti_form_begin_edit(widget_t widget)
 		widget_set_owner(ptd->editor, widget);
 
 		widget_set_color_mode(ptd->editor, &ob);
-		widget_noti_xfont(ptd->editor, &xf);
-		widget_noti_xface(ptd->editor, &xa);
+		editbox_set_xfont(ptd->editor, &xf);
+		editbox_set_xface(ptd->editor, &xa);
 
 		if (fd.menu)
 		{
@@ -1236,8 +1236,8 @@ void noti_form_begin_edit(widget_t widget)
 		widget_set_owner(ptd->editor, widget);
 
 		widget_set_color_mode(ptd->editor, &ob);
-		widget_noti_xfont(ptd->editor, &xf);
-		widget_noti_xface(ptd->editor, &xa);
+		editbox_set_xfont(ptd->editor, &xf);
+		editbox_set_xface(ptd->editor, &xa);
 
 		if (fd.menu)
 		{
@@ -1272,8 +1272,8 @@ void noti_form_begin_edit(widget_t widget)
 		widget_set_owner(ptd->editor, widget);
 
 		widget_set_color_mode(ptd->editor, &ob);
-		widget_noti_xfont(ptd->editor, &xf);
-		widget_noti_xface(ptd->editor, &xa);
+		editbox_set_xfont(ptd->editor, &xf);
+		editbox_set_xface(ptd->editor, &xa);
 
 		if (fd.menu)
 		{
@@ -1314,8 +1314,8 @@ void noti_form_begin_edit(widget_t widget)
 		widget_set_owner(ptd->editor, widget);
 
 		widget_set_color_mode(ptd->editor, &ob);
-		widget_noti_xfont(ptd->editor, &xf);
-		widget_noti_xface(ptd->editor, &xa);
+		editbox_set_xfont(ptd->editor, &xf);
+		editbox_set_xface(ptd->editor, &xa);
 
 		if (fd.menu)
 		{
@@ -2535,7 +2535,7 @@ void hand_form_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 		}
 		else
 		{
-			xmem_copy((void*)&xc, (void*)&(pif->mode.clr_frg), sizeof(xcolor_t));
+			xmem_copy((void*)&xc, (void*)&(pif->clrs->clr_frg), sizeof(xcolor_t));
 			draw_corner(pif, &xc, (const xrect_t*)&(pif->rect));
 		}
 	}
@@ -2684,8 +2684,6 @@ widget_t formctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* px
 		EVENT_ON_NOTICE(hand_form_notice)
 		EVENT_ON_CHILD_COMMAND(hand_form_child_command)
 		EVENT_ON_MENU_COMMAND(hand_form_menu_command)
-
-		
 
 	EVENT_END_DISPATH
 

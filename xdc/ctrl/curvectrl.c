@@ -244,13 +244,6 @@ void hand_curve_wheel(widget_t widget, bool_t bHorz, int nDelta)
 	}
 }
 
-void hand_curve_xpen(widget_t widget, const xpen_t* pxp)
-{
-	curve_delta_t* ptd = GETCURVEDELTA(widget);
-
-	xmem_copy((void*)&ptd->xp, (void*)pxp, sizeof(xpen_t));
-}
-
 void hand_curve_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 {
 	curve_delta_t* ptd = GETCURVEDELTA(widget);
@@ -333,10 +326,6 @@ widget_t curvectrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* p
 		EVENT_ON_RBUTTON_DOWN(hand_curve_rbutton_down)
 		EVENT_ON_RBUTTON_UP(hand_curve_rbutton_up)
 
-		EVENT_ON_XPEN(hand_curve_xpen)
-
-		
-
 	EVENT_END_DISPATH
 
 	return widget_create(wname, wstyle, pxr, wparent, &ev);
@@ -367,4 +356,22 @@ void curvectrl_get_vector(widget_t widget, vector_t vt)
 
 	XDK_ASSERT(ptd != NULL);
 
+}
+
+void curvectrl_set_xpen(widget_t widget, const xpen_t* pxp)
+{
+	curve_delta_t* ptd = GETCURVEDELTA(widget);
+
+	XDK_ASSERT(ptd != NULL);
+
+	xmem_copy((void*)&ptd->xp, (void*)pxp, sizeof(xpen_t));
+}
+
+void curvectrl_get_xpen(widget_t widget, xpen_t* pxp)
+{
+	curve_delta_t* ptd = GETCURVEDELTA(widget);
+
+	XDK_ASSERT(ptd != NULL);
+	
+	xmem_copy((void*)pxp, (void*)&ptd->xp, sizeof(xpen_t));
 }

@@ -44,13 +44,32 @@ int acp_gb2312_code_sequence(unsigned char b)
 	return 2;
 }
 
-int acp_gb2312_byte_to_unicode(const byte_t* src, wchar_t* dest)
+int acp_gb2312_byte_to_unicode(const byte_t* src, wchar_t* dst)
 {
-#ifdef XDK_SUPPORT_ACP_TABLE
-	return table_gb2312_seek_unicode(src, (unsigned short*)dest);
-#else
-	return share_gb2312_seek_unicode((unsigned char*)src, (unsigned short*)dest);
-#endif
+	int len;
+	unsigned short sch, uch;
+	bool_t b;
+
+	len = acp_gb2312_code_sequence(*src);
+
+	if (len == 1)
+	{
+		if (dst)
+		{
+			*dst = (wchar_t)MAKESHORT(src[0], 0);
+		}
+		return 1;
+	}
+
+	sch = MAKESHORT(src[0], src[1]);
+
+	b = share_gb2312_seek_unicode(sch, (unsigned short*)&uch);
+	if(dst)
+	{
+		*dst = (b)? (wchar_t)uch : (wchar_t)ALT_CHAR;
+	}
+
+	return 1;
 }
 
 int acp_gb2312_to_unicode(const byte_t* src, dword_t slen, wchar_t* dest, int dlen)
@@ -60,11 +79,8 @@ int acp_gb2312_to_unicode(const byte_t* src, dword_t slen, wchar_t* dest, int dl
 
 	while (total < slen && len < dlen)
 	{
-#ifdef XDK_SUPPORT_ACP_TABLE
-		len += table_gb2312_seek_unicode((src + total), ((dest)? (unsigned short*)(dest + len) : NULL));
-#else
-		len += share_gb2312_seek_unicode(((unsigned char*)src + total), ((dest) ? (unsigned short*)(dest + len) : NULL));
-#endif
+		len += acp_gb2312_byte_to_unicode(((unsigned char*)src + total), ((dest) ? (wchar_t*)(dest + len) : NULL));
+
 		total += acp_gb2312_code_sequence((unsigned char)(src[total]));
 	}
 

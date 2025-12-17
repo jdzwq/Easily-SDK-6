@@ -468,16 +468,16 @@ void draw_pie(canvas_t canv, const xpen_t* pxp, const xbrush_t* pxb, const xrect
 	(*pif->pf_gdi_draw_pie)(rdc, pxp, pxb, &xr, fang, tang);
 }
 
-void draw_text_raw(visual_t rdc,const xfont_t* pxf,const xface_t* pxa,const xrect_t* pxr,const tchar_t* txt,int len)
+void draw_text_raw(visual_t rdc,const xface_t* pxa,const xrect_t* pxr,const tchar_t* txt,int len)
 {
 	if_context_t *pif;
 
 	pif = PROCESS_CONTEXT_INTERFACE;
 
-	(*pif->pf_gdi_draw_text)(rdc,pxf,pxa,pxr,txt,len);
+	(*pif->pf_gdi_draw_text)(rdc,pxa,pxr,txt,len);
 }
 
-void draw_text(canvas_t canv, const xfont_t* pxf, const xface_t* pxa, const xrect_t* pxr, const tchar_t* txt, int len)
+void draw_text(canvas_t canv, const xface_t* pxa, const xrect_t* pxr, const tchar_t* txt, int len)
 {
 	visual_t rdc = get_canvas_visual(canv);
 	xrect_t xr;
@@ -489,19 +489,19 @@ void draw_text(canvas_t canv, const xfont_t* pxf, const xface_t* pxa, const xrec
 	xmem_copy((void*)&xr, (void*)pxr, sizeof(xrect_t));
 	rect_mm_to_pt(canv, &xr);
 
-	(*pif->pf_gdi_draw_text)(rdc, pxf, pxa, &xr, txt, len);
+	(*pif->pf_gdi_draw_text)(rdc, pxa, &xr, txt, len);
 }
 
-void text_out_raw(visual_t rdc, const xfont_t* pxf, const xpoint_t* ppt, const tchar_t* txt, int len)
+void text_out_raw(visual_t rdc, const xface_t* pxa, const xpoint_t* ppt, const tchar_t* txt, int len)
 {
 	if_context_t *pif;
 
 	pif = PROCESS_CONTEXT_INTERFACE;
 
-	(*pif->pf_gdi_text_out)(rdc, pxf, ppt, txt, len);
+	(*pif->pf_gdi_text_out)(rdc, pxa, ppt, txt, len);
 }
 
-void text_out(canvas_t canv, const xfont_t* pxf, const xpoint_t* ppt, const tchar_t* txt, int len)
+void text_out(canvas_t canv, const xface_t* pxa, const xpoint_t* ppt, const tchar_t* txt, int len)
 {
 	visual_t rdc = get_canvas_visual(canv);
 	xpoint_t pt;
@@ -513,122 +513,37 @@ void text_out(canvas_t canv, const xfont_t* pxf, const xpoint_t* ppt, const tcha
 	xmem_copy((void*)&pt, (void*)ppt, sizeof(xpoint_t));
 	point_mm_to_pt(canv, &pt);
 
-	(*pif->pf_gdi_text_out)(rdc, pxf, &pt, txt, len);
+	(*pif->pf_gdi_text_out)(rdc, pxa, &pt, txt, len);
 }
 
-void text_rect_raw(visual_t rdc, const xfont_t* pxf, const xface_t* pxa, const tchar_t* txt, int len, xrect_t* prt)
+void text_rect_raw(visual_t rdc, const xface_t* pxa, const tchar_t* txt, int len, xrect_t* pxr)
 {
 	if_context_t *pif;
-	fontset_t ft;
-	int c, n = 0, total = 0;
-	tchar_t pch[CHS_LEN + 1] = {0};
-	xsize_t se;
-	int w, h, maxw = 0;
 
 	pif = PROCESS_CONTEXT_INTERFACE;
 
-	if(len < 0) len = xslen(txt);
-	if(!len) return;
-
-	ft = (*pif->pf_gdi_create_fontset)(pxf);
-	if(!ft) return;
-	
-	w = 0;
-	h = 0;
-	n = 0;
-	while (n++ < len)
-	{
-		c = peek_word((txt + total), pch);
-		total += c;
-
-		(*pif->pf_gdi_word_size)(ft, pch, c, &se);
-
-		if (!h)
-		{
-			if (is_null(pxa->line_height))
-				h = se.h;
-			else
-				h = (int)((float)se.h * xstof(pxa->line_height));
-		}
-
-		if (pxa && compare_text(pxa->text_wrap, -1, GDI_ATTR_TEXT_WRAP_WORDBREAK, -1, 1) == 0)
-		{
-			if (prt->w && (w + se.w > prt->w))
-			{
-				if (is_null(pxa->line_height))
-					h += se.h;
-				else
-					h += (int)((float)se.h * xstof(pxa->line_height));
-
-				w = 0;
-				total -= c;
-				n--;
-			}
-			else
-			{
-				w += se.w;
-			}
-		}
-		else if (pxa && compare_text(pxa->text_wrap, -1, GDI_ATTR_TEXT_WRAP_LINEBREAK, -1, 1) == 0)
-		{
-			if (pch[0] == _T('\n'))
-			{
-				if (is_null(pxa->line_height))
-					h += se.h;
-				else
-					h += (int)((float)se.h * xstof(pxa->line_height));
-
-				w = 0;
-			}
-			else if (prt->w && (w + se.w > prt->w))
-			{
-				if (is_null(pxa->line_height))
-					h += se.h;
-				else
-					h += (int)((float)se.h * xstof(pxa->line_height));
-
-				w = 0;
-				total -= xslen(pch);
-				n--;
-			}
-			else
-			{
-				w += se.w;
-			}
-		}
-		else
-		{
-			w += se.w;
-		}
-
-		if (maxw < w) maxw = w;
-	}
-
-	prt->h = h;
-	if (!prt->w) prt->w = maxw;
-
-	(*pif->pf_gdi_destroy_fontset)(ft);
+	(*pif->pf_gdi_text_rect)(rdc, pxa, txt, len, pxr);
 }
 
-void text_rect(canvas_t canv, const xfont_t* pxf, const xface_t* pxa, const tchar_t* txt, int len, xrect_t* pxr)
+void text_rect(canvas_t canv, const xface_t* pxa, const tchar_t* txt, int len, xrect_t* pxr)
 {
 	visual_t rdc = get_canvas_visual(canv);
 
-	text_rect_raw(rdc, pxf, pxa, txt, len, pxr);
+	text_rect_raw(rdc, pxa, txt, len, pxr);
 
 	rect_pt_to_mm(canv, pxr);
 }
 
-void text_size_raw(visual_t rdc, const xfont_t* pxf, const tchar_t* txt, int len, xsize_t* pxs)
+void text_size_raw(visual_t rdc, const tchar_t* txt, int len, xsize_t* pxs)
 {
 	if_context_t *pif;
 
 	pif = PROCESS_CONTEXT_INTERFACE;
 
-	(*pif->pf_gdi_text_size)(rdc, pxf, txt, len, pxs);
+	(*pif->pf_gdi_text_size)(rdc, txt, len, pxs);
 }
 
-void text_size(canvas_t canv, const xfont_t* pxf, const tchar_t* txt, int len, xsize_t* pxs)
+void text_size(canvas_t canv, const tchar_t* txt, int len, xsize_t* pxs)
 {
 	visual_t rdc = get_canvas_visual(canv);
 
@@ -636,21 +551,21 @@ void text_size(canvas_t canv, const xfont_t* pxf, const tchar_t* txt, int len, x
 
 	pif = PROCESS_CONTEXT_INTERFACE;
 
-	(*pif->pf_gdi_text_size)(rdc, pxf, txt, len, pxs);
+	(*pif->pf_gdi_text_size)(rdc, txt, len, pxs);
 
 	size_pt_to_mm(canv, pxs);
 }
 
-void font_size_raw(visual_t rdc, const xfont_t* pxf, xsize_t* pxs)
+void font_size_raw(visual_t rdc, xsize_t* pxs)
 {
 	if_context_t *pif;
 
 	pif = PROCESS_CONTEXT_INTERFACE;
 
-	(*pif->pf_gdi_font_size)(rdc, pxf, pxs);
+	(*pif->pf_gdi_font_size)(rdc, pxs);
 }
 
-void font_size(canvas_t canv, const xfont_t* pxf, xsize_t* pxs)
+void font_size(canvas_t canv, xsize_t* pxs)
 {
 	visual_t rdc = get_canvas_visual(canv);
 
@@ -658,21 +573,21 @@ void font_size(canvas_t canv, const xfont_t* pxf, xsize_t* pxs)
 
 	pif = PROCESS_CONTEXT_INTERFACE;
 
-	(*pif->pf_gdi_font_size)(rdc, pxf, pxs);
+	(*pif->pf_gdi_font_size)(rdc, pxs);
 
 	size_pt_to_mm(canv, pxs);
 }
 
-float pixel_size_raw(visual_t rdc)
+void set_xfont_raw(visual_t rdc, const xfont_t* pxf)
 {
 	if_context_t *pif;
 
 	pif = PROCESS_CONTEXT_INTERFACE;
 
-	return (*pif->pf_pixel_metric)(rdc);
+	(*pif->pf_gdi_set_xfont)(rdc, pxf);
 }
 
-float pixel_size(canvas_t canv)
+void set_xfont(canvas_t canv, const xfont_t* pxf)
 {
 	visual_t rdc = get_canvas_visual(canv);
 
@@ -680,7 +595,27 @@ float pixel_size(canvas_t canv)
 
 	pif = PROCESS_CONTEXT_INTERFACE;
 
-	return (*pif->pf_pixel_metric)(rdc);
+	(*pif->pf_gdi_set_xfont)(rdc, pxf);
+}
+
+void get_xfont_raw(visual_t rdc, xfont_t* pxf)
+{
+	if_context_t *pif;
+
+	pif = PROCESS_CONTEXT_INTERFACE;
+
+	(*pif->pf_gdi_get_xfont)(rdc, pxf);
+}
+
+void get_xfont(canvas_t canv, xfont_t* pxf)
+{
+	visual_t rdc = get_canvas_visual(canv);
+
+	if_context_t *pif;
+
+	pif = PROCESS_CONTEXT_INTERFACE;
+
+	(*pif->pf_gdi_get_xfont)(rdc, pxf);
 }
 
 void draw_bitmap_raw(visual_t rdc, bitmap_t bmp, const xpoint_t* ppt)
@@ -860,34 +795,6 @@ void inclip_rect_raw(visual_t rdc, const xrect_t* pxr)
 }
 
 
-fontset_t create_fontset(const xfont_t* pxf)
-{
-	if_context_t *pif;
-
-	pif = PROCESS_CONTEXT_INTERFACE;
-
-	return (*pif->pf_gdi_create_fontset)(pxf);
-}
-
-void destroy_fontset(fontset_t ft)
-{
-	if_context_t *pif;
-
-	pif = PROCESS_CONTEXT_INTERFACE;
-
-	(*pif->pf_gdi_destroy_fontset)(ft);
-}
-
-void word_size_raw(fontset_t ft, const tchar_t* pch, int bytes, xsize_t* pxs)
-{
-	if_context_t *pif;
-
-	pif = PROCESS_CONTEXT_INTERFACE;
-
-	(*pif->pf_gdi_word_size)(ft, pch, bytes, pxs);
-}
-
-
 /******************************************************************************************************************/
 
 void draw_triangle_raw(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const xrect_t* pxr, const tchar_t* orient)
@@ -980,7 +887,7 @@ void draw_sector(canvas_t canv, const xpen_t* pxp, const xbrush_t* pxb, const xp
 	draw_sector_raw(rdc, pxp, pxb, &pt, &rl, &rs, arcf, arct);
 }
 
-void multi_line_raw(visual_t rdc, const xfont_t* pxf, const xface_t* pxa, const xpen_t* pxp, const xrect_t* pxr)
+void multi_line_raw(visual_t rdc, const xface_t* pxa, const xpen_t* pxp, const xrect_t* pxr)
 {
 	float line_rati;
 	int lh, th;
@@ -996,7 +903,7 @@ void multi_line_raw(visual_t rdc, const xfont_t* pxf, const xface_t* pxa, const 
 	if (line_rati < 1)
 		line_rati = 1.0;
 
-	font_size_raw(rdc, pxf, &xs);
+	font_size_raw(rdc, &xs);
 
 	th = xs.h;
 	lh = (int)((float)th * (line_rati - 1.0));
@@ -1017,7 +924,7 @@ void multi_line_raw(visual_t rdc, const xfont_t* pxf, const xface_t* pxa, const 
 	}
 }
 
-void multi_line(canvas_t canv, const xfont_t* pxf, const xface_t* pxa, const xpen_t* pxp, const xrect_t* pxr)
+void multi_line(canvas_t canv, const xface_t* pxa, const xpen_t* pxp, const xrect_t* pxr)
 {
 	visual_t rdc = get_canvas_visual(canv);
 	xrect_t xr;
@@ -1025,7 +932,7 @@ void multi_line(canvas_t canv, const xfont_t* pxf, const xface_t* pxa, const xpe
 	xmem_copy((void*)&xr, (void*)pxr, sizeof(xrect_t));
 	rect_mm_to_pt(canv, &xr);
 
-	multi_line_raw(rdc, pxf, pxa, pxp, &xr);
+	multi_line_raw(rdc, pxa, pxp, &xr);
 }
 
 void draw_equilagon_raw(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const xpoint_t* ppt, const xspan_t* pxn, int n)

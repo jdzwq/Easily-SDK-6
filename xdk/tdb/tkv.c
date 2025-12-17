@@ -432,7 +432,7 @@ void test_tkv()
 	{
 		xsprintf(kid, _T("key%d"), i);
 		variant_from_string(key, kid, -1);
-		object_set_variant(val, key);
+		object_encode_variant(val, key);
 
 		n = i;
 		len = 0;

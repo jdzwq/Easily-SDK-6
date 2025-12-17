@@ -86,7 +86,7 @@ void destroy_multi_tree(link_t_ptr ptr)
 }
 
 
-link_t_ptr enum_multi_node(link_t_ptr ptr,CALLBACK_ENUMLINK pf,void* param)
+link_t_ptr enum_multi_node(link_t_ptr ptr,PF_ENUMLINK pf,void* param)
 {
 	link_t_ptr nlk;
 	link_t_ptr st = NULL;
@@ -124,7 +124,7 @@ link_t_ptr enum_multi_node(link_t_ptr ptr,CALLBACK_ENUMLINK pf,void* param)
 	return nlk;
 }
 
-link_t_ptr enum_multi_node_deep(link_t_ptr ptr, CALLBACK_ENUMLINK pf, void* param)
+link_t_ptr enum_multi_node_deep(link_t_ptr ptr, PF_ENUMLINK pf, void* param)
 {
 	link_t_ptr nlk;
 	link_t_ptr st = NULL;
@@ -197,7 +197,7 @@ bool_t is_multi_child_node(link_t_ptr ilk,link_t_ptr plk)
 	if (!plk)
 		return 0;
 
-	return (enum_multi_node(ilk, (CALLBACK_ENUMLINK)_compare_multi_node_proc, (void*)plk)) ? 1 : 0;
+	return (enum_multi_node(ilk, (PF_ENUMLINK)_compare_multi_node_proc, (void*)plk)) ? 1 : 0;
 }
 
 link_t_ptr get_multi_node_attr_table(link_t_ptr ilk)
@@ -360,7 +360,7 @@ int get_multi_child_node_mask_check_count(link_t_ptr ilk,dword_t ul)
 	NODE_MASK_COUNT nd = { 0 };
 
 	nd.mask = ul;
-	enum_multi_node(ilk, (CALLBACK_ENUMLINK)_count_check_node, (void*)&nd);
+	enum_multi_node(ilk, (PF_ENUMLINK)_count_check_node, (void*)&nd);
 
 	return nd.count;
 }
@@ -389,7 +389,7 @@ int set_multi_child_node_mask_check(link_t_ptr ilk,dword_t ul, bool_t b)
 
 	nd.mask = ul;
 	nd.check = b;
-	enum_multi_node(ilk, (CALLBACK_ENUMLINK)_reset_check_node, (void*)&nd);
+	enum_multi_node(ilk, (PF_ENUMLINK)_reset_check_node, (void*)&nd);
 
 	return nd.count;
 }

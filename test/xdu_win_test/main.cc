@@ -651,22 +651,23 @@ void child_on_paint(widget_t wt, visual_t rdc, const xrect_t* prt)
     xfont_t xf = {0};
     default_textor_xfont(&xf);
     xscpy(xf.size, _T("13"));
-    xscpy(xf.color, GDI_ATTR_RGB_LIGHTCYAN);
+
     xface_t xa = {0};
     default_xface(&xa);
+    xscpy(xa.text_color, GDI_ATTR_RGB_LIGHTCYAN);
 
     const tchar_t* token = _T("您好，世界！");
     
     xsize_t xs = {0};
-    (*if_context.pf_gdi_font_size)(ctx, &xf, &xs);
-	(*if_context.pf_gdi_text_size)(ctx, &xf,  token, -1, &xs);
+    (*if_context.pf_gdi_font_size)(ctx, &xs);
+	(*if_context.pf_gdi_text_size)(ctx, token, -1, &xs);
 	xp1.x = 10;
 	xp1.y = 10;
 	xp2.x = xp1.x + xs.w;
 	xp2.y = 10;
 
 	(*if_context.pf_gdi_draw_line)(ctx, &xp, &xp1, &xp2);
-	(*if_context.pf_gdi_text_out)(ctx, &xf, &xp1, token, -1);
+	(*if_context.pf_gdi_text_out)(ctx, &xa, &xp1, token, -1);
 
     xr.x = 10;
     xr.y = 20;

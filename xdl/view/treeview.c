@@ -90,13 +90,14 @@ float calc_tree_width(const measure_interface* pif, link_t_ptr ptr)
 
 	default_xfont(&xf);
 	parse_xfont_from_style(&xf, get_tree_style_ptr(ptr));
+	(*pif->pf_set_xfont)(pif->ctx, &xf);
 
 	ilk = get_tree_first_child_item(ptr);
 	while (ilk)
 	{
 		token = get_tree_item_title_ptr(ilk);
 
-		(*pif->pf_measure_size)(pif->ctx, &xf, token, -1, &xs);
+		(*pif->pf_measure_size)(pif->ctx, token, -1, &xs);
 
 		if (get_tree_item_showcheck(ilk))
 			xs.fw += ic;
@@ -380,23 +381,24 @@ void draw_tree(const drawing_interface* pif, link_t_ptr ptr)
 	style = get_tree_style_ptr(ptr);
 
 	parse_xface_from_style(&xa, style);
-
-	parse_xfont_from_style(&xf, style);
 	if (!b_print)
 	{
-		format_xcolor(&pif->mode.clr_txt, xf.color);
+		format_xcolor(&pif->clrs->clr_txt, xa.text_color);
 	}
+
+	parse_xfont_from_style(&xf, style);
+	(*pif->pf_set_xfont)(pif->ctx, &xf);
 
 	/*parse_xpen_from_style(&xp, style);
 	if (!b_print)
 	{
-		format_xcolor(&pif->mode.clr_frg, xp.color);
+		format_xcolor(&pif->clrs->clr_frg, xp.color);
 	}*/
 
 	parse_xbrush_from_style(&xb, style);
 	if (!b_print)
 	{
-		format_xcolor(&pif->mode.clr_bkg, xb.color);
+		format_xcolor(&pif->clrs->clr_bkg, xb.color);
 	}
 
 	xscpy(xp.color, xb.color);
@@ -405,16 +407,16 @@ void draw_tree(const drawing_interface* pif, link_t_ptr ptr)
 
 	if (!b_print)
 	{
-		format_xcolor(&pif->mode.clr_msk, xi.color);
+		format_xcolor(&pif->clrs->clr_msk, xi.color);
 	}
 
 	if (!b_print)
 	{
-		xmem_copy((void*)&xc, (void*)&pif->mode.clr_ico, sizeof(xcolor_t));
+		xmem_copy((void*)&xc, (void*)&pif->clrs->clr_ico, sizeof(xcolor_t));
 	}
 	else
 	{
-		parse_xcolor(&xc, xf.color);
+		parse_xcolor(&xc, xa.text_color);
 	}
 
 	parse_xcolor(&xc_check, xp.color);
@@ -453,7 +455,7 @@ void draw_tree(const drawing_interface* pif, link_t_ptr ptr)
 	xr_text.fy = total_height;
 	xr_text.fh = th;
 
-	(*pif->pf_draw_text)(pif->ctx, &xf, &xa, &xr_text, get_tree_title_ptr(ptr), -1);
+	(*pif->pf_draw_text)(pif->ctx, &xa, &xr_text, get_tree_title_ptr(ptr), -1);
 
 	total_height += th;
 
@@ -518,7 +520,7 @@ void draw_tree(const drawing_interface* pif, link_t_ptr ptr)
 			xr_text.fh = ih;
 		}
 
-		(*pif->pf_draw_text)(pif->ctx, &xf, &xa, &xr_text, get_tree_item_title_ptr(ilk), -1);
+		(*pif->pf_draw_text)(pif->ctx, &xa, &xr_text, get_tree_item_title_ptr(ilk), -1);
 
 		total_height += ih;
 		if (!get_tree_item_collapsed(ilk) && get_tree_first_child_item(ilk))

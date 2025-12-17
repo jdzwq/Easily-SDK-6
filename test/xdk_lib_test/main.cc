@@ -229,178 +229,6 @@ void test_nums()
 	XDK_ASSERT(dl == l && dh == h);
 }
 
-typedef struct _time_hint{
-	int n_mon;
-	int* p_mon;
-	int n_week;
-	int* p_week;
-	int n_day;
-	int* p_day;
-	int n_hour;
-	int* p_hour;
-	int n_min;
-	int* p_min;
-	int n_sec;
-	int* p_sec;
-}time_hint;
-
-void test_time_hint()
-{
-	time_hint th = { 0 };
-
-	th.n_mon = parse_intset(_T("[1-12]"), -1, NULL, MAX_LONG);
-	th.p_mon = (int*)xmem_alloc(th.n_mon * sizeof(int));
-	parse_intset(_T("[1-12]"), -1, th.p_mon, th.n_mon);
-
-	th.n_week = parse_intset(_T("[0,2,4]"), -1, NULL, MAX_LONG);
-	th.p_week = (int*)xmem_alloc(th.n_week * sizeof(int));
-	parse_intset(_T("[0,2,4]"), -1, th.p_week, th.n_week);
-
-	th.n_day = parse_intset(_T("[1,2,3,4,5,6,7]"), -1, NULL, MAX_LONG);
-	th.p_day = (int*)xmem_alloc(th.n_day * sizeof(int));
-	parse_intset(_T("[1,2,3,4,5,6,7]"), -1, th.p_day, th.n_day);
-
-	th.n_hour = parse_intset(_T("[10]"), -1, NULL, MAX_LONG);
-	th.p_hour = (int*)xmem_alloc(th.n_hour * sizeof(int));
-	parse_intset(_T("[10]"), -1, th.p_hour, th.n_hour);
-
-	th.n_min = parse_intset(_T("[30]"), -1, NULL, MAX_LONG);
-	th.p_min = (int*)xmem_alloc(th.n_min * sizeof(int));
-	parse_intset(_T("[30]"), -1, th.p_min, th.n_min);
-
-	th.n_sec = parse_intset(_T("[45]"), -1, NULL, MAX_LONG);
-	th.p_sec = (int*)xmem_alloc(th.n_sec * sizeof(int));
-	parse_intset(_T("[45]"), -1, th.p_sec, th.n_sec);
-
-	xdate_t dt1 = { 0 }, dt2 = { 0 };
-	parse_datetime(&dt1, _T("2020-01-01 00:00:00"));
-	parse_datetime(&dt2, _T("2020-12-31 00:00:00"));
-
-	tchar_t token[DATE_LEN] = { 0 };
-	bool_t b = 0;
-	int i;
-
-	while (compare_datetime(&dt1, &dt2) < 0)
-	{
-		mak_loc_week(&dt1);
-
-		b = 0;
-		for (i = 0; i < th.n_mon; i++)
-		{
-			if (dt1.mon == th.p_mon[i])
-			{
-				b = 1;
-				break;
-			}
-		}
-		if (!b && th.n_mon)
-		{
-			plus_months(&dt1, 1);
-			dt1.day = 1;
-			dt1.hour = 0;
-			dt1.min = 0;
-			dt1.sec = 0;
-			continue;
-		}
-
-		b = 0;
-		for (i = 0; i < th.n_week; i++)
-		{
-			if (dt1.wday == th.p_week[i])
-			{
-				b = 1;
-				break;
-			}
-		}
-		if (!b && th.n_week)
-		{
-			plus_days(&dt1, 1);
-			dt1.hour = 0;
-			dt1.min = 0;
-			dt1.sec = 0;
-			continue;
-		}
-
-		b = 0;
-		for (i = 0; i < th.n_day; i++)
-		{
-			if (dt1.day == th.p_day[i])
-			{
-				b = 1;
-				break;
-			}
-		}
-		if (!b && th.n_day)
-		{
-			plus_days(&dt1, 1);
-			dt1.hour = 0;
-			dt1.min = 0;
-			dt1.sec = 0;
-			continue;
-		}
-
-		b = 0;
-		for (i = 0; i < th.n_hour; i++)
-		{
-			if (dt1.hour == th.p_hour[i])
-			{
-				b = 1;
-				break;
-			}
-		}
-		if (!b && th.n_hour)
-		{
-			plus_hours(&dt1, 1);
-			dt1.min = 0;
-			dt1.sec = 0;
-			continue;
-		}
-
-		b = 0;
-		for (i = 0; i < th.n_min; i++)
-		{
-			if (dt1.min == th.p_min[i])
-			{
-				b = 1;
-				break;
-			}
-		}
-		if (!b && th.n_min)
-		{
-			plus_minutes(&dt1, 1);
-			dt1.sec = 0;
-			continue;
-		}
-
-		b = 0;
-		for (i = 0; i < th.n_sec; i++)
-		{
-			if (dt1.sec == th.p_sec[i])
-			{
-				b = 1;
-				break;
-			}
-		}
-		if (!b && th.n_sec)
-		{
-			plus_seconds(&dt1, 1);
-			continue;
-		}
-
-		mak_loc_week(&dt1);
-		format_datetime(&dt1, token);
-		_tprintf(_T("%s W%d\n"), token, dt1.wday);
-
-		plus_seconds(&dt1, 1);
-	}
-
-	xmem_free(th.p_mon);
-	xmem_free(th.p_week);
-	xmem_free(th.p_day);
-	xmem_free(th.p_hour);
-	xmem_free(th.p_min);
-	xmem_free(th.p_sec);
-}
 
 
 void test_hash32()
@@ -471,57 +299,6 @@ void test_hash64()
 	_tprintf(_T("hash64 collide:%f percent\n"), (double)k / (double)n * 100.0);
 }
 
-void test_dict()
-{
-	link_t_ptr dict = create_dict_table();
-
-	variant_t var = variant_alloc(VV_STRING_UTF8);
-
-	object_t val = object_alloc();
-	tchar_t str[100] = { 0 };
-	int i;
-
-	for (i = 0; i < 10000; i++)
-	{
-		xsprintf(str, _T("string%d"), i);
-		variant_from_string(var, str, -1);
-		object_set_variant(val, var);
-
-		link_t_ptr ent = write_dict_entity(dict, var, val);
-
-		bool_t rt = read_dict_entity(dict, var, val);
-		if (!rt)
-			_tprintf(_T("%s losted\n"), str);
-		else
-		{
-			object_get_variant(val, var);
-			xszero(str, 100);
-			variant_to_string(var, str, 100);
-			//_tprintf(_T("%s passed\n"), str);
-		}
-	}
-
-	variant_free(var);
-	object_free(val);
-
-	destroy_dict_table(dict);
-
-	_tprintf(_T("end\n"));
-}
-
-void test_hlp()
-{
-	const schar_t* a_str = "T汉字 拼F音a";
-	const wchar_t* w_str = L"T汉字 拼F音a";
-
-	schar_t a_hlp[10] = { 0 };
-	int n = a_acp_help_code(a_str, -1, NULL, 10);
-	a_acp_help_code(a_str, -1, a_hlp, 10);
-
-	wchar_t w_hlp[10];
-	n = w_acp_help_code(w_str, -1, NULL, 10);
-	w_acp_help_code(w_str, -1, w_hlp, 10);
-}
 
 void test_printf_big5()
 {
@@ -587,155 +364,73 @@ void test_rtf()
 
 }*/
 
+void test_enc(void)
+{
+	base64_self_test();
+
+	der_self_test();
+}
+
+void test_mob(void)
+{
+	//map_self_test();
+
+	//matrix_self_test();
+
+	//vector_self_test();
+
+	//set_self_test();
+
+	//variant_self_test();
+
+	//message_self_test();
+
+	object_self_test();
+}
+
+void test_vob(void)
+{
+	//spinlock_self_test();
+
+	//sequence_self_test();
+
+	//queue_self_test();
+}
+
+void test_dob(void)
+{
+	//ac_tableself_test();
+
+	//bina_treeself_test();
+
+	//trie_treeself_test();
+
+	//hash_tableself_test();
+
+	//dict_tableself_test();
+
+	//words_tableself_test();
+
+	//string_tableself_test();
+
+	//file_tableself_test();
+
+	//bplus_tree_self_test();
+
+	bplus_tree_self_test();
+}
+
 int main(int argc, char* argv[])
 {
-	xdk_process_init(XDK_APARTMENT_PROCESS);
+	xdk_process_init(XDK_APARTMENT_THREAD | XDK_INITIALIZE_CONSOLE);
 
-	//test_error();
+	//test_enc();
 
-	//test_mem();
+	test_mob();
 
-	//test_conv();
+	//test_vob();
 
-	//test_utc();
-
-	//test_stamp();
-
-	//test_nuid();
-
-	//test_printf();
-
-	//test_money();
-
-	//test_vector();
-
-	//test_matrix();
-
-	//test_set();
-
-	//test_map();
-
-	//test_dict();
-
-	//test_string_array();
-
-	//test_integer_array();
-
-	//test_numeric_array();
-
-	//test_intset();
-
-	//test_words();
-
-	//test_nums();
-
-	//test_time_hint();
-
-	//test_variant();
-
-	//test_message();
-
-	//test_queue();
-
-	//test_object();
-
-	//test_ac_table();
-
-	//test_dict_table();
-
-	//test_lock_table();
-
-	//test_file_table_alloc(_T("demo"), FILETABLE_SHARE);
-
-	//test_file_table_write(_T("demo"), FILETABLE_SHARE | FILETABLE_DIRECT);
-
-	//test_bplus_tree_none_table();
-
-	//test_bplus_tree_file_table(_T("demo"), FILETABLE_SHARE);
-
-	//test_tkv();
-
-	//test_hash32();
-
-	//test_hash64();
-
-	//test_linear();
-
-	//test_trie_tree();
-
-	//test_tkv();
-
-	//test_hkv();
-
-	//aes_self_test(1);
-
-	//arc4_self_test(1);
-
-	//asn1_self_test(1);
-
-	//base64_self_test(1);
-
-	//ctr_drbg_self_test(1);
-
-	//hmac_drbg_self_test(1);
-
-	//des_self_test(1);
-
-	//md2_self_test(1);
-
-	//md4_self_test(1);
-
-	//md5_self_test(1);
-
-	//ripemd160_self_test(1);
-
-	//sha1_self_test(1);
-
-	//sha256_self_test(1);
-
-	//sha512_self_test(1);
-
-	//sm3_self_test(1);
-
-	//test_hkdf(1);
-
-	//timing_self_test(1);
-
-	//mpi_self_test(1);
-
-	//rsa_self_test(1);
-
-	//rsa_test_parse(1);
-
-	//ecp_self_test(1);
-
-	//ecp_test_parse(1);
-
-	//entropy_self_test(1);
-
-	//ecdh_x25519_test(1);
-
-	//ecdh_test(1);
-
-	//chacha20_self_test(1);
-
-	//poly1305_self_test(1);
-
-	//chachapoly_self_test(1);
-
-	//gcm_self_test(1);
-
-	//dhm_self_test(1);
-
-	//x509_self_test(1);
-
-	//test_hlp();
-
-	//test_mgc();
-
-	//test_printf_big5();
-
-	//test_rtf();
+	//test_dob();
 
 	xdk_process_uninit();
 

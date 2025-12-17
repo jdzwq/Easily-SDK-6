@@ -29,6 +29,13 @@ LICENSE.GPL3 for more details.
 
 #include "../xdldef.h"
 
+typedef struct _svg_visual_t{
+	handle_head head;
+
+	link_t_ptr g;
+	xfont_t xf;
+}svg_visual_t;
+
 #ifdef	__cplusplus
 extern "C" {
 #endif
@@ -46,6 +53,9 @@ EXP_API canvas_t create_svg_canvas(visual_t view);
 @RETURN void: none.
 */
 EXP_API void destroy_svg_canvas(canvas_t canv);
+
+EXP_API void svg_set_xfont(canvas_t canv, const xfont_t* pxf);
+EXP_API void svg_get_xfont(canvas_t canv, xfont_t* pxf);
 
 /*
 @FUNCTION svg_get_canvas_visual: get the svg visual object.
@@ -172,6 +182,9 @@ EXP_API void destroy_svg_visual(visual_t view);
 @RETURN link_t_ptr: return the svg document if exists, otherwise return NULL.
 */
 EXP_API link_t_ptr svg_get_visual_doc(visual_t view);
+
+EXP_API void svg_set_xfont_raw(visual_t view, const xfont_t* pxf);
+EXP_API void svg_get_xfont_raw(visual_t view, xfont_t* pxf);
 
 /*
 @FUNCTION svg_pt_to_mm: mapping points to millimeter in svg canvas.

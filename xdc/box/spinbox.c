@@ -32,7 +32,6 @@ LICENSE.GPL3 for more details.
 typedef struct _spinbox_delta_t{
 	int cur;
 
-	xfont_t xf;
 }spinbox_delta_t;
 
 #define GETSPINBOXDELTA(ph) 	(spinbox_delta_t*)widget_get_user_delta(ph)
@@ -81,8 +80,6 @@ int hand_spinbox_create(widget_t widget, void* data)
 	ptd = (spinbox_delta_t*)xmem_alloc(sizeof(spinbox_delta_t));
 	xmem_zero((void*)ptd, sizeof(spinbox_delta_t));
 
-	default_widget_xfont(&ptd->xf);
-	
 	SETSPINBOXDELTA(widget, ptd);
 
 	return 0;
@@ -122,7 +119,7 @@ void hand_spinbox_lbutton_up(widget_t widget, const xpoint_t* pxp)
 
 	get_canvas_measure(widget_get_canvas(widget), &im);
 
-	hint = calc_spinbox_hint(&im, &ptd->xf, &pt);
+	hint = calc_spinbox_hint(&im, &pt);
 
 	if (hint == SPINBOX_HINT_PLUS)
 		spinbox_on_plus(widget);
@@ -147,15 +144,6 @@ void hand_spinbox_size(widget_t widget, int code, const xsize_t* prs)
 	case WS_SIZE_LAYOUT:
 		break;
 	}
-}
-
-void hand_spinbox_xfont(widget_t widget, const xfont_t* pxf)
-{
-	spinbox_delta_t* ptd = GETSPINBOXDELTA(widget);
-
-	XDK_ASSERT(ptd != NULL);
-
-	xmem_copy((void*)&ptd->xf, (void*)pxf, sizeof(xfont_t));
 }
 
 void hand_spinbox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
@@ -185,7 +173,7 @@ void hand_spinbox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 
 	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
 
-	draw_spinbox(pif, &ptd->xf, ptd->cur);
+	draw_spinbox(pif, ptd->cur);
 
 	end_canvas_paint(canv, dc, pxr);
 }
@@ -207,10 +195,6 @@ widget_t spinbox_create(widget_t widget, dword_t style, const xrect_t* pxr)
 		EVENT_ON_LBUTTON_DOWN(hand_spinbox_lbutton_down)
 		EVENT_ON_LBUTTON_UP(hand_spinbox_lbutton_up)
 
-		EVENT_ON_XFONT(hand_spinbox_xfont)
-
-		
-
 	EVENT_END_DISPATH
 
 	return widget_create(NULL, style, pxr, widget, &ev);
@@ -225,7 +209,7 @@ void spinbox_popup_size(widget_t widget, xsize_t* pxs)
 
 	get_canvas_measure(widget_get_canvas(widget), &im);
 
-	calc_spinbox_size(&im, &ptd->xf, pxs);
+	calc_spinbox_size(&im, pxs);
 
 	widget_size_to_pt(widget, pxs);
 

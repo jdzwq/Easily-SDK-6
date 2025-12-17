@@ -31,7 +31,11 @@
 
 #define GENPRIME
 #define HAVE_LONGLONG
+#ifdef _OS_64
 #define HAVE_INT64
+#else
+#define HAVE_INT32
+#endif
 //#define HAVE_ASM
 
 #define ERR_MPI_NOT_ACCEPTABLE	(-2)

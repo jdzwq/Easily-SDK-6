@@ -35,7 +35,6 @@ typedef struct _pushbox_delta_t{
 	tchar_t* sz_text;
 	bool_t b_check;
 
-	xfont_t xf;
 }pushbox_delta_t;
 
 #define GETPUSHBOXDELTA(ph) 	(pushbox_delta_t*)widget_get_user_delta(ph)
@@ -61,8 +60,6 @@ int hand_pushbox_create(widget_t widget, void* data)
 
 	ptd = (pushbox_delta_t*)xmem_alloc(sizeof(pushbox_delta_t));
 	xmem_zero((void*)ptd, sizeof(pushbox_delta_t));
-
-	default_widget_xfont(&ptd->xf);
 
 	SETPUSHBOXDELTA(widget, ptd);
 
@@ -153,13 +150,6 @@ void hand_pushbox_size(widget_t widget, int code, const xsize_t* prs)
 	}
 }
 
-void hand_pushbox_xfont(widget_t widget, const xfont_t* pxf)
-{
-	pushbox_delta_t* ptd = GETPUSHBOXDELTA(widget);
-	
-	xmem_copy((void*)&ptd->xf, (void*)pxf, sizeof(xfont_t));
-}
-
 void hand_pushbox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 {
 	pushbox_delta_t* ptd = GETPUSHBOXDELTA(widget);
@@ -221,7 +211,7 @@ void hand_pushbox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 		xr_box.fh = pif->rect.fh;
 
 		xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_NEAR);
-		(pif->pf_draw_text)(pif->ctx, &ptd->xf, &xa, &xr_box, ptd->sz_text, -1);
+		(pif->pf_draw_text)(pif->ctx, &xa, &xr_box, ptd->sz_text, -1);
 	}
 	else if (ws & WD_PUSHBOX_ICON)
 	{
@@ -296,7 +286,7 @@ void hand_pushbox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 		xr_box.fh = pif->rect.fh;
 
 		xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_CENTER);
-		(pif->pf_draw_text)(pif->ctx, &ptd->xf, &xa, &xr_box, ptd->sz_text, -1);
+		(pif->pf_draw_text)(pif->ctx, &xa, &xr_box, ptd->sz_text, -1);
 	}
 
 	end_canvas_paint(canv, dc, pxr);
@@ -318,8 +308,6 @@ widget_t pushbox_create(widget_t widget, dword_t style, const xrect_t* pxr)
 
 		EVENT_ON_LBUTTON_DOWN(hand_pushbox_lbutton_down)
 		EVENT_ON_LBUTTON_UP(hand_pushbox_lbutton_up)
-
-		EVENT_ON_XFONT(hand_pushbox_xfont)
 
 	EVENT_END_DISPATH
 
@@ -372,7 +360,7 @@ void pushbox_popup_size(widget_t widget, xsize_t* pxs)
 
 	pif = widget_get_canvas_interface(widget);
 
-	(pif->pf_text_size)(pif->ctx, &ptd->xf, ptd->sz_text, -1, &xs);
+	(pif->pf_text_size)(pif->ctx, ptd->sz_text, -1, &xs);
 
 	if (xs.fw < xs.fh)
 		xs.fw = xs.fh;

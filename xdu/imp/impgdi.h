@@ -357,6 +357,17 @@ LOC_API void	draw_path_raw(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb,
 */
 LOC_API void	draw_path(canvas_t canv, const xpen_t* pxp, const xbrush_t* pxb, const tchar_t* aa, const xpoint_t* pa, int n);
 
+LOC_API void	set_xfont_raw(visual_t rdc, const xfont_t* pxf);
+
+LOC_API void	set_xfont(canvas_t canv, const xfont_t* pxf);
+
+LOC_API void	get_xfont_raw(visual_t rdc, xfont_t* pxf);
+
+LOC_API void	get_xfont(canvas_t canv, xfont_t* pxf);
+
+LOC_API void	font_size_raw(visual_t rdc, xsize_t* pxs);
+LOC_API void	font_size(canvas_t canv, xsize_t* pxs);
+
 /*
 @FUNCTION multi_line_raw: draw multiple base line in memory or device context using points coordinate, the line separated by line height of font and face.
 @INPUT visual_t rdc: the context resource handle.
@@ -366,7 +377,7 @@ LOC_API void	draw_path(canvas_t canv, const xpen_t* pxp, const xbrush_t* pxb, co
 @INPUT const xrect_t* pxr: the rect struct using integer member.
 @RETURN void: none.
 */
-LOC_API void	multi_line_raw(visual_t rdc, const xfont_t* pxf, const xface_t* pxa, const xpen_t* pxp, const xrect_t* pxr);
+LOC_API void	multi_line_raw(visual_t rdc, const xface_t* pxa, const xpen_t* pxp, const xrect_t* pxr);
 
 /*
 @FUNCTION multi_line: draw multiple base line in canvas using millimeter coordinate, the line separated by line height of font and face.
@@ -377,7 +388,7 @@ LOC_API void	multi_line_raw(visual_t rdc, const xfont_t* pxf, const xface_t* pxa
 @INPUT const xrect_t* pxr: the rect struct using float member.
 @RETURN void: none.
 */
-LOC_API void	multi_line(canvas_t canv, const xfont_t* pxf, const xface_t* pxa, const xpen_t* pxp, const xrect_t* pxr);
+LOC_API void	multi_line(canvas_t canv, const xface_t* pxa, const xpen_t* pxp, const xrect_t* pxr);
 
 /*
 @FUNCTION draw_text_raw: draw text in memory or device context using points coordinate.
@@ -389,7 +400,7 @@ LOC_API void	multi_line(canvas_t canv, const xfont_t* pxf, const xface_t* pxa, c
 @INPUT int len: the text length in characters, -1 indicate the text is terminated by zero.
 @RETURN void: none.
 */
-LOC_API void	draw_text_raw(visual_t rdc, const xfont_t* pxf, const xface_t* pxa, const xrect_t* pxr, const tchar_t* txt, int len);
+LOC_API void	draw_text_raw(visual_t rdc, const xface_t* pxa, const xrect_t* pxr, const tchar_t* txt, int len);
 
 /*
 @FUNCTION draw_text: draw text in canvas using millimeter coordinate.
@@ -401,7 +412,7 @@ LOC_API void	draw_text_raw(visual_t rdc, const xfont_t* pxf, const xface_t* pxa,
 @INPUT int len: the text length in characters, -1 indicate the text is terminated by zero.
 @RETURN void: none.
 */
-LOC_API void	draw_text(canvas_t canv, const xfont_t* pxf, const xface_t* pxa, const xrect_t* pxr, const tchar_t* txt, int len);
+LOC_API void	draw_text(canvas_t canv, const xface_t* pxa, const xrect_t* pxr, const tchar_t* txt, int len);
 
 /*
 @FUNCTION text_out_raw: output text in memory or device context using points coordinate.
@@ -412,7 +423,7 @@ LOC_API void	draw_text(canvas_t canv, const xfont_t* pxf, const xface_t* pxa, co
 @INPUT int len: the text length in characters, -1 indicate the text is terminated by zero.
 @RETURN void: none.
 */
-LOC_API void	text_out_raw(visual_t rdc, const xfont_t* pxf, const xpoint_t* ppt, const tchar_t* txt, int len);
+LOC_API void	text_out_raw(visual_t rdc, const xface_t* pxa, const xpoint_t* ppt, const tchar_t* txt, int len);
 
 /*
 @FUNCTION text_out: output text in canvas using millimeter coordinate.
@@ -423,7 +434,7 @@ LOC_API void	text_out_raw(visual_t rdc, const xfont_t* pxf, const xpoint_t* ppt,
 @INPUT int len: the text length in characters, -1 indicate the text is terminated by zero.
 @RETURN void: none.
 */
-LOC_API void	text_out(canvas_t canv, const xfont_t* pxf, const xpoint_t* ppt, const tchar_t* txt, int len);
+LOC_API void	text_out(canvas_t canv, const xface_t* pxa, const xpoint_t* ppt, const tchar_t* txt, int len);
 
 /*
 @FUNCTION text_rect_raw: calc the text suitable rect in memory or device context using points coordinate.
@@ -434,7 +445,7 @@ LOC_API void	text_out(canvas_t canv, const xfont_t* pxf, const xpoint_t* ppt, co
 @OUTPUT xrect_t* pxs: the rect struct for returning integer member.
 @RETURN void: none.
 */
-LOC_API void	text_rect_raw(visual_t rdc, const xfont_t* pxf, const xface_t* pxa, const tchar_t* txt, int len, xrect_t* pxs);
+LOC_API void	text_rect_raw(visual_t rdc, const xface_t* pxa, const tchar_t* txt, int len, xrect_t* pxs);
 
 /*
 @FUNCTION text_rect: calc the text suitable rect in canvas using millimeter coordinate.
@@ -445,7 +456,7 @@ LOC_API void	text_rect_raw(visual_t rdc, const xfont_t* pxf, const xface_t* pxa,
 @OUTPUT xrect_t* pxs: the rect struct for returning float member.
 @RETURN void: none.
 */
-LOC_API void	text_rect(canvas_t canv, const xfont_t* pxf, const xface_t* pxa, const tchar_t* txt, int len, xrect_t* pxr);
+LOC_API void	text_rect(canvas_t canv, const xface_t* pxa, const tchar_t* txt, int len, xrect_t* pxr);
 
 /*
 @FUNCTION text_size_raw: calc the text suitable size in memory or device context using points coordinate.
@@ -456,7 +467,7 @@ LOC_API void	text_rect(canvas_t canv, const xfont_t* pxf, const xface_t* pxa, co
 @OUTPUT xsize_t* pxs: the size struct for returning integer member.
 @RETURN void: none.
 */
-LOC_API void	text_size_raw(visual_t rdc, const xfont_t* pxf, const tchar_t* txt, int len, xsize_t* pxs);
+LOC_API void	text_size_raw(visual_t rdc, const tchar_t* txt, int len, xsize_t* pxs);
 
 /*
 @FUNCTION text_size: calc the text suitable size in canvas using millimeter coordinate.
@@ -467,28 +478,7 @@ LOC_API void	text_size_raw(visual_t rdc, const xfont_t* pxf, const tchar_t* txt,
 @OUTPUT xsize_t* pxs: the size struct for returning float member.
 @RETURN void: none.
 */
-LOC_API void	text_size(canvas_t canv, const xfont_t* pxf, const tchar_t* txt, int len, xsize_t* pxr);
-
-/*
-@FUNCTION font_size_raw: calc the character metric in memory or device context using points coordinate.
-@INPUT visual_t rdc: the context resource handle.
-@INPUT cont xfont_t* pxf: the font struct.
-@OUTPUT xsize_t* pxs: the size struct for returning integer member.
-@RETURN void: none.
-*/
-LOC_API void	font_size_raw(visual_t rdc, const xfont_t* pxf, xsize_t* pxs);
-
-/*
-@FUNCTION font_size: calc the character metric in canvas using millimeter coordinate.
-@INPUT canvas_t canv: the canvas object.
-@INPUT cont xfont_t* pxf: the font struct.
-@OUTPUT xsize_t* pxs: the size struct for returning float member.
-@RETURN void: none.
-*/
-LOC_API void	font_size(canvas_t canv, const xfont_t* pxf, xsize_t* pxs);
-
-LOC_API float 	pixel_size_raw(visual_t mgc);
-LOC_API float	pixel_size(canvas_t canv);
+LOC_API void	text_size(canvas_t canv, const tchar_t* txt, int len, xsize_t* pxr);
 
 /*
 @FUNCTION color_out_raw: output color sequence in memory or device context using points coordinate.
@@ -648,10 +638,6 @@ LOC_API void	gradient_rect_raw(visual_t rdc, const xcolor_t* xc_brim, const xcol
 @RETURN void: none.
 */
 LOC_API void	alphablend_rect_raw(visual_t rdc, const xcolor_t* pxc, const xrect_t* prt, int opacity);
-
-LOC_API fontset_t create_fontset(const xfont_t* pxf);
-LOC_API void destroy_fontset(fontset_t ft);
-LOC_API void word_size_raw(fontset_t ft, const tchar_t* pch, int bytes, xsize_t* pxs);
 
 
 #ifdef	__cplusplus

@@ -5,7 +5,7 @@
 #include "geo/geo.h"
 
 #ifdef _OS_WINDOWS
-#pragma comment(lib,"geo.lib")
+//#pragma comment(lib,"geo.lib")
 #endif
 
 #endif //_TP_GEO_H

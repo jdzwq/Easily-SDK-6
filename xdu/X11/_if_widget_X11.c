@@ -573,6 +573,9 @@ static int _message_dispatch(XEvent* pmsg)
 	xpoint_t xp;
 	xrect_t xr;
 	dword_t ms;
+
+	Window org = 0;
+	int rev;
 	
 	switch(pmsg->type)
 	{
@@ -1158,7 +1161,10 @@ static int _message_dispatch(XEvent* pmsg)
 				if(pxw->disable) break;
 				if(pxw->style & WD_STYLE_NOACTIVE) break;
 
-				XSetInputFocus(g_display, pxw->self, RevertToParent, CurrentTime);
+				XGetInputFocus(g_display, &org, &rev);
+				if(org == pxw->self) break;
+
+				XSetInputFocus(g_display, pxw->self, RevertToNone, CurrentTime);
 				break;
 			}
 
@@ -1228,10 +1234,14 @@ widget_t _widget_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr
     Window win, rot, par;
     int screen_num, screen_dep;
 	int window_x, window_y, window_width, window_height, border_width = 0;
-    XSetWindowAttributes attr = {0};
+    XSetWindowAttributes wattr = {0};
 	Atom atom, atoms[2] = {0};
 	XWMHints *hints = NULL;
-	XWindowAttributes wattr = {0};
+
+	XWindowAttributes rattr = {0};
+	Colormap clrmap;
+	XColor clr;
+	unsigned long bkg_pixel, frg_pixel;
 
 	X11_widget_t* pxw = NULL;
 	if_dispatch_t* pv = NULL;
@@ -1240,9 +1250,6 @@ widget_t _widget_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr
 	screen_dep = DefaultDepth(g_display, screen_num);
 	rot = RootWindow(g_display, screen_num);
 
-	attr.border_pixel = BlackPixel(g_display, screen_num);
-	attr.background_pixel = WhitePixel(g_display, screen_num);
-
 	if(wstyle & WD_STYLE_CHILD)
 		par = pxw_par->self;
 	else
@@ -1250,26 +1257,26 @@ widget_t _widget_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr
 
 	if(wstyle & WD_STYLE_TITLE)
 	{
-		attr.override_redirect = False;
-		attr.event_mask = WIDGET_MAIN_EVENTS;
+		wattr.override_redirect = False;
+		wattr.event_mask = WIDGET_MAIN_EVENTS;
 		border_width = 0;
 	}else
 	{
-		attr.override_redirect = True;
+		wattr.override_redirect = True;
 		if(wstyle & WD_STYLE_CHILD)
 		{
 			border_width = 0;
-			attr.event_mask = WIDGET_CHILD_EVENTS;
+			wattr.event_mask = WIDGET_CHILD_EVENTS;
 		}else
 		{
 			border_width = WIDGET_BORDER_WIDTH;
-			attr.event_mask = WIDGET_POPUP_EVENTS;
+			wattr.event_mask = WIDGET_POPUP_EVENTS;
 		}
 	}
 
 	if(wstyle & WD_STYLE_NOACTIVE)
 	{
-		attr.event_mask &= ~(KeyPressMask | KeyReleaseMask | FocusChangeMask);
+		wattr.event_mask &= ~(KeyPressMask | KeyReleaseMask | FocusChangeMask);
 	}
 
 	window_x = pxr->x;
@@ -1284,8 +1291,8 @@ widget_t _widget_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr
 			screen_dep,
 			InputOutput,
             CopyFromParent,
-            (CWOverrideRedirect | CWBorderPixel | CWBackPixel | CWEventMask),
-            &attr);
+            (CWOverrideRedirect | CWEventMask),
+            &wattr);
 
 
 	if(!win) return (widget_t)0;
@@ -1335,11 +1342,15 @@ widget_t _widget_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr
 	if(wstyle & WD_STYLE_NOACTIVE)
 	{
 		hints = XAllocWMHints();
-		hints->flags |= InputHint;
+		hints->flags = InputHint;
 		hints->input = False;
 		XSetWMHints(g_display, win, hints);
 		XFree(hints);
 	}
+
+	XGetWindowAttributes(g_display, win, &rattr);
+	//bkg_pixel = wattr.background_pixel;
+    //frg_pixel = wattr.border_pixel;
 
 	pxw = (X11_widget_t*)xmem_alloc_handle(sizeof(X11_widget_t));
 
@@ -1349,7 +1360,7 @@ widget_t _widget_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr
 	pxw->style = wstyle;
 	pxw->mode = WS_MODE_NORMAL;
 	pxw->state = WS_SHOW_HIDE;
-	pxw->evmsk = attr.event_mask;
+	pxw->evmsk = wattr.event_mask;
 	pxw->accel = NULL;
 	
 	pxw->pt.x = window_x;
@@ -1357,7 +1368,31 @@ widget_t _widget_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr
 	pxw->st.w = window_width;
 	pxw->st.h = window_height;
 
-	default_widget_color_mode(&(pxw->clrs));
+	clrmap = DefaultColormap(g_display, screen_num);
+
+    clr.pixel = bkg_pixel = BlackPixel(g_display, screen_num);
+    XQueryColor(g_display, clrmap, &clr);
+
+	pxw->clrs.clr_bkg.r = clr.red >> 8;
+	pxw->clrs.clr_bkg.g = clr.green >> 8;
+	pxw->clrs.clr_bkg.b = clr.blue >> 8;
+	pxw->clrs.clr_bkg.a = 255;
+
+	clr.pixel = frg_pixel = WhitePixel(g_display, screen_num);;
+    XQueryColor(g_display, clrmap, &clr);
+	
+	pxw->clrs.clr_frg.r = clr.red >> 8;
+	pxw->clrs.clr_frg.g = clr.green >> 8;
+	pxw->clrs.clr_frg.b = clr.blue >> 8;
+	pxw->clrs.clr_frg.a = 255;
+
+	clr.pixel = WhitePixel(g_display, screen_num);;
+    XQueryColor(g_display, clrmap, &clr);
+	
+	pxw->clrs.clr_txt.r = clr.red >> 8;
+	pxw->clrs.clr_txt.g = clr.green >> 8;
+	pxw->clrs.clr_txt.b = clr.blue >> 8;
+	pxw->clrs.clr_txt.a = 255;
 
 	if(wstyle & WD_STYLE_EDITOR)
 	{
@@ -1365,6 +1400,7 @@ widget_t _widget_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr
 	}
 
 	SETXDUSTRUCT(win, pxw);
+
 	if(pev)
 	{
 		pv = (if_dispatch_t*)xmem_alloc(sizeof(if_dispatch_t));
@@ -1929,7 +1965,7 @@ void _widget_set_capture(widget_t wt, bool_t b)
 {
 	X11_widget_t* pxw = TypePtrFromHead(X11_widget_t, wt);
 
-	if(b)
+	/*if(b)
 	{
 		XGrabPointer(g_display, pxw->self, 0, 
 			ButtonPressMask | ButtonReleaseMask | PointerMotionMask | FocusChangeMask | EnterWindowMask | LeaveWindowMask,
@@ -1937,7 +1973,7 @@ void _widget_set_capture(widget_t wt, bool_t b)
 	}else 
 	{
 		XUngrabPointer(g_display, CurrentTime);
-	}
+	}*/
 }
 
 static void _widget_timer_proc(void* pa, res_timer_t rt)
@@ -2074,6 +2110,7 @@ void _widget_set_focus(widget_t wt)
     event.xclient.data.l[1] = CurrentTime;
 
     XSendEvent(g_display, pxw->self, False, SubstructureNotifyMask, &event);
+	XFlush(g_display);
 }
 
 bool_t _widget_key_state(widget_t wt, int ks)
@@ -2376,6 +2413,7 @@ void _widget_post_wchar(widget_t wt, wchar_t ch)
 	ev.data.l[0] = (long)ch;
 
 	XSendEvent(g_display, pxw->self, False, SubstructureNotifyMask, (XEvent *)&ev);
+	XFlush(g_display);
 }
 
 void _widget_post_key(widget_t wt, int key)
@@ -2429,6 +2467,8 @@ void _widget_post_key(widget_t wt, int key)
 	ev.same_screen = 1;
 
 	XSendEvent (g_display, pxw->self, False, NoEventMask, (XEvent*)&ev);
+
+	XFlush(g_display);
 }
 
 void _widget_set_title(widget_t wt, const tchar_t* token)
@@ -2619,6 +2659,13 @@ void _widget_get_color_mode(widget_t wt, color_mod_t* pclr)
 	X11_widget_t* pxw = TypePtrFromHead(X11_widget_t, wt);
 
 	xmem_copy((void*)pclr, (void*)&(pxw->clrs), sizeof(color_mod_t));
+}
+
+const color_mod_t* _widget_get_color_mode_ptr(widget_t wt)
+{
+	X11_widget_t* pxw = TypePtrFromHead(X11_widget_t, wt);
+
+	return &(pxw->clrs);
 }
 
 void _widget_set_diaph(widget_t wt, float f)

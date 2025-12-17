@@ -55,23 +55,23 @@ typedef enum{
 	_TEXTOR_PRESS_ACCEPT = 2
 }TEXTOR_PRESS;
 
-typedef void(*PF_SCAN_TEXT)(void* data, measure_interface* pif, const xfont_t* pxf, const xface_t* pxa, int bx, int by, int bw, int bh, bool_t paged, PF_SCAN_TEXTOR_CALLBACK pf, void* pp);
+typedef void(*PF_SCAN_TEXT)(void* data, measure_interface* pif, const viewbox_t* pvb, const xface_t* pxa, bool_t paged, PF_SCAN_TEXTOR_CALLBACK pf, void* pp);
 typedef int(*PF_GET_TEXT)(void* data, tchar_t* buf, int max);
 typedef void(*PF_SET_TEXT)(void* data, const tchar_t* buf, int len);
 typedef bool_t(*PF_GET_PAGING)(widget_t wt, xsize_t* pse);
+typedef const xfont_t*(*PF_GET_XFONT_PTR)(widget_t wt);
+typedef const xface_t*(*PF_GET_XFACE_PTR)(widget_t wt);
 
 typedef struct _textor_context{
 	widget_t widget;
 	visual_t cdc;
 	viewbox_t vb;
 
-	const xfont_t* pxf;
-	const xface_t* pxa;
-
 	void* data;
 	void* object;
 	bool_t atom;
 
+	int wrap;
 	bool_t paged;
 	int pages;
 	int page;
@@ -86,6 +86,8 @@ typedef struct _textor_context{
 	PF_GET_TEXT	pf_get_text;
 	PF_SET_TEXT pf_set_text;
 	PF_GET_PAGING pf_get_paging;
+	PF_GET_XFONT_PTR pf_get_xfont_ptr;
+	PF_GET_XFACE_PTR pf_get_xface_ptr;
 
 	int max_undo;
 	TEXTORUNDO* ptu;

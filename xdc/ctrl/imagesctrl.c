@@ -454,7 +454,7 @@ void noti_images_begin_edit(widget_t widget)
 	widget_set_user_id(ptd->editor, IDC_FIREEDIT);
 	widget_set_owner(ptd->editor, widget);
 
-	widget_noti_xfont(ptd->editor, &xf);
+	editbox_set_xfont(ptd->editor, &xf);
 	widget_set_color_mode(ptd->editor, &ob);
 
 	widget_show(ptd->editor, WS_SHOW_NORMAL);

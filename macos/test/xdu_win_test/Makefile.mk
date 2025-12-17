@@ -30,7 +30,7 @@ $(OBJ_PATH)%.o : $(SRC_PATH)/%.cc
 
 all : $(OBJS)
 	rm -f $@
-	$(CC) -o $(OBJ_PATH)/$(MODULE) $(OBJS) -L $(LIB_PATH) -lxdk -lxdg -lxdu \
+	$(CC) -o $(OUT_PATH)/$(MODULE) $(OBJS) -L $(LIB_PATH) -lxdk -lxdg -lxdu \
 	-Wl,-rpath $(LIB_PATH)
 
 test:
@@ -38,21 +38,15 @@ test:
 	mkdir -p $(OBJ_PATH); \
 	chmod 755 $(OBJ_PATH); \
 	fi
+	if ! test -d $(OUT_PATH); then \
+	mkdir -p $(OUT_PATH); \
+	chmod 755 $(OUT_PATH); \
+	fi
 	@echo $(DIRS)
 	@echo $(SRCS)
 	@echo $(OBJS)
 
-install:
-	if ! test -d $(OUT_PATH); then \
-	sudo mkdir $(OUT_PATH); \
-	fi
 
-	sudo cp -f $(OBJ_PATH)/$(MODULE) $(OUT_PATH);
-	sudo chmod +x $(OUT_PATH)/$(MODULE);
-
-uninstall:
-	sudo rm -f $(OUT_PATH)/$(MODULE)
-	
 .PHONY : clean
 clean:
 	rm -f $(OBJS)

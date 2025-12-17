@@ -475,6 +475,7 @@ int	get_plot_y_grades(link_t_ptr ptr, double** sa)
 {
 	link_t_ptr nlk, sub;
 	int n = 0;
+	double dbl;
 
 	nlk = find_dom_node_by_name(ptr, 0, DOC_PLOT_Y_GRADES, -1);
 	if (!nlk)
@@ -485,7 +486,8 @@ int	get_plot_y_grades(link_t_ptr ptr, double** sa)
 	{
 		if (compare_text(get_dom_node_name_ptr(sub), -1, DOC_PLOT_Y_GRADE, -1, 1) == 0)
 		{
-			insert_numeric(sa, n, xstonum(get_dom_node_text_ptr(sub)));
+			dbl = xstonum(get_dom_node_text_ptr(sub));
+			insert_numeric(sa, n, &dbl, 1);
 
 			n++;
 		}
@@ -583,6 +585,7 @@ int	get_plot_y_bases(link_t_ptr ptr, double** sa)
 {
 	link_t_ptr nlk, sub;
 	int n = 0;
+	double dbl;
 
 	nlk = find_dom_node_by_name(ptr, 0, DOC_PLOT_Y_BASES, -1);
 	if (!nlk)
@@ -593,7 +596,8 @@ int	get_plot_y_bases(link_t_ptr ptr, double** sa)
 	{
 		if (compare_text(get_dom_node_name_ptr(sub), -1, DOC_PLOT_Y_BASE, -1, 1) == 0)
 		{
-			insert_numeric(sa, n, xstonum(get_dom_node_text_ptr(sub)));
+			dbl = xstonum(get_dom_node_text_ptr(sub));
+			insert_numeric(sa, n, &dbl, 1);
 
 			n++;
 		}
@@ -691,6 +695,7 @@ int	get_plot_y_steps(link_t_ptr ptr, double** sa)
 {
 	link_t_ptr nlk, sub;
 	int n = 0;
+	double dbl;
 
 	nlk = find_dom_node_by_name(ptr, 0, DOC_PLOT_Y_STEPS, -1);
 	if (!nlk)
@@ -701,7 +706,8 @@ int	get_plot_y_steps(link_t_ptr ptr, double** sa)
 	{
 		if (compare_text(get_dom_node_name_ptr(sub), -1, DOC_PLOT_Y_STEP, -1, 1) == 0)
 		{
-			insert_numeric(sa, n, xstonum(get_dom_node_text_ptr(sub)));
+			dbl = xstonum(get_dom_node_text_ptr(sub));
+			insert_numeric(sa, n, &dbl, 1);
 
 			n++;
 		}
@@ -1436,8 +1442,6 @@ void set_plot_matrix_data(link_t_ptr ptr, const tchar_t* data, int len)
 void get_plot_matrix(link_t_ptr ptr, matrix_t mt)
 {
 	link_t_ptr nlk, sub;
-
-	matrix_reset(mt, get_plot_matrix_rows(ptr), get_plot_matrix_cols(ptr));
 
 	nlk = find_dom_node_by_name(ptr, 0, DOC_MATRIX, -1);
 	if (!nlk)

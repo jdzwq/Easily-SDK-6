@@ -33,7 +33,6 @@ typedef struct _menu_delta_t{
 	link_t_ptr menu;
 	link_t_ptr item;
 
-	xfont_t xf;
 }menu_delta_t;
 
 #define GETMENUDELTA(widget) 	((menu_delta_t*)widget_get_user_delta(widget))
@@ -154,8 +153,6 @@ int hand_menu_create(widget_t widget, void* data)
 
 	ptd = (menu_delta_t*)xmem_alloc(sizeof(menu_delta_t));
 	xmem_zero((void*)ptd, sizeof(menu_delta_t));
-
-	default_widget_xfont(&ptd->xf);
 
 	SETMENUDELTA(widget, ptd);
 
@@ -302,13 +299,6 @@ void hand_menu_scroll(widget_t widget, bool_t bHorz, int nLine)
 	widget_hand_scroll(widget, bHorz, nLine);
 }
 
-void hand_menu_xfont(widget_t widget, const xfont_t* pxf)
-{
-	menu_delta_t* ptd = GETMENUDELTA(widget);
-
-	xmem_copy((void*)&ptd->xf, (void*)pxf, sizeof(xfont_t));
-}
-
 void hand_menu_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 {
 	menu_delta_t* ptd = GETMENUDELTA(widget);
@@ -380,10 +370,6 @@ widget_t menubox_create(widget_t wparent, dword_t wstyle, const xrect_t* pxr)
 		EVENT_ON_LBUTTON_UP(hand_menu_lbutton_up)
 		EVENT_ON_RBUTTON_DOWN(hand_menu_rbutton_down)
 		EVENT_ON_RBUTTON_UP(hand_menu_rbutton_up)
-
-		EVENT_ON_XFONT(hand_menu_xfont)
-
-		
 
 	EVENT_END_DISPATH
 

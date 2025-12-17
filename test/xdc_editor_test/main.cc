@@ -74,7 +74,7 @@ void _MainFrame_CreateEditor(widget_t widget)
 	widget_set_user_id(pdt->hEditor, IDC_EDITBOX);
 	widget_set_owner(pdt->hEditor, widget);
 
-	widget_set_color_mode(pdt->hEditor, &clrs);
+	//widget_set_color_mode(pdt->hEditor, &clrs);
 
 	widget_show(pdt->hEditor, WS_SHOW_NORMAL);
 

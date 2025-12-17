@@ -63,8 +63,9 @@ schar_t* a_xsnclone(const schar_t* str, int len)
 {
 	schar_t* token;
 
-	if (a_is_null(str))
-		return NULL;
+	if(len < 0) len = a_xslen(str);
+
+	if (a_is_null(str) || !len) return NULL;
 
 	token = a_xsalloc(len + 1);
 
@@ -76,8 +77,9 @@ wchar_t* w_xsnclone(const wchar_t* str, int len)
 {
 	wchar_t* token;
 
-	if (w_is_null(str))
-		return NULL;
+	if(len < 0) len = w_xslen(str);
+
+	if (w_is_null(str) || !len) return NULL;
 
 	token = w_xsalloc(len + 1);
 
@@ -1461,7 +1463,7 @@ float a_xsntof(const schar_t* sz, int n)
 {
 	bool_t sign = 0;
 	int prec = MAX_FLOAT_DIGI;
-	int mul = 1;
+	sword_t mul = 1;
 	int num = 0;
 	int dec = 0; 
 	float f = 0;
@@ -1520,7 +1522,7 @@ float w_xsntof(const wchar_t* sz, int n)
 {
 	int sign = 0;
 	int prec = MAX_FLOAT_DIGI;
-	int mul = 1;
+	sword_t mul = 1;
 	int num = 0;
 	int dec = 0; 
 	float f = 0;
@@ -1795,7 +1797,7 @@ int w_ftoxs(float f, wchar_t* buf, int n)
 double a_xsntonum_dig(const schar_t* sz, int n, int prec)
 {
 	bool_t sign = 0;
-	int mul = 1;
+	dword_t mul = 1;
 	int num = 0;
 	int dec = 0;
 	double f = 0;
@@ -1851,7 +1853,7 @@ double a_xsntonum_dig(const schar_t* sz, int n, int prec)
 double w_xsntonum_dig(const wchar_t* sz, int n, int prec)
 {
 	int sign = 0;
-	int mul = 1;
+	dword_t mul = 1;
 	int num = 0;
 	int dec = 0;
 	double f = 0;

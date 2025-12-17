@@ -1,8 +1,4 @@
-﻿
-#ifndef _BAR_H
-#define	_BAR_H
-
-/***********************************************************************
+﻿/***********************************************************************
 	Easily SDK v6.0
 
 	(c) 2013-2016 JianDe LiFang Technology Corporation.  All Rights Reserved.
@@ -11,7 +7,7 @@
 
 	@doc codepage document
 
-	@module	acp.h | interface file
+	@module	bar.h | interface file
 
 	@devnote 张文权 2021.01 - 2021.12	v6.0
 ***********************************************************************/
@@ -27,6 +23,9 @@ but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
 LICENSE.GPL3 for more details.
 ***********************************************************************/
+
+#ifndef _BAR_H
+#define	_BAR_H
 
 #include "../xdkdef.h"
 
@@ -49,10 +48,10 @@ EXP_API dword_t code128_encode(const byte_t* token, dword_t len, byte_t* buf, dw
 /***********************************************************************
 @FUNCTION: get code128 sequence drawing units.
 @INPUT: code128-encoded sequence.
-@INPUT: column indicated.
+@INPUT: bar sequence bytes.
 @RETURN: the count of code128 drawing units.
 ***********************************************************************/
-EXP_API int code128_units(const byte_t* bar_buf, int cols);
+EXP_API int code128_units(const byte_t* bar_buf, dword_t bar_len);
 
 /***********************************************************************
 @FUNCTION: encode binary sequence to pdf417 sequence.
@@ -99,6 +98,11 @@ EXP_API dword_t qr_encode(const byte_t* token, dword_t len, byte_t* buf, dword_t
 @RETURN: the count of qrcode drawing units.
 ***********************************************************************/
 EXP_API int qr_units(const byte_t* bar_buf, int rows, int cols);
+
+
+#if defined (DEBUG) || defined (_DEBUG)
+EXP_API void bar_self_test(void);
+#endif
 
 #ifdef	__cplusplus
 }

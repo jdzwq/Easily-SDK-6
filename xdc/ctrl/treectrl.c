@@ -1002,7 +1002,7 @@ void treectrl_accept(widget_t widget, bool_t bAccept)
 	noti_tree_reset_editor(widget, bAccept);
 }
 
-bool_t _redraw_tree_node(link_t_ptr plk, void* pv)
+bool_t CALLBACK _redraw_tree_node(link_t_ptr plk, void* pv)
 {
 	tree_redraw_param* ptp = (tree_redraw_param*)pv;
 

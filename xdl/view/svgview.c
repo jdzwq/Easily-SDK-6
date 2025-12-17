@@ -162,19 +162,20 @@ void draw_svg(const drawing_interface* pif, const xrect_t* pbox, link_t_ptr ptr)
 			xmem_zero((void*)&xf, sizeof(xfont_t));
 			xmem_zero((void*)&xa, sizeof(xface_t));
 			sz_text = read_text_from_svg_node(ilk, &xf, &xa, &xr);
+			(*pif->pf_set_xfont)(pif->ctx, &xf);
 			svg_rect_pt_to_mm(canv, &xr);
 
 			xr.fx += pbox->fx;
 			xr.fy += pbox->fy;
 			if (xr.h)
 			{
-				(*pif->pf_draw_text)(pif->ctx, &xf, &xa, &xr, sz_text, -1);
+				(*pif->pf_draw_text)(pif->ctx, &xa, &xr, sz_text, -1);
 			}
 			else
 			{
 				pt[0].fx = xr.fx;
 				pt[0].fy = xr.fy;
-				(*pif->pf_text_out)(pif->ctx, &xf, &pt[0], sz_text, -1);
+				(*pif->pf_text_out)(pif->ctx, &xa, &pt[0], sz_text, -1);
 			}
 		}
 		else if (compare_text(sz_name, -1, SVG_NODE_PATH, -1, 1) == 0)

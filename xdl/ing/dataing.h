@@ -44,7 +44,7 @@ extern "C" {
 @INPUT int len: the text length in characters, -1 indicate the text is terminated by zero.
 @RETURN void: none.
 */
-EXP_API void	draw_pass(const drawing_interface* pif,  const xfont_t* pxf, const xface_t* pxa, const xrect_t* pxr, const tchar_t* txt, int len);
+EXP_API void	draw_pass(const drawing_interface* pif,  const xface_t* pxa, const xrect_t* pxr, const tchar_t* txt, int len);
 
 /*
 @FUNCTION draw_data: draw the formated data in canvas using millimeter coordinate.
@@ -61,7 +61,7 @@ EXP_API void	draw_pass(const drawing_interface* pif,  const xfont_t* pxf, const 
 @INPUT bool_t autowap: if nonzero, the text will auto
 @RETURN void: none.
 */
-EXP_API void	draw_data(const drawing_interface* pif, const xfont_t* pxf, const xface_t* pxa, const xrect_t* pxr, const tchar_t* data, int len, int dig, const tchar_t* type, const tchar_t* fmt, bool_t zeronull, bool_t autowrap);
+EXP_API void	draw_data(const drawing_interface* pif, const xface_t* pxa, const xrect_t* pxr, const tchar_t* data, int len, int dig, const tchar_t* type, const tchar_t* fmt, bool_t zeronull, bool_t autowrap);
 
 
 #ifdef	__cplusplus

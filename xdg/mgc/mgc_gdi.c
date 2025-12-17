@@ -1649,14 +1649,14 @@ void mgc_draw_path(canvas_t canv, const xpen_t *pxp, const xbrush_t *pxb, const 
 	xmem_free(ppt);
 }
 
-void mgc_multi_line_raw(visual_t mgc, const xfont_t *pxf, const xface_t *pxa, const xpen_t *pxp, const xrect_t *pxr)
+void mgc_multi_line_raw(visual_t mgc, const xface_t *pxa, const xpen_t *pxp, const xrect_t *pxr)
 {
 	device_t hand;
 	int rop;
 	mem_device_ptr pdev;
 
 	XDK_ASSERT(mgc != NULL);
-	XDK_ASSERT(pxf != NULL && pxp != NULL && pxr != NULL);
+	XDK_ASSERT(pxp != NULL && pxr != NULL);
 
 	float line_rati;
 	int th, lh;
@@ -1675,7 +1675,7 @@ void mgc_multi_line_raw(visual_t mgc, const xfont_t *pxf, const xface_t *pxa, co
 	if (line_rati < 1.0)
 		line_rati = 1.0;
 
-	mgc_font_size_raw(mgc, pxf, &xs);
+	mgc_font_size_raw(mgc, &xs);
 
 	th = xs.h;
 	lh = (int)((float)th * (line_rati - 1.0));
@@ -1696,7 +1696,7 @@ void mgc_multi_line_raw(visual_t mgc, const xfont_t *pxf, const xface_t *pxa, co
 	}
 }
 
-void mgc_multi_line(canvas_t canv, const xfont_t *pxf, const xface_t *pxa, const xpen_t *pxp, const xrect_t *pxr)
+void mgc_multi_line(canvas_t canv, const xface_t *pxa, const xpen_t *pxp, const xrect_t *pxr)
 {
 	visual_t view;
 	xrect_t xr;
@@ -1706,10 +1706,10 @@ void mgc_multi_line(canvas_t canv, const xfont_t *pxf, const xface_t *pxa, const
 
 	view = mgc_get_canvas_visual(canv);
 
-	mgc_multi_line_raw(view, pxf, pxa, pxp, &xr);
+	mgc_multi_line_raw(view, pxa, pxp, &xr);
 }
 
-void mgc_text_out_raw(visual_t mgc, const xfont_t *pxf, const xpoint_t *ppt, const tchar_t *txt, int len)
+void mgc_text_out_raw(visual_t mgc, const xface_t* pxa, const xpoint_t *ppt, const tchar_t *txt, int len)
 {
 	device_t hand;
 	int rop;
@@ -1725,7 +1725,7 @@ void mgc_text_out_raw(visual_t mgc, const xfont_t *pxf, const xpoint_t *ppt, con
 	int x, y, w, n;
 
 	XDK_ASSERT(mgc != NULL);
-	XDK_ASSERT(pxf != NULL && ppt != NULL);
+	XDK_ASSERT(ppt != NULL);
 
 	TRY_CATCH;
 
@@ -1735,7 +1735,7 @@ void mgc_text_out_raw(visual_t mgc, const xfont_t *pxf, const xpoint_t *ppt, con
 	if (len < 0)
 		len = xslen(txt);
 
-	pmf = mgc_get_font_interface(mgc, pxf, &ft);
+	pmf = mgc_get_font_interface(mgc, &ft);
 	if(!pmf)
 	{
 		raise_user_error(_T("mgc_text_out"), _T("font interface"));
@@ -1757,7 +1757,7 @@ void mgc_text_out_raw(visual_t mgc, const xfont_t *pxf, const xpoint_t *ppt, con
 	x = ppt->x;
 	y = ppt->y;
 
-	parse_xcolor(&xc, pxf->color);
+	parse_xcolor(&xc, pxa->text_color);
 
 	while (len)
 	{
@@ -1794,7 +1794,7 @@ ONERROR:
 	return;
 }
 
-void mgc_text_out(canvas_t canv, const xfont_t *pxf, const xpoint_t *ppt, const tchar_t *txt, int len)
+void mgc_text_out(canvas_t canv, const xface_t* pxa, const xpoint_t *ppt, const tchar_t *txt, int len)
 {
 	xpoint_t pt = {0};
 	visual_t view;
@@ -1806,10 +1806,10 @@ void mgc_text_out(canvas_t canv, const xfont_t *pxf, const xpoint_t *ppt, const 
 
 	mgc_point_mm_to_pt(canv, &pt);
 
-	mgc_text_out_raw(view, pxf, &pt, txt, len);
+	mgc_text_out_raw(view, pxa, &pt, txt, len);
 }
 
-void mgc_draw_text_raw(visual_t mgc, const xfont_t *pxf, const xface_t *pxa, const xrect_t *pxr, const tchar_t *txt, int len)
+void mgc_draw_text_raw(visual_t mgc, const xface_t *pxa, const xrect_t *pxr, const tchar_t *txt, int len)
 {
 	device_t hand;
 	int rop;
@@ -1826,7 +1826,7 @@ void mgc_draw_text_raw(visual_t mgc, const xfont_t *pxf, const xface_t *pxa, con
 	xrect_t *pa = NULL;
 
 	XDK_ASSERT(mgc != NULL);
-	XDK_ASSERT(pxf != NULL && pxr != NULL);
+	XDK_ASSERT(pxr != NULL);
 
 	TRY_CATCH;
 
@@ -1839,7 +1839,7 @@ void mgc_draw_text_raw(visual_t mgc, const xfont_t *pxf, const xface_t *pxa, con
 		raise_user_error(_T("mgc_draw_text"), _T("empty text"));
 	}
 
-	pmf = mgc_get_font_interface(mgc, pxf, &ft);
+	pmf = mgc_get_font_interface(mgc, &ft);
 	if(!pmf)
 	{
 		raise_user_error(_T("mgc_draw_text"), _T("font interface"));
@@ -1859,11 +1859,11 @@ void mgc_draw_text_raw(visual_t mgc, const xfont_t *pxf, const xface_t *pxa, con
 	}
 
 	pa = (xrect_t *)xmem_alloc(sizeof(xrect_t) * len);
-	mgc_text_indicate_raw(mgc, pxf, pxa, txt, -1, pxr, pa, len);
+	mgc_text_indicate_raw(mgc, pxa, txt, -1, pxr, pa, len);
 
-	parse_xcolor(&xc, pxf->color);
+	parse_xcolor(&xc, pxa->text_color);
 
-	copy_rect(&xr,pxr);
+	copy_rect(&xr, pxr);
 
 	(*(pdev->LpToDp))(hand, RECTPOINT(pa), 2 * len);
 	(*(pdev->LpToDp))(hand, RECTPOINT(&xr), 2);
@@ -1903,7 +1903,7 @@ ONERROR:
 	return;
 }
 
-void mgc_draw_text(canvas_t canv, const xfont_t *pxf, const xface_t *pxa, const xrect_t *pxr, const tchar_t *txt, int len)
+void mgc_draw_text(canvas_t canv, const xface_t *pxa, const xrect_t *pxr, const tchar_t *txt, int len)
 {
 	visual_t view;
 	xrect_t xr;
@@ -1917,10 +1917,10 @@ void mgc_draw_text(canvas_t canv, const xfont_t *pxf, const xface_t *pxa, const 
 
 	mgc_rect_mm_to_pt(canv, &xr);
 
-	mgc_draw_text_raw(view, pxf, pxa, &xr, txt, len);
+	mgc_draw_text_raw(view, pxa, &xr, txt, len);
 }
 
-void mgc_text_rect_raw(visual_t mgc, const xfont_t *pxf, const xface_t *pxa, const tchar_t *txt, int len, xrect_t *pxr)
+void mgc_text_rect_raw(visual_t mgc, const xface_t *pxa, const tchar_t *txt, int len, xrect_t *pxr)
 {
 	device_t hand;
 	int rop;
@@ -1934,7 +1934,7 @@ void mgc_text_rect_raw(visual_t mgc, const xfont_t *pxf, const xface_t *pxa, con
 	int w, h, maxw = 0;
 
 	XDK_ASSERT(mgc != NULL);
-	XDK_ASSERT(pxf != NULL && pxr != NULL);
+	XDK_ASSERT(pxr != NULL);
 
 	TRY_CATCH;
 
@@ -1943,7 +1943,7 @@ void mgc_text_rect_raw(visual_t mgc, const xfont_t *pxf, const xface_t *pxa, con
 
 	len = words_count(txt, len);
 
-	pmf = mgc_get_font_interface(mgc, pxf, &ft);
+	pmf = mgc_get_font_interface(mgc, &ft);
 	if(!pmf)
 	{
 		raise_user_error(_T("mgc_text_rect"), _T("font interface"));
@@ -2035,42 +2035,20 @@ ONERROR:
 	return;
 }
 
-void mgc_text_rect(canvas_t canv, const xfont_t *pxf, const xface_t *pxa, const tchar_t *txt, int len, xrect_t *pxr)
+void mgc_text_rect(canvas_t canv, const xface_t *pxa, const tchar_t *txt, int len, xrect_t *pxr)
 {
-	int n, m = 0, total = 0;
-	float fw = 0.0f, fh = 0.0f;
-	float px, pm;
-	tchar_t pch[CHS_LEN + 1] = {0};
+	visual_t view;
 
-	if (len < 0)
-		len = xslen(txt);
+	view = mgc_get_canvas_visual(canv);
 
-	if (is_null(txt) || !len)
-		return;
+	mgc_rect_mm_to_pt(canv, pxr);
 
-	font_metric_by_pt(xstof(pxf->size), &pm, &px);
-	fh = px;
-	m = 0;
-	while (total < len)
-	{
-		n = peek_word((txt + total), pch);
-		m += n;
-		total += n;
-		fw += px;
-		if ((fw >= pxr->fw) || (total == len && (int)fw))
-		{
-			m = 0;
-			fw = 0.0f;
+	mgc_text_rect_raw(view, pxa, txt, len, pxr);
 
-			if (n)
-				fh += px;
-		}
-	}
-
-	pxr->fh = fh;
+	mgc_rect_pt_to_mm(canv, pxr);
 }
 
-void mgc_text_size_raw(visual_t mgc, const xfont_t *pxf, const tchar_t *txt, int len, xsize_t *pxs)
+void mgc_text_size_raw(visual_t mgc, const tchar_t *txt, int len, xsize_t *pxs)
 {
 	device_t hand;
 	int rop;
@@ -2082,7 +2060,7 @@ void mgc_text_size_raw(visual_t mgc, const xfont_t *pxf, const tchar_t *txt, int
 	xsize_t se;
 
 	XDK_ASSERT(mgc != NULL);
-	XDK_ASSERT(pxf != NULL && pxs != NULL);
+	XDK_ASSERT(pxs != NULL);
 
 	TRY_CATCH;
 
@@ -2092,7 +2070,7 @@ void mgc_text_size_raw(visual_t mgc, const xfont_t *pxf, const tchar_t *txt, int
 	if (len < 0)
 		len = xslen(txt);
 
-	pmf = mgc_get_font_interface(mgc, pxf, &ft);
+	pmf = mgc_get_font_interface(mgc, &ft);
 	if(!pmf)
 	{
 		raise_user_error(_T("mgc_text_size"), _T("font interface"));
@@ -2130,120 +2108,85 @@ ONERROR:
 	return;
 }
 
-void mgc_text_size(canvas_t canv, const xfont_t *pxf, const tchar_t *txt, int len, xsize_t *pxs)
+void mgc_text_size(canvas_t canv, const tchar_t *txt, int len, xsize_t *pxs)
 {
-	float pm, mm = 0.0f;
-	int n, total = 0;
-	byte_t chs[5];
-	tchar_t pch[CHS_LEN + 1] = {0};
+	visual_t view;
 
-	font_metric_by_pt(xstof(pxf->size), &pm, NULL);
+	view = mgc_get_canvas_visual(canv);
 
-	if (len < 0)
-		len = xslen(txt);
-	if (is_null(txt) || !len)
-	{
-		pxs->w = 0;
-		pxs->h = 0;
-		return;
-	}
+	mgc_size_mm_to_pt(canv, pxs);
 
-	while (n = peek_word((txt + total), pch))
-	{
-		if (n > 1)
-		{
-			mm += pm;
-		}
-		else if (n > 0)
-		{
-#if defined(_UNICODE) || defined(UNICODE)
-			if (ucs_byte_to_utf8(*(txt + total), chs) > 1)
-				mm += pm;
-			else
-				mm += (float)(pm * 0.75);
-#else
-			mm += (float)(pm * 0.75);
-#endif
-		}
+	mgc_text_size_raw(view, txt, len, pxs);
 
-		total += n;
-	}
-
-	pxs->fw = mm;
-	pxs->fh = pm * 1.2f;
+	mgc_size_pt_to_mm(canv, pxs);
 }
 
-void mgc_font_size_raw(visual_t mgc, const xfont_t *pxf, xsize_t *pxs)
+void mgc_font_size_raw(visual_t mgc, xsize_t *pxs)
 {
 	device_t hand;
 	int rop;
 	mem_device_ptr pdev;
 
 	mem_font_ptr pmf;
-	fontset_t ft;
 	fontset_t fnt = NULL;
 	font_metrix_t fm = {0};
 
 	XDK_ASSERT(mgc != NULL);
-	XDK_ASSERT(pxf != NULL && pxs != NULL);
+	XDK_ASSERT(pxs != NULL);
 
 	TRY_CATCH;
 
 	pdev = mgc_get_device_interface(mgc, &hand);
 	rop = mgc_get_rop(mgc);
 
-	pmf = mgc_get_font_interface(mgc, pxf, &ft);
+	pmf = mgc_get_font_interface(mgc, &fnt);
 	if (!pmf)
 	{
 		raise_user_error(_T("mgc_text_size"), _T("font interface"));
 	}
 
-	fnt = (*pmf->createFontSet)(pxf);
-	if (!fnt)
-	{
-		raise_user_error(_T("mgc_text_size"), _T("createFont"));
-	}
-
 	(*pmf->getFontMetrix)(fnt, NULL, &fm);
-
 	pxs->w = fm.width;
 	pxs->h = fm.height;
-
-	(*pmf->destroyFontSet)(fnt);
-	fnt = NULL;
 
 	END_CATCH;
 
 	return;
 ONERROR:
-	if (fnt)
-		(*pmf->destroyFontSet)(fnt);
 
 	return;
 }
 
-void mgc_font_size(canvas_t canv, const xfont_t *pxf, xsize_t *pxs)
+void mgc_font_size(canvas_t canv, xsize_t *pxs)
 {
 	visual_t view;
 
 	view = mgc_get_canvas_visual(canv);
 
-	mgc_font_size_raw(view, pxf, pxs);
+	mgc_font_size_raw(view, pxs);
 
 	mgc_size_pt_to_mm(canv, pxs);
 }
 
-float mgc_pixel_size_raw(visual_t mgc)
+void mgc_set_xfont(canvas_t canv, const xfont_t* pxf)
 {
-	return LOGMMPERPT;
+	visual_t view;
+
+	view = mgc_get_canvas_visual(canv);
+
+	mgc_set_xfont_raw(view, pxf);
 }
 
-float mgc_pixel_size(canvas_t canv)
+void mgc_get_xfont(canvas_t canv, xfont_t* pxf)
 {
-	return LOGMMPERPT;
+	visual_t view;
+
+	view = mgc_get_canvas_visual(canv);
+
+	mgc_get_xfont_raw(view, pxf);
 }
 
-void mgc_text_indicate_raw(visual_t mgc, const xfont_t *pxf, const xface_t *pxa, const tchar_t *txt, int len, const xrect_t* pxr, xrect_t *pr, int pn)
+void mgc_text_indicate_raw(visual_t mgc, const xface_t *pxa, const tchar_t *txt, int len, const xrect_t* pxr, xrect_t *pr, int pn)
 {
 	device_t hand;
 	int rop;
@@ -2258,7 +2201,7 @@ void mgc_text_indicate_raw(visual_t mgc, const xfont_t *pxf, const xface_t *pxa,
 	int w, h, maxw, maxh;
 
 	XDK_ASSERT(mgc != NULL);
-	XDK_ASSERT(pxf != NULL && pxr != NULL);
+	XDK_ASSERT(pxr != NULL);
 
 	TRY_CATCH;
 
@@ -2268,7 +2211,7 @@ void mgc_text_indicate_raw(visual_t mgc, const xfont_t *pxf, const xface_t *pxa,
 	len = words_count(txt, len);
 	len = (len < pn) ? len : pn;
 
-	pmf = mgc_get_font_interface(mgc, pxf, &ft);
+	pmf = mgc_get_font_interface(mgc, &ft);
 	if(!pmf)
 	{
 		raise_user_error(_T("mgc_text_indicate"), _T("font interface"));
@@ -2404,14 +2347,14 @@ ONERROR:
 	return;
 }
 
-void mgc_text_indicate(canvas_t canv, const xfont_t *pxf, const xface_t *pxa, const tchar_t *str, int len, const xrect_t *pxr, xrect_t *pa, int n)
+void mgc_text_indicate(canvas_t canv, const xface_t *pxa, const tchar_t *str, int len, const xrect_t *pxr, xrect_t *pa, int n)
 {
 	visual_t view;
 	int i;
 
 	view = mgc_get_canvas_visual(canv);
 
-	mgc_text_indicate_raw(view, pxf, pxa, str, len, pxr, pa, n);
+	mgc_text_indicate_raw(view, pxa, str, len, pxr, pa, n);
 
 	for (i = 0; i < n; i++)
 	{

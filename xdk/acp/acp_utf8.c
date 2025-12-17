@@ -304,6 +304,13 @@ int acp_unicode_to_utf8(const wchar_t* src, int slen, byte_t* dest, dword_t dlen
 	dword_t len = 0;
 	int total = 0;
 
+	if (src && slen < 0)
+	{
+		slen = 0;
+		while (*(src + slen))
+			slen++;
+	}
+	
 	while (total < slen && len < dlen)
 	{
 		len += unicode_seek_utf8((unsigned short)(src[total]), ((dest) ? (unsigned char*)(dest + len) : NULL));

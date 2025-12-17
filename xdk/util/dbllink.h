@@ -278,51 +278,51 @@ EXP_API void switch_link_after(link_t_ptr root, link_t_ptr prev, link_t_ptr plk)
 /*
 @FUNCTION bubble_sort_link: bubble sorting the root link component.
 @INPUT link_t_ptr root: the root link component.
-@INPUT CALLBACK_SORTLINK pf: the compare callback function.
+@INPUT PF_SORTLINK pf: the compare callback function.
 @INPUT bool_t dest: nonzero for descending, zero for ascending.
 @INPUT void* parm: the parameter translated into compare callback function.
 @RETURN void: none.
 */
-EXP_API void bubble_sort_link(link_t_ptr root,CALLBACK_SORTLINK pf, bool_t desc,void* parm);
+EXP_API void bubble_sort_link(link_t_ptr root,PF_SORTLINK pf, bool_t desc,void* parm);
 
 /*
 @FUNCTION merge_sort_link: merge sorting the root link component.
 @INPUT link_t_ptr root: the root link component.
-@INPUT CALLBACK_SORTLINK pf: the compare callback function.
+@INPUT PF_SORTLINK pf: the compare callback function.
 @INPUT bool_t dest: nonzero for descending, zero for ascending.
 @INPUT void* parm: the parameter translated into compare callback function.
 @RETURN void: none.
 */
-EXP_API void merge_sort_link(link_t_ptr root, CALLBACK_SORTLINK pf, bool_t desc, void* parm);
+EXP_API void merge_sort_link(link_t_ptr root, PF_SORTLINK pf, bool_t desc, void* parm);
 
 /*
 @FUNCTION heap_sort_link: heap sorting the root link component.
 @INPUT link_t_ptr root: the root link component.
-@INPUT CALLBACK_SORTLINK pf: the compare callback function.
+@INPUT PF_SORTLINK pf: the compare callback function.
 @INPUT bool_t dest: nonzero for descending, zero for ascending.
 @INPUT void* parm: the parameter translated into compare callback function.
 @RETURN void: none.
 */
-EXP_API void heap_sort_link(link_t_ptr root, CALLBACK_SORTLINK pf, bool_t desc, void* parm);
+EXP_API void heap_sort_link(link_t_ptr root, PF_SORTLINK pf, bool_t desc, void* parm);
 
 /*
 @FUNCTION quick_sort_link: quick sorting the root link component.
 @INPUT link_t_ptr root: the root link component.
-@INPUT CALLBACK_SORTLINK pf: the compare callback function.
+@INPUT PF_SORTLINK pf: the compare callback function.
 @INPUT bool_t dest: nonzero for descending, zero for ascending.
 @INPUT void* parm: the parameter translated into compare callback function.
 @RETURN void: none.
 */
-EXP_API void quick_sort_link(link_t_ptr root, CALLBACK_SORTLINK pf, bool_t desc, void* parm);
+EXP_API void quick_sort_link(link_t_ptr root, PF_SORTLINK pf, bool_t desc, void* parm);
 
 /*
 @FUNCTION enum_link: enum link component in root.
 @INPUT link_t_ptr root: the root link component.
-@INPUT CALLBACK_ENUMLINK pf: the enum callback function.
+@INPUT PF_ENUMLINK pf: the enum callback function.
 @INPUT void* parm: the parameter translated into enum callback function.
 @RETURN void: none.
 */
-EXP_API void enum_link(link_t_ptr root,CALLBACK_ENUMLINK pf,void* parm);
+EXP_API void enum_link(link_t_ptr root,PF_ENUMLINK pf,void* parm);
 
 #ifdef	__cplusplus
 }

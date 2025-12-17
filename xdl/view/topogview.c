@@ -118,13 +118,13 @@ void draw_topog(const drawing_interface* pif, link_t_ptr ptr)
 	parse_xbrush_from_style(&xb, style);
 	if (!b_print)
 	{
-		format_xcolor(&pif->mode.clr_bkg, xb.color);
+		format_xcolor(&pif->clrs->clr_bkg, xb.color);
 	}
 
 	/*parse_xpen_from_style(&xp, style);
 	if (!b_print)
 	{
-	format_xcolor(&pif->mode.clr_frg, xp.color);
+	format_xcolor(&pif->clrs->clr_frg, xp.color);
 	}*/
 
 	xscpy(xp.color, xb.color);
@@ -136,7 +136,7 @@ void draw_topog(const drawing_interface* pif, link_t_ptr ptr)
 
 	if (!b_print)
 	{
-		format_xcolor(&pif->mode.clr_msk, xi.color);
+		format_xcolor(&pif->clrs->clr_msk, xi.color);
 	}
 	else
 	{
@@ -190,11 +190,12 @@ void draw_topog(const drawing_interface* pif, link_t_ptr ptr)
 
 		default_xfont(&xf);
 		parse_xfont_from_style(&xf, style);
+		(*pif->pf_set_xfont)(pif->ctx, &xf);
 
 		default_xface(&xa);
 		parse_xface_from_style(&xa, style);
 
-		(*pif->pf_font_size)(pif->ctx, &xf, &xs);
+		(*pif->pf_font_size)(pif->ctx, &xs);
 
 		calc_topog_spot_rect(ptr, ilk, &xr);
 		xr.fw = xs.fw;
@@ -207,7 +208,7 @@ void draw_topog(const drawing_interface* pif, link_t_ptr ptr)
 		}
 		else if (compare_text(type, -1, ATTR_SPOT_TYPE_ICON, -1, 0) == 0)
 		{
-			parse_xcolor(&xc, xf.color);
+			parse_xcolor(&xc, xa.text_color);
 			draw_gizmo(pif, &xc, &xr, get_topog_spot_title_ptr(ilk));
 		}
 		else if (compare_text(type, -1, ATTR_SPOT_TYPE_IMAGE, -1, 0) == 0)
@@ -219,7 +220,7 @@ void draw_topog(const drawing_interface* pif, link_t_ptr ptr)
 		else if (compare_text(type, -1, ATTR_SPOT_TYPE_TEXT, -1, 0) == 0)
 		{
 			string_cpy(vs, get_topog_spot_title_ptr(ilk), -1);
-			draw_var_text(pif, &xf, &xa, &xr, vs);
+			draw_var_text(pif, &xa, &xr, vs);
 		}
 
 		ilk = get_topog_next_spot(ptr, ilk);

@@ -57,6 +57,8 @@ void mgc_get_canvas_interface(canvas_t canv, drawing_interface* pif)
 	pif->pf_draw_equilagon = (PF_DRAW_EQUILAGON)mgc_draw_equilagon;
 	pif->pf_draw_path = (PF_DRAW_PATH)mgc_draw_path;
 
+	pif->pf_set_xfont = (PF_SET_XFONT)mgc_set_xfont;
+	pif->pf_get_xfont = (PF_GET_XFONT)mgc_get_xfont;
 	pif->pf_font_size = (PF_FONT_SIZE)mgc_font_size;
 	pif->pf_text_size = (PF_TEXT_SIZE)mgc_text_size;
 	pif->pf_text_rect = (PF_TEXT_RECT)mgc_text_rect;
@@ -69,12 +71,6 @@ void mgc_get_canvas_interface(canvas_t canv, drawing_interface* pif)
 
 	pif->pf_get_visual_interface = (PF_GET_INTERFACE)mgc_get_visual_interface;
 	pif->pf_get_visual_handle = (PF_GET_VISUAL)mgc_get_canvas_visual;
-
-	parse_xcolor(&pif->mode.clr_bkg, GDI_ATTR_RGB_WHITE);
-	parse_xcolor(&pif->mode.clr_frg, GDI_ATTR_RGB_GRAY);
-	parse_xcolor(&pif->mode.clr_txt, GDI_ATTR_RGB_BLACK);
-	parse_xcolor(&pif->mode.clr_msk, GDI_ATTR_RGB_WHITE);
-	parse_xcolor(&pif->mode.clr_ico, GDI_ATTR_RGB_BLACK);
 }
 
 void mgc_get_visual_interface(visual_t visual, drawing_interface* pif)
@@ -106,6 +102,8 @@ void mgc_get_visual_interface(visual_t visual, drawing_interface* pif)
 	pif->pf_draw_equilagon = (PF_DRAW_EQUILAGON)mgc_draw_equilagon_raw;
 	pif->pf_draw_path = (PF_DRAW_PATH)mgc_draw_path_raw;
 
+	pif->pf_set_xfont = (PF_SET_XFONT)mgc_set_xfont_raw;
+	pif->pf_get_xfont = (PF_GET_XFONT)mgc_get_xfont_raw;
 	pif->pf_font_size = (PF_FONT_SIZE)mgc_font_size_raw;
 	pif->pf_text_size = (PF_TEXT_SIZE)mgc_text_size_raw;
 	pif->pf_text_rect = (PF_TEXT_RECT)mgc_text_rect_raw;
@@ -121,7 +119,8 @@ void mgc_get_visual_measure(visual_t view, measure_interface* pim)
 {
 	pim->ctx = (void*)view;
 
-	pim->pf_measure_pixel = (PF_MEASURE_PIXEL)mgc_pixel_size_raw;
+	pim->pf_set_xfont = (PF_SET_XFONT)mgc_set_xfont_raw;
+	pim->pf_get_xfont = (PF_GET_XFONT)mgc_get_xfont_raw;
 	pim->pf_measure_font = (PF_MEASURE_FONT)mgc_font_size_raw;
 	pim->pf_measure_size = (PF_MEASURE_SIZE)mgc_text_size_raw;
 	pim->pf_measure_rect = (PF_MEASURE_RECT)mgc_text_rect_raw;
@@ -131,7 +130,8 @@ void mgc_get_canvas_measure(canvas_t canv, measure_interface* pim)
 {
 	pim->ctx = (void*)canv;
 
-	pim->pf_measure_pixel = (PF_MEASURE_PIXEL)mgc_pixel_size;
+	pim->pf_set_xfont = (PF_SET_XFONT)mgc_set_xfont;
+	pim->pf_get_xfont = (PF_GET_XFONT)mgc_get_xfont;
 	pim->pf_measure_font = (PF_MEASURE_FONT)mgc_font_size;
 	pim->pf_measure_size = (PF_MEASURE_SIZE)mgc_text_size;
 	pim->pf_measure_rect = (PF_MEASURE_RECT)mgc_text_rect;

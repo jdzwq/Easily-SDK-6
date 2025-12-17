@@ -337,7 +337,7 @@ int a_tk_printf(schar_t* buf,schar_t flag,int width,int prec,schar_t size,schar_
 		}
 		if (width)
 		{
-			len = width - a_uctobin(ui, NULL, width);
+			len = width - a_uctobin(uc, NULL, width);
 			while (len > 0)
 			{
 				if (buf)
@@ -775,7 +775,7 @@ int w_tk_printf(wchar_t* buf,wchar_t flag,int width,int prec,wchar_t size,wchar_
 		}
 		if (width)
 		{
-			len = width - w_uctobin(ui, NULL, width);
+			len = width - w_uctobin(uc, NULL, width);
 			while (len > 0)
 			{
 				if (buf)

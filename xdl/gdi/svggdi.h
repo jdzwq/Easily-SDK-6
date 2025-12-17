@@ -200,8 +200,8 @@ LOC_API void	svg_draw_equilagon_raw(visual_t view, const xpen_t* pxp, const xbru
 @INPUT const xrect_t* pxr: the rect struct using float member.
 @RETURN void: none.
 */
-LOC_API void	svg_multi_line(canvas_t canv, const xfont_t* pxf, const xface_t* pxa, const xpen_t* pxp, const xrect_t* pxr);
-LOC_API void	svg_multi_line_raw(visual_t view, const xfont_t* pxf, const xface_t* pxa, const xpen_t* pxp, const xrect_t* pxr);
+LOC_API void	svg_multi_line(canvas_t canv, const xface_t* pxa, const xpen_t* pxp, const xrect_t* pxr);
+LOC_API void	svg_multi_line_raw(visual_t view, const xface_t* pxa, const xpen_t* pxp, const xrect_t* pxr);
 
 /*
 @FUNCTION svg_draw_path: draw path in canvas using milimeter coordinate.
@@ -226,8 +226,8 @@ LOC_API void	svg_draw_path_raw(visual_t view, const xpen_t* pxp, const xbrush_t*
 @INPUT int len: the text length in characters, -1 indicate the text is terminated by zero.
 @RETURN void: none.
 */
-LOC_API void	svg_draw_text(canvas_t canv, const xfont_t* pxf, const xface_t* pxa, const xrect_t* pxr, const tchar_t* txt, int len);
-LOC_API void	svg_draw_text_raw(visual_t view, const xfont_t* pxf, const xface_t* pxa, const xrect_t* pxr, const tchar_t* txt, int len);
+LOC_API void	svg_draw_text(canvas_t canv, const xface_t* pxa, const xrect_t* pxr, const tchar_t* txt, int len);
+LOC_API void	svg_draw_text_raw(visual_t view, const xface_t* pxa, const xrect_t* pxr, const tchar_t* txt, int len);
 /*
 @FUNCTION svg_text_out: output text in svg canvas using millimeter coordinate.
 @INPUT canvas_t canv: the svg canvas object.
@@ -237,8 +237,8 @@ LOC_API void	svg_draw_text_raw(visual_t view, const xfont_t* pxf, const xface_t*
 @INPUT int len: the text length in characters, -1 indicate the text is terminated by zero.
 @RETURN void: none.
 */
-LOC_API void	svg_text_out(canvas_t canv, const xfont_t* pxf, const xpoint_t* ppt, const tchar_t* txt, int len);
-LOC_API void	svg_text_out_raw(visual_t view, const xfont_t* pxf, const xpoint_t* ppt, const tchar_t* txt, int len);
+LOC_API void	svg_text_out(canvas_t canv, const xpoint_t* ppt, const tchar_t* txt, int len);
+LOC_API void	svg_text_out_raw(visual_t view, const xpoint_t* ppt, const tchar_t* txt, int len);
 
 /*
 @FUNCTION svg_text_size: calc the text suitable size in svg canvas using millimeter coordinate.
@@ -249,18 +249,15 @@ LOC_API void	svg_text_out_raw(visual_t view, const xfont_t* pxf, const xpoint_t*
 @OUTPUT xsize_t* pxs: the size struct for returning float member.
 @RETURN void: none.
 */
-LOC_API void	svg_text_size(canvas_t canv, const xfont_t* pxf, const tchar_t* txt, int len, xsize_t* pxs);
-LOC_API void	svg_text_size_raw(visual_t view, const xfont_t* pxf, const tchar_t* txt, int len, xsize_t* pxs);
+LOC_API void	svg_text_size(canvas_t canv, const tchar_t* txt, int len, xsize_t* pxs);
+LOC_API void	svg_text_size_raw(visual_t view, const tchar_t* txt, int len, xsize_t* pxs);
 
 
-LOC_API void	svg_text_rect(canvas_t canv, const xfont_t* pxf, const xface_t* pxa, const tchar_t* txt, int len, xrect_t* pxr);
-LOC_API void	svg_text_rect_raw(visual_t view, const xfont_t* pxf, const xface_t* pxa, const tchar_t* txt, int len, xrect_t* pxr);
+LOC_API void	svg_text_rect(canvas_t canv, const xface_t* pxa, const tchar_t* txt, int len, xrect_t* pxr);
+LOC_API void	svg_text_rect_raw(visual_t view, const xface_t* pxa, const tchar_t* txt, int len, xrect_t* pxr);
 
-LOC_API void	svg_font_size(canvas_t canv, const xfont_t* pxf, xsize_t* pxs);
-LOC_API void	svg_font_size_raw(visual_t view, const xfont_t* pxf, xsize_t* pxs);
-
-LOC_API float	svg_pixel_size(canvas_t canv);
-LOC_API float	svg_pixel_size_raw(visual_t mgc);
+LOC_API void	svg_font_size(canvas_t canv, xsize_t* pxs);
+LOC_API void	svg_font_size_raw(visual_t view, xsize_t* pxs);
 
 /*
 @FUNCTION svg_color_out: output color sequence in svg canvas using millimeter coordinate.

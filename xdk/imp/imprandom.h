@@ -40,8 +40,9 @@ extern "C" {
 @OUTPUT word* pn: the 32bit or 64bit random number.
 @RETURN none
 */
-EXP_API void system_random32(dword_t *pn);
-EXP_API void system_random64(lword_t *pn);
+EXP_API void system_srand(void);
+EXP_API dword_t system_rand32(void);
+EXP_API lword_t system_rand64(void);
 
 #ifdef	__cplusplus
 }

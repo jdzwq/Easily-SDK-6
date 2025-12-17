@@ -391,11 +391,11 @@ void _invoke_select(const slots_block_t* pb, rnet_block_t* pd)
 
 	tkv_read(pd->hkv, var, val);
 
-	dw = variant_encode(&var, NULL, MAX_LONG) + object_encode(val, NULL, MAX_LONG);
+	dw = variant_encode(&var, NULL) + object_encode(val, NULL);
 	buf = (byte_t*)xmem_alloc(dw);
 
-	n = variant_encode(&var, buf, MAX_LONG);
-	n = object_encode(val, buf + n, MAX_LONG);
+	n = variant_encode(&var, buf);
+	n = object_encode(val, buf + n);
 
 	variant_to_null(&var);
 

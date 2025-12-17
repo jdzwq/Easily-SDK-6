@@ -130,6 +130,8 @@ visual_t _create_display_context(widget_t wt)
 		ctx->type = CONTEXT_SCREEN;
 	}
 
+	ctx->fontset = g_fontset;
+
 	return (visual_t)&(ctx->head);
 }
 
@@ -150,6 +152,8 @@ visual_t _create_compatible_context(visual_t rdc, int cx, int cy)
 
 	ctx->device.bitmap = (HBITMAP)SelectObject(ctx->context, (HGDIOBJ)bmp);
 	ctx->type = CONTEXT_MEMORY;
+
+	ctx->fontset = g_fontset;
 
 	return (visual_t)&(ctx->head);
 }
@@ -207,6 +211,7 @@ void _render_context(visual_t src, int srcx, int srcy, visual_t dst, int dstx, i
 }
 
 /*******************************************************************************************************************/
+
 #ifdef WINCE
 static int MulDiv(int a, int b, int c)
 {
@@ -228,12 +233,23 @@ float _pixel_metric(visual_t rdc)
 	return fp;
 }
 
-float _font_metric(visual_t rdc, const xfont_t* pxf)
+float _font_metric(visual_t rdc, const tchar_t* xf_size)
 {
-	float pt = xstof(pxf->size);
-	float pm = 0.0f;
+	const tchar_t* tk;
+	int len;
+	float pt, pm = 0.0f;
 
-	font_metric_by_pt(pt, &pm, NULL);
+	tk = xsistr(xf_size, _T("px"));
+	if(tk)
+	{
+		pt = xsntof(xf_size, (int)(tk - xf_size));
+		font_metric_by_px(pt, &pm, NULL);
+	}
+	else
+	{
+		pt = xstof(xf_size);
+		font_metric_by_pt(pt, &pm, NULL);
+	}
 
 	return pm;
 }

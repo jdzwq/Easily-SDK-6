@@ -77,8 +77,8 @@ typedef struct _tftp_context{
 	int snd_eof;
 	int rcv_eof;
 
-	linear_t snd_line;
-	linear_t rcv_line;
+	sequence_t snd_seq;
+	sequence_t rcv_seq;
 
 	sword_t errcode;
 	tchar_t errtext[ERR_LEN + 1];
@@ -423,10 +423,10 @@ bool_t _tftp_send_request(tftp_context* ppt)
 
 	if (pdu->type == TFTP_PDU_DATA)
 	{
-		lin_buf = insert_linear_frame(ppt->snd_line, pdu->pdv_num, pdu->pdv_len);
+		lin_buf = insert_sequence_frame(ppt->snd_seq, pdu->pdv_num, pdu->pdv_len);
 		if (!lin_buf)
 		{
-			raise_user_error(_T("_tftp_send_request"), _T("linear insert falied"));
+			raise_user_error(_T("_tftp_send_request"), _T("sequence insert falied"));
 		}
 		xmem_copy((void*)lin_buf, (void*)(pdu->payload), pdu->pdv_len);
 
@@ -469,10 +469,10 @@ bool_t _tftp_replay_request(tftp_context* ppt, int pdvnum)
 	pdu->type = TFTP_PDU_DATA;
 	pdu->pdv_num = pdvnum;
 
-	lin_buf = get_linear_frame(ppt->snd_line, pdvnum, &pdu->pdv_len);
+	lin_buf = get_sequence_frame(ppt->snd_seq, pdvnum, &pdu->pdv_len);
 	if (!lin_buf)
 	{
-		raise_user_error(_T("_tftp_replay_request"), _T("linear get failed"));
+		raise_user_error(_T("_tftp_replay_request"), _T("sequence get failed"));
 	}
 	xmem_copy((void*)(pdu->payload), (void*)lin_buf, pdu->pdv_len);
 
@@ -500,7 +500,7 @@ ONERROR:
 
 static void _tftp_clear_request(tftp_context* ppt, int pdvnum)
 {
-	clean_linear_frame(ppt->snd_line, pdvnum);
+	clean_sequence_frame(ppt->snd_seq, pdvnum);
 }
 
 bool_t _tftp_recv_request(tftp_context* ppt)
@@ -558,24 +558,24 @@ bool_t _tftp_recv_request(tftp_context* ppt)
 
 	if (pdu->type == TFTP_PDU_DATA || pdu->type == TFTP_PDU_ACK)
 	{
-		lin_buf = insert_linear_frame(ppt->rcv_line, pdu->pdv_num, pdu->pdv_len);
+		lin_buf = insert_sequence_frame(ppt->rcv_seq, pdu->pdv_num, pdu->pdv_len);
 		if (!lin_buf)
 		{
-			raise_user_error(_T("_tftp_recv_request"), _T("linear insert failed"));
+			raise_user_error(_T("_tftp_recv_request"), _T("sequence insert failed"));
 		}
 		xmem_copy((void*)(lin_buf), (void*)(pdu->payload), pdu->pdv_len);
 
 		xmem_zero((void*)pdu->payload, pdu->pdv_len);
 		pdu->pdv_len = 0;
 
-		lin_buf = get_linear_frame(ppt->rcv_line, ppt->pre_rcv_num + 1, &pdu->pdv_len);
+		lin_buf = get_sequence_frame(ppt->rcv_seq, ppt->pre_rcv_num + 1, &pdu->pdv_len);
 		if (!lin_buf)
 		{
-			raise_user_error(_T("_tftp_recv_request"), _T("linear get failed"));
+			raise_user_error(_T("_tftp_recv_request"), _T("sequence get failed"));
 		}
 		xmem_copy((void*)(pdu->payload), (void*)lin_buf, pdu->pdv_len);
 
-		clean_linear_frame(ppt->rcv_line, ppt->pre_rcv_num + 1);
+		clean_sequence_frame(ppt->rcv_seq, ppt->pre_rcv_num + 1);
 
 		ppt->pre_rcv_num++;
 
@@ -629,10 +629,10 @@ bool_t _tftp_send_response(tftp_context* ppt)
 
 	if (pdu->type == TFTP_PDU_DATA)
 	{
-		lin_buf = insert_linear_frame(ppt->snd_line, pdu->pdv_num, pdu->pdv_len);
+		lin_buf = insert_sequence_frame(ppt->snd_seq, pdu->pdv_num, pdu->pdv_len);
 		if (!lin_buf)
 		{
-			raise_user_error(_T("_tftp_send_response"), _T("linear insert falied"));
+			raise_user_error(_T("_tftp_send_response"), _T("sequence insert falied"));
 		}
 		xmem_copy((void*)(lin_buf), (void*)(pdu->payload), pdu->pdv_len);
 
@@ -670,10 +670,10 @@ bool_t _tftp_replay_response(tftp_context* ppt, int pdvnum)
 	pdu->type = TFTP_PDU_DATA;
 	pdu->pdv_num = pdvnum;
 
-	lin_buf = get_linear_frame(ppt->snd_line, pdvnum, &pdu->pdv_len);
+	lin_buf = get_sequence_frame(ppt->snd_seq, pdvnum, &pdu->pdv_len);
 	if (!lin_buf)
 	{
-		raise_user_error(_T("_tftp_replay_response"), _T("linear get failed"));
+		raise_user_error(_T("_tftp_replay_response"), _T("sequence get failed"));
 	}
 	xmem_copy((void*)(pdu->payload), (void*)lin_buf, pdu->pdv_len);
 
@@ -701,7 +701,7 @@ ONERROR:
 
 static void _tftp_clear_response(tftp_context* ppt, int pdvnum)
 {
-	clean_linear_frame(ppt->snd_line, pdvnum);
+	clean_sequence_frame(ppt->snd_seq, pdvnum);
 }
 
 bool_t _tftp_recv_response(tftp_context* ppt)
@@ -740,24 +740,24 @@ bool_t _tftp_recv_response(tftp_context* ppt)
 
 	if (pdu->type == TFTP_PDU_DATA || pdu->type == TFTP_PDU_ACK)
 	{
-		lin_buf = insert_linear_frame(ppt->rcv_line, pdu->pdv_num, pdu->pdv_len);
+		lin_buf = insert_sequence_frame(ppt->rcv_seq, pdu->pdv_num, pdu->pdv_len);
 		if (!lin_buf)
 		{
-			raise_user_error(_T("_tftp_recv_response"), _T("linear insert failed"));
+			raise_user_error(_T("_tftp_recv_response"), _T("sequence insert failed"));
 		}
 		xmem_copy((void*)(lin_buf), (void*)(pdu->payload), pdu->pdv_len);
 
 		xmem_zero((void*)pdu->payload, pdu->pdv_len);
 		pdu->pdv_len = 0;
 
-		lin_buf = get_linear_frame(ppt->rcv_line, ppt->pre_rcv_num + 1, &pdu->pdv_len);
+		lin_buf = get_sequence_frame(ppt->rcv_seq, ppt->pre_rcv_num + 1, &pdu->pdv_len);
 		if (!lin_buf)
 		{
-			raise_user_error(_T("_tftp_recv_response"), _T("linear get failed"));
+			raise_user_error(_T("_tftp_recv_response"), _T("sequence get failed"));
 		}
 		xmem_copy((void*)(pdu->payload), (void*)lin_buf, pdu->pdv_len);
 
-		clean_linear_frame(ppt->rcv_line, ppt->pre_rcv_num + 1);
+		clean_sequence_frame(ppt->rcv_seq, ppt->pre_rcv_num + 1);
 
 		ppt->pre_rcv_num++;
 
@@ -857,8 +857,8 @@ xhand_t xtftp_client(const tchar_t* method, const tchar_t* url)
 	xdk_bio_interface(bio, pftp->pif);
 	bio = NULL;
 
-	pftp->snd_line = alloc_linear(TFTP_WIN_SIZE);
-	pftp->rcv_line = alloc_linear(TFTP_WIN_SIZE);
+	pftp->snd_seq = alloc_sequence(TFTP_WIN_SIZE);
+	pftp->rcv_seq = alloc_sequence(TFTP_WIN_SIZE);
 
 	pdu = &pftp->snd_pdu;
 
@@ -881,10 +881,10 @@ ONERROR:
 		if (pftp->pif)
 			xmem_free(pftp->pif);
 
-		if (pftp->snd_line)
-			free_linear(pftp->snd_line);
-		if (pftp->rcv_line)
-			free_linear(pftp->rcv_line);
+		if (pftp->snd_seq)
+			free_sequence(pftp->snd_seq);
+		if (pftp->rcv_seq)
+			free_sequence(pftp->rcv_seq);
 
 		xmem_free(pftp);
 	}
@@ -933,8 +933,8 @@ xhand_t	xtftp_server(xhand_t bio)
 		xudp_set_package(bio, TFTP_PKG_SIZE);
 	}
 
-	pftp->snd_line = alloc_linear(TFTP_WIN_SIZE);
-	pftp->rcv_line = alloc_linear(TFTP_WIN_SIZE);
+	pftp->snd_seq = alloc_sequence(TFTP_WIN_SIZE);
+	pftp->rcv_seq = alloc_sequence(TFTP_WIN_SIZE);
 
 	END_CATCH;
 
@@ -947,10 +947,10 @@ ONERROR:
 		if (pftp->pif)
 			xmem_free(pftp->pif);
 
-		if (pftp->snd_line)
-			free_linear(pftp->snd_line);
-		if (pftp->rcv_line)
-			free_linear(pftp->rcv_line);
+		if (pftp->snd_seq)
+			free_sequence(pftp->snd_seq);
+		if (pftp->rcv_seq)
+			free_sequence(pftp->rcv_seq);
 
 		xmem_free(pftp);
 	}
@@ -979,10 +979,10 @@ void xtftp_close(xhand_t tftp)
 		xmem_free(pftp->pif);
 	}
 
-	if (pftp->snd_line)
-		free_linear(pftp->snd_line);
-	if (pftp->rcv_line)
-		free_linear(pftp->rcv_line);
+	if (pftp->snd_seq)
+		free_sequence(pftp->snd_seq);
+	if (pftp->rcv_seq)
+		free_sequence(pftp->rcv_seq);
 
 	xmem_free(pftp);
 }
@@ -1152,7 +1152,7 @@ bool_t xtftp_recv(xhand_t tftp, byte_t* buf, dword_t* pch)
 
 	TRY_CATCH;
 
-	mw = get_linear_window(ppt->snd_line);
+	mw = get_sequence_window(ppt->snd_seq);
 
 	pdu = &ppt->rcv_pdu;
 
@@ -1255,7 +1255,7 @@ bool_t xtftp_send(xhand_t tftp, const byte_t* buf, dword_t *pch)
 
 	TRY_CATCH;
 
-	mw = get_linear_window(ppt->snd_line);
+	mw = get_sequence_window(ppt->snd_seq);
 
 	pdu = &ppt->snd_pdu;
 

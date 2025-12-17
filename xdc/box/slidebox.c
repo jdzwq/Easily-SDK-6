@@ -33,7 +33,6 @@ typedef struct _slidebox_delta_t{
 	int n_pos;
 	bool_t b_move;
 
-	xfont_t xf;
 }slidebox_delta_t;
 
 #define GETSLIDEBOXDELTA(ph) 	(slidebox_delta_t*)widget_get_user_delta(ph)
@@ -85,7 +84,7 @@ void slidebox_on_moved(widget_t widget, const xpoint_t* pxp)
 
 	get_canvas_measure(widget_get_canvas(widget), &im);
 
-	hint = calc_slidebox_hint(&im, &ptd->xf, &pt);
+	hint = calc_slidebox_hint(&im, &pt);
 	if (hint == ptd->n_pos)
 		return;
 
@@ -156,15 +155,6 @@ void hand_slidebox_size(widget_t widget, int code, const xsize_t* prs)
 	}
 }
 
-void hand_slidebox_xfont(widget_t widget, const xfont_t* pxf)
-{
-	slidebox_delta_t* ptd = GETSLIDEBOXDELTA(widget);
-
-	XDK_ASSERT(ptd != NULL);
-
-	xmem_copy((void*)&ptd->xf, (void*)pxf, sizeof(xfont_t));
-}
-
 void hand_slidebox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 {
 	slidebox_delta_t* ptd = GETSLIDEBOXDELTA(widget);
@@ -192,7 +182,7 @@ void hand_slidebox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 
 	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
 
-	draw_slidebox(pif, &ptd->xf, ptd->n_pos);
+	draw_slidebox(pif, ptd->n_pos);
 
 	end_canvas_paint(canv, dc, pxr);
 }
@@ -214,10 +204,6 @@ widget_t slidebox_create(widget_t widget, dword_t style, const xrect_t* pxr)
 		EVENT_ON_LBUTTON_DOWN(hand_slidebox_lbutton_down)
 		EVENT_ON_LBUTTON_UP(hand_slidebox_lbutton_up)
 
-		EVENT_ON_XFONT(hand_slidebox_xfont)
-
-		
-
 	EVENT_END_DISPATH
 
 	return widget_create(NULL, style, pxr, widget, &ev);
@@ -232,7 +218,7 @@ void slidebox_popup_size(widget_t widget, xsize_t* pxs)
 
 	get_canvas_measure(widget_get_canvas(widget), &im);
 
-	calc_slidebox_size(&im, &ptd->xf, pxs);
+	calc_slidebox_size(&im, pxs);
 
 	widget_size_to_pt(widget, pxs);
 

@@ -32,7 +32,6 @@ LICENSE.GPL3 for more details.
 typedef struct _timebox_delta_t{
 	xdate_t tt;
 
-	xfont_t xf;
 }timebox_delta_t;
 
 #define GETTIMEBOXDELTA(ph) 	(timebox_delta_t*)widget_get_user_delta(ph)
@@ -247,8 +246,6 @@ int hand_timebox_create(widget_t widget, void* data)
 	ptd = (timebox_delta_t*)xmem_alloc(sizeof(timebox_delta_t));
 	xmem_zero((void*)ptd, sizeof(timebox_delta_t));
 
-	default_widget_xfont(&ptd->xf);
-
 	SETTIMEBOXDELTA(widget, ptd);
 
 	get_loc_date(&ptd->tt);
@@ -291,7 +288,7 @@ void hand_timebox_lbutton_up(widget_t widget, const xpoint_t* pxp)
 
 	get_canvas_measure(widget_get_canvas(widget), &im);
 
-	hint = calc_timebox_hint(&im, &ptd->xf, &pt);
+	hint = calc_timebox_hint(&im, &pt);
 
 	if (hint == TIMEBOX_HINT_YEAR_UP)
 		timebox_on_year_up(widget);
@@ -348,15 +345,6 @@ void hand_timebox_size(widget_t widget, int code, const xsize_t* prs)
 	}
 }
 
-void hand_timebox_xfont(widget_t widget, const xfont_t* pxf)
-{
-	timebox_delta_t* ptd = GETTIMEBOXDELTA(widget);
-
-	XDK_ASSERT(ptd != NULL);
-
-	xmem_copy((void*)&ptd->xf, (void*)pxf, sizeof(xfont_t));
-}
-
 void hand_timebox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 {
 	timebox_delta_t* ptd = GETTIMEBOXDELTA(widget);
@@ -384,7 +372,7 @@ void hand_timebox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 
 	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
 
-	draw_timebox(pif, &ptd->xf, &ptd->tt);
+	draw_timebox(pif, &ptd->tt);
 	
 	end_canvas_paint(canv, dc, pxr);
 }
@@ -406,10 +394,6 @@ widget_t timebox_create(widget_t widget, dword_t style, const xrect_t* pxr)
 		EVENT_ON_LBUTTON_DOWN(hand_timebox_lbutton_down)
 		EVENT_ON_LBUTTON_UP(hand_timebox_lbutton_up)
 
-		EVENT_ON_XFONT(hand_timebox_xfont)
-
-		
-
 	EVENT_END_DISPATH
 
 	return widget_create(NULL, style, pxr, widget, &ev);
@@ -424,7 +408,7 @@ void timebox_popup_size(widget_t widget, xsize_t* pxs)
 
 	get_canvas_measure(widget_get_canvas(widget), &im);
 
-	calc_timebox_size(&im, &ptd->xf, pxs);
+	calc_timebox_size(&im, pxs);
 
 	widget_size_to_pt(widget, pxs);
 

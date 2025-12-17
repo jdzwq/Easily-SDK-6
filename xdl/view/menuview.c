@@ -42,8 +42,11 @@ float calc_menu_height(const measure_interface* pif, link_t_ptr ptr)
 	link_t_ptr ilk;
 
 	style = get_menu_style_ptr(ptr);
-
-	parse_xfont_from_style(&xf, style);
+	if(style)
+	{
+		parse_xfont_from_style(&xf, style);
+		(*pif->pf_set_xfont)(pif->ctx, &xf);
+	}
 
 	b_horz = (compare_text(get_menu_layer_ptr(ptr), -1, ATTR_LAYER_HORZ, -1, 0) == 0) ? 1 : 0;
 
@@ -63,7 +66,7 @@ float calc_menu_height(const measure_interface* pif, link_t_ptr ptr)
 			else
 			{
 				h = ic;
-				(*pif->pf_measure_size)(pif->ctx, &xf, get_menu_item_title_ptr(ilk), -1, &xs);
+				(*pif->pf_measure_size)(pif->ctx, get_menu_item_title_ptr(ilk), -1, &xs);
 
 				if (h < xs.fh)
 					h = xs.fh;
@@ -77,7 +80,7 @@ float calc_menu_height(const measure_interface* pif, link_t_ptr ptr)
 			}
 			else
 			{
-				(*pif->pf_measure_size)(pif->ctx, &xf, get_menu_item_title_ptr(ilk), -1, &xs);
+				(*pif->pf_measure_size)(pif->ctx, get_menu_item_title_ptr(ilk), -1, &xs);
 
 				h += ((ic > xs.fh) ? ic : xs.fh);
 			}
@@ -120,7 +123,7 @@ float calc_menu_width(const measure_interface* pif, link_t_ptr ptr)
 			}
 			else
 			{
-				(*pif->pf_measure_size)(pif->ctx, &xf, get_menu_item_title_ptr(ilk), -1, &xs);
+				(*pif->pf_measure_size)(pif->ctx, get_menu_item_title_ptr(ilk), -1, &xs);
 
 				w += (xs.fw + MENU_FEED);
 
@@ -136,7 +139,7 @@ float calc_menu_width(const measure_interface* pif, link_t_ptr ptr)
 			}
 			else
 			{
-				(*pif->pf_measure_size)(pif->ctx, &xf, get_menu_item_title_ptr(ilk), -1, &xs);
+				(*pif->pf_measure_size)(pif->ctx, get_menu_item_title_ptr(ilk), -1, &xs);
 				xs.fw += (MENU_FEED + ic);
 
 				if (w < xs.fw)
@@ -163,8 +166,11 @@ void calc_menu_item_rect(const measure_interface* pif, link_t_ptr ptr, link_t_pt
 	memset((void*)pxr, 0, sizeof(xrect_t));
 
 	style = get_menu_style_ptr(ptr);
-
-	parse_xfont_from_style(&xf, style);
+	if(style)
+	{
+		parse_xfont_from_style(&xf, style);
+		(*pif->pf_set_xfont)(pif->ctx, &xf);
+	}
 
 	b_horz = (compare_text(get_menu_layer_ptr(ptr), -1, ATTR_LAYER_HORZ, -1, 0) == 0) ? 1 : 0;
 
@@ -209,7 +215,7 @@ void calc_menu_item_rect(const measure_interface* pif, link_t_ptr ptr, link_t_pt
 			}
 			else
 			{
-				(*pif->pf_measure_size)(pif->ctx, &xf, get_menu_item_title_ptr(ilk), -1, &xs);
+				(*pif->pf_measure_size)(pif->ctx, get_menu_item_title_ptr(ilk), -1, &xs);
 
 				w += (xs.fw + MENU_FEED);
 
@@ -225,7 +231,7 @@ void calc_menu_item_rect(const measure_interface* pif, link_t_ptr ptr, link_t_pt
 			}
 			else
 			{
-				(*pif->pf_measure_size)(pif->ctx, &xf, get_menu_item_title_ptr(ilk), -1, &xs);
+				(*pif->pf_measure_size)(pif->ctx, get_menu_item_title_ptr(ilk), -1, &xs);
 
 				h += ((ic > xs.fh) ? ic : xs.fh);
 			}
@@ -266,8 +272,11 @@ int	calc_menu_hint(const measure_interface* pif, const xpoint_t* ppt, link_t_ptr
 	*pilk = NULL;
 
 	style = get_menu_style_ptr(ptr);
-
-	parse_xfont_from_style(&xf, style);
+	if(style)
+	{
+		parse_xfont_from_style(&xf, style);
+		(*pif->pf_set_xfont)(pif->ctx, &xf);
+	}
 
 	b_horz = (compare_text(get_menu_layer_ptr(ptr), -1, ATTR_LAYER_HORZ, -1, 0) == 0) ? 1 : 0;
 
@@ -309,7 +318,7 @@ int	calc_menu_hint(const measure_interface* pif, const xpoint_t* ppt, link_t_ptr
 			}
 			else
 			{
-				(*pif->pf_measure_size)(pif->ctx, &xf, get_menu_item_title_ptr(ilk), -1, &xs);
+				(*pif->pf_measure_size)(pif->ctx, get_menu_item_title_ptr(ilk), -1, &xs);
 
 				w += (xs.fw + MENU_FEED);
 
@@ -325,7 +334,7 @@ int	calc_menu_hint(const measure_interface* pif, const xpoint_t* ppt, link_t_ptr
 			}
 			else
 			{
-				(*pif->pf_measure_size)(pif->ctx, &xf, get_menu_item_title_ptr(ilk), -1, &xs);
+				(*pif->pf_measure_size)(pif->ctx, get_menu_item_title_ptr(ilk), -1, &xs);
 
 				h += ((ic > xs.fh) ? ic : xs.fh);
 			}
@@ -385,16 +394,16 @@ void draw_menu(const drawing_interface* pif, link_t_ptr ptr)
 	style = get_menu_style_ptr(ptr);
 
 	parse_xface_from_style(&xa, style);
-
 	parse_xfont_from_style(&xf, style);
-	format_xcolor(&pif->mode.clr_txt, xf.color);
+	format_xcolor(&pif->clrs->clr_txt, xa.text_color);
+	(*pif->pf_set_xfont)(pif->ctx, &xf);
 
 	parse_xpen_from_style(&xp, style);
-	format_xcolor(&pif->mode.clr_frg, xp.color);
+	format_xcolor(&pif->clrs->clr_frg, xp.color);
 
-	format_xcolor(&pif->mode.clr_msk, xi.color);
+	format_xcolor(&pif->clrs->clr_msk, xi.color);
 
-	xmem_copy((void*)&xc, (void*)&pif->mode.clr_ico, sizeof(xcolor_t));
+	xmem_copy((void*)&xc, (void*)&pif->clrs->clr_ico, sizeof(xcolor_t));
 
 	ic = get_menu_icon_span(ptr);
 	
@@ -431,7 +440,7 @@ void draw_menu(const drawing_interface* pif, link_t_ptr ptr)
 			}
 			else
 			{
-				(*pif->pf_text_size)(pif->ctx, &xf, get_menu_item_title_ptr(ilk), -1, &xs);
+				(*pif->pf_text_size)(pif->ctx, get_menu_item_title_ptr(ilk), -1, &xs);
 
 				w += (xs.fw + MENU_FEED);
 
@@ -447,7 +456,7 @@ void draw_menu(const drawing_interface* pif, link_t_ptr ptr)
 			}
 			else
 			{
-				(*pif->pf_text_size)(pif->ctx, &xf, get_menu_item_title_ptr(ilk), -1, &xs);
+				(*pif->pf_text_size)(pif->ctx, get_menu_item_title_ptr(ilk), -1, &xs);
 
 				h += ((ic > xs.fh) ? ic : xs.fh);
 			}
@@ -502,7 +511,7 @@ void draw_menu(const drawing_interface* pif, link_t_ptr ptr)
 				xr_text.fh = xr.fh;
 			}
 
-			(*pif->pf_draw_text)(pif->ctx, &xf, &xa, &xr_text, get_menu_item_title_ptr(ilk), -1);
+			(*pif->pf_draw_text)(pif->ctx, &xa, &xr_text, get_menu_item_title_ptr(ilk), -1);
 		}
 
 		ilk = get_menu_next_item(ptr, ilk);

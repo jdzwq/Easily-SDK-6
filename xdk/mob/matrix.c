@@ -31,16 +31,20 @@ LICENSE.GPL3 for more details.
 #include "../xdkimp.h"
 
 typedef struct _matrix_context{
-	memobj_head head;
+	memo_head head;
 
 	int rows;
 	int cols;
-	bool_t self;
 	void* data;
 }matrix_context;
 
 
 #define MATRIX_CALC_SIZE(rows, cols)	(rows * cols * sizeof(double))
+
+dword_t matrix_need_size(int rows, int cols)
+{
+	return (rows * cols * sizeof(double));
+}
 
 matrix_t matrix_alloc(int rows, int cols)
 {
@@ -54,7 +58,6 @@ matrix_t matrix_alloc(int rows, int cols)
 
 	pmt->rows = rows;
 	pmt->cols = cols;
-	pmt->self = 1;
 	pmt->data = NULL;
 
 	return (matrix_t)&(pmt->head);
@@ -65,64 +68,9 @@ void matrix_free(matrix_t mat)
 	matrix_context* pmt = TypePtrFromHead(matrix_context, mat);
 
 	XDK_ASSERT(pmt && pmt->head.tag == MEM_MATRIX);
+	XDK_ASSERT(pmt->data == NULL);
 	
-	if (pmt->self && pmt->data)
-		xmem_free(pmt->data);
-
 	xmem_free(pmt);
-}
-
-matrix_t matrix_clone(matrix_t mat)
-{
-	matrix_context* pmt = TypePtrFromHead(matrix_context, mat);
-	int n;
-	matrix_context* pnew;
-
-	XDK_ASSERT(pmt && pmt->head.tag == MEM_MATRIX);
-
-	pnew = (matrix_context*)matrix_alloc(pmt->rows, pmt->cols);
-	
-	if (pmt->data)
-	{
-		n = MATRIX_CALC_SIZE(pmt->rows, pmt->cols);
-		pnew->data = xmem_realloc(pnew->data, n);
-		xmem_copy((void*)pnew->data, (void*)pmt->data, n);
-	}
-
-	return (matrix_t)&(pnew->head);
-}
-
-void matrix_reset(matrix_t mat, int rows, int cols)
-{
-	matrix_context* pmt = TypePtrFromHead(matrix_context, mat);
-	
-	XDK_ASSERT(pmt && pmt->head.tag == MEM_MATRIX);
-
-	if (pmt->self && pmt->data)
-		xmem_free(pmt->data);
-
-	pmt->self = 1;
-	pmt->data = NULL;
-	pmt->rows = rows;
-	pmt->cols = cols;
-}
-
-void matrix_copy(matrix_t dst, matrix_t src)
-{
-	matrix_context* psrc = (matrix_context*)src;
-	matrix_context* pdst = (matrix_context*)dst;
-	int n;
-
-	XDK_ASSERT(psrc && psrc->head.tag == MEM_MATRIX && pdst && pdst->head.tag == MEM_MATRIX);
-
-	matrix_reset(dst, psrc->rows, psrc->cols);
-
-	if (psrc->data)
-	{
-		n = MATRIX_CALC_SIZE(psrc->rows, psrc->cols);
-		pdst->data = xmem_realloc(pdst->data, n);
-		xmem_copy(pdst->data, psrc->data, n);
-	}
 }
 
 int matrix_get_rows(matrix_t mat)
@@ -157,12 +105,9 @@ void matrix_attach(matrix_t mat, void* data)
 	matrix_context* pmt = TypePtrFromHead(matrix_context, mat);
 
 	XDK_ASSERT(pmt && pmt->head.tag == MEM_MATRIX);
-
-	if (pmt->self && pmt->data)
-		xmem_free(pmt->data);
+	XDK_ASSERT(pmt->data == NULL);
 
 	pmt->data = data;
-	pmt->self = 0;
 }
 
 void* matrix_detach(matrix_t mat)
@@ -174,7 +119,6 @@ void* matrix_detach(matrix_t mat)
 
 	d = pmt->data;
 	pmt->data = NULL;
-	pmt->self = 1;
 
 	return d;
 }
@@ -185,14 +129,9 @@ void matrix_zero(matrix_t mat)
 	int n;
 
 	XDK_ASSERT(pmt && pmt->head.tag == MEM_MATRIX);
+	XDK_ASSERT(pmt->data != NULL);
 
 	n = MATRIX_CALC_SIZE(pmt->rows, pmt->cols);
-
-	if (!pmt->data)
-	{
-		pmt->data = xmem_alloc(n);
-		pmt->self = 1;
-	}
 
 	xmem_zero((void*)pmt->data, n);
 }
@@ -201,20 +140,12 @@ void matrix_set_value(matrix_t mat, int row, int col, double db)
 {
 	matrix_context* pmt = TypePtrFromHead(matrix_context, mat);
 	double* pd;
-	int n;
 
 	XDK_ASSERT(pmt && pmt->head.tag == MEM_MATRIX);
-
-	if (!pmt->data)
-	{
-		n = MATRIX_CALC_SIZE(pmt->rows, pmt->cols);
-		pmt->data = xmem_alloc(n);
-	}
+	XDK_ASSERT(row >= 0 && row < pmt->rows && col >= 0 && col < pmt->cols);
+	XDK_ASSERT(pmt->data != NULL);
 
 	pd = (double*)pmt->data;
-
-	XDK_ASSERT(row >= 0 && row < pmt->rows && col >= 0 && col < pmt->cols);
-
 	pd[row * pmt->cols + col] = db;
 }
 
@@ -224,16 +155,10 @@ double matrix_get_value(matrix_t mat, int row, int col)
 	double* pd;
 
 	XDK_ASSERT(pmt && pmt->head.tag == MEM_MATRIX);
-
-	if (!pmt->data)
-	{
-		return MAXDBL;
-	}
-
+	XDK_ASSERT(row >= 0 && row < pmt->rows && col >= 0 && col < pmt->cols);
+	XDK_ASSERT(pmt->data != NULL);
+	
 	pd = (double*)pmt->data;
-
-	if (row < 0 || col >= pmt->rows || col < 0 || col >= pmt->cols)
-		return MAXDBL;
 
 	return pd[row * pmt->cols + col];
 }
@@ -245,12 +170,7 @@ void matrix_set_bit(matrix_t mat, int i, int j, bool_t b)
 	int n;
 
 	XDK_ASSERT(pmt && pmt->head.tag == MEM_MATRIX);
-
-	if (!pmt->data)
-	{
-		n = MATRIX_CALC_SIZE(pmt->rows, pmt->cols);
-		pmt->data = xmem_alloc(n);
-	}
+	XDK_ASSERT(pmt->data != NULL);
 
 	pd = (byte_t*)pmt->data;
 
@@ -272,11 +192,7 @@ bool_t matrix_get_bit(matrix_t mat, int i, int j)
 	int n;
 
 	XDK_ASSERT(pmt && pmt->head.tag == MEM_MATRIX);
-
-	if (!pmt->data)
-	{
-		return 0;
-	}
+	XDK_ASSERT(pmt->data != NULL);
 
 	pd = (byte_t*)pmt->data;
 
@@ -292,20 +208,12 @@ void matrix_unit(matrix_t mat)
 {
 	matrix_context* pmt = TypePtrFromHead(matrix_context, mat);
 	double* pd;
-	int n, i;
+	int i;
 
 	XDK_ASSERT(pmt && pmt->head.tag == MEM_MATRIX);
-
-	if (!pmt->data)
-	{
-		n = MATRIX_CALC_SIZE(pmt->rows, pmt->cols);
-		pmt->data = xmem_alloc(n);
-		pmt->self = 1;
-	}
+	XDK_ASSERT(pmt->data != NULL);
 
 	pd = (double*)pmt->data;
-
-	XDK_ASSERT(pd != NULL);
 
 	i = pmt->rows * pmt->cols;
 	while (i--)
@@ -314,112 +222,76 @@ void matrix_unit(matrix_t mat)
 	}
 }
 
-matrix_t matrix_trans(matrix_t mat)
+void matrix_trans(matrix_t dst, matrix_t src)
 {
-	matrix_context* pmt = TypePtrFromHead(matrix_context, mat);
+	matrix_context* pmt = TypePtrFromHead(matrix_context, src);
 	double dbl;
 	int i, j;
-	matrix_t pnew;
 
 	XDK_ASSERT(pmt && pmt->head.tag == MEM_MATRIX);
-
-	if (!pmt->data)
-	{
-		return NULL;
-	}
-
-	pnew = matrix_alloc(pmt->cols, pmt->rows);
+	XDK_ASSERT(pmt->data != NULL);
 
 	for (i = 0; i < pmt->cols; i++)
 	{
 		for (j = 0; j < pmt->rows; j++)
 		{
-			dbl = matrix_get_value(mat, j, i);
-			matrix_set_value(pnew, i, j, dbl);
+			dbl = matrix_get_value(src, j, i);
+			matrix_set_value(dst, i, j, dbl);
 		}
 	}
-
-	return pnew;
 }
 
-matrix_t matrix_plus(matrix_t mat, double n)
+void matrix_plus(matrix_t dst, matrix_t src, double n)
 {
-	matrix_context* pmt = TypePtrFromHead(matrix_context, mat);
+	matrix_context* pmt = TypePtrFromHead(matrix_context, src);
 	double dbl;
 	int i, j;
-	matrix_t pnew;
 
 	XDK_ASSERT(pmt && pmt->head.tag == MEM_MATRIX);
-
-	if (!pmt->data)
-	{
-		return NULL;
-	}
-
-	pnew = matrix_alloc(pmt->rows, pmt->cols);
+	XDK_ASSERT(pmt->data != NULL);
 
 	for (i = 0; i < pmt->rows; i++)
 	{
 		for (j = 0; j < pmt->cols; j++)
 		{
-			dbl = matrix_get_value(mat, i, j) * n;
-			matrix_set_value(pnew, i, j, dbl);
+			dbl = matrix_get_value(src, i, j) * n;
+			matrix_set_value(dst, i, j, dbl);
 		}
 	}
-
-	return pnew;
 }
 
-matrix_t matrix_add(matrix_t mat1, matrix_t mat2)
+void matrix_add(matrix_t dst, matrix_t mat1, matrix_t mat2)
 {
 	matrix_context* pmt1 = TypePtrFromHead(matrix_context, mat1);
 	matrix_context* pmt2 = TypePtrFromHead(matrix_context, mat2);
 	double dbl;
 	int i, j;
-	matrix_t pnew;
 
 	XDK_ASSERT(pmt1 && pmt1->head.tag == MEM_MATRIX && pmt2 && pmt2->head.tag == MEM_MATRIX);
-
 	XDK_ASSERT(pmt1->rows == pmt2->rows && pmt1->cols == pmt2->cols);
-
-	if (!pmt1->data || !pmt2->data)
-	{
-		return NULL;
-	}
-
-	pnew = matrix_alloc(pmt1->rows, pmt2->cols);
+	XDK_ASSERT(pmt1->data != NULL && pmt2->data != NULL);
 
 	for (i = 0; i < pmt1->rows; i++)
 	{
 		for (j = 0; j < pmt2->cols; j++)
 		{
 			dbl = matrix_get_value(mat1, i, j) + matrix_get_value(mat2, i, j);
-			matrix_set_value(pnew, i, j, dbl);
+			matrix_set_value(dst, i, j, dbl);
 		}
 	}
-
-	return pnew;
 }
 
-matrix_t matrix_mul(matrix_t mat1, matrix_t mat2)
+void matrix_mul(matrix_t dst, matrix_t mat1, matrix_t mat2)
 {
 	matrix_context* pmt1 = TypePtrFromHead(matrix_context, mat1);
 	matrix_context* pmt2 = TypePtrFromHead(matrix_context, mat2);
 	double dbl;
 	int i, j, k;
-	matrix_t pnew;
 
 	XDK_ASSERT(pmt1 && pmt1->head.tag == MEM_MATRIX && pmt2 && pmt2->head.tag == MEM_MATRIX);
-
 	XDK_ASSERT(pmt1->cols == pmt2->rows);
-
-	if (!pmt1->data || !pmt2->data)
-	{
-		return NULL;
-	}
-
-	pnew = matrix_alloc(pmt1->rows, pmt2->cols);
-
+	XDK_ASSERT(pmt1->data != NULL && pmt2->data != NULL);
+	
 	for (i = 0; i < pmt1->rows; i++)
 	{
 		for (j = 0; j < pmt2->cols; j++)
@@ -429,11 +301,9 @@ matrix_t matrix_mul(matrix_t mat1, matrix_t mat2)
 			{
 				dbl += matrix_get_value(mat1, i, k) * matrix_get_value(mat2, k, j);
 			}
-			matrix_set_value(pnew, i, j, dbl);
+			matrix_set_value(dst, i, j, dbl);
 		}
 	}
-
-	return pnew;
 }
 
 double matrix_det(matrix_t mat)
@@ -443,11 +313,7 @@ double matrix_det(matrix_t mat)
 	int i, j, k;
 
 	XDK_ASSERT(pmt && pmt->head.tag == MEM_MATRIX);
-
-	if (!pmt->data)
-	{
-		return MAXDBL;
-	}
+	XDK_ASSERT(pmt->data != NULL);
 
 	n1 = 0.0;
 	for (k = 0; k < pmt->cols; k++)
@@ -486,19 +352,13 @@ void matrix_parse(matrix_t mat, const tchar_t* str, int len)
 	int i, j, n;
 
 	XDK_ASSERT(pmt && pmt->head.tag == MEM_MATRIX);
+	XDK_ASSERT(pmt->data != NULL);
 
 	if (len < 0)
 		len = xslen(str);
 
 	if (!len)
 		return;
-
-	if (!pmt->data)
-	{
-		n = MATRIX_CALC_SIZE(pmt->rows, pmt->cols);
-		pmt->data = xmem_alloc(n);
-		pmt->self = 1;
-	}
 
 	pd = (double*)pmt->data;
 
@@ -639,57 +499,153 @@ int matrix_format(matrix_t mat, tchar_t* buf, int max)
 	return total;
 }
 
-/*
-struct{
-	byte[2]: rows
-	byte[2]: cols
-	byte[]: data
-}matrix_dump
-*/
-dword_t matrix_encode(matrix_t mat, byte_t* buf, dword_t max)
+/**********************************************************************
+ASN.1 CER ENCODING
+Matrix::=SEQUENCE{
+	Rows: BER_INTEGERS
+	Cols: BER_INTEGERS
+	Data: BER_OCTET_STRING
+}
+**********************************************************************/
+dword_t matrix_encode(matrix_t mat, byte_t* buf)
 {
 	matrix_context* pmt = TypePtrFromHead(matrix_context, mat);
-	dword_t n = 0;
+	dword_t n, total = 0;
+	dword_t mn, hn;
+	byte_t* pos = NULL;
 	
 	XDK_ASSERT(mat != NULL && mat->tag == MEM_MATRIX);
 
-	if (buf)
-	{
-		PUT_SWORD_LOC(buf, 0, pmt->rows);
-		PUT_SWORD_LOC(buf, 2, pmt->cols);
-	}
+	mn = MATRIX_CALC_SIZE(pmt->rows, pmt->cols);
 
-	n = MATRIX_CALC_SIZE(pmt->rows, pmt->cols);
-	n = (n < max) ? n : max;
-	if (buf && pmt->data)
+	n = ver_write_sequence(((buf)? buf + total : NULL), &pos);
+	if(!n)
 	{
-		xmem_copy((void*)(buf + 4), (void*)pmt->data, n);
-	}
+		set_last_error(_T("matrix_encode"), _T("ver_write_sequence"), -1);
+		return 0;
+	} 
+	total += n;
 
-	return (n + 4);
+	n = ver_write_int(((buf)? buf + total : NULL), (int)pmt->rows);
+	if(!n)
+	{
+		set_last_error(_T("matrix_encode"), _T("ver_write_int"), -1);
+		return 0;
+	} 
+	total += n;
+
+	n = ver_write_int(((buf)? buf + total : NULL), (int)pmt->cols);
+	if(!n)
+	{
+		set_last_error(_T("matrix_encode"), _T("ver_write_int"), -1);
+		return 0;
+	} 
+	total += n;
+
+	if(pmt->data)
+	{
+		n = ver_write_byte_array(((buf) ? buf + total : NULL), (byte_t *)pmt->data, mn);
+	}else
+	{
+		n = ver_write_byte_array(((buf) ? buf + total : NULL), NULL, 0);
+	}
+	if(!n)
+	{
+		set_last_error(_T("matrix_encode"), _T("ver_write_byte_array"), -1);
+		return 0;
+	} 
+	total += n;
+
+	if(pos) ver_write_sequence_length(pos, total);
+
+	return total;
 }
 
 dword_t matrix_decode(matrix_t mat, const byte_t* buf)
 {
 	matrix_context* pmt = TypePtrFromHead(matrix_context, mat);
-	dword_t n = 0;
-	int rows, cols;
+	dword_t len, n, total = 0;
 
-	if (!buf)
+	if (!buf) return total;
+
+	n = ver_read_sequence(buf + total, &len);
+	if(!n)
 	{
+		set_last_error(_T("matrix_decode"), _T("ver_read_sequence"), -1);
 		return 0;
-	}
+	} 
+	total += n;
 
-	rows = GET_SWORD_LOC(buf, 0);
-	cols = GET_SWORD_LOC(buf, 2);
-
-	n = rows * cols * sizeof(double);
-	if (mat)
+	n = ver_read_int(buf + total, (int*)&len);
+	if(!n)
 	{
-		matrix_reset(mat, rows, cols);
-		pmt->data = xmem_realloc(pmt->data, n);
-		xmem_copy((void*)pmt->data, (void*)(buf + 4), n);
-	}
+		set_last_error(_T("matrix_decode"), _T("ver_read_int"), -1);
+		return 0;
+	} 
+	total += n;
 
-	return (n + 4);
+	if(pmt) pmt->rows = len;
+	
+	n = ver_read_int(buf + total, (int*)&len);
+	if(!n)
+	{
+		set_last_error(_T("matrix_decode"), _T("ver_read_int"), -1);
+		return 0;
+	} 
+	total += n;
+
+	if(pmt) pmt->cols = len;
+
+	len = MATRIX_CALC_SIZE(pmt->rows, pmt->cols);
+	n = ver_read_byte_array(buf + total, ((pmt)? pmt->data : NULL), ((pmt)? len : 0));
+	if(!n)
+	{
+		set_last_error(_T("matrix_decode"), _T("ver_read_byte_array"), -1);
+		return 0;
+	} 
+	total += n;
+
+	return total;
 }
+
+/**********************************************************************/
+#if defined (DEBUG) || defined (_DEBUG)
+void matrix_self_test(void)
+{
+	tchar_t* buf;
+	int len;
+
+	void* mb;
+	dword_t bys;
+	void* buff;
+	matrix_t mat;
+
+	printf("test matrix...\n");
+	
+	buff = xmem_alloc(matrix_need_size(2, 10));
+	mat = matrix_alloc(2, 10);
+	matrix_attach(mat, buff);
+
+	matrix_parse(mat, _T("{ [0, 1, 2,3, 4, 5, 6, 7, 8,9 ],[9,8,7,6,5,4,3,2,1,0] }"), -1);
+
+	len = matrix_format(mat, NULL, MAX_LONG);
+	buf = xsalloc(len + 1);
+	matrix_format(mat, buf, len);
+
+	_tprintf(_T("%s\n"), buf);
+
+	xsfree(buf);
+
+	bys = matrix_encode(mat, NULL);
+	mb = xmem_alloc(bys);
+	matrix_encode(mat, mb);
+	bys = matrix_decode(mat, mb);
+	xmem_free(mb);
+
+	buff = matrix_detach(mat);
+	xmem_free(buff);
+	matrix_free(mat);
+
+	printf("test matrix end\n");
+}
+#endif

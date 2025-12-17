@@ -50,6 +50,10 @@ EXP_API int w_xbas_encode(const byte_t* src, dword_t slen, wchar_t* dest, int dl
 #define xbas_encode		a_xbas_encode
 #endif
 
+#if defined (DEBUG) || defined (_DEBUG)
+EXP_API void base64_self_test(void);
+#endif
+
 #ifdef	__cplusplus
 }
 #endif

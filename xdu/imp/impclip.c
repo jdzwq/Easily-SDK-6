@@ -39,7 +39,7 @@ bool_t clipboard_put(widget_t win, int fmt, const byte_t* data, dword_t size)
 
 	pif = PROCESS_CLIPBOARD_INTERFACE;
 
-	return (pif->pf_clipboard_put)(win, fmt, data, size);
+	return (*pif->pf_clipboard_put)(win, fmt, data, size);
 }
 
 dword_t clipboard_get(widget_t win, int fmt, byte_t* buf, dword_t max)
@@ -48,7 +48,7 @@ dword_t clipboard_get(widget_t win, int fmt, byte_t* buf, dword_t max)
 
 	pif = PROCESS_CLIPBOARD_INTERFACE;
 
-	return (pif->pf_clipboard_get)(win, fmt, buf, max);
+	return (*pif->pf_clipboard_get)(win, fmt, buf, max);
 }
 
 

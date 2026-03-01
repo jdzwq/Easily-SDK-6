@@ -559,10 +559,15 @@ void hand_panel_size(widget_t widget, int code, const xsize_t* prs)
 		break;
 	case WS_SIZE_MINIMIZED:
 		break;
+	case WS_SIZE_MAXSHOW:
+		break;
+	case WS_SIZE_RESTORE:
+		break;
 	case WS_SIZE_LAYOUT:
-		_panelctrl_reset_page(widget);
 		break;
 	}
+
+	_panelctrl_reset_page(widget);
 }
 
 void hand_panel_scroll(widget_t widget, bool_t bHorz, int nLine)
@@ -638,7 +643,7 @@ void hand_panel_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	panel_delta_t* ptd = GETPANELDELTA(widget);
 	visual_t rdc;
 	canvas_t canv;
-	const drawing_interface* pif = NULL;
+	drawing_interface ifc = {0};
 	drawing_interface ifv = {0};
 	const tchar_t* title = NULL;
 
@@ -649,7 +654,7 @@ void hand_panel_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 
 	viewbox_t vb = { 0 };
 
-	color_mod_t clrs;
+	const color_mod_t *pclrs;
 	xface_t xa = { 0 };
 	xbrush_t xb_bar, xb = { 0 };
 	xpen_t xp = { 0 };
@@ -657,11 +662,11 @@ void hand_panel_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 
 	if (!ptd->arch) return;
 
-	widget_get_color_mode(widget, &clrs);
+	pclrs = widget_get_color_mode_ptr(widget);
 	default_xbrush(&xb);
-	format_xcolor(&clrs.clr_bkg, xb.color);
+	format_xcolor(&(pclrs->clr_bkg), xb.color);
 	default_xpen(&xp);
-	format_xcolor(&clrs.clr_frg, xp.color);
+	format_xcolor(&(pclrs->clr_frg), xp.color);
 
 	default_xface(&xa);
 
@@ -671,10 +676,14 @@ void hand_panel_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	widget_get_client_rect(widget, &xr);
 
 	canv = widget_get_canvas(widget);
-	pif = widget_get_canvas_interface(widget);
-
 	rdc = begin_canvas_paint(canv, dc, xr.w, xr.h);
+	
 	get_visual_interface(rdc, &ifv);
+	widget_get_view_rect(widget, (viewbox_t*)&(ifv.rect));
+
+	get_canvas_interface(canv, &ifc);
+	widget_get_canv_rect(widget, (canvbox_t*)&(ifc.rect));
+	ifc.pclrs = pclrs;
 
 	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
 
@@ -717,7 +726,7 @@ void hand_panel_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 		xr_icon.h = ptd->title_height;
 		pt_center_rect(&xr_icon, 12, 12);
 		rect_pt_to_mm(canv, &xr_icon);
-		draw_gizmo(pif, &xc, &xr_icon, GDI_ATTR_GIZMO_BOOK);
+		draw_gizmo(&ifc, &xc, &xr_icon, GDI_ATTR_GIZMO_BOOK);
 
 		xr_icon.x = xr.x + 12;
 		xr_icon.y = xr.y;
@@ -846,7 +855,7 @@ void panelctrl_redraw(widget_t widget)
 	}
 
 	_panelctrl_reset_page(widget);
-
+	widget_erase(widget, NULL);
 }
 
 void panelctrl_redraw_item(widget_t widget, link_t_ptr ilk)

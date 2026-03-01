@@ -1,5 +1,5 @@
 SOURCES= \
-D:/Easily-temp/windows/xtimers/x64/Debug/xtimers.cc \
-D:/Easily-temp/windows/xtimers/x64/Debug/xtimersMain.cc \
-D:/Easily-temp/windows/xtimers/x64/Debug/srvcrt.cc \
-D:/Easily-temp/windows/xtimers/x64/Debug/srvlog.cc \
+E:/Easily-temp/windows/xtimers/x64/Debug/xtimers.cc \
+E:/Easily-temp/windows/xtimers/x64/Debug/xtimersMain.cc \
+E:/Easily-temp/windows/xtimers/x64/Debug/srvcrt.cc \
+E:/Easily-temp/windows/xtimers/x64/Debug/srvlog.cc \

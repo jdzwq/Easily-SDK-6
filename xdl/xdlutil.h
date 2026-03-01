@@ -2,7 +2,7 @@
 #ifndef _XDLUTIL_H
 #define _XDLUTIL_H
 
-
+#include "bag/attrbag.h"
 #include "bag/properbag.h"
 #include "bag/gridbag.h"
 #include "bag/schemabag.h"

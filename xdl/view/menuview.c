@@ -393,17 +393,26 @@ void draw_menu(const drawing_interface* pif, link_t_ptr ptr)
 
 	style = get_menu_style_ptr(ptr);
 
-	parse_xface_from_style(&xa, style);
 	parse_xfont_from_style(&xf, style);
-	format_xcolor(&pif->clrs->clr_txt, xa.text_color);
 	(*pif->pf_set_xfont)(pif->ctx, &xf);
 
+	parse_xface_from_style(&xa, style);
+	format_xcolor(&pif->pclrs->clr_txt, xa.text_color);
+
 	parse_xpen_from_style(&xp, style);
-	format_xcolor(&pif->clrs->clr_frg, xp.color);
+	format_xcolor(&pif->pclrs->clr_bkg, xp.color);
+	lighten_xpen(&xp, DEF_HARD_DARKEN);
 
-	format_xcolor(&pif->clrs->clr_msk, xi.color);
+	format_xcolor(&pif->pclrs->clr_msk, xi.color);
 
-	xmem_copy((void*)&xc, (void*)&pif->clrs->clr_ico, sizeof(xcolor_t));
+	xmem_copy((void*)&xc, (void*)&pif->pclrs->clr_ico, sizeof(xcolor_t));
+
+	xr.fx = pbox->fx;
+	xr.fy = pbox->fy;
+	xr.fw = pbox->fw;
+	xr.fh = pbox->fh;
+
+	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
 
 	ic = get_menu_icon_span(ptr);
 	

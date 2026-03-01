@@ -13,12 +13,27 @@ int main(int argc, char* argv[])
 {
 	xdk_process_init(XDK_APARTMENT_PROCESS);
 
-	test_ac_table();
+	//ac_tableself_test();
+
+	//bina_treeself_test();
+
+	//trie_treeself_test();
+
+	//hash_tableself_test();
+
+	//dict_tableself_test();
+
+	//words_tableself_test();
+
+	//string_tableself_test();
+
+	//file_tableself_test();
+
+	//bplus_tree_self_test();
+
+	bplus_tree_self_test();
 
 	xdk_process_uninit();
-#ifdef _OS_WINDOWS
-	getch();
-#endif
 
 	return 0;
 }

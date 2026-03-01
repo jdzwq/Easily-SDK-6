@@ -114,14 +114,14 @@ bool_t xfile_write(file_t pfn, const byte_t* buf, dword_t size)
 	return rt;
 }
 
-bool_t xfile_read_range(file_t pfn, dword_t hoff, dword_t loff, byte_t* buf, dword_t size)
+bool_t xfile_read_range(file_t pfn, vword_t off, byte_t* buf, dword_t size)
 {
-	return (*pfn->pf_read_range)(pfn->fd, hoff, loff, buf, size);
+	return (*pfn->pf_read_range)(pfn->fd, off, buf, size);
 }
 
-bool_t	xfile_write_range(file_t pfn, dword_t hoff, dword_t loff, const byte_t* buf, dword_t size)
+bool_t	xfile_write_range(file_t pfn, vword_t off, const byte_t* buf, dword_t size)
 {
-	return (*pfn->pf_write_range)(pfn->fd, hoff, loff, buf, size);
+	return (*pfn->pf_write_range)(pfn->fd, off, buf, size);
 }
 
 bool_t xfile_flush(file_t pfn)
@@ -302,8 +302,9 @@ bool_t xfile_copy(const secu_desc_t* psd, const tchar_t* srcfile, const tchar_t*
 	bool_t rt;
 	bool_t b_range = 0;
 	dword_t hoff, loff;
+	vword_t voff;
 	dword_t max = 2 * XHTTP_ZIPED_SIZE;
-	long long l_bytes, l_total = 0;
+	long long l_total = 0;
 
 	byte_t* d_buf = NULL;
 	file_t d_src = NULL;
@@ -349,7 +350,7 @@ bool_t xfile_copy(const secu_desc_t* psd, const tchar_t* srcfile, const tchar_t*
 		
 	if (b_range)
 	{
-		hoff = loff = 0;
+		voff = 0;
 		while (l_total)
 		{
 			if ((long long)MAKELWORD(max, 0) > l_total)
@@ -358,7 +359,7 @@ bool_t xfile_copy(const secu_desc_t* psd, const tchar_t* srcfile, const tchar_t*
 				len = max;
 
 			d_buf = (byte_t*)xmem_alloc(len);
-			rt = xfile_read_range(d_src, hoff, loff, d_buf, len);
+			rt = xfile_read_range(d_src, voff, d_buf, len);
 			if (rt)
 			{
 				//last set filetime
@@ -367,17 +368,14 @@ bool_t xfile_copy(const secu_desc_t* psd, const tchar_t* srcfile, const tchar_t*
 					xfile_settime(d_dest, ftime);
 				}
 
-				rt = xfile_write_range(d_dest, hoff, loff, d_buf, len);
+				rt = xfile_write_range(d_dest, voff, d_buf, len);
 			}
 			xmem_free(d_buf);
 
 			if (!rt)
 				break;
 
-			l_bytes = (long long)MAKELWORD(loff, hoff) + len;
-			hoff = GETHDWORD(l_bytes);
-			loff = GETLDWORD(l_bytes);
-
+			voff += len;
 			l_total -= len;
 		}
 

@@ -90,11 +90,11 @@ static bool_t _flush_file_head(file_table_context* ppt, bool_t b_save)
 		PUT_DWORD_LOC(head, (NUID_TOKEN_SIZE + 12), ppt->file_maps);
 		PUT_LWORD_LOC(head, (NUID_TOKEN_SIZE + 16), ppt->file_root);
 
-		return xuncf_write_file_range(ppt->block, 0, 0, head, ppt->page_size);
+		return xuncf_write_file_range(ppt->block, 0, head, ppt->page_size);
 	}
 	else
 	{
-		if (!xuncf_read_file_range(ppt->block, 0, 0, head, PAGE_SIZE))
+		if (!xuncf_read_file_range(ppt->block, 0, head, PAGE_SIZE))
 			return 0;
 
 #if defined(_UNICODE) || defined(UNICODE)
@@ -117,8 +117,7 @@ static bool_t _flush_file_head(file_table_context* ppt, bool_t b_save)
 static res_file_t _lock_file_table_map(file_table_context* ppt, dword_t map_ind, map_t map)
 {
 	dword_t map_bytes, map_blocks;
-	lword_t ll;
-	dword_t hoff, loff;
+	vword_t ll;
 	res_file_t mh = 0;
 	void* buff;
 
@@ -130,10 +129,8 @@ static res_file_t _lock_file_table_map(file_table_context* ppt, dword_t map_ind,
 
 	//the file table map position is: head bytes + map index * (map bytes + blocks bytes)
 	ll = ppt->page_size + map_ind * (map_bytes + map_blocks * ppt->block_size);
-	hoff = GETHDWORD(ll);
-	loff = GETLDWORD(ll);
 
-	buff = xuncf_lock_file_range(ppt->block, hoff, loff, map_bytes, bool_true, &mh);
+	buff = xuncf_lock_file_range(ppt->block, ll, map_bytes, bool_true, &mh);
 	if(!buff)
 	{
 		return INVALID_FILE;
@@ -153,8 +150,7 @@ static res_file_t _lock_file_table_map(file_table_context* ppt, dword_t map_ind,
 static void _unlock_file_table_map(file_table_context* ppt, dword_t map_ind, res_file_t mh, map_t map)
 {
 	dword_t map_bytes, map_blocks;
-	lword_t ll;
-	dword_t hoff, loff;
+	vword_t ll;
 	void* buff;
 
 	map_blocks = BLOCKS_PERMAP(ppt->page_size, ppt->mask_bits);
@@ -162,20 +158,17 @@ static void _unlock_file_table_map(file_table_context* ppt, dword_t map_ind, res
 
 	//the file table map position is: head bytes + map index * (map bytes + blocks bytes)
 	ll = ppt->page_size + map_ind * (map_bytes + map_blocks * ppt->block_size);
-	hoff = GETHDWORD(ll);
-	loff = GETLDWORD(ll);
 
 	buff = map_detach(map);
 	XDK_ASSERT(buff != NULL);
 
-	xuncf_unlock_file_range(ppt->block, hoff, loff, map_bytes, mh, buff);
+	xuncf_unlock_file_range(ppt->block, ll, map_bytes, mh, buff);
 }
 
 static void* _lock_file_table_block(file_table_context* ppt, dword_t map_ind, dword_t map_pos, dword_t size, bool_t write, res_file_t* pmh)
 {
 	dword_t map_bytes, map_blocks;
-	lword_t ll;
-	dword_t hoff, loff;
+	vword_t ll;
 	bool_t b_write;
 	void* buff;
 
@@ -184,17 +177,14 @@ static void* _lock_file_table_block(file_table_context* ppt, dword_t map_ind, dw
 
 	//the file table block position is: head bytes + map index * (map bytes + blocks bytes) + map bytes + block index * blocks bytes
 	ll = ppt->page_size + map_ind * (map_bytes + map_blocks * ppt->block_size) + (map_bytes + map_pos * ppt->block_size);
-	hoff = GETHDWORD(ll);
-	loff = GETLDWORD(ll);
 
-	return xuncf_lock_file_range(ppt->block, hoff, loff, size, write, pmh);
+	return xuncf_lock_file_range(ppt->block, ll, size, write, pmh);
 }
 
 static void _unlock_file_table_block(file_table_context* ppt, dword_t map_ind, dword_t map_pos, dword_t size, bool_t write, res_file_t mh, void* buf)
 {
 	dword_t map_bytes, map_blocks;
-	lword_t ll;
-	dword_t hoff, loff;
+	vword_t ll;
 	bool_t b_write;
 	void* buff;
 
@@ -203,10 +193,8 @@ static void _unlock_file_table_block(file_table_context* ppt, dword_t map_ind, d
 
 	//the file table block position is: head bytes + map index * (map bytes + blocks bytes) + map bytes + block index * blocks bytes
 	ll = ppt->page_size + map_ind * (map_bytes + map_blocks * ppt->block_size) + (map_bytes + map_pos * ppt->block_size);
-	hoff = GETHDWORD(ll);
-	loff = GETLDWORD(ll);
 
-	xuncf_unlock_file_range(ppt->block, hoff, loff, size, mh, buf);
+	xuncf_unlock_file_range(ppt->block, ll, size, mh, buf);
 }
 
 /************************************************************************************/
@@ -215,8 +203,7 @@ link_t_ptr create_file_table(const tchar_t* fname, int block, dword_t mask)
 {
 	file_table_context* ppt = NULL;
 
-	lword_t ll;
-	dword_t dwh = 0,dwl = 0;
+	vword_t ll;
 	dword_t i, map_blocks;
 
 	lword_t tms;
@@ -236,10 +223,9 @@ link_t_ptr create_file_table(const tchar_t* fname, int block, dword_t mask)
 		raise_user_error(NULL, NULL);
 	}
 
-	xuncf_file_size(ppt->block, &dwh, &dwl);
-	ll = MAKELWORD(dwl, dwh);
+	xuncf_file_size(ppt->block, &ll);
 
-	if (ll && ll < (lword_t)PAGE_SIZE)
+	if (ll && ll < (vword_t)PAGE_SIZE)
 	{
 		raise_user_error(_T("open_file_table"), _T("invalid file size"));
 	}
@@ -579,8 +565,7 @@ void trunc_file_table(link_t_ptr ptr)
 	res_file_t mh;
 	map_t map = NULL;
 	dword_t map_blocks, map_bytes;
-	lword_t ll;
-	dword_t hoff, loff;
+	vword_t ll;
 
 	XDK_ASSERT(ptr && ptr->tag == lkFileTable);
 
@@ -608,10 +593,8 @@ void trunc_file_table(link_t_ptr ptr)
 		if(pos < map_blocks - 1)
 		{
 			ll = ppt->page_size + ind * (map_bytes + map_blocks * ppt->block_size) + (map_bytes + pos * ppt->block_size);
-			hoff = GETHDWORD(ll);
-			loff = GETLDWORD(ll);
 
-			xuncf_truncate(ppt->block, hoff, loff);
+			xuncf_truncate(ppt->block, ll);
 		}
 
 		_unlock_file_table_map(ppt, ind, mh, map);
@@ -622,10 +605,8 @@ void trunc_file_table(link_t_ptr ptr)
 
 		//trunc file table map
 		ll = ppt->page_size + ppt->file_maps * (map_bytes + map_blocks * ppt->block_size);
-		hoff = GETHDWORD(ll);
-		loff = GETLDWORD(ll);
 
-		xuncf_truncate(ppt->block, hoff, loff);
+		xuncf_truncate(ppt->block, ll);
 
 		//save file table maps changed
 		if (!_flush_file_head(ppt, 1))

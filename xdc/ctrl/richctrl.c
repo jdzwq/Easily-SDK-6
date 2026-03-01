@@ -570,6 +570,10 @@ void hand_richctrl_size(widget_t widget, int code, const xsize_t* prs)
 		break;
 	case WS_SIZE_MINIMIZED:
 		break;
+	case WS_SIZE_MAXSHOW:
+		break;
+	case WS_SIZE_RESTORE:
+		break;
 	case WS_SIZE_LAYOUT:
 		break;
 	}

@@ -10,25 +10,19 @@ int main(int argc, char* argv[])
 {
 	xdk_process_init(XDK_APARTMENT_PROCESS);
 
-	//test_linear();
+	//map_self_test();
 
-	//test_map();
+	//matrix_self_test();
 
-	//test_matrix();
+	//vector_self_test();
 
-	//test_message();
+	//set_self_test();
 
-	//test_queue();
+	//variant_self_test();
 
-	//test_set();
+	//message_self_test();
 
-	//test_spinlock();
-
-	//test_variant();
-
-	//test_object();
-
-	test_vector();
+	object_self_test();
 
 	xdk_process_uninit();
 #ifdef _OS_WINDOWS

@@ -1871,33 +1871,15 @@ void hand_textor_paint(textor_context* ptd, visual_t dc, const xrect_t* pxr)
 	visual_t rdc;
 	canvas_t canv;
 	
-	const drawing_interface* pif = NULL;
-	drawing_interface ifv = { 0 };
-
-	xcolor_t xc = { 0 };
-
 	XDK_ASSERT(ptd && ptd->widget);
-
-	canv = widget_get_canvas(ptd->widget);
-
-	pif = widget_get_canvas_interface(ptd->widget);
 
 	widget_get_client_rect(ptd->widget, &xr);
 
+	canv = widget_get_canvas(ptd->widget);
 	rdc = begin_canvas_paint(canv, dc, xr.w, xr.h);
 
 	widget_hand_paint(ptd->widget, rdc, NULL);
 	
-	get_visual_interface(rdc, &ifv);
-
-	/*if (widget_can_paging(ptd->widget))
-	{
-		xmem_copy((void*)&xc, (void*)&pclrs->clr_frg, sizeof(xcolor_t));
-		lighten_xcolor(&xc, DEF_HARD_DARKEN);
-
-		draw_corner(pif, &xc, (const xrect_t*)&(pif->rect));
-	}*/
-
 	_textor_draw_text(ptd, ptd->vb.px, ptd->vb.py, ptd->vb.pw, ptd->vb.ph, ptd->paged, rdc);
 
 	if (ptd->b_select)

@@ -133,8 +133,6 @@ static void sub_editbox_unsubbing(widget_t widget, uid_t subid, vword_t delta)
 	{
 		widget_destroy(dropbox);
 	}
-
-	widget_del_subproc(widget, IDS_EDITBOX);
 }
 
 static int sub_editbox_show(widget_t widget, bool_t show, uid_t subid, vword_t delta)
@@ -202,14 +200,6 @@ static int sub_dropbox_self_command(widget_t widget, int code, vword_t data, uid
 	return 0;
 }
 
-static void sub_dropbox_unsubbing(widget_t widget, uid_t subid, vword_t delta)
-{
-	if (subid != IDS_DROPBOX)
-		return;
-
-	widget_del_subproc(widget, IDS_DROPBOX);
-}
-
 /*********************************************************************************************************/
 
 widget_t firelist_create(widget_t widget, const xrect_t* pxr, link_t_ptr data)
@@ -246,7 +236,6 @@ widget_t firelist_create(widget_t widget, const xrect_t* pxr, link_t_ptr data)
 	xmem_zero((void*)&ev, sizeof(if_subproc_t));
 	
 	ev.sub_on_self_command = sub_dropbox_self_command;
-	ev.sub_on_unsubbed = sub_dropbox_unsubbing;
 
 	widget_set_subproc(dropbox, IDS_DROPBOX, &ev);
 	widget_set_subproc_delta(dropbox, IDS_DROPBOX, (vword_t)editor);

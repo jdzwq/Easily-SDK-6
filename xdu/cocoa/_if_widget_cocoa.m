@@ -335,6 +335,8 @@ static NSColor* _xcolor_to_nscolor(xcolor_t* xclr)
 
 NSString *const NoticeMessage = @"NoticeMessage";
 NSString *const CommandMessage = @"CommandMessage";
+NSString *const HideNotification = @"HideNotification";
+NSString *const UnHideNotification = @"UnHideNotification";
 
 @implementation _CocoaViewDelegate
 
@@ -353,6 +355,14 @@ NSString *const CommandMessage = @"CommandMessage";
     [[NSNotificationCenter defaultCenter] addObserver:self
                                             selector:@selector(handleViewFrameChanged:)
                                             name:NSViewFrameDidChangeNotification
+                                            object:initView];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                            selector:@selector(handleViewVisibilityChanged:)
+                                            name:HideNotification
+                                            object:initView];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                            selector:@selector(handleViewVisibilityChanged:)
+                                            name:UnHideNotification
                                             object:initView];
     return self;
 }
@@ -472,16 +482,38 @@ NSString *const CommandMessage = @"CommandMessage";
     if_subproc_t* psubp = (if_subproc_t*)ref_view.subproc;
     if(psubp && psubp->sub_on_size)
     {
-        pwidg->result = (*psubp->sub_on_size)((widget_t)&(pwidg->head), WS_SIZE_LAYOUT, &xs, psubp->sid, psubp->delta);
+        pwidg->result = (*psubp->sub_on_size)((widget_t)&(pwidg->head), WS_SIZE_RESTORE, &xs, psubp->sid, psubp->delta);
         if(pwidg->result) return;
     }
 
     if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
     if(pdisp && pdisp->pf_on_size)
     {
-        (*pdisp->pf_on_size)((widget_t)&(pwidg->head), WS_SIZE_LAYOUT, &xs);
+        (*pdisp->pf_on_size)((widget_t)&(pwidg->head), WS_SIZE_RESTORE, &xs);
     }
 }}
+
+- (void)handleViewVisibilityChanged:(NSNotification*)notification
+{@autoreleasepool {
+    _CocoaView* ref_view = notification.object;
+    cocoa_widget_t* pwidg = (cocoa_widget_t*)ref_view.widget;
+
+    bool_t visible = ([notification.name isEqualToString:HideNotification]) ? 0 : 1;
+    
+    if_subproc_t* psubp = (if_subproc_t*)ref_view.subproc;
+    if(psubp && psubp->sub_on_show)
+    {
+        pwidg->result = (*psubp->sub_on_show)((widget_t)&(pwidg->head), visible, psubp->sid, psubp->delta);
+        if(pwidg->result) return;
+    }
+
+    if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
+    if(pdisp && pdisp->pf_on_show)
+    {
+        (*pdisp->pf_on_show)((widget_t)&(pwidg->head), visible);
+    }
+}}
+
 @end
 
 /**************************************************************************************/
@@ -669,6 +701,7 @@ NSString *const CommandMessage = @"CommandMessage";
     case WS_MODE_TRACK:
         _CocoaApplicationDelegate* appDelegate = [NSApp delegate];
         appDelegate.trackview = nil;
+        [NSApp stopModal];
         break;
     }
 }}
@@ -694,7 +727,7 @@ NSString *const CommandMessage = @"CommandMessage";
         if (NSEqualRects(newFrame, scrFrame))
             pwidg->result = (*psubp->sub_on_size)((widget_t)&(pwidg->head), WS_SIZE_MAXIMIZED, &xs, psubp->sid, psubp->delta);
         else
-            pwidg->result = (*psubp->sub_on_size)((widget_t)&(pwidg->head), WS_SIZE_LAYOUT, &xs, psubp->sid, psubp->delta);
+            pwidg->result = (*psubp->sub_on_size)((widget_t)&(pwidg->head), WS_SIZE_RESTORE, &xs, psubp->sid, psubp->delta);
         
         if(pwidg->result) return;
     }
@@ -705,7 +738,7 @@ NSString *const CommandMessage = @"CommandMessage";
         if (NSEqualRects(newFrame, scrFrame))
             (*pdisp->pf_on_size)((widget_t)&(pwidg->head), WS_SIZE_MAXIMIZED, &xs);
         else
-            (*pdisp->pf_on_size)((widget_t)&(pwidg->head), WS_SIZE_LAYOUT, &xs);
+            (*pdisp->pf_on_size)((widget_t)&(pwidg->head), WS_SIZE_RESTORE, &xs);
     }
 }}
 
@@ -760,14 +793,14 @@ NSString *const CommandMessage = @"CommandMessage";
     if_subproc_t* psubp = (if_subproc_t*)ref_view.subproc;
     if(psubp && psubp->sub_on_size)
     {
-        pwidg->result = (*psubp->sub_on_size)((widget_t)&(pwidg->head), WS_SIZE_LAYOUT, &xs, psubp->sid, psubp->delta);
+        pwidg->result = (*psubp->sub_on_size)((widget_t)&(pwidg->head), WS_SIZE_RESTORE, &xs, psubp->sid, psubp->delta);
         if(pwidg->result) return;
     }
 
     if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
     if(pdisp && pdisp->pf_on_size)
     {
-        (*pdisp->pf_on_size)((widget_t)&(pwidg->head), WS_SIZE_LAYOUT, &xs);
+        (*pdisp->pf_on_size)((widget_t)&(pwidg->head), WS_SIZE_RESTORE, &xs);
     }
 }}
 
@@ -854,14 +887,14 @@ NSString *const CommandMessage = @"CommandMessage";
     if_subproc_t* psubp = (if_subproc_t*)ref_view.subproc;
     if(psubp && psubp->sub_on_size)
     {
-        pwidg->result = (*psubp->sub_on_size)((widget_t)&(pwidg->head), WS_SIZE_LAYOUT, &xs, psubp->sid, psubp->delta);
+        pwidg->result = (*psubp->sub_on_size)((widget_t)&(pwidg->head), WS_SIZE_RESTORE, &xs, psubp->sid, psubp->delta);
         if(pwidg->result) return;
     }
 
     if_dispatch_t* pdisp = (if_dispatch_t*)ref_view.dispatch;
     if(pdisp && pdisp->pf_on_size)
     {
-        (*pdisp->pf_on_size)((widget_t)&(pwidg->head), WS_SIZE_LAYOUT, &xs);
+        (*pdisp->pf_on_size)((widget_t)&(pwidg->head), WS_SIZE_RESTORE, &xs);
     }
 }}
 
@@ -982,6 +1015,7 @@ NSString *const CommandMessage = @"CommandMessage";
     //NSLog(@"Custom nsEvent handling: %@", nsEvent);
 }}
 
+
 @end
 /**************************************************************************************/
 
@@ -1098,6 +1132,14 @@ NSString *const CommandMessage = @"CommandMessage";
     }
 }
 
+- (void)setHidden:(BOOL)hidden
+{
+    [super setHidden:hidden];
+
+    [[NSNotificationCenter defaultCenter] postNotificationName:(hidden ? HideNotification : UnHideNotification)
+                                                        object:self];
+}
+
 - (NSView *)hitTest:(NSPoint)aPoint
 {@autoreleasepool {
     if([self isKindOfClass:[_CocoaView class]] == NO)
@@ -1108,7 +1150,15 @@ NSString *const CommandMessage = @"CommandMessage";
     _CocoaApplicationDelegate* appDelegate = [NSApp delegate];
     if(appDelegate.trackview && (NSView*)appDelegate.trackview != cur_view)
     {
-        return (NSView*)appDelegate.trackview;
+        NSEvent *event = [NSApp currentEvent];
+        NSEventType type = event.type;
+        if(NSEventTypeLeftMouseDown == type || NSEventTypeRightMouseDown == type)
+        {
+            _CocoaView* track_view = appDelegate.trackview;
+            cocoa_widget_t* pw = (cocoa_widget_t*)track_view.widget;
+            if(pw) _widget_post_key(&(pw->head), KEY_ESC);
+        }
+        return nil;//(NSView*)appDelegate.trackview;
     }
 
     _CocoaView* coc_view = self;
@@ -1596,6 +1646,22 @@ NSString *const CommandMessage = @"CommandMessage";
         (*pdisp->pf_on_keydown)((widget_t)&(pwidg->head), mask, (int)key);
     }
 
+    if(key == KEY_ENTER || key == KEY_TAB)
+    {
+        if(psubp && psubp->sub_on_wchar)
+        {
+            pwidg->result = (*psubp->sub_on_wchar)((widget_t)&(pwidg->head), (wchar_t)key, psubp->sid, psubp->delta);
+            if(pwidg->result) return;
+        }
+
+        if(pdisp && pdisp->pf_on_wchar)
+        {
+            (*pdisp->pf_on_wchar)((widget_t)&(pwidg->head), (wchar_t)key);
+        }
+
+        return;
+    }
+
     [self interpretKeyEvents:@[nsEvent]];
 }}
 
@@ -1659,20 +1725,6 @@ NSString *const CommandMessage = @"CommandMessage";
     if(pdisp && pdisp->pf_on_keyup)
     {
         (*pdisp->pf_on_keyup)((widget_t)&(pwidg->head), mask, (int)key);
-    }
-
-    if(key == KEY_ENTER || key == KEY_TAB)
-    {
-        if(psubp && psubp->sub_on_wchar)
-        {
-            pwidg->result = (*psubp->sub_on_wchar)((widget_t)&(pwidg->head), (wchar_t)key, psubp->sid, psubp->delta);
-            if(pwidg->result) return;
-        }
-
-        if(pdisp && pdisp->pf_on_wchar)
-        {
-            (*pdisp->pf_on_wchar)((widget_t)&(pwidg->head), (wchar_t)key);
-        }
     }
 }}
 
@@ -1849,7 +1901,6 @@ widget_t _widget_create(const tchar_t* wname, dword_t wstyle, const xrect_t* wre
         NSRect nsRect = NSMakeRect(nsPoint.x, nsPoint.y, wrect->w, wrect->h);
 
         new_view = [[_CocoaView alloc] initWithFrame:nsRect];
-
         if(new_view == nil) goto clean;
 
         new_view.properties = [[NSMutableDictionary alloc] init];
@@ -1898,7 +1949,6 @@ widget_t _widget_create(const tchar_t* wname, dword_t wstyle, const xrect_t* wre
         nsRect = [coc_window frame];
         NSRect content = [NSWindow contentRectForFrameRect:nsRect styleMask:nsStyle];
 
-
         nsRect = [[coc_window contentView] bounds];
         new_view = [[_CocoaView alloc] initWithFrame:nsRect];
 
@@ -1935,6 +1985,7 @@ widget_t _widget_create(const tchar_t* wname, dword_t wstyle, const xrect_t* wre
     NSColor *bkgColor = [NSColor windowBackgroundColor];
     //if(ape) [bkgColor resolvedColorWithAppearance:ape];
     _nscolor_to_xcolor(bkgColor, &(pwidg->clrs.clr_bkg));
+    _nscolor_to_xcolor(bkgColor, &(pwidg->clrs.clr_msk));
 
     NSColor *frgColor = [NSColor labelColor];
     //if(ape) [frgColor resolvedColorWithAppearance:ape];
@@ -1943,6 +1994,7 @@ widget_t _widget_create(const tchar_t* wname, dword_t wstyle, const xrect_t* wre
     NSColor *txtColor = [NSColor textColor];
     //if(ape) [txtColor resolvedColorWithAppearance:ape];
     _nscolor_to_xcolor(txtColor, &(pwidg->clrs.clr_txt));
+    _nscolor_to_xcolor(txtColor, &(pwidg->clrs.clr_ico));
 
     pwidg->self = new_view;
 
@@ -2123,8 +2175,11 @@ void _widget_del_subproc(widget_t wt, uid_t sid)
     cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
     _CocoaView* coc_view = pwidg->self;
 
-    if(coc_view.subproc)
+    if_subproc_t* psubp = (if_subproc_t*)coc_view.subproc;
+    if(psubp && psubp->sub_on_unsubbed)
     {
+        (*psubp->sub_on_unsubbed)((widget_t)&(pwidg->head), psubp->sid, psubp->delta);
+
         xmem_free((if_subproc_t*)coc_view.subproc);
         coc_view.subproc = 0;
     }
@@ -2156,7 +2211,7 @@ vword_t _widget_get_subproc_delta(widget_t wt, uid_t sid)
 	return psub->delta;
 }}
 
-bool_t _widget_has_subproc(widget_t wt)
+bool_t _widget_has_subproc(widget_t wt, uid_t sid)
 {@autoreleasepool {
     cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
     _CocoaView* coc_view = pwidg->self;
@@ -2726,6 +2781,7 @@ bool_t _widget_key_state(widget_t wt, int ks)
 bool_t _widget_is_valid(widget_t wt)
 {@autoreleasepool {
     if(!wt) return 0;
+    if(wt->tag != _HANDLE_WIDGET) return 0;
 
     cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
     _CocoaView* coc_view = pwidg->self;
@@ -2875,13 +2931,15 @@ void _widget_show(widget_t wt, dword_t sw)
         if(coc_window == nil) break;
 
         NSRect nsFrame = [[coc_window screen] visibleFrame];
-        [coc_window setFrame:nsFrame display:YES animate:NO];
+        [coc_window setFrame:nsFrame display:YES];
+        [coc_window makeKeyAndOrderFront:nil];
         pwidg->state = WS_SHOW_MAXIMIZE;
         break;
     case WS_SHOW_FULLSCREEN:
         if(coc_window == nil) break;
 
 		[coc_window toggleFullScreen:nil];
+        [coc_window makeKeyAndOrderFront:nil];
 		pwidg->state = WS_SHOW_FULLSCREEN;
 		break;
 	case WS_SHOW_HIDE:
@@ -2969,8 +3027,21 @@ void _widget_enable(widget_t wt, bool_t b)
 
 void _widget_post_notice(widget_t wt, NOTICE* pnt)
 {@autoreleasepool {
-    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
-    _CocoaView* coc_view = pwidg->self;
+    cocoa_widget_t* pwidg = (wt)? TypePtrFromHead(cocoa_widget_t, wt) : nil;
+    _CocoaView* coc_view = (wt)? pwidg->self : nil;
+
+    if(!coc_view)
+    {
+        NSWindow *win = [NSApp keyWindow];
+        if (!win) win = [NSApp mainWindow];
+        if(win)
+        {
+            coc_view = [win firstResponder];
+        }
+        if(!coc_view) return;
+
+        pwidg = coc_view.widget;
+    }
 
     vword_t delta = (vword_t)pnt;
 
@@ -3030,8 +3101,19 @@ int _widget_send_notice(widget_t wt, NOTICE* pnt)
 
 void _widget_post_command(widget_t wt, int code, uid_t cid, vword_t data)
 {@autoreleasepool {
-    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
-    _CocoaView* coc_view = pwidg->self;
+    cocoa_widget_t* pwidg = (wt)? TypePtrFromHead(cocoa_widget_t, wt) : nil;
+    _CocoaView* coc_view = (wt)? pwidg->self : nil;
+
+    if(!coc_view)
+    {
+        NSWindow *win = [NSApp keyWindow];
+        if (!win) win = [NSApp mainWindow];
+        if(win)
+        {
+            coc_view = [win firstResponder];
+        }
+        if(!coc_view) return;
+    }
 
     if(pwidg->style & WD_STYLE_CHILD)
     {
@@ -3096,11 +3178,21 @@ int _widget_send_command(widget_t wt, int code, uid_t cid, vword_t data)
 
 void _widget_post_wchar(widget_t wt, wchar_t ch)
 {@autoreleasepool {
-    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
-    _CocoaView* coc_view = pwidg->self;
+    cocoa_widget_t* pwidg = (wt)? TypePtrFromHead(cocoa_widget_t, wt) : nil;
+    _CocoaView* coc_view = (wt)? pwidg->self : nil;
+
+    if(!coc_view)
+    {
+        NSWindow *win = [NSApp keyWindow];
+        if (!win) win = [NSApp mainWindow];
+        if(win)
+        {
+            coc_view = [win firstResponder];
+        }
+    }
+    if(!coc_view) return;
 
     NSWindow* nsWindow = [(NSView*)coc_view window];
-
     NSString* nsString = [NSString stringWithCharacters:&ch length:1];
 
     NSEvent *nsKeydown = [NSEvent keyEventWithType:NSEventTypeKeyDown
@@ -3132,8 +3224,19 @@ void _widget_post_wchar(widget_t wt, wchar_t ch)
 
 void _widget_post_key(widget_t wt, int key)
 {@autoreleasepool {
-    cocoa_widget_t* pwidg = TypePtrFromHead(cocoa_widget_t, wt);
-    _CocoaView* coc_view = pwidg->self;
+    cocoa_widget_t* pwidg = (wt)? TypePtrFromHead(cocoa_widget_t, wt) : nil;
+    _CocoaView* coc_view = (wt)? pwidg->self : nil;
+
+    if(!coc_view)
+    {
+        NSWindow *win = [NSApp keyWindow];
+        if (!win) win = [NSApp mainWindow];
+        if(win)
+        {
+            coc_view = [win firstResponder];
+        }
+    }
+    if(!coc_view) return;
 
     NSWindow* nsWindow = [(NSView*)coc_view window];
     NSString *nsString = [NSString stringWithFormat:@"%c", key];
@@ -3445,6 +3548,8 @@ void _widget_do_track(widget_t wt)
     [coc_window makeKeyAndOrderFront:nil];
 
     app_delegate.trackview = coc_view;
+
+    [NSApp runModalForWindow:coc_window];
 }}
 
 void _message_quit(int code)

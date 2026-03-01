@@ -198,10 +198,9 @@ static Font* create_font(const xfont_t* pxf)
 
 	FontFamily ff(face);
 
-	float fx = 12.0f;
-	font_metric_by_pt(xstof(pxf->size), NULL, &fx);
+	float pt = xstof(pxf->size);
 
-	return new Font(&ff, (BYTE)fx, fs, UnitPixel);
+	return new Font(&ff, (BYTE)pt, fs, UnitPoint);
 }
 
 static StringFormat* create_face(const xface_t* pxa)
@@ -559,11 +558,10 @@ void _gdi_uninit(void)
 
 void _gdi_set_xfont(visual_t rdc, const xfont_t* pxf)
 {
-	win32_context_t* ctx = TypePtrFromHead(win32_context_t, rdc);
-	win32_fontset_t* fnt = TypePtrFromHead(win32_fontset_t, ctx->fontset);
+	win32_context_t* ctx = (rdc)? TypePtrFromHead(win32_context_t, rdc) : NULL;
+	win32_fontset_t* fnt = (rdc)? TypePtrFromHead(win32_fontset_t, ctx->fontset) : TypePtrFromHead(win32_fontset_t, g_fontset);
 
-	float px = 12.0f;
-	font_metric_by_pt(xstof(pxf->size), NULL, &px);
+	float pt = xstof(pxf->size);
 
 	FontStyle fs;
 	if (xstol(pxf->weight) > 500)
@@ -588,25 +586,19 @@ void _gdi_set_xfont(visual_t rdc, const xfont_t* pxf)
 	}
 
 	tchar_t curFace[32];
-	if (is_null(pxf->family))
-	{
-		xscpy(curFace, SYSTEM_FONTNAME);
-	}else
-	{
-		xscpy(curFace, pxf->family);
-	}
+	xscpy(curFace, pxf->family);
 	
-	Font* orgFont = (ctx->fontset)? ((Font*)fnt->font_object) : NULL;
+	Font* orgFont = (fnt)? ((Font*)fnt->font_object) : NULL;
 	tchar_t orgFace[32] = {0};
-	if(orgFont)
-	{
-		FontFamily orgFamily;
-		orgFont->GetFamily(&orgFamily);
-		LANGID lang = MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US);
-		orgFamily.GetFamilyName(orgFace, lang);
-	}
 
-	if(orgFont && px == orgFont->GetSize() && fs == orgFont->GetStyle() && xsicmp(curFace, orgFace) == 0)
+	FontFamily orgFamily;
+	orgFont->GetFamily(&orgFamily);
+	LANGID lang = MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US);
+	orgFamily.GetFamilyName(orgFace, lang);
+	float px = orgFont->GetSize();
+	int fx = orgFont->GetStyle();
+
+	if(orgFont && (int)pt == (int)px && (int)fs == fx && (is_null(curFace) || xsicmp(curFace, orgFace) == 0))
 	{
 		return;
 	}
@@ -618,15 +610,15 @@ void _gdi_set_xfont(visual_t rdc, const xfont_t* pxf)
 	}
 
     g_fontset = _gdi_create_fontset(pxf);
-	ctx->fontset = g_fontset;
+	if(ctx) ctx->fontset = g_fontset;
 }
 
 void _gdi_get_xfont(visual_t rdc, xfont_t* pxf)
 {
-	win32_context_t* ctx = TypePtrFromHead(win32_context_t, rdc);
-	win32_fontset_t* fnt = TypePtrFromHead(win32_fontset_t, ctx->fontset);
+	win32_context_t* ctx = (rdc)? TypePtrFromHead(win32_context_t, rdc) : NULL;
+	win32_fontset_t* fnt = (rdc)? TypePtrFromHead(win32_fontset_t, ctx->fontset) : TypePtrFromHead(win32_fontset_t, g_fontset);
 
-	Font* orgFont = (ctx->fontset)? ((Font*)fnt->font_object) : NULL;
+	Font* orgFont = (fnt)? ((Font*)fnt->font_object) : NULL;
 	if(!orgFont) return;
 
 	FontStyle fs = (FontStyle)orgFont->GetStyle();
@@ -701,9 +693,6 @@ void _gdi_draw_line(visual_t rdc,const xpen_t* pxp, const xpoint_t*ppt1, const x
 	Pen* pp = create_pen(pxp);
 
 	Gdiplus::Graphics gh(hDC);
-
-	gh.SetPageUnit(UnitPixel);
-
 	gh.SetSmoothingMode(SmoothingModeAntiAlias);
 	gh.DrawLine(pp,pt[0].x,pt[0].y,pt[1].x,pt[1].y);
 	delete pp;
@@ -732,8 +721,6 @@ void _gdi_draw_polyline(visual_t rdc, const xpen_t* pxp, const xpoint_t* ppt, in
 	Pen* pp = create_pen(pxp);
 
 	Gdiplus::Graphics gh(hDC);
-
-	gh.SetPageUnit(UnitPixel);
 	gh.SetSmoothingMode(SmoothingModeAntiAlias);
 
 	gh.DrawPath(pp, &path);
@@ -785,8 +772,6 @@ void _gdi_draw_arc(visual_t rdc, const xpen_t* pxp, const xpoint_t * ppt1, const
 	Rect rf(xp[2].x - rx, xp[2].y - ry, 2 * rx, 2 * ry);
 
 	Gdiplus::Graphics gh(hDC);
-
-	gh.SetPageUnit(UnitPixel);
 	gh.SetSmoothingMode(SmoothingModeHighQuality);
 
 	Pen* pp = create_pen(pxp);
@@ -815,8 +800,6 @@ void _gdi_draw_bezier(visual_t rdc, const xpen_t* pxp, const xpoint_t* ppt1, con
 	DPtoLP(hDC, pt, 4);
 
 	Gdiplus::Graphics gh(hDC);
-
-	gh.SetPageUnit(UnitPixel);
 	gh.SetSmoothingMode(SmoothingModeAntiAlias);
 
 	Pen* pp = (Pen*)create_pen(pxp);
@@ -846,8 +829,6 @@ void _gdi_draw_curve(visual_t rdc, const xpen_t* pxp, const xpoint_t* ppt, int n
 	}
 
 	Gdiplus::Graphics gh(hDC);
-
-	gh.SetPageUnit(UnitPixel);
 	gh.SetSmoothingMode(SmoothingModeAntiAlias);
 
 	Pen* pp = (Pen*)create_pen(pxp);
@@ -874,8 +855,6 @@ void _gdi_draw_rect(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const 
 
 	Gdiplus::Graphics gh(hDC);
 
-	gh.SetPageUnit(UnitPixel);
-
 	if (!is_null_xbrush(pxb))
 	{
 		Brush* pb = (Brush*)create_brush(pxb, prt, NULL);
@@ -884,11 +863,14 @@ void _gdi_draw_rect(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const 
 		delete pb;
 	}
 
-	Pen* pp = (Pen*)create_pen(pxp);
-	gh.SetSmoothingMode(SmoothingModeAntiAlias);
-	gh.DrawRectangle(pp, Rect(pt[0].x, pt[0].y, pt[1].x - pt[0].x, pt[1].y - pt[0].y));
-
-	delete pp;
+	if (!is_null_xpen(pxp))
+	{
+		Pen* pp = (Pen*)create_pen(pxp);
+		gh.SetSmoothingMode(SmoothingModeAntiAlias);
+		gh.DrawRectangle(pp, Rect(pt[0].x, pt[0].y, pt[1].x - pt[0].x, pt[1].y - pt[0].y));
+	
+		delete pp;
+	}
 }
 
 void _gdi_draw_round(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const xrect_t* prt, const xsize_t* pxs)
@@ -939,8 +921,6 @@ void _gdi_draw_round(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const
 	path.AddLine(rf.X, rf.Y + rf.Height - rx, rf.X, rf.Y + ry);
 
 	Gdiplus::Graphics gh(hDC);
-
-	gh.SetPageUnit(UnitPixel);
 	gh.SetSmoothingMode(SmoothingModeHighQuality);
 
 	if (!is_null_xbrush(pxb))
@@ -951,10 +931,13 @@ void _gdi_draw_round(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const
 		delete pb;
 	}
 
-	Pen* pp = create_pen(pxp);
-	gh.DrawPath(pp, &path);
+	if (!is_null_xpen(pxp))
+	{
+		Pen* pp = create_pen(pxp);
+		gh.DrawPath(pp, &path);
 
-	delete pp;
+		delete pp;
+	}
 }
 
 void _gdi_draw_ellipse(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const xrect_t* prt)
@@ -971,8 +954,6 @@ void _gdi_draw_ellipse(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, con
 	DPtoLP(hDC, pt, 2);
 
 	Gdiplus::Graphics gh(hDC);
-
-	gh.SetPageUnit(UnitPixel);
 	gh.SetSmoothingMode(SmoothingModeAntiAlias);
 
 	if (!is_null_xbrush(pxb))
@@ -983,10 +964,13 @@ void _gdi_draw_ellipse(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, con
 		delete pb;
 	}
 
-	Pen* pp = (Pen*)create_pen(pxp);
-	gh.DrawEllipse(pp, Rect(pt[0].x, pt[0].y, pt[1].x - pt[0].x, pt[1].y - pt[0].y));
+	if (!is_null_xpen(pxp))
+	{
+		Pen* pp = (Pen*)create_pen(pxp);
+		gh.DrawEllipse(pp, Rect(pt[0].x, pt[0].y, pt[1].x - pt[0].x, pt[1].y - pt[0].y));
 
-	delete pp;
+		delete pp;
+	}
 }
 
 void _gdi_draw_pie(visual_t rdc, const xpen_t* pxp, const xbrush_t*pxb, const xrect_t* prt, double fang, double tang)
@@ -1019,8 +1003,6 @@ void _gdi_draw_pie(visual_t rdc, const xpen_t* pxp, const xbrush_t*pxb, const xr
 	fdeg = (int)fdeg % 360;
 
 	Gdiplus::Graphics gh(hDC);
-
-	gh.SetPageUnit(UnitPixel);
 	gh.SetSmoothingMode(SmoothingModeHighQuality);
 
 	if (!is_null_xbrush(pxb))
@@ -1036,12 +1018,15 @@ void _gdi_draw_pie(visual_t rdc, const xpen_t* pxp, const xbrush_t*pxb, const xr
 		delete pb;
 	}
 
-	Pen* pp = create_pen(pxp);
+	if (!is_null_xpen(pxp))
+	{
+		Pen* pp = create_pen(pxp);
 
-	gh.SetCompositingQuality(CompositingQualityGammaCorrected);
-	gh.DrawPie(pp, rf, fdeg, tdeg);
+		gh.SetCompositingQuality(CompositingQualityGammaCorrected);
+		gh.DrawPie(pp, rf, fdeg, tdeg);
 
-	delete pp;
+		delete pp;
+	}
 }
 
 void _gdi_draw_polygon(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const xpoint_t* ppt, int n)
@@ -1077,8 +1062,6 @@ void _gdi_draw_polygon(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, con
 	}
 
 	Gdiplus::Graphics gh(hDC);
-
-	gh.SetPageUnit(UnitPixel);
 	gh.SetSmoothingMode(SmoothingModeAntiAlias);
 
 	if (!is_null_xbrush(pxb))
@@ -1089,10 +1072,13 @@ void _gdi_draw_polygon(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, con
 		delete pb;
 	}
 
-	Pen* pp = create_pen(pxp);
-	gh.DrawPath(pp, &path);
+	if (!is_null_xpen(pxp))
+	{
+		Pen* pp = create_pen(pxp);
+		gh.DrawPath(pp, &path);
 
-	delete pp;
+		delete pp;
+	}
 }
 
 void _gdi_draw_path(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const tchar_t* aa, const xpoint_t* pa, int pn)
@@ -1105,8 +1091,6 @@ void _gdi_draw_path(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const 
 	if (!path) return;
 
 	Gdiplus::Graphics gh(hDC);
-
-	gh.SetPageUnit(UnitPixel);
 	gh.SetSmoothingMode(SmoothingModeAntiAlias);
 
 	if (!is_null_xbrush(pxb))
@@ -1117,10 +1101,14 @@ void _gdi_draw_path(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const 
 		delete pb;
 	}
 
-	Pen* pp = create_pen(pxp);
-	gh.DrawPath(pp, path);
+	if (!is_null_xpen(pxp))
+	{
+		Pen* pp = create_pen(pxp);
+		gh.DrawPath(pp, path);
 
-	delete pp;
+		delete pp;
+	}
+
 	delete path;
 }
 
@@ -1150,8 +1138,6 @@ void _gdi_draw_text(visual_t rdc,const xface_t* pxa,const xrect_t* prt,const tch
 	RectF rf((REAL)pt[0].x,(REAL)pt[0].y,(REAL)(pt[1].x - pt[0].x),(REAL)(pt[1].y - pt[0].y));
 
 	Gdiplus::Graphics gh(hDC);
-
-	gh.SetPageUnit(UnitPixel);
 	gh.DrawString(txt,len,pf,rf,ps,pb);
 
 	delete pb;
@@ -1181,8 +1167,6 @@ void _gdi_text_out(visual_t rdc, const xface_t* pxa, const xpoint_t* ppt, const 
 
 	Gdiplus::Graphics gh(hDC);
 
-	gh.SetPageUnit(UnitPixel);
-
 	gh.DrawString(txt, len, pf, PointF(pt.x, pt.y), pb);
 
 	delete pb;
@@ -1190,15 +1174,18 @@ void _gdi_text_out(visual_t rdc, const xface_t* pxa, const xpoint_t* ppt, const 
 
 void _gdi_text_size(visual_t rdc, const tchar_t* txt, int len, xsize_t* pxs)
 {
-	win32_context_t* ctx = TypePtrFromHead(win32_context_t, rdc);
-	win32_fontset_t* fnt = TypePtrFromHead(win32_fontset_t, ctx->fontset);
-	HDC hDC = (HDC)(ctx->context);
+	win32_context_t* ctx = (rdc)? TypePtrFromHead(win32_context_t, rdc) : NULL;
+	win32_fontset_t* fnt = (rdc)? TypePtrFromHead(win32_fontset_t, ctx->fontset) : TypePtrFromHead(win32_fontset_t, g_fontset);
+	HDC hDC = (ctx)? (HDC)(ctx->context) : GetDC(NULL);
 
 	if (len < 0) len = xslen(txt);
-	if(!len) return;
+	if(!len) 
+	{
+		if(!ctx) ReleaseDC(NULL, hDC);
+		return;
+	}
 
 	Gdiplus::Graphics gh(hDC);
-	gh.SetPageUnit(UnitPixel);
 
 	Font* pf = (Font*)(fnt->font_object);
 
@@ -1207,11 +1194,14 @@ void _gdi_text_size(visual_t rdc, const tchar_t* txt, int len, xsize_t* pxs)
 	
 	pxs->w = (int)(rf.GetRight()) - (int)(rf.GetLeft());
 	pxs->h = (int)(rf.GetBottom()) - (int)(rf.GetTop());
+
+	if(!ctx) ReleaseDC(NULL, hDC);
 }
 
 void _gdi_text_rect(visual_t rdc, const xface_t* pxa, const tchar_t* txt, int len, xrect_t* prt)
 {
-	win32_context_t* ctx = TypePtrFromHead(win32_context_t, rdc);
+	win32_context_t* ctx = (rdc)? TypePtrFromHead(win32_context_t, rdc) : NULL;
+	fontset_t fnt = (rdc)? ctx->fontset : g_fontset;
 
 	int c, n = 0, total = 0;
 	tchar_t pch[CHS_LEN + 1] = {0};
@@ -1229,7 +1219,7 @@ void _gdi_text_rect(visual_t rdc, const xface_t* pxa, const tchar_t* txt, int le
 		c = peek_word((txt + total), pch);
 		total += c;
 
-		_gdi_word_size(ctx->fontset, pch, c, &se);
+		_gdi_word_size(fnt, pch, c, &se);
 
 		if (!h)
 		{
@@ -1298,8 +1288,8 @@ void _gdi_text_rect(visual_t rdc, const xface_t* pxa, const tchar_t* txt, int le
 
 void _gdi_font_size(visual_t rdc, xsize_t* pxs)
 {
-	win32_context_t* ctx = TypePtrFromHead(win32_context_t, rdc);
-	win32_fontset_t* fnt = TypePtrFromHead(win32_fontset_t, ctx->fontset);
+	win32_context_t* ctx = (rdc)? TypePtrFromHead(win32_context_t, rdc) : NULL;
+	win32_fontset_t* fnt = (rdc)? TypePtrFromHead(win32_fontset_t, ctx->fontset) : TypePtrFromHead(win32_fontset_t, g_fontset);
 
 	FontFamily fam;
 	Font* pf = (Font*)(fnt->font_object);
@@ -1359,8 +1349,6 @@ void _gdi_draw_image(visual_t rdc,bitmap_t bmp,const xcolor_t* clr,const xrect_t
 
 	Gdiplus::Graphics gh(hDC);
 
-	gh.SetPageUnit(UnitPixel);
-
 	gh.DrawImage(pi,Rect(rt.left,rt.top,rt.right - rt.left,rt.bottom - rt.top),0,0,srcw,srch,UnitPixel,&iab);
 
 	delete pi;
@@ -1390,8 +1378,6 @@ void _gdi_draw_bitmap(visual_t rdc, bitmap_t bmp, const xpoint_t* ppt)
 
 	Gdiplus::Graphics gh(hDC);
 
-	gh.SetPageUnit(UnitPixel);
-
 	gh.DrawImage(pi, pt.x, pt.y, 0, 0, srcw, srch, UnitPixel);
 
 	delete pi;
@@ -1416,8 +1402,6 @@ void _gdi_alphablend_rect(visual_t rdc, const xcolor_t* pxc, const xrect_t* prt,
 	xsprintf(xb.opacity, _T("%d"), opacity);
 
 	Gdiplus::Graphics gh(hDC);
-
-	gh.SetPageUnit(UnitPixel);
 
 	Brush* pb = (Brush*)create_brush(&xb, prt, NULL);
 	gh.FillRectangle(pb, Rect(pt[0].x, pt[0].y, pt[1].x - pt[0].x, pt[1].y - pt[0].y));
@@ -1454,8 +1438,6 @@ void _gdi_gradient_rect(visual_t rdc, const xcolor_t* clr_brim, const xcolor_t* 
 	delete pbm;
 
 	Gdiplus::Graphics gh(hDC);
-
-	gh.SetPageUnit(UnitPixel);
 
 	gh.FillRectangle(pb, Rect(pt[0].x, pt[0].y, pt[1].x - pt[0].x, pt[1].y - pt[0].y));
 

@@ -129,8 +129,6 @@ static void sub_editbox_unsubbing(widget_t widget, uid_t subid, vword_t delta)
 	{
 		widget_destroy(datebox);
 	}
-
-	widget_del_subproc(widget, IDS_EDITBOX);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -167,14 +165,6 @@ static int sub_datebox_self_command(widget_t widget, int code, vword_t data, uid
 	return 0;
 }
 
-static void sub_datebox_unsubbing(widget_t widget, uid_t subid, vword_t delta)
-{
-	if (subid != IDS_DATEBOX)
-		return;
-
-	widget_del_subproc(widget, IDS_DATEBOX);
-}
-
 /*************************************************************************************/
 widget_t firedate_create(widget_t widget, const xrect_t* pxr)
 {
@@ -208,7 +198,6 @@ widget_t firedate_create(widget_t widget, const xrect_t* pxr)
 	xmem_zero((void*)&ev, sizeof(if_subproc_t));
 
 	ev.sub_on_self_command = sub_datebox_self_command;
-	ev.sub_on_unsubbed = sub_datebox_unsubbing;
 
 	widget_set_subproc(datebox, IDS_DATEBOX, &ev);
 	widget_set_subproc_delta(datebox, IDS_DATEBOX, (vword_t)editor);

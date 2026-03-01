@@ -118,20 +118,20 @@ void draw_dialog(const drawing_interface* pif, link_t_ptr ptr)
 	parse_xface_from_style(&xa, style);
 	if (!b_print)
 	{
-		format_xcolor(&pif->clrs->clr_txt, xa.text_color);
+		format_xcolor(&pif->pclrs->clr_txt, xa.text_color);
 		(*pif->pf_set_xfont)(pif->ctx, &xf);
 	}
 
 	/*parse_xpen_from_style(&xp, style);
 	if (!b_print)
 	{
-		format_xcolor(&pif->clrs->clr_frg, xp.color);
+		format_xcolor(&pif->pclrs->clr_frg, xp.color);
 	}*/
 
 	parse_xbrush_from_style(&xb, style);
 	if (!b_print)
 	{
-		format_xcolor(&pif->clrs->clr_bkg, xb.color);
+		format_xcolor(&pif->pclrs->clr_bkg, xb.color);
 	}
 
 	xscpy(xp.color, xb.color);
@@ -191,7 +191,7 @@ void draw_dialog(const drawing_interface* pif, link_t_ptr ptr)
 			parse_xface_from_style(&xa, style);
 			if (!b_print)
 			{
-				format_xcolor(&pif->clrs->clr_txt, xa.text_color);
+				format_xcolor(&pif->pclrs->clr_txt, xa.text_color);
 				(*pif->pf_set_xfont)(pif->ctx, &xf);
 			}
 		}

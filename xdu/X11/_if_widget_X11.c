@@ -427,7 +427,7 @@ void _widget_startup(int ver)
 	g_queue = create_timer_queue();
 
 	setlocale(LC_ALL, "");
-    XSetLocaleModifiers("");
+    XSetLocaleModifiers(getenv("XMODIFIERS"));
 
     g_xim = XOpenIM(g_display, NULL, NULL, NULL);
 }
@@ -450,7 +450,7 @@ static bool_t _message_translate(XEvent* pmsg)
 	char keystr[5] = {0};
 	KeySym keysys = 0;
 	Status status = 0;
-	unsigned int state;
+	unsigned int state = 0;
 	int i, keys = 0;
 	char ch = 0;
 	char* pch = NULL;
@@ -468,7 +468,7 @@ static bool_t _message_translate(XEvent* pmsg)
 		if(!pxw) return 0;
 
 		if(pxw->xic)
-			keys = XmbLookupString(pxw->xic, &(pmsg->xkey), keystr, 4, &keysys, &status);
+			keys = Xutf8LookupString(pxw->xic, &(pmsg->xkey), keystr, 4, &keysys, &status);
 		else
 			keys = XLookupString(&(pmsg->xkey), keystr, 4, &keysys, (XComposeStatus*)&status);
 
@@ -958,14 +958,14 @@ static int _message_dispatch(XEvent* pmsg)
 				psub = GETXDUSUBPROC(pmsg->xconfigure.window);
 				if(psub && psub->sub_on_size)
 				{
-					pxw->result = (*psub->sub_on_size)(wt, WS_SIZE_LAYOUT, &(pxw->st), psub->sid, psub->delta);
+					pxw->result = (*psub->sub_on_size)(wt, WS_SIZE_RESTORE, &(pxw->st), psub->sid, psub->delta);
 					if(pxw->result) break;
 				}
 
 				pif = GETXDUDISPATCH(pmsg->xconfigure.window);
 				if(pif && pif->pf_on_size)
 				{
-					(*pif->pf_on_size)(wt, WS_SIZE_LAYOUT, &(pxw->st));
+					(*pif->pf_on_size)(wt, WS_SIZE_RESTORE, &(pxw->st));
 				}
 			}
 			break;
@@ -1164,7 +1164,7 @@ static int _message_dispatch(XEvent* pmsg)
 				XGetInputFocus(g_display, &org, &rev);
 				if(org == pxw->self) break;
 
-				XSetInputFocus(g_display, pxw->self, RevertToNone, CurrentTime);
+				XSetInputFocus(g_display, pxw->self, RevertToPointerRoot, CurrentTime);
 				break;
 			}
 
@@ -1396,7 +1396,7 @@ widget_t _widget_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr
 
 	if(wstyle & WD_STYLE_EDITOR)
 	{
-		pxw->xic = XCreateIC(g_xim, XNInputStyle, XIMPreeditNothing | XIMStatusNothing, XNClientWindow, win, NULL);
+		pxw->xic = XCreateIC(g_xim, XNInputStyle, XIMPreeditNothing | XIMStatusNothing, XNClientWindow, win, XNFocusWindow, win, NULL);
 	}
 
 	SETXDUSTRUCT(win, pxw);
@@ -1547,7 +1547,7 @@ vword_t _widget_get_subproc_delta(widget_t wt, uid_t sid)
 	return (psub)? psub->delta : 0;
 }
 
-bool_t _widget_has_subproc(widget_t wt)
+bool_t _widget_has_subproc(widget_t wt, uid_t sid)
 {
 	X11_widget_t* pxw = TypePtrFromHead(X11_widget_t, wt);
 
@@ -1969,7 +1969,7 @@ void _widget_set_capture(widget_t wt, bool_t b)
 	{
 		XGrabPointer(g_display, pxw->self, 0, 
 			ButtonPressMask | ButtonReleaseMask | PointerMotionMask | FocusChangeMask | EnterWindowMask | LeaveWindowMask,
-			GrabModeAsync,GrabModeAsync, None, None, CurrentTime);
+			GrabModeSync, GrabModeSync, None, None, CurrentTime);
 	}else 
 	{
 		XUngrabPointer(g_display, CurrentTime);
@@ -2110,7 +2110,6 @@ void _widget_set_focus(widget_t wt)
     event.xclient.data.l[1] = CurrentTime;
 
     XSendEvent(g_display, pxw->self, False, SubstructureNotifyMask, &event);
-	XFlush(g_display);
 }
 
 bool_t _widget_key_state(widget_t wt, int ks)
@@ -2700,50 +2699,6 @@ float _widget_get_diaph(widget_t wt)
 	return pxw->diaph;
 }
 
-void _widget_noti_xfont(widget_t wt, const xfont_t* pxf)
-{
-	X11_widget_t* pxw = TypePtrFromHead(X11_widget_t, wt);
-	if_dispatch_t* pif = GETXDUDISPATCH(pxw->self);
-
-	if(pif && pif->pf_on_xfont)
-	{
-		(*pif->pf_on_xfont)(wt, pxf);
-	}
-}
-
-void _widget_noti_xface(widget_t wt, const xface_t* pxa)
-{
-	X11_widget_t* pxw = TypePtrFromHead(X11_widget_t, wt);
-	if_dispatch_t* pif = GETXDUDISPATCH(pxw->self);
-
-	if(pif && pif->pf_on_xface)
-	{
-		(*pif->pf_on_xface)(wt, pxa);
-	}
-}
-
-void _widget_noti_xbrush(widget_t wt, const xbrush_t* pxb)
-{
-	X11_widget_t* pxw = TypePtrFromHead(X11_widget_t, wt);
-	if_dispatch_t* pif = GETXDUDISPATCH(pxw->self);
-
-	if(pif && pif->pf_on_xbrush)
-	{
-		(*pif->pf_on_xbrush)(wt, pxb);
-	}
-}
-
-void _widget_noti_xpen(widget_t wt, const xpen_t* pxp)
-{
-	X11_widget_t* pxw = TypePtrFromHead(X11_widget_t, wt);
-	if_dispatch_t* pif = GETXDUDISPATCH(pxw->self);
-
-	if(pif && pif->pf_on_xpen)
-	{
-		(*pif->pf_on_xpen)(wt, pxp);
-	}
-}
-
 int	_widget_do_main(widget_t wt)
 {
 	X11_widget_t* pxw = TypePtrFromHead(X11_widget_t, wt);
@@ -2763,8 +2718,8 @@ int	_widget_do_main(widget_t wt)
 				break;
 			}
 
-			if (XFilterEvent(&msg, None))
-				continue;
+			//if (XFilterEvent(&msg, msg.xany.window))
+			//	continue;
 
 			if (_message_translate(&msg))
 				continue;
@@ -2801,8 +2756,6 @@ int	_widget_do_modal(widget_t wt)
 		powner->disable = 1;
 	}
 
-	_widget_set_focus(wt);
-
 	pxw->mode = WS_MODE_MODAL;
 
 	while(_widget_is_valid(wt))
@@ -2812,7 +2765,7 @@ int	_widget_do_modal(widget_t wt)
 			_message_fetch(&msg, (Window)0);
 
 			if (_message_translate(&msg))
-				continue;
+				break;
 
 			_message_dispatch(&msg);
 		}
@@ -2820,7 +2773,7 @@ int	_widget_do_modal(widget_t wt)
 		if(pxw->mode != WS_MODE_MODAL)
 			break;
 
-		usleep(1000);
+		usleep(500);
     }
 
 	ret = pxw->retcode;

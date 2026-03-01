@@ -31,7 +31,7 @@ LICENSE.GPL3 for more details.
 
 void default_status_attr(link_t_ptr ptr)
 {
-	set_status_style(ptr, _T("font-size:9;text-align:near;line-align:center;"));
+	set_status_style(ptr, _T("font-size:10.5;text-align:near;line-align:center;"));
 	set_status_icon_span(ptr, DEF_ICON_SPAN);
 }
 

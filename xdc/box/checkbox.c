@@ -54,7 +54,7 @@ void noti_checkbox_command(widget_t widget, int code, vword_t data)
 {
 	checkbox_delta_t* ptd = GETCHECKBOXDELTA(widget);
 
-	if (widget_has_subproc(widget))
+	if (widget_has_subproc(widget, IDS_CHECKBOX))
 		widget_post_command(widget, code, IDC_SELF, data);
 	else
 		widget_post_command(widget_get_owner(widget), code, widget_get_user_id(widget), data);
@@ -141,10 +141,15 @@ void hand_checkbox_size(widget_t widget, int code, const xsize_t* prs)
 		break;
 	case WS_SIZE_MINIMIZED:
 		break;
+	case WS_SIZE_MAXSHOW:
+		break;
+	case WS_SIZE_RESTORE:
+		break;
 	case WS_SIZE_LAYOUT:
-		_checkbox_reset_page(widget);
 		break;
 	}
+
+	_checkbox_reset_page(widget);
 }
 
 void hand_checkbox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
@@ -153,30 +158,34 @@ void hand_checkbox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 
 	visual_t rdc;
 	canvas_t canv;
-	const drawing_interface* pif = NULL;
+
+	drawing_interface ifc = {0};
 	drawing_interface ifv = {0};
 
 	xrect_t xr;	
 
-	color_mod_t clrs;
+	const color_mod_t *pclrs;
 	xbrush_t xb;
 
-	widget_get_color_mode(widget, &clrs);
+	pclrs = widget_get_color_mode_ptr(widget);
 	default_xbrush(&xb);
-	format_xcolor(&clrs.clr_bkg, xb.color);
-
-	canv = widget_get_canvas(widget);
-	pif = widget_get_canvas_interface(widget);
+	format_xcolor(&(pclrs->clr_bkg), xb.color);
 
 	widget_get_client_rect(widget, &xr);
 
+	canv = widget_get_canvas(widget);
 	rdc = begin_canvas_paint(canv, dc, xr.w, xr.h);
 	
 	get_visual_interface(rdc, &ifv);
+	widget_get_view_rect(widget, (viewbox_t*)&(ifv.rect));
+
+	get_canvas_interface(canv, &ifc);
+	widget_get_canv_rect(widget, (canvbox_t*)&(ifc.rect));
+	ifc.pclrs = pclrs;
 
 	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
 
-	draw_checkbox(pif, ptd->on);
+	draw_checkbox(&ifc, ptd->on);
 
 	end_canvas_paint(canv, dc, pxr);
 }

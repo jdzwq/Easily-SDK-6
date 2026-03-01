@@ -30,8 +30,7 @@ LICENSE.GPL3 for more details.
 #include "../xdkimp.h"
 #include "../xdkstd.h"
 #include "../xdkobj.h"
-#include "../xdkbio.h"
-#include "../xdkstm.h"
+#include "../xdkiop.h"
 
 typedef struct _udp_accept_t{
 	unsigned short port;
@@ -197,7 +196,7 @@ static unsigned STDCALL process_dispatch(void* param)
 			pipe = xpipe_attach(pi.pip_write);
 			if (pipe)
 			{
-				xdk_bio_interface(pipe, &bio);
+				get_bio_interface(pipe, &bio);
 
 				stm = stream_alloc(&bio);
 				if (stm)

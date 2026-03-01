@@ -1,3 +1,3 @@
 SOURCES= \
-D:\Easily-temp\windows\xdf\x64\Debug/_if_bluetooth_windows.cc \
-D:\Easily-temp\windows\xdf\x64\Debug/xdfinf.c \
+E:\Easily-temp\windows\xdf\x64\Debug/_if_bluetooth_windows.cc \
+E:\Easily-temp\windows\xdf\x64\Debug/xdfinf.c \

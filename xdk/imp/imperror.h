@@ -82,6 +82,10 @@ EXP_API void xdk_trace_last(void);
 #define XDK_TRACE_LAST
 #endif
 
+#if defined (DEBUG) || defined (_DEBUG)
+EXP_API void error_self_test(void);
+#endif
+
 #ifdef	__cplusplus
 }
 #endif

@@ -1,5 +1,5 @@
 SOURCES= \
-D:/Easily-temp/windows/xudps/x64/Debug/xudps.cc \
-D:/Easily-temp/windows/xudps/x64/Debug/xudpsMain.cc \
-D:/Easily-temp/windows/xudps/x64/Debug/srvcrt.cc \
-D:/Easily-temp/windows/xudps/x64/Debug/srvlog.cc \
+E:/Easily-temp/windows/xudps/x64/Debug/xudps.cc \
+E:/Easily-temp/windows/xudps/x64/Debug/xudpsMain.cc \
+E:/Easily-temp/windows/xudps/x64/Debug/srvcrt.cc \
+E:/Easily-temp/windows/xudps/x64/Debug/srvlog.cc \

@@ -5,9 +5,9 @@
 
 	@author ZhangWenQuan, JianDe HangZhou ZheJiang China, Mail: powersuite@hotmaol.com
 
-	@doc bio interface document
+	@doc uio interface document
 
-	@module	xdkbio.h | interface file
+	@module	uioinf.h | interface file
 
 	@devnote 张文权 2021.01 - 2021.12	v6.0
 ***********************************************************************/
@@ -24,27 +24,24 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
 LICENSE.GPL3 for more details.
 ***********************************************************************/
 
-#ifndef _XDKBIO_H
-#define _XDKBIO_H
-
-#include "xdkdef.h"
+#ifndef _UIOINF_H
+#define _UIOINF_H
 
 
-#ifdef	__cplusplus
-extern "C" {
-#endif
+typedef bool_t(*PF_UIO_PUSH)(xhand_t, const byte_t*, dword_t*);
+typedef bool_t(*PF_UIO_POP)(xhand_t, byte_t*, dword_t*);
+typedef bool_t(*PF_UIO_PEEK)(xhand_t,byte_t*, dword_t*);
+typedef void(*PF_UIO_CLOSE)(xhand_t);
 
-/*
-@FUNCTION get_bio_interface: get bio interface.
-@INPUT xhand_t io: the io object.
-@RETURN bio_interface*: if succeeds return bio interface struct.
-*/
-EXP_API bool_t xdk_bio_interface(xhand_t io, bio_interface* pio);
+typedef struct _uio_interface{
+	xhand_t		fd;
 
-
-#ifdef	__cplusplus
-}
-#endif
+	PF_UIO_PUSH		pf_push;
+	PF_UIO_POP		pf_pop;
+	PF_UIO_PEEK		pf_peek;
+	PF_UIO_CLOSE	pf_close;
+}uio_interface;
 
 
-#endif /*_XDKBIO_H*/
+
+#endif /*_UIOINF_H*/

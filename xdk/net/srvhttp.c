@@ -30,8 +30,7 @@ LICENSE.GPL3 for more details.
 #include "../xdkimp.h"
 #include "../xdkstd.h"
 #include "../xdkobj.h"
-#include "../xdkbio.h"
-#include "../xdkstm.h"
+#include "../xdkiop.h"
 
 /*****************************************************************************************************/
 

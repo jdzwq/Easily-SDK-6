@@ -30,8 +30,8 @@ LICENSE.GPL3 for more details.
 typedef xhand_t(*PF_FIO_OPEN)(const secu_desc_t*, const tchar_t*, dword_t);
 typedef bool_t(*PF_FIO_READ)(xhand_t, byte_t*, dword_t*);
 typedef bool_t(*PF_FIO_WRITE)(xhand_t, const byte_t*, dword_t*);
-typedef bool_t(*PF_FIO_READ_RANGE)(xhand_t, dword_t, dword_t, byte_t*, dword_t);
-typedef bool_t(*PF_FIO_WRITE_RANGE)(xhand_t, dword_t, dword_t, const byte_t*, dword_t);
+typedef bool_t(*PF_FIO_READ_RANGE)(xhand_t, vword_t, byte_t*, dword_t);
+typedef bool_t(*PF_FIO_WRITE_RANGE)(xhand_t, vword_t, const byte_t*, dword_t);
 typedef bool_t(*PF_FIO_FLUSH)(xhand_t);
 typedef void(*PF_FIO_CLOSE)(xhand_t);
 typedef bool_t(*PF_FIO_SETOPT)(xhand_t, int, void*, int);

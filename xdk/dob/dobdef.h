@@ -80,6 +80,7 @@ typedef struct _link_t{
 
 #define lkFileTable		0x17
 #define lkLockTable		0x18
+#define lkUndoTable		0x19
 
 #define IS_DOM_DOC(ptr)		((ptr->tag == lkNode)? 1 : 0)
 #define IS_XML_DOC(ptr)		((ptr->tag == lkDoc)? 1 : 0)

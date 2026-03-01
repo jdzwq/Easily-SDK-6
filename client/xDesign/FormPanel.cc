@@ -52,6 +52,7 @@ typedef struct tagFormPanelDelta{
 	widget_t hForm;
 
 	tchar_t szFile[PATH_LEN + 1];
+	uio_interface uiof;
 	METADATA meta;
 }FormPanelDelta;
 
@@ -73,7 +74,7 @@ void FormPanel_Switch(widget_t widget)
 {
 	FormPanelDelta* pdt = GETFORMPANELDELTA(widget);
 
-	if (!formctrl_get_dirty(pdt->hForm))
+	if (!designer_get_dirty(pdt->hForm))
 		return;
 
 	dword_t rt = ShowMsg(MSGBTN_YES | MSGBTN_NO | MSGICO_TIP, _T("文件尚未保存，是否保存文件？"));
@@ -84,7 +85,7 @@ void FormPanel_Switch(widget_t widget)
 		widget_send_command(widget, 0, IDA_FILE_SAVE, NULL);
 		break;
 	case MSGBTN_NO:
-		formctrl_set_dirty(pdt->hForm, 0);
+		designer_set_dirty(pdt->hForm, 0);
 		break;
 	}
 }
@@ -132,6 +133,17 @@ bool_t FormPanel_OpenFile(widget_t widget, const tchar_t* szFile)
 
 	xscpy(pdt->szFile, szFile);
 
+	tchar_t undoFile[PATH_LEN] = {0};
+
+	xscpy(undoFile, pdt->szFile);
+	xsncat(undoFile, _T("~"), 1);
+
+	pdt->uiof.fd = xuncf_open_file(NULL, undoFile, FILE_OPEN_CREATE | FILE_OPEN_WRITE | FILE_OPEN_READ);
+	if(pdt->uiof.fd)
+	{
+		get_uio_interface(pdt->uiof.fd, &(pdt->uiof));
+	}
+
 	return 1;
 }
 
@@ -169,6 +181,12 @@ bool_t FormPanel_SaveFile(widget_t widget, const tchar_t* szFile)
 
 	MainFrame_UpdatePanel(g_hMain, widget, szName);
 
+	if(pdt->uiof.fd)
+	{
+		(*pdt->uiof.pf_close)(pdt->uiof.fd);
+		pdt->uiof.fd = 0;
+	}
+
 	return 1;
 }
 
@@ -177,12 +195,12 @@ void FormPanel_SelectAttr(widget_t widget, const tchar_t* attr_name, const tchar
 	FormPanelDelta* pdt = GETFORMPANELDELTA(widget);
 
 	LINKPTR ptrForm = formctrl_fetch(pdt->hForm);
-	LINKPTR ptrField = formctrl_get_focus_field(pdt->hForm);
+	LINKPTR ptrField = (LINKPTR)designer_get_focused(pdt->hForm);
 
 	tchar_t style[CSS_LEN + 1] = { 0 };
 	tchar_t token[RES_LEN + 1] = { 0 };
 
-	formctrl_set_dirty(pdt->hForm, 1);
+	designer_set_dirty(pdt->hForm, 1);
 
 	LINKPTR flk = get_next_field(ptrForm, LINK_FIRST);
 	while (flk)
@@ -215,9 +233,9 @@ void FormPanel_SelectShape(widget_t widget, const tchar_t* attr_val)
 	FormPanelDelta* pdt = GETFORMPANELDELTA(widget);
 
 	LINKPTR ptrForm = formctrl_fetch(pdt->hForm);
-	LINKPTR ptrField = formctrl_get_focus_field(pdt->hForm);
+	LINKPTR ptrField = (LINKPTR)designer_get_focused(pdt->hForm);
 
-	formctrl_set_dirty(pdt->hForm, 1);
+	designer_set_dirty(pdt->hForm, 1);
 
 	LINKPTR flk = get_next_field(ptrForm, LINK_FIRST);
 	while (flk)
@@ -261,7 +279,7 @@ void FormPanel_OnSave(widget_t widget)
 
 	if (FormPanel_SaveFile(widget, szFile))
 	{
-		formctrl_set_dirty(pdt->hForm, 0);
+		designer_set_dirty(pdt->hForm, 0);
 	}
 }
 
@@ -517,9 +535,9 @@ void FormPanel_OnDelete(widget_t widget)
 
 	XDK_ASSERT(ptrForm);
 
-	formctrl_set_dirty(pdt->hForm, 1);
+	designer_set_dirty(pdt->hForm, 1);
 
-	LINKPTR ptrField = formctrl_get_focus_field(pdt->hForm);
+	LINKPTR ptrField = (LINKPTR)designer_get_focused(pdt->hForm);
 
 	formctrl_set_focus_field(pdt->hForm, NULL);
 
@@ -583,7 +601,7 @@ void FormPanel_OnAttach(widget_t widget)
 {
 	FormPanelDelta* pdt = GETFORMPANELDELTA(widget);
 
-	LINKPTR flk = formctrl_get_focus_field(pdt->hForm);
+	LINKPTR flk = (LINKPTR)designer_get_focused(pdt->hForm);
 	if (!flk)
 		return;
 
@@ -671,7 +689,7 @@ void FormPanel_OnDetach(widget_t widget)
 {
 	FormPanelDelta* pdt = GETFORMPANELDELTA(widget);
 
-	LINKPTR flk = formctrl_get_focus_field(pdt->hForm);
+	LINKPTR flk = (LINKPTR)designer_get_focused(pdt->hForm);
 	if (!flk)
 		return;
 
@@ -705,7 +723,7 @@ void FormPanel_OnEditEx(widget_t widget)
 {
 	FormPanelDelta* pdt = GETFORMPANELDELTA(widget);
 
-	LINKPTR flk = formctrl_get_focus_field(pdt->hForm);
+	LINKPTR flk = (LINKPTR)designer_get_focused(pdt->hForm);
 	if (!flk)
 		return;
 
@@ -740,7 +758,7 @@ void FormPanel_OnCSSProper(widget_t widget)
 	LINKPTR ptr_proper = create_proper_doc();
 
 	LINKPTR ptr = formctrl_fetch(pdt->hForm);
-	LINKPTR flk = formctrl_get_focus_field(pdt->hForm);
+	LINKPTR flk = (LINKPTR)designer_get_focused(pdt->hForm);
 
 	if (flk)
 		properbag_parse_stylesheet(ptr_proper, get_field_style_ptr(flk));
@@ -769,7 +787,7 @@ void FormPanel_OnCSSProper(widget_t widget)
 			formctrl_redraw(pdt->hForm, 0);
 		}
 
-		formctrl_set_dirty(pdt->hForm, 1);
+		designer_set_dirty(pdt->hForm, 1);
 	}
 
 	destroy_proper_doc(ptr_proper);
@@ -778,43 +796,67 @@ void FormPanel_OnCSSProper(widget_t widget)
 void FormPanel_OnFontName(widget_t widget, void* pv)
 {
 	FormPanelDelta* pdt = GETFORMPANELDELTA(widget);
+	xpoint_t pt;
+	
+	pt.x = GETLDWORD((vword_t)pv);
+	pt.y = GETHDWORD((vword_t)pv);
 
-	fontname_menu(widget, IDC_FORMPANEL_FONTNAME, (xpoint_t*)pv, WS_LAYOUT_RIGHTBOTTOM);
+	fontname_menu(widget, IDC_FORMPANEL_FONTNAME, &pt, WS_LAYOUT_RIGHTBOTTOM);
 }
 
 void FormPanel_OnFontSize(widget_t widget, void* pv)
 {
 	FormPanelDelta* pdt = GETFORMPANELDELTA(widget);
+	xpoint_t pt;
+	
+	pt.x = GETLDWORD((vword_t)pv);
+	pt.y = GETHDWORD((vword_t)pv);
 
-	fontsize_menu(widget, IDC_FORMPANEL_FONTSIZE, (xpoint_t*)pv, WS_LAYOUT_RIGHTBOTTOM);
+	fontsize_menu(widget, IDC_FORMPANEL_FONTSIZE, &pt, WS_LAYOUT_RIGHTBOTTOM);
 }
 
 void FormPanel_OnTextColor(widget_t widget, void* pv)
 {
 	FormPanelDelta* pdt = GETFORMPANELDELTA(widget);
+	xpoint_t pt;
+	
+	pt.x = GETLDWORD((vword_t)pv);
+	pt.y = GETHDWORD((vword_t)pv);
 
-	color_menu(widget, IDC_FORMPANEL_FONTCOLOR, (xpoint_t*)pv, WS_LAYOUT_RIGHTBOTTOM);
+	color_menu(widget, IDC_FORMPANEL_FONTCOLOR, &pt, WS_LAYOUT_RIGHTBOTTOM);
 }
 
 void FormPanel_OnPaintColor(widget_t widget, void* pv)
 {
 	FormPanelDelta* pdt = GETFORMPANELDELTA(widget);
+	xpoint_t pt;
+	
+	pt.x = GETLDWORD((vword_t)pv);
+	pt.y = GETHDWORD((vword_t)pv);
 
-	color_menu(widget, IDC_FORMPANEL_PAINTCOLOR, (xpoint_t*)pv, WS_LAYOUT_RIGHTBOTTOM);
+	color_menu(widget, IDC_FORMPANEL_PAINTCOLOR, &pt, WS_LAYOUT_RIGHTBOTTOM);
 }
 
 void FormPanel_OnDrawColor(widget_t widget, void* pv)
 {
 	FormPanelDelta* pdt = GETFORMPANELDELTA(widget);
+	xpoint_t pt;
+	
+	pt.x = GETLDWORD((vword_t)pv);
+	pt.y = GETHDWORD((vword_t)pv);
 
-	color_menu(widget, IDC_FORMPANEL_DRAWCOLOR, (xpoint_t*)pv, WS_LAYOUT_RIGHTBOTTOM);
+	color_menu(widget, IDC_FORMPANEL_DRAWCOLOR, &pt, WS_LAYOUT_RIGHTBOTTOM);
 }
 
 void FormPanel_OnFieldShape(widget_t widget, void* pv)
 {
 	FormPanelDelta* pdt = GETFORMPANELDELTA(widget);
+	xpoint_t pt;
+	
+	pt.x = GETLDWORD((vword_t)pv);
+	pt.y = GETHDWORD((vword_t)pv);
 
-	shape_menu(widget, IDC_FORMPANEL_FIELDSHAPE, (xpoint_t*)pv, WS_LAYOUT_RIGHTBOTTOM);
+	shape_menu(widget, IDC_FORMPANEL_FIELDSHAPE, &pt, WS_LAYOUT_RIGHTBOTTOM);
 }
 
 void FormPanel_OnTextNear(widget_t widget)
@@ -862,7 +904,7 @@ void FormPanel_OnAlignNear(widget_t widget)
 	FormPanelDelta* pdt = GETFORMPANELDELTA(widget);
 
 	LINKPTR ptrForm = formctrl_fetch(pdt->hForm);
-	LINKPTR ptrField = formctrl_get_focus_field(pdt->hForm);
+	LINKPTR ptrField = (LINKPTR)designer_get_focused(pdt->hForm);
 
 	if (!ptrField)
 		return;
@@ -870,7 +912,7 @@ void FormPanel_OnAlignNear(widget_t widget)
 	if (!get_field_selected_count(ptrForm))
 		return;
 
-	formctrl_set_dirty(pdt->hForm, 1);
+	designer_set_dirty(pdt->hForm, 1);
 
 	LINKPTR flk = get_next_field(ptrForm, LINK_FIRST);
 	while (flk)
@@ -891,7 +933,7 @@ void FormPanel_OnAlignCenter(widget_t widget)
 	FormPanelDelta* pdt = GETFORMPANELDELTA(widget);
 
 	LINKPTR ptrForm = formctrl_fetch(pdt->hForm);
-	LINKPTR ptrField = formctrl_get_focus_field(pdt->hForm);
+	LINKPTR ptrField = (LINKPTR)designer_get_focused(pdt->hForm);
 
 	if (!ptrField)
 		return;
@@ -899,7 +941,7 @@ void FormPanel_OnAlignCenter(widget_t widget)
 	if (!get_field_selected_count(ptrForm))
 		return;
 
-	formctrl_set_dirty(pdt->hForm, 1);
+	designer_set_dirty(pdt->hForm, 1);
 
 	LINKPTR flk = get_next_field(ptrForm, LINK_FIRST);
 	while (flk)
@@ -920,7 +962,7 @@ void FormPanel_OnAlignFar(widget_t widget)
 	FormPanelDelta* pdt = GETFORMPANELDELTA(widget);
 
 	LINKPTR ptrForm = formctrl_fetch(pdt->hForm);
-	LINKPTR ptrField = formctrl_get_focus_field(pdt->hForm);
+	LINKPTR ptrField = (LINKPTR)designer_get_focused(pdt->hForm);
 
 	if (!ptrField)
 		return;
@@ -928,7 +970,7 @@ void FormPanel_OnAlignFar(widget_t widget)
 	if (!get_field_selected_count(ptrForm))
 		return;
 
-	formctrl_set_dirty(pdt->hForm, 1);
+	designer_set_dirty(pdt->hForm, 1);
 
 	LINKPTR flk = get_next_field(ptrForm, LINK_FIRST);
 	while (flk)
@@ -949,7 +991,7 @@ void FormPanel_OnSizeHeight(widget_t widget)
 	FormPanelDelta* pdt = GETFORMPANELDELTA(widget);
 
 	LINKPTR ptrForm = formctrl_fetch(pdt->hForm);
-	LINKPTR ptrField = formctrl_get_focus_field(pdt->hForm);
+	LINKPTR ptrField = (LINKPTR)designer_get_focused(pdt->hForm);
 
 	if (!ptrField)
 		return;
@@ -957,7 +999,7 @@ void FormPanel_OnSizeHeight(widget_t widget)
 	if (!get_field_selected_count(ptrForm))
 		return;
 
-	formctrl_set_dirty(pdt->hForm, 1);
+	designer_set_dirty(pdt->hForm, 1);
 
 	LINKPTR flk = get_next_field(ptrForm, LINK_FIRST);
 	while (flk)
@@ -978,7 +1020,7 @@ void FormPanel_OnSizeWidth(widget_t widget)
 	FormPanelDelta* pdt = GETFORMPANELDELTA(widget);
 
 	LINKPTR ptrForm = formctrl_fetch(pdt->hForm);
-	LINKPTR ptrField = formctrl_get_focus_field(pdt->hForm);
+	LINKPTR ptrField = (LINKPTR)designer_get_focused(pdt->hForm);
 
 	if (!ptrField)
 		return;
@@ -986,7 +1028,7 @@ void FormPanel_OnSizeWidth(widget_t widget)
 	if (!get_field_selected_count(ptrForm))
 		return;
 
-	formctrl_set_dirty(pdt->hForm, 1);
+	designer_set_dirty(pdt->hForm, 1);
 
 	LINKPTR flk = get_next_field(ptrForm, LINK_FIRST);
 	while (flk)
@@ -1007,13 +1049,13 @@ void FormPanel_OnSizeHorz(widget_t widget)
 	FormPanelDelta* pdt = GETFORMPANELDELTA(widget);
 
 	LINKPTR ptrForm = formctrl_fetch(pdt->hForm);
-	LINKPTR ptrField = formctrl_get_focus_field(pdt->hForm);
+	LINKPTR ptrField = (LINKPTR)designer_get_focused(pdt->hForm);
 
 	int count = get_field_selected_count(ptrForm);
 	if (count <= 1)
 		return;
 
-	formctrl_set_dirty(pdt->hForm, 1);
+	designer_set_dirty(pdt->hForm, 1);
 
 	xsort_t* pxs = (xsort_t*)xmem_alloc(sizeof(xsort_t) * count);
 
@@ -1060,13 +1102,13 @@ void FormPanel_OnSizeVert(widget_t widget)
 	FormPanelDelta* pdt = GETFORMPANELDELTA(widget);
 
 	LINKPTR ptrForm = formctrl_fetch(pdt->hForm);
-	LINKPTR ptrField = formctrl_get_focus_field(pdt->hForm);
+	LINKPTR ptrField = (LINKPTR)designer_get_focused(pdt->hForm);
 
 	int count = get_field_selected_count(ptrForm);
 	if (count <= 1)
 		return;
 
-	formctrl_set_dirty(pdt->hForm, 1);
+	designer_set_dirty(pdt->hForm, 1);
 
 	xsort_t* pxs = (xsort_t*)xmem_alloc(sizeof(xsort_t) * count);
 
@@ -1113,7 +1155,7 @@ void FormPanel_OnGroup(widget_t widget)
 	FormPanelDelta* pdt = GETFORMPANELDELTA(widget);
 
 	LINKPTR ptrForm = formctrl_fetch(pdt->hForm);
-	LINKPTR ptrField = formctrl_get_focus_field(pdt->hForm);
+	LINKPTR ptrField = (LINKPTR)designer_get_focused(pdt->hForm);
 
 	bool_t bGroup = 1;
 	if (ptrField)
@@ -1122,7 +1164,7 @@ void FormPanel_OnGroup(widget_t widget)
 	if (bGroup && !get_field_selected_count(ptrForm))
 		return;
 
-	formctrl_set_dirty(pdt->hForm, 1);
+	designer_set_dirty(pdt->hForm, 1);
 
 	int n_max = 0;
 	if (bGroup)
@@ -1154,12 +1196,12 @@ void FormPanel_OnSendBack(widget_t widget)
 	FormPanelDelta* pdt = GETFORMPANELDELTA(widget);
 
 	LINKPTR ptrForm = formctrl_fetch(pdt->hForm);
-	LINKPTR ptrField = formctrl_get_focus_field(pdt->hForm);
+	LINKPTR ptrField = (LINKPTR)designer_get_focused(pdt->hForm);
 
 	if (!ptrField)
 		return;
 
-	formctrl_set_dirty(pdt->hForm, 1);
+	designer_set_dirty(pdt->hForm, 1);
 
 	set_field_taborder(ptrField, 0);
 
@@ -1175,7 +1217,7 @@ void FormPanel_OnLabelField(widget_t widget)
 
 	LINKPTR ptrForm = formctrl_fetch(pdt->hForm);
 
-	formctrl_set_dirty(pdt->hForm, 1);
+	designer_set_dirty(pdt->hForm, 1);
 
 	LINKPTR flk = insert_field(ptrForm, DOC_FORM_LABEL);
 
@@ -1199,7 +1241,7 @@ void FormPanel_OnTextField(widget_t widget)
 
 	LINKPTR ptrForm = formctrl_fetch(pdt->hForm);
 
-	formctrl_set_dirty(pdt->hForm, 1);
+	designer_set_dirty(pdt->hForm, 1);
 
 	LINKPTR flk = insert_field(ptrForm, DOC_FORM_TEXT);
 
@@ -1223,7 +1265,7 @@ void FormPanel_OnRichField(widget_t widget)
 
 	LINKPTR ptrForm = formctrl_fetch(pdt->hForm);
 
-	formctrl_set_dirty(pdt->hForm, 1);
+	designer_set_dirty(pdt->hForm, 1);
 
 	LINKPTR flk = insert_field(ptrForm, DOC_FORM_RICH);
 
@@ -1247,7 +1289,7 @@ void FormPanel_OnMemoField(widget_t widget)
 
 	LINKPTR ptrForm = formctrl_fetch(pdt->hForm);
 
-	formctrl_set_dirty(pdt->hForm, 1);
+	designer_set_dirty(pdt->hForm, 1);
 
 	LINKPTR flk = insert_field(ptrForm, DOC_FORM_MEMO);
 
@@ -1271,7 +1313,7 @@ void FormPanel_OnTagField(widget_t widget)
 
 	LINKPTR ptrForm = formctrl_fetch(pdt->hForm);
 
-	formctrl_set_dirty(pdt->hForm, 1);
+	designer_set_dirty(pdt->hForm, 1);
 
 	LINKPTR flk = insert_field(ptrForm, DOC_FORM_TAG);
 
@@ -1295,7 +1337,7 @@ void FormPanel_OnCheckField(widget_t widget)
 
 	LINKPTR ptrForm = formctrl_fetch(pdt->hForm);
 
-	formctrl_set_dirty(pdt->hForm, 1);
+	designer_set_dirty(pdt->hForm, 1);
 
 	LINKPTR flk = insert_field(ptrForm, DOC_FORM_CHECK);
 
@@ -1360,7 +1402,7 @@ void FormPanel_OnShapeField(widget_t widget)
 
 	LINKPTR ptrForm = formctrl_fetch(pdt->hForm);
 
-	formctrl_set_dirty(pdt->hForm, 1);
+	designer_set_dirty(pdt->hForm, 1);
 
 	LINKPTR flk = insert_field(ptrForm, DOC_FORM_SHAPE);
 
@@ -1384,7 +1426,7 @@ void FormPanel_OnPageNumField(widget_t widget)
 
 	LINKPTR ptrForm = formctrl_fetch(pdt->hForm);
 
-	formctrl_set_dirty(pdt->hForm, 1);
+	designer_set_dirty(pdt->hForm, 1);
 
 	LINKPTR flk = insert_field(ptrForm, DOC_FORM_PAGENUM);
 
@@ -1400,7 +1442,7 @@ void FormPanel_OnHrefField(widget_t widget)
 {
 	FormPanelDelta* pdt = GETFORMPANELDELTA(widget);
 
-	formctrl_set_dirty(pdt->hForm, 1);
+	designer_set_dirty(pdt->hForm, 1);
 
 	LINKPTR ptrForm = formctrl_fetch(pdt->hForm);
 
@@ -1423,7 +1465,7 @@ void FormPanel_OnTableField(widget_t widget)
 {
 	FormPanelDelta* pdt = GETFORMPANELDELTA(widget);
 
-	formctrl_set_dirty(pdt->hForm, 1);
+	designer_set_dirty(pdt->hForm, 1);
 
 	LINKPTR ptrForm = formctrl_fetch(pdt->hForm);
 
@@ -1448,7 +1490,7 @@ void FormPanel_OnEmbedGrid(widget_t widget)
 
 	LINKPTR ptrForm = formctrl_fetch(pdt->hForm);
 
-	formctrl_set_dirty(pdt->hForm, 1);
+	designer_set_dirty(pdt->hForm, 1);
 
 	LINKPTR flk = insert_field(ptrForm, DOC_FORM_GRID);
 
@@ -1471,7 +1513,7 @@ void FormPanel_OnEmbedStatis(widget_t widget)
 
 	LINKPTR ptrForm = formctrl_fetch(pdt->hForm);
 
-	formctrl_set_dirty(pdt->hForm, 1);
+	designer_set_dirty(pdt->hForm, 1);
 
 	LINKPTR flk = insert_field(ptrForm, DOC_FORM_STATIS);
 
@@ -1494,7 +1536,7 @@ void FormPanel_OnEmbedImages(widget_t widget)
 
 	LINKPTR ptrForm = formctrl_fetch(pdt->hForm);
 
-	formctrl_set_dirty(pdt->hForm, 1);
+	designer_set_dirty(pdt->hForm, 1);
 
 	LINKPTR flk = insert_field(ptrForm, DOC_FORM_IMAGES);
 
@@ -1517,7 +1559,7 @@ void FormPanel_OnEmbedForm(widget_t widget)
 
 	LINKPTR ptrForm = formctrl_fetch(pdt->hForm);
 
-	formctrl_set_dirty(pdt->hForm, 1);
+	designer_set_dirty(pdt->hForm, 1);
 
 	LINKPTR flk = insert_field(ptrForm, DOC_FORM_FORM);
 
@@ -1540,7 +1582,7 @@ void FormPanel_OnEmbedPlot(widget_t widget)
 
 	LINKPTR ptrForm = formctrl_fetch(pdt->hForm);
 
-	formctrl_set_dirty(pdt->hForm, 1);
+	designer_set_dirty(pdt->hForm, 1);
 
 	LINKPTR flk = insert_field(ptrForm, DOC_FORM_PLOT);
 
@@ -1568,7 +1610,7 @@ void FormPanel_OnAttributes(widget_t widget)
 	properctrl_redraw(pdt->hProper);
 
 	LINKPTR ptrForm = formctrl_fetch(pdt->hForm);
-	LINKPTR ptrField = formctrl_get_focus_field(pdt->hForm);
+	LINKPTR ptrField = (LINKPTR)designer_get_focused(pdt->hForm);
 
 	if (ptrField)
 		properbag_write_field_attributes(ptrProper, ptrField);
@@ -1589,7 +1631,7 @@ void FormPanel_OnStyleSheet(widget_t widget)
 	properctrl_redraw(pdt->hProper);
 
 	LINKPTR ptrForm = formctrl_fetch(pdt->hForm);
-	LINKPTR ptrField = formctrl_get_focus_field(pdt->hForm);
+	LINKPTR ptrField = (LINKPTR)designer_get_focused(pdt->hForm);
 
 	if (ptrField)
 		properbag_parse_stylesheet(ptrProper, get_field_style_ptr(ptrField));
@@ -1610,7 +1652,7 @@ void FormPanel_Proper_OnEntityUpdate(widget_t widget, NOTICE_PROPER* pnp)
 	int n_id = xstol(get_title_item_id_ptr(ptrItem));
 
 	LINKPTR ptrForm = formctrl_fetch(pdt->hForm);
-	LINKPTR ptrField = formctrl_get_focus_field(pdt->hForm);
+	LINKPTR ptrField = (LINKPTR)designer_get_focused(pdt->hForm);
 
 	tchar_t sz_style[CSS_LEN + 1] = { 0 };
 
@@ -1659,7 +1701,7 @@ void FormPanel_Title_OnItemChanged(widget_t widget, NOTICE_TITLE* pnt)
 
 	int n_id = xstol(get_title_item_id_ptr(pnt->item));
 
-	widget_post_command(widget, 0, n_id, NULL);
+	widget_post_command(widget, n_id, 0, NULL);
 }
 
 void FormPanel_Form_OnRBClick(widget_t widget, NOTICE_FORM* pnf)
@@ -1737,7 +1779,7 @@ void FormPanel_Form_OnRBClick(widget_t widget, NOTICE_FORM* pnf)
 	destroy_menu_doc(ptrMenu);
 }
 
-void FormPanel_Form_OnLBClick(widget_t widget, NOTICE_FORM* pnf)
+void FormPanel_Form_OnFieldChanging(widget_t widget, NOTICE_FORM* pnf)
 {
 	FormPanelDelta* pdt = GETFORMPANELDELTA(widget);
 
@@ -1746,7 +1788,19 @@ void FormPanel_Form_OnLBClick(widget_t widget, NOTICE_FORM* pnf)
 		return;
 
 	int n_id = xstol(get_title_item_id_ptr(ptrItem));
-	widget_post_command(widget, 0, n_id, NULL);
+	widget_post_command(widget, n_id, 0, NULL);
+}
+
+void FormPanel_Form_OnFieldChanged(widget_t widget, NOTICE_FORM* pnf)
+{
+	FormPanelDelta* pdt = GETFORMPANELDELTA(widget);
+
+	LINKPTR ptrItem = titlectrl_get_focus_item(pdt->hTitle);
+	if (!ptrItem)
+		return;
+
+	int n_id = xstol(get_title_item_id_ptr(ptrItem));
+	widget_post_command(widget, n_id, 0, NULL);
 }
 
 void FormPanel_Form_OnFieldSize(widget_t widget, NOTICE_FORM* pnf)
@@ -1758,7 +1812,7 @@ void FormPanel_Form_OnFieldSize(widget_t widget, NOTICE_FORM* pnf)
 		return;
 
 	int n_id = xstol(get_title_item_id_ptr(ptrItem));
-	widget_post_command(widget, 0, n_id, NULL);
+	widget_post_command(widget, n_id, 0, NULL);
 }
 
 void FormPanel_Form_OnFieldMove(widget_t widget, NOTICE_FORM* pnf)
@@ -1770,7 +1824,7 @@ void FormPanel_Form_OnFieldMove(widget_t widget, NOTICE_FORM* pnf)
 		return;
 
 	int n_id = xstol(get_title_item_id_ptr(ptrItem));
-	widget_post_command(widget, 0, n_id, NULL);
+	widget_post_command(widget, n_id, 0, NULL);
 }
 
 /***********************************************************************************************************/
@@ -1810,6 +1864,8 @@ int FormPanel_OnCreate(widget_t widget, void* data)
 	pdt->hForm = formctrl_create(_T("FormPanel"), WD_STYLE_CONTROL | WD_STYLE_PAGING, &xr, widget);
 	widget_set_user_id(pdt->hForm, IDC_FORMPANEL_FORM);
 	widget_set_owner(pdt->hForm, widget);
+
+	hand_designer_create(pdt->hForm, &desg_formctrl);
 
 	set_split_item_delta(ilkForm, pdt->hForm);
 	widget_show(pdt->hForm, WS_SHOW_NORMAL);
@@ -1859,6 +1915,7 @@ int FormPanel_OnCreate(widget_t widget, void* data)
 	titlectrl_set_focus_item(pdt->hTitle, get_title_next_item(ptrTitle, LINK_FIRST));
 
 	widget_attach_splitor(widget, ptrSplit);
+	widget_layout_splitor(widget);
 
 	if (!is_null(szParam))
 	{
@@ -1881,6 +1938,8 @@ void FormPanel_OnDestroy(widget_t widget)
 
 	if (widget_is_valid(pdt->hForm))
 	{
+		hand_designer_destroy(pdt->hForm);
+
 		LINKPTR ptrForm = formctrl_detach(pdt->hForm);
 		if (ptrForm)
 			destroy_form_doc(ptrForm);
@@ -2211,7 +2270,7 @@ int FormPanel_OnClose(widget_t widget)
 
 	FormPanel_Switch(widget);
 
-	return (formctrl_get_dirty(pdt->hForm)) ? 1 : 0;
+	return (designer_get_dirty(pdt->hForm)) ? 1 : 0;
 }
 
 void FormPanel_OnCommandFind(widget_t widget, str_find_t* pfd)
@@ -2254,7 +2313,7 @@ void FormPanel_OnParentCommand(widget_t widget, int code, vword_t data)
 	}
 	else if (code == COMMAND_REMOVE)
 	{
-		formctrl_set_dirty(pdt->hForm, 0);
+		designer_set_dirty(pdt->hForm, 0);
 	}
 }
 
@@ -2264,7 +2323,7 @@ void FormPanel_OnMenuCommand(widget_t widget, int code, int cid, vword_t data)
 
 	tchar_t token[RES_LEN + 1];
 
-	switch (cid)
+	switch (code)
 	{
 	case IDA_FILE_SAVE:
 		FormPanel_OnSave(widget);
@@ -2439,7 +2498,7 @@ void FormPanel_OnMenuCommand(widget_t widget, int code, int cid, vword_t data)
 		widget_destroy((widget_t)data);
 		if (code)
 		{
-			widget_post_command(widget, 0, code, NULL);
+			widget_post_command(widget, code, 0, NULL);
 		}
 		break;
 	case IDC_FORMPANEL_FONTNAME:
@@ -2463,7 +2522,7 @@ void FormPanel_OnMenuCommand(widget_t widget, int code, int cid, vword_t data)
 		if (code)
 		{
 			color_menu_item(code, token, RES_LEN);
-			FormPanel_SelectAttr(widget, GDI_ATTR_FONT_COLOR, token);
+			FormPanel_SelectAttr(widget, GDI_ATTR_TEXT_COLOR, token);
 		}
 		break;
 	case IDC_FORMPANEL_PAINTCOLOR:
@@ -2506,16 +2565,19 @@ void FormPanel_OnNotice(widget_t widget, LPNOTICE phdr)
 			break;
 		case NC_FIELDCALCED:
 			break;
-		case NC_FORMLBCLK:
-			FormPanel_Form_OnLBClick(widget, pnf);
-			break;
 		case NC_FORMRBCLK:
 			FormPanel_Form_OnRBClick(widget, pnf);
 			break;
-		case NC_FIELDSIZED:
+		case NC_OBJECT_CHANGING:
+			FormPanel_Form_OnFieldChanging(widget, pnf);
+			break;
+		case NC_OBJECT_CHANGED:
+			FormPanel_Form_OnFieldChanged(widget, pnf);
+			break;
+		case NC_OBJECT_SIZED:
 			FormPanel_Form_OnFieldSize(widget, pnf);
 			break;
-		case NC_FIELDDROP:
+		case NC_OBJECT_DROP:
 			FormPanel_Form_OnFieldMove(widget, pnf);
 			break;
 		}
@@ -2528,7 +2590,7 @@ void FormPanel_OnNotice(widget_t widget, LPNOTICE phdr)
 		case NC_PROPERCALCED:
 			break;
 		case NC_ENTITYCOMMIT:
-			formctrl_set_dirty(pdt->hForm, 1);
+			designer_set_dirty(pdt->hForm, 1);
 			break;
 		case NC_ENTITYUPDATE:
 			FormPanel_Proper_OnEntityUpdate(widget, pnp);

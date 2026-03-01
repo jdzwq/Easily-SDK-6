@@ -217,8 +217,6 @@ static void sub_editbox_unsubbing(widget_t widget, uid_t subid, vword_t delta)
 	{
 		widget_destroy(ctrl);
 	}
-
-	widget_del_subproc(widget, IDS_EDITBOX);
 }
 
 /****************************************************************************************************/

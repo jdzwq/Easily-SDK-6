@@ -1198,7 +1198,7 @@ static int hash_table_compare_attr(const tchar_t* key,const tchar_t* sin,const t
 	return rt;
 }
 
-static bool_t _on_parse_token(void* pp, const tchar_t* key, int klen, const tchar_t* val, int vlen)
+static bool_t CALLBACK _on_parse_token(void* pp, const tchar_t* key, int klen, const tchar_t* val, int vlen)
 {
 	link_t_ptr ht = (link_t_ptr)pp;
 
@@ -1207,7 +1207,7 @@ static bool_t _on_parse_token(void* pp, const tchar_t* key, int klen, const tcha
 	return 1;
 }
 
-static bool_t _on_format_token(void* fp, const tchar_t** pkey, int* pklen, const tchar_t** pval, int* pvlen)
+static bool_t CALLBACK _on_format_token(void* fp, const tchar_t** pkey, int* pklen, const tchar_t** pval, int* pvlen)
 {
 	hash_enum_t* phe = (hash_enum_t*)fp;
 	link_t_ptr ent;

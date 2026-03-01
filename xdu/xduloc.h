@@ -205,7 +205,7 @@ LOC_API bool_t	_widget_set_subproc(widget_t wt, uid_t sid, if_subproc_t* sub);
 LOC_API void	_widget_del_subproc(widget_t wt, uid_t sid);
 LOC_API bool_t	_widget_set_subproc_delta(widget_t wt, uid_t sid, vword_t delta);
 LOC_API vword_t _widget_get_subproc_delta(widget_t wt, uid_t sid);
-LOC_API bool_t	_widget_has_subproc(widget_t wt);
+LOC_API bool_t	_widget_has_subproc(widget_t wt,  uid_t sid);
 
 LOC_API void	_widget_post_wchar(widget_t wt, wchar_t ch);
 LOC_API void	_widget_post_key(widget_t wt, int key);

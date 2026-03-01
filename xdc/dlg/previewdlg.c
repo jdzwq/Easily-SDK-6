@@ -199,7 +199,7 @@ typedef struct _PREVIEWDLG_ENUM_PARAM{
 	bool_t b_sel;
 }PREVIEWDLG_ENUM_PARAM;
 
-static bool_t _enum_tree_item(link_t_ptr ilk, void* param)
+static bool_t CALLBACK _enum_tree_item(link_t_ptr ilk, void* param)
 {
 	PREVIEWDLG_ENUM_PARAM* pp = (PREVIEWDLG_ENUM_PARAM*)param;
 	previewdlg_delta_t* ptd = GETPREVIEWDLGDELTA(pp->widget);

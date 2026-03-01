@@ -768,10 +768,15 @@ void hand_diagram_size(widget_t widget, int code, const xsize_t* prs)
 		break;
 	case WS_SIZE_MINIMIZED:
 		break;
+	case WS_SIZE_MAXSHOW:
+		break;
+	case WS_SIZE_RESTORE:
+		break;
 	case WS_SIZE_LAYOUT:
-		_diagramctrl_reset_page(widget);
 		break;
 	}
+
+	_diagramctrl_reset_page(widget);
 }
 
 void hand_diagram_scroll(widget_t widget, bool_t bHorz, int nLine)
@@ -1187,34 +1192,37 @@ void hand_diagram_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	link_t_ptr ilk;
 
 	canvas_t canv;
-	const drawing_interface* pif = NULL;
+	drawing_interface ifc = {0};
 	drawing_interface ifv = {0};
 
-	color_mod_t clrs;
+	const color_mod_t *pclrs;
 	xbrush_t xb;
 	xpen_t xp;
 	xcolor_t xc;
 
 	if (!ptd->diagram) return;
 
-	widget_get_color_mode(widget, &clrs);
+	pclrs = widget_get_color_mode_ptr(widget);
 	default_xbrush(&xb);
-	format_xcolor(&clrs.clr_bkg, xb.color);
+	format_xcolor(&(pclrs->clr_bkg), xb.color);
 	default_xpen(&xp);
-	format_xcolor(&clrs.clr_frg, xp.color);
-
-	canv = widget_get_canvas(widget);
-	pif = widget_get_canvas_interface(widget);
+	format_xcolor(&(pclrs->clr_frg), xp.color);
 
 	widget_get_client_rect(widget, &xr);
 
+	canv = widget_get_canvas(widget);
 	rdc = begin_canvas_paint(canv, dc, xr.w, xr.h);
+	
 	get_visual_interface(rdc, &ifv);
-	widget_get_view_rect(widget, (viewbox_t*)(&ifv.rect));
+	widget_get_view_rect(widget, (viewbox_t*)&(ifv.rect));
+
+	get_canvas_interface(canv, &ifc);
+	widget_get_canv_rect(widget, (canvbox_t*)&(ifc.rect));
+	ifc.pclrs = pclrs;
 
 	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
 
-	draw_diagram(pif, ptd->diagram);
+	draw_diagram(&ifc, ptd->diagram);
 	
 	//draw focus
 	if (ptd->entity)
@@ -1387,6 +1395,7 @@ void diagramctrl_redraw(widget_t widget)
 	ptd->hover = NULL;
 
 	_diagramctrl_reset_page(widget);
+	widget_erase(widget, NULL);
 }
 
 void diagramctrl_redraw_entity(widget_t widget, link_t_ptr ilk)

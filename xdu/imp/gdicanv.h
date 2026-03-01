@@ -128,6 +128,26 @@ EXP_API visual_t begin_canvas_paint(canvas_t canv, visual_t rdc, int width, int 
 */
 EXP_API void	end_canvas_paint(canvas_t canv, visual_t rdc, const xrect_t* pxr);
 
+EXP_API float pt_to_mm(canvas_t canv, int pt, bool_t horz);
+
+EXP_API int mm_to_pt(canvas_t canv, float mm, bool_t horz);
+
+EXP_API void rect_mm_to_pt(canvas_t canv, xrect_t* pxr);
+
+EXP_API void rect_pt_to_mm(canvas_t canv, xrect_t* pxr);
+
+EXP_API void size_mm_to_pt(canvas_t canv, xsize_t* pxs);
+
+EXP_API void size_pt_to_mm(canvas_t canv, xsize_t* pxs);
+
+EXP_API void point_mm_to_pt(canvas_t canv, xpoint_t* ppt);
+
+EXP_API void point_pt_to_mm(canvas_t canv, xpoint_t* ppt);
+
+EXP_API void span_mm_to_pt(canvas_t canv, xspan_t* pxs);
+
+EXP_API void span_pt_to_mm(canvas_t canv, xspan_t* pxs);
+
 #ifdef XDU_SUPPORT_CONTEXT_PRINTER
 /*
 @FUNCTION create_printer_canvas: create a printer context canvas.
@@ -144,88 +164,6 @@ EXP_API canvas_t create_printer_canvas(visual_t rdc);
 EXP_API void	destroy_printer_canvas(canvas_t canv);
 
 #endif //XDU_SUPPORT_CONTEXT_PRINTER
-
-/*
-@FUNCTION pt_to_mm: mapping points to millimeter in canvas.
-@INPUT canvas_t canv: the canvas object.
-@INPUT int pt: the points value.
-@INPUT bool_t horz: nonzero fro horizon mapping, zero for vertical mapping.
-@RETURN float: return the value in millimeter.
-*/
-EXP_API float pt_to_mm(canvas_t canv, int pt, bool_t horz);
-
-/*
-@FUNCTION mm_to_pt: mapping millimeter to points in canvas.
-@INPUT canvas_t canv: the canvas object.
-@INPUT float tm: the millimeter value.
-@INPUT bool_t horz: nonzero fro horizon mapping, zero for vertical mapping.
-@RETURN float: return the value in points.
-*/
-EXP_API int mm_to_pt(canvas_t canv, float mm, bool_t horz);
-
-/*
-@FUNCTION rect_mm_to_pt: mapping rectangle points to millimeter in canvas.
-@INPUT canvas_t canv: the canvas object.
-@INOUTPUT xrect_t* pxr: the rect struct for inputing integer member and outputing float member.
-@RETURN void: none.
-*/
-EXP_API void rect_mm_to_pt(canvas_t canv, xrect_t* pxr);
-
-/*
-@FUNCTION rect_pt_to_mm: mapping rectangle millimeter to points in canvas.
-@INPUT canvas_t canv: the canvas object.
-@INOUTPUT xrect_t* pxr: the rect struct for inputing float member and outputing integer member.
-@RETURN void: none.
-*/
-EXP_API void rect_pt_to_mm(canvas_t canv, xrect_t* pxr);
-
-/*
-@FUNCTION size_mm_to_pt: mapping size points to millimeter in canvas.
-@INPUT canvas_t canv: the canvas object.
-@INOUTPUT xsize_t* pxs: the size struct for inputing integer member and outputing float member.
-@RETURN void: none.
-*/
-EXP_API void size_mm_to_pt(canvas_t canv, xsize_t* pxs);
-
-/*
-@FUNCTION size_pt_to_mm: mapping size points to millimeter in canvas.
-@INPUT canvas_t canv: the canvas object.
-@INOUTPUT xsize_t* pxs: the size struct for inputing integer member and outputing float member.
-@RETURN void: none.
-*/
-EXP_API void size_pt_to_mm(canvas_t canv, xsize_t* pxs);
-
-/*
-@FUNCTION point_mm_to_pt: mapping point points to millimeter in canvas.
-@INPUT canvas_t canv: the canvas object.
-@INOUTPUT xpoint_t* ppt: the point struct for inputing integer member and outputing float member.
-@RETURN void: none.
-*/
-EXP_API void point_mm_to_pt(canvas_t canv, xpoint_t* ppt);
-
-/*
-@FUNCTION point_pt_to_mm: mapping point points to millimeter in canvas.
-@INPUT canvas_t canv: the canvas object.
-@INOUTPUT xpoint_t* ppt: the point struct for inputing integer member and outputing float member.
-@RETURN void: none.
-*/
-EXP_API void point_pt_to_mm(canvas_t canv, xpoint_t* ppt);
-
-/*
-@FUNCTION span_mm_to_pt: mapping span points to millimeter in canvas.
-@INPUT canvas_t canv: the canvas object.
-@INOUTPUT xspan_t* pxs: the span struct for inputing integer member and outputing float member.
-@RETURN void: none.
-*/
-EXP_API void span_mm_to_pt(canvas_t canv, xspan_t* pxs);
-
-/*
-@FUNCTION span_pt_to_mm: mapping span points to millimeter in canvas.
-@INPUT canvas_t canv: the canvas object.
-@INOUTPUT xspan_t* pxs: the span struct for inputing integer member and outputing float member.
-@RETURN void: none.
-*/
-EXP_API void span_pt_to_mm(canvas_t canv, xspan_t* pxs);
 
 #ifdef	__cplusplus
 }

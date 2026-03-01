@@ -445,13 +445,7 @@ void SQLPanel_OnPreview(widget_t widget)
 
 	LINKPTR svg = create_svg_doc();
 
-	xfont_t xf;
-	xface_t xa;
-
-	default_textor_xfont(&xf);
-	default_textor_xface(&xa);
-
-	svg_print_memo(svg, &xf, &xa, ptrMemo, page);
+	svg_print_memo(svg, ptrMemo, page);
 
 	LINKPTR ptr_arch = previewdlg_get_arch(hPreviewDlg);
 
@@ -512,6 +506,7 @@ int SQLPanel_OnCreate(widget_t widget, void* data)
 	widget_show(pdt->hGrid, WS_SHOW_NORMAL);
 
 	widget_attach_splitor(widget, ptrSplit);
+	widget_layout_splitor(widget);
 
 	const tchar_t* szParam = (tchar_t*)data;
 

@@ -65,6 +65,11 @@ EXP_API const wchar_t* w_xsscanf(const wchar_t* str, const wchar_t* fmt, ...);
 EXP_API const schar_t* a_xsscanf_arg(const schar_t* str, const schar_t* fmt, va_list* parg);
 EXP_API const wchar_t* w_xsscanf_arg(const wchar_t* str, const wchar_t* fmt, va_list* parg);
 
+#if defined (DEBUG) || defined (_DEBUG)
+EXP_API void test_printf(void);
+EXP_API void test_scanf(void);
+#endif
+
 #ifdef	__cplusplus
 }
 #endif

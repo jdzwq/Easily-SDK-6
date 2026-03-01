@@ -180,8 +180,11 @@ EXP_API void*		pmem_lock(void* p);
 */
 EXP_API void		pmem_unlock(void* p);
 
-
+#if defined (DEBUG) || defined (_DEBUG)
+EXP_API void pmen_self_test(void);
 #endif
+
+#endif //XDK_SUPPORT_MEMO_PAGE
 
 
 #ifdef	__cplusplus

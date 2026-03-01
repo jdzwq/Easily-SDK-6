@@ -232,7 +232,7 @@ bool_t is_dom_doc_node(link_t_ptr ptr)
 	return (bool_t)(pti->lkSibling.next == NULL && pti->lkSibling.prev == NULL);
 }
 
-static bool_t _compare_dom_node_proc(link_t_ptr plk, void* pv)
+static bool_t CALLBACK _compare_dom_node_proc(link_t_ptr plk, void* pv)
 {
 	return (plk == (link_t_ptr)pv)? 0 : 1;
 }
@@ -870,7 +870,7 @@ typedef struct _NODE_MASK_COUNT{
 	int count;
 }NODE_MASK_COUNT;
 
-static bool_t _count_check_node(link_t_ptr plk, void* pv)
+static bool_t CALLBACK _count_check_node(link_t_ptr plk, void* pv)
 {
 	NODE_MASK_COUNT* pn = (NODE_MASK_COUNT*)pv;
 
@@ -896,7 +896,7 @@ typedef struct _NODE_MASK_CHECK{
 	int count;
 }NODE_MASK_CHECK;
 
-static bool_t _reset_check_node(link_t_ptr plk, void* pv)
+static bool_t CALLBACK _reset_check_node(link_t_ptr plk, void* pv)
 {
 	NODE_MASK_CHECK* pn = (NODE_MASK_CHECK*)pv;
 
@@ -1213,7 +1213,7 @@ link_t_ptr get_dom_prev_leaf_node(link_t_ptr ptr, link_t_ptr pos)
 	return plk;
 }
 
-static bool_t _compare_dom_node_attr_proc(link_t_ptr plk, void* pv)
+static bool_t CALLBACK _compare_dom_node_attr_proc(link_t_ptr plk, void* pv)
 {
 	entity_param_t* pp;
 
@@ -1253,7 +1253,7 @@ link_t_ptr find_dom_node_by_attr(link_t_ptr pos,bool_t deep,const tchar_t* key,i
 	}
 }
 
-static bool_t _compare_dom_node_name_proc(link_t_ptr plk, void* pv)
+static bool_t CALLBACK _compare_dom_node_name_proc(link_t_ptr plk, void* pv)
 {
 	token_param_t *pp;
 
@@ -1291,7 +1291,7 @@ link_t_ptr find_dom_node_by_name(link_t_ptr pos,bool_t deep,const tchar_t* sz_na
 	}
 }
 
-static bool_t _compare_dom_node_text_proc(link_t_ptr plk, void* pv)
+static bool_t CALLBACK _compare_dom_node_text_proc(link_t_ptr plk, void* pv)
 {
 	token_param_t *pp;
 
@@ -1329,7 +1329,7 @@ link_t_ptr find_dom_node_by_text(link_t_ptr pos, bool_t deep, const tchar_t* sz_
 	}
 }
 
-int _sorting_dom_node_name_proc(link_t_ptr plk1, link_t_ptr plk2, void* param)
+static int CALLBACK _sorting_dom_node_name_proc(link_t_ptr plk1, link_t_ptr plk2, void* param)
 {
 	return compare_text(get_dom_node_name_ptr(plk1), -1, get_dom_node_name_ptr(plk2), -1, 0);
 }
@@ -1344,7 +1344,7 @@ void sort_dom_child_node_by_name(link_t_ptr ilk,int desc)
 	bubble_sort_link(&ptt->lkChild, (PF_SORTLINK)_sorting_dom_node_name_proc, desc, NULL);
 }
 
-int _sorting_dom_node_text_proc(link_t_ptr plk1, link_t_ptr plk2, void* param)
+static int CALLBACK _sorting_dom_node_text_proc(link_t_ptr plk1, link_t_ptr plk2, void* param)
 {
 	return compare_text(get_dom_node_text_ptr(plk1), -1, get_dom_node_text_ptr(plk2), -1, 0);
 }
@@ -1359,7 +1359,7 @@ void sort_dom_child_node_by_text(link_t_ptr ilk,int desc)
 	bubble_sort_link(&ptt->lkChild, (PF_SORTLINK)_sorting_dom_node_text_proc, desc, NULL);
 }
 
-int _sorting_dom_node_attr_proc(link_t_ptr plk1, link_t_ptr plk2, void* param)
+static int CALLBACK _sorting_dom_node_attr_proc(link_t_ptr plk1, link_t_ptr plk2, void* param)
 {
 	return compare_text(get_dom_node_attr_ptr(plk1, (const tchar_t*)param, -1), -1, get_dom_node_attr_ptr(plk2, (const tchar_t*)param, -1), -1, 0);
 }

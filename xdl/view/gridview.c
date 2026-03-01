@@ -109,22 +109,6 @@ void call_grid_cur_item(void* param, link_t_ptr* p_xlk, link_t_ptr* p_ylk)
 	*p_ylk = poo->clk;
 }
 
-
-void hint_grid_item(link_t_ptr ptr, int page, PF_HINT_DESIGNER_CALLBACK pf, void* pp)
-{
-	GRIDITEMOPERATOR ro = { 0 };
-	if_itemhint_t it = { 0 };
-
-	ro.grid = ptr;
-	ro.page = page;
-
-	it.param = (void*)&ro;
-	it.pf_next_item = call_grid_next_item;
-	it.pf_cur_item = call_grid_cur_item;
-	
-	hint_object_item(&it, pf, pp);
-}
-
 /******************************************************************************************************************************************/
 static int _grid_rows_persubfield(link_t_ptr ptr)
 {
@@ -643,13 +627,13 @@ void draw_grid_page(const drawing_interface* pif, link_t_ptr ptr, int page)
 	parse_xbrush_from_style(&xb, style);
 	if (!b_print)
 	{
-		format_xcolor(&pif->clrs->clr_bkg, xb.color);
+		format_xcolor(&pif->pclrs->clr_bkg, xb.color);
 	}
 
 	/*parse_xpen_from_style(&xp, style);
 	if (!b_print)
 	{
-		format_xcolor(&pif->clrs->clr_frg, xp.color);
+		format_xcolor(&pif->pclrs->clr_frg, xp.color);
 	}*/
 
 	xscpy(xp.color, xb.color);
@@ -660,13 +644,13 @@ void draw_grid_page(const drawing_interface* pif, link_t_ptr ptr, int page)
 	parse_xfont_from_style(&xf, style);
 	if (!b_print)
 	{
-		format_xcolor(&pif->clrs->clr_txt, xa.text_color);
+		format_xcolor(&pif->pclrs->clr_txt, xa.text_color);
 		(*pif->pf_set_xfont)(pif->ctx, &xf);
 	}
 
 	if (!b_print)
 	{
-		format_xcolor(&pif->clrs->clr_msk, xi.color);
+		format_xcolor(&pif->pclrs->clr_msk, xi.color);
 	}
 
 	xmem_copy((void*)&xb_bar, (void*)&xb, sizeof(xbrush_t));
@@ -746,7 +730,7 @@ void draw_grid_page(const drawing_interface* pif, link_t_ptr ptr, int page)
 				parse_xfont_from_style(&xf, style);
 				if (!b_print)
 				{
-					format_xcolor(&pif->clrs->clr_txt, xa.text_color);
+					format_xcolor(&pif->pclrs->clr_txt, xa.text_color);
 					(*pif->pf_set_xfont)(pif->ctx, &xf);
 				}
 
@@ -848,7 +832,7 @@ void draw_grid_page(const drawing_interface* pif, link_t_ptr ptr, int page)
 		{
 			if (!b_print)
 			{
-				format_xcolor(&pif->clrs->clr_txt, xa.text_color);
+				format_xcolor(&pif->pclrs->clr_txt, xa.text_color);
 			}
 
 			rstyle = get_row_style_ptr(rlk);

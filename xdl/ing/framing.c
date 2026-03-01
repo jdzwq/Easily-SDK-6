@@ -141,6 +141,7 @@ void draw_ruler(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t
 	int vm, hm;
 	xpen_t xp;
 	xface_t xa;
+	xfont_t xf;
 	tchar_t sz[NUM_LEN + 1];
 
 	float x1, x2, y1, y2;
@@ -153,6 +154,11 @@ void draw_ruler(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t
 
 	default_xface(&xa);
 	xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_NEAR);
+	format_xcolor(pxc, xa.text_color);
+
+	default_xfont(&xf);
+	xscpy(xf.size, GDI_ATTR_FONT_SIZE_FOOTER);
+	(*pif->pf_set_xfont)(pif->ctx, &xf);
 
 	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, prt);
 

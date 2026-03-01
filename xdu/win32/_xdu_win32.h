@@ -184,5 +184,6 @@ typedef struct _win32_glrc_t{
 #endif
 
 #define SYSTEM_FONTNAME     _T("Microsoft YaHei")
+//#define SYSTEM_FONTNAME     _T("SimSun")
 
 #endif //_XDU_WIN32_H

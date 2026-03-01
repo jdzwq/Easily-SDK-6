@@ -280,7 +280,7 @@ typedef bool_t(*PF_WIDGET_SET_SUBPROC)(widget_t, uid_t, if_subproc_t*);
 typedef void(*PF_WIDGET_DEL_SUBPROC)(widget_t, uid_t);
 typedef bool_t(*PF_WIDGET_SET_SUBPROC_DELTA)(widget_t, uid_t, vword_t);
 typedef vword_t (*PF_WIDGET_GET_SUBPROC_DELTA)(widget_t, uid_t);
-typedef bool_t(*PF_WIDGET_HAS_SUBPROC)(widget_t);
+typedef bool_t(*PF_WIDGET_HAS_SUBPROC)(widget_t, uid_t);
 
 typedef void(*PF_WIDGET_POST_WCHAR)(widget_t, wchar_t);
 typedef void(*PF_WIDGET_POST_KEY)(widget_t, int);

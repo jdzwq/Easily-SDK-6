@@ -104,6 +104,10 @@ void hand_staticbox_size(widget_t widget, int code, const xsize_t* prs)
 		break;
 	case WS_SIZE_MINIMIZED:
 		break;
+	case WS_SIZE_MAXSHOW:
+		break;
+	case WS_SIZE_RESTORE:
+		break;
 	case WS_SIZE_LAYOUT:
 		break;
 	}
@@ -126,6 +130,7 @@ void hand_staticbox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	default_xbrush(&xb);
 	format_xcolor(&clrs.clr_bkg, xb.color);
 	default_xface(&xa);
+	format_xcolor(&clrs.clr_txt, xa.text_color);
 
 	widget_get_client_rect(widget, &xr);
 

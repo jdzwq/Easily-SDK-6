@@ -75,6 +75,10 @@ EXP_API void merge_xfont(xfont_t* pxf_dst, const xfont_t* pxf_src);
 
 EXP_API void merge_xface(xface_t* pxa_dst, const xface_t* pxa_src);
 
+EXP_API int parse_wrap(const xface_t* pxa);
+
+EXP_API void format_wrap(int wrap, xface_t* pxa);
+
 EXP_API int compare_xfont(xfont_t *pxf1, const xfont_t *pxf2);
 
 EXP_API void lighten_xbrush(xbrush_t* pxb, int n);

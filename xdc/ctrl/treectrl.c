@@ -140,7 +140,6 @@ static void _treectrl_reset_page(widget_t widget)
 	widget_reset_paging(widget, pw, ph, vw, vh, lw, lh);
 
 	widget_reset_scroll(widget, 1);
-
 	widget_reset_scroll(widget, 0);
 }
 
@@ -532,6 +531,8 @@ void hand_tree_size(widget_t widget, int code, const xsize_t* pxs)
 
 	XDK_ASSERT(ptd != NULL);
 
+	_treectrl_reset_page(widget);
+	
 	switch(code)
 	{
 	case WS_SIZE_FULLSCREEN:
@@ -540,8 +541,12 @@ void hand_tree_size(widget_t widget, int code, const xsize_t* pxs)
 		break;
 	case WS_SIZE_MINIMIZED:
 		break;
+	case WS_SIZE_MAXSHOW:
+		break;
+	case WS_SIZE_RESTORE:
+		break;
 	case WS_SIZE_LAYOUT:
-		_treectrl_reset_page(widget);
+		widget_erase(widget, NULL);
 		break;
 	}
 }
@@ -858,33 +863,35 @@ void hand_tree_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	xrect_t xr = { 0 };
 
 	canvas_t canv;
-	const drawing_interface* pif = NULL;
+	drawing_interface ifc = {0};
 	drawing_interface ifv = {0};
 
-	color_mod_t clrs;
+	const color_mod_t* pclrs;
 	xbrush_t xb;
 	xcolor_t xc;
 
 	if (!ptd->tree) return;
 
-	widget_get_color_mode(widget, &clrs);
+	pclrs = widget_get_color_mode_ptr(widget);
 	default_xbrush(&xb);
-	format_xcolor(&clrs.clr_bkg, xb.color);
-	xmem_copy((void*)&xc, (void*)&clrs.clr_bkg, sizeof(xcolor_t));
+	format_xcolor(&(pclrs->clr_bkg), xb.color);
+	xmem_copy((void*)&xc, (void*)&(pclrs->clr_bkg), sizeof(xcolor_t));
 
-	canv = widget_get_canvas(widget);
-
-	pif = widget_get_canvas_interface(widget);
-	
 	widget_get_client_rect(widget, &xr);
 
+	canv = widget_get_canvas(widget);
 	rdc = begin_canvas_paint(canv, dc, xr.w, xr.h);
-		
+	
 	get_visual_interface(rdc, &ifv);
+	widget_get_view_rect(widget, (viewbox_t*)&(ifv.rect));
+
+	get_canvas_interface(canv, &ifc);
+	widget_get_canv_rect(widget, (canvbox_t*)&(ifc.rect));
+	ifc.pclrs = pclrs;
 
 	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
 
-	draw_tree(pif, ptd->tree);
+	draw_tree(&ifc, ptd->tree);
 
 	//draw focus
 	if (ptd->item)
@@ -1044,7 +1051,7 @@ void treectrl_redraw(widget_t widget)
 	ptd->hover = NULL;
 
 	_treectrl_reset_page(widget);
-
+	widget_erase(widget, NULL);
 }
 
 void treectrl_redraw_item(widget_t widget, link_t_ptr ilk)

@@ -1,8 +1,8 @@
 SOURCES= \
-D:/Easily-temp/windows/xService/x64/Debug/xhttps.cc \
-D:/Easily-temp/windows/xService/x64/Debug/xtcps.cc \
-D:/Easily-temp/windows/xService/x64/Debug/xudps.cc \
-D:/Easily-temp/windows/xService/x64/Debug/xportd.cc \
-D:/Easily-temp/windows/xService/x64/Debug/SrvMain.cc \
-D:/Easily-temp/windows/xService/x64/Debug/srvcrt.cc \
-D:/Easily-temp/windows/xService/x64/Debug/srvlog.cc \
+E:/Easily-temp/windows/xService/x64/Debug/xhttps.cc \
+E:/Easily-temp/windows/xService/x64/Debug/xtcps.cc \
+E:/Easily-temp/windows/xService/x64/Debug/xudps.cc \
+E:/Easily-temp/windows/xService/x64/Debug/xportd.cc \
+E:/Easily-temp/windows/xService/x64/Debug/SrvMain.cc \
+E:/Easily-temp/windows/xService/x64/Debug/srvcrt.cc \
+E:/Easily-temp/windows/xService/x64/Debug/srvlog.cc \

@@ -2084,3 +2084,52 @@ int w_xsappend(wchar_t* buf, const wchar_t* fmt, ...)
 	return len;
 }
 
+/**********************************************************************/
+#if defined (DEBUG) || defined (_DEBUG)
+void test_printf()
+{
+	int n;
+	tchar_t sz[256];
+	
+	char sc = MIN_CHAR + 1;
+	short ss = MIN_SHORT + 1;
+	int si = MIN_LONG + 1;
+	long long sl = MIN_LONG - 1;
+
+	n = xsprintf(sz, _T("sc =%c ss=%hd si=%d sl=%ld"), sc, ss, si, sl);
+	_tprintf(_T("%s\n"),sz);
+
+	unsigned char uc = MAX_CHAR;
+	unsigned short us = MAX_SHORT;
+	unsigned int ui = MAX_LONG;
+	unsigned long long ul = (long long)MAX_LONG + 1;
+
+	n = xsprintf(sz, _T("ss=%hu si=%u sl=%lu"), us, ui, ul);
+	_tprintf(_T("%s\n"),sz);
+
+	xsprintf(sz, _T("max short=%#hX max int=%X max long=%#lx"), MAX_SHORT, MAX_LONG, MAX_LONGLONG);
+	_tprintf(_T("%s\n"),sz);
+
+	schar_t ssz[50];
+	wchar_t wsz[50];
+	const schar_t* sstr = "multibyte string";
+	const wchar_t* wstr = L"wide string";
+	a_xsprintf(ssz, "multibyte string test: %s, %S", sstr, wstr);
+	printf("%s\n",ssz);
+	w_xsprintf(wsz, L"wide string test: %S, %s", sstr, wstr);
+	ucs_to_mbs(wsz, -1, ssz, 50);
+	printf("%s\n",ssz);
+}
+
+void test_scanf()
+{
+	tchar_t c = 0;
+	short s = 0;
+	int i = 0;
+	long long l = 0;
+	double f = 0.0;
+
+	xsscanf(_T("test: c=t s=1 i=2 l=3 f=4.0"),_T("test: c=%c s=%hd i=%d l=%ld f=%f"), &c, &s, &i, &l, &f);
+	_tprintf(_T("test: c=%c s=%hd i=%d l=%lld f=%f\n"), c, s, i, l, f);
+}
+#endif

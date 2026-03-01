@@ -200,6 +200,13 @@ void xdk_impl_file(if_file_t* pif)
 	pif->pf_file_write = _file_write;
 	pif->pf_file_flush = _file_flush;
 	pif->pf_file_truncate = _file_truncate;
+	pif->pf_file_seek_begin = _file_seek_begin;
+	pif->pf_file_seek_end = _file_seek_end;
+	pif->pf_file_seek_bytes = _file_seek_bytes;
+	pif->pf_file_seek_lines = _file_seek_lines;
+	pif->pf_file_peek_line = _file_peek_line;
+	pif->pf_file_read_line = _file_read_line;
+	pif->pf_file_write_line = _file_write_line;
 	pif->pf_file_delete = _file_delete;
 	pif->pf_file_rename = _file_rename;
 	pif->pf_file_info = _file_info;

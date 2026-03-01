@@ -489,5 +489,34 @@ void pmem_unlock(void* p)
 	(*pif->pf_page_unlock)(p);
 }
 
+/**********************************************************************/
+#if defined (DEBUG) || defined (_DEBUG)
+void pmem_self_test()
+{
+	void* p;
+	dword_t dw;
+
+	p = pmem_alloc(2050);
+	dw = pmem_size(p);
+
+	_tprintf(_T("pmem_alloc(2050) = %p, size = %d\n"), p, dw);
+
+	p = pmem_realloc(p, 4096);
+
+	if(pmem_lock(p) == NULL)
+	{
+		_tprintf(_T("pmem_lock failed\n"));
+	}
+	else
+	{
+		_tprintf(_T("pmem_lock success\n"));
+	}
+
+	xmem_set(p, (byte_t)1, 4096);
+
+	pmem_unlock(p);
+}
 #endif
+
+#endif //XDK_SUPPORT_MEMO_PAGE
 

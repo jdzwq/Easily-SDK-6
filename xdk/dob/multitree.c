@@ -187,7 +187,7 @@ bool_t is_multi_tree(link_t_ptr ptr)
 	return (bool_t)(pti->lkSibling.next == NULL && pti->lkSibling.prev == NULL);
 }
 
-static bool_t _compare_multi_node_proc(link_t_ptr plk, void* pv)
+static bool_t CALLBACK _compare_multi_node_proc(link_t_ptr plk, void* pv)
 {
 	return (plk == (link_t_ptr)pv)? 0 : 1;
 }
@@ -345,7 +345,7 @@ typedef struct _NODE_MASK_COUNT{
 	int count;
 }NODE_MASK_COUNT;
 
-static bool_t _count_check_node(link_t_ptr plk, void* pv)
+static bool_t CALLBACK _count_check_node(link_t_ptr plk, void* pv)
 {
 	NODE_MASK_COUNT* pn = (NODE_MASK_COUNT*)pv;
 
@@ -371,7 +371,7 @@ typedef struct _NODE_MASK_CHECK{
 	int count;
 }NODE_MASK_CHECK;
 
-static bool_t _reset_check_node(link_t_ptr plk, void* pv)
+static bool_t CALLBACK _reset_check_node(link_t_ptr plk, void* pv)
 {
 	NODE_MASK_CHECK* pn = (NODE_MASK_CHECK*)pv;
 

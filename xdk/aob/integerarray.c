@@ -128,3 +128,29 @@ void delete_integer(int** sa, int index, int count)
 
 	*(int*)(sa + 1) = (size - count);
 }
+
+/**********************************************************************/
+#if defined (DEBUG) || defined (_DEBUG)
+void test_integer_array()
+{
+	int** sa = alloc_integer_array();
+	int i;
+
+	for (i = 0; i < 10; i++)
+	{
+		insert_integer(sa, i, &i, 1);
+	}
+
+	for (i = 0; i < 10; i++)
+	{
+		_tprintf(_T("%d\n"), get_integer(sa, i));
+	}
+
+	while (get_integer_array_size(sa))
+	{
+		delete_integer(sa, 0, 1);
+	}
+
+	free_integer_array(sa);
+}
+#endif

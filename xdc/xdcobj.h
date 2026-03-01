@@ -5,7 +5,11 @@
 #include "hand/docker.h"
 #include "hand/splitor.h"
 #include "hand/textor.h"
+#include "hand/designer.h"
 
+#include "desg/desg.h"
+
+#include "win/widgeting.h"
 #include "win/widgetex.h"
 #include "box/box.h"
 #include "edit/editor.h"

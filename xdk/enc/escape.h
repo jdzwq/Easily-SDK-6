@@ -158,6 +158,10 @@ EXP_API int xml_mbs_decode(const schar_t* src, tchar_t* dest);
 
 EXP_API int xml_mbs_encode(tchar_t ch, schar_t* dest, int max);
 
+#if defined (DEBUG) || defined (_DEBUG)
+EXP_API void csv_encode_test(void);
+#endif
+
 #ifdef	__cplusplus
 }
 #endif

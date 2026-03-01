@@ -107,7 +107,7 @@ typedef enum{
 
 #define DEF_INNER_FEED		-1
 #define DEF_OUTER_FEED		1
-#define DEF_FOCUS_SPAN		5
+#define DEF_FOCUS_SPAN		6
 
 /*define object sizing type*/
 #define SIZING_TOPLEFT			0x00000001
@@ -157,7 +157,6 @@ typedef struct _page_cator_t{
 #define _DB_SQLITE		0x2F
 typedef struct _handle_head	*xdb_t;
 
-#include "inf/hintinf.h"
 #include "inf/xdbinf.h"
 #include "inf/xmlinf.h"
 #include "inf/tioinf.h"

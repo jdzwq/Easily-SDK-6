@@ -205,10 +205,15 @@ void hand_title_size(widget_t widget, int code, const xsize_t* pxs)
 		break;
 	case WS_SIZE_MINIMIZED:
 		break;
+	case WS_SIZE_MAXSHOW:
+		break;
+	case WS_SIZE_RESTORE:
+		break;
 	case WS_SIZE_LAYOUT:
-		_titlectrl_reset_page(widget);
 		break;
 	}
+
+	_titlectrl_reset_page(widget);
 }
 
 void hand_title_mouse_move(widget_t widget, dword_t dw, const xpoint_t* pxp)
@@ -385,14 +390,16 @@ void hand_title_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	xrect_t xr = { 0 };
 
 	canvas_t canv;
-	const drawing_interface* pif = NULL;
+	drawing_interface ifc = {0};
 
 	widget_get_client_rect(widget, &xr);
 
 	canv = widget_get_canvas(widget);
-	pif = widget_get_canvas_interface(widget);
-	
 	rdc = begin_canvas_paint(canv, dc, xr.w, xr.h);
+	
+	get_canvas_interface(canv, &ifc);
+	widget_get_canv_rect(widget, (canvbox_t*)&(ifc.rect));
+	ifc.pclrs = widget_get_color_mode_ptr(widget);
 
 	orita = get_title_oritation_ptr(ptd->title);
 	if (compare_text(orita, -1, ATTR_ORITATION_BOTTOM, -1, 0) == 0 || compare_text(orita, -1, ATTR_ORITATION_TOP, -1, 0) == 0)
@@ -402,7 +409,7 @@ void hand_title_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	
 	if (ptd->title)
 	{
-		draw_title(pif, ptd->title, ptd->item);
+		draw_title(&ifc, ptd->title, ptd->item);
 	}
 
 	end_canvas_paint(canv, dc, pxr);
@@ -572,7 +579,6 @@ void titlectrl_redraw(widget_t widget)
 	ptd->hover = NULL;
 
 	_titlectrl_reset_page(widget);
-
 	widget_erase(widget, NULL);
 }
 

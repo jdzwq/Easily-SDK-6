@@ -81,7 +81,7 @@ EXP_API bool_t	xfile_flush(file_t xf);
 @INPUT dword_t size: the request size in bytes.
 @RETURN bool_t: if succeeds return nonzero, fails return zero.
 */
-EXP_API bool_t	xfile_read_range(file_t xf, dword_t hoff, dword_t loff, byte_t* buf, dword_t size);
+EXP_API bool_t	xfile_read_range(file_t xf, vword_t off, byte_t* buf, dword_t size);
 
 /*
 @FUNCTION xfile_write_range: random write file data at the start position.
@@ -92,7 +92,7 @@ EXP_API bool_t	xfile_read_range(file_t xf, dword_t hoff, dword_t loff, byte_t* b
 @INPUT dword_t size: the data size in bytes.
 @RETURN bool_t: if succeeds return nonzero, fails return zero.
 */
-EXP_API bool_t	xfile_write_range(file_t xf, dword_t hoff, dword_t loff, const byte_t* buf, dword_t size);
+EXP_API bool_t	xfile_write_range(file_t xf, vword_t off, const byte_t* buf, dword_t size);
 
 /*
 @FUNCTION xfile_close: close file and free file object.

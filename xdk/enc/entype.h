@@ -64,8 +64,10 @@ typedef unsigned long long lword_t;
 
 #ifdef _OS_64
 typedef unsigned long long	vword_t;
+typedef long long			vlong_t;
 #else
 typedef unsigned int		vword_t;
+typedef int					vlong_t;
 #endif
 
 #ifndef stamp_t

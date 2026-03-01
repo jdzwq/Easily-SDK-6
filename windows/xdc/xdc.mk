@@ -17,8 +17,8 @@ INC_PATH = ../../include
 SRC_PATH = ../../xdc
 LIB_PATH = ../lib/$(ARCH)
 
-OBJ_PATH = D:\Easily-temp\windows\$(MODULE)\$(ARCH)\Release
-PDB_PATH = D:\Easily-temp\windows\$(ARCH)
+OBJ_PATH = E:\Easily-temp\windows\$(MODULE)\$(ARCH)\Release
+PDB_PATH = E:\Easily-temp\windows\$(ARCH)
 OUT_PATH = Z:\Easily-app-6\windows\lib
 
 TARGET = $(OBJ_PATH)/$(MODULE).dll
@@ -67,7 +67,7 @@ ASMS = $(patsubsti %.obj,%.asm,$(OBJS))
 {$(SRC_PATH)/hand}.c{$(OBJ_PATH)}.obj::
 	$(CC) $(CFLAGS) /I $(INC_PATH) $<
 
-{$(SRC_PATH)/imp}.c{$(OBJ_PATH)}.obj::
+{$(SRC_PATH)/desg}.c{$(OBJ_PATH)}.obj::
 	$(CC) $(CFLAGS) /I $(INC_PATH) $<
 
 {$(SRC_PATH)/menu}.c{$(OBJ_PATH)}.obj::
@@ -96,7 +96,7 @@ test:
 	for %i in ($(SRC_PATH)/dlg/*.c) do @echo $(OBJ_PATH)/%i \>>$(MODULE).txt
 	for %i in ($(SRC_PATH)/edit/*.c) do @echo $(OBJ_PATH)/%i \>>$(MODULE).txt
 	for %i in ($(SRC_PATH)/hand/*.c) do @echo $(OBJ_PATH)/%i \>>$(MODULE).txt
-	for %i in ($(SRC_PATH)/imp/*.c) do @echo $(OBJ_PATH)/%i \>>$(MODULE).txt
+	for %i in ($(SRC_PATH)/desg/*.c) do @echo $(OBJ_PATH)/%i \>>$(MODULE).txt
 	for %i in ($(SRC_PATH)/menu/*.c) do @echo $(OBJ_PATH)/%i \>>$(MODULE).txt
 	for %i in ($(SRC_PATH)/*.c) do @echo $(OBJ_PATH)/%i \>>$(MODULE).txt
 

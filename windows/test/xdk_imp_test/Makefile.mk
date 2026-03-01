@@ -5,14 +5,14 @@
 # 2. nmake /f Makefile.mk clean
 # 3. nmake /f Makefile.mk
 #-----------------------------------------------------------------------------
-ARCH = x64
+ARCH = x86
 MODULE = xdk_imp_test
 
 INC_PATH = Z:/Easily-sdk-6/include
 SRC_PATH = Z:/Easily-sdk-6/test/xdk_imp_test
 LIB_PATH = Z:/Easily-sdk-6/windows/lib/$(ARCH)
-OBJ_PATH = Z:/Easily-temp/windows/$(MODULE)/$(ARCH)/Debug
-PDB_PATH = Z:/Easily-temp/windows/$(ARCH)
+OBJ_PATH = E:/Easily-temp/windows/$(MODULE)/$(ARCH)/Debug
+PDB_PATH = E:/Easily-temp/windows/$(ARCH)
 OUT_PATH = Z:/Easily-app-6/windows/bin
 
 TARGET = $(OUT_PATH)/$(MODULE).exe
@@ -32,11 +32,11 @@ LFLAGS = /OUT:"$(TARGET)" /NXCOMPAT /PDB:"$(DATABASE)" \
 	/LIBPATH:"$(LIB_PATH)" \
 	/ERRORREPORT:PROMPT /NOLOGO /TLBID:1
 
-DIRS = $(strip $(OBJ_PATH)/main.cpp)
-OBJS = $(patsubsti %.cpp,%.obj,$(DIRS))
+DIRS = $(strip $(OBJ_PATH)/main.cc)
+OBJS = $(patsubsti %.cc,%.obj,$(DIRS))
 ASMS = $(patsubsti %.obj,%.asm,$(OBJS))
 
-{$(SRC_PATH)}.cpp{$(OBJ_PATH)}.obj::
+{$(SRC_PATH)}.cc{$(OBJ_PATH)}.obj::
 	$(CC) $(CFLAGS) /I $(INC_PATH) $<
 
 all : $(OBJS)

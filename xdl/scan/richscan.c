@@ -57,14 +57,14 @@ typedef struct _rich_scan_context{
 #define RICHWORD_INDICATOR_NEXT_BREAK	-1
 #define RICHWORD_INDICATOR_NEXT_WORD	0
 
-bool_t INFCALL call_rich_is_paging(void* ctx)
+bool_t call_rich_is_paging(void* ctx)
 {
 	rich_scan_context* pscan = (rich_scan_context*)ctx;
 
 	return pscan->paged;
 }
 
-bool_t INFCALL call_rich_break_page(void* ctx)
+bool_t call_rich_break_page(void* ctx)
 {
 	rich_scan_context* pscan = (rich_scan_context*)ctx;
 	page_cator_t cat = { 0 };
@@ -122,7 +122,7 @@ bool_t INFCALL call_rich_break_page(void* ctx)
 	return 1;
 }
 
-int INFCALL call_rich_next_page(void* ctx)
+int call_rich_next_page(void* ctx)
 {
 	rich_scan_context* pscan = (rich_scan_context*)ctx;
 
@@ -207,7 +207,7 @@ int INFCALL call_rich_next_page(void* ctx)
 	return pscan->page;
 }
 
-int INFCALL call_rich_next_words(void* ctx, tchar_t** ppch, xsize_t* pse, bool_t* pins, bool_t* pdel, bool_t* psel, bool_t* patom)
+int call_rich_next_words(void* ctx, tchar_t** ppch, xsize_t* pse, bool_t* pins, bool_t* pdel, bool_t* psel, bool_t* patom)
 {
 	rich_scan_context* pscan = (rich_scan_context*)ctx;
 	measure_interface* pif = pscan->pmi;
@@ -448,7 +448,7 @@ int INFCALL call_rich_next_words(void* ctx, tchar_t** ppch, xsize_t* pse, bool_t
 	return n;
 }
 
-int INFCALL call_rich_insert_words(void* ctx, tchar_t* pch, xsize_t* pse)
+int call_rich_insert_words(void* ctx, tchar_t* pch, xsize_t* pse)
 {
 	rich_scan_context* pscan = (rich_scan_context*)ctx;
 	measure_interface* pif = pscan->pmi;
@@ -506,7 +506,7 @@ int INFCALL call_rich_insert_words(void* ctx, tchar_t* pch, xsize_t* pse)
 	return n;
 }
 
-int INFCALL call_rich_delete_words(void* ctx)
+int call_rich_delete_words(void* ctx)
 {
 	rich_scan_context* pscan = (rich_scan_context*)ctx;
 	int n = 0;
@@ -542,14 +542,14 @@ int INFCALL call_rich_delete_words(void* ctx)
 	return n;
 }
 
-void INFCALL call_rich_cur_object(void* ctx, void** pobj)
+void call_rich_cur_object(void* ctx, void** pobj)
 {
 	rich_scan_context* pscan = (rich_scan_context*)ctx;
 
 	*pobj = (void*)pscan->nlk;
 }
 
-void INFCALL call_rich_object_attr(void* ctx, void* pobj, object_attr_t* pret)
+void call_rich_object_attr(void* ctx, void* pobj, object_attr_t* pret)
 {
 	rich_scan_context* pscan = (rich_scan_context*)ctx;
 	

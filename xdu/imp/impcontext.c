@@ -38,7 +38,7 @@ visual_t create_display_context(widget_t wt)
 
 	pif = PROCESS_CONTEXT_INTERFACE;
 
-	return (pif->pf_create_display_context)(wt);
+	return (*pif->pf_create_display_context)(wt);
 }
 
 visual_t create_compatible_context(visual_t rdc, int width, int height)
@@ -47,7 +47,7 @@ visual_t create_compatible_context(visual_t rdc, int width, int height)
 
 	pif = PROCESS_CONTEXT_INTERFACE;
 
-	return (pif->pf_create_compatible_context)(rdc, width, height);
+	return (*pif->pf_create_compatible_context)(rdc, width, height);
 }
 
 void destroy_context(visual_t rdc)
@@ -56,7 +56,7 @@ void destroy_context(visual_t rdc)
 
 	pif = PROCESS_CONTEXT_INTERFACE;
 
-	(pif->pf_destroy_context)(rdc);
+	(*pif->pf_destroy_context)(rdc);
 }
 
 void render_context(visual_t src, int srcx, int srcy, visual_t dst, int dstx, int dsty, int dstw, int dsth)
@@ -65,7 +65,7 @@ void render_context(visual_t src, int srcx, int srcy, visual_t dst, int dstx, in
 
 	pif = PROCESS_CONTEXT_INTERFACE;
 
-	(pif->pf_render_context)(src, srcx, srcy, dst, dstx, dsty, dstw, dsth);
+	(*pif->pf_render_context)(src, srcx, srcy, dst, dstx, dsty, dstw, dsth);
 }
 
 void get_device_caps(visual_t rdc, dev_cap_t* pcap)
@@ -74,7 +74,7 @@ void get_device_caps(visual_t rdc, dev_cap_t* pcap)
 
 	pif = PROCESS_CONTEXT_INTERFACE;
 
-	(pif->pf_get_device_caps)(rdc, pcap);
+	(*pif->pf_get_device_caps)(rdc, pcap);
 }
 
 float pixel_metric(visual_t rdc)
@@ -83,7 +83,7 @@ float pixel_metric(visual_t rdc)
 
 	pif = PROCESS_CONTEXT_INTERFACE;
 
-	return (pif->pf_pixel_metric)(rdc);
+	return (*pif->pf_pixel_metric)(rdc);
 }
 
 float font_metric(visual_t rdc, const tchar_t* xf_size)
@@ -92,7 +92,7 @@ float font_metric(visual_t rdc, const tchar_t* xf_size)
 
 	pif = PROCESS_CONTEXT_INTERFACE;
 
-	return (pif->pf_font_metric)(rdc, xf_size);
+	return (*pif->pf_font_metric)(rdc, xf_size);
 }
 
 #ifdef XDU_SUPPORT_CONTEXT_PRINTER
@@ -103,7 +103,7 @@ visual_t create_printer_context(const dev_prn_t* pmod)
 
 	pif = PROCESS_CONTEXT_INTERFACE;
 
-	return (pif->pf_create_printer_context)(pmod);
+	return (*pif->pf_create_printer_context)(pmod);
 }
 
 void destroy_printer_context(visual_t rdc)
@@ -112,7 +112,7 @@ void destroy_printer_context(visual_t rdc)
 
 	pif = PROCESS_CONTEXT_INTERFACE;
 
-	(pif->pf_destroy_printer_context)(rdc);
+	(*pif->pf_destroy_printer_context)(rdc);
 }
 
 bool_t default_printer_mode(dev_prn_t* pmod)
@@ -121,7 +121,7 @@ bool_t default_printer_mode(dev_prn_t* pmod)
 
 	pif = PROCESS_CONTEXT_INTERFACE;
 
-	return (pif->pf_default_printer_mode)(pmod);
+	return (*pif->pf_default_printer_mode)(pmod);
 }
 
 bool_t setup_printer_mode(widget_t wnd, dev_prn_t* pmod)
@@ -130,7 +130,7 @@ bool_t setup_printer_mode(widget_t wnd, dev_prn_t* pmod)
 
 	pif = PROCESS_CONTEXT_INTERFACE;
 
-	return (pif->pf_setup_printer_mode)(wnd, pmod);
+	return (*pif->pf_setup_printer_mode)(wnd, pmod);
 }
 
 void  begin_page(visual_t rdc)
@@ -139,7 +139,7 @@ void  begin_page(visual_t rdc)
 
 	pif = PROCESS_CONTEXT_INTERFACE;
 
-	(pif->pf_begin_page)(rdc);
+	(*pif->pf_begin_page)(rdc);
 }
 
 void  end_page(visual_t rdc)
@@ -148,7 +148,7 @@ void  end_page(visual_t rdc)
 
 	pif = PROCESS_CONTEXT_INTERFACE;
 
-	(pif->pf_end_page)(rdc);
+	(*pif->pf_end_page)(rdc);
 }
 
 void  begin_doc(visual_t rdc, const tchar_t* docname)
@@ -157,7 +157,7 @@ void  begin_doc(visual_t rdc, const tchar_t* docname)
 
 	pif = PROCESS_CONTEXT_INTERFACE;
 
-	(pif->pf_begin_doc)(rdc, docname);
+	(*pif->pf_begin_doc)(rdc, docname);
 }
 
 void  end_doc(visual_t rdc)
@@ -166,7 +166,7 @@ void  end_doc(visual_t rdc)
 
 	pif = PROCESS_CONTEXT_INTERFACE;
 
-	(pif->pf_end_doc)(rdc);
+	(*pif->pf_end_doc)(rdc);
 }
 
 #endif //XDU_SUPPORT_CONTEXT_PRINTER

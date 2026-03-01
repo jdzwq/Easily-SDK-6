@@ -30,7 +30,6 @@ LICENSE.GPL3 for more details.
 #include "../xdcdef.h"
 
 
-
 #ifdef	__cplusplus
 extern "C" {
 #endif

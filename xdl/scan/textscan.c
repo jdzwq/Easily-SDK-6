@@ -37,22 +37,22 @@ typedef struct _text_scan_context{
 	const xface_t* pxa;
 }text_scan_context;
 
-bool_t INFCALL call_string_is_paging(void* ctx)
+bool_t call_string_is_paging(void* ctx)
 {
 	return 0;
 }
 
-bool_t INFCALL call_string_break_page(void* ctx)
+bool_t call_string_break_page(void* ctx)
 {
 	return 0;
 }
 
-int INFCALL call_string_next_page(void* ctx)
+int call_string_next_page(void* ctx)
 {
 	return 1;
 }
 
-int INFCALL call_string_next_words(void* ctx, tchar_t** ppch, xsize_t* pse, bool_t* pins, bool_t* pdel, bool_t* psel, bool_t* patom)
+int call_string_next_words(void* ctx, tchar_t** ppch, xsize_t* pse, bool_t* pins, bool_t* pdel, bool_t* psel, bool_t* patom)
 {
 	text_scan_context* pscan = (text_scan_context*)ctx;
 	measure_interface* pif = pscan->pmi;
@@ -95,7 +95,7 @@ int INFCALL call_string_next_words(void* ctx, tchar_t** ppch, xsize_t* pse, bool
 	return n;
 }
 
-int INFCALL call_string_insert_words(void* ctx, tchar_t* pch, xsize_t* pse)
+int call_string_insert_words(void* ctx, tchar_t* pch, xsize_t* pse)
 {
 	text_scan_context* pscan = (text_scan_context*)ctx;
 	int n;
@@ -108,7 +108,7 @@ int INFCALL call_string_insert_words(void* ctx, tchar_t* pch, xsize_t* pse)
 	return n;
 }
 
-int INFCALL call_string_delete_words(void* ctx)
+int call_string_delete_words(void* ctx)
 {
 	text_scan_context* pscan = (text_scan_context*)ctx;
 	int n;
@@ -122,14 +122,14 @@ int INFCALL call_string_delete_words(void* ctx)
 	return n;
 }
 
-void INFCALL call_string_cur_object(void* ctx, void** pobj)
+void call_string_cur_object(void* ctx, void** pobj)
 {
 	text_scan_context* pscan = (text_scan_context*)ctx;
 
 	*pobj = (void*)pscan->vs;
 }
 
-void INFCALL call_string_object_attr(void* ctx, void* pobj, object_attr_t* pret)
+void call_string_object_attr(void* ctx, void* pobj, object_attr_t* pret)
 {
 	text_scan_context* pscan = (text_scan_context*)ctx;
 
@@ -179,22 +179,22 @@ typedef struct _FIXSTRWORDOPERATOR{
 	const xface_t* pxa;
 }FIXSTRWORDOPERATOR;
 
-bool_t INFCALL call_fixstr_is_paging(void* ctx)
+bool_t call_fixstr_is_paging(void* ctx)
 {
 	return 0;
 }
 
-bool_t INFCALL call_fixstr_break_page(void* ctx)
+bool_t call_fixstr_break_page(void* ctx)
 {
 	return 0;
 }
 
-int INFCALL call_fixstr_next_page(void* ctx)
+int call_fixstr_next_page(void* ctx)
 {
 	return 1;
 }
 
-int INFCALL call_fixstr_next_words(void* ctx, tchar_t** ppch, xsize_t* pse, bool_t* pins, bool_t* pdel, bool_t* psel, bool_t* patom)
+int call_fixstr_next_words(void* ctx, tchar_t** ppch, xsize_t* pse, bool_t* pins, bool_t* pdel, bool_t* psel, bool_t* patom)
 {
 	FIXSTRWORDOPERATOR* pscan = (FIXSTRWORDOPERATOR*)ctx;
 	measure_interface* pif = pscan->pmi;
@@ -244,7 +244,7 @@ int INFCALL call_fixstr_next_words(void* ctx, tchar_t** ppch, xsize_t* pse, bool
 	return n;
 }
 
-int INFCALL call_fixstr_insert_words(void* ctx, tchar_t* pch, xsize_t* pse)
+int call_fixstr_insert_words(void* ctx, tchar_t* pch, xsize_t* pse)
 {
 	FIXSTRWORDOPERATOR* pscan = (FIXSTRWORDOPERATOR*)ctx;
 	int n;
@@ -262,7 +262,7 @@ int INFCALL call_fixstr_insert_words(void* ctx, tchar_t* pch, xsize_t* pse)
 	return n;
 }
 
-int INFCALL call_fixstr_delete_words(void* ctx)
+int call_fixstr_delete_words(void* ctx)
 {
 	FIXSTRWORDOPERATOR* pscan = (FIXSTRWORDOPERATOR*)ctx;
 	int n;
@@ -279,14 +279,14 @@ int INFCALL call_fixstr_delete_words(void* ctx)
 	return n;
 }
 
-void INFCALL call_fixstr_cur_object(void* ctx, void** pobj)
+void call_fixstr_cur_object(void* ctx, void** pobj)
 {
 	FIXSTRWORDOPERATOR* pscan = (FIXSTRWORDOPERATOR*)ctx;
 
 	*pobj = (void*)pscan->buf;
 }
 
-void INFCALL call_fixstr_object_attr(void* ctx, void* pobj, object_attr_t* pret)
+void call_fixstr_object_attr(void* ctx, void* pobj, object_attr_t* pret)
 {
 	text_scan_context* pscan = (text_scan_context*)ctx;
 

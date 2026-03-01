@@ -82,7 +82,7 @@ void calc_text_rect(const drawing_interface* pif, const xface_t* pxa, const tcha
 
 	calc_text_rect_raw(&iv, pxa, txt, len, &xr);
 
-	(pif->pf_rect_pt_to_mm)(pif->ctx, &xr);
+	(*pif->pf_rect_pt_to_mm)(pif->ctx, &xr);
 
 	xmem_copy((void*)pxr, (void*)&xr, sizeof(xrect_t));
 }

@@ -188,3 +188,31 @@ void delete_string(tchar_t** sa, int index)
 
 	*(long*)(sa + 1) = size;
 }
+
+/**********************************************************************/
+#if defined (DEBUG) || defined (_DEBUG)
+void test_string_array()
+{
+	tchar_t token[10];
+
+	tchar_t** sa = alloc_string_array();
+
+	for (int i = 0; i < 10; i++)
+	{
+		xsprintf(token, _T("token%d"), i);
+		insert_string(sa, i, token, -1);
+	}
+
+	for (int i = 0; i < 10; i++)
+	{
+		_tprintf(_T("%s\n"), get_string_ptr(sa, i));
+	}
+
+	while (get_string_array_size(sa))
+	{
+		delete_string(sa, 0);
+	}
+
+	free_string_array(sa);
+}
+#endif

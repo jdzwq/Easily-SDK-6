@@ -118,13 +118,13 @@ void draw_topog(const drawing_interface* pif, link_t_ptr ptr)
 	parse_xbrush_from_style(&xb, style);
 	if (!b_print)
 	{
-		format_xcolor(&pif->clrs->clr_bkg, xb.color);
+		format_xcolor(&pif->pclrs->clr_bkg, xb.color);
 	}
 
 	/*parse_xpen_from_style(&xp, style);
 	if (!b_print)
 	{
-	format_xcolor(&pif->clrs->clr_frg, xp.color);
+	format_xcolor(&pif->pclrs->clr_frg, xp.color);
 	}*/
 
 	xscpy(xp.color, xb.color);
@@ -136,7 +136,7 @@ void draw_topog(const drawing_interface* pif, link_t_ptr ptr)
 
 	if (!b_print)
 	{
-		format_xcolor(&pif->clrs->clr_msk, xi.color);
+		format_xcolor(&pif->pclrs->clr_msk, xi.color);
 	}
 	else
 	{

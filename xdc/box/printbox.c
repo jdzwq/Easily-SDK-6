@@ -54,14 +54,14 @@ static int _printbox_calc_pages(widget_t widget)
 	xface_t xa = {0};
 
 	canvas_t canv;
-	const drawing_interface* pif = NULL;
+	drawing_interface ifc = {0};
 
 	canv = widget_get_canvas(widget);
-	pif = widget_get_canvas_interface(widget);
+	get_canvas_interface(canv, &ifc);
 
 	if (is_form_doc(ptd->sheet))
 	{
-		pages = calc_form_pages(pif, ptd->sheet);
+		pages = calc_form_pages(&ifc, ptd->sheet);
 	}
 	else if (is_grid_doc(ptd->sheet))
 	{
@@ -75,13 +75,13 @@ static int _printbox_calc_pages(widget_t widget)
 	{
 		default_xface(&xa);
 		xscpy(xa.text_wrap, GDI_ATTR_TEXT_WRAP_WORDBREAK);
-		pages = calc_rich_pages(pif, &xa, &xr, ptd->sheet);
+		pages = calc_rich_pages(&ifc, &xa, &xr, ptd->sheet);
 	}
 	else if (is_memo_doc(ptd->sheet))
 	{
 		default_xface(&xa);
 		xscpy(xa.text_wrap, GDI_ATTR_TEXT_WRAP_WORDBREAK);
-		pages = calc_rich_pages(pif, &xa, &xr, ptd->sheet);
+		pages = calc_rich_pages(&ifc, &xa, &xr, ptd->sheet);
 	}
 
 	return pages;
@@ -210,10 +210,15 @@ void hand_print_size(widget_t widget, int code, const xsize_t* pxs)
 		break;
 	case WS_SIZE_MINIMIZED:
 		break;
+	case WS_SIZE_MAXSHOW:
+		break;
+	case WS_SIZE_RESTORE:
+		break;
 	case WS_SIZE_LAYOUT:
-		_printbox_reset_page(widget);
 		break;
 	}
+
+	_printbox_reset_page(widget);
 }
 
 void hand_print_lbutton_down(widget_t widget, const xpoint_t* pxp)
@@ -328,33 +333,36 @@ void hand_print_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	xrect_t xr = { 0 };
 
 	canvas_t canv;
-	const drawing_interface* pif = NULL;
+	drawing_interface ifc = {0};
 	drawing_interface ifv = {0};
 
-	color_mod_t clrs;
+	const color_mod_t *pclrs;
 	xbrush_t xb;
 	xcolor_t xc;
 	xface_t xa;
 
 	if (!ptd->sheet) return;
 
-	widget_get_color_mode(widget, &clrs);
+	pclrs = widget_get_color_mode_ptr(widget);
 	default_xbrush(&xb);
-	format_xcolor(&clrs.clr_bkg, xb.color);
-	xmem_copy((void*)&xc, (void*)&clrs.clr_frg, sizeof(xcolor_t));
+	format_xcolor(&(pclrs->clr_bkg), xb.color);
+	xmem_copy((void*)&xc, (void*)&(pclrs->clr_frg), sizeof(xcolor_t));
 
 	default_xface(&xa);
 	xscpy(xa.text_wrap, GDI_ATTR_TEXT_WRAP_WORDBREAK);
-
-	canv = widget_get_canvas(widget);
-
-	pif = widget_get_canvas_interface(widget);
+	format_xcolor(&(pclrs->clr_txt), xa.text_color);
 
 	widget_get_client_rect(widget, &xr);
 
+	canv = widget_get_canvas(widget);
 	rdc = begin_canvas_paint(canv, dc, xr.w, xr.h);
-
+	
 	get_visual_interface(rdc, &ifv);
+	widget_get_view_rect(widget, (viewbox_t*)&(ifv.rect));
+
+	get_canvas_interface(canv, &ifc);
+	widget_get_canv_rect(widget, (canvbox_t*)&(ifc.rect));
+	ifc.pclrs = pclrs;
 
 	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
 
@@ -362,30 +370,30 @@ void hand_print_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	{
 		lighten_xcolor(&xc, DEF_HARD_DARKEN);
 
-		draw_corner(pif, &xc, (const xrect_t*)&(pif->rect));
+		draw_corner(&ifc, &xc, (const xrect_t*)&(ifc.rect));
 	}
 
 	if (ptd->sheet)
 	{
 		if (is_form_doc(ptd->sheet))
 		{
-			draw_form_page(pif, ptd->sheet, ptd->page);
+			draw_form_page(&ifc, ptd->sheet, ptd->page);
 		}
 		else if (is_grid_doc(ptd->sheet))
 		{
-			draw_grid_page(pif, ptd->sheet, ptd->page);
+			draw_grid_page(&ifc, ptd->sheet, ptd->page);
 		}
 		else if (is_statis_doc(ptd->sheet))
 		{
-			draw_statis_page(pif, ptd->sheet, ptd->page);
+			draw_statis_page(&ifc, ptd->sheet, ptd->page);
 		}
 		else if (is_rich_doc(ptd->sheet))
 		{
-			draw_rich_text(pif, &xa, (xrect_t*)&(pif->rect), ptd->sheet, ptd->page);
+			draw_rich_text(&ifc, &xa, (xrect_t*)&(ifc.rect), ptd->sheet, ptd->page);
 		}
 		else if (is_memo_doc(ptd->sheet))
 		{
-			draw_memo_text(pif, &xa, (xrect_t*)&(pif->rect), ptd->sheet, ptd->page);
+			draw_memo_text(&ifc, &xa, (xrect_t*)&(ifc.rect), ptd->sheet, ptd->page);
 		}
 	}
 
@@ -458,6 +466,7 @@ void printbox_redraw(widget_t widget)
 		ptd->page = pages;
 
 	_printbox_reset_page(widget);
+	widget_erase(widget, NULL);
 }
 
 void printbox_move_prev_page(widget_t widget)

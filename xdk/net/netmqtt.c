@@ -30,7 +30,7 @@ LICENSE.GPL3 for more details.
 #include "../xdkimp.h"
 #include "../xdkstd.h"
 #include "../xdkobj.h"
-#include "../xdkbio.h"
+#include "../xdkiop.h"
 
 typedef struct _mqtt_context{
 	handle_head head;	/*head for xhand_t*/
@@ -1605,7 +1605,7 @@ xhand_t xmqtt_scu(xhand_t bio, int scu)
 	pmqtt->type = scu;
 
 	pmqtt->pif = (bio_interface*)xmem_alloc(sizeof(bio_interface));
-	xdk_bio_interface(bio, pmqtt->pif);
+	get_bio_interface(bio, pmqtt->pif);
 
 	pmqtt->session_ver = MQTT_VER;
 
@@ -1624,7 +1624,7 @@ xhand_t xmqtt_scp(xhand_t bio, int scp)
 	pmqtt->type = scp;
 
 	pmqtt->pif = (bio_interface*)xmem_alloc(sizeof(bio_interface));
-	xdk_bio_interface(bio, pmqtt->pif);
+	get_bio_interface(bio, pmqtt->pif);
 
 	pmqtt->session_ver = MQTT_VER;
 

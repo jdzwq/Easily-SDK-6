@@ -165,7 +165,7 @@ bool_t row_find_proc(const tchar_t* key,const tchar_t* sin,const tchar_t* val,vo
 	return matched;
 }
 
-int _row_compare_func(link_t_ptr rlk1, link_t_ptr rlk2, void* parm)
+static int CALLBACK _row_compare_func(link_t_ptr rlk1, link_t_ptr rlk2, void* parm)
 {
 	link_t_ptr clk = (link_t_ptr)parm;
 

@@ -90,16 +90,16 @@ typedef void(*PF_INVERT_RECT)(visual_t, const xrect_t*);
 typedef void(*PF_EXCLUDE_RECT)(visual_t, const xrect_t*);
 typedef void(*PF_INCLIP_RECT)(visual_t, const xrect_t*);
 
-typedef visual_t(*PF_GET_VISUAL)(void*);
 
 typedef struct _drawing_interface* drawing_interface_ptr;
 
+typedef visual_t(*PF_GET_VISUAL)(void*);
 typedef void(*PF_GET_INTERFACE)(void*, drawing_interface_ptr);
 
 typedef struct _drawing_interface{
 	int tag;
 	void* ctx;
-	const color_mod_t* clrs;
+	const color_mod_t* pclrs;
 
 	PF_GET_MEASURE		pf_get_measure;
 

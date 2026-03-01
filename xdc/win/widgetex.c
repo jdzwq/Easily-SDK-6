@@ -40,8 +40,6 @@ typedef struct _widget_exten_t{
 		splitor_t splitor;
 		docker_t docker;
 	};
-
-	drawing_interface* pif;
 }widget_exten_t;
 
 #define GETEXTENSTRUCT(wt)			(widget_exten_t*)widget_get_core_delta(wt)
@@ -49,22 +47,6 @@ typedef struct _widget_exten_t{
 
 
 /***********************************************************************************************************************/
-
-const drawing_interface* widget_get_canvas_interface(widget_t wt)
-{
-	widget_exten_t* pwt;
-
-	pwt = GETEXTENSTRUCT(wt);
-
-	XDK_ASSERT(pwt != NULL);
-
-	if (pwt->pif)
-	{
-		widget_get_canv_rect(wt, (canvbox_t*)&(pwt->pif->rect));
-	}
-
-	return pwt->pif;
-}
 
 canvas_t widget_get_canvas(widget_t wt)
 {
@@ -671,11 +653,6 @@ void widget_hand_create(widget_t wt)
 	pwt->canv = create_display_canvas(rdc);
 	widget_release_context(wt, rdc);
 
-	pwt->pif = (drawing_interface*)xmem_alloc(sizeof(drawing_interface));
-
-	get_canvas_interface(pwt->canv, pwt->pif);
-	pwt->pif->clrs = widget_get_color_mode_ptr(wt);
-
 	SETEXTENSTRUCT(wt, pwt);
 
 	widget_reset_paging(wt, xr.w, xr.h, xr.w, xr.h, 0, 0);
@@ -723,9 +700,6 @@ void widget_hand_destroy(widget_t wt)
 	if (pwt)
 	{
 		destroy_display_canvas(pwt->canv);
-
-		if (pwt->pif)
-			xmem_free(pwt->pif);
 
 		xmem_free(pwt);
 	}

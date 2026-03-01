@@ -106,6 +106,11 @@ EXP_API void* xshare_lock(xhand_t sh, dword_t offset, dword_t size);
 */
 EXP_API void xshare_unlock(xhand_t sh, dword_t offset, dword_t size, void* p);
 
+#if defined (DEBUG) || defined (_DEBUG)
+EXP_API void xshare_test_cli(void);
+EXP_API void xshare_test_srv(void);
+#endif
+
 #ifdef	__cplusplus
 }
 #endif

@@ -98,14 +98,6 @@ static int sub_editbox_show(widget_t widget, bool_t show, uid_t subid, vword_t d
 	return 1;
 }
 
-static void sub_editbox_unsubbing(widget_t widget, uid_t subid, vword_t delta)
-{
-	if (subid != IDS_EDITBOX)
-		return;
-
-	widget_del_subproc(widget, IDS_EDITBOX);
-}
-
 /*************************************************************************************/
 
 widget_t fireedit_create(widget_t widget, const xrect_t* pxr)
@@ -125,7 +117,6 @@ widget_t fireedit_create(widget_t widget, const xrect_t* pxr)
 	widget_set_user_id(editor, IDC_EDITBOX);
 
 	ev.sub_on_keydown = sub_editbox_keydown;
-	ev.sub_on_unsubbed = sub_editbox_unsubbing;
 	ev.sub_on_self_command = sub_editbox_self_command;
 	ev.sub_on_show = sub_editbox_show;
 

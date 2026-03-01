@@ -30,8 +30,7 @@ LICENSE.GPL3 for more details.
 #include "../xdkimp.h"
 #include "../xdkstd.h"
 #include "../xdkobj.h"
-#include "../xdkbio.h"
-#include "../xdkstm.h"
+#include "../xdkiop.h"
 
 pnet_t* pnet_scu(xhand_t bio)
 {
@@ -47,7 +46,7 @@ pnet_t* pnet_scu(xhand_t bio)
 	pnet->type = _PNET_TYPE_SCU;
 
 	pnet->pif = (bio_interface*)xmem_alloc(sizeof(bio_interface));
-	xdk_bio_interface(bio, pnet->pif);
+	get_bio_interface(bio, pnet->pif);
 
 	pnet->ver = 0x0001;
 	pnet->udm = PNET_USER_DATA_MAXINUM;
@@ -75,7 +74,7 @@ pnet_t* pnet_scp(xhand_t bio)
 	pnet->type = _PNET_TYPE_SCP;
 
 	pnet->pif = (bio_interface*)xmem_alloc(sizeof(bio_interface));
-	xdk_bio_interface(bio, pnet->pif);
+	get_bio_interface(bio, pnet->pif);
 
 	pnet->udm = PNET_USER_DATA_MAXINUM;
 

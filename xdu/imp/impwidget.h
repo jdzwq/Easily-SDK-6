@@ -587,7 +587,7 @@ EXP_API bool_t	widget_is_minimized(widget_t wt);
 @INPUT if_subproc_t* sub: the subclass message dispatch struct.
 @RETURN bool_t: if succeeds return nonzero, fails return zero.
 */
-EXP_API bool_t	widget_set_subproc(widget_t wt, dword_t sid, if_subproc_t* sub);
+EXP_API bool_t	widget_set_subproc(widget_t wt, uid_t sid, if_subproc_t* sub);
 
 /*
 @FUNCTION widget_del_subproc: delete widget subclass routing.
@@ -595,7 +595,7 @@ EXP_API bool_t	widget_set_subproc(widget_t wt, dword_t sid, if_subproc_t* sub);
 @INPUT dword_t sid: the subclass id.
 @RETURN bool_t: if succeeds return nonzero, fails return zero.
 */
-EXP_API void	widget_del_subproc(widget_t wt, dword_t sid);
+EXP_API void	widget_del_subproc(widget_t wt, uid_t sid);
 
 /*
 @FUNCTION widget_set_subproc_delta: set widget subclass routing extract data.
@@ -604,7 +604,7 @@ EXP_API void	widget_del_subproc(widget_t wt, dword_t sid);
 @INPUT vword_t delta: the subclass extract data.
 @RETURN bool_t: if succeeds return nonzero, fails return zero.
 */
-EXP_API bool_t	widget_set_subproc_delta(widget_t wt, dword_t sid, vword_t delta);
+EXP_API bool_t	widget_set_subproc_delta(widget_t wt, uid_t sid, vword_t delta);
 
 /*
 @FUNCTION widget_get_subproc_delta: get widget subclass routing extract data.
@@ -612,14 +612,14 @@ EXP_API bool_t	widget_set_subproc_delta(widget_t wt, dword_t sid, vword_t delta)
 @INPUT dword_t sid: the subclass id.
 @RETURN vword_t: return the subclass extract data if exists, otherwise return zero.
 */
-EXP_API vword_t widget_get_subproc_delta(widget_t wt, dword_t sid);
+EXP_API vword_t widget_get_subproc_delta(widget_t wt, uid_t sid);
 
 /*
 @FUNCTION widget_has_subproc: test widget has subclass routing.
 @INPUT widget_t wt: the widget resource handle.
 @RETURN bool_t: return nonzero if exists, otherwise return zero.
 */
-EXP_API bool_t	widget_has_subproc(widget_t wt);
+EXP_API bool_t	widget_has_subproc(widget_t wt, uid_t sid);
 
 /*
 @FUNCTION widget_set_timer: set widget timer routing.

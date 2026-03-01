@@ -128,3 +128,31 @@ void delete_numeric(double** sa, int index, int count)
 
 	*(int*)(sa + 1) = (size - count);
 }
+
+/**********************************************************************/
+#if defined (DEBUG) || defined (_DEBUG)
+void test_numeric_array()
+{
+	double** sa = alloc_numeric_array();
+	int i;
+	double d;
+
+	for (i = 0; i < 10; i++)
+	{
+		d = i;
+		insert_numeric(sa, i, &d, 1);
+	}
+
+	for (i = 0; i < 10; i++)
+	{
+		_tprintf(_T("%f\n"), get_numeric(sa, i));
+	}
+
+	while (get_numeric_array_size(sa))
+	{
+		delete_numeric(sa, 0, 1);
+	}
+
+	free_numeric_array(sa);
+}
+#endif

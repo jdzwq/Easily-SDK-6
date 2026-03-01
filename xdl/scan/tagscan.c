@@ -67,17 +67,17 @@ typedef struct _tag_scan_contet{
 #define TAGWORD_IS_PARAGRAPH_SPLIT(pch)	(pch[0] == '\n')
 #endif
 
-bool_t INFCALL call_tag_is_paging(void* ctx)
+bool_t call_tag_is_paging(void* ctx)
 {
 	return 0;
 }
 
-bool_t INFCALL call_tag_break_page(void* ctx)
+bool_t call_tag_break_page(void* ctx)
 {
 	return 0;
 }
 
-int INFCALL call_tag_next_page(void* ctx)
+int call_tag_next_page(void* ctx)
 {
 	tag_scan_contet* pscan = (tag_scan_contet*)ctx;
 
@@ -90,7 +90,7 @@ int INFCALL call_tag_next_page(void* ctx)
 }
 
 
-int INFCALL call_tag_next_words(void* ctx, tchar_t** ppch, xsize_t* pse, bool_t* pins, bool_t* pdel, bool_t* psel, bool_t* patom)
+int call_tag_next_words(void* ctx, tchar_t** ppch, xsize_t* pse, bool_t* pins, bool_t* pdel, bool_t* psel, bool_t* patom)
 {
 	tag_scan_contet* pscan = (tag_scan_contet*)ctx;
 	measure_interface* pif = pscan->pmi;
@@ -171,7 +171,7 @@ int INFCALL call_tag_next_words(void* ctx, tchar_t** ppch, xsize_t* pse, bool_t*
 	return n;
 }
 
-int INFCALL call_tag_insert_words(void* ctx, tchar_t* pch, xsize_t* pse)
+int call_tag_insert_words(void* ctx, tchar_t* pch, xsize_t* pse)
 {
 	tag_scan_contet* pscan = (tag_scan_contet*)ctx;
 	measure_interface* pif = pscan->pmi;
@@ -259,7 +259,7 @@ int INFCALL call_tag_insert_words(void* ctx, tchar_t* pch, xsize_t* pse)
 	return n;
 }
 
-int INFCALL call_tag_delete_words(void* ctx)
+int call_tag_delete_words(void* ctx)
 {
 	tag_scan_contet* pscan = (tag_scan_contet*)ctx;
 	int n = 0;
@@ -339,14 +339,14 @@ int INFCALL call_tag_delete_words(void* ctx)
 	return n;
 }
 
-void INFCALL call_tag_cur_object(void* ctx, void** pobj)
+void call_tag_cur_object(void* ctx, void** pobj)
 {
 	tag_scan_contet* pscan = (tag_scan_contet*)ctx;
 
 	*pobj = (void*)pscan->nlk;
 }
 
-void INFCALL call_tag_object_attr(void* ctx, void* pobj, object_attr_t* pret)
+void call_tag_object_attr(void* ctx, void* pobj, object_attr_t* pret)
 {
 	tag_scan_contet* pscan = (tag_scan_contet*)ctx;
 

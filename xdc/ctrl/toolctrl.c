@@ -234,10 +234,15 @@ void hand_tool_size(widget_t widget, int code, const xsize_t* prs)
 		break;
 	case WS_SIZE_MINIMIZED:
 		break;
+	case WS_SIZE_MAXSHOW:
+		break;
+	case WS_SIZE_RESTORE:
+		break;
 	case WS_SIZE_LAYOUT:
-		_toolctrl_reset_page(widget);
 		break;
 	}
+
+	_toolctrl_reset_page(widget);
 }
 
 void hand_tool_mouse_move(widget_t widget, dword_t dw, const xpoint_t* pxp)
@@ -434,23 +439,28 @@ void hand_tool_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	xrect_t xr = { 0 };
 
 	canvas_t canv;
-	const drawing_interface* pif = NULL;
+	drawing_interface ifc = {0};
 	drawing_interface ifv = {0};
 
 	xcolor_t xc_focus;
 
-	canv = widget_get_canvas(widget);
-	pif = widget_get_canvas_interface(widget);
-
 	widget_get_client_rect(widget, &xr);
 
+	canv = widget_get_canvas(widget);
 	rdc = begin_canvas_paint(canv, dc, xr.w, xr.h);
+	
+	get_visual_interface(rdc, &ifv);
+	widget_get_view_rect(widget, (viewbox_t*)&(ifv.rect));
+
+	get_canvas_interface(canv, &ifc);
+	widget_get_canv_rect(widget, (canvbox_t*)&(ifc.rect));
+	ifc.pclrs = widget_get_color_mode_ptr(widget);
 	
 	widget_hand_paint(widget, rdc, GDI_ATTR_GRADIENT_VERT);
 
 	if(ptd->tool)
 	{
-		draw_tool(pif, ptd->tool);
+		draw_tool(&ifc, ptd->tool);
 		//draw focus
 		if (ptd->hover && ptd->b_press)
 		{
@@ -587,7 +597,6 @@ void toolctrl_redraw(widget_t widget)
 	ptd->hover = NULL;
 
 	_toolctrl_reset_page(widget);
-
 	widget_erase(widget, NULL);
 }
 

@@ -293,6 +293,10 @@ EXP_API bool_t w_is_prefix(const wchar_t* str, const wchar_t* sub);
 EXP_API bool_t a_is_suffix(const schar_t* str, const schar_t* sub);
 EXP_API bool_t w_is_suffix(const wchar_t* str, const wchar_t* sub);
 
+#if defined (DEBUG) || defined (_DEBUG)
+EXP_API void test_hexnum(void);
+#endif
+
 #ifdef	__cplusplus
 }
 #endif

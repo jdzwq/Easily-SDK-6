@@ -24,12 +24,12 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
 LICENSE.GPL3 for more details.
 ***********************************************************************/
 
-#include "xdkbio.h"
+#include "bioimp.h"
 
-#include "xdkimp.h"
-#include "xdknet.h"
+#include "../xdkimp.h"
+#include "../xdknet.h"
 
-bool_t xdk_bio_interface(xhand_t io, bio_interface* pio)
+bool_t get_bio_interface(xhand_t io, bio_interface* pio)
 {
 	pio->fd = io;
 	

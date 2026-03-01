@@ -93,6 +93,10 @@ EXP_API void insert_numeric(double** sa, int index, const double* pa, int count)
 EXP_API void delete_numeric(double** sa, int index, int count);
 
 
+#if defined (DEBUG) || defined (_DEBUG)
+EXP_API void test_numeric_array(void);
+#endif
+
 #ifdef	__cplusplus
 }
 #endif

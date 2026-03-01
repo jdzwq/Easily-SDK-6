@@ -11,8 +11,8 @@ CFLAGS = -g -Wall -fPIC -D _DEBUG
 
 MODULE = xdk
 ARCH = aarch64
-CUR_VER = 25
-MAX_VER = 11
+CUR_VER = 26
+MAX_VER = 2
 MIN_VER = 0
 
 LIB_PATH = /usr/local/lib
@@ -41,6 +41,7 @@ DIRS = $(wildcard \
 		$(SRC_PATH)/mob/*.c \
 		$(SRC_PATH)/vob/*.c \
 		$(SRC_PATH)/net/*.c \
+		$(SRC_PATH)/iop/*.c \
 		$(SRC_PATH)/stm/*.c \
 		$(SRC_PATH)/expr/*.c \
 		$(SRC_PATH)/math/*.c \
@@ -89,6 +90,9 @@ $(OBJ_PATH)/%.o : $(SRC_PATH)/vob/%.c
 $(OBJ_PATH)/%.o : $(SRC_PATH)/net/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
 
+$(OBJ_PATH)/%.o : $(SRC_PATH)/iop/%.c
+	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
+
 $(OBJ_PATH)/%.o : $(SRC_PATH)/stm/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
 
@@ -132,8 +136,7 @@ install:
 
 uninstall:
 	sudo rm -r $(LIB_PATH)/$(LINKIT);
-	
-	rm -f $(OUT_PATH)/$(TARGET)
+	sudo rm -f $(OUT_PATH)/$(TARGET)
 	
 .PHONY : clean
 clean:

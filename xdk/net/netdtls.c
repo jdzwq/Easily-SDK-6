@@ -30,7 +30,7 @@ LICENSE.GPL3 for more details.
 #include "../xdkimp.h"
 #include "../xdkstd.h"
 #include "../xdkobj.h"
-#include "../xdkbio.h"
+#include "../xdkiop.h"
 
 #if defined(XDK_SUPPORT_SOCK)
 
@@ -402,7 +402,7 @@ xhand_t xdtls_cli(unsigned short port, const tchar_t* addr)
 
 	pdtls->pif = (bio_interface*)xmem_alloc(sizeof(bio_interface));
 
-	xdk_bio_interface(udp, pdtls->pif);
+	get_bio_interface(udp, pdtls->pif);
 
 	return &pdtls->head;
 }
@@ -425,7 +425,7 @@ xhand_t xdtls_srv(unsigned short port, const tchar_t* addr, const byte_t* pack, 
 
 	pdtls->pif = (bio_interface*)xmem_alloc(sizeof(bio_interface));
 
-	xdk_bio_interface(udp, pdtls->pif);
+	get_bio_interface(udp, pdtls->pif);
 
 	return &pdtls->head;
 }

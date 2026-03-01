@@ -3451,3 +3451,38 @@ bool_t w_is_suffix(const wchar_t* str, const wchar_t* sub)
 
 	return (*sub) ? 0 : 1;
 }
+
+/**********************************************************************/
+#if defined (DEBUG) || defined (_DEBUG)
+void test_hexnum()
+{
+	const tchar_t* TK_GBKBOM = _T("0xFF");
+	const tchar_t* TK_BIGBOM = _T("0xFFFE");
+	const tchar_t* TK_LITBOM = _T("0xFEFF");
+	const tchar_t* TK_UTFBOM = _T("0xBFBBEF");	
+
+	sword_t sw_gbkbom;
+	dword_t dw_bigbom,dw_litbom;
+	lword_t lw_utfbom;
+
+	sw_gbkbom = hextol(TK_GBKBOM);
+	XDK_ASSERT(sw_gbkbom == GBKBOM);
+	_tprintf(_T("gbkbom: %s %X\n"), TK_GBKBOM, sw_gbkbom);
+
+	dw_bigbom = hextol(TK_BIGBOM);
+	XDK_ASSERT(dw_bigbom == BIGBOM);
+	_tprintf(_T("bigbom: %s %X\n"), TK_BIGBOM, dw_bigbom);
+
+	dw_bigbom = hextol(TK_BIGBOM);
+	XDK_ASSERT(dw_bigbom == BIGBOM);
+	_tprintf(_T("bigbom: %s %X\n"), TK_BIGBOM, dw_bigbom);
+
+	dw_litbom = hextol(TK_LITBOM);
+	XDK_ASSERT(dw_litbom == LITBOM);
+	_tprintf(_T("litbom: %s %X\n"), TK_LITBOM, dw_litbom);
+
+	lw_utfbom = hextoll(TK_UTFBOM);
+	XDK_ASSERT(lw_utfbom == UTFBOM);
+	_tprintf(_T("utfbom: %s %llX\n"), TK_UTFBOM, lw_utfbom);
+}
+#endif

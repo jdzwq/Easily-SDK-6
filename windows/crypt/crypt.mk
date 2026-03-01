@@ -17,8 +17,8 @@ INC_PATH = ../../include
 SRC_PATH = ../../third-party
 LIB_PATH = ../lib/$(ARCH)
 
-OBJ_PATH = D:\Easily-temp\windows\$(MODULE)\$(ARCH)\Debug
-PDB_PATH = D:\Easily-temp\windows\$(ARCH)
+OBJ_PATH = E:\Easily-temp\windows\$(MODULE)\$(ARCH)\Debug
+PDB_PATH = E:\Easily-temp\windows\$(ARCH)
 
 TARGET = $(LIB_PATH)/$(MODULE).lib
 

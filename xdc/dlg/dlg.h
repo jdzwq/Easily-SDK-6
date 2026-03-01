@@ -192,9 +192,9 @@ EXP_API void previewdlg_redraw(widget_t widget);
 */
 EXP_API widget_t create_dialog(link_t_ptr ptr_dlg, widget_t owner);
 
-EXP_API int sub_dialog_on_paint(widget_t widget, visual_t rdc, const xrect_t* prt, uid_t sid, vword_t delta);
+EXP_API int dialog_sub_paint(widget_t widget, visual_t rdc, const xrect_t* prt, uid_t sid, vword_t delta);
 
-EXP_API int sub_dialog_on_size(widget_t widget, int code, const xsize_t* pxs, uid_t sid, vword_t delta);
+EXP_API int dialog_sub_size(widget_t widget, int code, const xsize_t* pxs, uid_t sid, vword_t delta);
 
 #ifdef	__cplusplus
 }

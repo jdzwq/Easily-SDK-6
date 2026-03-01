@@ -30,7 +30,7 @@ LICENSE.GPL3 for more details.
 #include "../xdkimp.h"
 #include "../xdkstd.h"
 #include "../xdkobj.h"
-#include "../xdkbio.h"
+#include "../xdkiop.h"
 
 #if defined(XDK_SUPPORT_SOCK)
 
@@ -854,7 +854,7 @@ xhand_t xtftp_client(const tchar_t* method, const tchar_t* url)
 	}
 
 	pftp->pif = (bio_interface*)xmem_alloc(sizeof(bio_interface));
-	xdk_bio_interface(bio, pftp->pif);
+	get_bio_interface(bio, pftp->pif);
 	bio = NULL;
 
 	pftp->snd_seq = alloc_sequence(TFTP_WIN_SIZE);
@@ -912,7 +912,7 @@ xhand_t	xtftp_server(xhand_t bio)
 	pftp->secu = (bio->tag == _HANDLE_DTLS) ? _SECU_DTLS : _SECU_NONE;
 
 	pftp->pif = (bio_interface*)xmem_alloc(sizeof(bio_interface));
-	xdk_bio_interface(bio, pftp->pif);
+	get_bio_interface(bio, pftp->pif);
 
 	if (pftp->secu == _SECU_DTLS)
 	{

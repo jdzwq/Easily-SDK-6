@@ -78,6 +78,10 @@ if zero, the timer is signed once. the timer is periodic by the period value.
 */
 EXP_API bool_t alter_timer(res_queue_t rq, res_timer_t rt, dword_t duetime, dword_t period);
 
+#if defined (DEBUG) || defined (_DEBUG)
+EXP_API void timer_self_test(void);
+#endif
+
 #ifdef	__cplusplus
 }
 #endif

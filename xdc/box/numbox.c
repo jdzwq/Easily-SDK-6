@@ -182,6 +182,10 @@ void hand_numbox_size(widget_t widget, int code, const xsize_t* prs)
 		break;
 	case WS_SIZE_MINIMIZED:
 		break;
+	case WS_SIZE_MAXSHOW:
+		break;
+	case WS_SIZE_RESTORE:
+		break;
 	case WS_SIZE_LAYOUT:
 		break;
 	}
@@ -211,11 +215,10 @@ void hand_numbox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	format_xcolor(&clrs.clr_bkg, xb_bark.color);
 	lighten_xbrush(&xb_bark, DEF_MIDD_DARKEN);
 
-	format_xcolor(&clrs.clr_txt, xa.text_color);
-
 	default_xface(&xa);
 	xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_CENTER);
 	xscpy(xa.line_align, GDI_ATTR_TEXT_ALIGN_CENTER);
+	format_xcolor(&clrs.clr_txt, xa.text_color);
 
 	widget_get_client_rect(widget, &xr);
 	

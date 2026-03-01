@@ -92,6 +92,9 @@ EXP_API void insert_integer(int** sa, int index, const int* pa, int count);
 */
 EXP_API void delete_integer(int** sa, int index, int count);
 
+#if defined (DEBUG) || defined (_DEBUG)
+EXP_API void test_integer_array(void);
+#endif
 
 #ifdef	__cplusplus
 }

@@ -259,7 +259,7 @@ xhand_t xuncf_open_file(const secu_desc_t* psd, const tchar_t* fname, dword_t fm
 	return &pcf->head;
 }
 
-bool_t xuncf_file_size(xhand_t unc, dword_t* ph, dword_t* pl)
+bool_t xuncf_file_size(xhand_t unc, vword_t* fs)
 {
 	uncf_context* pcf = TypePtrFromHead(uncf_context, unc);
 	if_file_t* pif;
@@ -270,7 +270,7 @@ bool_t xuncf_file_size(xhand_t unc, dword_t* ph, dword_t* pl)
 
 	XDK_ASSERT(pif != NULL);
 
-	return (*pif->pf_file_size)(pcf->file, ph, pl);
+	return (*pif->pf_file_size)(pcf->file, fs);
 }
 
 void xuncf_close_file(xhand_t unc)
@@ -375,7 +375,7 @@ bool_t xuncf_flush_file(xhand_t unc)
 	return (*pif->pf_file_flush)(pcf->file);
 }
 
-bool_t xuncf_read_file_range(xhand_t unc, dword_t hoff, dword_t loff, byte_t* buf, dword_t dw)
+bool_t xuncf_read_file_range(xhand_t unc, vword_t off, byte_t* buf, dword_t dw)
 {
 	uncf_context* pcf = TypePtrFromHead(uncf_context, unc);
 	if_file_t* pif;
@@ -386,7 +386,7 @@ bool_t xuncf_read_file_range(xhand_t unc, dword_t hoff, dword_t loff, byte_t* bu
 
 	XDK_ASSERT(pif != NULL);
 
-	if (!(*pif->pf_file_read_range)(pcf->file, hoff, loff, (void*)(buf), dw))
+	if (!(*pif->pf_file_read_range)(pcf->file, off, (void*)(buf), dw))
 	{
 		set_system_error(_T("xuncf_read_file_range"));
 		return 0;
@@ -395,7 +395,7 @@ bool_t xuncf_read_file_range(xhand_t unc, dword_t hoff, dword_t loff, byte_t* bu
 	return 1;
 }
 
-bool_t xuncf_write_file_range(xhand_t unc, dword_t hoff, dword_t loff, const byte_t* buf, dword_t dw)
+bool_t xuncf_write_file_range(xhand_t unc, vword_t off, const byte_t* buf, dword_t dw)
 {
 	uncf_context* pcf = TypePtrFromHead(uncf_context, unc);
 	if_file_t* pif;
@@ -404,7 +404,7 @@ bool_t xuncf_write_file_range(xhand_t unc, dword_t hoff, dword_t loff, const byt
 
 	XDK_ASSERT(pif != NULL);
 	
-	if (!(*pif->pf_file_write_range)(pcf->file,  hoff, loff, (void*)(buf), dw))
+	if (!(*pif->pf_file_write_range)(pcf->file,  off, (void*)(buf), dw))
 	{
 		set_system_error(_T("xuncf_write_file_range"));
 		return 0;
@@ -413,7 +413,7 @@ bool_t xuncf_write_file_range(xhand_t unc, dword_t hoff, dword_t loff, const byt
 	return 1;
 }
 
-void* xuncf_lock_file_range(xhand_t unc, dword_t hoff, dword_t loff, dword_t dw, bool_t write, res_file_t* pmh)
+void* xuncf_lock_file_range(xhand_t unc, vword_t off, dword_t dw, bool_t write, res_file_t* pmh)
 {
 	uncf_context* pcf = TypePtrFromHead(uncf_context, unc);
 	if_file_t* pif;
@@ -423,7 +423,7 @@ void* xuncf_lock_file_range(xhand_t unc, dword_t hoff, dword_t loff, dword_t dw,
 
 	XDK_ASSERT(pif != NULL);
 
-	p = (*pif->pf_file_lock_range)(pcf->file, hoff, loff, dw, write, pmh);
+	p = (*pif->pf_file_lock_range)(pcf->file, off, dw, write, pmh);
 	if (!p)
 	{
 		set_system_error(_T("xuncf_lock_file_range"));
@@ -433,7 +433,7 @@ void* xuncf_lock_file_range(xhand_t unc, dword_t hoff, dword_t loff, dword_t dw,
 	return p;
 }
 
-void xuncf_unlock_file_range(xhand_t unc, dword_t hoff, dword_t loff, dword_t dw, res_file_t mh, void* p)
+void xuncf_unlock_file_range(xhand_t unc, vword_t off, dword_t dw, res_file_t mh, void* p)
 {
 	uncf_context* pcf = TypePtrFromHead(uncf_context, unc);
 	if_file_t* pif;
@@ -442,10 +442,10 @@ void xuncf_unlock_file_range(xhand_t unc, dword_t hoff, dword_t loff, dword_t dw
 
 	XDK_ASSERT(pif != NULL);
 
-	(*pif->pf_file_unlock_range)(mh, hoff, loff, dw, p);
+	(*pif->pf_file_unlock_range)(mh, off, dw, p);
 }
 
-bool_t xuncf_truncate(xhand_t unc, dword_t hoff, dword_t loff)
+bool_t xuncf_truncate(xhand_t unc, vword_t off)
 {
 	uncf_context* pcf = TypePtrFromHead(uncf_context, unc);
 
@@ -457,13 +457,142 @@ bool_t xuncf_truncate(xhand_t unc, dword_t hoff, dword_t loff)
 
 	XDK_ASSERT(pif != NULL);
 
-	if (!(*pif->pf_file_truncate)(pcf->file, hoff, loff))
+	if (!(*pif->pf_file_truncate)(pcf->file, off))
 	{
-		set_system_error(_T("uncf_contextruncate"));
+		set_system_error(_T("xuncf_truncate"));
 		return 0;
 	}
 
 	return 1;
+}
+
+vlong_t xuncf_seek_begin(xhand_t unc)
+{
+	uncf_context* pcf = TypePtrFromHead(uncf_context, unc);
+
+	if_file_t* pif;
+	vlong_t pos;
+
+	XDK_ASSERT(unc && unc->tag == _HANDLE_UNCF);
+
+	pif = PROCESS_FILE_INTERFACE;
+
+	XDK_ASSERT(pif != NULL);
+
+	if ((pos = (*pif->pf_file_seek_begin)(pcf->file)) < 0)
+	{
+		set_system_error(_T("xuncf_seek_begin"));
+	}
+
+	return pos;
+}
+
+vlong_t xuncf_seek_end(xhand_t unc)
+{
+	uncf_context* pcf = TypePtrFromHead(uncf_context, unc);
+
+	if_file_t* pif;
+	vlong_t pos;
+
+	XDK_ASSERT(unc && unc->tag == _HANDLE_UNCF);
+
+	pif = PROCESS_FILE_INTERFACE;
+
+	XDK_ASSERT(pif != NULL);
+
+	if ((pos = (*pif->pf_file_seek_end)(pcf->file)) < 0)
+	{
+		set_system_error(_T("xuncf_seek_end"));
+	}
+
+	return pos;
+}
+
+vlong_t xuncf_seek_bytes(xhand_t unc, vlong_t bytes)
+{
+	uncf_context* pcf = TypePtrFromHead(uncf_context, unc);
+
+	if_file_t* pif;
+	vlong_t pos;
+
+	XDK_ASSERT(unc && unc->tag == _HANDLE_UNCF);
+
+	pif = PROCESS_FILE_INTERFACE;
+
+	XDK_ASSERT(pif != NULL);
+
+	if ((pos = (*pif->pf_file_seek_bytes)(pcf->file, bytes)) < 0)
+	{
+		set_system_error(_T("xuncf_seek_bytes"));
+	}
+
+	return pos;
+}
+
+vlong_t xuncf_seek_lines(xhand_t unc, vlong_t lines)
+{
+	uncf_context* pcf = TypePtrFromHead(uncf_context, unc);
+
+	if_file_t* pif;
+	vlong_t pos;
+
+	XDK_ASSERT(unc && unc->tag == _HANDLE_UNCF);
+
+	pif = PROCESS_FILE_INTERFACE;
+
+	XDK_ASSERT(pif != NULL);
+
+	if ((pos = (*pif->pf_file_seek_lines)(pcf->file, lines)) < 0)
+	{
+		set_system_error(_T("xuncf_seek_lines"));
+	}
+
+	return pos;
+}
+
+dword_t xuncf_peek_line(xhand_t unc, byte_t* buf, dword_t max)
+{
+	uncf_context* pcf = TypePtrFromHead(uncf_context, unc);
+
+	if_file_t* pif;
+
+	XDK_ASSERT(unc && unc->tag == _HANDLE_UNCF);
+
+	pif = PROCESS_FILE_INTERFACE;
+
+	XDK_ASSERT(pif != NULL);
+
+	return (*pif->pf_file_peek_line)(pcf->file, buf, max);
+}
+
+dword_t xuncf_read_line(xhand_t unc, byte_t* buf, dword_t max)
+{
+	uncf_context* pcf = TypePtrFromHead(uncf_context, unc);
+
+	if_file_t* pif;
+
+	XDK_ASSERT(unc && unc->tag == _HANDLE_UNCF);
+
+	pif = PROCESS_FILE_INTERFACE;
+
+	XDK_ASSERT(pif != NULL);
+
+	return (*pif->pf_file_read_line)(pcf->file, buf, max);
+}
+
+dword_t xuncf_write_line(xhand_t unc, const byte_t* buf, dword_t len)
+{
+	uncf_context* pcf = TypePtrFromHead(uncf_context, unc);
+
+	if_file_t* pif;
+
+	XDK_ASSERT(unc && unc->tag == _HANDLE_UNCF);
+
+	pif = PROCESS_FILE_INTERFACE;
+
+	XDK_ASSERT(pif != NULL);
+
+	return (*pif->pf_file_write_line)(pcf->file, buf, len);
 }
 
 bool_t xuncf_set_filetime(xhand_t unc, const tchar_t* ftime)
@@ -596,7 +725,7 @@ bool_t xuncf_remove_directory(const secu_desc_t* psd, const tchar_t* pname)
 	return 1;
 }
 
-bool_t xuncf_list_file(const secu_desc_t* psd, const tchar_t* path, CALLBACK_LISTFILE pf, void* pa)
+bool_t xuncf_list_file(const secu_desc_t* psd, const tchar_t* path, PF_LIST_FILES pf, void* pa)
 {
 	res_find_t fd;
 	file_info_t fi = { 0 };
@@ -650,5 +779,64 @@ bool_t xuncf_getopt(xhand_t inet, int oid, void* opt, int len)
 
 	return 0;
 }
+
+/**********************************************************************/
+#if defined (DEBUG) || defined (_DEBUG)
+void xuncf_self_test()
+{
+	xhand_t xh = NULL;
+	schar_t ibuf[1024] = { 0 };
+	schar_t obuf[1024] = { 0 };
+	dword_t dw = 0;
+	int i, len = 0;
+	vlong_t pos;
+
+	TRY_CATCH;
+
+	xh = xuncf_open_file(NULL, _T("lines.txt"), FILE_OPEN_CREATE);
+	if(xh == NULL)
+	{
+		raise_user_error(_T("xuncf_self_test"), _T("xuncf_open_file failed"));
+	}
+
+	for(i=0; i<10; i++)
+	{
+		len = a_xsprintf(ibuf, "line%d", i);
+		xuncf_write_line(xh, (byte_t*)ibuf, len);
+
+		printf("write: %s\n", ibuf);
+	}
+
+	pos = xuncf_seek_lines(xh, -10);
+
+	for(i=0; i<10; i++)
+	{
+		len = xuncf_peek_line(xh, (byte_t*)obuf, 1024);
+		xuncf_seek_lines(xh, 1);
+
+		printf("read: %s\n", obuf);
+	}
+
+	for(i=0; i<10; i++)
+	{
+		pos = xuncf_seek_lines(xh, -1);
+		len = xuncf_read_line(xh, (byte_t*)obuf, 1024);
+		pos = xuncf_seek_lines(xh, -1);
+
+		printf("read: %s\n", obuf);
+	}
+	
+	xuncf_close_file(xh);
+	xh = NULL;
+
+	END_CATCH;
+
+	return;
+
+ONERROR:
+	if(xh) xuncf_close_file(xh);
+	XDK_TRACE_LAST;
+}
+#endif
 
 #endif //XDK_SUPPORT_FILE

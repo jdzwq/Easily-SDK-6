@@ -33,8 +33,6 @@ LICENSE.GPL3 for more details.
 extern "C" {
 #endif
 
-EXP_API const drawing_interface* widget_get_canvas_interface(widget_t wt);
-
 /*
 @FUNCTION widget_get_canvas: get the canvas from widget.
 @INPUT widget_t wt: the widget resource handle.

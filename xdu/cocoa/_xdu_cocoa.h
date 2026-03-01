@@ -80,7 +80,6 @@ typedef struct _cocoa_fontset_t{
 	handle_head head;
 
     id font_object;
-	xcolor_t font_color;
 }cocoa_fontset_t;
 
 #endif /*XDU_SUPPORT_CONTEXT*/

@@ -17,8 +17,8 @@ INC_PATH = ../../include
 SRC_PATH = ../../xdu
 LIB_PATH = ../lib/$(ARCH)
 
-OBJ_PATH = D:\Easily-temp\windows\$(MODULE)\$(ARCH)\Debug
-PDB_PATH = D:\Easily-temp\windows\$(ARCH)
+OBJ_PATH = E:\Easily-temp\windows\$(MODULE)\$(ARCH)\Debug
+PDB_PATH = E:\Easily-temp\windows\$(ARCH)
 OUT_PATH = Z:\Easily-app-6\windows\lib
 
 TARGET = $(OBJ_PATH)/$(MODULE).dll
@@ -52,6 +52,9 @@ ASMS = $(patsubsti %.obj,%.asm,$(OBJS))
 {$(SRC_PATH)/imp}.c{$(OBJ_PATH)}.obj::
 	$(CC) $(CFLAGS) /I $(INC_PATH) $<
 
+{$(SRC_PATH)/inf}.c{$(OBJ_PATH)}.obj::
+	$(CC) $(CFLAGS) /I $(INC_PATH) $<
+
 {$(SRC_PATH)}.c{$(OBJ_PATH)}.obj::
 	$(CC) $(CFLAGS) /I $(INC_PATH) $<
 
@@ -67,6 +70,7 @@ test:
  	echo SOURCES= \>$(MODULE).txt
  	for %i in ($(SRC_PATH)/win32/*.cc) do @echo $(OBJ_PATH)/%i \>>$(MODULE).txt
 	for %i in ($(SRC_PATH)/imp/*.c) do @echo $(OBJ_PATH)/%i \>>$(MODULE).txt
+	for %i in ($(SRC_PATH)/inf/*.c) do @echo $(OBJ_PATH)/%i \>>$(MODULE).txt
 	for %i in ($(SRC_PATH)/*.c) do @echo $(OBJ_PATH)/%i \>>$(MODULE).txt
 
 	@echo $(SOURCES)

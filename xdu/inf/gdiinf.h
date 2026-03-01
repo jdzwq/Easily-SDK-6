@@ -35,23 +35,13 @@ LICENSE.GPL3 for more details.
 extern "C" {
 #endif
 
-/*
-@FUNCTION create_canvas_interface: create canvas interface.
-@INPUT canvas_t canv: the canvas object.
-@RETURN if_canvas_t*: if succeeds return canvas interface struct, fails return NULL.
-*/
 EXP_API void get_canvas_interface(canvas_t canv, drawing_interface* pif);
 
-/*
-@FUNCTION create_visual_interface: create view interface.
-@INPUT visual_t ctx: the context object.
-@RETURN if_viewING_t*: if succeeds return view interface struct, fails return NULL.
-*/
-EXP_API void 	get_visual_interface(visual_t visu, drawing_interface* piv);
+EXP_API void get_visual_interface(visual_t visu, drawing_interface* piv);
 
-EXP_API void	get_visual_measure(visual_t view, measure_interface* pim);
+EXP_API void get_visual_measure(visual_t view, measure_interface* pim);
 
-EXP_API void	get_canvas_measure(canvas_t canv, measure_interface* pim);
+EXP_API void get_canvas_measure(canvas_t canv, measure_interface* pim);
 
 #ifdef	__cplusplus
 }

@@ -30,8 +30,7 @@ LICENSE.GPL3 for more details.
 #include "../xdkimp.h"
 #include "../xdkstd.h"
 #include "../xdkobj.h"
-#include "../xdkbio.h"
-#include "../xdkstm.h"
+#include "../xdkiop.h"
 
 #if defined(XDK_SUPPORT_SOCK)
 
@@ -537,30 +536,26 @@ static bool_t http_write_file(xhand_t inet, const byte_t* buf, dword_t* pb)
 	return _http_write_file(pfn, buf, pb, NULL);
 }
 
-static bool_t http_read_file_range(xhand_t inet, dword_t hoff, dword_t loff, byte_t* buf, dword_t size)
+static bool_t http_read_file_range(xhand_t inet, vword_t off, byte_t* buf, dword_t size)
 {
 	netf_context* pfn = TypePtrFromHead(netf_context, inet);
 
 	tchar_t sz_range[RES_LEN + 1] = { 0 };
 	tchar_t sz_from[NUM_LEN + 1] = { 0 };
 	tchar_t sz_to[NUM_LEN + 1] = { 0 };
-	long long ll = 0;
+	vword_t ll = 0;
 	dword_t dw = size;
 
-	format_long(hoff, loff, sz_from);
-
-	ll = MAKELWORD(loff, hoff) + size - 1;
-	hoff = GETHDWORD(ll);
-	loff = GETLDWORD(ll);
-
-	format_long(hoff, loff, sz_to);
+	lltoxs(off, sz_from, NUM_LEN);
+	ll = off + size - 1;
+	lltoxs(ll, sz_to, NUM_LEN);
 
 	xsprintf(sz_range, _T("bytes=%s-%s"), sz_from, sz_to);
 
 	return _http_read_file(pfn, buf, &dw, sz_range);
 }
 
-static bool_t http_write_file_range(xhand_t inet, dword_t hoff, dword_t loff, const byte_t* buf, dword_t size)
+static bool_t http_write_file_range(xhand_t inet, vword_t off, const byte_t* buf, dword_t size)
 {
 	netf_context* pfn = TypePtrFromHead(netf_context, inet);
 
@@ -568,7 +563,7 @@ static bool_t http_write_file_range(xhand_t inet, dword_t hoff, dword_t loff, co
 	tchar_t sz_from[NUM_LEN + 1] = { 0 };
 	tchar_t sz_to[NUM_LEN + 1] = { 0 };
 	tchar_t sz_total[NUM_LEN + 1] = { 0 };
-	long long ll = 0;
+	vword_t ll = 0;
 	dword_t dw = size;
 
 	if (!size)
@@ -577,18 +572,11 @@ static bool_t http_write_file_range(xhand_t inet, dword_t hoff, dword_t loff, co
 	}
 	else
 	{
-		format_long(hoff, loff, sz_from);
-
-		ll = MAKELWORD(loff, hoff) + size - 1;
-		hoff = GETHDWORD(ll);
-		loff = GETLDWORD(ll);
-		format_long(hoff, loff, sz_to);
-
+		lltoxs(off, sz_from, NUM_LEN);
+		ll = off + size - 1;
+		lltoxs(ll, sz_to, NUM_LEN);
 		ll += 1;
-		hoff = GETHDWORD(ll);
-		loff = GETLDWORD(ll);
-
-		format_long(hoff, loff, sz_total);
+		lltoxs(ll, sz_total, NUM_LEN);
 
 		xsprintf(sz_range, _T("%s-%s/%s"), sz_from, sz_to, sz_total);
 
@@ -648,7 +636,7 @@ static bool_t http_delete_file(const secu_desc_t* psd, const tchar_t* fname)
 	return 1;
 }
 
-static bool_t http_list_file(const secu_desc_t* psd, const tchar_t* path, CALLBACK_LISTFILE pf, void* pa)
+static bool_t http_list_file(const secu_desc_t* psd, const tchar_t* path, PF_LIST_FILES pf, void* pa)
 {
 	tchar_t code[NUM_LEN + 1] = { 0 };
 	tchar_t text[ERR_LEN + 1] = { 0 };
@@ -905,7 +893,7 @@ static void tftp_close_file(xhand_t inet)
 	xmem_free(pfn);
 }
 
-static bool_t tftp_list_file(const secu_desc_t* psd, const tchar_t* path, CALLBACK_LISTFILE pf, void* pa)
+static bool_t tftp_list_file(const secu_desc_t* psd, const tchar_t* path, PF_LIST_FILES pf, void* pa)
 {
 	return 0;
 }
@@ -1015,26 +1003,26 @@ bool_t xnetf_write_file(xhand_t inet, const byte_t* buf, dword_t* pb)
 		return 0;
 }
 
-bool_t xnetf_read_file_range(xhand_t inet, dword_t hoff, dword_t loff, byte_t* buf, dword_t size)
+bool_t xnetf_read_file_range(xhand_t inet, vword_t off, byte_t* buf, dword_t size)
 {
 	netf_context* pfn = TypePtrFromHead(netf_context, inet);
 
 	XDK_ASSERT(pfn && pfn->head.tag == _HANDLE_INET);
 
 	if (pfn->proto == _PROTO_HTTP)
-		return http_read_file_range(inet, hoff, loff, buf, size);
+		return http_read_file_range(inet, off, buf, size);
 	else
 		return 0;
 }
 
-bool_t xnetf_write_file_range(xhand_t inet, dword_t hoff, dword_t loff, const byte_t* buf, dword_t size)
+bool_t xnetf_write_file_range(xhand_t inet, vword_t off, const byte_t* buf, dword_t size)
 {
 	netf_context* pfn = TypePtrFromHead(netf_context, inet);
 
 	XDK_ASSERT(pfn && pfn->head.tag == _HANDLE_INET);
 
 	if (pfn->proto == _PROTO_HTTP)
-		return http_write_file_range(inet, hoff, loff, buf, size);
+		return http_write_file_range(inet, off, buf, size);
 	else
 		return 0;
 }
@@ -1093,7 +1081,7 @@ bool_t xnetf_delete_file(const secu_desc_t* psd, const tchar_t* fname)
 		return 0;
 }
 
-bool_t xnetf_list_file(const secu_desc_t* psd, const tchar_t* path, CALLBACK_LISTFILE pf, void* pa)
+bool_t xnetf_list_file(const secu_desc_t* psd, const tchar_t* path, PF_LIST_FILES pf, void* pa)
 {
 	byte_t proto;
 

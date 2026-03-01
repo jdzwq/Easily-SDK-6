@@ -32,7 +32,8 @@ LIBS = -lm -ldl -lutil -lrt -lX11 -lXft -lXrender -L $(LIB_PATH) -lxdk -lxdg
 DIRS = $(wildcard \
 	$(SRC_PATH)/*.c \
 	$(SRC_PATH)/X11/*.c \
-	$(SRC_PATH)/imp/*.c)
+	$(SRC_PATH)/imp/*.c \
+	$(SRC_PATH)/inf/*.c )
 SRCS = $(notdir $(DIRS))
 COBS = $(patsubst %.c, %.o, $(SRCS))
 OBJS = $(addprefix $(OBJ_PATH)/,$(COBS))
@@ -41,6 +42,9 @@ $(OBJ_PATH)/%.o : $(SRC_PATH)/X11/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(SYS_PATH) -I $(XFT_PATH) -I $(INC_PATH) -I $(SRC_PATH)
 
 $(OBJ_PATH)/%.o : $(SRC_PATH)/imp/%.c
+	$(CC) $(CFLAGS) -c $< -o $@ -I $(SYS_PATH) -I $(XFT_PATH) -I $(INC_PATH) -I $(SRC_PATH)
+
+$(OBJ_PATH)/%.o : $(SRC_PATH)/inf/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(SYS_PATH) -I $(XFT_PATH) -I $(INC_PATH) -I $(SRC_PATH)
 
 $(OBJ_PATH)/%.o : $(SRC_PATH)/%.c

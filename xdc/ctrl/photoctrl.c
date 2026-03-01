@@ -1041,10 +1041,15 @@ void hand_photo_size(widget_t widget, int code, const xsize_t* prs)
 		break;
 	case WS_SIZE_MINIMIZED:
 		break;
+	case WS_SIZE_MAXSHOW:
+		break;
+	case WS_SIZE_RESTORE:
+		break;
 	case WS_SIZE_LAYOUT:
-		_photoctrl_reset_page(widget);
 		break;
 	}
+
+	_photoctrl_reset_page(widget);
 }
 
 void hand_photo_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
@@ -1054,24 +1059,27 @@ void hand_photo_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	xrect_t xr;
 
 	canvas_t canv;
-	const drawing_interface* pif = NULL;
+	drawing_interface ifc = {0};
 	drawing_interface ifv = {0};
 
-	color_mod_t clrs;
+	const color_mod_t *pclrs;
 	xbrush_t xb;
 	xcolor_t xc;
 
-	widget_get_color_mode(widget, &clrs);
-	format_xcolor(&clrs.clr_bkg, xb.color);
+	pclrs = widget_get_color_mode_ptr(widget);
+	format_xcolor(&(pclrs->clr_bkg), xb.color);
 
 	widget_get_client_rect(widget, &xr);
 
 	canv = widget_get_canvas(widget);
-	pif = widget_get_canvas_interface(widget);
-	
 	rdc = begin_canvas_paint(canv, dc, xr.w, xr.h);
 	
 	get_visual_interface(rdc, &ifv);
+	widget_get_view_rect(widget, (viewbox_t*)&(ifv.rect));
+
+	get_canvas_interface(canv, &ifc);
+	widget_get_canv_rect(widget, (canvbox_t*)&(ifc.rect));
+	ifc.pclrs = pclrs;
 	
 	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
 
@@ -1084,7 +1092,7 @@ void hand_photo_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 
 	noti_photo_owner(widget, NC_PHOTOFACEDRAW, NULL, (void*)&xr, rdc);
 
-	draw_anno(pif, ptd->anno);
+	draw_anno(&ifc, ptd->anno);
 
 	if (ptd->arti)
 	{
@@ -1196,7 +1204,6 @@ void photoctrl_set_bitmap(widget_t widget, const byte_t* data, dword_t size)
 	widget_release_context(widget, rdc);
 
 	_photoctrl_reset_page(widget);
-
 	widget_erase(widget, NULL);
 }
 

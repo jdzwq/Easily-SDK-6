@@ -292,7 +292,7 @@ void draw_images(const drawing_interface* pif, link_t_ptr ptr)
 
 	if (!b_print)
 	{
-		format_xcolor(&pif->clrs->clr_txt, xa.text_color);
+		format_xcolor(&pif->pclrs->clr_txt, xa.text_color);
 		(*pif->pf_set_xfont)(pif->ctx, &xf);
 	}
 
@@ -311,7 +311,7 @@ void draw_images(const drawing_interface* pif, link_t_ptr ptr)
 
 	if (!b_print)
 	{
-		format_xcolor(&pif->clrs->clr_msk, xi.color);
+		format_xcolor(&pif->pclrs->clr_msk, xi.color);
 	}
 
 	xr.fx = px;

@@ -168,15 +168,15 @@ void draw_datebox(const drawing_interface* pif, const xdate_t* pdt)
 	mx = (xs.fw > DEF_TOUCH_SPAN) ? xs.fw : DEF_TOUCH_SPAN;
 	my = (xs.fh > DEF_TOUCH_SPAN) ? xs.fh : DEF_TOUCH_SPAN;
 
-	b_print = (pif->tag == _CANVAS_PRINTER) ? 1 : 0;
-	if (!b_print)
-	{
-		format_xcolor(&pif->clrs->clr_txt, xa.text_color);
-	}
-
 	default_xface(&xa);
 	xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_CENTER);
 	xscpy(xa.line_align, GDI_ATTR_TEXT_ALIGN_CENTER);
+
+	b_print = (pif->tag == _CANVAS_PRINTER) ? 1 : 0;
+	if (!b_print)
+	{
+		format_xcolor(&pif->pclrs->clr_txt, xa.text_color);
+	}
 
 	default_xpen(&xp);
 	xscpy(xp.color, xa.text_color);
@@ -427,7 +427,7 @@ void draw_timebox(const drawing_interface* pif, const xdate_t* ptt)
 	b_print = (pif->tag == _CANVAS_PRINTER) ? 1 : 0;
 	if (!b_print)
 	{
-		format_xcolor(&pif->clrs->clr_txt, xa.text_color);
+		format_xcolor(&pif->pclrs->clr_txt, xa.text_color);
 	}
 
 	default_xpen(&xp);
@@ -748,15 +748,15 @@ void draw_listbox(const drawing_interface* pif, link_t_ptr ptr)
 	mx = (xs.fw > DEF_TOUCH_SPAN) ? xs.fw : DEF_TOUCH_SPAN;
 	my = (xs.fh > DEF_TOUCH_SPAN) ? xs.fh : DEF_TOUCH_SPAN;
 
-	b_print = (pif->tag == _CANVAS_PRINTER) ? 1 : 0;
-	if (!b_print)
-	{
-		format_xcolor(&pif->clrs->clr_txt, xa.text_color);
-	}
-
 	default_xface(&xa);
 	xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_NEAR);
 	xscpy(xa.line_align, GDI_ATTR_TEXT_ALIGN_CENTER);
+
+	b_print = (pif->tag == _CANVAS_PRINTER) ? 1 : 0;
+	if (!b_print)
+	{
+		format_xcolor(&pif->pclrs->clr_txt, xa.text_color);
+	}
 
 	xr.fx = pbox->fx;
 	xr.fy = pbox->fy;
@@ -923,15 +923,15 @@ void draw_dropbox(const drawing_interface* pif, link_t_ptr ptr)
 	mx = (xs.fw > DEF_TOUCH_SPAN) ? xs.fw : DEF_TOUCH_SPAN;
 	my = (xs.fh > DEF_TOUCH_SPAN) ? xs.fh : DEF_TOUCH_SPAN;
 
-	b_print = (pif->tag == _CANVAS_PRINTER) ? 1 : 0;
-	if (!b_print)
-	{
-		format_xcolor(&pif->clrs->clr_txt, xa.text_color);
-	}
-
 	default_xface(&xa);
 	xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_NEAR);
 	xscpy(xa.line_align, GDI_ATTR_TEXT_ALIGN_CENTER);
+
+	b_print = (pif->tag == _CANVAS_PRINTER) ? 1 : 0;
+	if (!b_print)
+	{
+		format_xcolor(&pif->pclrs->clr_txt, xa.text_color);
+	}
 
 	xr.fx = pbox->fx;
 	xr.fy = pbox->fy;
@@ -964,15 +964,15 @@ void draw_pushbox(const drawing_interface* pif, const tchar_t* text)
 
 	const canvbox_t* pbox = (canvbox_t*)(&pif->rect);
 
-	b_print = (pif->tag == _CANVAS_PRINTER) ? 1 : 0;
-	if (!b_print)
-	{
-		format_xcolor(&pif->clrs->clr_txt, xa.text_color);
-	}
-
 	default_xface(&xa);
 	xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_CENTER);
 	xscpy(xa.line_align, GDI_ATTR_TEXT_ALIGN_CENTER);
+
+	b_print = (pif->tag == _CANVAS_PRINTER) ? 1 : 0;
+	if (!b_print)
+	{
+		format_xcolor(&pif->pclrs->clr_txt, xa.text_color);
+	}
 
 	default_xpen(&xp);
 	xscpy(xp.color, xa.text_color);
@@ -1049,20 +1049,21 @@ void draw_radiobox(const drawing_interface* pif, bool_t b_on)
 
 	const canvbox_t* pbox = (canvbox_t*)(&pif->rect);
 
-	b_print = (pif->tag == _CANVAS_PRINTER) ? 1 : 0;
-	if (!b_print)
-	{
-		format_xcolor(&pif->clrs->clr_txt, xa.text_color);
-	}
-
 	default_xface(&xa);
 	xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_CENTER);
 	xscpy(xa.line_align, GDI_ATTR_TEXT_ALIGN_CENTER);
 
-	default_xbrush(&xb);
+	b_print = (pif->tag == _CANVAS_PRINTER) ? 1 : 0;
 	if (!b_print)
 	{
-		format_xcolor(&pif->clrs->clr_bkg, xb.color);
+		format_xcolor(&pif->pclrs->clr_txt, xa.text_color);
+	}
+
+	default_xbrush(&xb);
+
+	if (!b_print)
+	{
+		format_xcolor(&pif->pclrs->clr_bkg, xb.color);
 	}
 
 	default_xpen(&xp);
@@ -1156,20 +1157,20 @@ void draw_checkbox(const drawing_interface* pif, bool_t b_on)
 
 	const canvbox_t* pbox = (canvbox_t*)(&pif->rect);
 
-	b_print = (pif->tag == _CANVAS_PRINTER) ? 1 : 0;
-	if (!b_print)
-	{
-		format_xcolor(&pif->clrs->clr_txt, xa.text_color);
-	}
-
 	default_xface(&xa);
 	xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_CENTER);
 	xscpy(xa.line_align, GDI_ATTR_TEXT_ALIGN_CENTER);
 
+	b_print = (pif->tag == _CANVAS_PRINTER) ? 1 : 0;
+	if (!b_print)
+	{
+		format_xcolor(&pif->pclrs->clr_txt, xa.text_color);
+	}
+
 	default_xbrush(&xb);
 	if (!b_print)
 	{
-		format_xcolor(&pif->clrs->clr_bkg, xb.color);
+		format_xcolor(&pif->pclrs->clr_bkg, xb.color);
 	}
 
 	default_xpen(&xp);
@@ -1270,7 +1271,7 @@ void draw_slidebox(const drawing_interface* pif, int pos)
 	b_print = (pif->tag == _CANVAS_PRINTER) ? 1 : 0;
 	if (!b_print)
 	{
-		format_xcolor(&pif->clrs->clr_txt, xa.text_color);
+		format_xcolor(&pif->pclrs->clr_txt, xa.text_color);
 	}
 
 	default_xpen(&xp);
@@ -1394,15 +1395,15 @@ void draw_spinbox(const drawing_interface* pif, int cur)
 
 	const canvbox_t* pbox = (canvbox_t*)(&pif->rect);
 
-	b_print = (pif->tag == _CANVAS_PRINTER) ? 1 : 0;
-	if (!b_print)
-	{
-		format_xcolor(&pif->clrs->clr_txt, xa.text_color);
-	}
-
 	default_xface(&xa);
 	xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_CENTER);
 	xscpy(xa.line_align, GDI_ATTR_TEXT_ALIGN_CENTER);
+
+	b_print = (pif->tag == _CANVAS_PRINTER) ? 1 : 0;
+	if (!b_print)
+	{
+		format_xcolor(&pif->pclrs->clr_txt, xa.text_color);
+	}
 
 	default_xpen(&xp);
 	xscpy(xp.color, xa.text_color);
@@ -1521,7 +1522,7 @@ void draw_navibox(const drawing_interface* pif, const NAVISTATE* pns)
 	b_print = (pif->tag == _CANVAS_PRINTER) ? 1 : 0;
 	if (!b_print)
 	{
-		xmem_copy((void*)&xc, (void*)&(pif->clrs->clr_txt), sizeof(xcolor_t));
+		xmem_copy((void*)&xc, (void*)&(pif->pclrs->clr_txt), sizeof(xcolor_t));
 	}
 
 	(*pif->pf_font_size)(pif->ctx, &xs);
@@ -1644,7 +1645,7 @@ void draw_vertbox(const drawing_interface* pif)
 	b_print = (pif->tag == _CANVAS_PRINTER) ? 1 : 0;
 	if (!b_print)
 	{
-		xmem_copy((void*)&xc, (void*)&(pif->clrs->clr_txt), sizeof(xcolor_t));
+		xmem_copy((void*)&xc, (void*)&(pif->pclrs->clr_txt), sizeof(xcolor_t));
 	}
 
 	(*pif->pf_font_size)(pif->ctx, &xs);
@@ -1757,7 +1758,7 @@ void draw_horzbox(const drawing_interface* pif)
 	b_print = (pif->tag == _CANVAS_PRINTER) ? 1 : 0;
 	if (!b_print)
 	{
-		xmem_copy((void*)&xc, (void*)&(pif->clrs->clr_txt), sizeof(xcolor_t));
+		xmem_copy((void*)&xc, (void*)&(pif->pclrs->clr_txt), sizeof(xcolor_t));
 	}
 
 	(*pif->pf_font_size)(pif->ctx, &xs);
@@ -2013,7 +2014,7 @@ void draw_iconbox(const drawing_interface* pif, const tchar_t* layer, const tcha
 	b_print = (pif->tag == _CANVAS_PRINTER) ? 1 : 0;
 	if (!b_print)
 	{
-		xmem_copy((void*)&xc, (void*)&(pif->clrs->clr_txt), sizeof(xcolor_t));
+		xmem_copy((void*)&xc, (void*)&(pif->pclrs->clr_txt), sizeof(xcolor_t));
 	}
 
 	(*pif->pf_font_size)(pif->ctx, &xs);
@@ -2331,15 +2332,15 @@ void draw_wordsbox(const drawing_interface* pif, link_t_ptr ptr, int page)
 	mx = (xs.fw > DEF_TOUCH_SPAN) ? xs.fw : DEF_TOUCH_SPAN;
 	my = (xs.fh > DEF_TOUCH_SPAN) ? xs.fh : DEF_TOUCH_SPAN;
 
-	b_print = (pif->tag == _CANVAS_PRINTER) ? 1 : 0;
-	if (!b_print)
-	{
-		format_xcolor(&pif->clrs->clr_txt, xa.text_color);
-	}
-
 	default_xface(&xa);
 	xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_NEAR);
 	xscpy(xa.line_align, GDI_ATTR_TEXT_ALIGN_CENTER);
+
+	b_print = (pif->tag == _CANVAS_PRINTER) ? 1 : 0;
+	if (!b_print)
+	{
+		format_xcolor(&pif->pclrs->clr_txt, xa.text_color);
+	}
 
 	xr.fy = pbox->fy;
 	xr.fh = my;

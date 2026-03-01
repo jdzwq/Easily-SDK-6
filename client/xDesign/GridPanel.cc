@@ -1181,7 +1181,7 @@ void GridPanel_Title_OnItemChanged(widget_t widget, NOTICE_TITLE* pnt)
 
 	int n_id = xstol(get_title_item_id_ptr(pnt->item));
 
-	widget_post_command(widget, 0, n_id, NULL);
+	widget_post_command(widget, n_id, 0, NULL);
 }
 
 void GridPanel_Grid_OnLBClick(widget_t widget, NOTICE_GRID* pnf)
@@ -1193,7 +1193,7 @@ void GridPanel_Grid_OnLBClick(widget_t widget, NOTICE_GRID* pnf)
 		return;
 
 	int n_id = xstol(get_title_item_id_ptr(ptrItem));
-	widget_post_command(widget, 0, n_id, NULL);
+	widget_post_command(widget, n_id, 0, NULL);
 }
 
 void GridPanel_Grid_OnColSize(widget_t widget, NOTICE_GRID* pnf)
@@ -1205,7 +1205,7 @@ void GridPanel_Grid_OnColSize(widget_t widget, NOTICE_GRID* pnf)
 		return;
 
 	int n_id = xstol(get_title_item_id_ptr(ptrItem));
-	widget_post_command(widget, 0, n_id, NULL);
+	widget_post_command(widget, n_id, 0, NULL);
 }
 
 void GridPanel_Grid_OnColMove(widget_t widget, NOTICE_GRID* pnf)
@@ -1347,6 +1347,7 @@ int GridPanel_OnCreate(widget_t widget, void* data)
 	titlectrl_set_focus_item(pdt->hTitle, get_title_next_item(ptrTitle,LINK_FIRST));
 
 	widget_attach_splitor(widget, ptrSplit);
+	widget_layout_splitor(widget);
 
 	if (!is_null(szParam))
 	{
@@ -1660,7 +1661,7 @@ void GridPanel_OnMenuCommand(widget_t widget, int code, int cid, vword_t data)
 
 	tchar_t token[RES_LEN + 1];
 
-	switch (cid)
+	switch (code)
 	{
 	case IDA_FILE_SAVE:
 		GridPanel_OnSave(widget);
@@ -1801,7 +1802,7 @@ void GridPanel_OnMenuCommand(widget_t widget, int code, int cid, vword_t data)
 		if (code)
 		{
 			color_menu_item(code, token, RES_LEN);
-			GridPanel_OnSelectAttr(widget, GDI_ATTR_FONT_COLOR, token);
+			GridPanel_OnSelectAttr(widget, GDI_ATTR_TEXT_COLOR, token);
 		}
 		break;
 	case IDC_GRIDPANEL_PAINTCOLOR:

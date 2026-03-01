@@ -326,15 +326,9 @@ void RichPanel_OnSaveAs(widget_t widget)
 	{
 		LINKPTR ptrSvg = create_svg_doc();
 
-		xfont_t xf;
-		xface_t xa;
-
-		default_textor_xfont(&xf);
-		default_textor_xface(&xa);
-
 		int page = richctrl_get_cur_page(pdt->hRich);
 
-		svg_print_rich(ptrSvg, &xf, &xa, ptrRich, page);
+		svg_print_rich(ptrSvg, ptrRich, page);
 
 		rt = save_dom_doc_to_file(ptrSvg, NULL, szFile);
 
@@ -473,13 +467,7 @@ void RichPanel_OnPreview(widget_t widget)
 
 	LINKPTR svg = create_svg_doc();
 
-	xfont_t xf;
-	xface_t xa;
-
-	default_textor_xfont(&xf);
-	default_textor_xface(&xa);
-
-	svg_print_rich(svg, &xf, &xa, ptrRich, page);
+	svg_print_rich(svg, ptrRich, page);
 
 	LINKPTR ptr_arch = previewdlg_get_arch(hPreviewDlg);
 
@@ -540,6 +528,7 @@ int RichPanel_OnCreate(widget_t widget, void* data)
 	widget_show(pdt->hProper, WS_SHOW_NORMAL);
 
 	widget_attach_splitor(widget, ptrSplit);
+	widget_layout_splitor(widget);
 
 	const tchar_t* szParam = (tchar_t*)data;
 
@@ -776,7 +765,7 @@ void RichPanel_OnMenuCommand(widget_t widget, int code, int cid, vword_t data)
 		widget_destroy((widget_t)data);
 		if (code)
 		{
-			widget_post_command(widget, 0, code, NULL);
+			widget_post_command(widget, code, 0, NULL);
 		}
 		break;
 	}

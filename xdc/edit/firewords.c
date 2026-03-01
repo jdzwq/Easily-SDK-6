@@ -211,8 +211,6 @@ static void sub_editbox_unsubbing(widget_t widget, uid_t subid, vword_t delta)
 	{
 		widget_destroy(ctrl);
 	}
-
-	widget_del_subproc(widget, IDS_EDITBOX);
 }
 /***************************************************************************************************/
 static int sub_wordsbox_self_command(widget_t widget, int code, vword_t data, uid_t subid, vword_t delta)
@@ -239,13 +237,6 @@ static int sub_wordsbox_self_command(widget_t widget, int code, vword_t data, ui
 	return 0;
 }
 
-static void sub_wordsbox_unsubbing(widget_t widget, uid_t subid, vword_t delta)
-{
-	if (subid != IDS_WORDSBOX)
-		return;
-
-	widget_del_subproc(widget, IDS_WORDSBOX);
-}
 /****************************************************************************************************/
 
 widget_t firewords_create(widget_t widget, const xrect_t* pxr, link_t_ptr data)
@@ -292,7 +283,6 @@ widget_t firewords_create(widget_t widget, const xrect_t* pxr, link_t_ptr data)
 		xmem_zero((void*)&ev, sizeof(if_subproc_t));
 
 		ev.sub_on_self_command = sub_wordsbox_self_command;
-		ev.sub_on_unsubbed = sub_wordsbox_unsubbing;
 
 		widget_set_subproc(ctrlbox, IDS_WORDSBOX, &ev);
 		widget_set_subproc_delta(ctrlbox, IDS_WORDSBOX, (vword_t)editor);

@@ -5,9 +5,9 @@
 
 	@author ZhangWenQuan, JianDe HangZhou ZheJiang China, Mail: powersuite@hotmaol.com
 
-	@doc view hintner document
+	@doc uio interface document
 
-	@module	hintner.h | interface file
+	@module	xdkuio.h | interface file
 
 	@devnote 张文权 2021.01 - 2021.12	v6.0
 ***********************************************************************/
@@ -24,17 +24,17 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
 LICENSE.GPL3 for more details.
 ***********************************************************************/
 
-#ifndef _HINTNER_H
-#define _HINTNER_H
+#ifndef _UIOIMP_H
+#define _UIOIMP_H
 
-#include "../xdldef.h"
+#include "../xdkdef.h"
 
 
 #ifdef	__cplusplus
 extern "C" {
 #endif
 
-	EXP_API void hint_object_item(if_itemhint_t* pit, PF_HINT_DESIGNER_CALLBACK pf, void* pp);
+EXP_API bool_t get_uio_interface(xhand_t io, uio_interface* pio);
 
 
 #ifdef	__cplusplus
@@ -42,4 +42,4 @@ extern "C" {
 #endif
 
 
-#endif /*HINTNER_H*/
+#endif /*_BIOIMP_H*/

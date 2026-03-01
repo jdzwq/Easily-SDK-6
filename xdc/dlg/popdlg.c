@@ -201,30 +201,32 @@ widget_t create_dialog(link_t_ptr ptr_dlg, widget_t owner)
 }
 
 
-int sub_dialog_on_paint(widget_t widget, visual_t dc, const xrect_t* pxr, uid_t sid, vword_t delta)
+int dialog_sub_paint(widget_t widget, visual_t dc, const xrect_t* pxr, uid_t sid, vword_t delta)
 {
 	visual_t rdc;
 	xrect_t xr;
 
 	canvas_t canv;
-	const drawing_interface* pif = NULL;
+	drawing_interface ifc = {0};
 	drawing_interface ifv = {0};
 
-	color_mod_t clrs;
+	const color_mod_t *pclrs;
 	xbrush_t xb;
 
-	widget_get_color_mode(widget, &clrs);
+	pclrs = widget_get_color_mode_ptr(widget);
 	default_xbrush(&xb);
-	format_xcolor(&clrs.clr_bkg, xb.color);
+	format_xcolor(&(pclrs->clr_bkg), xb.color);
 	
 	widget_get_client_rect(widget, &xr);
 
 	canv = widget_get_canvas(widget);
 	if (canv)
 	{
-		pif = widget_get_canvas_interface(widget);
-
 		rdc = begin_canvas_paint(canv, dc, xr.w, xr.h);
+		
+		get_canvas_interface(canv, &ifc);
+		widget_get_canv_rect(widget, (canvbox_t*)&(ifc.rect));
+		ifc.pclrs = pclrs;
 	}
 	else
 	{
@@ -255,7 +257,7 @@ static int STDCALL _widget_set_child_point(widget_t widget, vword_t pv)
 	return 1;
 }
 
-int sub_dialog_on_size(widget_t widget, int code, const xsize_t* pxs, uid_t sid, vword_t delta)
+int dialog_sub_size(widget_t widget, int code, const xsize_t* pxs, uid_t sid, vword_t delta)
 {
 	if (code != WS_SIZE_MINIMIZED)
 	{

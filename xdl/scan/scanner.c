@@ -30,7 +30,7 @@ LICENSE.GPL3 for more details.
 void scan_object_text(const measure_interface* pif, const viewbox_t* pvb, words_scan_interface* pit, PF_SCAN_TEXTOR_CALLBACK pf, void* pp)
 {
 	float line_rati = 1.0f;
-	bool_t b_wordbreak = 0;
+	int break_mode = 0;
 
 	object_attr_t attr = {0};
 	xpen_t* pxp = NULL;
@@ -69,7 +69,7 @@ void scan_object_text(const measure_interface* pif, const viewbox_t* pvb, words_
 
 	if(pxa)
 	{
-		b_wordbreak = (compare_text(pxa->text_wrap, -1, GDI_ATTR_TEXT_WRAP_WORDBREAK, -1, 0) == 0) ? 1 : 0;
+		break_mode = parse_wrap(pxa);
 
 		if (is_null(pxa->line_height))
 			line_rati = xstof(DEF_GDI_TEXT_LINE_HEIGHT);
@@ -237,33 +237,8 @@ void scan_object_text(const measure_interface* pif, const viewbox_t* pvb, words_
 		}
 		else
 		{
-			if (!b_atom && pch && *pch == _T('\t'))
-			{
-				tm.cur_w = xs.w; // tm.char_w * 4;
-				tm.cur_h = xs.h; // tm.char_h;
-			}else if (!b_atom && pch && *pch == _T('\0'))
-			{
-				tm.cur_w = xs.w; // tm.char_w;
-				tm.cur_h = xs.h; // tm.char_h;
-			}
-			else
-			{
-				if (!chs)
-				{
-					tm.cur_w = xs.w; // tm.char_w;
-					tm.cur_h = xs.h; // tm.char_h;
-				}
-				else
-				{
-					//if (b_atom)
-					//	(*pif->pf_text_size)(pif->ctx, &xf_atom, pch, chs, &xs);
-					//else
-					//	(*pif->pf_text_size)(pif->ctx, pxf, pch, chs, &xs);
-
-					tm.cur_w = xs.w;
-					tm.cur_h = xs.h; // tm.char_h;
-				}
-			}
+			tm.cur_w = xs.w; // tm.char_w;
+			tm.cur_h = xs.h; // tm.char_h;
 
 			ts = _SCANNER_STATE_WORDS;
 		}
@@ -313,7 +288,7 @@ void scan_object_text(const measure_interface* pif, const viewbox_t* pvb, words_
 				xsncpy(sch, _T("\v"), 1);
 				pch = sch;
 			}
-			else if (b_wordbreak && (tm.cur_x - tm.char_w > tm.min_x) && (tm.cur_x + tm.char_w > tm.max_x))
+			else if ((break_mode == WORD_BREAK) && (tm.cur_x - tm.char_w > tm.min_x) && (tm.cur_x + tm.char_w > tm.max_x))
 			{
 				ts = _SCANNER_STATE_NEWLINE;
 				b_newline = 1;
@@ -334,7 +309,7 @@ void scan_object_text(const measure_interface* pif, const viewbox_t* pvb, words_
 				xsncpy(sch, _T("\v"), 1);
 				pch = sch;
 			}
-			else if (b_wordbreak)
+			else if (break_mode == LINE_BREAK)
 			{
 				ts = _SCANNER_STATE_NEWLINE;
 				b_newline = 1;

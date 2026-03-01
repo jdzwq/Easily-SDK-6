@@ -21,8 +21,8 @@ SRC_PATH = ../../xdb
 
 LIB_PATH = ../lib/$(ARCH)
 
-OBJ_PATH = D:\Easily-temp\windows\$(MODULE)\$(ARCH)\Debug
-PDB_PATH = D:\Easily-temp\windows\$(ARCH)
+OBJ_PATH = E:\Easily-temp\windows\$(MODULE)\$(ARCH)\Debug
+PDB_PATH = E:\Easily-temp\windows\$(ARCH)
 OUT_PATH = Z:\Easily-app-6\windows\lib
 
 TARGET = $(OBJ_PATH)/$(MODULE).dll

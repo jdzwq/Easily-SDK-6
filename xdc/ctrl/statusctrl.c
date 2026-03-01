@@ -216,10 +216,15 @@ void hand_status_size(widget_t widget, int code, const xsize_t* prs)
 		break;
 	case WS_SIZE_MINIMIZED:
 		break;
+	case WS_SIZE_MAXSHOW:
+		break;
+	case WS_SIZE_RESTORE:
+		break;
 	case WS_SIZE_LAYOUT:
-		_statusctrl_reset_page(widget);
 		break;
 	}
+
+	_statusctrl_reset_page(widget);
 }
 
 void hand_status_mouse_move(widget_t widget, dword_t dw, const xpoint_t* pxp)
@@ -374,11 +379,11 @@ void hand_status_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	xrect_t xr_step,xr = { 0 };
 
 	canvas_t canv;
-	const drawing_interface* pif = NULL;
+	drawing_interface ifc = {0};
 	drawing_interface ifv = {0};
 
 	xface_t xa;
-	color_mod_t clrs;
+	const color_mod_t *pclrs;
 	xbrush_t xb = { 0 };
 	xpen_t xp = { 0 };
 	xcolor_t xc = { 0 };
@@ -390,20 +395,23 @@ void hand_status_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	default_xface(&xa);
 	xscpy(xa.text_wrap, GDI_ATTR_TEXT_WRAP_WORDBREAK);
 
-	widget_get_color_mode(widget, &clrs);
+	pclrs = widget_get_color_mode_ptr(widget);
 	default_xbrush(&xb);
-	format_xcolor(&clrs.clr_bkg, xb.color);
+	format_xcolor(&(pclrs->clr_bkg), xb.color);
 	default_xpen(&xp);
-	format_xcolor(&clrs.clr_frg, xp.color);
+	format_xcolor(&(pclrs->clr_frg), xp.color);
 
-	canv = widget_get_canvas(widget);
-	pif = widget_get_canvas_interface(widget);
-	
 	widget_get_client_rect(widget, &xr);
 
+	canv = widget_get_canvas(widget);
 	rdc = begin_canvas_paint(canv, dc, xr.w, xr.h);
-
+	
 	get_visual_interface(rdc, &ifv);
+	widget_get_view_rect(widget, (viewbox_t*)&(ifv.rect));
+
+	get_canvas_interface(canv, &ifc);
+	widget_get_canv_rect(widget, (canvbox_t*)&(ifc.rect));
+	ifc.pclrs = pclrs;
 
 	parse_xcolor(&xc_brim, xb.color);
 	parse_xcolor(&xc_core, xb.color);
@@ -411,7 +419,7 @@ void hand_status_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 
 	(*ifv.pf_gradient_rect)(ifv.ctx, &xc_brim, &xc_core, GDI_ATTR_GRADIENT_VERT, &xr);
 
-	draw_status(pif, ptd->status);
+	draw_status(&ifc, ptd->status);
 
 	calc_status_title_rect(ptd->status, &xr);
 
@@ -423,14 +431,14 @@ void hand_status_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 		xr_step.fh = xr.fh;
 
 		parse_xcolor(&xc, xp.color);
-		draw_progress(pif, &xc, &xr_step, ptd->n_step);
+		draw_progress(&ifc, &xc, &xr_step, ptd->n_step);
 
 		xr.fx += xr_step.fw;
-		(pif->pf_draw_text)(pif->ctx, &xa, &xr, get_status_title_ptr(ptd->status), -1);
+		(ifc.pf_draw_text)(ifc.ctx, &xa, &xr, get_status_title_ptr(ptd->status), -1);
 	}
 	else
 	{
-		(pif->pf_draw_text)(pif->ctx, &xa, &xr, get_status_title_ptr(ptd->status), -1);
+		(ifc.pf_draw_text)(ifc.ctx, &xa, &xr, get_status_title_ptr(ptd->status), -1);
 	}
 
 	end_canvas_paint(canv, dc, pxr);
@@ -546,7 +554,6 @@ void statusctrl_redraw(widget_t widget)
 	ptd->hover = NULL;
 
 	_statusctrl_reset_page(widget);
-
 	widget_erase(widget, NULL);
 }
 

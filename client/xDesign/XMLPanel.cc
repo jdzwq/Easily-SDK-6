@@ -491,6 +491,7 @@ int XMLPanel_OnCreate(widget_t widget, void* data)
 	widget_show(pdt->hProper, WS_SHOW_NORMAL);
 
 	widget_attach_splitor(widget, ptrSplit);
+	widget_layout_splitor(widget);
 
 	const tchar_t* szParam = (tchar_t*)data;
 

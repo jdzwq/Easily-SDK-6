@@ -38,275 +38,27 @@ typedef struct _form_delta_t{
 	link_t_ptr field;
 	link_t_ptr hover;
 
-	int org_hint;
-	int org_x, org_y;
-	int cur_x, cur_y;
+	bool_t b_alarm;
+	bool_t b_lock;
+
 	short cur_page;
 	short max_page;
 
 	widget_t editor;
 	widget_t hsc;
 	widget_t vsc;
-
-	bool_t b_drag;
-	bool_t b_size;
-	bool_t b_group;
-	bool_t b_alarm;
-	bool_t b_lock;
-
-	link_t_ptr stack;
 }form_delta_t;
 
 #define GETFORMDELTA(ph) 	(form_delta_t*)widget_get_user_delta(ph)
 #define SETFORMDELTA(ph,ptd) widget_set_user_delta(ph,(vword_t)ptd)
 
 /******************************************form event********************************************************/
-static void _formctrl_done(widget_t widget)
-{
-	form_delta_t* ptd = GETFORMDELTA(widget);
-	byte_t* buf;
-	dword_t len;
-
-	XDK_ASSERT(ptd && ptd->form);
-
-#ifdef _UNICODE
-	len = format_dom_doc_to_bytes(ptd->form, NULL, MAX_LONG, DEF_UCS);
-#else
-	len = format_dom_doc_to_bytes(ptd->form, NULL, MAX_LONG, DEF_MBS);
-#endif
-
-	buf = (byte_t*)xmem_alloc(len + sizeof(tchar_t));
-
-#ifdef _UNICODE
-	format_dom_doc_to_bytes(ptd->form, buf, len, DEF_UCS);
-#else
-	format_dom_doc_to_bytes(ptd->form, buf, len, DEF_MBS);
-#endif
-
-	push_stack_node(ptd->stack, (void*)buf);
-}
-
-static void _formctrl_undo(widget_t widget)
-{
-	form_delta_t* ptd = GETFORMDELTA(widget);
-	void* p;
-	int len;
-
-	XDK_ASSERT(ptd && ptd->form);
-
-	p = pop_stack_node(ptd->stack);
-	if (p)
-	{
-		clear_form_doc(ptd->form);
-
-		len = xslen((tchar_t*)p);
-
-#ifdef _UNICODE
-		parse_dom_doc_from_bytes(ptd->form, (byte_t*)p, len * sizeof(tchar_t), DEF_UCS);
-#else
-		parse_dom_doc_from_bytes(ptd->form, (byte_t*)p, len * sizeof(tchar_t), DEF_MBS);
-#endif
-
-		xmem_free(p);
-
-		formctrl_redraw(widget, 1);
-	}
-}
-
-static void _formctrl_discard(widget_t widget)
-{
-	form_delta_t* ptd = GETFORMDELTA(widget);
-	void* p;
-
-	XDK_ASSERT(ptd && ptd->stack);
-
-	p = pop_stack_node(ptd->stack);
-	if (p)
-	{
-		xmem_free(p);
-	}
-}
-
-static void _formctrl_clean(widget_t widget)
-{
-	form_delta_t* ptd = GETFORMDELTA(widget);
-	void* p;
-
-	XDK_ASSERT(ptd && ptd->stack);
-
-	while (p = pop_stack_node(ptd->stack))
-	{
-		xmem_free(p);
-	}
-}
-
-static bool_t _formctrl_copy(widget_t widget)
-{
-	form_delta_t* ptd = GETFORMDELTA(widget);
-
-	dword_t len;
-	byte_t* buf;
-	link_t_ptr dom, nlk, ilk;
-
-	XDK_ASSERT(ptd && ptd->form);
-
-	if (!form_is_design(ptd->form))
-		return 0;
-
-	if (!get_field_selected_count(ptd->form) && !ptd->field)
-		return 0;
-
-	dom = create_form_doc();
-	ilk = get_next_field(ptd->form, LINK_FIRST);
-	while (ilk)
-	{
-		if (get_field_selected(ilk) || ilk == ptd->field)
-		{
-			nlk = insert_field(dom, get_field_class_ptr(ilk));
-			copy_dom_node(nlk, ilk);
-		}
-
-		ilk = get_next_field(ptd->form, ilk);
-	}
-
-#ifdef _UNICODE
-	len = format_dom_doc_to_bytes(dom, NULL, MAX_LONG, DEF_UCS);
-#else
-	len = format_dom_doc_to_bytes(dom, NULL, MAX_LONG, DEF_MBS);
-#endif
-
-	buf = (byte_t*)xmem_alloc(len);
-
-#ifdef _UNICODE
-	format_dom_doc_to_bytes(dom, buf, len, DEF_UCS);
-#else
-	format_dom_doc_to_bytes(dom, buf, len, DEF_MBS);
-#endif
-
-	if (!clipboard_put(widget, DEF_CB_FORMAT, buf, len))
-	{
-		xmem_free(buf);
-
-		destroy_form_doc(dom);
-		return 0;
-	}
-
-	xmem_free(buf);
-
-	destroy_form_doc(dom);
-
-	return 1;
-}
-
-static bool_t _formctrl_cut(widget_t widget)
-{
-	form_delta_t* ptd = GETFORMDELTA(widget);
-	link_t_ptr nxt, ilk;
-
-	XDK_ASSERT(ptd && ptd->form);
-
-	if (!_formctrl_copy(widget))
-		return 0;
-
-	ilk = get_next_field(ptd->form, LINK_FIRST);
-	while (ilk)
-	{
-		nxt = get_next_field(ptd->form, ilk);
-
-		if (get_field_selected(ilk) || ilk == ptd->field)
-		{
-			delete_field(ilk);
-		}
-		ilk = nxt;
-	}
-
-	formctrl_redraw(widget, 1);
-
-	return 1;
-}
-
-static bool_t _formctrl_paste(widget_t widget)
-{
-	form_delta_t* ptd = GETFORMDELTA(widget);
-
-	dword_t len;
-	byte_t* buf;
-	link_t_ptr dom, nlk;
-
-	float y;
-	tchar_t sz_name[RES_LEN + 1] = { 0 };
-
-	XDK_ASSERT(ptd && ptd->form);
-
-	if (!form_is_design(ptd->form))
-		return 0;
-
-	len = clipboard_get(widget, DEF_CB_FORMAT, NULL, MAX_LONG);
-	if (!len)
-	{
-		return 0;
-	}
-
-	buf = (byte_t*)xmem_alloc(len);
-
-	clipboard_get(widget, DEF_CB_FORMAT, buf, len);
-
-	dom = create_dom_doc();
-#ifdef _UNICODE
-	if (!parse_dom_doc_from_bytes(dom, buf, len, DEF_UCS))
-#else
-	if (!parse_dom_doc_from_bytes(dom, buf, len, DEF_MBS))
-#endif
-	{
-		xmem_free(buf);
-
-		destroy_dom_doc(dom);
-		return 0;
-	}
-
-	if (!is_form_doc(dom))
-	{
-		xmem_free(buf);
-
-		destroy_dom_doc(dom);
-		return 0;
-	}
-
-	while (nlk = get_next_field(dom, LINK_FIRST))
-	{
-		nlk = detach_dom_node(get_form_fieldset(dom), nlk);
-		attach_dom_node(get_form_fieldset(ptd->form), LINK_LAST, nlk);
-
-		y = get_field_y(nlk);
-		y += get_field_height(nlk);
-		set_field_y(nlk, y);
-
-		xsprintf(sz_name, _T("%s%d"), get_field_class_ptr(nlk), get_field_count_by_class(ptd->form, get_field_class_ptr(nlk)));
-		set_field_name(nlk, sz_name);
-	}
-
-	xmem_free(buf);
-
-	destroy_dom_doc(dom);
-	formctrl_redraw(widget, 1);
-
-	return 1;
-}
 
 static void _formctrl_field_rect(widget_t widget, link_t_ptr flk, xrect_t* pxr)
 {
 	form_delta_t* ptd = GETFORMDELTA(widget);
 
 	calc_form_field_rect(ptd->form, flk, pxr);
-
-	widget_rect_to_pt(widget, pxr);
-}
-
-static void _formctrl_group_rect(widget_t widget, link_t_ptr flk, xrect_t* pxr)
-{
-	form_delta_t* ptd = GETFORMDELTA(widget);
-
-	calc_form_group_rect(ptd->form, flk, pxr);
 
 	widget_rect_to_pt(widget, pxr);
 }
@@ -415,7 +167,9 @@ static void _formctrl_reset_group(widget_t widget)
 		flk = get_next_visible_field(ptd->form, flk);
 	}
 }
+
 /*********************************************************************************************************/
+
 int noti_form_owner(widget_t widget, unsigned int code, link_t_ptr form, link_t_ptr flk, void* data)
 {
 	form_delta_t* ptd = GETFORMDELTA(widget);
@@ -435,54 +189,6 @@ int noti_form_owner(widget_t widget, unsigned int code, link_t_ptr form, link_t_
 	return nf.ret;
 }
 
-void noti_form_reset_select(widget_t widget)
-{
-	form_delta_t* ptd = GETFORMDELTA(widget);
-	link_t_ptr flk;
-	int count = 0;
-
-	flk = get_next_field(ptd->form, LINK_FIRST);
-	while (flk)
-	{
-		if (get_field_selected(flk))
-		{
-			set_field_selected(flk, 0);
-			noti_form_owner(widget, NC_FIELDSELECTED, ptd->form, flk, NULL);
-
-			count++;
-		}
-
-		flk = get_next_field(ptd->form, flk);
-	}
-
-	if (count)
-	{
-		widget_erase(widget, NULL);
-	}
-}
-
-void noti_form_field_selected(widget_t widget, link_t_ptr flk)
-{
-	form_delta_t* ptd = GETFORMDELTA(widget);
-	xrect_t xr;
-	bool_t b_check;
-
-	b_check = get_field_selected(flk);
-
-	if (b_check)
-		set_field_selected(flk, 0);
-	else
-		set_field_selected(flk, 1);
-
-	noti_form_owner(widget, NC_FIELDSELECTED, ptd->form, flk, NULL);
-
-	_formctrl_field_rect(widget, flk, &xr);
-
-	pt_expand_rect(&xr, DEF_OUTER_FEED, DEF_OUTER_FEED);
-
-	widget_erase(widget, &xr);
-}
-
 bool_t noti_form_field_changing(widget_t widget)
 {
 	form_delta_t* ptd = GETFORMDELTA(widget);
@@ -490,15 +196,12 @@ bool_t noti_form_field_changing(widget_t widget)
 
 	XDK_ASSERT(ptd->field);
 
-	if (noti_form_owner(widget, NC_FIELDCHANGING, ptd->form, ptd->field, NULL))
+	if (noti_form_owner(widget, NC_FIELDUNFOCUS, ptd->form, ptd->field, NULL))
 		return (bool_t)0;
 
 	ptd->b_alarm = (bool_t)0;
 
-	if (form_is_design(ptd->form) && get_field_group(ptd->field))
-		_formctrl_group_rect(widget, ptd->field, &xr);
-	else
-		_formctrl_field_rect(widget, ptd->field, &xr);
+	_formctrl_field_rect(widget, ptd->field, &xr);
 
 	pt_expand_rect(&xr, DEF_OUTER_FEED, DEF_OUTER_FEED);
 
@@ -519,16 +222,13 @@ void noti_form_field_changed(widget_t widget, link_t_ptr flk)
 
 	ptd->field = flk;
 
-	if (form_is_design(ptd->form) && get_field_group(ptd->field))
-		_formctrl_group_rect(widget, ptd->field, &xr);
-	else
-		_formctrl_field_rect(widget, ptd->field, &xr);
+	_formctrl_field_rect(widget, ptd->field, &xr);
 
 	pt_expand_rect(&xr, DEF_OUTER_FEED, DEF_OUTER_FEED);
 
 	widget_erase(widget, &xr);
 
-	noti_form_owner(widget, NC_FIELDCHANGED, ptd->form, flk, NULL);
+	noti_form_owner(widget, NC_FIELDFOCUSED, ptd->form, flk, NULL);
 }
 
 void noti_form_field_enter(widget_t widget, link_t_ptr flk)
@@ -572,256 +272,6 @@ void noti_form_field_hover(widget_t widget, int x, int y)
 	noti_form_owner(widget, NC_FIELDHOVER, ptd->form, ptd->hover, (void*)&xp);
 }
 
-void noti_form_field_drag(widget_t widget, int x, int y)
-{
-	form_delta_t* ptd = GETFORMDELTA(widget);
-	xpoint_t pt;
-
-	XDK_ASSERT(ptd->field);
-
-	ptd->b_drag = (bool_t)1;
-	ptd->org_x = x;
-	ptd->org_y = y;
-
-	if (widget_can_focus(widget))
-	{
-		widget_set_capture(widget, 1);
-	}
-
-	pt.x = x;
-	pt.y = y;
-	noti_form_owner(widget, NC_FIELDDRAG, ptd->form, ptd->field, (void*)&pt);
-}
-
-void noti_form_field_drop(widget_t widget, int x, int y)
-{
-	form_delta_t* ptd = GETFORMDELTA(widget);
-	
-	xpoint_t pt;
-	xrect_t xr;
-	link_t_ptr flk;
-	int gid;
-	int cx, cy;
-
-	XDK_ASSERT(ptd->field);
-
-	ptd->cur_x = x;
-	ptd->cur_y = y;
-
-	ptd->b_drag = (bool_t)0;
-
-	if (widget_can_focus(widget))
-	{
-		widget_set_capture(widget, 0);
-	}
-
-	cx = x - ptd->org_x;
-	cy = y - ptd->org_y;
-
-	if (!cx && !cy)
-		return;
-
-	_formctrl_done(widget);
-
-	calc_form_group_rect(ptd->form, ptd->field, &xr);
-
-	widget_rect_to_pt(widget, &xr);
-
-	if (xr.x + cx < 0 || xr.y + cy < 0)
-		return;
-
-	gid = get_field_group(ptd->field);
-
-	flk = get_next_field(ptd->form, LINK_FIRST);
-	while (flk)
-	{
-		if (flk != ptd->field)
-		{
-			if ((!gid && !get_field_selected(flk)) || (gid && get_field_group(flk) != gid))
-			{
-				flk = get_next_field(ptd->form, flk);
-				continue;
-			}
-		}
-
-		calc_form_field_rect(ptd->form, flk, &xr);
-
-		widget_rect_to_pt(widget, &xr);
-
-		pt.x = xr.x + cx;
-		pt.y = xr.y + cy;
-	
-		widget_point_to_mm(widget, &pt);
-
-		pt.fx = (float)((int)(pt.fx));
-		pt.fy = (float)((int)(pt.fy));
-
-		set_field_x(flk, pt.fx);
-		set_field_y(flk, pt.fy);
-
-		flk = get_next_field(ptd->form, flk);
-	}
-
-	widget_erase(widget, NULL);
-
-	pt.x = x;
-	pt.y = y;
-	noti_form_owner(widget, NC_FIELDDROP, ptd->form, ptd->field, (void*)&pt);
-}
-
-void noti_form_field_sizing(widget_t widget, int hint, int x, int y)
-{
-	form_delta_t* ptd = GETFORMDELTA(widget);
-
-	XDK_ASSERT(ptd->field);
-
-	if (widget_can_focus(widget))
-	{
-		widget_set_capture(widget, 1);
-	}
-
-	ptd->org_hint = hint;
-	ptd->org_x = x;
-	ptd->org_y = y;
-
-	ptd->b_size = (bool_t)1;
-
-	noti_form_owner(widget, NC_FIELDSIZING, ptd->form, ptd->field, NULL);
-}
-
-void noti_form_field_sized(widget_t widget, int x, int y)
-{
-	form_delta_t* ptd = GETFORMDELTA(widget);
-	float minw, minh, fw, fh;
-	int hint;
-	xrect_t xr;
-	xsize_t xs;
-
-	XDK_ASSERT(ptd->field);
-
-	ptd->cur_x = x;
-	ptd->cur_y = y;
-
-	ptd->b_size = (bool_t)0;
-
-	if (widget_can_focus(widget))
-	{
-		widget_set_capture(widget, 0);
-	}
-	widget_set_cursor(widget, CURSOR_ARROW);
-
-	hint = ptd->org_hint;
-
-	minw = FIELD_MIN_WIDTH;
-	minh = FIELD_MIN_HEIGHT;
-
-	xs.w = ptd->cur_x - ptd->org_x;
-	xs.h = ptd->cur_y - ptd->org_y;
-
-	if (!xs.w && !xs.h)
-		return;
-
-	_formctrl_done(widget);
-
-	widget_size_to_mm(widget, &xs);
-
-	_formctrl_field_rect(widget, ptd->field, &xr);
-
-	pt_expand_rect(&xr, DEF_OUTER_FEED, DEF_OUTER_FEED);
-
-	widget_erase(widget, &xr);
-
-	fw = get_field_width(ptd->field);
-	fh = get_field_height(ptd->field);
-
-	fw += xs.fw;
-	fh += xs.fh;
-
-	if (fw < minw)
-		fw = minw;
-
-	if (fh < minh)
-		fh = minh;
-
-	fw = (float)((int)fw);
-	fh = (float)((int)fh);
-
-	if (hint == FORM_HINT_HORZ_SPLIT)
-	{
-		set_field_height(ptd->field, fh);
-	}
-	else if (hint == FORM_HINT_VERT_SPLIT)
-	{
-		set_field_width(ptd->field, fw);
-	}
-	else
-	{
-		set_field_width(ptd->field, fw);
-		set_field_height(ptd->field, fh);
-	}
-
-	_formctrl_field_rect(widget, ptd->field, &xr);
-
-	pt_expand_rect(&xr, DEF_OUTER_FEED, DEF_OUTER_FEED);
-
-	widget_erase(widget, &xr);
-
-	noti_form_owner(widget, NC_FIELDSIZED, ptd->form, ptd->field, NULL);
-}
-
-void noti_form_begin_group(widget_t widget, int x, int y)
-{
-	form_delta_t* ptd = GETFORMDELTA(widget);
-
-	if (widget_can_focus(widget))
-	{
-		widget_set_capture(widget, 1);
-	}
-	widget_set_cursor(widget,CURSOR_HAND);
-
-	ptd->b_group = (bool_t)1;
-	ptd->org_x = x;
-	ptd->org_y = y;
-}
-
-void noti_form_end_group(widget_t widget, int x, int y)
-{
-	form_delta_t* ptd = GETFORMDELTA(widget);
-	link_t_ptr flk;
-	xrect_t xr_group, xr;
-
-	ptd->b_group = (bool_t)0;
-
-	if (widget_can_focus(widget))
-	{
-		widget_set_capture(widget, 0);
-	}
-	widget_set_cursor(widget, CURSOR_ARROW);
-
-	ptd->cur_x = x;
-	ptd->cur_y = y;
-
-	xr_group.x = (ptd->org_x < ptd->cur_x) ? ptd->org_x : ptd->cur_x;
-	xr_group.y = (ptd->org_y < ptd->cur_y) ? ptd->org_y : ptd->cur_y;
-	xr_group.w = (ptd->org_x > ptd->cur_x) ? ptd->org_x : ptd->cur_x - xr_group.x;
-	xr_group.h = (ptd->org_y > ptd->cur_y) ? ptd->org_y : ptd->cur_y - xr_group.y;
-
-	flk = get_next_field(ptd->form, LINK_FIRST);
-	while (flk)
-	{
-		_formctrl_field_rect(widget, flk, &xr);
-
-		if (pt_inside(xr.x, xr.y, xr_group.x, xr_group.y, xr_group.x + xr_group.w, xr_group.y + xr_group.h))
-		{
-			set_field_selected(flk, 1);
-		}
-
-		flk = get_next_field(ptd->form, flk);
-	}
-
-	widget_erase(widget, NULL);
-}
-
 void noti_form_begin_edit(widget_t widget)
 {
 	form_delta_t* ptd = GETFORMDELTA(widget);
@@ -844,7 +294,7 @@ void noti_form_begin_edit(widget_t widget)
 	if (widget_is_valid(ptd->editor))
 		return;
 
-	if (form_is_design(ptd->form) || !get_field_focusable(ptd->field))
+	if (!get_field_focusable(ptd->field))
 	{
 		return;
 	}
@@ -1760,7 +1210,6 @@ int hand_form_create(widget_t widget, void* data)
 	SETFORMDELTA(widget, ptd);
 
 	ptd->b_lock = 1;
-	ptd->stack = create_stack_table();
 
 	return 0;
 }
@@ -1777,64 +1226,11 @@ void hand_form_destroy(widget_t widget)
 	if (widget_is_valid(ptd->vsc))
 		widget_destroy(ptd->vsc);
 
-	_formctrl_clean(widget);
-	destroy_stack_table(ptd->stack);
-
 	xmem_free(ptd);
 
 	SETFORMDELTA(widget, 0);
 
 	widget_hand_destroy(widget);
-}
-
-void hand_form_undo(widget_t widget)
-{
-	form_delta_t* ptd = GETFORMDELTA(widget);
-
-	if (!ptd->form)
-		return;
-
-	_formctrl_undo(widget);
-}
-
-void hand_form_copy(widget_t widget)
-{
-	form_delta_t* ptd = GETFORMDELTA(widget);
-
-	if (!ptd->form)
-		return;
-
-	_formctrl_copy(widget);
-}
-
-void hand_form_cut(widget_t widget)
-{
-	form_delta_t* ptd = GETFORMDELTA(widget);
-
-	if (!ptd->form)
-		return;
-
-	_formctrl_done(widget);
-
-	if (!_formctrl_cut(widget))
-	{
-		_formctrl_discard(widget);
-	}
-}
-
-void hand_form_paste(widget_t widget)
-{
-	form_delta_t* ptd = GETFORMDELTA(widget);
-
-	if (!ptd->form)
-		return;
-
-	_formctrl_done(widget);
-
-	if (!_formctrl_paste(widget))
-	{
-		_formctrl_discard(widget);
-	}
 }
 
 void hand_form_size(widget_t widget, int code, const xsize_t* prs)
@@ -1851,10 +1247,15 @@ void hand_form_size(widget_t widget, int code, const xsize_t* prs)
 		break;
 	case WS_SIZE_MINIMIZED:
 		break;
+	case WS_SIZE_MAXSHOW:
+		break;
+	case WS_SIZE_RESTORE:
+		break;
 	case WS_SIZE_LAYOUT:
-		_formctrl_reset_page(widget);
 		break;
 	}
+
+	_formctrl_reset_page(widget);
 }
 
 void hand_form_scroll(widget_t widget, bool_t bHorz, int nLine)
@@ -1962,101 +1363,10 @@ void hand_form_mouse_leave(widget_t widget, dword_t dw, const xpoint_t* pxp)
 		noti_form_field_leave(widget);
 }
 
-void hand_form_mouse_move(widget_t widget, dword_t dw, const xpoint_t* pxp)
-{
-	form_delta_t* ptd = GETFORMDELTA(widget);
-	int nHint;
-	link_t_ptr flk;
-	bool_t b_design;
-	xpoint_t pt;
-
-	if (!ptd->form)
-		return;
-
-	b_design = form_is_design(ptd->form);
-
-	if (b_design)
-	{
-		if (ptd->b_size || ptd->b_drag || ptd->b_group)
-		{
-			ptd->cur_x = pxp->x;
-			ptd->cur_y = pxp->y;
-
-			widget_erase(widget, NULL);
-			return;
-		}
-	}
-
-	pt.x = pxp->x;
-	pt.y = pxp->y;
-	widget_point_to_mm(widget, &pt);
-
-	flk = NULL;
-	nHint = calc_form_hint(&pt, ptd->form, &flk);
-
-	if (b_design)
-	{
-		if (nHint == FORM_HINT_HORZ_SPLIT && flk == ptd->field && !(dw & KS_WITH_CONTROL))
-		{
-			widget_set_cursor(widget, CURSOR_SIZENS);
-
-			if (dw & MS_WITH_LBUTTON)
-			{
-				noti_form_field_sizing(widget, nHint, pxp->x, pxp->y);
-				return;
-			}	
-		}
-		else if (nHint == FORM_HINT_VERT_SPLIT && flk == ptd->field && !(dw & KS_WITH_CONTROL))
-		{				
-			widget_set_cursor(widget, CURSOR_SIZEWE);
-
-			if (dw & MS_WITH_LBUTTON)
-			{
-				noti_form_field_sizing(widget, nHint, pxp->x, pxp->y);
-				return;
-			}
-		}
-		else if (nHint == FORM_HINT_CROSS_SPLIT && flk == ptd->field && !(dw & KS_WITH_CONTROL))
-		{	
-			widget_set_cursor(widget, CURSOR_SIZEALL);
-
-			if (dw & MS_WITH_LBUTTON)
-			{
-				noti_form_field_sizing(widget, nHint, pxp->x, pxp->y);
-				return;
-			}
-		}
-		else if (nHint == FORM_HINT_FIELD && flk == ptd->field && !(dw & KS_WITH_CONTROL))
-		{
-			if (dw & MS_WITH_LBUTTON)
-			{
-				widget_set_cursor(widget, CURSOR_HAND);
-
-				noti_form_field_drag(widget, pxp->x, pxp->y);
-				return;
-			}
-		}
-		else if (nHint == FORM_HINT_NONE)
-		{
-			if (dw & MS_WITH_LBUTTON)
-			{
-				noti_form_begin_group(widget, pxp->x, pxp->y);
-				return;
-			}
-		}
-	}
-}
-
 void hand_form_lbutton_down(widget_t widget, const xpoint_t* pxp)
 {
 	form_delta_t* ptd = GETFORMDELTA(widget);
-	int nHint;
-	link_t_ptr flk;
-	bool_t bRe;
-	xpoint_t pt;
-
-	bool_t b_design;
-
+	
 	if (!ptd->form)
 		return;
 
@@ -2066,93 +1376,30 @@ void hand_form_lbutton_down(widget_t widget, const xpoint_t* pxp)
 	{
 		widget_set_focus(widget);
 	}
-
-	b_design = form_is_design(ptd->form);
-	
-	if (!b_design)
-		return;
-
-	pt.x = pxp->x;
-	pt.y = pxp->y;
-	widget_point_to_mm(widget, &pt);
-
-	flk = NULL;
-	nHint = calc_form_hint(&pt, ptd->form, &flk);
-	bRe = (flk == ptd->field) ? 1 : 0;
-
-	switch (nHint)
-	{
-	case FORM_HINT_HORZ_SPLIT:
-		widget_set_cursor(widget, CURSOR_SIZENS);
-		break;
-	case FORM_HINT_VERT_SPLIT:
-		widget_set_cursor(widget, CURSOR_SIZEWE);
-		break;
-	case FORM_HINT_CROSS_SPLIT:
-		widget_set_cursor(widget, CURSOR_SIZEALL);
-		break;
-	case FORM_HINT_FIELD:
-		if (widget_key_state(widget, KS_WITH_CONTROL))
-		{
-			noti_form_field_selected(widget, flk);
-		}
-		break;
-	case FORM_HINT_NONE:
-		if (!widget_key_state(widget, KS_WITH_CONTROL))
-		{		
-			noti_form_reset_select(widget);
-		}
-		break;
-	}
 }
 
 void hand_form_lbutton_up(widget_t widget, const xpoint_t* pxp)
 {
 	form_delta_t* ptd = GETFORMDELTA(widget);
 
-	int nHint;
+	//int nHint;
 	link_t_ptr flk;
-	bool_t b_design, bRe, bAuto = 0;
+	bool_t bRe = 0, bAuto = 0;
 	xpoint_t pt;
 
 	if (!ptd->form)
 		return;
-
-	b_design = form_is_design(ptd->form);
-
-	if (b_design)
-	{
-		if (ptd->b_size)
-		{
-			noti_form_field_sized(widget, pxp->x, pxp->y);
-			return;
-		}
-
-		if (ptd->b_drag)
-		{
-			widget_set_cursor(widget, CURSOR_ARROW);
-
-			noti_form_field_drop(widget, pxp->x, pxp->y);
-			return;
-		}
-
-		if (ptd->b_group)
-		{
-			noti_form_end_group(widget, pxp->x, pxp->y);
-			return;
-		}
-	}
 
 	pt.x = pxp->x;
 	pt.y = pxp->y;
 	widget_point_to_mm(widget, &pt);
 
 	flk = NULL;
-	nHint = calc_form_hint(&pt, ptd->form, &flk);
+	calc_form_hint(&pt, ptd->form, &flk);
 
 	bRe = (flk == ptd->field) ? 1 : 0;
 
-	if (!b_design && !ptd->b_lock && bRe && flk && get_field_editable(flk))
+	if (!ptd->b_lock && bRe && flk && get_field_editable(flk))
 	{
 		widget_post_key(widget, KEY_ENTER);
 		return;
@@ -2164,7 +1411,7 @@ void hand_form_lbutton_up(widget_t widget, const xpoint_t* pxp)
 			bRe = 1;
 	}
 
-	if (!b_design && flk && !get_field_focusable(flk))
+	if (flk && !get_field_focusable(flk))
 		flk = NULL;
 
 	if (flk && !bRe)
@@ -2177,7 +1424,7 @@ void hand_form_lbutton_up(widget_t widget, const xpoint_t* pxp)
 
 	noti_form_owner(widget, NC_FORMLBCLK, ptd->form, ptd->field, (void*)pxp);
 
-	if (!b_design && !ptd->b_lock && bAuto && flk && get_field_editable(flk))
+	if (!ptd->b_lock && bAuto && flk && get_field_editable(flk))
 	{
 		widget_post_key(widget, KEY_ENTER);
 	}
@@ -2218,140 +1465,44 @@ void hand_form_rbutton_up(widget_t widget, const xpoint_t* pxp)
 void hand_form_keydown(widget_t widget, dword_t ks, int nKey)
 {
 	form_delta_t* ptd = GETFORMDELTA(widget);
-	float x, y, w, h, m;
-	bool_t b_design;
-	link_t_ptr flk;
 
 	if (!ptd->form)
 		return;
 
-	b_design = form_is_design(ptd->form);
-
-	if (b_design)
+	if (nKey == KEY_ENTER && ptd->field)
 	{
-		if (ptd->field && (nKey == KEY_UP || nKey == KEY_DOWN || nKey == KEY_LEFT || nKey == KEY_RIGHT))
+		if (widget_can_focus(widget) && !ptd->b_lock)
 		{
-			ks = widget_key_state(widget, KS_WITH_SHIFT);
-			m = 1;
-
-			if (ks)
-				noti_form_owner(widget, NC_FIELDSIZING, ptd->form, ptd->field, NULL);
-			else
-				noti_form_owner(widget, NC_FIELDDRAG, ptd->form, ptd->field, NULL);
-
-			_formctrl_done(widget);
-
-			flk = get_next_field(ptd->form, LINK_FIRST);
-			while (flk)
-			{
-				if (flk != ptd->field && !get_field_selected(flk))
-				{
-					flk = get_next_field(ptd->form, flk);
-					continue;
-				}
-
-				x = get_field_x(flk);
-				y = get_field_y(flk);
-				w = get_field_width(flk);
-				h = get_field_height(flk);
-
-				switch (nKey)
-				{
-				case KEY_DOWN:
-					if (ks)
-						h += m;
-					else
-						y += m;
-					break;
-				case KEY_UP:
-					if (ks)
-						h = (h - m < 0) ? h : h - m;
-					else
-						y = (y - m < 0) ? y : y - m;
-					break;
-				case KEY_LEFT:
-					if (ks)
-						w = (w - m < 0) ? w : w - m;
-					else
-						x = (x - m < 0) ? x : x - m;
-					break;
-				case KEY_RIGHT:
-					if (ks)
-						w += m;
-					else
-						x += m;
-					break;
-				}
-
-				set_field_x(flk, x);
-				set_field_y(flk, y);
-				set_field_width(flk, w);
-				set_field_height(flk, h);
-
-				flk = get_next_field(ptd->form, flk);
-			}
-
-			widget_erase(widget, NULL);
-
-			if (ks)
-				noti_form_owner(widget, NC_FIELDSIZED, ptd->form, ptd->field, NULL);
-			else
-				noti_form_owner(widget, NC_FIELDDROP, ptd->form, ptd->field, NULL);
-		}
-		else if ((nKey == _T('z') || nKey == _T('Z')) && widget_key_state(widget, KS_WITH_CONTROL))
-		{
-			hand_form_undo(widget);
-		}
-		else if ((nKey == _T('c') || nKey == _T('C')) && widget_key_state(widget, KS_WITH_CONTROL))
-		{
-			hand_form_copy(widget);
-		}
-		else if ((nKey == _T('x') || nKey == _T('X')) && widget_key_state(widget, KS_WITH_CONTROL))
-		{
-			hand_form_cut(widget);
-		}
-		else if ((nKey == _T('v') || nKey == _T('V')) && widget_key_state(widget, KS_WITH_CONTROL))
-		{
-			hand_form_paste(widget);
+			noti_form_begin_edit(widget);
 		}
 	}
-	else
+	else if (nKey == KEY_TAB)
 	{
-		if (nKey == KEY_ENTER && ptd->field)
-		{
-			if (widget_can_focus(widget) && !ptd->b_lock)
-			{
-				noti_form_begin_edit(widget);
-			}
-		}
-		else if (nKey == KEY_TAB)
-		{
-			formctrl_tabskip(widget,TABORDER_RIGHT);
-		}
-		else if (nKey == KEY_LEFT || nKey == KEY_UP) //KEY_LEFT KEY_UP
-		{
-			formctrl_tabskip(widget,TABORDER_LEFT);
-		}
-		else if (nKey == KEY_RIGHT || nKey == KEY_DOWN) //KEY_RIGHT KEY_DOWN
-		{
-			formctrl_tabskip(widget,TABORDER_RIGHT);
-		}
-		else if (nKey == KEY_END) //vk_end
-		{
-			formctrl_move_last_page(widget);
-		}
-		else if (nKey == KEY_HOME) //vk_home
-		{
-			formctrl_move_first_page(widget);
-		}
-		else if (nKey == KEY_PAGEUP) //PAGEUP
-		{
-			formctrl_move_prev_page(widget);
-		}
-		else if (nKey == KEY_PAGEDOWN)	//PAGEDOWN
-		{
-			formctrl_move_next_page(widget);
-		}
+		formctrl_tabskip(widget, TABORDER_RIGHT);
+	}
+	else if (nKey == KEY_LEFT || nKey == KEY_UP) // KEY_LEFT KEY_UP
+	{
+		formctrl_tabskip(widget, TABORDER_LEFT);
+	}
+	else if (nKey == KEY_RIGHT || nKey == KEY_DOWN) // KEY_RIGHT KEY_DOWN
+	{
+		formctrl_tabskip(widget, TABORDER_RIGHT);
+	}
+	else if (nKey == KEY_END) // vk_end
+	{
+		formctrl_move_last_page(widget);
+	}
+	else if (nKey == KEY_HOME) // vk_home
+	{
+		formctrl_move_first_page(widget);
+	}
+	else if (nKey == KEY_PAGEUP) // PAGEUP
+	{
+		formctrl_move_prev_page(widget);
+	}
+	else if (nKey == KEY_PAGEDOWN) // PAGEDOWN
+	{
+		formctrl_move_next_page(widget);
 	}
 }
 
@@ -2360,9 +1511,6 @@ void hand_form_wchar(widget_t widget, wchar_t nChar)
 	form_delta_t* ptd = GETFORMDELTA(widget);
 
 	if (!ptd->form)
-		return;
-
-	if (form_is_design(ptd->form))
 		return;
 
 	if (IS_VISIBLE_CHAR(nChar) && !widget_is_valid(ptd->editor))
@@ -2395,26 +1543,10 @@ void hand_form_menu_command(widget_t widget, int code, int cid, vword_t data)
 {
 	form_delta_t* ptd = GETFORMDELTA(widget);
 
-	if (ptd->form && form_is_design(ptd->form))
+	if (ptd->form)
 	{
 		if (cid == IDC_EDITMENU)
 		{
-			switch (code)
-			{
-			case COMMAND_COPY:
-				hand_form_copy(widget);
-				break;
-			case COMMAND_CUT:
-				hand_form_cut(widget);
-				break;
-			case COMMAND_PASTE:
-				hand_form_paste(widget);
-				break;
-			case COMMAND_UNDO:
-				hand_form_undo(widget);
-				break;
-			}
-
 			if (widget_is_valid((widget_t)data))
 			{
 				widget_close((widget_t)data, 1);
@@ -2480,42 +1612,41 @@ void hand_form_notice(widget_t widget, NOTICE* pnt)
 void hand_form_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 {
 	form_delta_t* ptd = GETFORMDELTA(widget);
-	bool_t b_design;
 	xrect_t xr = { 0 };
 	xsize_t xs = { 0 };
 	visual_t rdc;
 	link_t_ptr flk;
 
 	canvas_t canv;
-	const drawing_interface* pif = NULL;
+	drawing_interface ifc = {0};
 	drawing_interface ifv = {0};
 
-	color_mod_t clrs;
+	const color_mod_t *pclrs;
 	xbrush_t xb;
 	xpen_t xp;
 	xcolor_t xc;
 
 	if (!ptd->form) return;
 
-	widget_get_color_mode(widget, &clrs);
+	pclrs = widget_get_color_mode_ptr(widget);
 	default_xbrush(&xb);
-	format_xcolor(&clrs.clr_bkg, xb.color);
+	format_xcolor(&(pclrs->clr_bkg), xb.color);
 	default_xpen(&xp);
-	format_xcolor(&clrs.clr_frg, xp.color);
+	format_xcolor(&(pclrs->clr_frg), xp.color);
 
-	b_design = form_is_design(ptd->form);
-
-	canv = widget_get_canvas(widget);
-	pif = widget_get_canvas_interface(widget);
-	
 	widget_get_client_rect(widget, &xr);
 
+	canv = widget_get_canvas(widget);
 	rdc = begin_canvas_paint(canv, dc, xr.w, xr.h);
-
+	
 	get_visual_interface(rdc, &ifv);
-	widget_get_view_rect(widget, (viewbox_t*)(&ifv.rect));
+	widget_get_view_rect(widget, (viewbox_t*)&(ifv.rect));
 
-	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
+	get_canvas_interface(canv, &ifc);
+	widget_get_canv_rect(widget, (canvbox_t*)&(ifc.rect));
+	ifc.pclrs = pclrs;
+
+	//(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
 
 	if (widget_can_paging(widget))
 	{
@@ -2527,122 +1658,33 @@ void hand_form_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 			draw_shape(canv, &xp, NULL, &xr, ATTR_SHAPE_RECT);
 		}*/
 
-		if (b_design)
-		{
-			parse_xcolor(&xc, xp.color);
-			lighten_xcolor(&xc, DEF_SOFT_DARKEN);
-			draw_ruler(pif, &xc, (const xrect_t*)&(pif->rect));
-		}
-		else
-		{
-			xmem_copy((void*)&xc, (void*)&(pif->clrs->clr_frg), sizeof(xcolor_t));
-			draw_corner(pif, &xc, (const xrect_t*)&(pif->rect));
-		}
+		xmem_copy((void*)&xc, (void*)&(pclrs->clr_frg), sizeof(xcolor_t));
+		draw_corner(&ifc, &xc, (const xrect_t*)&(ifc.rect));
 	}
 
-	draw_form_page(pif, ptd->form, ptd->cur_page);
+	set_form_design(ptd->form, 1);
+	draw_form_page(&ifc, ptd->form, ptd->cur_page);
+	set_form_design(ptd->form, 0);
 
 	//draw focus
 	if (ptd->field)
 	{
 		_formctrl_field_rect(widget, ptd->field, &xr);
 
-		if (b_design)
+		if (ptd->b_alarm)
 		{
-			parse_xcolor(&xc, DEF_ENABLE_COLOR);
+			parse_xcolor(&xc, DEF_ALARM_COLOR);
 
-			draw_sizing_raw(&ifv, &xc, &xr, ALPHA_SOLID, SIZING_BOTTOMCENTER | SIZING_RIGHTCENTER | SIZING_BOTTOMRIGHT);
+			draw_focus_raw(&ifv, &xc, &xr, ALPHA_SOLID);
 		}
 		else
 		{
-			if (ptd->b_alarm)
-			{
-				parse_xcolor(&xc, DEF_ALARM_COLOR);
-
-				draw_focus_raw(&ifv, &xc, &xr, ALPHA_SOLID);
-			}
+			if (get_field_editable(ptd->field))
+				parse_xcolor(&xc, DEF_ENABLE_COLOR);
 			else
-			{
-				if (get_field_editable(ptd->field))
-					parse_xcolor(&xc, DEF_ENABLE_COLOR);
-				else
-					parse_xcolor(&xc, DEF_DISABLE_COLOR);
+				parse_xcolor(&xc, DEF_DISABLE_COLOR);
 
-				draw_feed_raw(&ifv, &xc, &xr, ALPHA_SOLID);
-			}
-		}
-	}
-
-	if (b_design)
-	{
-		//draw check
-		parse_xcolor(&xc, DEF_ALPHA_COLOR);
-
-		flk = get_next_field(ptd->form, LINK_FIRST);
-		while (flk)
-		{
-			if (get_field_selected(flk))
-			{
-				_formctrl_field_rect(widget, flk, &xr);
-				pt_expand_rect(&xr, DEF_INNER_FEED, DEF_INNER_FEED);
-
-				(*ifv.pf_alphablend_rect)(ifv.ctx, &xc, &xr, ALPHA_TRANS);
-			}
-			flk = get_next_field(ptd->form, flk);
-		}
-
-		if (ptd->b_drag)
-		{
-			xscpy(xp.style, GDI_ATTR_STROKE_STYLE_DASH);
-
-			_formctrl_group_rect(widget, ptd->field, &xr);
-
-			xr.x += (ptd->cur_x - ptd->org_x);
-			xr.y += (ptd->cur_y - ptd->org_y);
-
-			(*ifv.pf_draw_rect)(ifv.ctx, &xp, NULL, &xr);
-		}
-		else if (ptd->b_size)
-		{
-			xscpy(xp.style, GDI_ATTR_STROKE_STYLE_DASH);
-
-			_formctrl_field_rect(widget, ptd->field, &xr);
-
-			if (ptd->org_hint == FORM_HINT_VERT_SPLIT)
-			{
-				xr.w = (ptd->cur_x - xr.x);
-			}
-			else if (ptd->org_hint == FORM_HINT_HORZ_SPLIT)
-			{
-				xr.h = (ptd->cur_y - xr.y);
-			}
-			else
-			{
-				xr.w = (ptd->cur_x - xr.x);
-				xr.h = (ptd->cur_y - xr.y);
-			}
-
-			(*ifv.pf_draw_rect)(ifv.ctx, &xp, NULL, &xr);
-		}
-		else if (ptd->b_group)
-		{
-			xscpy(xp.style, GDI_ATTR_STROKE_STYLE_DASH);
-
-			xr.x = ptd->org_x;
-			xr.w = ptd->cur_x - ptd->org_x;
-			xr.y = ptd->org_y;
-			xr.h = ptd->cur_y - ptd->org_y;
-
-			(*ifv.pf_draw_rect)(ifv.ctx, &xp, NULL, &xr);
-		}
-
-		if (ptd->field && get_field_group(ptd->field))
-		{
-			xscpy(xp.style, GDI_ATTR_STROKE_STYLE_DASH);
-
-			_formctrl_group_rect(widget, ptd->field, &xr);
-
-			(*ifv.pf_draw_rect)(ifv.ctx, &xp, NULL, &xr);
+			draw_feed_raw(&ifv, &xc, &xr, ALPHA_SOLID);
 		}
 	}
 
@@ -2671,7 +1713,6 @@ widget_t formctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* px
 		EVENT_ON_KEYDOWN(hand_form_keydown)
 		EVENT_ON_WCHAR(hand_form_wchar)
 
-		EVENT_ON_MOUSE_MOVE(hand_form_mouse_move)
 		EVENT_ON_MOUSE_HOVER(hand_form_mouse_hover)
 		EVENT_ON_MOUSE_LEAVE(hand_form_mouse_leave)
 
@@ -2785,7 +1826,7 @@ void formctrl_redraw(widget_t widget, bool_t bCalc)
 	form_delta_t* ptd = GETFORMDELTA(widget);
 	link_t_ptr flk;
 	bool_t b_valid;
-	const drawing_interface* pif;
+	drawing_interface ifc = {0};
 
 	XDK_ASSERT(ptd != NULL);
 
@@ -2823,16 +1864,19 @@ void formctrl_redraw(widget_t widget, bool_t bCalc)
 
 	if (bCalc)
 	{
-		pif = widget_get_canvas_interface(widget);
-		ptd->max_page = calc_form_pages(pif, ptd->form);
+		get_canvas_interface(widget_get_canvas(widget), &ifc);
+
+		ptd->max_page = calc_form_pages(&ifc, ptd->form);
 	}
+	
+	widget_erase(widget, NULL);
 }
 
 void formctrl_redraw_field(widget_t widget, link_t_ptr flk, bool_t bCalc)
 {
 	form_delta_t* ptd = GETFORMDELTA(widget);
 	xrect_t xr;
-	const drawing_interface* pif;
+	drawing_interface ifc = {0};
 
 	XDK_ASSERT(ptd != NULL);
 
@@ -2848,9 +1892,9 @@ void formctrl_redraw_field(widget_t widget, link_t_ptr flk, bool_t bCalc)
 	{
 		calc_form_field(ptd->form, flk);
 
-		pif = widget_get_canvas_interface(widget);
+		get_canvas_interface(widget_get_canvas(widget), &ifc);
 
-		ptd->max_page = (short)calc_form_pages(pif, ptd->form);
+		ptd->max_page = (short)calc_form_pages(&ifc, ptd->form);
 	}
 	
 	noti_form_owner(widget, NC_FIELDCALCED, ptd->form, flk, NULL);
@@ -3037,16 +2081,16 @@ int formctrl_get_cur_page(widget_t widget)
 int formctrl_get_max_page(widget_t widget)
 {
 	form_delta_t* ptd = GETFORMDELTA(widget);
-	const drawing_interface* pif;
+	drawing_interface ifc = {0};
 
 	XDK_ASSERT(ptd != NULL);
 
 	if (!ptd->form)
 		return 0;
 
-	pif = widget_get_canvas_interface(widget);
+	get_canvas_interface(widget_get_canvas(widget), &ifc);
 
-	return calc_form_pages(pif, ptd->form);
+	return calc_form_pages(&ifc, ptd->form);
 }
 
 void formctrl_move_to_page(widget_t widget, int page)
@@ -3158,33 +2202,10 @@ void formctrl_set_lock(widget_t widget, bool_t bLock)
 
 bool_t formctrl_get_dirty(widget_t widget)
 {
-	form_delta_t* ptd = GETFORMDELTA(widget);
-
-	XDK_ASSERT(ptd != NULL);
-
-	if (!ptd->form)
-		return 0;
-
-	if (!form_is_design(ptd->form))
-		return 0;
-
-	return (peek_stack_node(ptd->stack, -1)) ? 1 : 0;
+	return 0;
 }
 
-void formctrl_set_dirty(widget_t widget, bool_t bDirty)
+void formctrl_set_dirty(widget_t widget, bool_t b_dirty)
 {
-	form_delta_t* ptd = GETFORMDELTA(widget);
-
-	XDK_ASSERT(ptd != NULL);
-
-	if (!ptd->form)
-		return;
-
-	if (!form_is_design(ptd->form))
-		return ;
-
-	if (bDirty)
-		_formctrl_done(widget);
-	else
-		_formctrl_clean(widget);
+	NOP;
 }

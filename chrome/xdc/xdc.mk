@@ -34,8 +34,7 @@ DIRS = $(wildcard $(SRC_PATH)/*.c \
 	$(SRC_PATH)/edit/*.c \
 	$(SRC_PATH)/hand/*.c \
 	$(SRC_PATH)/win/*.c \
-	$(SRC_PATH)/menu/*.c \
-	$(SRC_PATH)/linux/*.c)
+	$(SRC_PATH)/menu/*.c )
 SRCS = $(notdir $(DIRS))
 COBS = $(patsubst %.c, %.o, $(SRCS))
 OBJS = $(addprefix $(OBJ_PATH)/,$(COBS))
@@ -65,9 +64,6 @@ $(OBJ_PATH)/%.o : $(SRC_PATH)/win/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
 
 $(OBJ_PATH)/%.o : $(SRC_PATH)/menu/%.c
-	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
-
-$(OBJ_PATH)/%.o : $(SRC_PATH)/linux/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
 
 all : $(OBJS)

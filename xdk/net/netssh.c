@@ -30,7 +30,7 @@ LICENSE.GPL3 for more details.
 #include "../xdkimp.h"
 #include "../xdkstd.h"
 #include "../xdkobj.h"
-#include "../xdkbio.h"
+#include "../xdkiop.h"
 
 #if defined(XDK_SUPPORT_SOCK)
 
@@ -3345,7 +3345,7 @@ xhand_t xssh_cli(unsigned short port, const tchar_t* addr)
 	pso->type = SSH_TYPE_CLIENT;
 
 	pso->pif = (bio_interface*)xmem_alloc(sizeof(bio_interface));
-	xdk_bio_interface(tcp, pso->pif);
+	get_bio_interface(tcp, pso->pif);
 
 	_ssh_init(pso);
 
@@ -3367,7 +3367,7 @@ xhand_t xssh_srv(res_file_t so)
 	pso->type = SSH_TYPE_SERVER;
 
 	pso->pif = (bio_interface*)xmem_alloc(sizeof(bio_interface));
-	xdk_bio_interface(tcp, pso->pif);
+	get_bio_interface(tcp, pso->pif);
 
 	_ssh_init(pso);
 

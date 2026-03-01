@@ -11,8 +11,8 @@ CFLAGS = -g -Wall -fPIC -D _DEBUG
 
 MODULE = xdc
 ARCH = aarch64
-CUR_VER = 25
-MAX_VER = 11
+CUR_VER = 26
+MAX_VER = 2
 MIN_VER = 0
 
 LIB_PATH = /usr/local/lib
@@ -35,9 +35,9 @@ DIRS = $(wildcard $(SRC_PATH)/*.c \
 	$(SRC_PATH)/dlg/*.c \
 	$(SRC_PATH)/edit/*.c \
 	$(SRC_PATH)/hand/*.c \
+	$(SRC_PATH)/desg/*.c \
 	$(SRC_PATH)/imp/*.c \
-	$(SRC_PATH)/menu/*.c \
-	$(SRC_PATH)/macos/*.c)
+	$(SRC_PATH)/menu/*.c )
 SRCS = $(notdir $(DIRS))
 COBS = $(patsubst %.c, %.o, $(SRCS))
 OBJS = $(addprefix $(OBJ_PATH)/,$(COBS))
@@ -66,13 +66,13 @@ $(OBJ_PATH)/%.o : $(SRC_PATH)/edit/%.c
 $(OBJ_PATH)/%.o : $(SRC_PATH)/hand/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
 
+$(OBJ_PATH)/%.o : $(SRC_PATH)/desg/%.c
+	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
+
 $(OBJ_PATH)/%.o : $(SRC_PATH)/imp/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
 
 $(OBJ_PATH)/%.o : $(SRC_PATH)/menu/%.c
-	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
-
-$(OBJ_PATH)/%.o : $(SRC_PATH)/macos/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
 
 all : $(OBJS)

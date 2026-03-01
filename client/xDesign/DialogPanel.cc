@@ -312,8 +312,6 @@ static void demoDlg_OnSubbing(widget_t widget, uid_t sid, vword_t delta)
 
 static void demoDlg_OnUnSubbing(widget_t widget, uid_t sid, vword_t delta)
 {
-	widget_del_subproc(widget, sid);
-
 	widget_hand_destroy(widget);
 }
 
@@ -1260,7 +1258,7 @@ void DialogPanel_Title_OnItemChanged(widget_t widget, NOTICE_TITLE* pnt)
 
 	int n_id = xstol(get_title_item_id_ptr(pnt->item));
 
-	widget_post_command(widget, 0, n_id, NULL);
+	widget_post_command(widget, n_id, 0, NULL);
 }
 
 void DialogPanel_Dialog_OnRBClick(widget_t widget, NOTICE_DIALOG* pnf)
@@ -1325,7 +1323,7 @@ void DialogPanel_Dialog_OnLBClick(widget_t widget, NOTICE_DIALOG* pnf)
 		return;
 
 	int n_id = xstol(get_title_item_id_ptr(ptrItem));
-	widget_post_command(widget, 0, n_id, NULL);
+	widget_post_command(widget, n_id, 0, NULL);
 }
 
 void DialogPanel_Dialog_OnItemSize(widget_t widget, NOTICE_DIALOG* pnf)
@@ -1337,7 +1335,7 @@ void DialogPanel_Dialog_OnItemSize(widget_t widget, NOTICE_DIALOG* pnf)
 		return;
 
 	int n_id = xstol(get_title_item_id_ptr(ptrItem));
-	widget_post_command(widget, 0, n_id, NULL);
+	widget_post_command(widget, n_id, 0, NULL);
 }
 
 void DialogPanel_Dialog_OnItemMove(widget_t widget, NOTICE_DIALOG* pnf)
@@ -1349,7 +1347,7 @@ void DialogPanel_Dialog_OnItemMove(widget_t widget, NOTICE_DIALOG* pnf)
 		return;
 
 	int n_id = xstol(get_title_item_id_ptr(ptrItem));
-	widget_post_command(widget, 0, n_id, NULL);
+	widget_post_command(widget, n_id, 0, NULL);
 }
 
 
@@ -1439,6 +1437,7 @@ int DialogPanel_OnCreate(widget_t widget, void* data)
 	titlectrl_set_focus_item(pdt->hTitle, get_title_next_item(ptrTitle, LINK_FIRST));
 
 	widget_attach_splitor(widget, ptrSplit);
+	widget_layout_splitor(widget);
 
 	if (!is_null(szParam))
 	{
@@ -1972,7 +1971,7 @@ void DialogPanel_OnMenuCommand(widget_t widget, int code, int cid, vword_t data)
 		if (code)
 		{
 			color_menu_item(code, token, RES_LEN);
-			DialogPanel_SelectAttr(widget, GDI_ATTR_FONT_COLOR, token);
+			DialogPanel_SelectAttr(widget, GDI_ATTR_TEXT_COLOR, token);
 		}
 		break;
 	case IDC_DIALOGPANEL_PAINTCOLOR:
@@ -2005,7 +2004,7 @@ void DialogPanel_OnNotice(widget_t widget, LPNOTICE phdr)
 		{
 		case NC_DIALOGCALCED:
 			break;
-		case NC_FIELDCALCED:
+		case NC_DIALOGITEMCALCED:
 			break;
 		case NC_DIALOGLBCLK:
 			DialogPanel_Dialog_OnLBClick(widget, pnf);

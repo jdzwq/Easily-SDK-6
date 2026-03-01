@@ -31,7 +31,7 @@ LICENSE.GPL3 for more details.
 
 void default_list_attr(link_t_ptr ptr) 
 {
-	set_list_style(ptr, _T("font-size:9;text-align:center;line-align:center;"));
+	set_list_style(ptr, _T("font-size:10.5;text-align:center;line-align:center;"));
 
 	set_list_item_height(ptr,18); 
 	set_list_item_width(ptr,20); 

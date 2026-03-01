@@ -134,7 +134,7 @@ EXP_API bool_t xuncf_flush_file(xhand_t fh);
 @INPUT dword_t size: the request size in bytes.
 @RETURN bool_t: if succeeds return nonzero, fails return zero.
 */
-EXP_API bool_t xuncf_read_file_range(xhand_t fh, dword_t hoff, dword_t loff, byte_t* buf, dword_t size);
+EXP_API bool_t xuncf_read_file_range(xhand_t fh, vword_t off, byte_t* buf, dword_t size);
 
 /*
 @FUNCTION xuncf_write_file_range: random write file data at the start position.
@@ -145,7 +145,7 @@ EXP_API bool_t xuncf_read_file_range(xhand_t fh, dword_t hoff, dword_t loff, byt
 @INPUT dword_t size: the data size in bytes.
 @RETURN bool_t: if succeeds return nonzero, fails return zero.
 */
-EXP_API bool_t xuncf_write_file_range(xhand_t fh, dword_t hoff, dword_t loff, const byte_t* buf, dword_t size);
+EXP_API bool_t xuncf_write_file_range(xhand_t fh, vword_t off, const byte_t* buf, dword_t size);
 
 /*
 @FUNCTION xuncf_lock_file_range: lock file range for read/write.
@@ -157,7 +157,7 @@ EXP_API bool_t xuncf_write_file_range(xhand_t fh, dword_t hoff, dword_t loff, co
 @OUTPUT res_file_t* pmh: the mapping handle returned.
 @RETURN void*: if succeeds return the buffer address, otherwise return NULL.
 */
-EXP_API void* xuncf_lock_file_range(xhand_t fh, dword_t hoff, dword_t loff, dword_t size, bool_t write, res_file_t* pmh);
+EXP_API void* xuncf_lock_file_range(xhand_t fh, vword_t off, dword_t size, bool_t write, res_file_t* pmh);
 
 /*
 @FUNCTION xuncf_unlock_file_range: unlock file range after read/write.
@@ -169,7 +169,7 @@ EXP_API void* xuncf_lock_file_range(xhand_t fh, dword_t hoff, dword_t loff, dwor
 @INPUT void* buf: the buffer, returned by lock file range.
 @RETURN void: none.
 */
-EXP_API void xuncf_unlock_file_range(xhand_t fh, dword_t hoff, dword_t loff, dword_t size, res_file_t mh, void* pbuf);
+EXP_API void xuncf_unlock_file_range(xhand_t fh, vword_t off, dword_t size, res_file_t mh, void* pbuf);
 
 /*
 @FUNCTION xuncf_setopt: set the file options.
@@ -188,7 +188,15 @@ EXP_API bool_t xuncf_setopt(xhand_t fh, int oid, void* opt, int len);
 @INPUT dword_t loff: the low value of 64bits position.
 @RETURN bool_t: if succeeds return nonzero, fails return zero.
 */
-EXP_API bool_t xuncf_truncate(xhand_t fh, dword_t hoff, dword_t loff);
+EXP_API bool_t xuncf_truncate(xhand_t fh, vword_t off);
+
+EXP_API vlong_t xuncf_seek_begin(xhand_t fh);
+EXP_API vlong_t xuncf_seek_end(xhand_t fh);
+EXP_API vlong_t xuncf_seek_bytes(xhand_t fh, vlong_t bytes);
+EXP_API vlong_t xuncf_seek_lines(xhand_t fh, vlong_t lines);
+EXP_API dword_t xuncf_peek_line(xhand_t fh, byte_t* buf, dword_t max);
+EXP_API dword_t xuncf_read_line(xhand_t fh, byte_t* buf, dword_t max);
+EXP_API dword_t xuncf_write_line(xhand_t fh, const byte_t* buf, dword_t len);
 
 /*
 @FUNCTION xuncf_close_file: close file and free file object.
@@ -204,7 +212,7 @@ EXP_API void xuncf_close_file(xhand_t fh);
 @OUTPUT dword_t* ph: the low value of 64bits file size.
 @RETURN bool_t: if succeeds return nonzero, fails return zero.
 */
-EXP_API bool_t xuncf_file_size(xhand_t fh, dword_t* ph, dword_t* pl);
+EXP_API bool_t xuncf_file_size(xhand_t fh, vword_t* fs);
 
 /*
 @FUNCTION xuncf_set_filetime: set the file write time.
@@ -268,11 +276,15 @@ EXP_API bool_t xuncf_remove_directory(const secu_desc_t* psd, const tchar_t* pna
 @FUNCTION xuncf_list_file: lis files one by one in the directory.
 @INPUT const secu_desc_t* psd: the security struct for writing destination file.
 @INPUT const tchar_t* pname: the path name.
-@INPUT CALLBACK_LISTFILE pf: the callback function for enuming file entity.
-@INPUT void* pa: the param transfer into CALLBACK_LISTFILE function.
+@INPUT PF_LIST_FILES pf: the callback function for enuming file entity.
+@INPUT void* pa: the param transfer into PF_LIST_FILES function.
 @RETURN bool_t: if succeeds return nonzero, fails return zero.
 */
-EXP_API bool_t xuncf_list_file(const secu_desc_t* psd, const tchar_t* path, CALLBACK_LISTFILE pf, void* pa);
+EXP_API bool_t xuncf_list_file(const secu_desc_t* psd, const tchar_t* path, PF_LIST_FILES pf, void* pa);
+
+#if defined (DEBUG) || defined (_DEBUG)
+EXP_API void xuncf_self_test(void);
+#endif
 
 #ifdef	__cplusplus
 }

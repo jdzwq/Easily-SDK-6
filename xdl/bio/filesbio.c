@@ -28,7 +28,7 @@ LICENSE.GPL3 for more details.
 
 #include "../xdldoc.h"
 
-static void _list_file(const file_info_t* pfi, void* pa)
+static void CALLBACK _list_file(const file_info_t* pfi, void* pa)
 {
 	link_t_ptr ptr = (link_t_ptr)pa;
 	link_t_ptr nlk;
@@ -101,7 +101,7 @@ void xfile_tree(const secu_desc_t* psd, const tchar_t* path, link_t_ptr ptr)
 }
 
 
-static void _dump_file(const file_info_t* pfi, void* pa)
+static void CALLBACK _dump_file(const file_info_t* pfi, void* pa)
 {
 	stream_t stm = (stream_t)pa;
 

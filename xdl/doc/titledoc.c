@@ -31,7 +31,7 @@ LICENSE.GPL3 for more details.
 
 void default_title_attr(link_t_ptr ptr)
 {
-	set_title_style(ptr, _T("font-size:9;text-align:near;line-align:center;"));
+	set_title_style(ptr, _T("font-size:10.5;text-align:near;line-align:center;"));
 
 	set_title_item_width(ptr, DEF_TEXT_WIDTH + DEF_ICON_SPAN);
 	set_title_item_height(ptr, 25);

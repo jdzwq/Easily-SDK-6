@@ -71,24 +71,6 @@ extern "C" {
 	*/
 	EXP_API bool_t save_proper_to_ini_file(link_t_ptr ptr, const secu_desc_t* psd, const tchar_t* fname);
 
-	/*
-	@FUNCTION parse_proper_doc_from_style: parse a proper content from style content.
-	@INPUT link_t_ptr ptr: the proper link component.
-	@INPUT const tchar_t* str: the style content string buffer.
-	@INPUT int len: the style content length in characters.
-	@RETURN void: non.
-	*/
-	EXP_API void parse_proper_from_style(link_t_ptr ptr, const tchar_t* str);
-
-	/*
-	@FUNCTION format_proper_doc_to_style: format proper content to style content.
-	@INPUT link_t_ptr ptr: the proper link component.
-	@OUTPUT tchar_t* buf: the string buffer.
-	@INPUT int max: the string buffer size in characters.
-	@RETURN int: return the characters formated.
-	*/
-	EXP_API int format_proper_to_style(link_t_ptr ptr, tchar_t* buf, int len);
-
 
 #ifdef	__cplusplus
 }

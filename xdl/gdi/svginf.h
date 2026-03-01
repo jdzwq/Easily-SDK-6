@@ -48,9 +48,9 @@ EXP_API void svg_get_canvas_interface(canvas_t canv, drawing_interface* pif);
 */
 EXP_API void svg_get_visual_interface(visual_t visu, drawing_interface* pif);
 
-LOC_API void	svg_get_visual_measure(visual_t view, measure_interface* pim);
+EXP_API void	svg_get_visual_measure(visual_t view, measure_interface* pim);
 
-LOC_API void	svg_get_canvas_measure(canvas_t canv, measure_interface* pim);
+EXP_API void	svg_get_canvas_measure(canvas_t canv, measure_interface* pim);
 
 #ifdef	__cplusplus
 }

@@ -7,7 +7,7 @@
 
 	@doc bio interface document
 
-	@module	bioinf.h | interface file
+	@module	xdkbio.h | interface file
 
 	@devnote 张文权 2021.01 - 2021.12	v6.0
 ***********************************************************************/
@@ -27,7 +27,7 @@ LICENSE.GPL3 for more details.
 #ifndef _BIOIMP_H
 #define _BIOIMP_H
 
-#include "../xdldef.h"
+#include "../xdkdef.h"
 
 
 #ifdef	__cplusplus
@@ -47,4 +47,4 @@ EXP_API bool_t get_bio_interface(xhand_t io, bio_interface* pio);
 #endif
 
 
-#endif /*BIOIMP_H*/
+#endif /*_BIOIMP_H*/

@@ -81,6 +81,10 @@ EXP_API bool_t xcache_read(xhand_t vmem, byte_t* buf, dword_t* pb);
 */
 EXP_API bool_t	xcache_protect(xhand_t vmem, bool_t b);
 
+#if defined (DEBUG) || defined (_DEBUG)
+EXP_API void xcache_self_test(void);
+#endif
+
 #endif
 
 #ifdef	__cplusplus

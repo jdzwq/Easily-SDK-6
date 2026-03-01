@@ -103,6 +103,10 @@ void hand_tipbox_size(widget_t widget, int code, const xsize_t* prs)
 		break;
 	case WS_SIZE_MINIMIZED:
 		break;
+	case WS_SIZE_MAXSHOW:
+		break;
+	case WS_SIZE_RESTORE:
+		break;
 	case WS_SIZE_LAYOUT:
 		break;
 	}
@@ -121,39 +125,38 @@ void hand_tipbox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 {
 	tipbox_delta_t* ptd = GETTIPBOXDELTA(widget);
 	visual_t rdc;
-
 	xrect_t xr;
-	const tchar_t *token;
-
 	canvas_t canv;
-	const drawing_interface* pif = NULL;
+	drawing_interface ifc = {0};
 	drawing_interface ifv = {0};
 
-	color_mod_t clrs;
+	const color_mod_t *pclrs;
 	xbrush_t xb;
 	xface_t xa;
 
-	widget_get_color_mode(widget, &clrs);
+	pclrs = widget_get_color_mode_ptr(widget);
 	default_xbrush(&xb);
-	format_xcolor(&clrs.clr_bkg, xb.color);
+	format_xcolor(&(pclrs->clr_bkg), xb.color);
 
 	default_xface(&xa);
 	xscpy(xa.text_wrap, GDI_ATTR_TEXT_WRAP_WORDBREAK);
+	format_xcolor(&(pclrs->clr_txt), xa.text_color);
 
 	widget_get_client_rect(widget, &xr);
 
 	canv = widget_get_canvas(widget);
-	pif = widget_get_canvas_interface(widget);
-
 	rdc = begin_canvas_paint(canv, dc, xr.w, xr.h);
-
+	
 	get_visual_interface(rdc, &ifv);
+	widget_get_view_rect(widget, (viewbox_t*)&(ifv.rect));
+
+	get_canvas_interface(canv, &ifc);
+	widget_get_canv_rect(widget, (canvbox_t*)&(ifc.rect));
+	ifc.pclrs = pclrs;
 
 	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
 
-	token = ptd->sz_text;
-
-	(*ifv.pf_draw_text)(ifv.ctx, &xa, &xr, token, -1);
+	(*ifv.pf_draw_text)(ifv.ctx, &xa, &xr, ptd->sz_text, -1);
 
 	end_canvas_paint(canv, dc, pxr);
 }

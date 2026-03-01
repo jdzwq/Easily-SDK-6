@@ -103,8 +103,6 @@ LICENSE.GPL3 for more details.
 #endif
 #endif
 
-#define INFCALL
-
 #ifndef _OS_WINDOWS
 #if defined(_UNICODE) || defined(UNICODE)
 #define _T(x)      L ## x
@@ -258,6 +256,7 @@ typedef struct _handle_head *stream_t;
 #include "inf/platinf.h"
 #include "inf/bioinf.h"
 #include "inf/fioinf.h"
+#include "inf/uioinf.h"
 
 #endif	/* _XDKDEF_H */
 

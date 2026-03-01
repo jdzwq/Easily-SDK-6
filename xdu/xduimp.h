@@ -18,7 +18,7 @@
 #include "imp/impcontext.h"
 #include "imp/impgdi.h"
 #include "imp/gdicanv.h"
-#include "imp/gdiinf.h"
+#include "inf/gdiinf.h"
 #endif
 
 #ifdef XDU_SUPPORT_WIDGET

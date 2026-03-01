@@ -30,15 +30,6 @@ LICENSE.GPL3 for more details.
 #include "../xdldef.h"
 
 
-typedef enum{
-	FORM_HINT_NONE,
-	FORM_HINT_FIELD,
-	FORM_HINT_GROUP,
-	FORM_HINT_VERT_SPLIT,
-	FORM_HINT_HORZ_SPLIT,
-	FORM_HINT_CROSS_SPLIT,
-}FORM_HINT_CODE;
-
 #ifdef	__cplusplus
 extern "C" {
 #endif
@@ -47,9 +38,7 @@ extern "C" {
 
 	EXP_API void calc_form_field_rect(link_t_ptr ptr, link_t_ptr flk, xrect_t* pxr);
 
-	EXP_API void calc_form_group_rect(link_t_ptr ptr, link_t_ptr alk, xrect_t* pxr);
-
-	EXP_API int calc_form_hint(const xpoint_t* ppt, link_t_ptr ptr, link_t_ptr* pflk);
+	EXP_API void calc_form_hint(const xpoint_t* ppt, link_t_ptr ptr, link_t_ptr* pflk);
 
 	EXP_API void draw_form_page(const drawing_interface* pcanv, link_t_ptr ptr, int page);
 

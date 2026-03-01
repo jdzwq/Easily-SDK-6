@@ -11,8 +11,8 @@ CFLAGS = -g -Wall -fPIC -D _DEBUG
 
 MODULE = xdl
 ARCH = aarch64
-CUR_VER = 25
-MAX_VER = 11
+CUR_VER = 26
+MAX_VER = 2
 MIN_VER = 0
 
 LIB_PATH = /usr/local/lib
@@ -33,7 +33,6 @@ DIRS = $(wildcard \
 	$(SRC_PATH)/bio/*.c \
 	$(SRC_PATH)/doc/*.c \
 	$(SRC_PATH)/gdi/*.c \
-	$(SRC_PATH)/hint/*.c \
 	$(SRC_PATH)/ing/*.c \
 	$(SRC_PATH)/mis/*.c \
 	$(SRC_PATH)/par/*.c \
@@ -61,9 +60,6 @@ $(OBJ_PATH)/%.o : $(SRC_PATH)/doc/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
 
 $(OBJ_PATH)/%.o : $(SRC_PATH)/gdi/%.c
-	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
-
-$(OBJ_PATH)/%.o : $(SRC_PATH)/hint/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
 
 $(OBJ_PATH)/%.o : $(SRC_PATH)/ing/%.c

@@ -197,7 +197,7 @@ void PlotPanel_Title_OnItemChanged(widget_t widget, NOTICE_TITLE* pnt)
 
 	int n_id = xstol(get_title_item_id_ptr(pnt->item));
 
-	widget_post_command(widget, 0, n_id, NULL);
+	widget_post_command(widget, n_id, 0, NULL);
 }
 
 void PlotPanel_Plot_OnRBClick(widget_t widget, NOTICE_PLOT* pnf)
@@ -217,7 +217,7 @@ void PlotPanel_Plot_OnLBClick(widget_t widget, NOTICE_PLOT* pnf)
 		return;
 
 	int n_id = xstol(get_title_item_id_ptr(ptrItem));
-	widget_post_command(widget, 0, n_id, NULL);
+	widget_post_command(widget, n_id, 0, NULL);
 }
 
 void PlotPanel_Proper_OnEntityUpdate(widget_t widget, NOTICE_PROPER* pnp)
@@ -497,6 +497,7 @@ int PlotPanel_OnCreate(widget_t widget, void* data)
 	titlectrl_set_focus_item(pdt->hTitle, get_title_next_item(ptrTitle, LINK_FIRST));
 
 	widget_attach_splitor(widget, ptrSplit);
+	widget_layout_splitor(widget);
 
 	const tchar_t* szParam = (tchar_t*)data;
 
@@ -672,7 +673,7 @@ void PlotPanel_OnMenuCommand(widget_t widget, int code, int cid, vword_t data)
 		widget_destroy((widget_t)data);
 		if (code)
 		{
-			widget_post_command(widget, 0, code, NULL);
+			widget_post_command(widget, code, 0, NULL);
 		}
 		break;
 	}

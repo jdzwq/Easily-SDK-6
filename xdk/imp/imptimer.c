@@ -86,4 +86,71 @@ bool_t alter_timer(res_queue_t rq, res_timer_t rt, dword_t duetime, dword_t peri
 	return (*pif->pf_alter_timer)(rq, rt, duetime, period);
 }
 
+/**********************************************************************/
+#if defined (DEBUG) || defined (_DEBUG)
+static void timer_proc_1(void* param, res_timer_t tid)
+{
+	int* pn = (int*)param;
+
+	(*pn) ++;
+
+	_tprintf(_T("the timer1 %0x scheduled %d\n"), (unsigned long)tid, *pn);
+}
+
+static void timer_proc_2(void* param, res_timer_t tid)
+{
+	int* pn = (int*)param;
+
+	(*pn) ++;
+
+	_tprintf(_T("the timer2 %0x scheduled %d\n"), (unsigned long)tid, *pn);
+}
+
+void timer_self_test()
+{
+	res_queue_t rq = 0;
+	res_timer_t rt_timer1 = 0, rt_timer2 = 0;
+	int timer1_count = 0;
+	int timer2_count = 0;
+	
+	TRY_CATCH;
+
+	rq = create_timer_queue();
+
+	_tprintf(_T("the timer1 be started after %d second, sheduled per %d seconds\n"), 2, 2);
+	rt_timer1 = create_timer(rq, 2000, 2000, (PF_TIMERFUNC)timer_proc_1, (void*)&timer1_count);
+
+	_tprintf(_T("the timer2 be started after %d second, sheduled per %d seconds\n"), 1, 3);
+	rt_timer2 = create_timer(rq, 1000, 3000, (PF_TIMERFUNC)timer_proc_2, (void*)&timer2_count);
+
+	while(timer1_count < 10 || timer2_count < 10)
+	{
+		thread_sleep(1000);
+	}
+
+	destroy_timer(rq, rt_timer1);
+	rt_timer1 = 0;
+
+	destroy_timer(rq, rt_timer2);
+	rt_timer2 = 0;
+
+	destroy_timer_queue(rq);
+	rq = 0;
+
+	END_CATCH;
+
+	return;
+ONERROR:
+	XDK_TRACE_LAST;
+
+	if(rt_timer1) destroy_timer(rq, rt_timer1);
+
+	if(rt_timer2) destroy_timer(rq, rt_timer2);
+
+	if(rq) destroy_timer_queue(rq);
+
+	return;
+}
+#endif
+
 #endif /*XDK_SUPPORT_TIMER*/

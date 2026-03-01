@@ -37,7 +37,7 @@ void destroy_bitmap(bitmap_t bmp)
 
 	pif = PROCESS_CONTEXT_INTERFACE;
 
-	(pif->pf_destroy_bitmap)(bmp);
+	(*pif->pf_destroy_bitmap)(bmp);
 }
 
 void get_bitmap_size(bitmap_t rdc, int* pw, int* ph)
@@ -46,7 +46,7 @@ void get_bitmap_size(bitmap_t rdc, int* pw, int* ph)
 
 	pif = PROCESS_CONTEXT_INTERFACE;
 
-	(pif->pf_get_bitmap_size)(rdc, pw, ph);
+	(*pif->pf_get_bitmap_size)(rdc, pw, ph);
 }
 
 bitmap_t create_context_bitmap(visual_t rdc)
@@ -55,7 +55,7 @@ bitmap_t create_context_bitmap(visual_t rdc)
 
 	pif = PROCESS_CONTEXT_INTERFACE;
 
-	return (pif->pf_create_context_bitmap)(rdc);
+	return (*pif->pf_create_context_bitmap)(rdc);
 }
 
 bitmap_t create_color_bitmap(visual_t rdc, const xcolor_t* pxc, int w, int h)
@@ -64,7 +64,7 @@ bitmap_t create_color_bitmap(visual_t rdc, const xcolor_t* pxc, int w, int h)
 
 	pif = PROCESS_CONTEXT_INTERFACE;
 
-	return (pif->pf_create_color_bitmap)(rdc, pxc, w, h);
+	return (*pif->pf_create_color_bitmap)(rdc, pxc, w, h);
 }
 
 bitmap_t create_pattern_bitmap(visual_t rdc, const xcolor_t* pxc_front, const xcolor_t* pxc_back, int w, int h)
@@ -73,7 +73,7 @@ bitmap_t create_pattern_bitmap(visual_t rdc, const xcolor_t* pxc_front, const xc
 
 	pif = PROCESS_CONTEXT_INTERFACE;
 
-	return (pif->pf_create_pattern_bitmap)(rdc, pxc_front, pxc_back, w, h);
+	return (*pif->pf_create_pattern_bitmap)(rdc, pxc_front, pxc_back, w, h);
 }
 
 bitmap_t create_gradient_bitmap(visual_t rdc, const xcolor_t* pxc_near, const xcolor_t* pxc_center, int w, int h, const tchar_t* lay)
@@ -82,7 +82,7 @@ bitmap_t create_gradient_bitmap(visual_t rdc, const xcolor_t* pxc_near, const xc
 
 	pif = PROCESS_CONTEXT_INTERFACE;
 
-	return (pif->pf_create_gradient_bitmap)(rdc, pxc_near, pxc_center, w, h, lay);
+	return (*pif->pf_create_gradient_bitmap)(rdc, pxc_near, pxc_center, w, h, lay);
 }
 
 bitmap_t create_code128_bitmap(visual_t rdc, const xcolor_t* pxc_front, const xcolor_t* pxc_back, const tchar_t* text)
@@ -126,7 +126,7 @@ bitmap_t create_code128_bitmap(visual_t rdc, const xcolor_t* pxc_front, const xc
 
 	xmem_free(buf);
 
-	bmp = (pif->pf_create_code128_bitmap)(rdc, pxc_front, pxc_back, bar_buf, bar_len);
+	bmp = (*pif->pf_create_code128_bitmap)(rdc, pxc_front, pxc_back, bar_buf, bar_len);
 
 	xmem_free(bar_buf);
 
@@ -175,7 +175,7 @@ bitmap_t create_pdf417_bitmap(visual_t rdc, const xcolor_t* pxc_front, const xco
 
 	xmem_free(buf);
 
-	bmp = (pif->pf_create_pdf417_bitmap)(rdc, pxc_front, pxc_back, bar_buf, rows, cols);
+	bmp = (*pif->pf_create_pdf417_bitmap)(rdc, pxc_front, pxc_back, bar_buf, rows, cols);
 
 	xmem_free(bar_buf);
 
@@ -224,7 +224,7 @@ bitmap_t create_qrcode_bitmap(visual_t rdc, const xcolor_t* pxc_front, const xco
 
 	xmem_free(buf);
 
-	bmp = (pif->pf_create_qrcode_bitmap)(rdc, pxc_front, pxc_back, bar_buf, rows, cols);
+	bmp = (*pif->pf_create_qrcode_bitmap)(rdc, pxc_front, pxc_back, bar_buf, rows, cols);
 
 	xmem_free(bar_buf);
 
@@ -237,7 +237,7 @@ bitmap_t load_bitmap_from_bytes(visual_t rdc, const byte_t* pb, dword_t len)
 
 	pif = PROCESS_CONTEXT_INTERFACE;
 
-	return (pif->pf_load_bitmap_from_bytes)(rdc, pb, len);
+	return (*pif->pf_load_bitmap_from_bytes)(rdc, pb, len);
 }
 
 dword_t	save_bitmap_to_bytes(visual_t rdc, bitmap_t rb, byte_t* pb, dword_t max)
@@ -246,7 +246,7 @@ dword_t	save_bitmap_to_bytes(visual_t rdc, bitmap_t rb, byte_t* pb, dword_t max)
 
 	pif = PROCESS_CONTEXT_INTERFACE;
 
-	return (dword_t)(pif->pf_save_bitmap_to_bytes)(rdc, rb, pb, max);
+	return (dword_t)(*pif->pf_save_bitmap_to_bytes)(rdc, rb, pb, max);
 }
 
 dword_t	get_bitmap_bytes(bitmap_t rdc)
@@ -255,7 +255,7 @@ dword_t	get_bitmap_bytes(bitmap_t rdc)
 
 	pif = PROCESS_CONTEXT_INTERFACE;
 
-	return (dword_t)(pif->pf_get_bitmap_bytes)(rdc);
+	return (dword_t)(*pif->pf_get_bitmap_bytes)(rdc);
 }
 
 #ifdef XDU_SUPPORT_SHELL
@@ -266,7 +266,7 @@ bitmap_t load_bitmap_from_thumb(visual_t rdc, const tchar_t* fname)
 
 	pif = PROCESS_CONTEXT_INTERFACE;
 
-	return (pif->pf_load_bitmap_from_thumb)(rdc, fname);
+	return (*pif->pf_load_bitmap_from_thumb)(rdc, fname);
 }
 
 bitmap_t load_bitmap_from_icon(visual_t rdc, const tchar_t* iname)
@@ -275,7 +275,7 @@ bitmap_t load_bitmap_from_icon(visual_t rdc, const tchar_t* iname)
 
 	pif = PROCESS_CONTEXT_INTERFACE;
 
-	return (pif->pf_load_bitmap_from_icon)(rdc, iname);
+	return (*pif->pf_load_bitmap_from_icon)(rdc, iname);
 }
 
 #endif /*XDU_SUPPORT_SHELL*/

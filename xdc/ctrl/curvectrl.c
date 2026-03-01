@@ -183,10 +183,15 @@ void hand_curve_size(widget_t widget, int code, const xsize_t* prs)
 		break;
 	case WS_SIZE_MINIMIZED:
 		break;
+	case WS_SIZE_MAXSHOW:
+		break;
+	case WS_SIZE_RESTORE:
+		break;
 	case WS_SIZE_LAYOUT:
-		_curvectrl_reset_page(widget);
 		break;
 	}
+
+	_curvectrl_reset_page(widget);
 }
 
 void hand_curve_scroll(widget_t widget, bool_t bHorz, int nLine)
@@ -338,7 +343,6 @@ void curvectrl_redraw(widget_t widget)
 	XDK_ASSERT(ptd != NULL);
 
 	_curvectrl_reset_page(widget);
-
 	widget_erase(widget, NULL);
 }
 

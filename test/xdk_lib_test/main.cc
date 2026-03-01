@@ -364,74 +364,13 @@ void test_rtf()
 
 }*/
 
-void test_enc(void)
-{
-	base64_self_test();
-
-	der_self_test();
-}
-
-void test_mob(void)
-{
-	//map_self_test();
-
-	//matrix_self_test();
-
-	//vector_self_test();
-
-	//set_self_test();
-
-	//variant_self_test();
-
-	//message_self_test();
-
-	object_self_test();
-}
-
-void test_vob(void)
-{
-	//spinlock_self_test();
-
-	//sequence_self_test();
-
-	//queue_self_test();
-}
-
-void test_dob(void)
-{
-	//ac_tableself_test();
-
-	//bina_treeself_test();
-
-	//trie_treeself_test();
-
-	//hash_tableself_test();
-
-	//dict_tableself_test();
-
-	//words_tableself_test();
-
-	//string_tableself_test();
-
-	//file_tableself_test();
-
-	//bplus_tree_self_test();
-
-	bplus_tree_self_test();
-}
 
 int main(int argc, char* argv[])
 {
 	xdk_process_init(XDK_APARTMENT_THREAD | XDK_INITIALIZE_CONSOLE);
 
-	//test_enc();
-
-	test_mob();
-
-	//test_vob();
-
-	//test_dob();
-
+	test_printf_big5();
+	
 	xdk_process_uninit();
 
 #ifdef _OS_WINDOWS

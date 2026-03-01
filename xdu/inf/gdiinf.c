@@ -127,6 +127,8 @@ void get_visual_interface(visual_t visu, drawing_interface* piv)
 	piv->pf_inclip_rect = (PF_INCLIP_RECT)inclip_rect_raw;
 }
 
+/**************************************************************************/
+
 void get_visual_measure(visual_t view, measure_interface* pim)
 {
 	pim->ctx = (void*)view;

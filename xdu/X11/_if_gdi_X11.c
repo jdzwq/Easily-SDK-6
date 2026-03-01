@@ -130,7 +130,7 @@ void _gdi_uninit(void)
 void _gdi_set_xfont(visual_t rdc, const xfont_t* pxf)
 {
 	X11_context_t* ctx = TypePtrFromHead(X11_context_t, rdc);
-	X11_fontset_t* fnt = TypePtrFromHead(X11_fontset_t, ctx->fontset);
+	X11_fontset_t* fnt = (rdc)? TypePtrFromHead(X11_fontset_t, ctx->fontset) : NULL;
 	XftFont* xft_font;
 	char* family = NULL;
 	double size = 0.0;
@@ -138,8 +138,10 @@ void _gdi_set_xfont(visual_t rdc, const xfont_t* pxf)
 	int slant;
 	tchar_t style[20] = {0};
 
-	xft_font = (XftFont*)fnt->font_object;
-	if(xft_font->pattern)
+	if(!ctx) return;
+
+	xft_font = (fnt)? (XftFont*)fnt->font_object : NULL;
+	if(xft_font &&xft_font->pattern)
 	{
 		FcPatternGetString(xft_font->pattern, FC_FAMILY, 0, (FcChar8 **)&family);
 		FcPatternGetDouble(xft_font->pattern, FC_SIZE, 0, &size);
@@ -153,7 +155,7 @@ void _gdi_set_xfont(visual_t rdc, const xfont_t* pxf)
 			xscpy(style, GDI_ATTR_FONT_STYLE_REGULAR);
 	}
 
-	if(size == xstof(pxf->size) && weight == xstol(pxf->weight) && xsicmp(style, pxf->style) == 0 && xsicmp(family, pxf->family) == 0)
+	if(size == xstof(pxf->size) && weight == xstol(pxf->weight) && xsicmp(style, pxf->style) == 0 && (is_null(pxf->family) || xsicmp(family, pxf->family) == 0))
 	{
 		return;
 	}
@@ -171,7 +173,7 @@ void _gdi_set_xfont(visual_t rdc, const xfont_t* pxf)
 void _gdi_get_xfont(visual_t rdc, xfont_t* pxf)
 {
 	X11_context_t* ctx = TypePtrFromHead(X11_context_t, rdc);
-	X11_fontset_t* fnt = TypePtrFromHead(X11_fontset_t, ctx->fontset);
+	X11_fontset_t* fnt = (rdc)? TypePtrFromHead(X11_fontset_t, ctx->fontset) : NULL;
 
 	XftFont* xft_font;
 	char* family = NULL;
@@ -179,6 +181,7 @@ void _gdi_get_xfont(visual_t rdc, xfont_t* pxf)
 	int weight = 0;
 	int slant;
 
+	if(!ctx) return;
 	xft_font = (XftFont*)fnt->font_object;
 	if(!xft_font->pattern) return;
 

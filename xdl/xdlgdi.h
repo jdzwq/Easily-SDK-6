@@ -6,8 +6,6 @@
 #include "gdi/svggdi.h"
 #include "gdi/svginf.h"
 
-#include "hint/hintner.h"
-
 #include "scan/scanner.h"
 #include "scan/memoscan.h"
 #include "scan/richscan.h"

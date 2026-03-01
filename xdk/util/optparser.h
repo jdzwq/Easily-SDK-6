@@ -30,16 +30,16 @@ LICENSE.GPL3 for more details.
 
 #include "../xdkdef.h"
 
-typedef bool_t(*PF_OPTIONS_PARSE)(void* pp, const tchar_t* key, int klen, const tchar_t* val, int vlen);
-typedef bool_t(*PF_OPTIONS_FORMAT)(void* fp, const tchar_t** pkey, int* pklen, const tchar_t** pval, int* pvlen);
+typedef bool_t(CALLBACK *PF_OPTIONS_PARSE)(void* pp, const tchar_t* key, int klen, const tchar_t* val, int vlen);
+typedef bool_t(CALLBACK *PF_OPTIONS_FORMAT)(void* fp, const tchar_t** pkey, int* pklen, const tchar_t** pval, int* pvlen);
+
+LOC_API int parse_options(const tchar_t* str, int len, tchar_t itemfeed, tchar_t linefeed, void* param, PF_OPTIONS_PARSE pf_parse);
+
+LOC_API int format_options(tchar_t* buf, int max, tchar_t itemfeed, tchar_t linefeed, void* param, PF_OPTIONS_FORMAT pf_format);
 
 #ifdef	__cplusplus
 extern "C" {
 #endif
-	
-	LOC_API int parse_options(const tchar_t* str, int len, tchar_t itemfeed, tchar_t linefeed, void* param, PF_OPTIONS_PARSE pf_parse);
-
-	LOC_API int format_options(tchar_t* buf, int max, tchar_t itemfeed, tchar_t linefeed, void* param, PF_OPTIONS_FORMAT pf_format);
 
 #ifdef	__cplusplus
 }

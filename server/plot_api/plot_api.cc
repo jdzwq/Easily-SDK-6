@@ -27,17 +27,17 @@ LICENSE.GPL3 for more details.
 #include "plot_api.h"
 
 #define DEF_COLOR_TABLE		_T("LightSlateGray,CornflowerBlue,DarkSalmon,ForestGreen,Indigo,LightSteelBlue,Orange,PapayaWhip")
-#define DEF_INDICATOR_STYLE		_T("font-size:9;stroke-color:Azure;fill-color:Gray;fill-style:gradient;gradient:radial")
-#define DEF_THERMOMETER_STYLE	_T("font-size:9;stroke-color:Gray;fill-color:Gray;fill-style:gradient;gradient:radial")
-#define DEF_BARGRAM_STYLE		_T("font-size:9;stroke-color:Gray;fill-color:Gray;fill-style:gradient;gradient:radial")
-#define DEF_KPIGRAM_STYLE		_T("font-size:9;stroke-color:Gray;fill-color:Gray;fill-style:gradient;gradient:radial")
-#define DEF_TASKGRAM_STYLE		_T("font-size:9;stroke-color:Gray;fill-color:Gray;fill-style:gradient;gradient:radial")
-#define DEF_HISTOGRAM_STYLE		_T("font-size:9;stroke-color:Gray;fill-color:Gray;fill-style:gradient;gradient:radial")
-#define DEF_PANTOGRAM_STYLE		_T("font-size:9;stroke-color:Gray;fill-color:Gray;fill-style:gradient;gradient:radial")
-#define DEF_SCATTERGRAM_STYLE	_T("font-size:9;stroke-color:Gray;fill-color:Gray;fill-style:gradient;gradient:radial")
-#define DEF_TRENDGRAM_STYLE		_T("font-size:9;stroke-color:Gray;fill-color:Gray;fill-style:gradient;gradient:radial")
-#define DEF_RADARGRAM_STYLE		_T("font-size:9;stroke-color:Gray;fill-color:Gray;fill-style:gradient;gradient:radial")
-#define DEF_FUELGRAM_STYLE		_T("font-size:9;stroke-color:Gray;fill-color:Gray;fill-style:gradient;gradient:radial")
+#define DEF_INDICATOR_STYLE		_T("font-size:10.5;stroke-color:Azure;fill-color:Gray;fill-style:gradient;gradient:radial")
+#define DEF_THERMOMETER_STYLE	_T("font-size:10.5;stroke-color:Gray;fill-color:Gray;fill-style:gradient;gradient:radial")
+#define DEF_BARGRAM_STYLE		_T("font-size:10.5;stroke-color:Gray;fill-color:Gray;fill-style:gradient;gradient:radial")
+#define DEF_KPIGRAM_STYLE		_T("font-size:10.5;stroke-color:Gray;fill-color:Gray;fill-style:gradient;gradient:radial")
+#define DEF_TASKGRAM_STYLE		_T("font-size:10.5;stroke-color:Gray;fill-color:Gray;fill-style:gradient;gradient:radial")
+#define DEF_HISTOGRAM_STYLE		_T("font-size:10.5;stroke-color:Gray;fill-color:Gray;fill-style:gradient;gradient:radial")
+#define DEF_PANTOGRAM_STYLE		_T("font-size:10.5;stroke-color:Gray;fill-color:Gray;fill-style:gradient;gradient:radial")
+#define DEF_SCATTERGRAM_STYLE	_T("font-size:10.5;stroke-color:Gray;fill-color:Gray;fill-style:gradient;gradient:radial")
+#define DEF_TRENDGRAM_STYLE		_T("font-size:10.5;stroke-color:Gray;fill-color:Gray;fill-style:gradient;gradient:radial")
+#define DEF_RADARGRAM_STYLE		_T("font-size:10.5;stroke-color:Gray;fill-color:Gray;fill-style:gradient;gradient:radial")
+#define DEF_FUELGRAM_STYLE		_T("font-size:10.5;stroke-color:Gray;fill-color:Gray;fill-style:gradient;gradient:radial")
 
 typedef struct _plot_block_t{
 	secu_desc_t sd;

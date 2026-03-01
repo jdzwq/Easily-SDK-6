@@ -9,12 +9,7 @@
 
 	@module	stringtable.c | implement file
 
-	@devnote 张文权 2005.01 - 2007.12	v3.0
-	@devnote 张文权 2008.01 - 2009.12	v3.5
-	@devnote 张文权 2012.01 - 2015.12	v4.0
-	@devnote 张文权 2016.01 - 2016.12	v4.5
-	@devnote 张文权 2017.01 - 2017.12	v5.0
-	@devnote 张文权 2018.01 - 2018.12	v5.5
+	@devnote 张文权 2021.01 - 2021.12	v6.0
 ***********************************************************************/
 
 /**********************************************************************
@@ -759,7 +754,7 @@ typedef struct _ST_FORMAT_PARAM{
 	link_t_ptr ent;
 }ST_FORMAT_PARAM;
 
-static bool_t _on_parse_token(void* pp, const tchar_t* key, int klen, const tchar_t* val, int vlen)
+static bool_t CALLBACK _on_parse_token(void* pp, const tchar_t* key, int klen, const tchar_t* val, int vlen)
 {
 	link_t_ptr st = (link_t_ptr)pp;
 
@@ -768,7 +763,7 @@ static bool_t _on_parse_token(void* pp, const tchar_t* key, int klen, const tcha
 	return 1;
 }
 
-static bool_t _on_format_token(void* fp, const tchar_t** pkey, int* pklen, const tchar_t** pval, int* pvlen)
+static bool_t CALLBACK _on_format_token(void* fp, const tchar_t** pkey, int* pklen, const tchar_t** pval, int* pvlen)
 {
 	ST_FORMAT_PARAM* pfp = (ST_FORMAT_PARAM*)fp;
 	link_t_ptr ent;

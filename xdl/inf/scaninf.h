@@ -70,14 +70,14 @@ typedef struct _object_attr_t
 
 typedef int(CALLBACK *PF_SCAN_TEXTOR_CALLBACK)(int scan, void* object, object_attr_t* attr, bool_t b_atom, bool_t b_ins, bool_t b_del, bool_t b_sel, const tchar_t* cur_word, int cur_count, tchar_t* ret_word, int page, int cur_row, int cur_col, const word_place_t* ptm, void* pp);
 
-typedef bool_t(INFCALL *PF_SCAN_IS_PAGING)(void* ctx);
-typedef bool_t(INFCALL *PF_SCAN_BREAK_PAGE)(void* ctx);
-typedef int(INFCALL *PF_SCAN_NEXT_PAGE)(void* ctx);
-typedef int(INFCALL *PF_SCAN_NEXT_WORD)(void* ctx, tchar_t** ppch, xsize_t* pse, bool_t* pins, bool_t* pdel, bool_t* psel, bool_t* patom);
-typedef int(INFCALL *PF_SCAN_INSERT_WORD)(void* ctx, tchar_t* pch, xsize_t* pse);
-typedef int(INFCALL *PF_SCAN_DELETE_WORD)(void* ctx);
-typedef void(INFCALL *PF_SCAN_CUR_OBJECT)(void* ctx, void** pobj);
-typedef void(INFCALL *PF_SCAN_OBJECT_ATTR)(void* ctx, void* pobj, object_attr_t* pret);
+typedef bool_t(*PF_SCAN_IS_PAGING)(void* ctx);
+typedef bool_t(*PF_SCAN_BREAK_PAGE)(void* ctx);
+typedef int(*PF_SCAN_NEXT_PAGE)(void* ctx);
+typedef int(*PF_SCAN_NEXT_WORD)(void* ctx, tchar_t** ppch, xsize_t* pse, bool_t* pins, bool_t* pdel, bool_t* psel, bool_t* patom);
+typedef int(*PF_SCAN_INSERT_WORD)(void* ctx, tchar_t* pch, xsize_t* pse);
+typedef int(*PF_SCAN_DELETE_WORD)(void* ctx);
+typedef void(*PF_SCAN_CUR_OBJECT)(void* ctx, void** pobj);
+typedef void(*PF_SCAN_OBJECT_ATTR)(void* ctx, void* pobj, object_attr_t* pret);
 
 typedef struct _words_scan_interface{
 	void* ctx;

@@ -186,9 +186,25 @@ void hand_menu_size(widget_t widget, int code, const xsize_t* prs)
 		break;
 	case WS_SIZE_MINIMIZED:
 		break;
-	case WS_SIZE_LAYOUT:
-		_menubox_reset_page(widget);
+	case WS_SIZE_MAXSHOW:
 		break;
+	case WS_SIZE_RESTORE:
+		break;
+	case WS_SIZE_LAYOUT:
+		break;
+	}
+
+	_menubox_reset_page(widget);
+}
+
+void hand_menu_keydown(widget_t widget, dword_t ks, int key)
+{
+	menu_delta_t* ptd = GETMENUDELTA(widget);
+
+	if(key == KEY_ESC)
+	{
+		widget_post_command(widget_get_owner(widget), 0, widget_get_user_id(widget), (vword_t)widget);
+		widget_close(widget, 0);
 	}
 }
 
@@ -258,6 +274,7 @@ void hand_menu_lbutton_up(widget_t widget, const xpoint_t* pxp)
 		code = 0;
 
 	widget_post_command(widget_get_owner(widget), code, widget_get_user_id(widget), (vword_t)widget);
+	widget_close(widget, 0);
 }
 
 void hand_menu_rbutton_down(widget_t widget, const xpoint_t* pxp)
@@ -287,6 +304,7 @@ void hand_menu_rbutton_up(widget_t widget, const xpoint_t* pxp)
 		code = 0;
 
 	widget_post_command(widget_get_owner(widget), code, widget_get_user_id(widget), (vword_t)widget);
+	widget_close(widget, 0);
 }
 
 void hand_menu_scroll(widget_t widget, bool_t bHorz, int nLine)
@@ -307,32 +325,34 @@ void hand_menu_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	visual_t rdc;
 
 	canvas_t canv;
-	const drawing_interface* pif = NULL;
+	drawing_interface ifc = {0};
 	drawing_interface ifv = {0};
 
-	color_mod_t clrs;
+	const color_mod_t *pclrs;
 	xbrush_t xb;
 	xcolor_t xc;
 
 	if (!ptd->menu) return;
 
-	widget_get_color_mode(widget, &clrs);
+	pclrs = widget_get_color_mode_ptr(widget);
 	default_xbrush(&xb);
-	format_xcolor(&clrs.clr_bkg, xb.color);
-
-	canv = widget_get_canvas(widget);
-	pif = widget_get_canvas_interface(widget);
+	format_xcolor(&(pclrs->clr_bkg), xb.color);
 
 	widget_get_client_rect(widget, &xr);
 
+	canv = widget_get_canvas(widget);
 	rdc = begin_canvas_paint(canv, dc, xr.w, xr.h);
-
+	
 	get_visual_interface(rdc, &ifv);
-	widget_get_view_rect(widget, (viewbox_t*)(&ifv.rect));
+	widget_get_view_rect(widget, (viewbox_t*)&(ifv.rect));
+
+	get_canvas_interface(canv, &ifc);
+	widget_get_canv_rect(widget, (canvbox_t*)&(ifc.rect));
+	ifc.pclrs = pclrs;
 
 	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
 
-	draw_menu(pif, ptd->menu);
+	draw_menu(&ifc, ptd->menu);
 
 	//draw focus
 	if (ptd->item)
@@ -370,6 +390,8 @@ widget_t menubox_create(widget_t wparent, dword_t wstyle, const xrect_t* pxr)
 		EVENT_ON_LBUTTON_UP(hand_menu_lbutton_up)
 		EVENT_ON_RBUTTON_DOWN(hand_menu_rbutton_down)
 		EVENT_ON_RBUTTON_UP(hand_menu_rbutton_up)
+
+		EVENT_ON_KEYDOWN(hand_menu_keydown)
 
 	EVENT_END_DISPATH
 
@@ -426,6 +448,7 @@ void menubox_redraw(widget_t widget)
 	}
 
 	_menubox_reset_page(widget);
+	widget_erase(widget, NULL);
 }
 
 void menubox_tabskip(widget_t widget, int nSkip)

@@ -30,8 +30,7 @@ LICENSE.GPL3 for more details.
 #include "../xdkimp.h"
 #include "../xdkstd.h"
 #include "../xdkobj.h"
-#include "../xdkbio.h"
-#include "../xdkstm.h"
+#include "../xdkiop.h"
 
 #if defined(XDK_SUPPORT_SOCK)
 
@@ -1030,7 +1029,7 @@ xhand_t xhttp_client(const tchar_t* method,const tchar_t* url)
 		raise_user_error(_T("xhttp_client"), _T("create bio failed"));
 	}
 
-	xdk_bio_interface(phttp->pif->fd, phttp->pif);
+	get_bio_interface(phttp->pif->fd, phttp->pif);
 
 	phttp->st_request = create_string_table(ORDER_ASCEND);
 	phttp->st_response = create_string_table(ORDER_ASCEND);
@@ -1069,7 +1068,7 @@ xhand_t xhttp_server(xhand_t bio)
 
 	phttp->pif = (bio_interface*)xmem_alloc(sizeof(bio_interface));
 
-	xdk_bio_interface(bio, phttp->pif);
+	get_bio_interface(bio, phttp->pif);
 
 	switch (bio->tag)
 	{

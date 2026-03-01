@@ -93,9 +93,6 @@ typedef struct _textor_context{
 	TEXTORUNDO* ptu;
 }textor_context;
 
-#ifdef	__cplusplus
-extern "C" {
-#endif
 
 LOC_API void hand_textor_set_focus(textor_context* ptd, widget_t wt);
 
@@ -186,6 +183,10 @@ LOC_API void textor_cursor_rect(textor_context* ptd, xrect_t* pxr);
 LOC_API bool_t textor_is_select(textor_context* ptd);
 
 LOC_API bool_t textor_at_atom(textor_context* ptd);
+
+#ifdef	__cplusplus
+extern "C" {
+#endif
 
 #ifdef	__cplusplus
 }

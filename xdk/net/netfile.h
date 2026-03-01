@@ -81,7 +81,7 @@ EXP_API bool_t xnetf_write_file(xhand_t inet, const byte_t* buf, dword_t* pb);
 @INPUT dword_t size: the data size in bytes.
 @RETURN bool_t: if succeeds return nonzero, fails return zero.
 */
-EXP_API bool_t xnetf_write_file_range(xhand_t inet, dword_t hoff, dword_t loff, const byte_t* buf, dword_t size);
+EXP_API bool_t xnetf_write_file_range(xhand_t inet, vword_t off, const byte_t* buf, dword_t size);
 
 /*
 @FUNCTION xnetf_read_file_range: random read file data at the start position.
@@ -92,7 +92,7 @@ EXP_API bool_t xnetf_write_file_range(xhand_t inet, dword_t hoff, dword_t loff, 
 @INPUT dword_t size: the request size in bytes.
 @RETURN bool_t: if succeeds return nonzero, fails return zero.
 */
-EXP_API bool_t xnetf_read_file_range(xhand_t inet, dword_t hoff, dword_t loff, byte_t* buf, dword_t size);
+EXP_API bool_t xnetf_read_file_range(xhand_t inet, vword_t off, byte_t* buf, dword_t size);
 
 /*
 @FUNCTION xnetf_setopt: set the file options.
@@ -132,11 +132,11 @@ EXP_API bool_t xnetf_delete_file(const secu_desc_t* psd, const tchar_t* fname);
 @FUNCTION xnetf_list_file: lis files one by one in the directory.
 @INPUT const secu_desc_t* psd: the security struct for writing destination file.
 @INPUT const tchar_t* pname: the path name.
-@INPUT CALLBACK_LISTFILE pf: the callback function for enuming file entity.
-@INPUT void* pa: the param transfer into CALLBACK_LISTFILE function.
+@INPUT PF_LIST_FILES pf: the callback function for enuming file entity.
+@INPUT void* pa: the param transfer into PF_LIST_FILES function.
 @RETURN bool_t: if succeeds return nonzero, fails return zero.
 */
-EXP_API bool_t xnetf_list_file(const secu_desc_t* psd, const tchar_t* path, CALLBACK_LISTFILE pf, void* pa);
+EXP_API bool_t xnetf_list_file(const secu_desc_t* psd, const tchar_t* path, PF_LIST_FILES pf, void* pa);
 
 /*
 @FUNCTION xnetf_file_info: get the file information.

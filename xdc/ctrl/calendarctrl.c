@@ -294,11 +294,15 @@ void hand_calendar_size(widget_t widget, int code, const xsize_t* prs)
 		break;
 	case WS_SIZE_MINIMIZED:
 		break;
-	case WS_SIZE_LAYOUT:
-		_calendarctrl_reset_page(widget);
+	case WS_SIZE_MAXSHOW:
 		break;
-
+	case WS_SIZE_RESTORE:
+		break;
+	case WS_SIZE_LAYOUT:
+		break;
 	}
+
+	_calendarctrl_reset_page(widget);
 }
 
 void hand_calendar_scroll(widget_t widget, bool_t bHorz, int nLine)
@@ -525,26 +529,31 @@ void hand_calendar_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	link_t_ptr ilk;
 
 	canvas_t canv;
-	const drawing_interface* pif = NULL;
+	drawing_interface ifc = {0};
 	drawing_interface ifv = {0};
 
+	const color_mod_t* pclrs;
 	xcolor_t xc;
 
 	if (!ptd->calendar)
 		return;
 
-	canv = widget_get_canvas(widget);
-	pif = widget_get_canvas_interface(widget);
-
+	pclrs = widget_get_color_mode_ptr(widget);
 	widget_get_client_rect(widget, &xr);
 
+	canv = widget_get_canvas(widget);
 	rdc = begin_canvas_paint(canv, dc, xr.w, xr.h);
+	
 	get_visual_interface(rdc, &ifv);
-	widget_get_view_rect(widget, (viewbox_t*)(&ifv.rect));
+	widget_get_view_rect(widget, (viewbox_t*)&(ifv.rect));
+
+	get_canvas_interface(canv, &ifc);
+	widget_get_canv_rect(widget, (canvbox_t*)&(ifc.rect));
+	ifc.pclrs = pclrs;
 
 	widget_hand_paint(widget, rdc, NULL);
 
-	draw_calendar(pif, ptd->calendar);
+	draw_calendar(&ifc, ptd->calendar);
 
 	//draw focus
 	if (ptd->daily)
@@ -683,6 +692,7 @@ void calendarctrl_redraw(widget_t widget)
 	ptd->hover = NULL;
 
 	_calendarctrl_reset_page(widget);
+	widget_erase(widget, NULL);
 }
 
 void calendarctrl_redraw_daily(widget_t widget, link_t_ptr ilk)

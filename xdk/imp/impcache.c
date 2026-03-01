@@ -170,4 +170,62 @@ bool_t xcache_protect(xhand_t cache,  bool_t b)
 	return (*pif->pf_cache_protect)(ppt->cache, b);
 }
 
+/**********************************************************************/
+#if defined (DEBUG) || defined (_DEBUG)
+void xcache_self_test()
+{
+	xhand_t ca;
+	dword_t dw;
+	byte_t data[1024] = {1};
+
+	ca = xcache_open();
+	
+	for(int i = 0; i < 256; i++)
+	{
+		dw = 1024;
+		if(xcache_write(ca, data, &dw))
+		{
+			_tprintf(_T("xcache_write success\n"));
+		}
+		else
+		{
+			_tprintf(_T("xcache_write failed\n"));
+		}
+	}
+
+	if(xcache_protect(ca, 1))
+	{
+		_tprintf(_T("xcache_protect success\n"));
+	}
+	else
+	{
+		_tprintf(_T("xcache_protect failed\n"));
+	}
+
+	for(int i = 0; i < 256; i++)
+	{
+		dw = 1024;
+		if(xcache_read(ca, data, &dw))
+		{
+			_tprintf(_T("xcache_read success\n"));
+		}
+		else
+		{
+			_tprintf(_T("xcache_read failed\n"));
+		}
+
+		if(xcache_write(ca, data, &dw))
+		{
+			_tprintf(_T("xcache_write success\n"));
+		}
+		else
+		{
+			_tprintf(_T("xcache_write failed\n"));
+		}
+	}
+
+	xcache_close(ca);
+}
+#endif
+
 #endif //XDK_SUPPORT_MEMO_CACHE

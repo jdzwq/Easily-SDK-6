@@ -12,8 +12,8 @@ MFLAGS = -framework Cocoa -g
 
 MODULE = xdu
 ARCH = aarch64
-CUR_VER = 25
-MAX_VER = 11
+CUR_VER = 26
+MAX_VER = 2
 MIN_VER = 0
 
 LIB_PATH = /usr/local/lib
@@ -31,6 +31,7 @@ LIBS = -lm -lxdk -lxdg
 DIRS = $(wildcard \
 	$(SRC_PATH)/cocoa/*.m \
 	$(SRC_PATH)/imp/*.c \
+	$(SRC_PATH)/inf/*.c \
 	$(SRC_PATH)/*.c)
 SRCS = $(notdir $(DIRS))
 COB1 = $(patsubst %.c, %.o, $(SRCS))
@@ -42,6 +43,9 @@ $(OBJ_PATH)/%.o : $(SRC_PATH)/cocoa/%.m
 	$(CC) $(MFLAGS) -c $< -o $@ -I $(INC_PATH)
 
 $(OBJ_PATH)/%.o : $(SRC_PATH)/imp/%.c
+	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
+
+$(OBJ_PATH)/%.o : $(SRC_PATH)/inf/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
 
 $(OBJ_PATH)/%.o : $(SRC_PATH)/%.c

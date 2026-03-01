@@ -260,20 +260,20 @@ void draw_label(const drawing_interface* pif, link_t_ptr ptr, int page)
 	parse_xfont_from_style(&xf, style);
 	if (!b_print)
 	{
-		format_xcolor(&pif->clrs->clr_txt, xa.text_color);
+		format_xcolor(&pif->pclrs->clr_txt, xa.text_color);
 		(*pif->pf_set_xfont)(pif->ctx, &xf);
 	}
 
 	/*parse_xpen_from_style(&xp, style);
 	if (!b_print)
 	{
-		format_xcolor(&pif->clrs->clr_frg, xp.color);
+		format_xcolor(&pif->pclrs->clr_frg, xp.color);
 	}*/
 
 	parse_xbrush_from_style(&xb, style);
 	if (!b_print)
 	{
-		format_xcolor(&pif->clrs->clr_bkg, xb.color);
+		format_xcolor(&pif->pclrs->clr_bkg, xb.color);
 	}
 
 	xscpy(xp.color, xb.color);
@@ -282,13 +282,13 @@ void draw_label(const drawing_interface* pif, link_t_ptr ptr, int page)
 
 	if (!b_print)
 	{
-		format_xcolor(&pif->clrs->clr_msk, xi.color);
-		format_xcolor(&pif->clrs->clr_msk, xi_ico.color);
+		format_xcolor(&pif->pclrs->clr_msk, xi.color);
+		format_xcolor(&pif->pclrs->clr_msk, xi_ico.color);
 	}
 
 	if (!b_print)
 	{
-		xmem_copy((void*)&xc, (void*)&pif->clrs->clr_ico, sizeof(xcolor_t));
+		xmem_copy((void*)&xc, (void*)&pif->pclrs->clr_ico, sizeof(xcolor_t));
 	}
 	else
 	{

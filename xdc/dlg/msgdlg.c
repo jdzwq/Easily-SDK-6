@@ -40,8 +40,8 @@ LICENSE.GPL3 for more details.
 #define MSGDLG_TITLE_WIDTH		(float)100 //TM
 #define MSGDLG_BUTTON_HEIGHT	(float)6 //tm
 #define MSGDLG_BUTTON_WIDTH_MAXI	(float)30 //tm
-#define MSGDLG_BUTTON_WIDTH_MIDD	(float)12 //tm
-#define MSGDLG_BUTTON_WIDTH_MINI	(float)6 //tm
+#define MSGDLG_BUTTON_WIDTH_MIDD	(float)15 //tm
+#define MSGDLG_BUTTON_WIDTH_MINI	(float)8 //tm
 
 #define MSGDLG_EDGE_FEED		(int)4 //PT
 
@@ -471,16 +471,17 @@ void hand_msgdlg_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	xpen_t xp;
 	xface_t xa;
 
-	default_xface(&xa);
-	xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_CENTER);
-	xscpy(xa.line_align, GDI_ATTR_TEXT_ALIGN_CENTER);
-	xscpy(xa.text_wrap, GDI_ATTR_TEXT_WRAP_WORDBREAK);
-
 	widget_get_color_mode(widget, &clrs);
 	default_xbrush(&xb);
 	format_xcolor(&clrs.clr_bkg, xb.color);
 	default_xpen(&xp);
 	format_xcolor(&clrs.clr_frg, xp.color);
+
+	default_xface(&xa);
+	xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_CENTER);
+	xscpy(xa.line_align, GDI_ATTR_TEXT_ALIGN_CENTER);
+	xscpy(xa.text_wrap, GDI_ATTR_TEXT_WRAP_WORDBREAK);
+	format_xcolor(&clrs.clr_txt, xa.text_color);
 
 	widget_get_client_rect(widget, &xr);
 
@@ -511,7 +512,7 @@ void hand_msgdlg_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	pt2.x = xr.x + xr.w;
 	pt2.y = xr.y + xr.h - xs.h;
 
-	(*ifv.pf_draw_line)(ifv.ctx, &xp, &pt1, &pt2);
+	//(*ifv.pf_draw_line)(ifv.ctx, &xp, &pt1, &pt2);
 
 	xr_txt.x = xr.x + xs.w;
 	xr_txt.y = xr.y;

@@ -381,6 +381,10 @@ void hand_keybox_size(widget_t widget, int code, const xsize_t* prs)
 		break;
 	case WS_SIZE_MINIMIZED:
 		break;
+	case WS_SIZE_MAXSHOW:
+		break;
+	case WS_SIZE_RESTORE:
+		break;
 	case WS_SIZE_LAYOUT:
 		break;
 	}
@@ -413,6 +417,7 @@ void hand_keybox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	default_xface(&xa);
 	xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_CENTER);
 	xscpy(xa.line_align, GDI_ATTR_TEXT_ALIGN_CENTER);
+	format_xcolor(&clrs.clr_txt, xa.text_color);
 
 	canv = widget_get_canvas(widget);
 

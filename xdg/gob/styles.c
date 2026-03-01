@@ -235,6 +235,32 @@ void default_xface(xface_t* pxa)
 	xscpy(pxa->text_wrap, _T(""));
 }
 
+int parse_wrap(const xface_t* pxa)
+{
+	if(xscmp(pxa->text_wrap, GDI_ATTR_TEXT_WRAP_WORDBREAK) == 0)
+		return WORD_BREAK;
+	else if(xscmp(pxa->text_wrap, GDI_ATTR_TEXT_WRAP_LINEBREAK) == 0)
+		return LINE_BREAK;
+	else
+		return NONE_BREAK;
+}
+
+void format_wrap(int wrap, xface_t* pxa)
+{
+	switch(wrap)
+	{
+	case WORD_BREAK:
+		xscpy(pxa->text_wrap, GDI_ATTR_TEXT_WRAP_WORDBREAK);
+		break;
+	case LINE_BREAK:
+		xscpy(pxa->text_wrap, GDI_ATTR_TEXT_WRAP_LINEBREAK);
+		break;
+	default:
+		xscpy(pxa->text_wrap, _T(""));
+		break;
+	}
+}
+
 void merge_xpen(xpen_t* pxp_dst, const xpen_t* pxp_src)
 {
 	if (is_null(pxp_dst->style))

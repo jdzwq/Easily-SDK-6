@@ -211,4 +211,111 @@ void xshare_unlock(xhand_t block, dword_t offset, dword_t size, void* p)
 	(*pif->pf_share_unlock)(ppt->block, offset, size, p);
 }
 
+/**********************************************************************/
+#if defined (DEBUG) || defined (_DEBUG)
+void xshare_test_cli()
+{
+	xhand_t ch = NULL;
+	unsigned char buf[4096] = {0};
+    dword_t dw = 0;
+
+	TRY_CATCH;
+
+    ch = xshare_cli(_T("mytest"),MAX_LONG, FILE_OPEN_CREATE);
+    if(!ch)
+    {
+		raise_user_error(_T("test_share_cli"),_T("xshare_cli"));
+	}
+
+    a_xscpy((schar_t*)buf, "hello word!");
+	dw = 4096;
+    if(!xshare_write(ch, buf, &dw))
+	{
+		raise_user_error(_T("test_share_cli"),_T("xshare_write"));
+	}
+
+    xmem_zero((void*)buf, 4096);
+    dw = 4096;
+    if(!xshare_read(ch, buf, &dw))
+    {
+		raise_user_error(_T("test_share_cli"),_T("xshare_write"));
+	}
+    
+    xshare_close(ch);
+	ch = NULL;
+
+	END_CATCH;
+
+	return;
+ONERROR:
+	XDK_TRACE_LAST;
+
+	if(ch) xshare_close(ch);
+
+	return;
+}
+
+#ifndef _OS_WINDOWS
+void xshare_test_srv()
+{
+    if_share_t if_share = { 0 };
+    
+    xdk_impl_share(&if_share);
+    
+	tchar_t fname[1024];
+	get_runpath(0, fname, 1024);
+	xscat(fname,_T("/demo.txt"));
+
+    res_file_t fh = (*if_share.pf_share_srv)(_T("mytest"),fname,0,0,1024);
+    if(fh == INVALID_FILE)
+	{
+        printf("parent error : %s\n", strerror(errno));
+		return;
+	}else{
+		printf("parent share server: %s\n", "mytest");
+	}
+    
+    char buf[4096] = {0};
+    dword_t dw = 0;
+    
+    pid_t pid;
+    int status;
+    
+    pid = fork();
+    //kill(0, SIGSTOP);
+    
+    if(pid == 0)
+    {
+		xdk_impl_share(&if_share);
+
+		res_file_t ch = (*if_share.pf_share_cli)(_T("mytest"), 1024, FILE_OPEN_READ);
+
+		if (ch == INVALID_FILE)
+		{
+			printf("child error : %s\n", strerror(errno));
+			exit(-1);
+		}else
+		{
+			memset((void *)buf, 0, 4096);
+			dw = 0;
+			if (!(*if_share.pf_share_read)(ch, 0, buf, 4096, &dw))
+				printf("child error : %s\n", strerror(errno));
+			else
+				printf("child read mytest: %s\n", buf);
+
+			(*if_share.pf_share_close)(_T("mytest"), ch);
+			exit(0);
+		}
+	}
+    else
+	{
+        waitpid(pid, &status, 0);
+		printf("Child exited with status: %d\n", WEXITSTATUS(status));
+
+        (*if_share.pf_share_close)(_T("mytest"), fh);
+    }
+}
+#endif //_OS_WINDOWS
+#endif 
+
 #endif //XDK_SUPPORT_SHARE

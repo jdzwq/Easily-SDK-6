@@ -78,13 +78,15 @@ void _file_close(res_file_t fh)
 	CloseHandle(fh);
 }
 
-bool_t _file_size(res_file_t fh, dword_t* ph, dword_t* pl)
+bool_t _file_size(res_file_t fh, vword_t* fs)
 {
 	bool_t rt;
+	DWORD dwl, dwh;
 
-	*pl = GetFileSize(fh, (LPDWORD)ph);
+	dwl = GetFileSize(fh, (LPDWORD)&dwh);
+	if(fs) *fs = MAKESIZE(dwl, dwh);
 
-	rt = (*pl == INVALID_FILE_SIZE) ? 0 : 1;
+	rt = (dwl == INVALID_FILE_SIZE) ? 0 : 1;
 
 	return rt;
 }
@@ -232,18 +234,20 @@ ITRET:
 	return rt;
 }
 
-bool_t _file_read_range(res_file_t fh, dword_t hoff, dword_t loff, void* buf, dword_t size)
+bool_t _file_read_range(res_file_t fh, vword_t voff, void* buf, dword_t size)
 {
 	HANDLE mh;
 	void* pBase;
-	dword_t gran, dwh, dwl, poff;
-	lword_t flen;
-	vword_t dlen;
+	dword_t gran, hoff, loff, dwh, dwl, poff;
+	vword_t flen, dlen;
 
 	SYSTEM_INFO si = { 0 };
 
 	GetSystemInfo(&si);
 	gran = si.dwAllocationGranularity;
+
+	hoff = GETHDWORD(voff);
+	loff = GETLDWORD(voff);
 
 	poff = (loff % gran);
 	loff = (loff / gran) * gran;
@@ -274,18 +278,20 @@ bool_t _file_read_range(res_file_t fh, dword_t hoff, dword_t loff, void* buf, dw
 	return 1;
 }
 
-bool_t _file_write_range(res_file_t fh, dword_t hoff, dword_t loff, void* buf, dword_t size)
+bool_t _file_write_range(res_file_t fh, vword_t voff, void* buf, dword_t size)
 {
 	HANDLE mh;
 	void* pBase;
-	dword_t gran, dwh, dwl, poff;
-	lword_t flen;
-	vword_t dlen;
+	dword_t gran, hoff, loff, dwh, dwl, poff;
+	vword_t flen, dlen;
 
 	SYSTEM_INFO si = { 0 };
 
 	GetSystemInfo(&si);
 	gran = si.dwAllocationGranularity;
+
+	hoff = GETHDWORD(voff);
+	loff = GETLDWORD(voff);
 
 	poff = (loff % gran);
 	loff = (loff / gran) * gran;
@@ -318,17 +324,19 @@ bool_t _file_write_range(res_file_t fh, dword_t hoff, dword_t loff, void* buf, d
 	return 1;
 }
 
-void* _file_lock_range(res_file_t fh, dword_t hoff, dword_t loff, dword_t size, bool_t write, res_file_t* ph)
+void* _file_lock_range(res_file_t fh, vword_t voff, dword_t size, bool_t write, res_file_t* ph)
 {
 	HANDLE mh;
 	void* pBase;
-	dword_t mask, gran, dwh, dwl, poff;
-	lword_t flen;
-	vword_t dlen;
+	dword_t mask, gran, hoff, loff, dwh, dwl, poff;
+	vword_t flen, dlen;
 
 	SYSTEM_INFO si = { 0 };
 
 	*ph = NULL;
+
+	hoff = GETHDWORD(voff);
+	loff = GETLDWORD(voff);
 
 	GetSystemInfo(&si);
 	gran = si.dwAllocationGranularity;
@@ -362,17 +370,19 @@ void* _file_lock_range(res_file_t fh, dword_t hoff, dword_t loff, dword_t size, 
 	return (void*)((char*)pBase + poff);
 }
 
-void _file_unlock_range(res_file_t mh, dword_t hoff, dword_t loff, dword_t size, void* p)
+void _file_unlock_range(res_file_t mh, vword_t voff, dword_t size, void* p)
 {
 	void* pBase;
-	dword_t gran, dwh, dwl, poff;
-	lword_t flen;
-	vword_t dlen;
+	dword_t gran, hoff, loff, dwh, dwl, poff;
+	vword_t flen, dlen;
 
 	SYSTEM_INFO si = { 0 };
 
 	GetSystemInfo(&si);
 	gran = si.dwAllocationGranularity;
+
+	hoff = GETHDWORD(voff);
+	loff = GETLDWORD(voff);
 
 	poff = (loff % gran);
 	loff = (loff / gran) * gran;
@@ -390,10 +400,14 @@ void _file_unlock_range(res_file_t mh, dword_t hoff, dword_t loff, dword_t size,
 	CloseHandle(mh);
 }
 
-bool_t _file_truncate(res_file_t fh, dword_t hoff, dword_t loff)
+bool_t _file_truncate(res_file_t fh, vword_t voff)
 {
 	HANDLE hMap = NULL;
+	dword_t hoff, loff;
 
+	hoff = GETHDWORD(voff);
+	loff = GETLDWORD(voff);
+	
 	hMap = CreateFileMapping(fh, NULL, PAGE_READWRITE, hoff, loff, NULL);
 	if (!hMap)
 	{
@@ -405,23 +419,187 @@ bool_t _file_truncate(res_file_t fh, dword_t hoff, dword_t loff)
 	return 1;
 }
 
-/*bool_t _file_write_range(res_file_t fh, void* buf, dword_t hoff, dword_t loff, dword_t size, dword_t* pb)
+vlong_t _file_seek_begin(res_file_t fh)
 {
-	bool_t rt;
-	dword_t dw;
+    LARGE_INTEGER off = {0}, pos = {0};
 
-	dw = hoff;
-	SetFilePointer(fh, loff, (PLONG)&dw, FILE_BEGIN);
+    SetFilePointerEx(fh, off, &pos, FILE_BEGIN);
 
-	dw = 0;
-	rt = WriteFile(fh, buf, (DWORD)size, &dw, NULL);
+    return (vlong_t)(pos.QuadPart);
+}
 
-	if (pb)
-		*pb = dw;
+vlong_t _file_seek_end(res_file_t fh)
+{
+	LARGE_INTEGER off = {0}, pos = {0};
 
-	return rt;
-}*/
+    SetFilePointerEx(fh, off, &pos, FILE_END);
 
+    return (vlong_t)(pos.QuadPart);
+}
+
+vlong_t _file_seek_bytes(res_file_t fh, vlong_t bytes)
+{
+    LARGE_INTEGER off, pos;
+
+	off.QuadPart = bytes;
+    SetFilePointerEx(fh, off, &pos, FILE_CURRENT);
+    
+    return (vlong_t)(pos.QuadPart);
+}
+
+vlong_t _file_seek_lines(res_file_t fh, vlong_t lines)
+{
+	unsigned char ch = 0;
+    DWORD n;
+    size_t fs;
+    LARGE_INTEGER pos = {0}, off = {0};
+
+    _file_size(fh, (vword_t*)&fs);
+
+    SetFilePointerEx(fh, off, &pos, FILE_CURRENT);
+
+	off.QuadPart = (lines > 0)? 1 : -1;
+    lines *= ((lines > 0)? 1 : -1);
+
+    while(lines--)
+    {
+        if(off.QuadPart < 0)
+        {
+            while(ch == '\0' || ch == '\r' || ch == '\n')
+            {
+				SetFilePointerEx(fh, off, &pos, FILE_CURRENT);
+                if(pos.QuadPart < 0) return (vlong_t)-1;
+
+                ReadFile(fh, &ch, (DWORD)1, &n, NULL);
+                if(!n) break;
+
+				SetFilePointerEx(fh, off, &pos, FILE_CURRENT);
+                if(pos.QuadPart < 0) return (vlong_t)-1;
+            }
+        }
+
+        while(ch != '\r' && ch != '\n')
+        {
+            if(off.QuadPart < 0)
+            {
+               SetFilePointerEx(fh, off, &pos, FILE_CURRENT);
+                if(pos.QuadPart < 0) return (vlong_t)-1;
+            }
+
+            ReadFile(fh, &ch, (DWORD)1, &n, NULL);
+
+            if(off.QuadPart > 0)
+            {
+                SetFilePointerEx(fh, (LARGE_INTEGER){0}, &pos, FILE_CURRENT);
+                if(pos.QuadPart < 0) return (vlong_t)-1;
+            }else
+			{
+				SetFilePointerEx(fh, off, &pos, FILE_CURRENT);
+                if(pos.QuadPart < 0) return (vlong_t)-1;
+			}
+
+            if(!pos.QuadPart || pos.QuadPart == fs) break;
+        }
+
+		if(ch == '\r' || ch == '\n')
+        {
+			off.QuadPart *= -1;
+			SetFilePointerEx(fh, off, &pos, FILE_CURRENT);
+			off.QuadPart *= -1;
+            if(pos.QuadPart < 0) return (vlong_t)-1;
+        }
+
+		if(off.QuadPart > 0)
+        {
+            while(ch == '\r' || ch == '\n')
+            {
+                ReadFile(fh, &ch, (DWORD)1, &n, NULL);
+                if(!n) break;
+				off.QuadPart *= -1;
+				SetFilePointerEx(fh, off, &pos, FILE_CURRENT);
+				off.QuadPart *= -1;
+				if (pos.QuadPart < 0) return (vlong_t)-1;
+            }
+		}
+    }
+
+    return (vlong_t)(pos.QuadPart);
+}
+
+dword_t _file_peek_line(res_file_t fh, byte_t* buf, dword_t max)
+{
+    unsigned char ch = 0;
+    DWORD n;
+    LARGE_INTEGER off = {0}, pos = {0};
+    vlong_t total = 0;
+
+    SetFilePointerEx(fh, off, &pos, FILE_CURRENT);
+
+    ReadFile(fh, &ch, (DWORD)1, &n, NULL);
+	
+    while (n > 0 && ch != '\r' && ch != '\n')
+    {
+        if(buf && total < max) buf[total] = ch;
+        total ++;
+
+        ReadFile(fh, &ch, (DWORD)1, &n, NULL);
+    }
+
+    SetFilePointerEx(fh, pos, NULL, FILE_BEGIN);
+
+    return total;
+}
+
+dword_t _file_read_line(res_file_t fh, byte_t* buf, dword_t max)
+{
+    unsigned char ch = 0;
+    DWORD n;
+    LARGE_INTEGER off = {0}, pos = {0};
+    dword_t total = 0;
+
+    ReadFile(fh, &ch, (DWORD)1, &n, NULL);
+
+    while (n > 0 && ch != '\r' && ch != '\n')
+    {
+        if(buf && total < max) buf[total] = ch;
+        total ++;
+
+        ReadFile(fh, &ch, (DWORD)1, &n, NULL);
+		if(!n) break;
+    }
+
+    while (n > 0 && (ch == '\r' || ch == '\n'))
+    {
+        ReadFile(fh, &ch, (DWORD)1, &n, NULL);
+		if(!n) break;
+    }
+
+	if(n > 0)
+	{
+		pos.QuadPart = -1;
+		SetFilePointerEx(fh, pos, NULL, FILE_CURRENT);
+	}
+
+    return total;
+}
+
+dword_t _file_write_line(res_file_t fh, const byte_t* buf, dword_t len)
+{
+    unsigned char ch = 0;
+    DWORD n;
+    dword_t total = 0;
+
+	if(!WriteFile(fh, buf, (DWORD)len, &n, NULL))
+   		return (vlong_t)-1;
+    total += n;
+
+    ch = '\n';
+    if(!WriteFile(fh, &ch, (DWORD)1, &n, NULL))
+    	return (vlong_t)-1;
+    total ++;
+
+    return total;
+}
 
 void _systime_to_xdate(const SYSTEMTIME* pst, xdate_t* pdt)
 {

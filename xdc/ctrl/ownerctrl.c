@@ -222,7 +222,7 @@ void hand_owner_size(widget_t widget, int code, const xsize_t* prs)
 {
 	owner_delta_t* ptd = GETOWNERDELTA(widget);
 
-		XDK_ASSERT(ptd != NULL);
+	XDK_ASSERT(ptd != NULL);
 
 	switch(code)
 	{
@@ -232,10 +232,15 @@ void hand_owner_size(widget_t widget, int code, const xsize_t* prs)
 		break;
 	case WS_SIZE_MINIMIZED:
 		break;
+	case WS_SIZE_MAXSHOW:
+		break;
+	case WS_SIZE_RESTORE:
+		break;
 	case WS_SIZE_LAYOUT:
-		_ownerctrl_reset_page(widget);
 		break;
 	}
+
+	_ownerctrl_reset_page(widget);
 }
 
 void hand_owner_scroll(widget_t widget, bool_t bHorz, int nLine)
@@ -379,8 +384,6 @@ void ownerctrl_redraw(widget_t widget)
 	XDK_ASSERT(ptd != NULL);
 
 	_ownerctrl_reset_page(widget);
-
-
 	widget_erase(widget, NULL);
 }
 

@@ -294,15 +294,9 @@ void SchemaPanel_OnSaveAs(widget_t widget)
 	{
 		LINKPTR ptrSvg = create_svg_doc();
 
-		xfont_t xf;
-		xface_t xa;
-
-		default_textor_xfont(&xf);
-		default_textor_xface(&xa);
-
 		int page = memoctrl_get_cur_page(pdt->hMemo);
 
-		svg_print_memo(ptrSvg, &xf, &xa, ptr_memo, page);
+		svg_print_memo(ptrSvg, ptr_memo, page);
 
 		rt = save_dom_doc_to_file(ptrSvg, NULL, szFile);
 
@@ -343,13 +337,7 @@ void SchemaPanel_OnPreview(widget_t widget)
 
 	LINKPTR svg = create_svg_doc();
 
-	xfont_t xf;
-	xface_t xa;
-
-	default_textor_xfont(&xf);
-	default_textor_xface(&xa);
-
-	svg_print_memo(svg, &xf, &xa, ptrMemo, page);
+	svg_print_memo(svg, ptrMemo, page);
 
 	LINKPTR ptr_arch = previewdlg_get_arch(hPreviewDlg);
 
@@ -547,7 +535,7 @@ void SchemaPanel_OnMenuCommand(widget_t widget, int code, int cid, vword_t data)
 		widget_destroy((widget_t)data);
 		if (code)
 		{
-			widget_post_command(widget, 0, code, NULL);
+			widget_post_command(widget, code, 0, NULL);
 		}
 		break;
 	}

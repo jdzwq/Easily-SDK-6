@@ -129,7 +129,7 @@ void MainFrame_Switch(widget_t widget)
 	switch (rt)
 	{
 	case MSGBTN_YES:
-		widget_post_command(widget, 0, IDA_PROJECT_SAVE, NULL);
+		widget_post_command(widget, IDA_PROJECT_SAVE, 0, NULL);
 		break;
 	case MSGBTN_NO:
 		pdt->bDirty = FALSE;
@@ -1118,8 +1118,10 @@ void MainFrame_ToolBar_OnLBClick(widget_t widget, NOTICE_TOOL* pnt)
 	pt.x = xr.x;
 	pt.y = xr.y + xr.h;
 	widget_client_to_screen(pdt->hToolBar, &pt);
+	
+	vword_t vv = MAKELWORD(pt.x, pt.y);
 
-	widget_post_command(widget, code, cid, (vword_t)&pt);
+	widget_post_command(widget, code, cid, vv);
 }
 
 void MainFrame_ToolBar_OnItemHover(widget_t widget, NOTICE_TOOL* pnt)
@@ -1154,6 +1156,7 @@ void MainFrame_TitleBar_OnItemDelete(widget_t widget, NOTICE_TITLE* pnt)
 	if (!widget_is_valid(hPanel))
 		return;
 
+	widget_show(hPanel, WS_SHOW_HIDE);
 	widget_close(hPanel, 0);
 
 	if (widget_is_valid(hPanel))
@@ -1194,7 +1197,7 @@ void MainFrame_TitleBar_OnItemChanged(widget_t widget, NOTICE_TITLE* pnt)
 
 		widget_show(hPanel, WS_SHOW_NORMAL);
 
-		widget_post_command(widget, 0, IDA_OBJECT_FRESH, NULL);
+		widget_post_command(widget, IDA_OBJECT_FRESH, 0, NULL);
 	}
 }
 
@@ -1220,7 +1223,7 @@ void MainFrame_ResBar_OnLBClick(widget_t widget, NOTICE_TREE* pnt)
 {
 	MainFrameDelta* pdt = GETMAINFRAMEDELTA(widget);
 
-	widget_post_command(widget, 0, IDA_FILE_SHOW, NULL);
+	widget_post_command(widget, IDA_FILE_SHOW, 0, NULL);
 }
 
 void MainFrame_ResBar_OnDBClick(widget_t widget, NOTICE_TREE* pnt)
@@ -1322,7 +1325,7 @@ void MainFrame_ObjBar_OnLBClick(widget_t widget, NOTICE_TREE* pnt)
 {
 	MainFrameDelta* pdt = GETMAINFRAMEDELTA(widget);
 
-	widget_post_command(widget, 0, IDA_OBJECT_CHECK, NULL);
+	widget_post_command(widget, IDA_OBJECT_CHECK, 0, NULL);
 }
 
 void MainFrame_ObjBar_OnDBClick(widget_t widget, NOTICE_TREE* pnt)
@@ -2079,7 +2082,7 @@ void MainFrame_OnMenuCommand(widget_t widget, int code, int cid, vword_t data)
 	MainFrameDelta* pdt = GETMAINFRAMEDELTA(widget);
 
 	widget_t hPanel = MainFrame_GetActivePanel(widget);
-	if (hPanel && !code)
+	if (hPanel)
 	{
 		if (widget_send_command(hPanel, code, cid, data))
 			return;
@@ -2139,7 +2142,7 @@ void MainFrame_OnMenuCommand(widget_t widget, int code, int cid, vword_t data)
 
 		if (code)
 		{
-			widget_post_command(widget, 0, code, NULL);
+			widget_post_command(widget, code, 0, NULL);
 		}
 		break;
 
@@ -2305,7 +2308,7 @@ void MainFrame_OnNotice(widget_t widget, LPNOTICE phdr)
 			else if (compare_text(get_title_item_name_ptr(pnt->item), -1, MAINFRAME_TREE_OBJECT, -1, 0) == 0)
 			{
 				widget_show(pdt->hObjBar, WS_SHOW_NORMAL);
-				widget_post_command(widget, 0, IDA_OBJECT_FRESH, NULL);
+				widget_post_command(widget, IDA_OBJECT_FRESH, 0, NULL);
 			}
 			break;
 		}
@@ -2455,9 +2458,9 @@ widget_t MainFrame_Create(const tchar_t* mname)
 	parse_xcolor(&clr.clr_msk, g_face[g_indFace].msk);
 	parse_xcolor(&clr.clr_ico, g_face[g_indFace].ico);
 
-	widget_set_color_mode(widget, &clr);
+	//widget_set_color_mode(widget, &clr);
 
-	widget_show(widget, WS_SHOW_NORMAL);
+	widget_show(widget, WS_SHOW_MAXIMIZE);
 
 	return widget;
 }

@@ -13,8 +13,8 @@ SRC_PATH = Z:/Easily-sdk-6/test/xdk_lib_test
 LIB_PATH = Z:/Easily-sdk-6/windows/lib/$(ARCH)
 OUT_PATH = Z:/Easily-app-6/windows/bin
 
-OBJ_PATH = D:/Easily-temp/windows/$(MODULE)/$(ARCH)/Debug
-PDB_PATH = D:/Easily-temp/windows/$(ARCH)
+OBJ_PATH = E:/Easily-temp/windows/$(MODULE)/$(ARCH)/Debug
+PDB_PATH = E:/Easily-temp/windows/$(ARCH)
 
 TARGET = $(OUT_PATH)/$(MODULE).exe
 DATABASE = $(OBJ_PATH)/$(MODULE).pdb

@@ -29,8 +29,8 @@ $(OBJ_PATH)%.o : $(SRC_PATH)/%.cc
 
 all : $(OBJS)
 	rm -f $@
-	$(CC) -o $(OUT_PATH)/$(MODULE) $(OBJS) -L $(LIB_PATH) -lxdk
-#	rm -f $(OBJS)
+	$(CC) -o $(OUT_PATH)/$(MODULE) $(OBJS) -L $(LIB_PATH) -lxdk \
+	-Wl,-rpath $(LIB_PATH)
 
 test:
 	if ! test -d $(OBJ_PATH); then \

@@ -39,6 +39,7 @@ DIRS = $(wildcard \
 		$(SRC_PATH)/mob/*.c \
 		$(SRC_PATH)/dob/*.c \
 		$(SRC_PATH)/net/*.c \
+		$(SRC_PATH)/iop/*.c \
 		$(SRC_PATH)/stm/*.c \
 		$(SRC_PATH)/expr/*.c \
 		$(SRC_PATH)/math/*.c \
@@ -81,6 +82,9 @@ $(OBJ_PATH)/%.o : $(SRC_PATH)/dob/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
 
 $(OBJ_PATH)/%.o : $(SRC_PATH)/net/%.c
+	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
+
+$(OBJ_PATH)/%.o : $(SRC_PATH)/iop/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
 
 $(OBJ_PATH)/%.o : $(SRC_PATH)/stm/%.c

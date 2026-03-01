@@ -373,7 +373,7 @@ void child_on_parent_command(widget_t, int code, vword_t data)
 
 void child_on_paint(widget_t wt, visual_t rdc, const xrect_t* prt)
 {
-    printf("child on_paint the rect is x:%d y:%d w:%d h:%d \n", prt->x, prt->y, prt->w, prt->h);
+    //printf("child on_paint the rect is x:%d y:%d w:%d h:%d \n", prt->x, prt->y, prt->w, prt->h);
 
     xrect_t rt;
     (*if_widget.pf_widget_get_client_rect)(wt, &rt);

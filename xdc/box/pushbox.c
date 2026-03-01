@@ -144,10 +144,15 @@ void hand_pushbox_size(widget_t widget, int code, const xsize_t* prs)
 		break;
 	case WS_SIZE_MINIMIZED:
 		break;
+	case WS_SIZE_MAXSHOW:
+		break;
+	case WS_SIZE_RESTORE:
+		break;
 	case WS_SIZE_LAYOUT:
-		_pushbox_reset_page(widget);
 		break;
 	}
+
+	_pushbox_reset_page(widget);
 }
 
 void hand_pushbox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
@@ -158,135 +163,149 @@ void hand_pushbox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	dword_t ws;
 	xrect_t xr,xr_box;
 
-	color_mod_t clrs;
+	const color_mod_t *pclrs;
 	xcolor_t xc;
+	xfont_t xf;
 	xface_t xa;
 	xbrush_t xb;
 	xpen_t xp;
 	ximage_t xi;
 
 	canvas_t canv;
-	const drawing_interface* pif = NULL;
+	drawing_interface ifc = {0};
 	drawing_interface ifv = {0};
 
-	widget_get_color_mode(widget, &clrs);
+	pclrs = widget_get_color_mode_ptr(widget);
 	default_xpen(&xp);
-	format_xcolor(&clrs.clr_frg, xp.color);
+	format_xcolor(&(pclrs->clr_bkg), xp.color);
+	lighten_xpen(&xp, DEF_HARD_DARKEN);
 	default_xbrush(&xb);
-	format_xcolor(&clrs.clr_bkg, xb.color);
+	format_xcolor(&(pclrs->clr_bkg), xb.color);
 
-	xmem_copy((void*)&xc, (void*)&clrs.clr_ico, sizeof(xcolor_t));
+	xmem_copy((void*)&xc, (void*)&(pclrs->clr_ico), sizeof(xcolor_t));
 	default_xface(&xa);
 	xscpy(xa.line_align, GDI_ATTR_TEXT_ALIGN_CENTER);
+	format_xcolor(&(pclrs->clr_txt), xa.text_color);
+
+	default_xfont(&xf);
+	xscpy(xf.size, GDI_ATTR_FONT_SIZE_FOOTER);
 
 	widget_get_client_rect(widget, &xr);
 
 	canv = widget_get_canvas(widget);
-	pif = widget_get_canvas_interface(widget);
-	
 	rdc = begin_canvas_paint(canv, dc, xr.w, xr.h);
-
+	
 	get_visual_interface(rdc, &ifv);
+	widget_get_view_rect(widget, (viewbox_t*)&(ifv.rect));
 
+	get_canvas_interface(canv, &ifc);
+	widget_get_canv_rect(widget, (canvbox_t*)&(ifc.rect));
+	ifc.pclrs = pclrs;
+
+	(*ifv.pf_set_xfont)(ifv.ctx, &xf);
+	
 	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
 
 	ws = widget_get_style(widget);
 
 	if (ws & WD_PUSHBOX_CHECK)
 	{
-		xr_box.fx = pif->rect.fx;
-		xr_box.fy = pif->rect.fy;
+		xr_box.fx = ifc.rect.fx;
+		xr_box.fy = ifc.rect.fy;
 		xr_box.fw = DEF_SMALL_ICON;
-		xr_box.fh = pif->rect.fh;
+		xr_box.fh = ifc.rect.fh;
 		ft_center_rect(&xr_box, DEF_SMALL_ICON, DEF_SMALL_ICON);
 
 		if (ptd->b_check)
-			draw_gizmo(pif, &xc, &xr_box, GDI_ATTR_GIZMO_CHECKED);
+			draw_gizmo(&ifc, &xc, &xr_box, GDI_ATTR_GIZMO_CHECKED);
 		else
-			draw_gizmo(pif, &xc, &xr_box, GDI_ATTR_GIZMO_CHECKBOX);
+			draw_gizmo(&ifc, &xc, &xr_box, GDI_ATTR_GIZMO_CHECKBOX);
 
-		xr_box.fx = pif->rect.fx + DEF_SMALL_ICON;
-		xr_box.fy = pif->rect.fy;
-		xr_box.fw = pif->rect.fw - DEF_SMALL_ICON;
-		xr_box.fh = pif->rect.fh;
+		xr_box.fx = ifc.rect.fx + DEF_SMALL_ICON;
+		xr_box.fy = ifc.rect.fy;
+		xr_box.fw = ifc.rect.fw - DEF_SMALL_ICON;
+		xr_box.fh = ifc.rect.fh;
 
 		xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_NEAR);
-		(pif->pf_draw_text)(pif->ctx, &xa, &xr_box, ptd->sz_text, -1);
+		(ifc.pf_draw_text)(ifc.ctx, &xa, &xr_box, ptd->sz_text, -1);
 	}
 	else if (ws & WD_PUSHBOX_ICON)
 	{
-		xr_box.fx = pif->rect.fx;
-		xr_box.fy = pif->rect.fy;
-		xr_box.fw = pif->rect.fw;
-		xr_box.fh = pif->rect.fh;
+		xr_box.fx = ifc.rect.fx;
+		xr_box.fy = ifc.rect.fy;
+		xr_box.fw = ifc.rect.fw;
+		xr_box.fh = ifc.rect.fh;
+		ft_expand_rect(&xr_box, -0.5, -0.5);
 
 		if (ptd->b_check)
 		{
-			(pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr_box);
+			format_xcolor(&(pclrs->clr_frg), xp.color);
+			(ifc.pf_draw_rect)(ifc.ctx, &xp, NULL, &xr_box);
 		}
 		else
 		{
-			ft_expand_rect(&xr_box, -0.5, -0.5);
-			(pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr_box);
+			(ifc.pf_draw_rect)(ifc.ctx, &xp, NULL, &xr_box);
 		}
 
-		xr_box.fx = pif->rect.fx;
-		xr_box.fy = pif->rect.fy;
-		xr_box.fw = pif->rect.fw;
-		xr_box.fh = pif->rect.fh;
+		xr_box.fx = ifc.rect.fx;
+		xr_box.fy = ifc.rect.fy;
+		xr_box.fw = ifc.rect.fw;
+		xr_box.fh = ifc.rect.fh;
 
 		ft_center_rect(&xr_box, DEF_SMALL_ICON, DEF_SMALL_ICON);
-		draw_gizmo(pif, &xc, &xr_box, ptd->sz_text);
+		draw_gizmo(&ifc, &xc, &xr_box, ptd->sz_text);
 	}
 	else if (ws & WD_PUSHBOX_IMAGE)
 	{
-		xr_box.fx = pif->rect.fx;
-		xr_box.fy = pif->rect.fy;
-		xr_box.fw = pif->rect.fw;
-		xr_box.fh = pif->rect.fh;
+		xr_box.fx = ifc.rect.fx;
+		xr_box.fy = ifc.rect.fy;
+		xr_box.fw = ifc.rect.fw;
+		xr_box.fh = ifc.rect.fh;
+		ft_expand_rect(&xr_box, -0.5, -0.5);
 
 		if (ptd->b_check)
 		{
-			(pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr_box);
+			format_xcolor(&(pclrs->clr_frg), xp.color);
+			(ifc.pf_draw_rect)(ifc.ctx, &xp, NULL, &xr_box);
 		}
 		else
 		{
-			ft_expand_rect(&xr_box, -0.5, -0.5);
-			(pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr_box);
+			(ifc.pf_draw_rect)(ifc.ctx, &xp, NULL, &xr_box);
 		}
 
-		xr_box.fx = pif->rect.fx;
-		xr_box.fy = pif->rect.fy;
-		xr_box.fw = pif->rect.fw;
-		xr_box.fh = pif->rect.fh;
+		xr_box.fx = ifc.rect.fx;
+		xr_box.fy = ifc.rect.fy;
+		xr_box.fw = ifc.rect.fw;
+		xr_box.fh = ifc.rect.fh;
 
 		parse_ximage_from_source(&xi, ptd->sz_text);
-		(pif->pf_draw_image)(pif->ctx, &xi, &xr_box);
+		(ifc.pf_draw_image)(ifc.ctx, &xi, &xr_box);
 	}
 	else
 	{
-		xr_box.fx = pif->rect.fx;
-		xr_box.fy = pif->rect.fy;
-		xr_box.fw = pif->rect.fw;
-		xr_box.fh = pif->rect.fh;
+		xr_box.fx = ifc.rect.fx;
+		xr_box.fy = ifc.rect.fy;
+		xr_box.fw = ifc.rect.fw;
+		xr_box.fh = ifc.rect.fh;
+		ft_expand_rect(&xr_box, -0.5, -0.5);
 
 		if (ptd->b_check)
 		{
-			(pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr_box);
+			format_xcolor(&(pclrs->clr_frg), xp.color);
+			(ifc.pf_draw_rect)(ifc.ctx, &xp, NULL, &xr_box);
 		}
 		else
 		{
-			ft_expand_rect(&xr_box, -0.5, -0.5);
-			(pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr_box);
+			(ifc.pf_draw_rect)(ifc.ctx, &xp, NULL, &xr_box);
 		}
 
-		xr_box.fx = pif->rect.fx;
-		xr_box.fy = pif->rect.fy;
-		xr_box.fw = pif->rect.fw;
-		xr_box.fh = pif->rect.fh;
+		xr_box.fx = ifc.rect.fx;
+		xr_box.fy = ifc.rect.fy;
+		xr_box.fw = ifc.rect.fw;
+		xr_box.fh = ifc.rect.fh;
 
 		xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_CENTER);
-		(pif->pf_draw_text)(pif->ctx, &xa, &xr_box, ptd->sz_text, -1);
+		(ifc.pf_draw_text)(ifc.ctx, &xa, &xr_box, ptd->sz_text, -1);
 	}
 
 	end_canvas_paint(canv, dc, pxr);
@@ -354,13 +373,13 @@ void pushbox_popup_size(widget_t widget, xsize_t* pxs)
 {
 	pushbox_delta_t* ptd = GETPUSHBOXDELTA(widget);
 	xsize_t xs;
-	const drawing_interface* pif = NULL;
+	drawing_interface ifc = {0};
 
 	XDK_ASSERT(ptd != NULL);
 
-	pif = widget_get_canvas_interface(widget);
+	get_canvas_interface(widget_get_canvas(widget), &ifc);
 
-	(pif->pf_text_size)(pif->ctx, ptd->sz_text, -1, &xs);
+	(ifc.pf_text_size)(ifc.ctx, ptd->sz_text, -1, &xs);
 
 	if (xs.fw < xs.fh)
 		xs.fw = xs.fh;

@@ -29,7 +29,7 @@ LICENSE.GPL3 for more details.
 #include "../xdcobj.h"
 
 
-static bool_t _splitor_item_resize(link_t_ptr ilk, void* pv)
+static bool_t CALLBACK _splitor_item_resize(link_t_ptr ilk, void* pv)
 {
 	widget_t owner, win;
 	xrect_t xr;

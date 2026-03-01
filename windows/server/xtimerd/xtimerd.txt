@@ -1,6 +1,6 @@
 SOURCES= \
-D:/Easily-temp/windows/xtimerd/x64/Debug/xtimers.cc \
-D:/Easily-temp/windows/xtimerd/x64/Debug/xtimerd.cc \
-D:/Easily-temp/windows/xtimerd/x64/Debug/xtimerdMain_windows.cc \
-D:/Easily-temp/windows/xtimerd/x64/Debug/srvcrt.cc \
-D:/Easily-temp/windows/xtimerd/x64/Debug/srvlog.cc \
+E:/Easily-temp/windows/xtimerd/x64/Debug/xtimers.cc \
+E:/Easily-temp/windows/xtimerd/x64/Debug/xtimerd.cc \
+E:/Easily-temp/windows/xtimerd/x64/Debug/xtimerdMain_windows.cc \
+E:/Easily-temp/windows/xtimerd/x64/Debug/srvcrt.cc \
+E:/Easily-temp/windows/xtimerd/x64/Debug/srvlog.cc \

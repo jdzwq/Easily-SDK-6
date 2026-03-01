@@ -55,22 +55,29 @@ void draw_sizing_raw(const drawing_interface* piv, const xcolor_t* pxc, const xr
 	xsprintf(xp.opacity, _T("%d"), deep);
 	xscpy(xp.style, GDI_ATTR_STROKE_STYLE_DASHDASH);
 
+	xr.x = prt->x - 4;
+	xr.y = prt->y - 4;
+	xr.w = prt->w + 8;
+	xr.h = prt->h + 8;
+
+	//(*piv->pf_draw_rect)(piv->ctx, &xp, NULL, &xr);
+
 	if (pos & SIZING_TOPLEFT)
 	{
-		xr.x = prt->x;
-		xr.y = prt->y;
-		xr.w = 4;
-		xr.h = 4;
+		xr.x = prt->x - 4;
+		xr.y = prt->y - 4;
+		xr.w = 8;
+		xr.h = 8;
 
 		(*piv->pf_draw_rect)(piv->ctx, &xp, NULL, &xr);
 	}
 
 	if (pos & SIZING_TOPCENTER)
 	{
-		xr.x = prt->x + prt->w / 2 - 2;
-		xr.y = prt->y;
-		xr.w = 4;
-		xr.h = 4;
+		xr.x = prt->x + prt->w / 2 - 4;
+		xr.y = prt->y - 4;
+		xr.w = 8;
+		xr.h = 8;
 
 		(*piv->pf_draw_rect)(piv->ctx, &xp, NULL, &xr);
 	}
@@ -78,29 +85,29 @@ void draw_sizing_raw(const drawing_interface* piv, const xcolor_t* pxc, const xr
 	if (pos & SIZING_TOPRIGHT)
 	{
 		xr.x = prt->x + prt->w - 4;
-		xr.y = prt->y;
-		xr.w = 4;
-		xr.h = 4;
+		xr.y = prt->y - 4;
+		xr.w = 8;
+		xr.h = 8;
 
 		(*piv->pf_draw_rect)(piv->ctx, &xp, NULL, &xr);
 	}
 
 	if (pos & SIZING_BOTTOMLEFT)
 	{
-		xr.x = prt->x;
-		xr.y = prt->y + prt->h - 2;
-		xr.w = 4;
-		xr.h = 4;
+		xr.x = prt->x - 4;
+		xr.y = prt->y + prt->h - 4;
+		xr.w = 8;
+		xr.h = 8;
 
 		(*piv->pf_draw_rect)(piv->ctx, &xp, NULL, &xr);
 	}
 
 	if (pos & SIZING_BOTTOMCENTER)
 	{
-		xr.x = prt->x + prt->w / 2 - 2;
+		xr.x = prt->x + prt->w / 2 - 4;
 		xr.y = prt->y + prt->h - 4;
-		xr.w = 4;
-		xr.h = 4;
+		xr.w = 8;
+		xr.h = 8;
 
 		(*piv->pf_draw_rect)(piv->ctx, &xp, NULL, &xr);
 	}
@@ -109,18 +116,18 @@ void draw_sizing_raw(const drawing_interface* piv, const xcolor_t* pxc, const xr
 	{
 		xr.x = prt->x + prt->w - 4;
 		xr.y = prt->y + prt->h - 4;
-		xr.w = 4;
-		xr.h = 4;
+		xr.w = 8;
+		xr.h = 8;
 
 		(*piv->pf_draw_rect)(piv->ctx, &xp, NULL, &xr);
 	}
 
 	if (pos & SIZING_LEFTCENTER)
 	{
-		xr.x = prt->x;
-		xr.y = prt->y + prt->h / 2 - 2;
-		xr.w = 4;
-		xr.h = 4;
+		xr.x = prt->x - 4;
+		xr.y = prt->y + prt->h / 2 - 4;
+		xr.w = 8;
+		xr.h = 8;
 
 		(*piv->pf_draw_rect)(piv->ctx, &xp, NULL, &xr);
 	}
@@ -128,9 +135,9 @@ void draw_sizing_raw(const drawing_interface* piv, const xcolor_t* pxc, const xr
 	if (pos & SIZING_RIGHTCENTER)
 	{
 		xr.x = prt->x + prt->w - 4;
-		xr.y = prt->y + prt->h / 2 - 2;
-		xr.w = 4;
-		xr.h = 4;
+		xr.y = prt->y + prt->h / 2 - 4;
+		xr.w = 8;
+		xr.h = 8;
 
 		(*piv->pf_draw_rect)(piv->ctx, &xp, NULL, &xr);
 	}

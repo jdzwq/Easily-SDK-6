@@ -1,5 +1,5 @@
 SOURCES= \
-D:/Easily-temp/windows/xportm/x64/Debug/xportm.cc \
-D:/Easily-temp/windows/xportm/x64/Debug/xportmMain.cc \
-D:/Easily-temp/windows/xportm/x64/Debug/srvcrt.cc \
-D:/Easily-temp/windows/xportm/x64/Debug/srvlog.cc \
+E:/Easily-temp/windows/xportm/x64/Debug/xportm.cc \
+E:/Easily-temp/windows/xportm/x64/Debug/xportmMain.cc \
+E:/Easily-temp/windows/xportm/x64/Debug/srvcrt.cc \
+E:/Easily-temp/windows/xportm/x64/Debug/srvlog.cc \

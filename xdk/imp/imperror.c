@@ -198,3 +198,55 @@ void xdk_trace_last()
 	pdu->err_enable = 1;
 #endif
 }
+
+/**********************************************************************/
+#if defined (DEBUG) || defined (_DEBUG)
+void _error_level2()
+{
+	TRY_CATCH;
+
+	raise_user_error(_T("_error_level2"), _T("level 2 error"));
+
+	END_CATCH;
+
+	return;
+ONERROR:
+	xdk_trace_last();
+
+	return;
+}
+
+void _error_level1()
+{
+	TRY_CATCH;
+
+	_error_level2();
+
+	raise_user_error(_T("_error_level1"), _T("level 1 error"));
+
+	END_CATCH;
+
+	return;
+ONERROR:
+	xdk_trace_last();
+
+	return;
+}
+
+void error_self_test()
+{
+	TRY_CATCH;
+
+	_error_level1();
+
+	raise_user_error(_T("_error_level0"), _T("level 0 error"));
+
+	END_CATCH;
+
+	return;
+ONERROR:
+	xdk_trace_last();
+
+	XDK_TRACE_LAST;
+}
+#endif

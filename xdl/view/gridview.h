@@ -46,8 +46,6 @@ typedef enum{
 extern "C" {
 #endif
 
-EXP_API void hint_grid_item(link_t_ptr ptr, int page, PF_HINT_DESIGNER_CALLBACK pf, void* pp);
-
 EXP_API float calc_grid_page_width(link_t_ptr ptr);
 
 EXP_API float calc_grid_page_height(link_t_ptr ptr, int page);

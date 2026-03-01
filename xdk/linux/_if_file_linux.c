@@ -57,15 +57,13 @@ void _file_close(res_file_t fh)
 	close(fh);
 }
 
-bool_t _file_size(res_file_t fh, dword_t* ph, dword_t* pl)
+bool_t _file_size(res_file_t fh, vword_t* fs)
 {
     struct stat st = {0};
     
-    if(fstat(fh, &st) < 0)
-        return 0;
+    if(fstat(fh, &st) < 0) return 0;
     
-    *ph = GETSIZEH(st.st_size);
-    *pl = GETSIZEL(st.st_size);
+    if(fs) *fs = (vword_t)(st.st_size);
     
     return 1;
 }
@@ -235,26 +233,17 @@ bool_t _file_read(res_file_t fh, void* buf, dword_t size, async_t* pb)
     return 1;
 }
 
-bool_t _file_read_range(res_file_t fh, dword_t hoff, dword_t loff, void* buf, dword_t size)
+bool_t _file_read_range(res_file_t fh, vword_t off, void* buf, dword_t size)
 {
     void* pBase = NULL;
-    dword_t dwh, dwl, poff;
-    size_t dlen, flen;
-    
-    _file_size(fh, &dwh, &dwl);
+    dword_t poff;
+    size_t dlen, goff;
 
-    flen = MAKESIZE(loff, hoff) + size;
-
-    if(MAKESIZE(dwl,dwh) < flen)
-    {
-        return 0;
-    }
-
-    poff = (loff % PAGE_GRAN);
-    loff = (loff / PAGE_GRAN) * PAGE_GRAN;
+    poff = (off % PAGE_SIZE);
+    goff = (off / PAGE_SIZE) * PAGE_SIZE;
     dlen = poff + size;
 
-    pBase = mmap(NULL, dlen, PROT_READ, MAP_SHARED, fh, MAKESIZE(loff, hoff));
+    pBase = mmap(NULL, dlen, PROT_READ, MAP_SHARED, fh, goff);
     if(pBase == MAP_FAILED)
     {
         return 0;
@@ -267,29 +256,28 @@ bool_t _file_read_range(res_file_t fh, dword_t hoff, dword_t loff, void* buf, dw
     return 1;
 }
 
-bool_t _file_write_range(res_file_t fh, dword_t hoff, dword_t loff, void* buf, dword_t size)
+bool_t _file_write_range(res_file_t fh, vword_t off, void* buf, dword_t size)
 {
     void* pBase = NULL;
-    dword_t dwh, dwl, poff;
-    size_t dlen, flen;
+    dword_t poff;
+    size_t goff, dlen, flen = 0;
     
-    _file_size(fh, &dwh, &dwl);
+    _file_size(fh, (vword_t*)&flen);
     
-    flen = MAKESIZE(loff, hoff) + size;
-    
-    if(MAKESIZE(dwl,dwh) < flen)
+     if(flen < (off + size))
     {
+        flen = off + size;
         if(ftruncate(fh, flen) < 0)
         {
             return 0;
         }
     }
     
-    poff = (loff % PAGE_GRAN);
-    loff = (loff / PAGE_GRAN) * PAGE_GRAN;
+    poff = (off % PAGE_SIZE);
+    goff = (off / PAGE_SIZE) * PAGE_SIZE;
     dlen = poff + size;
     
-    pBase = mmap(NULL, dlen, PROT_WRITE | PROT_READ, MAP_SHARED, fh, MAKESIZE(loff, hoff));
+    pBase = mmap(NULL, dlen, PROT_WRITE | PROT_READ, MAP_SHARED, fh, goff);
     if(pBase == MAP_FAILED)
     {
         return 0;
@@ -304,37 +292,37 @@ bool_t _file_write_range(res_file_t fh, dword_t hoff, dword_t loff, void* buf, d
     return 1;
 }
 
-void* _file_lock_range(res_file_t fh, dword_t hoff, dword_t loff, dword_t size, bool_t write, res_file_t* ph)
+void* _file_lock_range(res_file_t fh, vword_t off, dword_t size, bool_t write, res_file_t* ph)
 {
     void* pBase = NULL;
-    dword_t dwh, dwl, poff;
-    size_t dlen, flen;
+    dword_t poff;
+    size_t goff, dlen, flen = 0;
     int prot;
 
     *ph = INVALID_FILE;
 
-    _file_size(fh, &dwh, &dwl);
+    _file_size(fh, (vword_t*)&flen);
     
-    flen = MAKESIZE(loff, hoff) + size;
-    
-    if(MAKESIZE(dwl,dwh) < flen)
+    //expand file first for writing
+    if(flen < (off + size))
     {
         if(!write)
         {
             return NULL;
         }
+        flen = off + size;
        if(ftruncate(fh, flen) < 0)
         {
             return NULL;
         }
     }
     
-    poff = (loff % PAGE_GRAN);
-    loff = (loff / PAGE_GRAN) * PAGE_GRAN;
+    poff = (off % PAGE_SIZE);
+    goff = (off / PAGE_SIZE) * PAGE_SIZE;
     dlen = poff + size;
     
     prot = (write)? (PROT_WRITE | PROT_READ) : PROT_READ;
-    pBase = mmap(NULL, dlen, prot, MAP_SHARED, fh, MAKESIZE(loff, hoff));
+    pBase = mmap(NULL, dlen, prot, MAP_SHARED, fh, goff);
     if(pBase == MAP_FAILED)
     {
         return NULL;
@@ -345,35 +333,205 @@ void* _file_lock_range(res_file_t fh, dword_t hoff, dword_t loff, dword_t size, 
     return (void*)((char*)pBase + poff);
 }
 
-void _file_unlock_range(res_file_t mh, dword_t hoff, dword_t loff, dword_t size, void* p)
+void _file_unlock_range(res_file_t mh, vword_t off, dword_t size, void* p)
 {
     void* pBase = NULL;
     dword_t poff;
-    size_t dlen;
+    size_t goff, dlen;
     
-    poff = (loff % PAGE_GRAN);
-    loff = (loff / PAGE_GRAN) * PAGE_GRAN;
+    poff = (off % PAGE_SIZE);
+    goff = (off / PAGE_SIZE) * PAGE_SIZE;
     dlen = poff + size;
 
     pBase = (void*)((char*)p - poff);
     
-    msync(pBase, dlen, MS_SYNC);
+    msync(pBase, dlen, MS_ASYNC);
     
     munmap(pBase, dlen);
 }
 
 
-bool_t _file_truncate(res_file_t fh, dword_t hoff, dword_t loff)
+bool_t _file_truncate(res_file_t fh, vword_t off)
 {
-    size_t len;
-    
-    len = MAKESIZE(loff, hoff);
+    size_t len = (size_t)off;
     
     if (ftruncate(fh, len) < 0)
         return 0;
     
     lseek(fh, len, SEEK_SET);
+    
     return 1;
+}
+
+vlong_t _file_seek_begin(res_file_t fh)
+{
+    off_t pos;
+
+    pos = lseek(fh, (off_t)0, SEEK_SET);
+
+    return (vlong_t)(pos);
+}
+
+vlong_t _file_seek_end(res_file_t fh)
+{
+    off_t pos;
+
+    pos = lseek(fh, (off_t)0, SEEK_END);
+
+    return (vlong_t)(pos);
+}
+
+vlong_t _file_seek_bytes(res_file_t fh, vlong_t bytes)
+{
+    off_t pos;
+
+    pos = lseek(fh, (off_t)bytes, SEEK_CUR);
+    
+    return (vlong_t)(pos);
+}
+
+vlong_t _file_seek_lines(res_file_t fh, vlong_t lines)
+{
+     unsigned char ch = 0;
+    ssize_t n;
+    size_t fs;
+    off_t pos = 0, step = (lines > 0)? 1 : -1;
+
+    _file_size(fh, (vword_t*)&fs);
+
+    pos = lseek(fh, 0, SEEK_CUR);
+
+    lines *= step;
+    while(lines--)
+    {
+        if(step < 0)
+        {
+            while(ch == '\0' || ch == '\r' || ch == '\n')
+            {
+                pos = lseek(fh, step, SEEK_CUR);
+                if(pos < 0) return (vlong_t)-1;
+
+                n = pread(fh, &ch, 1, pos);
+                if(!n) break;
+            }
+        }
+
+        while(ch != '\r' && ch != '\n')
+        {
+            if(step < 0)
+            {
+                pos = lseek(fh, step, SEEK_CUR);
+                if(pos < 0) return (vlong_t)-1;
+            }
+
+            n = pread(fh, &ch, 1, pos);
+
+            if(step > 0)
+            {
+                pos = lseek(fh, step, SEEK_CUR);
+                if(pos < 0) return (vlong_t)-1;
+            }
+
+            if(!pos || pos == fs) break;
+        }
+
+        if(ch == '\r' || ch == '\n')
+        {
+            pos = lseek(fh, -step, SEEK_CUR);
+            if(pos < 0) return (vlong_t)-1;
+        }
+
+        if(step > 0)
+        {
+            while(ch == '\r' || ch == '\n')
+            {
+                pos = lseek(fh, step, SEEK_CUR);
+                if(pos < 0) return (vlong_t)-1;
+
+                n = pread(fh, &ch, 1, pos);
+                if(!n) break;
+            }
+        }
+    }
+
+    return (vlong_t)(pos);
+}
+
+dword_t _file_peek_line(res_file_t fh, byte_t* buf, dword_t max)
+{
+    unsigned char ch = 0;
+    ssize_t n;
+    off_t pos;
+    dword_t total = 0;
+
+    pos = lseek(fh, 0, SEEK_CUR);
+    n = pread(fh, &ch, 1, pos);
+    
+    while (n > 0 && ch != '\r' && ch != '\n')
+    {
+        if(buf && total < max) buf[total] = ch;
+        total ++;
+
+        pos ++;
+        n = pread(fh, &ch, 1, pos);
+    }
+
+    while (n > 0 && (ch == '\r' || ch == '\n'))
+    {
+        pos ++;
+        n = pread(fh, &ch, 1, pos);
+    }
+
+    return (n < 0)? 0 : total;
+}
+
+dword_t _file_read_line(res_file_t fh, byte_t* buf, dword_t max)
+{
+    unsigned char ch = 0;
+    ssize_t n;
+    off_t pos;
+    dword_t total = 0;
+
+    pos = lseek(fh, 0, SEEK_CUR);
+    n = pread(fh, &ch, 1, pos);
+    while (n > 0 && ch != '\r' && ch != '\n')
+    {
+        if(buf && total < max) buf[total] = ch;
+        total ++;
+
+        pos = lseek(fh, 1, SEEK_CUR);
+        if(pos < 0) return total;
+
+        n = pread(fh, &ch, 1, pos);
+    }
+
+    while (n > 0 && (ch == '\r' || ch == '\n'))
+    {
+        pos = lseek(fh, 1, SEEK_CUR);
+        if(pos < 0) return total;
+
+        n = pread(fh, &ch, 1, pos);
+    }
+
+    return (n < 0)? 0 : total;
+}
+
+dword_t _file_write_line(res_file_t fh, const byte_t* buf, dword_t len)
+{
+    unsigned char ch = 0;
+    ssize_t n;
+    dword_t total = 0;
+
+    n = write(fh, buf, len);
+    if(n < 0) return 0;
+    total += n;
+
+    ch = '\n';
+    n = write(fh, &ch, 1);
+    if(n < 0) return 0;
+    total ++;
+
+    return total;
 }
 
 bool_t _file_gettime(res_file_t fh, xdate_t* pdt)

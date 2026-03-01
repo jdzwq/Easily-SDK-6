@@ -1,2 +1,2 @@
 SOURCES= \
-D:\Easily-temp\windows\xdb_sqlite\x64\Debug/xdb_sqlite.c \
+E:\Easily-temp\windows\xdb_sqlite\x64\Debug/xdb_sqlite.c \

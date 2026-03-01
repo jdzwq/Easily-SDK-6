@@ -89,7 +89,7 @@ typedef struct _secu_desc_t {
 }secu_desc_t;
 
 /*list file node callback function*/
-typedef void(*CALLBACK_LISTFILE)(const file_info_t* pfi, void* pv);
+typedef void(CALLBACK *PF_LIST_FILES)(const file_info_t* pfi, void* pv);
 #endif /*XDK_SUPPORT_FILE*/
 
 #ifdef XDK_SUPPORT_PROCESS
@@ -449,15 +449,22 @@ typedef struct _if_socket_t{
 /*file interface*/
 typedef res_file_t (*PF_FILE_OPEN)(const tchar_t*, dword_t);
 typedef void (*PF_FILE_CLOSE)(res_file_t);
-typedef bool_t(*PF_FILE_SIZE)(res_file_t, dword_t*, dword_t*);
+typedef bool_t(*PF_FILE_SIZE)(res_file_t, vword_t*);
 typedef bool_t(*PF_FILE_WRITE)(res_file_t, void*, dword_t, async_t*);
 typedef bool_t(*PF_FILE_FLUSH)(res_file_t);
 typedef bool_t(*PF_FILE_READ)(res_file_t, void*, dword_t, async_t*);
-typedef bool_t(*PF_FILE_READ_RANGE)(res_file_t, dword_t, dword_t, void*, dword_t);
-typedef bool_t(*PF_FILE_WRITE_RANGE)(res_file_t, dword_t, dword_t, void*, dword_t);
-typedef void*(*PF_FILE_LOCK_RANGE)(res_file_t, dword_t, dword_t, dword_t, bool_t, res_file_t*);
-typedef void(*PF_FILE_UNLOCK_RANGE)(res_file_t, dword_t, dword_t, dword_t, void*);
-typedef bool_t(*PF_FILE_TRUNCATE)(res_file_t, dword_t, dword_t);
+typedef bool_t(*PF_FILE_READ_RANGE)(res_file_t, vword_t, void*, dword_t);
+typedef bool_t(*PF_FILE_WRITE_RANGE)(res_file_t, vword_t, void*, dword_t);
+typedef void*(*PF_FILE_LOCK_RANGE)(res_file_t, vword_t, dword_t, bool_t, res_file_t*);
+typedef void(*PF_FILE_UNLOCK_RANGE)(res_file_t, vword_t, dword_t, void*);
+typedef bool_t(*PF_FILE_TRUNCATE)(res_file_t, vword_t);
+typedef vlong_t(*PF_FILE_SEEK_BEGIN)(res_file_t);
+typedef vlong_t(*PF_FILE_SEEK_END)(res_file_t);
+typedef vlong_t(*PF_FILE_SEEK_BYTES)(res_file_t, vlong_t);
+typedef vlong_t(*PF_FILE_SEEK_LINES)(res_file_t, vlong_t);
+typedef dword_t(*PF_FILE_PEEK_LINE)(res_file_t, byte_t*, dword_t);
+typedef dword_t(*PF_FILE_READ_LINE)(res_file_t, byte_t*, dword_t);
+typedef dword_t(*PF_FILE_WRITE_LINE)(res_file_t, const byte_t*, dword_t);
 typedef bool_t (*PF_FILE_DELETE)(const tchar_t*);
 typedef bool_t(*PF_FILE_RENAME)(const tchar_t*, const tchar_t*);
 typedef bool_t (*PF_FILE_INFO)(const tchar_t*, file_info_t*);
@@ -485,6 +492,13 @@ typedef struct _if_file_t{
 	PF_FILE_LOCK_RANGE	pf_file_lock_range;
 	PF_FILE_UNLOCK_RANGE pf_file_unlock_range;
 	PF_FILE_TRUNCATE	pf_file_truncate;
+	PF_FILE_SEEK_BEGIN	pf_file_seek_begin;
+	PF_FILE_SEEK_END	pf_file_seek_end;
+	PF_FILE_SEEK_BYTES	pf_file_seek_bytes;
+	PF_FILE_SEEK_LINES	pf_file_seek_lines;
+	PF_FILE_PEEK_LINE	pf_file_peek_line;
+	PF_FILE_READ_LINE	pf_file_read_line;
+	PF_FILE_WRITE_LINE	pf_file_write_line;
 	PF_FILE_DELETE		pf_file_delete;
 	PF_FILE_RENAME		pf_file_rename;
 	PF_FILE_INFO		pf_file_info;

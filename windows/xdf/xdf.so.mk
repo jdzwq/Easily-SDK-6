@@ -18,8 +18,8 @@ SRC_PATH = ../../xdf
 LIB_PATH = ../lib/$(ARCH)
 OUT_PATH = ../../../Easily-app-6/windows/sbin64/api
 
-OBJ_PATH = D:\Easily-temp\windows\$(MODULE)\$(ARCH)\Debug
-PDB_PATH = D:\Easily-temp\windows\$(ARCH)
+OBJ_PATH = E:\Easily-temp\windows\$(MODULE)\$(ARCH)\Debug
+PDB_PATH = E:\Easily-temp\windows\$(ARCH)
 OUT_PATH = C:\xService
 
 TARGET = $(OUT_PATH)/$(MODULE).dll

@@ -196,7 +196,7 @@ bool_t noti_form_field_changing(widget_t widget)
 
 	XDK_ASSERT(ptd->field);
 
-	if (noti_form_owner(widget, NC_FIELDUNFOCUS, ptd->form, ptd->field, NULL))
+	if (noti_form_owner(widget, NC_FIELDKILLFOCUS, ptd->form, ptd->field, NULL))
 		return (bool_t)0;
 
 	ptd->b_alarm = (bool_t)0;
@@ -228,7 +228,7 @@ void noti_form_field_changed(widget_t widget, link_t_ptr flk)
 
 	widget_erase(widget, &xr);
 
-	noti_form_owner(widget, NC_FIELDFOCUSED, ptd->form, flk, NULL);
+	noti_form_owner(widget, NC_FIELDSETFOCUS, ptd->form, flk, NULL);
 }
 
 void noti_form_field_enter(widget_t widget, link_t_ptr flk)
@@ -1646,7 +1646,7 @@ void hand_form_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	widget_get_canv_rect(widget, (canvbox_t*)&(ifc.rect));
 	ifc.pclrs = pclrs;
 
-	//(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
+	//(*ifv.drw->pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
 
 	if (widget_can_paging(widget))
 	{

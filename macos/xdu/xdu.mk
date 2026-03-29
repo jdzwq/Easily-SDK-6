@@ -31,7 +31,7 @@ LIBS = -lm -lxdk -lxdg
 DIRS = $(wildcard \
 	$(SRC_PATH)/cocoa/*.m \
 	$(SRC_PATH)/imp/*.c \
-	$(SRC_PATH)/inf/*.c \
+	$(SRC_PATH)/gdi/*.c \
 	$(SRC_PATH)/*.c)
 SRCS = $(notdir $(DIRS))
 COB1 = $(patsubst %.c, %.o, $(SRCS))
@@ -45,7 +45,7 @@ $(OBJ_PATH)/%.o : $(SRC_PATH)/cocoa/%.m
 $(OBJ_PATH)/%.o : $(SRC_PATH)/imp/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
 
-$(OBJ_PATH)/%.o : $(SRC_PATH)/inf/%.c
+$(OBJ_PATH)/%.o : $(SRC_PATH)/gdi/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
 
 $(OBJ_PATH)/%.o : $(SRC_PATH)/%.c

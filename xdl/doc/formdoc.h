@@ -492,6 +492,7 @@ LICENSE.GPL3 for more details.
 */
 #define get_field_dirty(flk)								(get_dom_node_mask(flk) & 0x0000000F)
 
+#define is_form_field_class(token)						((get_options_value(DOC_FORM_FIELD_OPTIONS,-1,OPT_ITEMFEED,OPT_LINEFEED,token,NULL,MAX_LONG) > 0)? 1 : 0)
 
 #define IS_STATIC_FIELD(token)	(compare_text(token,-1,DOC_FORM_SHAPE,-1,0) == 0 || compare_text(token,-1,DOC_FORM_LABEL,-1,0) == 0 || compare_text(token,-1,DOC_FORM_PLOT,-1,0) == 0)
 #define IS_DATA_FIELD(token)	(compare_text(token,-1,DOC_FORM_TEXT,-1,0) == 0 || compare_text(token,-1,DOC_FORM_CHECK,-1,0) == 0  ||  compare_text(token,-1,DOC_FORM_TAG,-1,0) == 0 || compare_text(token,-1,DOC_FORM_MEMO,-1,0) == 0 || compare_text(token,-1,DOC_FORM_PHOTO,-1,0) == 0 || compare_text(token,-1,DOC_FORM_CODE,-1,0) == 0 || compare_text(token,-1,DOC_FORM_HREF,-1,0) == 0 || compare_text(token,-1,DOC_FORM_TABLE,-1,0) == 0)

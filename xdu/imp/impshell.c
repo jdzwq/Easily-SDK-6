@@ -26,7 +26,6 @@ LICENSE.GPL3 for more details.
 
 #include "impshell.h"
 
-#include "../xduinf.h"
 #include "../xduimp.h"
 #include "../xduinit.h"
 

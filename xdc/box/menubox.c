@@ -44,13 +44,15 @@ static void _menubox_item_rect(widget_t widget, link_t_ptr ilk, xrect_t* pxr)
 	menu_delta_t* ptd = GETMENUDELTA(widget);
 	canvas_t canv;
 	measure_interface im = { 0 };
+	const xfont_t* pxf;
 
 	canv = widget_get_canvas(widget);
 
+	pxf = widget_get_xfont_ptr(widget);
 	get_canvas_measure(canv, &im);
 	widget_get_canv_rect(widget, (canvbox_t*)&(im.rect));
 
-	calc_menu_item_rect(&im, ptd->menu, ilk, pxr);
+	calc_menu_item_rect(&im, pxf, ptd->menu, ilk, pxr);
 
 	widget_rect_to_pt(widget, pxr);
 }
@@ -63,10 +65,13 @@ static void _menubox_reset_page(widget_t widget)
 	xsize_t xs;
 	canvas_t canv;
 	measure_interface im = { 0 };
+	const xfont_t* pxf;
 
 	widget_get_client_rect(widget, &xr);
 	pw = xr.w;
 	ph = xr.h;
+
+	pxf = widget_get_xfont_ptr(widget);
 
 	canv = widget_get_canvas(widget);
 	get_canvas_measure(canv, &im);
@@ -74,8 +79,8 @@ static void _menubox_reset_page(widget_t widget)
 
 	if (ptd->menu)
 	{
-		xs.fw = calc_menu_width(&im, ptd->menu);
-		xs.fh = calc_menu_height(&im, ptd->menu);
+		xs.fw = calc_menu_width(&im, pxf, ptd->menu);
+		xs.fh = calc_menu_height(&im, pxf, ptd->menu);
 
 		widget_size_to_pt(widget, &xs);
 
@@ -226,6 +231,7 @@ void hand_menu_lbutton_down(widget_t widget, const xpoint_t* pxp)
 	xpoint_t pt;
 	canvas_t canv;
 	measure_interface im = { 0 };
+	const xfont_t* pxf;
 
 	if (!ptd->menu)
 		return;
@@ -236,11 +242,13 @@ void hand_menu_lbutton_down(widget_t widget, const xpoint_t* pxp)
 	pt.y = pxp->y;
 	widget_point_to_mm(widget, &pt);
 
+	pxf = widget_get_xfont_ptr(widget);
+
 	canv = widget_get_canvas(widget);
 	get_canvas_measure(canv, &im);
 	widget_get_canv_rect(widget, (canvbox_t*)&(im.rect));
 
-	nHint = calc_menu_hint(&im, &pt, ptd->menu, &plk);
+	nHint = calc_menu_hint(&im, pxf, &pt, ptd->menu, &plk);
 
 	bRe = (plk == ptd->item) ? 1 : 0;
 	if (bRe)
@@ -329,11 +337,13 @@ void hand_menu_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	drawing_interface ifv = {0};
 
 	const color_mod_t *pclrs;
+	const xfont_t* pxf;
 	xbrush_t xb;
 	xcolor_t xc;
 
 	if (!ptd->menu) return;
 
+	pxf = widget_get_xfont_ptr(widget);
 	pclrs = widget_get_color_mode_ptr(widget);
 	default_xbrush(&xb);
 	format_xcolor(&(pclrs->clr_bkg), xb.color);
@@ -350,9 +360,9 @@ void hand_menu_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	widget_get_canv_rect(widget, (canvbox_t*)&(ifc.rect));
 	ifc.pclrs = pclrs;
 
-	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
+	(*ifv.drw->pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
 
-	draw_menu(&ifc, ptd->menu);
+	draw_menu(&ifc, pxf, ptd->menu);
 
 	//draw focus
 	if (ptd->item)
@@ -564,18 +574,20 @@ void menubox_popup_size(widget_t widget, xsize_t* pxs)
 
 	canvas_t canv;
 	measure_interface im = { 0 };
+	const xfont_t* pxf;
 
 	XDK_ASSERT(ptd != NULL);
 
 	if (!ptd->menu)
 		return;
 
+	pxf = widget_get_xfont_ptr(widget);
 	canv = widget_get_canvas(widget);
 	get_canvas_measure(canv, &im);
 	widget_get_canv_rect(widget, (canvbox_t*)&(im.rect));
 
-	pxs->fw = calc_menu_width(&im, ptd->menu);
-	pxs->fh = calc_menu_height(&im, ptd->menu);
+	pxs->fw = calc_menu_width(&im, pxf, ptd->menu);
+	pxs->fh = calc_menu_height(&im, pxf, ptd->menu);
 
 	widget_size_to_pt(widget, pxs);
 

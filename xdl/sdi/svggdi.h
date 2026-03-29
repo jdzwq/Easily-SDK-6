@@ -251,13 +251,18 @@ LOC_API void	svg_text_out_raw(visual_t view, const xpoint_t* ppt, const tchar_t*
 */
 LOC_API void	svg_text_size(canvas_t canv, const tchar_t* txt, int len, xsize_t* pxs);
 LOC_API void	svg_text_size_raw(visual_t view, const tchar_t* txt, int len, xsize_t* pxs);
-
+LOC_API void	svg_measure_size(canvas_t canv, const xfont_t* pxf, const tchar_t* txt, int len, xsize_t* pxs);
+LOC_API void	svg_measure_size_raw(visual_t view, const xfont_t* pxf, const tchar_t* txt, int len, xsize_t* pxs);
 
 LOC_API void	svg_text_rect(canvas_t canv, const xface_t* pxa, const tchar_t* txt, int len, xrect_t* pxr);
 LOC_API void	svg_text_rect_raw(visual_t view, const xface_t* pxa, const tchar_t* txt, int len, xrect_t* pxr);
+LOC_API void	svg_measure_rect(canvas_t canv, const xfont_t* pxf, const xface_t* pxa, const tchar_t* txt, int len, xrect_t* pxr);
+LOC_API void	svg_measure_rect_raw(visual_t view, const xfont_t* pxf, const xface_t* pxa, const tchar_t* txt, int len, xrect_t* pxr);
 
 LOC_API void	svg_font_size(canvas_t canv, xsize_t* pxs);
 LOC_API void	svg_font_size_raw(visual_t view, xsize_t* pxs);
+LOC_API void	svg_measure_font(canvas_t canv, const xfont_t* pxf, xsize_t* pxs);
+LOC_API void	svg_measure_font_raw(visual_t view, const xfont_t* pxf, xsize_t* pxs);
 
 /*
 @FUNCTION svg_color_out: output color sequence in svg canvas using millimeter coordinate.

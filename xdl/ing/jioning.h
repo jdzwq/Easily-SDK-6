@@ -35,14 +35,14 @@ extern "C" {
 
 /*
 @FUNCTION draw_linecap: draw the linecap in canvas using millimeter coordinate.
-@INPUT drawing_interface* pif: the canvas interface.
+@INPUT drawing_interface* pci: the canvas interface.
 @INPUT cont xpen_t* pxp: the pen struct.
 @INPUT const xpoint_t* pps: the line from.
 @INPUT const xpoint_t* ppt: the line to and the arrow at.
 @INPUT double angle: the angle for arrow.
 @RETURN void: none.
 */
-EXP_API void	draw_linecap(const drawing_interface* pif, const xpen_t* pxp, const xpoint_t* pps, const xpoint_t* ppt, double angle, const tchar_t* cap);
+EXP_API void	draw_linecap(const drawing_interface* pci, const xpen_t* pxp, const xpoint_t* pps, const xpoint_t* ppt, double angle, const tchar_t* cap);
 
 
 #ifdef	__cplusplus

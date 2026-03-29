@@ -51,12 +51,14 @@ void _wordsbox_item_rect(widget_t widget, link_t_ptr plk, xrect_t* pxr)
 
 	canvas_t canv;
 	measure_interface im = { 0 };
+	const xfont_t *pxf;
 
+	pxf = widget_get_xfont_ptr(widget);
 	canv = widget_get_canvas(widget);
 	get_canvas_measure(canv, &im);
 	widget_get_canv_rect(widget, (canvbox_t*)&(im.rect));
 
-	calc_wordsbox_item_rect(&im, ptd->words, ptd->page, plk, pxr);
+	calc_wordsbox_item_rect(&im, pxf, ptd->words, ptd->page, plk, pxr);
 	widget_rect_to_pt(widget, pxr);
 }
 
@@ -64,6 +66,7 @@ static void _wordsbox_reset_page(widget_t widget)
 {
 	words_delta_t* ptd = GETWORDSDELTA(widget);
 	measure_interface im = { 0 };
+	const xfont_t *pxf;
 
 	xrect_t xr;
 	xsize_t xs;
@@ -72,8 +75,9 @@ static void _wordsbox_reset_page(widget_t widget)
 
 	if (ptd->words)
 	{
+		pxf = widget_get_xfont_ptr(widget);
 		get_canvas_measure(widget_get_canvas(widget), &im);
-		calc_wordsbox_size(&im, ptd->words, &xs);
+		calc_wordsbox_size(&im, pxf, ptd->words, &xs);
 		widget_size_to_pt(widget, &xs);
 	}
 	else
@@ -234,20 +238,21 @@ void hand_words_lbutton_up(widget_t widget, const xpoint_t* pxp)
 {
 	words_delta_t* ptd = GETWORDSDELTA(widget);
 	measure_interface im = { 0 };
-
+	const xfont_t *pxf;
 	link_t_ptr ilk = NULL;
 	xpoint_t pt;
 
 	if (!ptd->words)
 		return;
 
+	pxf = widget_get_xfont_ptr(widget);
 	get_canvas_measure(widget_get_canvas(widget), &im);
 
 	pt.x = pxp->x;
 	pt.y = pxp->y;
 	widget_point_to_mm(widget, &pt);
 
-	calc_wordsbox_hint(&im, &pt, ptd->words, ptd->page, &ilk);
+	calc_wordsbox_hint(&im, pxf, &pt, ptd->words, ptd->page, &ilk);
 
 	if (ilk != ptd->item)
 	{
@@ -306,9 +311,11 @@ void hand_words_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	drawing_interface ifv = {0};
 
 	const color_mod_t *pclrs;
+	const xfont_t *pxf;
 	xbrush_t xb;
 	xcolor_t xc;
 
+	pxf = widget_get_xfont_ptr(widget);
 	pclrs = widget_get_color_mode_ptr(widget);
 	default_xbrush(&xb);
 	format_xcolor(&(pclrs->clr_bkg), xb.color);
@@ -325,9 +332,9 @@ void hand_words_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	widget_get_canv_rect(widget, (canvbox_t*)&(ifc.rect));
 	ifc.pclrs = pclrs;
 
-	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
+	(*ifv.drw->pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
 
-	draw_wordsbox(&ifc, ptd->words, ptd->page);
+	draw_wordsbox(&ifc, pxf, ptd->words, ptd->page);
 
 	if (ptd->item)
 	{
@@ -795,12 +802,14 @@ void wordsbox_popup_size(widget_t widget, xsize_t* pxs)
 {
 	words_delta_t* ptd = GETWORDSDELTA(widget);
 	measure_interface im = { 0 };
+	const xfont_t *pxf;
 
 	XDK_ASSERT(ptd != NULL);
 
+	pxf = widget_get_xfont_ptr(widget);
 	get_canvas_measure(widget_get_canvas(widget), &im);
 
-	calc_wordsbox_size(&im, ptd->words, pxs);
+	calc_wordsbox_size(&im, pxf, ptd->words, pxs);
 
 	widget_size_to_pt(widget, pxs);
 

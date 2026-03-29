@@ -105,7 +105,7 @@ LICENSE.GPL3 for more details.
 #define SUBPROC_ON_TIMER(proc)				pev->sub_on_timer = proc;
 #define SUBPROC_ON_SPLITOR_IMPLEMENT		{pev->sub_on_mouse_move = widget_splitor_sub_mousemove;pev->sub_on_lbutton_down=widget_splitor_sub_lbuttondown;pev->sub_on_lbutton_up=widget_splitor_sub_lbuttonup;pev->sub_on_size=widget_splitor_sub_size;pev->sub_on_paint=widget_splitor_sub_paint;}
 #define SUBPROC_ON_DOCKER_IMPLEMENT			{pev->sub_on_mouse_move = widget_docker_sub_mousemove;pev->sub_on_lbutton_down=widget_docker_sub_lbuttondown;pev->sub_on_lbutton_up=widget_docker_sub_lbuttonup;pev->sub_on_paint=widget_docker_sub_paint;}
-#define SUBPROC_ON_DESIGNER_IMPLEMENT		{pev->sub_on_mouse_move = designer_sub_mousemove;pev->sub_on_lbutton_down=designer_sub_lbutton_down;pev->sub_on_lbutton_up=designer_sub_lbutton_up;pev->sub_on_lbutton_dbclick=designer_sub_lbutton_dbclick;pev->sub_on_paint=designer_sub_paint;pev->sub_on_keydown=designer_sub_keydown;}
+#define SUBPROC_ON_DESIGNER_IMPLEMENT		{pev->sub_on_mouse_move = designer_sub_mousemove;pev->sub_on_lbutton_down=designer_sub_lbutton_down;pev->sub_on_lbutton_up=designer_sub_lbutton_up;pev->sub_on_lbutton_dbclick=designer_sub_lbutton_dbclick;pev->sub_on_rbutton_down=designer_sub_rbutton_down;pev->sub_on_rbutton_up=designer_sub_rbutton_up;pev->sub_on_paint=designer_sub_paint;pev->sub_on_keydown=designer_sub_keydown;}
 #define SUBPROC_ON_DIALOG_IMPLEMENT			{pev->sub_on_paint=dialog_sub_paint;pev->sub_on_size=dialog_sub_size;}
 #define SUBPROC_END_DISPATH					}
 

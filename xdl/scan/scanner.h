@@ -35,7 +35,7 @@ LICENSE.GPL3 for more details.
 extern "C" {
 #endif
 
-EXP_API void scan_object_text(const measure_interface* pim, const viewbox_t* pvb, words_scan_interface* pit, PF_SCAN_TEXTOR_CALLBACK pf, void* pp);
+EXP_API void scan_object_text(const measure_interface* pmv, const viewbox_t* pvb, words_scan_interface* pit, PF_SCAN_TEXTOR_CALLBACK pf, void* pp);
 
 #ifdef	__cplusplus
 }

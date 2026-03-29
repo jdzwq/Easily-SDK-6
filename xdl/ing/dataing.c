@@ -30,16 +30,16 @@ LICENSE.GPL3 for more details.
 #include "../xdlutil.h"
 
 
-void draw_pass(const drawing_interface* pif, const xface_t* pxa, const xrect_t* pxr, const tchar_t* txt, int len)
+void draw_pass(const drawing_interface* pci, const xface_t* pxa, const xrect_t* pxr, const tchar_t* txt, int len)
 {
 	tchar_t sz_pass[INT_LEN + 1] = { 0 };
 
 	len = format_password(txt, sz_pass, INT_LEN);
 
-	(*pif->pf_draw_text)(pif->ctx, pxa, pxr, sz_pass, len);
+	(*pci->drw->pf_draw_text)(pci->ctx, pxa, pxr, sz_pass, len);
 }
 
-void draw_data(const drawing_interface* pif, const xface_t* pxa, const xrect_t* pxr, const tchar_t* data, int len, int dig, const tchar_t* type, const tchar_t* fmt, bool_t zeronull, bool_t autowrap)
+void draw_data(const drawing_interface* pci, const xface_t* pxa, const xrect_t* pxr, const tchar_t* data, int len, int dig, const tchar_t* type, const tchar_t* fmt, bool_t zeronull, bool_t autowrap)
 {
 	tchar_t sz_format[RES_LEN + 1] = { 0 };
 	xdate_t dt = { 0 };
@@ -73,14 +73,14 @@ void draw_data(const drawing_interface* pif, const xface_t* pxa, const xrect_t* 
 
 		if (autowrap && pxa && is_null(xa.text_wrap))
 		{
-			(*pif->pf_text_size)(pif->ctx, sz_format, -1, &xs);
+			(*pci->drw->pf_text_size)(pci->ctx, sz_format, -1, &xs);
 			if (xs.fw > pxr->fw)
 			{
 				xscpy(xa.text_wrap, GDI_ATTR_TEXT_WRAP_WORDBREAK);
 			}
 		}
 
-		(*pif->pf_draw_text)(pif->ctx, &xa, pxr, sz_format, -1);
+		(*pci->drw->pf_draw_text)(pci->ctx, &xa, pxr, sz_format, -1);
 	}
 	else if (compare_text(type, -1, ATTR_DATA_TYPE_NUMERIC, -1, 0) == 0)
 	{
@@ -101,14 +101,14 @@ void draw_data(const drawing_interface* pif, const xface_t* pxa, const xrect_t* 
 
 		if (autowrap && is_null(xa.text_wrap))
 		{
-			(*pif->pf_text_size)(pif->ctx, sz_format, -1, &xs);
+			(*pci->drw->pf_text_size)(pci->ctx, sz_format, -1, &xs);
 			if (xs.fw > pxr->fw)
 			{
 				xscpy(xa.text_wrap, GDI_ATTR_TEXT_WRAP_WORDBREAK);
 			}
 		}
 
-		(*pif->pf_draw_text)(pif->ctx, &xa, pxr, sz_format, -1);
+		(*pci->drw->pf_draw_text)(pci->ctx, &xa, pxr, sz_format, -1);
 	}
 	else if (compare_text(type, -1, ATTR_DATA_TYPE_DATETIME, -1, 0) == 0)
 	{
@@ -124,14 +124,14 @@ void draw_data(const drawing_interface* pif, const xface_t* pxa, const xrect_t* 
 
 		if (autowrap && is_null(xa.text_wrap))
 		{
-			(*pif->pf_text_size)(pif->ctx, sz_format, -1, &xs);
+			(*pci->drw->pf_text_size)(pci->ctx, sz_format, -1, &xs);
 			if (xs.fw > pxr->fw)
 			{
 				xscpy(xa.text_wrap, GDI_ATTR_TEXT_WRAP_WORDBREAK);
 			}
 		}
 
-		(*pif->pf_draw_text)(pif->ctx, &xa, pxr, sz_format, -1);
+		(*pci->drw->pf_draw_text)(pci->ctx, &xa, pxr, sz_format, -1);
 	}
 	else if (compare_text(type, -1, ATTR_DATA_TYPE_DATE, -1, 0) == 0)
 	{
@@ -147,27 +147,27 @@ void draw_data(const drawing_interface* pif, const xface_t* pxa, const xrect_t* 
 
 		if (autowrap && is_null(xa.text_wrap))
 		{
-			(*pif->pf_text_size)(pif->ctx, sz_format, -1, &xs);
+			(*pci->drw->pf_text_size)(pci->ctx, sz_format, -1, &xs);
 			if (xs.fw > pxr->fw)
 			{
 				xscpy(xa.text_wrap, GDI_ATTR_TEXT_WRAP_WORDBREAK);
 			}
 		}
 
-		(*pif->pf_draw_text)(pif->ctx, &xa, pxr, sz_format, -1);
+		(*pci->drw->pf_draw_text)(pci->ctx, &xa, pxr, sz_format, -1);
 	}
 	else
 	{
 		if (autowrap && is_null(xa.text_wrap))
 		{
-			(*pif->pf_text_size)(pif->ctx, data, len, &xs);
+			(*pci->drw->pf_text_size)(pci->ctx, data, len, &xs);
 			if (xs.fw > pxr->fw)
 			{
 				xscpy(xa.text_wrap, GDI_ATTR_TEXT_WRAP_WORDBREAK);
 			}
 		}
 
-		(*pif->pf_draw_text)(pif->ctx, &xa, pxr, data, len);
+		(*pci->drw->pf_draw_text)(pci->ctx, &xa, pxr, data, len);
 	}
 }
 

@@ -46,7 +46,8 @@ typedef struct _proper_delta_t{
 #define GETPROPERDELTA(ph) 	(proper_delta_t*)widget_get_user_delta(ph)
 #define SETPROPERDELTA(ph,ptd) widget_set_user_delta(ph,(vword_t)ptd)
 
-/*****************************************************************************************************/
+/***********************************************************************/
+
 static void _properctrl_section_rect(widget_t widget, link_t_ptr sec, xrect_t* pxr)
 {
 	proper_delta_t* ptd = GETPROPERDELTA(widget);
@@ -139,7 +140,7 @@ static void _properctrl_ensure_visible(widget_t widget)
 	widget_ensure_visible(widget, &xr, 1);
 }
 
-/**********************************************************************************************************/
+/***********************************************************************/
 
 int noti_proper_owner(widget_t widget, unsigned int code, link_t_ptr proper, link_t_ptr slk, link_t_ptr elk, void* data)
 {
@@ -628,7 +629,9 @@ void noti_proper_reset_scroll(widget_t widget, bool_t bUpdate)
 			widget_close(ptd->vsc, 0);
 	}
 }
-/************************************************************************************************/
+
+/***********************************************************************/
+
 int hand_proper_create(widget_t widget, void* data)
 {
 	proper_delta_t* ptd;
@@ -1031,7 +1034,7 @@ void hand_proper_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	widget_get_canv_rect(widget, (canvbox_t*)&(ifc.rect));
 	ifc.pclrs = pclrs;
 
-	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
+	(*ifv.drw->pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
 
 	draw_proper(&ifc, ptd->proper);
 
@@ -1042,13 +1045,13 @@ void hand_proper_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 		pt_expand_rect(&xr, DEF_INNER_FEED, DEF_INNER_FEED);
 
 		parse_xcolor(&xc, DEF_ALPHA_COLOR);
-		(*ifv.pf_alphablend_rect)(ifv.ctx, &xc, &xr, ALPHA_TRANS);
+		(*ifv.drw->pf_alphablend_rect)(ifv.ctx, &xc, &xr, ALPHA_TRANS);
 	}
 
 	end_canvas_paint(canv, dc, pxr);
 }
 
-/*************************************************************************************************/
+/***********************************************************************/
 
 widget_t properctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, widget_t wparent)
 {

@@ -277,6 +277,7 @@ void hand_timebox_lbutton_up(widget_t widget, const xpoint_t* pxp)
 	timebox_delta_t* ptd = GETTIMEBOXDELTA(widget);
 	
 	measure_interface im = { 0 };
+	const xfont_t* pxf;
 
 	xpoint_t pt;
 	int hint;
@@ -286,9 +287,10 @@ void hand_timebox_lbutton_up(widget_t widget, const xpoint_t* pxp)
 
 	widget_point_to_mm(widget, &pt);
 
+	pxf = widget_get_xfont_ptr(widget);
 	get_canvas_measure(widget_get_canvas(widget), &im);
 
-	hint = calc_timebox_hint(&im, &pt);
+	hint = calc_timebox_hint(&im, pxf, &pt);
 
 	if (hint == TIMEBOX_HINT_YEAR_UP)
 		timebox_on_year_up(widget);
@@ -359,8 +361,10 @@ void hand_timebox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	drawing_interface ifv = {0};
 
 	const color_mod_t *pclrs;
+	const xfont_t* pxf;
 	xbrush_t xb;
 
+	pxf = widget_get_xfont_ptr(widget);
 	pclrs = widget_get_color_mode_ptr(widget);
 	default_xbrush(&xb);
 	format_xcolor(&(pclrs->clr_bkg), xb.color);
@@ -377,9 +381,9 @@ void hand_timebox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	widget_get_canv_rect(widget, (canvbox_t*)&(ifc.rect));
 	ifc.pclrs = pclrs;
 
-	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
+	(*ifv.drw->pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
 
-	draw_timebox(&ifc, &ptd->tt);
+	draw_timebox(&ifc, pxf, &ptd->tt);
 	
 	end_canvas_paint(canv, dc, pxr);
 }
@@ -410,12 +414,14 @@ void timebox_popup_size(widget_t widget, xsize_t* pxs)
 {
 	timebox_delta_t* ptd = GETTIMEBOXDELTA(widget);
 	measure_interface im = { 0 };
+	const xfont_t* pxf;
 
 	XDK_ASSERT(ptd != NULL);
 
+	pxf = widget_get_xfont_ptr(widget);
 	get_canvas_measure(widget_get_canvas(widget), &im);
 
-	calc_timebox_size(&im, pxs);
+	calc_timebox_size(&im, pxf, pxs);
 
 	widget_size_to_pt(widget, pxs);
 

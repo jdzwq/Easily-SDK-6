@@ -77,11 +77,12 @@ int calc_statis_pages(link_t_ptr ptr)
 		return xaxs / xaxsperpage + 1;
 }
 
-void calc_statis_xax_scope(link_t_ptr ptr, int page, link_t_ptr* firstxax, link_t_ptr* lastxax)
+int calc_statis_xax_scope(link_t_ptr ptr, int page, link_t_ptr* firstxax, link_t_ptr* lastxax)
 {
 	int xaxsperpage, pageindex;
 	float pw,ph,yw, xw;
 	link_t_ptr xlk;
+	int cn = 0;
 
 	pageindex = page;
 
@@ -95,22 +96,25 @@ void calc_statis_xax_scope(link_t_ptr ptr, int page, link_t_ptr* firstxax, link_
 	{
 		*firstxax = NULL;
 		*lastxax = NULL;
-		return;
+		return 0;
 	}
 
 	*firstxax = get_xax_at(ptr, (pageindex - 1) * xaxsperpage);
 	if (*firstxax == NULL)
 	{
 		*lastxax = NULL;
-		return;
+		return 0;
 	}
 
 	xlk = *firstxax;
 	while (xlk && xaxsperpage--)
 	{
+		cn++;
 		*lastxax = xlk;
 		xlk = get_next_xax(ptr, xlk);
 	}
+
+	return cn;
 }
 
 int calc_statis_xax_page(link_t_ptr ptr, link_t_ptr xlk)
@@ -147,40 +151,34 @@ int calc_statis_xax_page(link_t_ptr ptr, link_t_ptr xlk)
 	return page;
 }
 
-void calc_statis_yax_rect(link_t_ptr ptr, link_t_ptr ylk, xrect_t* pxr)
+float calc_statis_yax_width(link_t_ptr ptr, int page)
 {
-	link_t_ptr plk;
-	float yh, xh;
+	link_t_ptr fxlk = NULL, lxlk = NULL;
+	float yw, xw;
+	int cn;
 
-	xh = get_statis_xaxbar_height(ptr);
-	yh = get_statis_yaxbar_height(ptr);
+	xw = get_statis_xaxbar_width(ptr);
+	yw = get_statis_yaxbar_width(ptr);
 
-	pxr->fx = 0;
-	pxr->fy = get_statis_title_height(ptr) + xh;
+	cn = calc_statis_xax_scope(ptr, page, &fxlk, &lxlk);
+	yw += xw * cn;
 	
-	plk = get_next_yax(ptr, LINK_FIRST);
-	while (plk)
-	{
-		if (ylk == plk)
-			break;
-
-		pxr->fy += yh;
-		plk = get_next_yax(ptr, plk);
-	}
-
-	if (plk)
-	{
-		pxr->fw = get_statis_yaxbar_width(ptr);
-		pxr->fh = yh;
-	}
-	else
-	{
-		pxr->fw = 0;
-		pxr->fh = 0;
-	}
+	return yw;
 }
 
-void calc_statis_gax_rect(link_t_ptr ptr, link_t_ptr glk, xrect_t* pxr)
+float calc_statis_xax_height(link_t_ptr ptr)
+{
+	float xh, yh;
+
+	yh = get_statis_yaxbar_height(ptr);
+	xh = get_statis_xaxbar_height(ptr);
+
+	xh += yh * get_yax_count(ptr);
+
+	return xh;
+}
+
+void calc_statis_gaxbar_rect(link_t_ptr ptr, link_t_ptr glk, xrect_t* pxr)
 {
 	link_t_ptr plk;
 	float th, yw, yh, xh, gw;
@@ -195,7 +193,7 @@ void calc_statis_gax_rect(link_t_ptr ptr, link_t_ptr glk, xrect_t* pxr)
 	yw = get_statis_yaxbar_width(ptr);
 	yh = get_statis_yaxbar_height(ptr);
 
-	gw = (yw - yh) / gn;
+	gw = yw / gn;
 	if (gw < 1)
 		return;
 
@@ -224,7 +222,7 @@ void calc_statis_gax_rect(link_t_ptr ptr, link_t_ptr glk, xrect_t* pxr)
 	}
 }
 
-int calc_statis_coor_rect(link_t_ptr ptr, int page, link_t_ptr xlk, link_t_ptr ylk, xrect_t* pxr)
+bool_t calc_statis_coor_rect(link_t_ptr ptr, int page, link_t_ptr xlk, link_t_ptr ylk, xrect_t* pxr)
 {
 	link_t_ptr xax, yax, xlk_first, xlk_last;
 	float th, xw, xh, yw, yh, xm, ym;
@@ -246,7 +244,7 @@ int calc_statis_coor_rect(link_t_ptr ptr, int page, link_t_ptr xlk, link_t_ptr y
 		pxr->fw = yw;
 		pxr->fy = ym;
 		pxr->fh = xh;
-		return 1;
+		return bool_true;
 	}
 
 	if (ylk)
@@ -274,7 +272,7 @@ int calc_statis_coor_rect(link_t_ptr ptr, int page, link_t_ptr xlk, link_t_ptr y
 	{
 		pxr->fx = xm;
 		pxr->fw = yw;
-		return 1;
+		return bool_true;
 	}
 
 	calc_statis_xax_scope(ptr, page, &xlk_first, &xlk_last);
@@ -295,19 +293,11 @@ int calc_statis_coor_rect(link_t_ptr ptr, int page, link_t_ptr xlk, link_t_ptr y
 	{
 		pxr->fx = xm;
 		pxr->fw = xw;
-		return 1;
+		return bool_true;
 	}
 
 	xmem_zero((void*)pxr, sizeof(xrect_t));
-	return 0;
-}
-
-void calc_statis_xax_rect(link_t_ptr ptr, int page, link_t_ptr xlk, xrect_t* pxr)
-{
-	calc_statis_coor_rect(ptr, page, xlk, NULL, pxr);
-
-	pxr->fy = get_statis_title_height(ptr);
-	pxr->fh = get_statis_xaxbar_height(ptr) + get_yax_count(ptr) * get_statis_yaxbar_height(ptr);
+	return bool_false;
 }
 
 int calc_statis_hint(const xpoint_t* ppt, link_t_ptr ptr, int page, link_t_ptr* pxlk, link_t_ptr* pylk, link_t_ptr* pglk)
@@ -327,7 +317,7 @@ int calc_statis_hint(const xpoint_t* ppt, link_t_ptr ptr, int page, link_t_ptr* 
 
 	yt = xh + get_yax_count(ptr) * yh;
 	gn = get_gax_count(ptr);
-	gw = (gn) ? (float)((yw - yh) / gn) : 0;
+	gw = (gn) ? (yw / gn) : 0;
 
 	hint = STATIS_HINT_NONE;
 	*pxlk = NULL;
@@ -451,7 +441,7 @@ int calc_statis_hint(const xpoint_t* ppt, link_t_ptr ptr, int page, link_t_ptr* 
 	return hint;
 }
 
-void draw_statis_page(const drawing_interface* pif, link_t_ptr ptr, int page)
+void draw_statis_page(const drawing_interface* pci, link_t_ptr ptr, int page)
 {
 	link_t_ptr xlk_first, xlk_last, ylk, xlk, xlk_pre, glk;
 	float px, py, pw, ph;
@@ -477,10 +467,10 @@ void draw_statis_page(const drawing_interface* pif, link_t_ptr ptr, int page)
 	xrect_t xr_bar, xr = { 0 };
 	xpoint_t pt[2];
 
-	const canvbox_t* pbox = (canvbox_t*)(&pif->rect);
+	const canvbox_t* pbox = (canvbox_t*)(&pci->rect);
 
 	b_design = statis_is_design(ptr);
-	b_print = (pif->tag == _CANVAS_PRINTER)? 1 : 0;
+	b_print = (pci->tag == _CANVAS_PRINTER)? 1 : 0;
 
 	default_xpen(&xp);
 	default_xbrush(&xb);
@@ -502,18 +492,18 @@ void draw_statis_page(const drawing_interface* pif, link_t_ptr ptr, int page)
 
 	yt = xh + yh * get_yax_count(ptr);
 	gn = get_gax_count(ptr);
-	gw = (gn) ? (float)((yw - yh)/ gn) : 0;
+	gw = (gn) ? (yw / gn) : 0;
 
 	/*parse_xpen_from_style(&xp, style);
 	if (!b_print)
 	{
-		format_xcolor(&pif->pclrs->clr_frg, xp.color);
+		format_xcolor(&pci->pclrs->clr_frg, xp.color);
 	}*/
 
 	parse_xbrush_from_style(&xb, style);
 	if (!b_print)
 	{
-		format_xcolor(&pif->pclrs->clr_bkg, xb.color);
+		format_xcolor(&pci->pclrs->clr_bkg, xb.color);
 	}
 
 	xscpy(xp.color, xb.color);
@@ -526,15 +516,15 @@ void draw_statis_page(const drawing_interface* pif, link_t_ptr ptr, int page)
 	parse_xface_from_style(&xa, style);
 	if (!b_print)
 	{
-		format_xcolor(&pif->pclrs->clr_txt, xa.text_color);
+		format_xcolor(&pci->pclrs->clr_txt, xa.text_color);
 	}
 
 	parse_xfont_from_style(&xf, style);
-	(*pif->pf_set_xfont)(pif->ctx, &xf);
+	(*pci->drw->pf_set_xfont)(pci->ctx, &xf);
 
 	if (!b_print)
 	{
-		format_xcolor(&pif->pclrs->clr_msk, xi.color);
+		format_xcolor(&pci->pclrs->clr_msk, xi.color);
 	}
 
 	b_sum = get_statis_showsum(ptr);
@@ -549,7 +539,7 @@ void draw_statis_page(const drawing_interface* pif, link_t_ptr ptr, int page)
 	xr.fh = th;
 
 	xscpy(xa.text_align, ATTR_ALIGNMENT_NEAR);
-	(*pif->pf_draw_text)(pif->ctx, &xa, &xr, get_statis_title_ptr(ptr), -1);
+	(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, get_statis_title_ptr(ptr), -1);
 
 	//draw frame
 	//top line
@@ -557,28 +547,28 @@ void draw_statis_page(const drawing_interface* pif, link_t_ptr ptr, int page)
 	pt[0].fy = th + py;
 	pt[1].fx = pw + px;
 	pt[1].fy = th + py;
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pci->drw->pf_draw_line)(pci->ctx, &xp, &pt[0], &pt[1]);
 
 	//sum line
 	pt[0].fx = px;
 	pt[0].fy = th + yt + py;
 	pt[1].fx = pw + px;
 	pt[1].fy = th + yt + py;
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pci->drw->pf_draw_line)(pci->ctx, &xp, &pt[0], &pt[1]);
 
 	//vert line
 	pt[0].fx = yw + px;
 	pt[0].fy = th + py;
 	pt[1].fx = yw + px;
 	pt[1].fy = ph - th + py;
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pci->drw->pf_draw_line)(pci->ctx, &xp, &pt[0], &pt[1]);
 
 	//bottom line
 	pt[0].fx = px;
 	pt[0].fy = ph - th + py;
 	pt[1].fx = pw + px;
 	pt[1].fy = ph - th + py;
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pci->drw->pf_draw_line)(pci->ctx, &xp, &pt[0], &pt[1]);
 
 	if (ph <= th + yt)
 		return;
@@ -610,24 +600,24 @@ void draw_statis_page(const drawing_interface* pif, link_t_ptr ptr, int page)
 		ft_center_rect(&xr_bar, DEF_SMALL_ICON, DEF_SMALL_ICON);
 
 		if (compare_text(lcap, -1, ATTR_LINE_CAP_RECT, -1, 0) == 0)
-			draw_gizmo(pif, &xc, &xr_bar, GDI_ATTR_GIZMO_RECT);
+			draw_gizmo(pci, &xc, &xr_bar, GDI_ATTR_GIZMO_RECT);
 		else if (compare_text(lcap, -1, ATTR_LINE_CAP_ELLIPSE, -1, 0) == 0)
-			draw_gizmo(pif, &xc, &xr_bar, GDI_ATTR_GIZMO_ELLIPSE);
+			draw_gizmo(pci, &xc, &xr_bar, GDI_ATTR_GIZMO_ELLIPSE);
 		else if (compare_text(lcap, -1, ATTR_LINE_CAP_CROSS, -1, 0) == 0)
-			draw_gizmo(pif, &xc, &xr_bar, GDI_ATTR_GIZMO_CROSS);
+			draw_gizmo(pci, &xc, &xr_bar, GDI_ATTR_GIZMO_CROSS);
 		else if (compare_text(lcap, -1, ATTR_LINE_CAP_STAR, -1, 0) == 0)
-			draw_gizmo(pif, &xc, &xr_bar, GDI_ATTR_GIZMO_STAR);
+			draw_gizmo(pci, &xc, &xr_bar, GDI_ATTR_GIZMO_STAR);
 		else if (compare_text(lcap, -1, ATTR_LINE_CAP_DIAMOND, -1, 0) == 0)
-			draw_gizmo(pif, &xc, &xr_bar, GDI_ATTR_GIZMO_DIAMOND);
+			draw_gizmo(pci, &xc, &xr_bar, GDI_ATTR_GIZMO_DIAMOND);
 		else
-			draw_gizmo(pif, &xc, &xr_bar, GDI_ATTR_GIZMO_RECT);
+			draw_gizmo(pci, &xc, &xr_bar, GDI_ATTR_GIZMO_RECT);
 
 		xr_bar.fx = xr.fx + yh;
 		xr_bar.fy = xr.fy;
 		xr_bar.fw = yw - yh;
 		xr_bar.fh = yh;
 
-		(*pif->pf_draw_text)(pif->ctx, &xa, &xr_bar, get_yax_title_ptr(ylk), -1);
+		(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr_bar, get_yax_title_ptr(ylk), -1);
 
 		xr.fy += yh;
 		ylk = get_next_yax(ptr, ylk);
@@ -643,7 +633,7 @@ void draw_statis_page(const drawing_interface* pif, link_t_ptr ptr, int page)
 		ft_center_rect(&xr, DEF_SMALL_ICON, DEF_SMALL_ICON);
 
 		parse_xcolor(&xc, xa.text_color);
-		draw_gizmo(pif, &xc, &xr, GDI_ATTR_GIZMO_SUM);
+		draw_gizmo(pci, &xc, &xr, GDI_ATTR_GIZMO_SUM);
 	}
 
 	//draw xax bar and coor
@@ -661,10 +651,10 @@ void draw_statis_page(const drawing_interface* pif, link_t_ptr ptr, int page)
 		xr.fw = xw;
 		xr.fh = xh;
 
-		(*pif->pf_draw_rect)(pif->ctx, &xp, &xb_bar, &xr);
+		(*pci->drw->pf_draw_rect)(pci->ctx, &xp, &xb_bar, &xr);
 
 		xscpy(xa.text_align, ATTR_ALIGNMENT_CENTER);
-		draw_data(pif, &xa, &xr, get_xax_text_ptr(xlk), -1, 0, xaxtype, xaxfmt, 1, xaxwrp);
+		draw_data(pci, &xa, &xr, get_xax_text_ptr(xlk), -1, 0, xaxtype, xaxfmt, 1, xaxwrp);
 
 		maxdig = 0;
 
@@ -706,7 +696,7 @@ void draw_statis_page(const drawing_interface* pif, link_t_ptr ptr, int page)
 			}
 
 			xscpy(xa.text_align, ATTR_ALIGNMENT_FAR);
-			(*pif->pf_draw_text)(pif->ctx, &xa, &xr, token, -1);
+			(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, token, -1);
 
 			ylk = get_next_yax(ptr, ylk);
 		}
@@ -732,7 +722,7 @@ void draw_statis_page(const drawing_interface* pif, link_t_ptr ptr, int page)
 			}
 
 			xscpy(xa.text_align, ATTR_ALIGNMENT_FAR);
-			(*pif->pf_draw_text)(pif->ctx, &xa, &xr, token, -1);
+			(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, token, -1);
 		}
 
 		if (xlk == xlk_last)
@@ -757,7 +747,7 @@ void draw_statis_page(const drawing_interface* pif, link_t_ptr ptr, int page)
 	while (glk)
 	{
 		//gax title
-		(*pif->pf_draw_text)(pif->ctx, &xa, &xr, get_gax_title_ptr(glk), -1);
+		(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, get_gax_title_ptr(glk), -1);
 
 		gtype = get_gax_statis_type_ptr(glk);
 
@@ -777,7 +767,7 @@ void draw_statis_page(const drawing_interface* pif, link_t_ptr ptr, int page)
 
 		numtoxs_dig(middnum, 1, token, NUM_LEN);
 
-		(*pif->pf_draw_text)(pif->ctx, &xa, &xr_bar, token, -1);
+		(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr_bar, token, -1);
 
 		//midd line
 		if (compare_text(gtype, -1, ATTR_STATIS_TYPE_PIE, -1, 0) != 0)
@@ -789,7 +779,7 @@ void draw_statis_page(const drawing_interface* pif, link_t_ptr ptr, int page)
 			pt[0].fy = midy;
 			pt[1].fx = px + pw;
 			pt[1].fy = midy;
-			(*pif->pf_draw_line)(pif->ctx, &xp_shape, &pt[0], &pt[1]);
+			(*pci->drw->pf_draw_line)(pci->ctx, &xp_shape, &pt[0], &pt[1]);
 		}
 
 		for (i = 1; i <= 5; i++)
@@ -801,13 +791,13 @@ void draw_statis_page(const drawing_interface* pif, link_t_ptr ptr, int page)
 
 			numtoxs_dig(middnum + i * 10 * stepnum, 1, token, NUM_LEN);
 
-			(*pif->pf_draw_text)(pif->ctx, &xa, &xr_bar, token, -1);
+			(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr_bar, token, -1);
 
 			pt[0].fx = yw - 2 * STATIS_MINFEED + px;
 			pt[0].fy = midy - incy * i;
 			pt[1].fx = yw + px;
 			pt[1].fy = midy - incy * i;;
-			(*pif->pf_draw_line)(pif->ctx, &xp_shape, &pt[0], &pt[1]);
+			(*pci->drw->pf_draw_line)(pci->ctx, &xp_shape, &pt[0], &pt[1]);
 
 			xr_bar.fx = xr.fx;
 			xr_bar.fy = midy + incy * i - yh / 2;
@@ -816,13 +806,13 @@ void draw_statis_page(const drawing_interface* pif, link_t_ptr ptr, int page)
 
 			numtoxs_dig(middnum - i * 10 * stepnum, 1, token, NUM_LEN);
 
-			(*pif->pf_draw_text)(pif->ctx, &xa, &xr_bar, token, -1);
+			(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr_bar, token, -1);
 
 			pt[0].fx = yw - 2 * STATIS_MINFEED + px;
 			pt[0].fy = midy + incy * i;
 			pt[1].fx = yw + px;
 			pt[1].fy = midy + incy * i;;
-			(*pif->pf_draw_line)(pif->ctx, &xp_shape, &pt[0], &pt[1]);
+			(*pci->drw->pf_draw_line)(pci->ctx, &xp_shape, &pt[0], &pt[1]);
 		}
 
 		xr.fx += gw;
@@ -899,17 +889,17 @@ void draw_statis_page(const drawing_interface* pif, link_t_ptr ptr, int page)
 				xr.fh = DEF_SMALL_ICON;
 
 				if (compare_text(lcap, -1, ATTR_LINE_CAP_RECT, -1, 0) == 0)
-					draw_gizmo(pif, &xc, &xr, GDI_ATTR_GIZMO_RECT);
+					draw_gizmo(pci, &xc, &xr, GDI_ATTR_GIZMO_RECT);
 				else if (compare_text(lcap, -1, ATTR_LINE_CAP_ELLIPSE, -1, 0) == 0)
-					draw_gizmo(pif, &xc, &xr, GDI_ATTR_GIZMO_ELLIPSE);
+					draw_gizmo(pci, &xc, &xr, GDI_ATTR_GIZMO_ELLIPSE);
 				else if (compare_text(lcap, -1, ATTR_LINE_CAP_CROSS, -1, 0) == 0)
-					draw_gizmo(pif, &xc, &xr, GDI_ATTR_GIZMO_CROSS);
+					draw_gizmo(pci, &xc, &xr, GDI_ATTR_GIZMO_CROSS);
 				else if (compare_text(lcap, -1, ATTR_LINE_CAP_STAR, -1, 0) == 0)
-					draw_gizmo(pif, &xc, &xr, GDI_ATTR_GIZMO_STAR);
+					draw_gizmo(pci, &xc, &xr, GDI_ATTR_GIZMO_STAR);
 				else if (compare_text(lcap, -1, ATTR_LINE_CAP_DIAMOND, -1, 0) == 0)
-					draw_gizmo(pif, &xc, &xr, GDI_ATTR_GIZMO_DIAMOND);
+					draw_gizmo(pci, &xc, &xr, GDI_ATTR_GIZMO_DIAMOND);
 				else
-					draw_gizmo(pif, &xc, &xr, GDI_ATTR_GIZMO_ELLIPSE);
+					draw_gizmo(pci, &xc, &xr, GDI_ATTR_GIZMO_ELLIPSE);
 
 				if (xlk != xlk_first)
 				{
@@ -920,7 +910,7 @@ void draw_statis_page(const drawing_interface* pif, link_t_ptr ptr, int page)
 					pt[0].fy = prey;
 					pt[1].fx = (x1 + x2) / 2;
 					pt[1].fy = cury;
-					(*pif->pf_draw_line)(pif->ctx, &xp_shape, &pt[0], &pt[1]);
+					(*pci->drw->pf_draw_line)(pci->ctx, &xp_shape, &pt[0], &pt[1]);
 				}
 			}
 			else if (compare_text(gtype, -1, ATTR_STATIS_TYPE_RECT, -1, 0) == 0)
@@ -946,10 +936,10 @@ void draw_statis_page(const drawing_interface* pif, link_t_ptr ptr, int page)
 					pt[0].fy = cury;
 					pt[1].fx = xr.fx + xr.fw;
 					pt[1].fy = cury;
-					(*pif->pf_draw_line)(pif->ctx, &xp_shape, &pt[0], &pt[1]);
+					(*pci->drw->pf_draw_line)(pci->ctx, &xp_shape, &pt[0], &pt[1]);
 				}else
 				{
-					(*pif->pf_draw_rect)(pif->ctx, &xp_shape, &xb_shape, &xr);
+					(*pci->drw->pf_draw_rect)(pci->ctx, &xp_shape, &xb_shape, &xr);
 				}
 
 				rsteps++;
@@ -963,7 +953,7 @@ void draw_statis_page(const drawing_interface* pif, link_t_ptr ptr, int page)
 					xr.fy = cury - xw + STATIS_MINFEED;
 					xr.fh = xw - 2 * STATIS_MINFEED;
 
-					(*pif->pf_draw_ellipse)(pif->ctx, &xp, NULL, &xr);
+					(*pci->drw->pf_draw_ellipse)(pci->ctx, &xp, NULL, &xr);
 				}
 
 				pred = nxtd;
@@ -984,7 +974,7 @@ void draw_statis_page(const drawing_interface* pif, link_t_ptr ptr, int page)
 					pt_pie.fy = cury - xw / 2;
 					xs.fw = xw / 2 - STATIS_MINFEED;
 					xs.fh = xw / 2 - STATIS_MINFEED;*/
-					(*pif->pf_draw_pie)(pif->ctx, &xp_shape, &xb_shape, &xr, pred, (nxtd - pred));
+					(*pci->drw->pf_draw_pie)(pci->ctx, &xp_shape, &xb_shape, &xr, pred, (nxtd - pred));
 				}
 
 				if (ylk == get_prev_yax(ptr, LINK_LAST))
@@ -994,14 +984,14 @@ void draw_statis_page(const drawing_interface* pif, link_t_ptr ptr, int page)
 					xr.fy = cury - xw * 3 / 4;
 					xr.fh = xw / 2;
 
-					(*pif->pf_draw_ellipse)(pif->ctx, &xp, &xb, &xr);
+					(*pci->drw->pf_draw_ellipse)(pci->ctx, &xp, &xb, &xr);
 				}
 
 				xr.fx = x1 + STATIS_MINFEED;
 				xr.fw = 2 * STATIS_MINFEED;
 				xr.fy = cury + psteps * yh;
 				xr.fh = yh;
-				(*pif->pf_draw_rect)(pif->ctx, NULL, &xb_shape, &xr);
+				(*pci->drw->pf_draw_rect)(pci->ctx, NULL, &xb_shape, &xr);
 
 				xr.fx = x1 + 2 * STATIS_MINFEED;
 				xr.fw = xw - 2 * STATIS_MINFEED;
@@ -1009,7 +999,7 @@ void draw_statis_page(const drawing_interface* pif, link_t_ptr ptr, int page)
 				xr.fh = yh;
 				xsprintf(token, _T("%.2f%c"), dby * 100, _T('%'));
 				xscpy(xa.text_align, ATTR_ALIGNMENT_CENTER);
-				(*pif->pf_draw_text)(pif->ctx, &xa, &xr, token, -1);
+				(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, token, -1);
 
 				psteps++;
 			}

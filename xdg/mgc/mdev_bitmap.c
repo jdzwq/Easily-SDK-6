@@ -26,7 +26,7 @@ LICENSE.GPL3 for more details.
 
 #include "mdev.h"
 
-#include "../xdgobj.h"
+#include "../xdgmgc.h"
 
 typedef struct _bitmap_device_t{
 	handle_head head;

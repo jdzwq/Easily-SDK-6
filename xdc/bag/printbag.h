@@ -47,9 +47,9 @@ EXP_API void print_dialog(const dev_prn_t* pdev, link_t_ptr dialog);
 
 EXP_API void print_diagram(const dev_prn_t* pdev, link_t_ptr diagram);
 
-EXP_API void print_memo(const dev_prn_t* pdev, const xface_t* pxa, link_t_ptr memo);
+EXP_API void print_memo(const dev_prn_t* pdev, const xfont_t* pxf, const xface_t* pxa, link_t_ptr memo);
 
-EXP_API void print_rich(const dev_prn_t* pdev, const xface_t* pxa, link_t_ptr rich);
+EXP_API void print_rich(const dev_prn_t* pdev, const xfont_t* pxf, const xface_t* pxa, link_t_ptr rich);
 
 EXP_API void print_svg(const dev_prn_t* pdev, link_t_ptr svg);
 

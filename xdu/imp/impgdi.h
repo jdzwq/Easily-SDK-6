@@ -364,6 +364,9 @@ LOC_API void get_xfont(canvas_t canv, xfont_t* pxf);
 LOC_API void font_size_raw(visual_t rdc, xsize_t* pxs);
 LOC_API void font_size(canvas_t canv, xsize_t* pxs);
 
+LOC_API void measure_font_raw(visual_t rdc, const xfont_t* pxf, xsize_t* pxs);
+LOC_API void measure_font(canvas_t canv, const xfont_t* pxf, xsize_t* pxs);
+
 /*
 @FUNCTION multi_line_raw: draw multiple base line in memory or device context using points coordinate, the line separated by line height of font and face.
 @INPUT visual_t rdc: the context resource handle.
@@ -442,6 +445,7 @@ LOC_API void text_out(canvas_t canv, const xface_t* pxa, const xpoint_t* ppt, co
 @RETURN void: none.
 */
 LOC_API void text_rect_raw(visual_t rdc, const xface_t* pxa, const tchar_t* txt, int len, xrect_t* pxs);
+LOC_API void measure_rect_raw(visual_t rdc, const xfont_t* pxf, const xface_t* pxa, const tchar_t* txt, int len, xrect_t* pxs);
 
 /*
 @FUNCTION text_rect: calc the text suitable rect in canvas using millimeter coordinate.
@@ -453,6 +457,7 @@ LOC_API void text_rect_raw(visual_t rdc, const xface_t* pxa, const tchar_t* txt,
 @RETURN void: none.
 */
 LOC_API void text_rect(canvas_t canv, const xface_t* pxa, const tchar_t* txt, int len, xrect_t* pxr);
+LOC_API void measure_rect(canvas_t canv, const xfont_t* pxf, const xface_t* pxa, const tchar_t* txt, int len, xrect_t* pxr);
 
 /*
 @FUNCTION text_size_raw: calc the text suitable size in memory or device context using points coordinate.
@@ -464,6 +469,7 @@ LOC_API void text_rect(canvas_t canv, const xface_t* pxa, const tchar_t* txt, in
 @RETURN void: none.
 */
 LOC_API void text_size_raw(visual_t rdc, const tchar_t* txt, int len, xsize_t* pxs);
+LOC_API void measure_size_raw(visual_t rdc, const xfont_t* pxf, const tchar_t* txt, int len, xsize_t* pxs);
 
 /*
 @FUNCTION text_size: calc the text suitable size in canvas using millimeter coordinate.
@@ -475,6 +481,7 @@ LOC_API void text_size_raw(visual_t rdc, const tchar_t* txt, int len, xsize_t* p
 @RETURN void: none.
 */
 LOC_API void text_size(canvas_t canv, const tchar_t* txt, int len, xsize_t* pxr);
+LOC_API void measure_size(canvas_t canv, const xfont_t* pxf, const tchar_t* txt, int len, xsize_t* pxr);
 
 /*
 @FUNCTION color_out_raw: output color sequence in memory or device context using points coordinate.

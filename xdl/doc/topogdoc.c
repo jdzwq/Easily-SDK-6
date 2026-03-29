@@ -188,7 +188,7 @@ bool_t set_topog_matrix_value(link_t_ptr ptr, int row, int col, double v)
 	int rows, cols;
 	matrix_t mt;
 	int len;
-	tchar_t* buf;
+	tchar_t *tmp, *buf;
 
 	rows = get_topog_rows(ptr);
 	cols = get_topog_cols(ptr);
@@ -200,6 +200,8 @@ bool_t set_topog_matrix_value(link_t_ptr ptr, int row, int col, double v)
 		return 0;
 
 	mt = matrix_alloc(rows, cols);
+	tmp = xmem_alloc(matrix_need_size(rows, cols));
+	matrix_attach(mt, tmp);
 
 	matrix_parse(mt, get_topog_matrix_ptr(ptr), -1);
 
@@ -209,6 +211,8 @@ bool_t set_topog_matrix_value(link_t_ptr ptr, int row, int col, double v)
 	buf = xsalloc(len + 1);
 	len = matrix_format(mt, buf, len);
 
+	tmp = matrix_detach(mt);
+	xmem_free(tmp);
 	matrix_free(mt);
 
 	set_topog_matrix(ptr, buf, len);
@@ -220,6 +224,7 @@ bool_t set_topog_matrix_value(link_t_ptr ptr, int row, int col, double v)
 double get_topog_matrix_value(link_t_ptr ptr, int row, int col)
 {
 	int rows, cols;
+	void *tmp;
 	matrix_t mt;
 	double v;
 
@@ -233,11 +238,15 @@ double get_topog_matrix_value(link_t_ptr ptr, int row, int col)
 		return 0;
 
 	mt = matrix_alloc(rows, cols);
+	tmp = xmem_alloc(matrix_need_size(rows, cols));
+	matrix_attach(mt, tmp);
 
 	matrix_parse(mt, get_topog_matrix_ptr(ptr), -1);
 
 	v = matrix_get_value(mt, row, col);
 
+	tmp = matrix_detach(mt);
+	xmem_free(tmp);
 	matrix_free(mt);
 
 	return v;

@@ -643,7 +643,7 @@ void hand_annodlg_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 
 	get_visual_interface(rdc, &ifv);
 
-	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
+	(*ifv.drw->pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
 
 	xs.fw = ANNODLG_BUTTON_WIDTH;
 	xs.fh = ANNODLG_BUTTON_HEIGHT;
@@ -658,7 +658,7 @@ void hand_annodlg_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	parse_xcolor(&xc_core, xb.color);
 	lighten_xcolor(&xc_core, DEF_MIDD_DARKEN);
 	
-	(*ifv.pf_gradient_rect)(ifv.ctx, &xc_brim, &xc_core, GDI_ATTR_GRADIENT_VERT, &xr_bar);
+	(*ifv.drw->pf_gradient_rect)(ifv.ctx, &xc_brim, &xc_core, GDI_ATTR_GRADIENT_VERT, &xr_bar);
 
 	end_canvas_paint(canv, dc, pxr);
 }

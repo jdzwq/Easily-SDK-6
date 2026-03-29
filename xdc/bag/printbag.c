@@ -306,7 +306,7 @@ void print_diagram(const dev_prn_t* pdev, link_t_ptr diagram)
 	destroy_printer_context(rdc);
 }
 
-void print_memo(const dev_prn_t* pdev, const xface_t* pxa, link_t_ptr memo)
+void print_memo(const dev_prn_t* pdev, const xfont_t* pxf, const xface_t* pxa, link_t_ptr memo)
 {
 	visual_t rdc;
 	canvas_t canv;
@@ -334,11 +334,10 @@ void print_memo(const dev_prn_t* pdev, const xface_t* pxa, link_t_ptr memo)
 
 	get_canvas_interface(canv, &ifc);
 	
-
 	xr.fw = get_canvas_horz_size(canv);
 	xr.fh = get_canvas_vert_size(canv);
 
-	pages = calc_memo_pages(&ifc, pxa, &xr, memo);
+	pages = calc_memo_pages(&ifc, pxf, pxa, &xr, memo);
 
 	begin_doc(rdc, _T("MEMO"));
 
@@ -346,7 +345,7 @@ void print_memo(const dev_prn_t* pdev, const xface_t* pxa, link_t_ptr memo)
 	{
 		begin_page(rdc);
 
-		draw_memo_text(&ifc, pxa, &xr, memo, i + 1);
+		draw_memo_text(&ifc, pxf, pxa, &xr, memo, i + 1);
 
 		end_page(rdc);
 	}
@@ -357,7 +356,7 @@ void print_memo(const dev_prn_t* pdev, const xface_t* pxa, link_t_ptr memo)
 	destroy_printer_context(rdc);
 }
 
-void print_rich(const dev_prn_t* pdev, const xface_t* pxa, link_t_ptr rich)
+void print_rich(const dev_prn_t* pdev, const xfont_t* pxf, const xface_t* pxa, link_t_ptr rich)
 {
 	visual_t rdc;
 	canvas_t canv;
@@ -385,11 +384,10 @@ void print_rich(const dev_prn_t* pdev, const xface_t* pxa, link_t_ptr rich)
 
 	get_canvas_interface(canv, &ifc);
 	
-
 	xr.fw = get_canvas_horz_size(canv);
 	xr.fh = get_canvas_vert_size(canv);
 
-	pages = calc_rich_pages(&ifc, pxa, &xr, rich);
+	pages = calc_rich_pages(&ifc, pxf, pxa, &xr, rich);
 
 	begin_doc(rdc, _T("RICH"));
 
@@ -397,7 +395,7 @@ void print_rich(const dev_prn_t* pdev, const xface_t* pxa, link_t_ptr rich)
 	{
 		begin_page(rdc);
 
-		draw_rich_text(&ifc, pxa, &xr, rich, i + 1);
+		draw_rich_text(&ifc, pxf, pxa, &xr, rich, i + 1);
 
 		end_page(rdc);
 	}

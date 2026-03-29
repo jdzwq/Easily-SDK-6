@@ -235,7 +235,7 @@ int dialog_sub_paint(widget_t widget, visual_t dc, const xrect_t* pxr, uid_t sid
 
 	get_visual_interface(rdc, &ifv);
 
-	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
+	(*ifv.drw->pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
 
 	if (canv)
 	{

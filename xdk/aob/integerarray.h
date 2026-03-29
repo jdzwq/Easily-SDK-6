@@ -71,6 +71,7 @@ EXP_API int get_integer_array_size(int** sa);
 @RETURN int: return characters copyed.
 */
 EXP_API int get_integer(int** sa, int index);
+EXP_API int get_integer_safe(int** sa, int index, int def);
 
 EXP_API int copy_integer(int** sa, int index, int* buf, int max);
 

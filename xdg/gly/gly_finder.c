@@ -26,7 +26,7 @@ LICENSE.GPL3 for more details.
 
 #include "gly.h"
 
-#include "../xdgobj.h"
+#include "../xdgmgc.h"
 
 
 const glyph_info_t* find_glyph_info(const tchar_t* charset, const xfont_t* pxf)

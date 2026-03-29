@@ -72,6 +72,7 @@ static void _curvectrl_reset_page(widget_t widget)
 }
 
 /********************************************************************************************/
+
 int hand_curve_create(widget_t widget, void* data)
 {
 	curve_delta_t* ptd;
@@ -279,7 +280,7 @@ void hand_curve_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 
 	get_visual_interface(rdc, &ifv);
 
-	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
+	(*ifv.drw->pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
 
 	w = xr.w / 5;
 	for (i = 0; i < 10; i++)
@@ -298,7 +299,7 @@ void hand_curve_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 		pt[4].x = xr.x + xr.w;
 		pt[4].y = xr.y + xr.h / 2;
 
-		(*ifv.pf_draw_curve)(ifv.ctx, &ptd->xp, pt, 5);
+		(*ifv.drw->pf_draw_curve)(ifv.ctx, &ptd->xp, pt, 5);
 	}
 
 	end_canvas_paint(canv, dc, pxr);

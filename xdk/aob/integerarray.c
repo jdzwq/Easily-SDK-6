@@ -79,6 +79,19 @@ int get_integer(int** sa, int index)
 	return pa[index];
 }
 
+int get_integer_safe(int** sa, int index, int def)
+{
+	int* pa = *sa;
+	int size;
+
+	size = (int)(*(int*)(sa + 1));
+
+	if(index >= 0 && index < size)
+		return pa[index];
+	else
+		return def;
+}
+
 int copy_integer(int** sa, int index, int* buf, int max)
 {
 	int* pa = *sa;

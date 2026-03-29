@@ -27,7 +27,7 @@ LICENSE.GPL3 for more details.
 #include "dot.h"
 #include "../g2/g2.h"
 
-#include "../xdgobj.h"
+#include "../xdgmgc.h"
 
 /**********************************************************************
 * Bresenham Alogorithm (x0, y0) line to (x1, y1)

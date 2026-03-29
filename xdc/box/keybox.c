@@ -427,19 +427,19 @@ void hand_keybox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 
 	get_visual_interface(rdc, &ifv);
 
-	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb_bark, &xr);
+	(*ifv.drw->pf_draw_rect)(ifv.ctx, NULL, &xb_bark, &xr);
 
 	xr.x = xr.w - ptd->bw;
 	xr.w = ptd->bw;
 	xr.y = 0;
 	xr.h = ptd->bh;
-	(*ifv.pf_draw_text)(ifv.ctx, &xa, &xr, _T("×"), -1);
+	(*ifv.drw->pf_draw_text)(ifv.ctx, &xa, &xr, _T("×"), -1);
 
 	xr.x = 0;
 	xr.w = ptd->bw;
 	xr.y = 0;
 	xr.h = ptd->bh;
-	(*ifv.pf_draw_text)(ifv.ctx, &xa, &xr, _T("Esc"), -1);
+	(*ifv.drw->pf_draw_text)(ifv.ctx, &xa, &xr, _T("Esc"), -1);
 
 	for (i = 0; i < KEYBOX_COUNT; i++)
 	{
@@ -454,9 +454,9 @@ void hand_keybox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 		xr_focus.h = xr.h - 4;
 
 		if (ptd->index == i)
-			(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb_focus, &xr_focus);
+			(*ifv.drw->pf_draw_rect)(ifv.ctx, NULL, &xb_focus, &xr_focus);
 		else
-			(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb_bark, &xr_focus);
+			(*ifv.drw->pf_draw_rect)(ifv.ctx, NULL, &xb_bark, &xr_focus);
 
 		if (ptd->ca == _HCA)
 			tk[0] = KEYBOX_HCA[i];
@@ -466,29 +466,29 @@ void hand_keybox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 			tk[0] = KEYBOX_SCA[i];
 
 		if (tk[0] == _T('\n'))
-			(*ifv.pf_draw_text)(ifv.ctx, &xa, &xr, _T("Ent"), -1);
+			(*ifv.drw->pf_draw_text)(ifv.ctx, &xa, &xr, _T("Ent"), -1);
 		else if (tk[0] == _T('\b'))
-			(*ifv.pf_draw_text)(ifv.ctx, &xa, &xr, _T("CE"), -1);
+			(*ifv.drw->pf_draw_text)(ifv.ctx, &xa, &xr, _T("CE"), -1);
 		else if (tk[0] == _T('\0'))
-			(*ifv.pf_draw_text)(ifv.ctx, &xa, &xr, _T("FN"), -1);
+			(*ifv.drw->pf_draw_text)(ifv.ctx, &xa, &xr, _T("FN"), -1);
 		else if (tk[0] == 0x1)
-			(*ifv.pf_draw_text)(ifv.ctx, &xa, &xr, _T("↑"), -1);
+			(*ifv.drw->pf_draw_text)(ifv.ctx, &xa, &xr, _T("↑"), -1);
 		else if (tk[0] == 0x3)
-			(*ifv.pf_draw_text)(ifv.ctx, &xa, &xr, _T("←"), -1);
+			(*ifv.drw->pf_draw_text)(ifv.ctx, &xa, &xr, _T("←"), -1);
 		else if (tk[0] == _T('\a'))
-			(*ifv.pf_draw_text)(ifv.ctx, &xa, &xr, _T("复制"), -1);
+			(*ifv.drw->pf_draw_text)(ifv.ctx, &xa, &xr, _T("复制"), -1);
 		else if (tk[0] == _T('\r'))
-			(*ifv.pf_draw_text)(ifv.ctx, &xa, &xr, _T("剪切"), -1);
+			(*ifv.drw->pf_draw_text)(ifv.ctx, &xa, &xr, _T("剪切"), -1);
 		else if (tk[0] == _T('\f'))
-			(*ifv.pf_draw_text)(ifv.ctx, &xa, &xr, _T("粘贴"), -1);
+			(*ifv.drw->pf_draw_text)(ifv.ctx, &xa, &xr, _T("粘贴"), -1);
 		else if (tk[0] == _T('\v'))
-			(*ifv.pf_draw_text)(ifv.ctx, &xa, &xr, _T("撤销"), -1);
+			(*ifv.drw->pf_draw_text)(ifv.ctx, &xa, &xr, _T("撤销"), -1);
 		else if (tk[0] == 0x2)
-			(*ifv.pf_draw_text)(ifv.ctx, &xa, &xr, _T("↓"), -1);
+			(*ifv.drw->pf_draw_text)(ifv.ctx, &xa, &xr, _T("↓"), -1);
 		else if (tk[0] == 0x4)
-			(*ifv.pf_draw_text)(ifv.ctx, &xa, &xr, _T("→"), -1);
+			(*ifv.drw->pf_draw_text)(ifv.ctx, &xa, &xr, _T("→"), -1);
 		else
-			(*ifv.pf_draw_text)(ifv.ctx, &xa, &xr, tk, -1);
+			(*ifv.drw->pf_draw_text)(ifv.ctx, &xa, &xr, tk, -1);
 	}
 
 	end_canvas_paint(canv, dc, pxr);

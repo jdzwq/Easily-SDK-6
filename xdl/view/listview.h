@@ -52,7 +52,7 @@ extern "C" {
 
 	EXP_API int	calc_list_hint(const xpoint_t* ppt, link_t_ptr ptr, link_t_ptr plk, link_t_ptr* pilk);
 
-	EXP_API void draw_list_child(const drawing_interface* pcanv, link_t_ptr ptr, link_t_ptr plk);
+	EXP_API void draw_list_child(const drawing_interface* pci, link_t_ptr ptr, link_t_ptr plk);
 
 #ifdef	__cplusplus
 }

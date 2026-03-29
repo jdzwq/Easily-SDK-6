@@ -40,12 +40,16 @@ typedef struct _tagctrl_delta_t{
 
 	int chs;
 	tchar_t pch[CHS_LEN + 1];
+
+	xface_t xa;
+	xfont_t xf;
 }tagctrl_delta_t;
 
 #define GETTAGCTRLDELTA(ph) 	(tagctrl_delta_t*)widget_get_user_delta(ph)
 #define SETTAGCTRLDELTA(ph,ptd) widget_set_user_delta(ph,(vword_t)ptd)
 
-/********************************************************************************************/
+/***********************************************************************/
+
 static int _tagctrl_get_text(void* data, tchar_t* buf, int max)
 {
 	link_t_ptr tag = (link_t_ptr)data;
@@ -71,7 +75,23 @@ static bool_t _tagctrl_get_paging(widget_t widget, xsize_t* pse)
 
 	return 0;
 }
-/********************************************************************************************/
+
+static const xfont_t* _tagctrl_get_xfont_ptr(widget_t widget)
+{
+	tagctrl_delta_t* ptd = GETTAGCTRLDELTA(widget);
+
+	return &(ptd->xf);
+}
+
+static const xface_t* _tagctrl_get_xface_ptr(widget_t widget)
+{
+	tagctrl_delta_t* ptd = GETTAGCTRLDELTA(widget);
+
+	return &(ptd->xa);
+}
+
+/***********************************************************************/
+
 int noti_tagctrl_owner(widget_t widget, unsigned int code, link_t_ptr tag, link_t_ptr nlk, void* data)
 {
 	tagctrl_delta_t* ptd = GETTAGCTRLDELTA(widget);
@@ -111,10 +131,13 @@ void noti_tagctrl_reset_scroll(widget_t widget, bool_t bUpdate)
 			widget_close(ptd->hsc, 0);
 	}
 }
-/********************************************************************************************/
+
+/***********************************************************************/
+
 int hand_tagctrl_create(widget_t widget, void* data)
 {
 	tagctrl_delta_t* ptd;
+	color_mod_t clrs;
 
 	widget_hand_create(widget);
 
@@ -130,7 +153,14 @@ int hand_tagctrl_create(widget_t widget, void* data)
 	ptd->textor.pf_get_text = _tagctrl_get_text;
 	ptd->textor.pf_set_text = _tagctrl_set_text;
 	ptd->textor.pf_get_paging = _tagctrl_get_paging;
+	ptd->textor.pf_get_xfont_ptr = _tagctrl_get_xfont_ptr;
+	ptd->textor.pf_get_xface_ptr = _tagctrl_get_xface_ptr;
 	ptd->textor.max_undo = 1024;
+
+	widget_get_color_mode(widget, &clrs);
+	default_textor_xface(&ptd->xa);
+	format_xcolor(&(clrs.clr_txt), ptd->xa.text_color);
+	default_textor_xfont(&ptd->xf);
 
 	ptd->b_lock = 1;
 
@@ -686,7 +716,8 @@ void hand_tagctrl_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	hand_textor_paint(&ptd->textor, dc, pxr);
 }
 
-/************************************************************************************************/
+/***********************************************************************/
+
 widget_t tagctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, widget_t wparent)
 {
 	if_dispatch_t ev = { 0 };

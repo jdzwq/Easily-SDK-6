@@ -79,14 +79,28 @@ bool_t	GridPanel_SaveFile(widget_t widget, const tchar_t* szFile);
 bool_t	GridPanel_OpenFile(widget_t widget, const tchar_t* szFile);
 
 /***************************************************************************************/
+void GridPanel_SetDirty(widget_t widget, bool_t bDirty)
+{
+	GridPanelDelta* pdt = GETGRIDPANELDELTA(widget);
+
+	designer_set_dirty(pdt->hGrid, bDirty);
+}
+
+bool_t GridPanel_GetDirty(widget_t widget)
+{
+	GridPanelDelta* pdt = GETGRIDPANELDELTA(widget);
+
+	return designer_get_dirty(pdt->hGrid);
+}
+
 void GridPanel_Switch(widget_t widget)
 {
 	GridPanelDelta* pdt = GETGRIDPANELDELTA(widget);
 
-	if (!gridctrl_get_dirty(pdt->hGrid))
+	if (!GridPanel_GetDirty(widget))
 		return;
 
-	dword_t rt = ShowMsg(MSGBTN_YES | MSGBTN_NO | MSGICO_TIP, _T("文件尚未保存，是否保存文件？"));
+	dword_t rt = ShowMsg(MSGBTN_YES | MSGBTN_NO | MSGBTN_CANCEL | MSGICO_TIP, _T("文件尚未保存，是否保存文件？"));
 
 	switch (rt)
 	{
@@ -94,7 +108,7 @@ void GridPanel_Switch(widget_t widget)
 		widget_send_command(widget, 0, IDA_FILE_SAVE, NULL);
 		break;
 	case MSGBTN_NO:
-		gridctrl_set_dirty(pdt->hGrid, 0);
+		GridPanel_SetDirty(widget, 0);
 		break;
 	}
 }
@@ -200,7 +214,7 @@ void GridPanel_OnSave(widget_t widget)
 
 	if (GridPanel_SaveFile(widget, szFile))
 	{
-		gridctrl_set_dirty(pdt->hGrid, 0);
+		GridPanel_SetDirty(widget, 0);
 	}
 }
 
@@ -291,7 +305,7 @@ void GridPanel_OnPreview(widget_t widget)
 	LINKPTR ilk = insert_arch_document(ptr_arch, LINK_LAST, svg);
 
 	tchar_t token[1024] = { 0 };
-	xsprintf(token, _T("%s 第%d页"), get_grid_title_ptr(ptrGrid), page);
+	//xsprintf(token, _T("%s 第%d页"), get_grid_title_ptr(ptrGrid), page);
 	set_arch_item_title(ilk, token);
 
 	previewdlg_redraw(hPreviewDlg);
@@ -453,16 +467,15 @@ void GridPanel_OnDelete(widget_t widget)
 	GridPanelDelta* pdt = GETGRIDPANELDELTA(widget);
 
 	LINKPTR ptrGrid = gridctrl_fetch(pdt->hGrid);
-	XDK_ASSERT(ptrGrid);
-
-	gridctrl_set_focus_cell(pdt->hGrid, NULL, NULL);
+	LINKPTR ptrCol = (LINKPTR)designer_get_focused(pdt->hGrid);
+	designer_set_focused(pdt->hGrid, NULL);
 
 	bool_t bRedraw = 0;
 	LINKPTR nlk,clk = get_next_col(ptrGrid, LINK_FIRST);
 	while (clk)
 	{
 		nlk = get_next_col(ptrGrid, clk);
-		if (get_col_selected(clk))
+		if (get_col_selected(clk) || ptrCol == clk)
 		{
 			delete_col(clk);
 			clk = nlk;
@@ -519,7 +532,7 @@ void GridPanel_OnCSSProper(widget_t widget)
 	LINKPTR ptrProper = create_proper_doc();
 
 	LINKPTR ptr = gridctrl_fetch(pdt->hGrid);
-	LINKPTR clk = gridctrl_get_focus_col(pdt->hGrid);
+	LINKPTR clk = (LINKPTR)designer_get_focused(pdt->hGrid);
 
 	if (clk)
 		properbag_parse_stylesheet(ptrProper, get_col_style_ptr(clk));
@@ -548,7 +561,7 @@ void GridPanel_OnCSSProper(widget_t widget)
 			gridctrl_redraw(pdt->hGrid, 1);
 		}
 
-		gridctrl_set_dirty(pdt->hGrid, 1);
+		GridPanel_SetDirty(widget, 1);
 	}
 
 	destroy_proper_doc(ptrProper);
@@ -558,10 +571,10 @@ void GridPanel_OnSelectAttr(widget_t widget, const tchar_t* attr_name, const tch
 {
 	GridPanelDelta* pdt = GETGRIDPANELDELTA(widget);
 
-	gridctrl_set_dirty(pdt->hGrid, 1);
+	GridPanel_SetDirty(widget, 1);
 
 	LINKPTR ptrGrid = gridctrl_fetch(pdt->hGrid);
-	LINKPTR ptrCol = gridctrl_get_focus_col(pdt->hGrid);
+	LINKPTR ptrCol = (LINKPTR)designer_get_focused(pdt->hGrid);
 
 	tchar_t style[CSS_LEN + 1];
 
@@ -697,9 +710,9 @@ void GridPanel_OnInsertCol(widget_t widget)
 	GridPanelDelta* pdt = GETGRIDPANELDELTA(widget);
 
 	LINKPTR ptrGrid = gridctrl_fetch(pdt->hGrid);
-	LINKPTR ptrPos = gridctrl_get_focus_col(pdt->hGrid);
+	LINKPTR ptrPos = (LINKPTR)designer_get_focused(pdt->hGrid);
 
-	gridctrl_set_dirty(pdt->hGrid, 1);
+	GridPanel_SetDirty(widget, 1);
 
 	ptrPos = (ptrPos) ? get_prev_col(ptrGrid, ptrPos) : LINK_LAST;
 
@@ -773,7 +786,7 @@ void GridPanel_OnImportCols(widget_t widget)
 			return;
 	}
 
-	gridctrl_set_dirty(pdt->hGrid, 1);
+	GridPanel_SetDirty(widget, 1);
 
 	import_grid_schema(ptrGrid, ptrSch);
 
@@ -816,7 +829,7 @@ void GridPanel_OnSelectCols(widget_t widget)
 			return;
 	}
 
-	gridctrl_set_dirty(pdt->hGrid, 1);
+	GridPanel_SetDirty(widget, 1);
 
 	DBSchema(pct, ptrGrid, string_ptr(pd.vs_sql));
 
@@ -1133,7 +1146,7 @@ void GridPanel_OnAttributes(widget_t widget)
 	properctrl_redraw(pdt->hProper);
 
 	LINKPTR ptrGrid = gridctrl_fetch(pdt->hGrid);
-	LINKPTR ptrCol = gridctrl_get_focus_col(pdt->hGrid);
+	LINKPTR ptrCol = (LINKPTR)designer_get_focused(pdt->hGrid);
 
 	if (ptrCol)
 		properbag_write_col_attributes(ptrProper, ptrCol);
@@ -1154,7 +1167,7 @@ void GridPanel_OnStyleSheet(widget_t widget)
 	properctrl_redraw(pdt->hProper);
 
 	LINKPTR ptrGrid = gridctrl_fetch(pdt->hGrid);
-	LINKPTR ptrCol = gridctrl_get_focus_col(pdt->hGrid);
+	LINKPTR ptrCol = (LINKPTR)designer_get_focused(pdt->hGrid);
 
 	if (ptrCol)
 		properbag_parse_stylesheet(ptrProper, get_col_style_ptr(ptrCol));
@@ -1181,10 +1194,10 @@ void GridPanel_Title_OnItemChanged(widget_t widget, NOTICE_TITLE* pnt)
 
 	int n_id = xstol(get_title_item_id_ptr(pnt->item));
 
-	widget_post_command(widget, n_id, 0, NULL);
+	widget_post_command(widget, 0, n_id, NULL);
 }
 
-void GridPanel_Grid_OnLBClick(widget_t widget, NOTICE_GRID* pnf)
+void GridPanel_Grid_OnLBClick(widget_t widget, NOTICE_DESIGN* pnf)
 {
 	GridPanelDelta* pdt = GETGRIDPANELDELTA(widget);
 
@@ -1193,10 +1206,10 @@ void GridPanel_Grid_OnLBClick(widget_t widget, NOTICE_GRID* pnf)
 		return;
 
 	int n_id = xstol(get_title_item_id_ptr(ptrItem));
-	widget_post_command(widget, n_id, 0, NULL);
+	widget_post_command(widget, 0, n_id, NULL);
 }
 
-void GridPanel_Grid_OnColSize(widget_t widget, NOTICE_GRID* pnf)
+void GridPanel_Grid_OnSized(widget_t widget, NOTICE_DESIGN* pnf)
 {
 	GridPanelDelta* pdt = GETGRIDPANELDELTA(widget);
 
@@ -1205,10 +1218,10 @@ void GridPanel_Grid_OnColSize(widget_t widget, NOTICE_GRID* pnf)
 		return;
 
 	int n_id = xstol(get_title_item_id_ptr(ptrItem));
-	widget_post_command(widget, n_id, 0, NULL);
+	widget_post_command(widget, 0, n_id, NULL);
 }
 
-void GridPanel_Grid_OnColMove(widget_t widget, NOTICE_GRID* pnf)
+void GridPanel_Grid_OnMoved(widget_t widget, NOTICE_DESIGN* pnf)
 {
 	GridPanelDelta* pdt = GETGRIDPANELDELTA(widget);
 
@@ -1225,7 +1238,7 @@ void GridPanel_Proper_OnEntityUpdate(widget_t widget, NOTICE_PROPER* pnp)
 	int n_id = xstol(get_title_item_id_ptr(ptrItem));
 
 	LINKPTR ptrGrid = gridctrl_fetch(pdt->hGrid);
-	LINKPTR ptrCol = gridctrl_get_focus_col(pdt->hGrid);
+	LINKPTR ptrCol = (LINKPTR)designer_get_focused(pdt->hGrid);
 
 	tchar_t sz_style[CSS_LEN + 1] = { 0 };
 
@@ -1297,6 +1310,8 @@ int GridPanel_OnCreate(widget_t widget, void* data)
 	widget_set_owner(pdt->hGrid, widget);
 	set_split_item_delta(ilkGrid, pdt->hGrid);
 
+	hand_designer_create(pdt->hGrid, &desg_gridctrl);
+
 	LINKPTR ptrGrid = create_grid_doc();
 	set_grid_design(ptrGrid, 1);
 
@@ -1367,6 +1382,8 @@ void GridPanel_OnDestroy(widget_t widget)
 
 	if (widget_is_valid(pdt->hGrid))
 	{
+		hand_designer_destroy(pdt->hGrid);
+
 		LINKPTR ptrGrid = gridctrl_detach(pdt->hGrid);
 		if (ptrGrid)
 			destroy_grid_doc(ptrGrid);
@@ -1403,7 +1420,7 @@ int GridPanel_OnClose(widget_t widget)
 
 	GridPanel_Switch(widget);
 
-	return (gridctrl_get_dirty(pdt->hGrid)) ? 1 : 0;
+	return (GridPanel_GetDirty(widget)) ? 1 : 0;
 }
 
 void GridPanel_OnSetFocus(widget_t widget, widget_t hOrg)
@@ -1651,7 +1668,7 @@ void GridPanel_OnParentCommand(widget_t widget, int code, vword_t data)
 	}
 	else if (code == COMMAND_REMOVE)
 	{
-		gridctrl_set_dirty(pdt->hGrid, 0);
+		GridPanel_SetDirty(widget, 0);
 	}
 }
 
@@ -1661,7 +1678,7 @@ void GridPanel_OnMenuCommand(widget_t widget, int code, int cid, vword_t data)
 
 	tchar_t token[RES_LEN + 1];
 
-	switch (code)
+	switch (cid)
 	{
 	case IDA_FILE_SAVE:
 		GridPanel_OnSave(widget);
@@ -1831,27 +1848,17 @@ void GridPanel_OnNotice(widget_t widget, LPNOTICE phdr)
 
 	if (phdr->user == IDC_GRIDPANEL_GRID)
 	{
-		NOTICE_GRID* png = (NOTICE_GRID*)phdr;
+		NOTICE_DESIGN* png = (NOTICE_DESIGN*)phdr;
 		switch (png->code)
 		{
-		case NC_GRIDCALCED:
-			break;
-		case NC_COLCALCED:
-			break;
-		case NC_ROWCALCED:
-			break;
-		case NC_GRIDLBCLK:
+		case NC_OBJECT_LBCLICK:
 			GridPanel_Grid_OnLBClick(widget, png);
 			break;
-		case NC_COLSIZING:
+		case NC_OBJECT_SIZED:
+			GridPanel_Grid_OnSized(widget, png);
 			break;
-		case NC_COLSIZED:
-			GridPanel_Grid_OnColSize(widget, png);
-			break;
-		case NC_COLDRAG:
-			break;
-		case NC_COLDROP:
-			GridPanel_Grid_OnColMove(widget, png);
+		case NC_OBJECT_DROP:
+			GridPanel_Grid_OnMoved(widget, png);
 			break;
 		}
 	}
@@ -1863,7 +1870,7 @@ void GridPanel_OnNotice(widget_t widget, LPNOTICE phdr)
 		case NC_PROPERCALCED:
 			break;
 		case NC_ENTITYCOMMIT:
-			gridctrl_set_dirty(pdt->hGrid, 1);
+			GridPanel_SetDirty(widget, 1);
 			break;
 		case NC_ENTITYUPDATE:
 			GridPanel_Proper_OnEntityUpdate(widget, pnp);

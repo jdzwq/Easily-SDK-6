@@ -24,8 +24,8 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
 LICENSE.GPL3 for more details.
 ***********************************************************************/
 
-#ifndef _PLATINF_H
-#define	_PLATINF_H
+#ifndef _XDKINF_H
+#define	_XDKINF_H
 
 typedef struct _xdate_t{
 	unsigned short year;

@@ -36,6 +36,6 @@ E:\Easily-temp\windows\xdg\x86\Debug/bmp.c \
 E:\Easily-temp\windows\xdg\x86\Debug/jpg.c \
 E:\Easily-temp\windows\xdg\x86\Debug/pdg.c \
 E:\Easily-temp\windows\xdg\x86\Debug/png.c \
-E:\Easily-temp\windows\xdg\x86\Debug/mgcinf.c \
 E:\Easily-temp\windows\xdg\x86\Debug/imgbio.c \
+E:\Easily-temp\windows\xdg\x86\Debug/mgcinf.c \
 E:\Easily-temp\windows\xdg\x86\Debug/xdgutil.c \

@@ -1172,36 +1172,10 @@ void _gdi_text_out(visual_t rdc, const xface_t* pxa, const xpoint_t* ppt, const 
 	delete pb;
 }
 
-void _gdi_text_size(visual_t rdc, const tchar_t* txt, int len, xsize_t* pxs)
+void _gdi_text_rect(visual_t rdc, const xfont_t* pxf, const xface_t* pxa, const tchar_t* txt, int len, xrect_t* prt)
 {
 	win32_context_t* ctx = (rdc)? TypePtrFromHead(win32_context_t, rdc) : NULL;
-	win32_fontset_t* fnt = (rdc)? TypePtrFromHead(win32_fontset_t, ctx->fontset) : TypePtrFromHead(win32_fontset_t, g_fontset);
-	HDC hDC = (ctx)? (HDC)(ctx->context) : GetDC(NULL);
-
-	if (len < 0) len = xslen(txt);
-	if(!len) 
-	{
-		if(!ctx) ReleaseDC(NULL, hDC);
-		return;
-	}
-
-	Gdiplus::Graphics gh(hDC);
-
-	Font* pf = (Font*)(fnt->font_object);
-
-	RectF rf;
-	gh.MeasureString(txt, len, pf, PointF(0,0), &rf);
-	
-	pxs->w = (int)(rf.GetRight()) - (int)(rf.GetLeft());
-	pxs->h = (int)(rf.GetBottom()) - (int)(rf.GetTop());
-
-	if(!ctx) ReleaseDC(NULL, hDC);
-}
-
-void _gdi_text_rect(visual_t rdc, const xface_t* pxa, const tchar_t* txt, int len, xrect_t* prt)
-{
-	win32_context_t* ctx = (rdc)? TypePtrFromHead(win32_context_t, rdc) : NULL;
-	fontset_t fnt = (rdc)? ctx->fontset : g_fontset;
+	fontset_t fnt;
 
 	int c, n = 0, total = 0;
 	tchar_t pch[CHS_LEN + 1] = {0};
@@ -1210,6 +1184,16 @@ void _gdi_text_rect(visual_t rdc, const xface_t* pxa, const tchar_t* txt, int le
 
 	if(len < 0) len = xslen(txt);
 	if(!len) return;
+
+	if(pxf)
+	{
+		fnt = _gdi_create_fontset(pxf);
+	}else
+	{
+		fnt = (rdc)? ctx->fontset : g_fontset;
+	}
+
+	if(!fnt) return;
 
 	w = 0;
 	h = 0;
@@ -1284,15 +1268,74 @@ void _gdi_text_rect(visual_t rdc, const xface_t* pxa, const tchar_t* txt, int le
 
 	prt->h = h;
 	if (!prt->w) prt->w = maxw;
+
+	if(pxf)
+	{
+		_gdi_destroy_fontset(fnt);
+	}
 }
 
-void _gdi_font_size(visual_t rdc, xsize_t* pxs)
+void _gdi_text_size(visual_t rdc, const xfont_t* pxf, const tchar_t* txt, int len, xsize_t* pxs)
+{
+	win32_context_t* ctx = (rdc)? TypePtrFromHead(win32_context_t, rdc) : NULL;
+	win32_fontset_t* fnt = (rdc)? TypePtrFromHead(win32_fontset_t, ctx->fontset) : TypePtrFromHead(win32_fontset_t, g_fontset);
+	HDC hDC = (ctx)? (HDC)(ctx->context) : GetDC(NULL);
+
+	if (len < 0) len = xslen(txt);
+	if(!len) 
+	{
+		if(!ctx) ReleaseDC(NULL, hDC);
+		return;
+	}
+
+	Gdiplus::Graphics gh(hDC);
+
+	Font* pf;
+	
+	if(pxf)
+	{
+		pf = create_font(pxf);
+	}else
+	{
+		pf = (Font*)(fnt->font_object);
+	}
+
+	if(!pf)
+	{
+		if(!ctx) ReleaseDC(NULL, hDC);
+
+		return;
+	}
+
+	RectF rf;
+	gh.MeasureString(txt, len, pf, PointF(0,0), &rf);
+	
+	pxs->w = (int)(rf.GetRight()) - (int)(rf.GetLeft());
+	pxs->h = (int)(rf.GetBottom()) - (int)(rf.GetTop());
+
+	if(pxf) delete pf;
+
+	if(!ctx) ReleaseDC(NULL, hDC);
+}
+
+void _gdi_font_size(visual_t rdc, const xfont_t* pxf, xsize_t* pxs)
 {
 	win32_context_t* ctx = (rdc)? TypePtrFromHead(win32_context_t, rdc) : NULL;
 	win32_fontset_t* fnt = (rdc)? TypePtrFromHead(win32_fontset_t, ctx->fontset) : TypePtrFromHead(win32_fontset_t, g_fontset);
 
 	FontFamily fam;
-	Font* pf = (Font*)(fnt->font_object);
+	Font* pf;
+
+	if(pxf)
+	{
+		pf = create_font(pxf);
+	}else
+	{
+		pf = (Font*)(fnt->font_object);
+	}
+
+	if(!pf) return;
+
 	pf->GetFamily(&fam);
 
     INT fontStyle = pf->GetStyle();
@@ -1309,6 +1352,11 @@ void _gdi_font_size(visual_t rdc, xsize_t* pxs)
 	
     pxs->h = ascentPx + descentPx;
 	pxs->w = LOGPTPERMM;
+
+	if(pxf)
+	{
+		delete pf;
+	}
 }
 
 /**************************************************************************************** */

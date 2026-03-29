@@ -131,9 +131,11 @@ void hand_tipbox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	drawing_interface ifv = {0};
 
 	const color_mod_t *pclrs;
+	const xfont_t* pxf;
 	xbrush_t xb;
 	xface_t xa;
 
+	pxf = widget_get_xfont_ptr(widget);
 	pclrs = widget_get_color_mode_ptr(widget);
 	default_xbrush(&xb);
 	format_xcolor(&(pclrs->clr_bkg), xb.color);
@@ -154,9 +156,10 @@ void hand_tipbox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	widget_get_canv_rect(widget, (canvbox_t*)&(ifc.rect));
 	ifc.pclrs = pclrs;
 
-	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
+	(*ifv.drw->pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
 
-	(*ifv.pf_draw_text)(ifv.ctx, &xa, &xr, ptd->sz_text, -1);
+	(*ifv.drw->pf_set_xfont)(ifv.ctx, pxf);
+	(*ifv.drw->pf_draw_text)(ifv.ctx, &xa, &xr, ptd->sz_text, -1);
 
 	end_canvas_paint(canv, dc, pxr);
 }
@@ -217,7 +220,7 @@ void tipbox_popup_size(widget_t widget, xsize_t* pxs)
 
 	get_visual_interface(rdc, &ifv);
 
-	(*ifv.pf_text_rect)(ifv.ctx, &xa, ptd->sz_text, -1, &xr);
+	(*ifv.drw->pf_text_rect)(ifv.ctx, &xa, ptd->sz_text, -1, &xr);
 
 	widget_release_context(widget, rdc);
 

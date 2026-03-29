@@ -75,6 +75,7 @@ void checkbox_on_switch(widget_t widget)
 }
 
 /*********************************************************************************/
+
 int hand_checkbox_create(widget_t widget, void* data)
 {
 	checkbox_delta_t* ptd = GETCHECKBOXDELTA(widget);
@@ -165,11 +166,14 @@ void hand_checkbox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	xrect_t xr;	
 
 	const color_mod_t *pclrs;
+	const xfont_t* pxf;
 	xbrush_t xb;
 
 	pclrs = widget_get_color_mode_ptr(widget);
 	default_xbrush(&xb);
 	format_xcolor(&(pclrs->clr_bkg), xb.color);
+
+	pxf = widget_get_xfont_ptr(widget);
 
 	widget_get_client_rect(widget, &xr);
 
@@ -183,9 +187,9 @@ void hand_checkbox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	widget_get_canv_rect(widget, (canvbox_t*)&(ifc.rect));
 	ifc.pclrs = pclrs;
 
-	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
+	(*ifv.drw->pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
 
-	draw_checkbox(&ifc, ptd->on);
+	draw_checkbox(&ifc, pxf, ptd->on);
 
 	end_canvas_paint(canv, dc, pxr);
 }
@@ -218,12 +222,15 @@ void checkbox_popup_size(widget_t widget, xsize_t* pxs)
 {
 	checkbox_delta_t* ptd = GETCHECKBOXDELTA(widget);
 	measure_interface im = { 0 };
+	const xfont_t* pxf;
 
 	XDK_ASSERT(ptd != NULL);
 
+	pxf = widget_get_xfont_ptr(widget);
+
 	get_canvas_measure(widget_get_canvas(widget), &im);
 
-	calc_checkbox_size(&im, pxs);
+	calc_checkbox_size(&im, pxf, pxs);
 
 	widget_size_to_pt(widget, pxs);
 

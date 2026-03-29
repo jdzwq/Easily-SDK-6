@@ -82,7 +82,7 @@ int calc_topog_hint(const xpoint_t* ppt, link_t_ptr ptr, link_t_ptr* pilk, int* 
 	return nHit;
 }
 
-void draw_topog(const drawing_interface* pif, link_t_ptr ptr)
+void draw_topog(const drawing_interface* pci, link_t_ptr ptr)
 {
 	link_t_ptr ilk;
 	xrect_t xr;
@@ -99,15 +99,16 @@ void draw_topog(const drawing_interface* pif, link_t_ptr ptr)
 	const tchar_t *type;
 
 	matrix_t mt = NULL;
+	void* buf;
 	int rows,cols, i, j;
 	float rx, ry;
 	int dark;
 
-	const canvbox_t* pbox = (canvbox_t*)(&pif->rect);
+	const canvbox_t* pbox = (canvbox_t*)(&pci->rect);
 
 	string_t vs = NULL;
 
-	b_print = (pif->tag == _CANVAS_PRINTER)? 1 : 0;
+	b_print = (pci->tag == _CANVAS_PRINTER)? 1 : 0;
 	b_design = topog_is_design(ptr);
 
 	default_xpen(&xp);
@@ -118,13 +119,13 @@ void draw_topog(const drawing_interface* pif, link_t_ptr ptr)
 	parse_xbrush_from_style(&xb, style);
 	if (!b_print)
 	{
-		format_xcolor(&pif->pclrs->clr_bkg, xb.color);
+		format_xcolor(&pci->pclrs->clr_bkg, xb.color);
 	}
 
 	/*parse_xpen_from_style(&xp, style);
 	if (!b_print)
 	{
-	format_xcolor(&pif->pclrs->clr_frg, xp.color);
+	format_xcolor(&pci->pclrs->clr_frg, xp.color);
 	}*/
 
 	xscpy(xp.color, xb.color);
@@ -136,7 +137,7 @@ void draw_topog(const drawing_interface* pif, link_t_ptr ptr)
 
 	if (!b_print)
 	{
-		format_xcolor(&pif->pclrs->clr_msk, xi.color);
+		format_xcolor(&pci->pclrs->clr_msk, xi.color);
 	}
 	else
 	{
@@ -147,6 +148,8 @@ void draw_topog(const drawing_interface* pif, link_t_ptr ptr)
 	cols = get_topog_cols(ptr);
 
 	mt = matrix_alloc(rows, cols);
+	buf = xmem_alloc(matrix_need_size(rows, cols));
+	matrix_attach(mt, buf);
 
 	matrix_parse(mt, get_topog_matrix_ptr(ptr), -1);
 
@@ -169,15 +172,17 @@ void draw_topog(const drawing_interface* pif, link_t_ptr ptr)
 			{
 				xmem_copy((void*)&xb_dot, (void*)&xb, sizeof(xbrush_t));
 				lighten_xbrush(&xb_dot, dark + DEF_SOFT_LIGHTEN);
-				(*pif->pf_draw_rect)(pif->ctx, ((b_design)? &xp : NULL), &xb_dot, &xr);
+				(*pci->drw->pf_draw_rect)(pci->ctx, ((b_design)? &xp : NULL), &xb_dot, &xr);
 			}
 			else if (b_design)
 			{
-				(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+				(*pci->drw->pf_draw_rect)(pci->ctx, &xp, NULL, &xr);
 			}
 		}
 	}
 
+	buf = matrix_detach(mt);
+	xmem_free(buf);
 	matrix_free(mt);
 
 	vs = string_alloc();
@@ -190,12 +195,12 @@ void draw_topog(const drawing_interface* pif, link_t_ptr ptr)
 
 		default_xfont(&xf);
 		parse_xfont_from_style(&xf, style);
-		(*pif->pf_set_xfont)(pif->ctx, &xf);
+		(*pci->drw->pf_set_xfont)(pci->ctx, &xf);
 
 		default_xface(&xa);
 		parse_xface_from_style(&xa, style);
 
-		(*pif->pf_font_size)(pif->ctx, &xs);
+		(*pci->drw->pf_font_size)(pci->ctx, &xs);
 
 		calc_topog_spot_rect(ptr, ilk, &xr);
 		xr.fw = xs.fw;
@@ -204,23 +209,23 @@ void draw_topog(const drawing_interface* pif, link_t_ptr ptr)
 
 		if (compare_text(type, -1, ATTR_SPOT_TYPE_COLORBAR, -1, 0) == 0)
 		{
-			(*pif->pf_color_out)(pif->ctx, &xr, 1, get_topog_spot_title_ptr(ilk), -1);
+			(*pci->drw->pf_color_out)(pci->ctx, &xr, 1, get_topog_spot_title_ptr(ilk), -1);
 		}
 		else if (compare_text(type, -1, ATTR_SPOT_TYPE_ICON, -1, 0) == 0)
 		{
 			parse_xcolor(&xc, xa.text_color);
-			draw_gizmo(pif, &xc, &xr, get_topog_spot_title_ptr(ilk));
+			draw_gizmo(pci, &xc, &xr, get_topog_spot_title_ptr(ilk));
 		}
 		else if (compare_text(type, -1, ATTR_SPOT_TYPE_IMAGE, -1, 0) == 0)
 		{
 			parse_ximage_from_source(&xi, get_topog_spot_title_ptr(ilk));
-			(*pif->pf_draw_image)(pif->ctx, &xi, &xr);
+			(*pci->drw->pf_draw_image)(pci->ctx, &xi, &xr);
 			xi.source = NULL;
 		}
 		else if (compare_text(type, -1, ATTR_SPOT_TYPE_TEXT, -1, 0) == 0)
 		{
 			string_cpy(vs, get_topog_spot_title_ptr(ilk), -1);
-			draw_var_text(pif, &xa, &xr, vs);
+			draw_var_text(pci, &xf, &xa, &xr, vs);
 		}
 
 		ilk = get_topog_next_spot(ptr, ilk);

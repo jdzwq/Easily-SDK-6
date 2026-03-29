@@ -211,7 +211,7 @@ int calc_title_hint(const xpoint_t* ppt, link_t_ptr ptr, link_t_ptr plk_focus, l
 	return nHint;
 }
 
-void draw_title(const drawing_interface* pif, link_t_ptr ptr, link_t_ptr plk_focus)
+void draw_title(const drawing_interface* pci, link_t_ptr ptr, link_t_ptr plk_focus)
 {
 	link_t_ptr plk;
 	bool_t lay_vert;
@@ -231,14 +231,14 @@ void draw_title(const drawing_interface* pif, link_t_ptr ptr, link_t_ptr plk_foc
 	tchar_t ta[11] = { 0 };
 	xpoint_t pa[15] = { 0 };
 
-	const canvbox_t* pbox = (canvbox_t*)(&pif->rect);
+	const canvbox_t* pbox = (canvbox_t*)(&pci->rect);
 
 	px = pbox->fx;
 	py = pbox->fy;
 	pw = pbox->fw;
 	ph = pbox->fh;
 
-	b_print = (pif->tag == _CANVAS_PRINTER) ? 1 : 0;
+	b_print = (pci->tag == _CANVAS_PRINTER) ? 1 : 0;
 
 	default_xpen(&xp);
 	default_xbrush(&xb);
@@ -251,22 +251,22 @@ void draw_title(const drawing_interface* pif, link_t_ptr ptr, link_t_ptr plk_foc
 	parse_xface_from_style(&xa, style);
 	if (!b_print)
 	{
-		format_xcolor(&pif->pclrs->clr_txt, xa.text_color);
+		format_xcolor(&pci->pclrs->clr_txt, xa.text_color);
 	}
 
 	parse_xfont_from_style(&xf, style);
-	(*pif->pf_set_xfont)(pif->ctx, &xf);
+	(*pci->drw->pf_set_xfont)(pci->ctx, &xf);
 
 	parse_xbrush_from_style(&xb, style);
 	if (!b_print)
 	{
-		format_xcolor(&pif->pclrs->clr_bkg, xb.color);
+		format_xcolor(&pci->pclrs->clr_bkg, xb.color);
 	}
 
 	/*parse_xpen_from_style(&xp, style);
 	if (!b_print)
 	{
-	format_xcolor(&pif->pclrs->clr_frg, xp.color);
+	format_xcolor(&pci->pclrs->clr_frg, xp.color);
 	}*/
 
 	xscpy(xp.color, xb.color);
@@ -275,12 +275,12 @@ void draw_title(const drawing_interface* pif, link_t_ptr ptr, link_t_ptr plk_foc
 
 	if (!b_print)
 	{
-		format_xcolor(&pif->pclrs->clr_msk, xi.color);
+		format_xcolor(&pci->pclrs->clr_msk, xi.color);
 	}
 
 	if (!b_print)
 	{
-		xmem_copy((void*)&xc, (void*)&pif->pclrs->clr_ico, sizeof(xcolor_t));
+		xmem_copy((void*)&xc, (void*)&pci->pclrs->clr_ico, sizeof(xcolor_t));
 	}
 	else
 	{
@@ -370,7 +370,7 @@ void draw_title(const drawing_interface* pif, link_t_ptr ptr, link_t_ptr plk_foc
 				pa[13].fx = xr.fx;
 				pa[13].fy = ph + 0.5f;
 
-				(*pif->pf_draw_path)(pif->ctx, &xp, &xb, ta, pa, 14);
+				(*pci->drw->pf_draw_path)(pci->ctx, &xp, &xb, ta, pa, 14);
 
 				xr_image.fx = xr.fx + (xr.fw - ic) / 2 - TITLE_EDGE_DARK / 2;
 				xr_image.fy = xr.fy;
@@ -381,11 +381,11 @@ void draw_title(const drawing_interface* pif, link_t_ptr ptr, link_t_ptr plk_foc
 
 				if (get_title_item_locked(plk))
 				{
-					draw_gizmo(pif, &xc, &xr_image, icon);
+					draw_gizmo(pci, &xc, &xr_image, icon);
 				}
 				else
 				{
-					draw_gizmo(pif, &xc, &xr_image, GDI_ATTR_GIZMO_CLOSE);
+					draw_gizmo(pci, &xc, &xr_image, GDI_ATTR_GIZMO_CLOSE);
 				}
 
 				xr_text.fx = xr.fx;
@@ -393,7 +393,7 @@ void draw_title(const drawing_interface* pif, link_t_ptr ptr, link_t_ptr plk_foc
 				xr_text.fw = xr.fw - TITLE_EDGE_DARK;
 				xr_text.fh = xr.fh - ic;
 
-				(*pif->pf_draw_text)(pif->ctx, &xa, &xr_text, get_title_item_title_ptr(plk), -1);
+				(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr_text, get_title_item_title_ptr(plk), -1);
 			}
 			else if (compare_text(orita, -1, ATTR_ORITATION_RIGHT, -1, 0) == 0)
 			{
@@ -445,7 +445,7 @@ void draw_title(const drawing_interface* pif, link_t_ptr ptr, link_t_ptr plk_foc
 				pa[13].fx = xr.fx + xr.fw;
 				pa[13].fy = ph + 0.5f;
 
-				(*pif->pf_draw_path)(pif->ctx, &xp, &xb, ta, pa, 14);
+				(*pci->drw->pf_draw_path)(pci->ctx, &xp, &xb, ta, pa, 14);
 
 				xr_image.fx = xr.fx + (xr.fw - ic) / 2 + TITLE_EDGE_DARK / 2;
 				xr_image.fy = xr.fy;
@@ -456,11 +456,11 @@ void draw_title(const drawing_interface* pif, link_t_ptr ptr, link_t_ptr plk_foc
 
 				if (get_title_item_locked(plk))
 				{
-					draw_gizmo(pif, &xc, &xr_image, icon);
+					draw_gizmo(pci, &xc, &xr_image, icon);
 				}
 				else
 				{
-					draw_gizmo(pif, &xc, &xr_image, GDI_ATTR_GIZMO_CLOSE);
+					draw_gizmo(pci, &xc, &xr_image, GDI_ATTR_GIZMO_CLOSE);
 				}
 
 				xr_text.fx = xr.fx + TITLE_EDGE_DARK;
@@ -468,7 +468,7 @@ void draw_title(const drawing_interface* pif, link_t_ptr ptr, link_t_ptr plk_foc
 				xr_text.fw = xr.fw - TITLE_EDGE_DARK;
 				xr_text.fh = xr.fh - ic;
 
-				(*pif->pf_draw_text)(pif->ctx, &xa, &xr_text, get_title_item_title_ptr(plk), -1);
+				(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr_text, get_title_item_title_ptr(plk), -1);
 			}
 			else if (compare_text(orita, -1, ATTR_ORITATION_TOP, -1, 0) == 0)
 			{
@@ -520,7 +520,7 @@ void draw_title(const drawing_interface* pif, link_t_ptr ptr, link_t_ptr plk_foc
 				pa[13].fx = pw + 0.5f;
 				pa[13].fy = xr.fy;
 
-				(*pif->pf_draw_path)(pif->ctx, &xp, &xb, ta, pa, 14);
+				(*pci->drw->pf_draw_path)(pci->ctx, &xp, &xb, ta, pa, 14);
 
 				xr_image.fx = xr.fx;
 				xr_image.fy = xr.fy + (xr.fh - ic) / 2 - TITLE_EDGE_DARK / 2;
@@ -531,11 +531,11 @@ void draw_title(const drawing_interface* pif, link_t_ptr ptr, link_t_ptr plk_foc
 
 				if (get_title_item_locked(plk))
 				{
-					draw_gizmo(pif, &xc, &xr_image, icon);
+					draw_gizmo(pci, &xc, &xr_image, icon);
 				}
 				else
 				{
-					draw_gizmo(pif, &xc, &xr_image, GDI_ATTR_GIZMO_CLOSE);
+					draw_gizmo(pci, &xc, &xr_image, GDI_ATTR_GIZMO_CLOSE);
 				}
 
 				xr_text.fx = xr.fx + ic;
@@ -543,7 +543,7 @@ void draw_title(const drawing_interface* pif, link_t_ptr ptr, link_t_ptr plk_foc
 				xr_text.fw = xr.fw - ic;
 				xr_text.fh = xr.fh - TITLE_EDGE_DARK;
 
-				(*pif->pf_draw_text)(pif->ctx, &xa, &xr_text, get_title_item_title_ptr(plk), -1);
+				(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr_text, get_title_item_title_ptr(plk), -1);
 			}
 			else if (compare_text(orita, -1, ATTR_ORITATION_BOTTOM, -1, 0) == 0)
 			{
@@ -595,7 +595,7 @@ void draw_title(const drawing_interface* pif, link_t_ptr ptr, link_t_ptr plk_foc
 				pa[13].fx = pw +0.5f;
 				pa[13].fy = xr.fy + xr.fh;
 
-				(*pif->pf_draw_path)(pif->ctx, &xp, &xb, ta, pa, 14);
+				(*pci->drw->pf_draw_path)(pci->ctx, &xp, &xb, ta, pa, 14);
 
 				xr_image.fx = xr.fx;
 				xr_image.fy = xr.fy + (xr.fh - ic) / 2 + TITLE_EDGE_DARK / 2;
@@ -606,11 +606,11 @@ void draw_title(const drawing_interface* pif, link_t_ptr ptr, link_t_ptr plk_foc
 
 				if (get_title_item_locked(plk))
 				{
-					draw_gizmo(pif, &xc, &xr_image, icon);
+					draw_gizmo(pci, &xc, &xr_image, icon);
 				}
 				else
 				{
-					draw_gizmo(pif, &xc, &xr_image, GDI_ATTR_GIZMO_CLOSE);
+					draw_gizmo(pci, &xc, &xr_image, GDI_ATTR_GIZMO_CLOSE);
 				}
 
 				xr_text.fx = xr.fx + ic;
@@ -618,7 +618,7 @@ void draw_title(const drawing_interface* pif, link_t_ptr ptr, link_t_ptr plk_foc
 				xr_text.fw = xr.fw - ic;
 				xr_text.fh = xr.fh - TITLE_EDGE_DARK;
 
-				(*pif->pf_draw_text)(pif->ctx, &xa, &xr_text, get_title_item_title_ptr(plk), -1);
+				(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr_text, get_title_item_title_ptr(plk), -1);
 			}
 		}
 		else
@@ -632,14 +632,14 @@ void draw_title(const drawing_interface* pif, link_t_ptr ptr, link_t_ptr plk_foc
 
 				ft_center_rect(&xr_image, DEF_SMALL_ICON, DEF_SMALL_ICON);
 
-				draw_gizmo(pif, &xc, &xr_image, icon);
+				draw_gizmo(pci, &xc, &xr_image, icon);
 
 				xr_text.fx = xr.fx + TITLE_EDGE_LIGHT;
 				xr_text.fy = xr.fy + ic;
 				xr_text.fw = xr.fw - TITLE_EDGE_LIGHT;
 				xr_text.fh = xr.fh - ic;
 
-				(*pif->pf_draw_text)(pif->ctx, &xa, &xr_text, get_title_item_title_ptr(plk), -1);
+				(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr_text, get_title_item_title_ptr(plk), -1);
 			}
 			else if (compare_text(orita, -1, ATTR_ORITATION_RIGHT, -1, 0) == 0)
 			{
@@ -650,14 +650,14 @@ void draw_title(const drawing_interface* pif, link_t_ptr ptr, link_t_ptr plk_foc
 
 				ft_center_rect(&xr_image, DEF_SMALL_ICON, DEF_SMALL_ICON);
 
-				draw_gizmo(pif, &xc, &xr_image, icon);
+				draw_gizmo(pci, &xc, &xr_image, icon);
 
 				xr_text.fx = xr.fx;
 				xr_text.fy = xr.fy + ic;
 				xr_text.fw = xr.fw - TITLE_EDGE_LIGHT;
 				xr_text.fh = xr.fh - ic;
 
-				(*pif->pf_draw_text)(pif->ctx, &xa, &xr_text, get_title_item_title_ptr(plk), -1);
+				(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr_text, get_title_item_title_ptr(plk), -1);
 			}
 			else if (compare_text(orita, -1, ATTR_ORITATION_TOP, -1, 0) == 0)
 			{
@@ -668,14 +668,14 @@ void draw_title(const drawing_interface* pif, link_t_ptr ptr, link_t_ptr plk_foc
 
 				ft_center_rect(&xr_image, DEF_SMALL_ICON, DEF_SMALL_ICON);
 
-				draw_gizmo(pif, &xc, &xr_image, icon);
+				draw_gizmo(pci, &xc, &xr_image, icon);
 
 				xr_text.fx = xr.fx + ic;
 				xr_text.fy = xr.fy + TITLE_EDGE_LIGHT;
 				xr_text.fw = xr.fw - ic;
 				xr_text.fh = xr.fh - TITLE_EDGE_LIGHT;
 
-				(*pif->pf_draw_text)(pif->ctx, &xa, &xr_text, get_title_item_title_ptr(plk), -1);
+				(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr_text, get_title_item_title_ptr(plk), -1);
 			}
 			else if (compare_text(orita, -1, ATTR_ORITATION_BOTTOM, -1, 0) == 0)
 			{
@@ -686,14 +686,14 @@ void draw_title(const drawing_interface* pif, link_t_ptr ptr, link_t_ptr plk_foc
 
 				ft_center_rect(&xr_image, DEF_SMALL_ICON, DEF_SMALL_ICON);
 
-				draw_gizmo(pif, &xc, &xr_image, icon);
+				draw_gizmo(pci, &xc, &xr_image, icon);
 
 				xr_text.fx = xr.fx + ic;
 				xr_text.fy = xr.fy;
 				xr_text.fw = xr.fw - ic;
 				xr_text.fh = xr.fh - TITLE_EDGE_LIGHT;
 
-				(*pif->pf_draw_text)(pif->ctx, &xa, &xr_text, get_title_item_title_ptr(plk), -1);
+				(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr_text, get_title_item_title_ptr(plk), -1);
 			}
 		}
 

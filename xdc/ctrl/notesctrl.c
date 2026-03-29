@@ -49,13 +49,15 @@ static int _notesctrl_calc_width(widget_t widget)
 
 	canvas_t canv;
 	measure_interface im = { 0 };
+	const xfont_t *pxf;
 	xsize_t xs;
 
+	pxf = widget_get_xfont_ptr(widget);
 	canv = widget_get_canvas(widget);
 	get_canvas_measure(canv, &im);
 	widget_get_canv_rect(widget, (canvbox_t*)&(im.rect));
 
-	xs.fw = calc_notes_width(&im, ptd->arch);
+	xs.fw = calc_notes_width(&im, pxf, ptd->arch);
 	xs.fh = 0;
 
 	widget_size_to_pt(widget, &xs);
@@ -69,14 +71,16 @@ static int _notesctrl_calc_height(widget_t widget)
 
 	canvas_t canv;
 	measure_interface im = { 0 };
+	const xfont_t *pxf;
 	xsize_t xs;
 
+	pxf = widget_get_xfont_ptr(widget);
 	canv = widget_get_canvas(widget);
 	get_canvas_measure(canv, &im);
 	widget_get_canv_rect(widget, (canvbox_t*)&(im.rect));
 
 	xs.fw = 0;
-	xs.fh = calc_notes_height(&im, ptd->arch);
+	xs.fh = calc_notes_height(&im, pxf, ptd->arch);
 
 	widget_size_to_pt(widget, &xs);
 
@@ -89,9 +93,11 @@ static int _notesctrl_calc_hint(widget_t widget, const xpoint_t* ppt, link_t_ptr
 
 	canvas_t canv;
 	measure_interface im = { 0 };
+	const xfont_t *pxf;
 	xpoint_t pt;
 	int hint;
 
+	pxf = widget_get_xfont_ptr(widget);
 	canv = widget_get_canvas(widget);
 	get_canvas_measure(canv, &im);
 	widget_get_canv_rect(widget, (canvbox_t*)&(im.rect));
@@ -101,7 +107,7 @@ static int _notesctrl_calc_hint(widget_t widget, const xpoint_t* ppt, link_t_ptr
 	widget_point_to_mm(widget, &pt);
 
 	*pplk = NULL;
-	hint = calc_notes_hint(&im, &pt, ptd->arch, pplk);
+	hint = calc_notes_hint(&im, pxf, &pt, ptd->arch, pplk);
 
 	return hint;
 }
@@ -112,14 +118,16 @@ static void _notesctrl_item_rect(widget_t widget, link_t_ptr plk, xrect_t* pxr)
 
 	canvas_t canv;
 	measure_interface im = { 0 };
+	const xfont_t *pxf;
 	xrect_t xr;
 	int hint;
 
+	pxf = widget_get_xfont_ptr(widget);
 	canv = widget_get_canvas(widget);
 	get_canvas_measure(canv, &im);
 	widget_get_canv_rect(widget, (canvbox_t*)&(im.rect));
 
-	calc_notes_item_rect(&im, ptd->arch, plk, pxr);
+	calc_notes_item_rect(&im, pxf, ptd->arch, plk, pxr);
 
 	widget_rect_to_pt(widget, pxr);
 }
@@ -154,6 +162,7 @@ static void _notesctrl_ensure_visible(widget_t widget)
 }
 
 /*************************************************************************/
+
 int noti_notes_owner(widget_t widget, unsigned int code, link_t_ptr arch, link_t_ptr item, void* data)
 {
 	notes_delta_t* ptd = GETNOTESDELTA(widget);
@@ -268,7 +277,9 @@ void noti_notes_reset_scroll(widget_t widget, bool_t bUpdate)
 			widget_close(ptd->vsc, 0);
 	}
 }
+
 /********************************************************************************************/
+
 int hand_notes_create(widget_t widget, void* data)
 {
 	notes_delta_t* ptd;
@@ -536,12 +547,14 @@ void hand_notes_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	xrect_t xr;
 
 	const color_mod_t *pclrs;
+	const xfont_t *pxf;
 	xbrush_t xb = { 0 };
 	xpen_t xp = { 0 };
 	xcolor_t xc = { 0 };
 
 	if (!ptd->arch) return;
 
+	pxf = widget_get_xfont_ptr(widget);
 	pclrs = widget_get_color_mode_ptr(widget);
 	default_xbrush(&xb);
 	format_xcolor(&(pclrs->clr_bkg), xb.color);
@@ -560,9 +573,9 @@ void hand_notes_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	widget_get_canv_rect(widget, (canvbox_t*)&(ifc.rect));
 	ifc.pclrs = pclrs;
 
-	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
+	(*ifv.drw->pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
 
-	draw_notes(&ifc, &xp, &xb, ptd->arch, ptd->item);
+	draw_notes(&ifc, pxf, &xp, &xb, ptd->arch, ptd->item);
 
 	end_canvas_paint(canv, dc, pxr);
 }

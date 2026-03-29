@@ -2106,6 +2106,11 @@ void _widget_close(widget_t wt, int ret)
 			return;
 	}
 
+    if(pdisp && pdisp->pf_on_show)
+	{
+		(*pdisp->pf_on_show)(wt, bool_false);
+	}
+
     if(pwidg->style & WD_STYLE_CHILD)
     {
         _widget_destroy(wt);

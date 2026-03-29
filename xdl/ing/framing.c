@@ -29,7 +29,7 @@ LICENSE.GPL3 for more details.
 #include "../xdlgdi.h"
 
 
-void draw_progress(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt, int steps)
+void draw_progress(const drawing_interface* pci, const xcolor_t* pxc, const xrect_t* prt, int steps)
 {
 	int i,index;
 	float iw;
@@ -60,13 +60,13 @@ void draw_progress(const drawing_interface* pif, const xcolor_t* pxc, const xrec
 		ft_center_rect(&xr, DEF_SMALL_ICON, DEF_SMALL_ICON);
 
 		if (index > i)
-			(*pif->pf_draw_rect)(pif->ctx, &xp, &xb, &xr);
+			(*pci->drw->pf_draw_rect)(pci->ctx, &xp, &xb, &xr);
 		else
-			(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+			(*pci->drw->pf_draw_rect)(pci->ctx, &xp, NULL, &xr);
 	}
 }
 
-void draw_corner(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* pxr)
+void draw_corner(const drawing_interface* pci, const xcolor_t* pxc, const xrect_t* pxr)
 {
 	xrect_t xr;
 	xpoint_t pt1, pt2;
@@ -85,55 +85,55 @@ void draw_corner(const drawing_interface* pif, const xcolor_t* pxc, const xrect_
 	pt1.fy = xr.fy;
 	pt2.fx = xr.fx;
 	pt2.fy = xr.fy - SPAN;
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+	(*pci->drw->pf_draw_line)(pci->ctx, &xp, &pt1, &pt2);
 
 	pt1.fx = xr.fx;
 	pt1.fy = xr.fy;
 	pt2.fx = xr.fx - SPAN;
 	pt2.fy = xr.fy;
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+	(*pci->drw->pf_draw_line)(pci->ctx, &xp, &pt1, &pt2);
 
 	//right,top
 	pt1.fx = xr.fx + xr.fw;
 	pt1.fy = xr.fy;
 	pt2.fx = xr.fx + xr.fw;
 	pt2.fy = xr.fy - SPAN;
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+	(*pci->drw->pf_draw_line)(pci->ctx, &xp, &pt1, &pt2);
 
 	pt1.fx = xr.fx + xr.fw;
 	pt1.fy = xr.fy;
 	pt2.fx = xr.fx + xr.fw + SPAN;
 	pt2.fy = xr.fy;
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+	(*pci->drw->pf_draw_line)(pci->ctx, &xp, &pt1, &pt2);
 
 	//left,bottom
 	pt1.fx = xr.fx;
 	pt1.fy = xr.fy + xr.fh;
 	pt2.fx = xr.fx;
 	pt2.fy = xr.fy + xr.fh + SPAN;
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+	(*pci->drw->pf_draw_line)(pci->ctx, &xp, &pt1, &pt2);
 
 	pt1.fx = xr.fx;
 	pt1.fy = xr.fy + xr.fh;
 	pt2.fx = xr.fx - SPAN;
 	pt2.fy = xr.fy + xr.fh;
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+	(*pci->drw->pf_draw_line)(pci->ctx, &xp, &pt1, &pt2);
 
 	//right,bottom
 	pt1.fx = xr.fx + xr.fw;
 	pt1.fy = xr.fy + xr.fh;
 	pt2.fx = xr.fx + xr.fw;
 	pt2.fy = xr.fy + xr.fh + SPAN;
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+	(*pci->drw->pf_draw_line)(pci->ctx, &xp, &pt1, &pt2);
 
 	pt1.fx = xr.fx + xr.fw;
 	pt1.fy = xr.fy + xr.fh;
 	pt2.fx = xr.fx + xr.fw + SPAN;
 	pt2.fy = xr.fy + xr.fh;
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+	(*pci->drw->pf_draw_line)(pci->ctx, &xp, &pt1, &pt2);
 }
 
-void draw_ruler(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_ruler(const drawing_interface* pci, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xrect_t xr;
 	xpoint_t pt1, pt2;
@@ -158,9 +158,9 @@ void draw_ruler(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t
 
 	default_xfont(&xf);
 	xscpy(xf.size, GDI_ATTR_FONT_SIZE_FOOTER);
-	(*pif->pf_set_xfont)(pif->ctx, &xf);
+	(*pci->drw->pf_set_xfont)(pci->ctx, &xf);
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, prt);
+	(*pci->drw->pf_draw_rect)(pci->ctx, &xp, NULL, prt);
 
 	fx = prt->fx;
 	fy = prt->fy;
@@ -186,7 +186,7 @@ void draw_ruler(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t
 		pt1.fy = y1;
 		pt2.fx = x2;
 		pt2.fy = y1;
-		(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+		(*pci->drw->pf_draw_line)(pci->ctx, &xp, &pt1, &pt2);
 
 		for (j = 1; j < 10; j++)
 		{
@@ -196,7 +196,7 @@ void draw_ruler(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t
 				pt1.fy = y1 + j * MIN_SPAN;
 				pt2.fx = x2 + 2 * MIN_SPAN;
 				pt2.fy = y1 + j * MIN_SPAN;
-				(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+				(*pci->drw->pf_draw_line)(pci->ctx, &xp, &pt1, &pt2);
 			}
 		}
 
@@ -207,7 +207,7 @@ void draw_ruler(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t
 		xr.fw = MAX_SPAN;
 		xr.fh = (float)(MAX_SPAN / 2 + 0.5);
 		xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_NEAR);
-		(*pif->pf_draw_text)(pif->ctx, &xa, &xr, sz, -1);
+		(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, sz, -1);
 
 		if (i == vm - 1)
 		{
@@ -215,7 +215,7 @@ void draw_ruler(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t
 			pt1.fy = y2;
 			pt2.fx = x2;
 			pt2.fy = y2;
-			(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+			(*pci->drw->pf_draw_line)(pci->ctx, &xp, &pt1, &pt2);
 
 			xsprintf(sz, _T("%d"), i + 1);
 
@@ -224,7 +224,7 @@ void draw_ruler(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t
 			xr.fw = MAX_SPAN;
 			xr.fh = (float)(MAX_SPAN / 2 + 0.5);
 			xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_NEAR);
-			(*pif->pf_draw_text)(pif->ctx, &xa, &xr, sz, -1);
+			(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, sz, -1);
 		}
 	}
 
@@ -247,7 +247,7 @@ void draw_ruler(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t
 		pt1.fy = y1;
 		pt2.fx = x2;
 		pt2.fy = y1;
-		(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+		(*pci->drw->pf_draw_line)(pci->ctx, &xp, &pt1, &pt2);
 
 		for (j = 1; j < 10; j++)
 		{
@@ -257,7 +257,7 @@ void draw_ruler(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t
 				pt1.fy = y1 + j * MIN_SPAN;
 				pt2.fx = x2 - 2 * MIN_SPAN;
 				pt2.fy = y1 + j * MIN_SPAN;
-				(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+				(*pci->drw->pf_draw_line)(pci->ctx, &xp, &pt1, &pt2);
 			}
 		}
 
@@ -268,7 +268,7 @@ void draw_ruler(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t
 		xr.fw = MAX_SPAN;
 		xr.fh = (float)(MAX_SPAN / 2 + 0.5);
 		xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_FAR);
-		(*pif->pf_draw_text)(pif->ctx, &xa, &xr, sz, -1);
+		(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, sz, -1);
 
 		if (i == vm - 1)
 		{
@@ -276,7 +276,7 @@ void draw_ruler(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t
 			pt1.fy = y2;
 			pt2.fx = x2;
 			pt2.fy = y2;
-			(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+			(*pci->drw->pf_draw_line)(pci->ctx, &xp, &pt1, &pt2);
 
 			xsprintf(sz, _T("%d"), i + 1);
 
@@ -285,7 +285,7 @@ void draw_ruler(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t
 			xr.fw = MAX_SPAN;
 			xr.fh = (float)(MAX_SPAN / 2 + 0.5);
 			xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_FAR);
-			(*pif->pf_draw_text)(pif->ctx, &xa, &xr, sz, -1);
+			(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, sz, -1);
 		}
 	}
 
@@ -308,7 +308,7 @@ void draw_ruler(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t
 		pt1.fy = y1;
 		pt2.fx = x1;
 		pt2.fy = y2;
-		(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+		(*pci->drw->pf_draw_line)(pci->ctx, &xp, &pt1, &pt2);
 
 		for (j = 1; j < 10; j++)
 		{
@@ -318,7 +318,7 @@ void draw_ruler(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t
 				pt1.fy = y1;
 				pt2.fx = x1 + j * MIN_SPAN;
 				pt2.fy = y2 + 2 * MIN_SPAN;
-				(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+				(*pci->drw->pf_draw_line)(pci->ctx, &xp, &pt1, &pt2);
 			}
 		}
 
@@ -328,7 +328,7 @@ void draw_ruler(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t
 		xr.fw = (float)(MAX_SPAN - 0.5);
 		xr.fh = (float)(MAX_SPAN / 2 + 0.5);
 		xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_NEAR);
-		(*pif->pf_draw_text)(pif->ctx, &xa, &xr, sz, -1);
+		(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, sz, -1);
 
 		if (i == hm - 1)
 		{
@@ -336,7 +336,7 @@ void draw_ruler(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t
 			pt1.fy = y1;
 			pt2.fx = x2;
 			pt2.fy = y2;
-			(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+			(*pci->drw->pf_draw_line)(pci->ctx, &xp, &pt1, &pt2);
 
 			xsprintf(sz, _T("%d"), i + 1);
 
@@ -345,7 +345,7 @@ void draw_ruler(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t
 			xr.fw = (float)(MAX_SPAN - 0.5);
 			xr.fh = (float)(MAX_SPAN / 2 + 0.5);
 			xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_NEAR);
-			(*pif->pf_draw_text)(pif->ctx, &xa, &xr, sz, -1);
+			(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, sz, -1);
 		}
 	}
 
@@ -368,7 +368,7 @@ void draw_ruler(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t
 		pt1.fy = y1;
 		pt2.fx = x1;
 		pt2.fy = y2;
-		(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+		(*pci->drw->pf_draw_line)(pci->ctx, &xp, &pt1, &pt2);
 
 		for (j = 1; j < 10; j++)
 		{
@@ -378,7 +378,7 @@ void draw_ruler(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t
 				pt1.fy = y1;
 				pt2.fx = x1 + j * MIN_SPAN;
 				pt2.fy = y2 - 2 * MIN_SPAN;
-				(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+				(*pci->drw->pf_draw_line)(pci->ctx, &xp, &pt1, &pt2);
 			}
 		}
 
@@ -388,7 +388,7 @@ void draw_ruler(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t
 		xr.fw = MAX_SPAN;
 		xr.fh = (float)(MAX_SPAN / 2 + 0.5);
 		xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_NEAR);
-		(*pif->pf_draw_text)(pif->ctx, &xa, &xr, sz, -1);
+		(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, sz, -1);
 
 		if (i == hm - 1)
 		{
@@ -396,7 +396,7 @@ void draw_ruler(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t
 			pt1.fy = y1;
 			pt2.fx = x2;
 			pt2.fy = y2;
-			(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+			(*pci->drw->pf_draw_line)(pci->ctx, &xp, &pt1, &pt2);
 
 			xsprintf(sz, _T("%d"), i + 1);
 
@@ -405,7 +405,7 @@ void draw_ruler(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t
 			xr.fw = MAX_SPAN;
 			xr.fh = (float)(MAX_SPAN / 2 + 0.5);
 			xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_NEAR);
-			(*pif->pf_draw_text)(pif->ctx, &xa, &xr, sz, -1);
+			(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, sz, -1);
 		}
 	}
 }

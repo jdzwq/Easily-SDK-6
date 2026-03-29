@@ -26,7 +26,7 @@ LICENSE.GPL3 for more details.
 
 #include "mcanv.h"
 
-#include "../xdgobj.h"
+#include "../xdgmgc.h"
 
 typedef struct _mgc_canvas_t{
 	handle_head head;

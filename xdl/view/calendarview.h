@@ -50,7 +50,7 @@ extern "C" {
 
 	EXP_API int calc_calendar_hint(link_t_ptr ptr, const xpoint_t* ppt, link_t_ptr* pilk);
 
-	EXP_API void draw_calendar(const drawing_interface* pcanv, link_t_ptr ptr);
+	EXP_API void draw_calendar(const drawing_interface* pci, link_t_ptr ptr);
 
 #ifdef	__cplusplus
 }

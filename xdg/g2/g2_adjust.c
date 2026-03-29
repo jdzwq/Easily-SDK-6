@@ -26,7 +26,7 @@ LICENSE.GPL3 for more details.
 
 #include "g2.h"
 
-#include "../xdgobj.h"
+#include "../xdgmgc.h"
 
 
 bool_t pt_inside(int x, int y, int x1, int y1, int x2, int y2)

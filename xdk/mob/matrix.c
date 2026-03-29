@@ -163,6 +163,24 @@ double matrix_get_value(matrix_t mat, int row, int col)
 	return pd[row * pmt->cols + col];
 }
 
+double matrix_get_value_safe(matrix_t mat, int row, int col, double def)
+{
+	matrix_context* pmt = TypePtrFromHead(matrix_context, mat);
+	double* pd;
+
+	XDK_ASSERT(pmt && pmt->head.tag == MEM_MATRIX);
+	XDK_ASSERT(pmt->data != NULL);
+
+	if(row >= 0 && row < pmt->rows && col >= 0 && col < pmt->cols)
+	{
+		pd = (double*)pmt->data;
+		return pd[row * pmt->cols + col];
+	}else
+	{
+		return def;
+	}
+}
+
 void matrix_set_bit(matrix_t mat, int i, int j, bool_t b)
 {
 	matrix_context* pmt = TypePtrFromHead(matrix_context, mat);

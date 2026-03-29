@@ -360,7 +360,8 @@ typedef struct _str_replace_t
 	bool_t b_none;
 }str_replace_t;
 
-#include "inf/msginf.h"
+#include "inf/ediinf.h"
+#include "inf/xduinf.h"
 
 #endif	/* _XDUDEF_H */
 

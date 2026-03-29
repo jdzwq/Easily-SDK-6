@@ -42,7 +42,8 @@ typedef struct _memo_scan_context{
 
 	int point;
 
-	const measure_interface* pmi;
+	const measure_interface* pmv;
+	const xfont_t* pxf;
 	const xface_t* pxa;
 }memo_scan_context;
 
@@ -197,7 +198,7 @@ int call_memo_next_page(void* ctx)
 int call_memo_next_words(void* ctx, tchar_t** ppch, xsize_t* pse, bool_t* pins, bool_t* pdel, bool_t* psel, bool_t* patom)
 {
 	memo_scan_context* pscan = (memo_scan_context*)ctx;
-	measure_interface* pif = pscan->pmi;
+	measure_interface* pmv = pscan->pmv;
 	int n;
 	xsize_t xs;
 
@@ -287,7 +288,7 @@ int call_memo_next_words(void* ctx, tchar_t** ppch, xsize_t* pse, bool_t* pins, 
 				}
 				else
 				{
-					(*pif->pf_measure_size)(pif->ctx, pscan->pch, n, &xs);
+					(*pmv->mea->pf_measure_size)(pmv->ctx, pscan->pxf, pscan->pch, n, &xs);
 
 					if (xs.w)
 						pse->w = xs.w;
@@ -334,7 +335,7 @@ int call_memo_next_words(void* ctx, tchar_t** ppch, xsize_t* pse, bool_t* pins, 
 int call_memo_insert_words(void* ctx, tchar_t* pch, xsize_t* pse)
 {
 	memo_scan_context* pscan = (memo_scan_context*)ctx;
-	measure_interface* pif = pscan->pmi;
+	measure_interface* pmv = pscan->pmv;
 	int n;
 	xsize_t xs = { 0 };
 	link_t_ptr plk;
@@ -403,7 +404,7 @@ int call_memo_insert_words(void* ctx, tchar_t* pch, xsize_t* pse)
 				}
 				else
 				{
-					(*pif->pf_measure_size)(pif->ctx, pch, n, &xs);
+					(*pmv->mea->pf_measure_size)(pmv->ctx, pscan->pxf, pch, n, &xs);
 
 					if (!xs.w)
 						xs.w = pse->w;
@@ -456,7 +457,7 @@ int call_memo_insert_words(void* ctx, tchar_t* pch, xsize_t* pse)
 		}
 		else
 		{
-			(*pif->pf_measure_size)(pif->ctx, pch, n, &xs);
+			(*pmv->mea->pf_measure_size)(pmv->ctx, pscan->pxf, pch, n, &xs);
 
 			if (!xs.w)
 				xs.w = pse->w;
@@ -505,7 +506,7 @@ int call_memo_insert_words(void* ctx, tchar_t* pch, xsize_t* pse)
 			}
 			else
 			{
-				(*pif->pf_measure_size)(pif->ctx, pch, n, &xs);
+				(*pmv->mea->pf_measure_size)(pmv->ctx, pscan->pxf, pch, n, &xs);
 
 				if (!xs.w)
 					xs.w = pse->w;
@@ -613,20 +614,26 @@ void call_memo_cur_object(void* ctx, void** pobj)
 void call_memo_object_attr(void* ctx, void* pobj, object_attr_t* pret)
 {
 	memo_scan_context* pscan = (memo_scan_context*)ctx;
+	link_t_ptr plk = (link_t_ptr)pobj;
 
-	if(pret->ret & OBJECT_ATTR_XFACE)
+	if(is_memo_doc(plk))
 	{
+		pret->ret |= OBJECT_ATTR_XFONT;
+		*(pret->ppxf) = pscan->pxf;
+
+		pret->ret |= OBJECT_ATTR_XFACE;
 		*(pret->ppxa) = pscan->pxa;
 	}
 }
 
-void scan_memo_text(link_t_ptr ptr, const measure_interface* pif, const viewbox_t* pvb, const xface_t* pxa, bool_t paged, PF_SCAN_TEXTOR_CALLBACK pf, void* pp)
+void scan_memo_text(link_t_ptr ptr, const measure_interface* pmv, const viewbox_t* pvb, const xfont_t* pxf, const xface_t* pxa, bool_t paged, PF_SCAN_TEXTOR_CALLBACK pf, void* pp)
 {
 	memo_scan_context ro = { 0 };
 	words_scan_interface it = { 0 };
 
 	ro.memo = ptr;
-	ro.pmi = pif;
+	ro.pmv = pmv;
+	ro.pxf = pxf;
 	ro.pxa = pxa;
 
 	it.ctx = (void*)&ro;
@@ -648,5 +655,5 @@ void scan_memo_text(link_t_ptr ptr, const measure_interface* pif, const viewbox_
 		call_memo_next_page((void*)&ro);
 	}
 
-	scan_object_text(pif, pvb, &it, pf, pp);
+	scan_object_text(pmv, pvb, &it, pf, pp);
 }

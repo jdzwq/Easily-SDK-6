@@ -26,7 +26,7 @@ LICENSE.GPL3 for more details.
 
 #include "gly.h"
 
-#include "../xdgobj.h"
+#include "../xdgmgc.h"
 
 glyph_info_t a_glyph_list[a_glyph_list_length] = {
 	{_T("EN-ARI-M-R-5"), _T("ASCII"), _T("Arial"), _T("medium"), _T("regular"), _T("5"), 8, 8, 8, 0, 0x20, 0x20, 223, 1, NULL, NULL },

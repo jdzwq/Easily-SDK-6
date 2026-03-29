@@ -27,7 +27,7 @@ LICENSE.GPL3 for more details.
 #include "scanner.h"
 
 
-void scan_object_text(const measure_interface* pif, const viewbox_t* pvb, words_scan_interface* pit, PF_SCAN_TEXTOR_CALLBACK pf, void* pp)
+void scan_object_text(const measure_interface* pmv, const viewbox_t* pvb, words_scan_interface* pit, PF_SCAN_TEXTOR_CALLBACK pf, void* pp)
 {
 	float line_rati = 1.0f;
 	int break_mode = 0;
@@ -64,10 +64,10 @@ void scan_object_text(const measure_interface* pif, const viewbox_t* pvb, words_
 	(*pit->pf_cur_object)(pit->ctx, &obj);
 
 	attr.ppxp = &pxp; attr.ppxb = &pxb; attr.ppxf = &pxf; attr.ppxa = &pxa;
-	attr.ret = OBJECT_ATTR_XFONT | OBJECT_ATTR_XFACE;
+	attr.ret = 0;
 	(*pit->pf_object_attr)(pit->ctx, obj, &attr);
 
-	if(pxa)
+	if((attr.ret & OBJECT_ATTR_XFACE) && pxa)
 	{
 		break_mode = parse_wrap(pxa);
 
@@ -80,12 +80,10 @@ void scan_object_text(const measure_interface* pif, const viewbox_t* pvb, words_
 			line_rati = 1.0;
 	}
 
-	if(pxf)
+	if((attr.ret & OBJECT_ATTR_XFONT) && pxf)
 	{
-		(*pif->pf_set_xfont)(pif->ctx, pxf);
+		(*pmv->mea->pf_measure_font)(pmv->ctx, pxf, &xs);
 	}
-
-	(*pif->pf_measure_font)(pif->ctx, &xs);
 
 	tm.char_w = xs.w;
 	tm.char_h = xs.h;

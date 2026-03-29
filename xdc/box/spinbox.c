@@ -108,6 +108,7 @@ void hand_spinbox_lbutton_up(widget_t widget, const xpoint_t* pxp)
 {
 	spinbox_delta_t* ptd = GETSPINBOXDELTA(widget);
 	measure_interface im = { 0 };
+	const xfont_t* pxf;
 
 	xpoint_t pt;
 	int hint;
@@ -117,9 +118,10 @@ void hand_spinbox_lbutton_up(widget_t widget, const xpoint_t* pxp)
 
 	widget_point_to_mm(widget, &pt);
 
+	pxf = widget_get_xfont_ptr(widget);
 	get_canvas_measure(widget_get_canvas(widget), &im);
 
-	hint = calc_spinbox_hint(&im, &pt);
+	hint = calc_spinbox_hint(&im, pxf, &pt);
 
 	if (hint == SPINBOX_HINT_PLUS)
 		spinbox_on_plus(widget);
@@ -160,8 +162,10 @@ void hand_spinbox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	drawing_interface ifv = {0};
 
 	const color_mod_t *pclrs;
+	const xfont_t* pxf;
 	xbrush_t xb;
 
+	pxf = widget_get_xfont_ptr(widget);
 	pclrs = widget_get_color_mode_ptr(widget);
 	default_xbrush(&xb);
 	format_xcolor(&(pclrs->clr_bkg), xb.color);
@@ -178,9 +182,9 @@ void hand_spinbox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	widget_get_canv_rect(widget, (canvbox_t*)&(ifc.rect));
 	ifc.pclrs = pclrs;
 
-	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
+	(*ifv.drw->pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
 
-	draw_spinbox(&ifc, ptd->cur);
+	draw_spinbox(&ifc, pxf, ptd->cur);
 
 	end_canvas_paint(canv, dc, pxr);
 }
@@ -211,12 +215,14 @@ void spinbox_popup_size(widget_t widget, xsize_t* pxs)
 {
 	spinbox_delta_t* ptd = GETSPINBOXDELTA(widget);
 	measure_interface im = { 0 };
+	const xfont_t* pxf;
 
 	XDK_ASSERT(ptd != NULL);
 
+	pxf = widget_get_xfont_ptr(widget);
 	get_canvas_measure(widget_get_canvas(widget), &im);
 
-	calc_spinbox_size(&im, pxs);
+	calc_spinbox_size(&im, pxf, pxs);
 
 	widget_size_to_pt(widget, pxs);
 

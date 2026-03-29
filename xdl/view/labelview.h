@@ -49,7 +49,7 @@ EXP_API bool_t calc_label_item_rect(link_t_ptr ptr, int page, link_t_ptr ilk, xr
 
 EXP_API int	calc_label_hint(const xpoint_t* ppt, link_t_ptr ptr, int page, link_t_ptr* pilk);
 
-EXP_API void draw_label(const drawing_interface* pcanv, link_t_ptr ptr, int page);
+EXP_API void draw_label(const drawing_interface* pci, link_t_ptr ptr, int page);
 
 #ifdef	__cplusplus
 }

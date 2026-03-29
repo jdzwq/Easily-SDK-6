@@ -67,7 +67,7 @@ int words_size(sword_t** sa)
 	return (*(int*)(sa + 1));
 }
 
-sword_t words_byte(sword_t** sa, int index)
+sword_t get_words(sword_t** sa, int index)
 {
 	sword_t* pa = *sa;
 	int size;
@@ -77,6 +77,19 @@ sword_t words_byte(sword_t** sa, int index)
 	XDK_ASSERT(index >= 0 && index < size);
 
 	return pa[index];
+}
+
+sword_t get_words_safe(sword_t** sa, int index, sword_t def)
+{
+	sword_t* pa = *sa;
+	int size;
+
+	size = (int)(*(int*)(sa + 1));
+
+	if(index >= 0 && index < size)
+		return pa[index];
+	else
+		return def;
 }
 
 int words_copy(sword_t** sa, int index, sword_t* buf, int max)

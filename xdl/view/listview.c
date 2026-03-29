@@ -262,7 +262,7 @@ int	calc_list_hint(const xpoint_t* ppt, link_t_ptr ptr, link_t_ptr plk, link_t_p
 	return LIST_HINT_NONE;
 }
 
-void draw_list_child(const drawing_interface* pif, link_t_ptr ptr, link_t_ptr plk)
+void draw_list_child(const drawing_interface* pci, link_t_ptr ptr, link_t_ptr plk)
 {
 	link_t_ptr nlk;
 	int pi, count;
@@ -280,16 +280,14 @@ void draw_list_child(const drawing_interface* pif, link_t_ptr ptr, link_t_ptr pl
 	bool_t b_print;
 	float px, py, pw, ph;
 
-	const canvbox_t* pbox = (canvbox_t*)(&pif->rect);
-
-	XDK_ASSERT( pif != NULL);
+	const canvbox_t* pbox = (canvbox_t*)(&pci->rect);
 
 	px = pbox->fx;
 	py = pbox->fy;
 	pw = pbox->fw;
 	ph = pbox->fh;
 
-	b_print = (pif->tag == _CANVAS_PRINTER) ? 1 : 0;
+	b_print = (pci->tag == _CANVAS_PRINTER) ? 1 : 0;
 
 	b_showcheck = get_list_showcheck(ptr);
 
@@ -315,20 +313,20 @@ void draw_list_child(const drawing_interface* pif, link_t_ptr ptr, link_t_ptr pl
 	parse_xfont_from_style(&xf, style);
 	if (!b_print)
 	{
-		format_xcolor(&pif->pclrs->clr_txt, xa.text_color);
-		(*pif->pf_set_xfont)(pif->ctx, &xf);
+		format_xcolor(&pci->pclrs->clr_txt, xa.text_color);
 	}
+	(*pci->drw->pf_set_xfont)(pci->ctx, &xf);
 
 	/*parse_xpen_from_style(&xp, style);
 	if (!b_print)
 	{
-		format_xcolor(&pif->pclrs->clr_frg, xp.color);
+		format_xcolor(&pci->pclrs->clr_frg, xp.color);
 	}*/
 
 	parse_xbrush_from_style(&xb, style);
 	if (!b_print)
 	{
-		format_xcolor(&pif->pclrs->clr_bkg, xb.color);
+		format_xcolor(&pci->pclrs->clr_bkg, xb.color);
 	}
 
 	xscpy(xp.color, xb.color);
@@ -337,12 +335,12 @@ void draw_list_child(const drawing_interface* pif, link_t_ptr ptr, link_t_ptr pl
 
 	if (!b_print)
 	{
-		format_xcolor(&pif->pclrs->clr_msk, xi.color);
+		format_xcolor(&pci->pclrs->clr_msk, xi.color);
 	}
 
 	if (!b_print)
 	{
-		xmem_copy((void*)&xc, (void*)&pif->pclrs->clr_ico, sizeof(xcolor_t));
+		xmem_copy((void*)&xc, (void*)&pci->pclrs->clr_ico, sizeof(xcolor_t));
 	}
 	else
 	{
@@ -360,7 +358,7 @@ void draw_list_child(const drawing_interface* pif, link_t_ptr ptr, link_t_ptr pl
 	xr_img.fh = xr.fh - ic;
 	ft_center_rect(&xr_img, DEF_LARGE_ICON, DEF_LARGE_ICON);
 
-	draw_gizmo(pif, &xc, &xr_img, GDI_ATTR_GIZMO_FOLDER);
+	draw_gizmo(pci, &xc, &xr_img, GDI_ATTR_GIZMO_FOLDER);
 
 	xr_text.fx = xr.fx;
 	xr_text.fy = xr.fy + xr.fh - ic;
@@ -368,7 +366,7 @@ void draw_list_child(const drawing_interface* pif, link_t_ptr ptr, link_t_ptr pl
 	xr_text.fh = ic;
 	xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_CENTER);
 
-	(*pif->pf_draw_text)(pif->ctx, &xa, &xr_text, _T(". ."), -1);
+	(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr_text, _T(". ."), -1);
 
 	count = 1;
 	nlk = get_list_first_child_item(plk);
@@ -395,7 +393,7 @@ void draw_list_child(const drawing_interface* pif, link_t_ptr ptr, link_t_ptr pl
 		xr_img.fh = xr.fh - ic;
 		ft_center_rect(&xr_img, DEF_LARGE_ICON, DEF_LARGE_ICON);
 
-		draw_gizmo(pif, &xc, &xr_img, GDI_ATTR_GIZMO_FOLDER);
+		draw_gizmo(pci, &xc, &xr_img, GDI_ATTR_GIZMO_FOLDER);
 
 		xr_img.fx = xr.fx;
 		xr_img.fy = xr.fy;
@@ -407,7 +405,7 @@ void draw_list_child(const drawing_interface* pif, link_t_ptr ptr, link_t_ptr pl
 
 		ft_center_rect(&xr_img, DEF_SMALL_ICON, DEF_SMALL_ICON);
 
-		draw_gizmo(pif, &xc, &xr_img, get_list_item_icon_ptr(nlk));
+		draw_gizmo(pci, &xc, &xr_img, get_list_item_icon_ptr(nlk));
 
 		if (b_showcheck)
 		{
@@ -420,11 +418,11 @@ void draw_list_child(const drawing_interface* pif, link_t_ptr ptr, link_t_ptr pl
 
 			if (get_list_item_checked(nlk))
 			{
-				draw_gizmo(pif, &xc, &xr_checkbox, GDI_ATTR_GIZMO_CHECKED);
+				draw_gizmo(pci, &xc, &xr_checkbox, GDI_ATTR_GIZMO_CHECKED);
 			}
 			else
 			{
-				draw_gizmo(pif, &xc, &xr_checkbox, GDI_ATTR_GIZMO_CHECKBOX);
+				draw_gizmo(pci, &xc, &xr_checkbox, GDI_ATTR_GIZMO_CHECKBOX);
 			}
 
 			xr_text.fx = xr.fx + ic;
@@ -441,7 +439,7 @@ void draw_list_child(const drawing_interface* pif, link_t_ptr ptr, link_t_ptr pl
 		}
 
 		xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_CENTER);
-		(*pif->pf_draw_text)(pif->ctx, &xa, &xr_text, get_list_item_title_ptr(nlk), -1);
+		(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr_text, get_list_item_title_ptr(nlk), -1);
 
 		count++;
 		nlk = get_list_next_sibling_item(nlk);

@@ -191,7 +191,7 @@ link_t_ptr get_grid_colset(link_t_ptr ptr)
 	plk = get_dom_first_child_node(ptr);
 	while(plk)
 	{
-		if(0 == xscmp(get_dom_node_name_ptr(plk),DOC_GRID_COLSET))
+		if(is_grid_colset(plk))
 			return plk;
 
 		plk = get_dom_next_sibling_node(plk);
@@ -207,7 +207,7 @@ link_t_ptr get_grid_rowset(link_t_ptr ptr)
 	plk = get_dom_first_child_node(ptr);
 	while(plk)
 	{
-		if(0 == xscmp(get_dom_node_name_ptr(plk),DOC_GRID_ROWSET))
+		if(is_grid_rowset(plk))
 			return plk;
 
 		plk = get_dom_next_sibling_node(plk);

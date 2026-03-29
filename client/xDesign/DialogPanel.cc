@@ -71,14 +71,14 @@ void DialogPanel_SetDirty(widget_t widget, bool_t bDirty)
 {
 	DialogPanelDelta* pdt = GETDIALOGPANELDELTA(widget);
 
-	dialogctrl_set_dirty(pdt->hDialog, bDirty);
+	designer_set_dirty(pdt->hDialog, bDirty);
 }
 
 bool_t DialogPanel_GetDirty(widget_t widget)
 {
 	DialogPanelDelta* pdt = GETDIALOGPANELDELTA(widget);
 
-	return dialogctrl_get_dirty(pdt->hDialog);
+	return designer_get_dirty(pdt->hDialog);
 }
 
 void DialogPanel_Switch(widget_t widget)
@@ -170,7 +170,7 @@ void DialogPanel_SelectAttr(widget_t widget, const tchar_t* attr_name, const tch
 	DialogPanelDelta* pdt = GETDIALOGPANELDELTA(widget);
 
 	LINKPTR ptrDialog = dialogctrl_fetch(pdt->hDialog);
-	LINKPTR ptrItem = dialogctrl_get_focus_item(pdt->hDialog);
+	LINKPTR ptrItem = (LINKPTR)designer_get_focused(pdt->hDialog);
 
 	tchar_t style[CSS_LEN + 1];
 
@@ -376,9 +376,7 @@ void DialogPanel_OnDelete(widget_t widget)
 
 	DialogPanel_SetDirty(widget, 1);
 
-	LINKPTR ptrItem = dialogctrl_get_focus_item(pdt->hDialog);
-
-	dialogctrl_set_focus_item(pdt->hDialog, NULL);
+	LINKPTR ptrItem = (LINKPTR)designer_get_focused(pdt->hDialog);
 
 	bool_t bRedraw = 0;
 	LINKPTR nlk,flk = get_dialog_next_item(ptrDialog, LINK_FIRST);
@@ -444,13 +442,13 @@ void DialogPanel_OnCSSProper(widget_t widget)
 
 	LINKPTR ptrProper = create_proper_doc();
 
-	LINKPTR ptr = dialogctrl_fetch(pdt->hDialog);
-	LINKPTR flk = dialogctrl_get_focus_item(pdt->hDialog);
+	LINKPTR ptrDialog = dialogctrl_fetch(pdt->hDialog);
+	LINKPTR ptrItem = (LINKPTR)designer_get_focused(pdt->hDialog);
 
-	if (flk)
-		properbag_parse_stylesheet(ptrProper, get_dialog_item_style_ptr(flk));
+	if (ptrItem)
+		properbag_parse_stylesheet(ptrProper, get_dialog_item_style_ptr(ptrItem));
 	else
-		properbag_parse_stylesheet(ptrProper, get_dialog_style_ptr(ptr));
+		properbag_parse_stylesheet(ptrProper, get_dialog_style_ptr(ptrDialog));
 
 	widget_t hProperDlg = properdlg_create(_T("绘制样式"), ptrProper, g_hMain);
 
@@ -463,14 +461,14 @@ void DialogPanel_OnCSSProper(widget_t widget)
 		tchar_t sz_style[CSS_LEN + 1] = { 0 };
 		properbag_format_stylesheet(ptrProper, sz_style, CSS_LEN);
 
-		if (flk)
+		if (ptrItem)
 		{
-			set_dialog_item_style(flk, sz_style);
-			dialogctrl_redraw_item(pdt->hDialog, flk);
+			set_dialog_item_style(ptrItem, sz_style);
+			dialogctrl_redraw_item(pdt->hDialog, ptrItem);
 		}
 		else
 		{
-			set_dialog_style(ptr, sz_style);
+			set_dialog_style(ptrDialog, sz_style);
 			dialogctrl_redraw(pdt->hDialog);
 		}
 
@@ -560,7 +558,7 @@ void DialogPanel_OnAlignNear(widget_t widget)
 	DialogPanelDelta* pdt = GETDIALOGPANELDELTA(widget);
 
 	LINKPTR ptrDialog = dialogctrl_fetch(pdt->hDialog);
-	LINKPTR ptrItem = dialogctrl_get_focus_item(pdt->hDialog);
+	LINKPTR ptrItem = (LINKPTR)designer_get_focused(pdt->hDialog);
 
 	if (!ptrItem)
 		return;
@@ -589,7 +587,7 @@ void DialogPanel_OnAlignCenter(widget_t widget)
 	DialogPanelDelta* pdt = GETDIALOGPANELDELTA(widget);
 
 	LINKPTR ptrDialog = dialogctrl_fetch(pdt->hDialog);
-	LINKPTR ptrItem = dialogctrl_get_focus_item(pdt->hDialog);
+	LINKPTR ptrItem = (LINKPTR)designer_get_focused(pdt->hDialog);
 
 	if (!ptrItem)
 		return;
@@ -618,7 +616,7 @@ void DialogPanel_OnAlignFar(widget_t widget)
 	DialogPanelDelta* pdt = GETDIALOGPANELDELTA(widget);
 
 	LINKPTR ptrDialog = dialogctrl_fetch(pdt->hDialog);
-	LINKPTR ptrItem = dialogctrl_get_focus_item(pdt->hDialog);
+	LINKPTR ptrItem = (LINKPTR)designer_get_focused(pdt->hDialog);
 
 	if (!ptrItem)
 		return;
@@ -647,7 +645,7 @@ void DialogPanel_OnSizeHeight(widget_t widget)
 	DialogPanelDelta* pdt = GETDIALOGPANELDELTA(widget);
 
 	LINKPTR ptrDialog = dialogctrl_fetch(pdt->hDialog);
-	LINKPTR ptrItem = dialogctrl_get_focus_item(pdt->hDialog);
+	LINKPTR ptrItem = (LINKPTR)designer_get_focused(pdt->hDialog);
 
 	if (!ptrItem)
 		return;
@@ -676,7 +674,7 @@ void DialogPanel_OnSizeWidth(widget_t widget)
 	DialogPanelDelta* pdt = GETDIALOGPANELDELTA(widget);
 
 	LINKPTR ptrDialog = dialogctrl_fetch(pdt->hDialog);
-	LINKPTR ptrItem = dialogctrl_get_focus_item(pdt->hDialog);
+	LINKPTR ptrItem = (LINKPTR)designer_get_focused(pdt->hDialog);
 
 	if (!ptrItem)
 		return;
@@ -705,7 +703,7 @@ void DialogPanel_OnSizeHorz(widget_t widget)
 	DialogPanelDelta* pdt = GETDIALOGPANELDELTA(widget);
 
 	LINKPTR ptrDialog = dialogctrl_fetch(pdt->hDialog);
-	LINKPTR ptrItem = dialogctrl_get_focus_item(pdt->hDialog);
+	LINKPTR ptrItem = (LINKPTR)designer_get_focused(pdt->hDialog);
 
 	int count = get_dialog_item_selected_count(ptrDialog);
 	if (count <= 1)
@@ -758,7 +756,7 @@ void DialogPanel_OnSizeVert(widget_t widget)
 	DialogPanelDelta* pdt = GETDIALOGPANELDELTA(widget);
 
 	LINKPTR ptrDialog = dialogctrl_fetch(pdt->hDialog);
-	LINKPTR ptrItem = dialogctrl_get_focus_item(pdt->hDialog);
+	LINKPTR ptrItem = (LINKPTR)designer_get_focused(pdt->hDialog);
 
 	int count = get_dialog_item_selected_count(ptrDialog);
 	if (count <= 1)
@@ -811,7 +809,7 @@ void DialogPanel_OnSendBack(widget_t widget)
 	DialogPanelDelta* pdt = GETDIALOGPANELDELTA(widget);
 
 	LINKPTR ptrDialog = dialogctrl_fetch(pdt->hDialog);
-	LINKPTR ptrItem = dialogctrl_get_focus_item(pdt->hDialog);
+	LINKPTR ptrItem = (LINKPTR)designer_get_focused(pdt->hDialog);
 
 	if (!ptrItem)
 		return;
@@ -826,7 +824,6 @@ void DialogPanel_OnSendBack(widget_t widget)
 
 	dialogctrl_redraw(pdt->hDialog);
 }
-
 
 void DialogPanel_OnStaticBox(widget_t widget)
 {
@@ -1167,7 +1164,7 @@ void DialogPanel_OnAttributes(widget_t widget)
 	properctrl_redraw(pdt->hProper);
 
 	LINKPTR ptrDialog = dialogctrl_fetch(pdt->hDialog);
-	LINKPTR ptrItem = dialogctrl_get_focus_item(pdt->hDialog);
+	LINKPTR ptrItem = (LINKPTR)designer_get_focused(pdt->hDialog);
 
 	if (ptrItem)
 		properbag_write_dialog_item_attributes(ptrProper, ptrItem);
@@ -1188,7 +1185,7 @@ void DialogPanel_OnStyleSheet(widget_t widget)
 	properctrl_redraw(pdt->hProper);
 
 	LINKPTR ptrDialog = dialogctrl_fetch(pdt->hDialog);
-	LINKPTR ptrItem = dialogctrl_get_focus_item(pdt->hDialog);
+	LINKPTR ptrItem = (LINKPTR)designer_get_focused(pdt->hDialog);
 
 	if (ptrItem)
 		properbag_parse_stylesheet(ptrProper, get_dialog_item_style_ptr(ptrItem));
@@ -1209,7 +1206,7 @@ void DialogPanel_Proper_OnEntityUpdate(widget_t widget, NOTICE_PROPER* pnp)
 	int n_id = xstol(get_title_item_id_ptr(ilk));
 
 	LINKPTR ptrDialog = dialogctrl_fetch(pdt->hDialog);
-	LINKPTR ptrItem = dialogctrl_get_focus_item(pdt->hDialog);
+	LINKPTR ptrItem = (LINKPTR)designer_get_focused(pdt->hDialog);
 
 	tchar_t sz_style[CSS_LEN + 1] = { 0 };
 
@@ -1258,14 +1255,14 @@ void DialogPanel_Title_OnItemChanged(widget_t widget, NOTICE_TITLE* pnt)
 
 	int n_id = xstol(get_title_item_id_ptr(pnt->item));
 
-	widget_post_command(widget, n_id, 0, NULL);
+	widget_post_command(widget, 0, n_id, NULL);
 }
 
-void DialogPanel_Dialog_OnRBClick(widget_t widget, NOTICE_DIALOG* pnf)
+void DialogPanel_Dialog_OnRBClick(widget_t widget, NOTICE_DESIGN* pnf)
 {
 	DialogPanelDelta* pdt = GETDIALOGPANELDELTA(widget);
 
-	if (!pnf->item)
+	if (!pnf->object)
 		return;
 
 	xpoint_t* ppt = (xpoint_t*)pnf->data;
@@ -1314,7 +1311,7 @@ void DialogPanel_Dialog_OnRBClick(widget_t widget, NOTICE_DIALOG* pnf)
 	destroy_menu_doc(ptrMenu);
 }
 
-void DialogPanel_Dialog_OnLBClick(widget_t widget, NOTICE_DIALOG* pnf)
+void DialogPanel_Dialog_OnLBClick(widget_t widget, NOTICE_DESIGN* pnf)
 {
 	DialogPanelDelta* pdt = GETDIALOGPANELDELTA(widget);
 
@@ -1323,10 +1320,10 @@ void DialogPanel_Dialog_OnLBClick(widget_t widget, NOTICE_DIALOG* pnf)
 		return;
 
 	int n_id = xstol(get_title_item_id_ptr(ptrItem));
-	widget_post_command(widget, n_id, 0, NULL);
+	widget_post_command(widget, 0, n_id, NULL);
 }
 
-void DialogPanel_Dialog_OnItemSize(widget_t widget, NOTICE_DIALOG* pnf)
+void DialogPanel_Dialog_OnSized(widget_t widget, NOTICE_DESIGN* pnf)
 {
 	DialogPanelDelta* pdt = GETDIALOGPANELDELTA(widget);
 
@@ -1335,10 +1332,10 @@ void DialogPanel_Dialog_OnItemSize(widget_t widget, NOTICE_DIALOG* pnf)
 		return;
 
 	int n_id = xstol(get_title_item_id_ptr(ptrItem));
-	widget_post_command(widget, n_id, 0, NULL);
+	widget_post_command(widget, 0, n_id, NULL);
 }
 
-void DialogPanel_Dialog_OnItemMove(widget_t widget, NOTICE_DIALOG* pnf)
+void DialogPanel_Dialog_OnMoved(widget_t widget, NOTICE_DESIGN* pnf)
 {
 	DialogPanelDelta* pdt = GETDIALOGPANELDELTA(widget);
 
@@ -1347,7 +1344,7 @@ void DialogPanel_Dialog_OnItemMove(widget_t widget, NOTICE_DIALOG* pnf)
 		return;
 
 	int n_id = xstol(get_title_item_id_ptr(ptrItem));
-	widget_post_command(widget, n_id, 0, NULL);
+	widget_post_command(widget, 0, n_id, NULL);
 }
 
 
@@ -1388,6 +1385,8 @@ int DialogPanel_OnCreate(widget_t widget, void* data)
 	pdt->hDialog = dialogctrl_create(_T("DialogPanel"), WD_STYLE_CONTROL | WD_STYLE_PAGING, &xr, widget);
 	widget_set_user_id(pdt->hDialog, IDC_DIALOGPANEL_DIALOG);
 	widget_set_owner(pdt->hDialog, widget);
+
+	hand_designer_create(pdt->hDialog, &desg_dialogctrl);
 
 	set_split_item_delta(ilkDialog, pdt->hDialog);
 	widget_show(pdt->hDialog, WS_SHOW_NORMAL);
@@ -1460,6 +1459,8 @@ void DialogPanel_OnDestroy(widget_t widget)
 
 	if (widget_is_valid(pdt->hDialog))
 	{
+		hand_designer_destroy(pdt->hDialog);
+
 		LINKPTR ptrDialog = dialogctrl_detach(pdt->hDialog);
 		if (ptrDialog)
 			destroy_dialog_doc(ptrDialog);
@@ -1999,24 +2000,20 @@ void DialogPanel_OnNotice(widget_t widget, LPNOTICE phdr)
 
 	if (phdr->user == IDC_DIALOGPANEL_DIALOG)
 	{
-		NOTICE_DIALOG* pnf = (NOTICE_DIALOG*)phdr;
+		NOTICE_DESIGN* pnf = (NOTICE_DESIGN*)phdr;
 		switch (pnf->code)
 		{
-		case NC_DIALOGCALCED:
-			break;
-		case NC_DIALOGITEMCALCED:
-			break;
-		case NC_DIALOGLBCLK:
-			DialogPanel_Dialog_OnLBClick(widget, pnf);
-			break;
-		case NC_DIALOGRBCLK:
+		case NC_OBJECT_RBCLICK:
 			DialogPanel_Dialog_OnRBClick(widget, pnf);
 			break;
-		case NC_DIALOGITEMSIZED:
-			DialogPanel_Dialog_OnItemSize(widget, pnf);
+		case NC_OBJECT_LBCLICK:
+			DialogPanel_Dialog_OnLBClick(widget, pnf);
 			break;
-		case NC_DIALOGITEMDROP:
-			DialogPanel_Dialog_OnItemMove(widget, pnf);
+		case NC_OBJECT_SIZED:
+			DialogPanel_Dialog_OnSized(widget, pnf);
+			break;
+		case NC_OBJECT_DROP:
+			DialogPanel_Dialog_OnMoved(widget, pnf);
 			break;
 		}
 	}

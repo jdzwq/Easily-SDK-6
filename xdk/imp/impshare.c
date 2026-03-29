@@ -258,15 +258,13 @@ ONERROR:
 #ifndef _OS_WINDOWS
 void xshare_test_srv()
 {
-    if_share_t if_share = { 0 };
-    
-    xdk_impl_share(&if_share);
+    if_share_t* pif_share = PROCESS_SHARE_INTERFACE;
     
 	tchar_t fname[1024];
 	get_runpath(0, fname, 1024);
 	xscat(fname,_T("/demo.txt"));
 
-    res_file_t fh = (*if_share.pf_share_srv)(_T("mytest"),fname,0,0,1024);
+    res_file_t fh = (*pif_share->pf_share_srv)(_T("mytest"),fname,0,0,1024);
     if(fh == INVALID_FILE)
 	{
         printf("parent error : %s\n", strerror(errno));
@@ -286,9 +284,7 @@ void xshare_test_srv()
     
     if(pid == 0)
     {
-		xdk_impl_share(&if_share);
-
-		res_file_t ch = (*if_share.pf_share_cli)(_T("mytest"), 1024, FILE_OPEN_READ);
+		res_file_t ch = (*pif_share->pf_share_cli)(_T("mytest"), 1024, FILE_OPEN_READ);
 
 		if (ch == INVALID_FILE)
 		{
@@ -298,12 +294,12 @@ void xshare_test_srv()
 		{
 			memset((void *)buf, 0, 4096);
 			dw = 0;
-			if (!(*if_share.pf_share_read)(ch, 0, buf, 4096, &dw))
+			if (!(*pif_share->pf_share_read)(ch, 0, buf, 4096, &dw))
 				printf("child error : %s\n", strerror(errno));
 			else
 				printf("child read mytest: %s\n", buf);
 
-			(*if_share.pf_share_close)(_T("mytest"), ch);
+			(*pif_share->pf_share_close)(_T("mytest"), ch);
 			exit(0);
 		}
 	}
@@ -312,7 +308,7 @@ void xshare_test_srv()
         waitpid(pid, &status, 0);
 		printf("Child exited with status: %d\n", WEXITSTATUS(status));
 
-        (*if_share.pf_share_close)(_T("mytest"), fh);
+        (*pif_share->pf_share_close)(_T("mytest"), fh);
     }
 }
 #endif //_OS_WINDOWS

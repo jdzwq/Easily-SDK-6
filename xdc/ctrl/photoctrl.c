@@ -59,7 +59,9 @@ typedef struct _photo_delta_t{
 #define SETPHOTODELTA(ph,ptd) widget_set_user_delta(ph,(vword_t)ptd)
 
 int noti_photo_owner(widget_t widget, unsigned int code, link_t_ptr arti, void* data, visual_t rdc);
-/*******************************************************************************************************/
+
+/***********************************************************************/
+
 static void _photoctrl_done(widget_t widget)
 {
 	photo_delta_t* ptd = GETPHOTODELTA(widget);
@@ -274,6 +276,8 @@ static bool_t _photoctrl_paste(widget_t widget)
 	return 1;
 }
 
+/***********************************************************************/
+
 static void _photoctrl_arti_rect(widget_t widget, link_t_ptr ilk, xrect_t* pxr)
 {
 	photo_delta_t* ptd = GETPHOTODELTA(widget);
@@ -316,9 +320,9 @@ static bitmap_t _photoctrl_merge_anno(widget_t widget)
 	xr.w = xs.w;
 	xr.h = xs.h;
 
-	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
+	(*ifv.drw->pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
 
-	(*ifv.pf_draw_bitmap)(ifv.ctx, ptd->bmp, RECTPOINT(&xr));
+	(*ifv.drw->pf_draw_bitmap)(ifv.ctx, ptd->bmp, RECTPOINT(&xr));
 
 	ilk = get_anno_next_arti(ptd->anno, LINK_FIRST);
 	while (ilk)
@@ -1081,13 +1085,13 @@ void hand_photo_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	widget_get_canv_rect(widget, (canvbox_t*)&(ifc.rect));
 	ifc.pclrs = pclrs;
 	
-	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
+	(*ifv.drw->pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
 
 	widget_get_view_rect(widget, (viewbox_t*)&xr);
 
 	if (ptd->bmp)
 	{
-		(*ifv.pf_draw_bitmap)(ifv.ctx, ptd->bmp, RECTPOINT(&xr));
+		(*ifv.drw->pf_draw_bitmap)(ifv.ctx, ptd->bmp, RECTPOINT(&xr));
 	}
 
 	noti_photo_owner(widget, NC_PHOTOFACEDRAW, NULL, (void*)&xr, rdc);

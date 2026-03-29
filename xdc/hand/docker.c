@@ -338,7 +338,7 @@ void hand_docker_paint(docker_t* ptd, visual_t dc, const xrect_t* pxr)
 
 	get_visual_interface(rdc, &ifv);
 
-	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr_cli);
+	(*ifv.drw->pf_draw_rect)(ifv.ctx, NULL, &xb, &xr_cli);
 
 	span = DOCKER_SPLIT_SPAN;
 	top = bottom = left = right = 0;
@@ -359,7 +359,7 @@ void hand_docker_paint(docker_t* ptd, visual_t dc, const xrect_t* pxr)
 				xr_bar.y = xr.y;
 				xr_bar.h = xr.h;
 
-				(*ifv.pf_gradient_rect)(ifv.ctx, &xc_brim, &xc_core, GDI_ATTR_GRADIENT_HORZ, &xr_bar);
+				(*ifv.drw->pf_gradient_rect)(ifv.ctx, &xc_brim, &xc_core, GDI_ATTR_GRADIENT_HORZ, &xr_bar);
 			}
 
 			if ((ptd->dock[i].style & WS_DOCK_DYNA))
@@ -381,7 +381,7 @@ void hand_docker_paint(docker_t* ptd, visual_t dc, const xrect_t* pxr)
 				xr_bar.y = xr.y + xr.h;
 				xr_bar.h = span;
 
-				(*ifv.pf_gradient_rect)(ifv.ctx, &xc_brim, &xc_core, GDI_ATTR_GRADIENT_VERT, &xr_bar);
+				(*ifv.drw->pf_gradient_rect)(ifv.ctx, &xc_brim, &xc_core, GDI_ATTR_GRADIENT_VERT, &xr_bar);
 			}
 
 			if ((ptd->dock[i].style & WS_DOCK_DYNA))
@@ -403,7 +403,7 @@ void hand_docker_paint(docker_t* ptd, visual_t dc, const xrect_t* pxr)
 				xr_bar.y = xr.y;
 				xr_bar.h = xr.h;
 
-				(*ifv.pf_gradient_rect)(ifv.ctx, &xc_brim, &xc_core, GDI_ATTR_GRADIENT_HORZ, &xr_bar);
+				(*ifv.drw->pf_gradient_rect)(ifv.ctx, &xc_brim, &xc_core, GDI_ATTR_GRADIENT_HORZ, &xr_bar);
 			}
 
 			if ((ptd->dock[i].style & WS_DOCK_DYNA))
@@ -425,7 +425,7 @@ void hand_docker_paint(docker_t* ptd, visual_t dc, const xrect_t* pxr)
 				xr_bar.y = xr.y - span;
 				xr_bar.h = span;
 
-				(*ifv.pf_gradient_rect)(ifv.ctx, &xc_brim, &xc_core, GDI_ATTR_GRADIENT_VERT, &xr_bar);
+				(*ifv.drw->pf_gradient_rect)(ifv.ctx, &xc_brim, &xc_core, GDI_ATTR_GRADIENT_VERT, &xr_bar);
 			}
 
 			if ((ptd->dock[i].style & WS_DOCK_DYNA))

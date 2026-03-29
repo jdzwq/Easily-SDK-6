@@ -47,6 +47,7 @@ typedef struct _images_delta_t{
 #define SETIMAGESDELTA(widget,ptd) widget_set_user_delta(widget,(vword_t)ptd)
 
 /******************************************************************************************************/
+
 static bool_t _imagesctrl_copy(widget_t widget)
 {
 	images_delta_t* ptd = GETIMAGESDELTA(widget);
@@ -139,6 +140,8 @@ static bool_t _imagesctrl_paste(widget_t widget)
 
 	return 1;
 }
+
+/******************************************************************************************************/
 
 static void _imagesctrl_item_rect(widget_t widget, link_t_ptr ilk, xrect_t* pxr)
 {
@@ -241,6 +244,7 @@ void _imagesctrl_ensure_visible(widget_t widget)
 }
 
 /************************************control event**********************************************/
+
 int noti_images_owner(widget_t widget, unsigned int code, link_t_ptr image, link_t_ptr ilk, void* data)
 {
 	images_delta_t* ptd = GETIMAGESDELTA(widget);
@@ -871,10 +875,13 @@ void hand_images_rbutton_up(widget_t widget, const xpoint_t* pxp)
 void hand_images_keydown(widget_t widget, dword_t ks, int nKey)
 {
 	images_delta_t* ptd = GETIMAGESDELTA(widget);
+	bool_t b_ctl;
 
 	if (!ptd->images)
 		return;
 
+	b_ctl = ((ks & KS_WITH_CONTROL) || (ks & KS_WITH_CMD))? 1 : 0;
+	
 	switch (nKey)
 	{
 	case KEY_ENTER:
@@ -903,23 +910,20 @@ void hand_images_keydown(widget_t widget, dword_t ks, int nKey)
 	case KEY_END:
 		imagesctrl_tabskip(widget,TABORDER_END);
 		break;
-	case _T('c'):
-	case _T('C'):
-		if (widget_key_state(widget, KS_WITH_CONTROL))
+	case KEY_COPY:
+		if (b_ctl)
 		{
 			_imagesctrl_copy(widget);
 		}
 		break;
-	case _T('x'):
-	case _T('X'):
-		if (widget_key_state(widget, KS_WITH_CONTROL))
+	case KEY_CUT:
+		if (b_ctl)
 		{
 			_imagesctrl_cut(widget);
 		}
 		break;
-	case _T('v'):
-	case _T('V'):
-		if (widget_key_state(widget, KS_WITH_CONTROL))
+	case KEY_PASTE:
+		if (b_ctl)
 		{
 			_imagesctrl_paste(widget);
 		}
@@ -1005,7 +1009,7 @@ void hand_images_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	widget_get_canv_rect(widget, (canvbox_t*)&(ifc.rect));
 	ifc.pclrs = pclrs;
 
-	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
+	(*ifv.drw->pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
 
 	draw_images(&ifc, ptd->images);
 

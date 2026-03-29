@@ -26,7 +26,7 @@ LICENSE.GPL3 for more details.
 
 #include "g2.h"
 
-#include "../xdgobj.h"
+#include "../xdgmgc.h"
 
 void pt_world_to_screen(xpoint_t pt_origin, xpoint_t* ppt_points, int count_points)
 {

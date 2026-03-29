@@ -253,7 +253,7 @@ typedef struct _handle_head *stream_t;
 #include "net/oauthattr.h"
 
 #include "inf/loginf.h"
-#include "inf/platinf.h"
+#include "inf/xdkinf.h"
 #include "inf/bioinf.h"
 #include "inf/fioinf.h"
 #include "inf/uioinf.h"

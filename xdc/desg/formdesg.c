@@ -34,18 +34,26 @@ LICENSE.GPL3 for more details.
 
 /***********************************************interface********************************************************/
 
-static void _designer_get_object_point(widget_t wt, void* obj, xpoint_t* ppt)
+static void _formctrl_get_point_scale(widget_t wt, int* pcx, int* pcy)
+{
+	*pcx = *pcy = 1;
+}
+
+static void _formctrl_get_object_point(widget_t wt, void* obj, xpoint_t* ppt)
 {
 	link_t_ptr form = formctrl_fetch(wt);
 	link_t_ptr flk = (link_t_ptr)obj;
 
-	ppt->fx = get_field_x(flk);
-	ppt->fy = get_field_y(flk);
+	if (is_form_field(form, flk))
+	{
+		ppt->fx = get_field_x(flk);
+		ppt->fy = get_field_y(flk);
 
-	widget_point_to_pt(wt, ppt);
+		widget_point_to_pt(wt, ppt);
+	}
 }
 
-static void _designer_set_object_point(widget_t wt, void* obj, const xpoint_t* ppt)
+static bool_t _formctrl_set_object_point(widget_t wt, void* obj, const xpoint_t* ppt)
 {
 	link_t_ptr form = formctrl_fetch(wt);
 	link_t_ptr flk = (link_t_ptr)obj;
@@ -56,22 +64,34 @@ static void _designer_set_object_point(widget_t wt, void* obj, const xpoint_t* p
 
 	widget_point_to_mm(wt, &pt);
 
-	set_field_x(flk, pt.fx);
-	set_field_y(flk, pt.fy);
+	if (is_form_field(form, flk))
+	{
+		set_field_x(flk, pt.fx);
+		set_field_y(flk, pt.fy);
+
+		return bool_true;
+	}
+	else
+	{
+		return bool_false;
+	}
 }
 
-static void _designer_get_object_size(widget_t wt, void* obj, xsize_t* pxs)
+static void _formctrl_get_object_size(widget_t wt, void* obj, xsize_t* pxs)
 {
 	link_t_ptr form = formctrl_fetch(wt);
 	link_t_ptr flk = (link_t_ptr)obj;
 
-	pxs->fw = get_field_width(flk);
-	pxs->fh = get_field_height(flk);
+	if (is_form_field(form, flk))
+	{
+		pxs->fw = get_field_width(flk);
+		pxs->fh = get_field_height(flk);
 
-	widget_size_to_pt(wt, pxs);
+		widget_size_to_pt(wt, pxs);
+	}
 }
 
-static void _designer_set_object_size(widget_t wt, void* obj, const xsize_t* pxs)
+static bool_t _formctrl_set_object_size(widget_t wt, void* obj, const xsize_t* pxs)
 {
 	link_t_ptr form = formctrl_fetch(wt);
 	link_t_ptr flk = (link_t_ptr)obj;
@@ -82,24 +102,36 @@ static void _designer_set_object_size(widget_t wt, void* obj, const xsize_t* pxs
 
 	widget_size_to_mm(wt, &xs);
 
-	set_field_width(flk, xs.fw);
-	set_field_height(flk, xs.fh);
+	if (is_form_field(form, flk))
+	{
+		set_field_width(flk, xs.fw);
+		set_field_height(flk, xs.fh);
+
+		return bool_true;
+	}
+	else
+	{
+		return bool_false;
+	}
 }
 
-static void _designer_get_object_rect(widget_t wt, void* obj, xrect_t* pxr)
+static void _formctrl_get_object_rect(widget_t wt, void* obj, xrect_t* pxr)
 {
 	link_t_ptr form = formctrl_fetch(wt);
 	link_t_ptr flk = (link_t_ptr)obj;
 
-	pxr->fx = get_field_x(flk);
-	pxr->fy = get_field_y(flk);
-	pxr->fw = get_field_width(flk);
-	pxr->fh = get_field_height(flk);
+	if (is_form_field(form, flk))
+	{
+		pxr->fx = get_field_x(flk);
+		pxr->fy = get_field_y(flk);
+		pxr->fw = get_field_width(flk);
+		pxr->fh = get_field_height(flk);
 
-	widget_rect_to_pt(wt, pxr);
+		widget_rect_to_pt(wt, pxr);
+	}
 }
 
-static void _designer_set_object_rect(widget_t wt, void* obj, const xrect_t* pxr)
+static bool_t _formctrl_set_object_rect(widget_t wt, void* obj, const xrect_t* pxr)
 {
 	link_t_ptr form = formctrl_fetch(wt);
 	link_t_ptr flk = (link_t_ptr)obj;
@@ -112,33 +144,55 @@ static void _designer_set_object_rect(widget_t wt, void* obj, const xrect_t* pxr
 
 	widget_rect_to_mm(wt, &xr);
 
-	set_field_x(flk, xr.fx);
-	set_field_y(flk, xr.fy);
-	set_field_width(flk, xr.fw);
-	set_field_height(flk, xr.fh);
+	if (is_form_field(form, flk))
+	{
+		set_field_x(flk, xr.fx);
+		set_field_y(flk, xr.fy);
+		set_field_width(flk, xr.fw);
+		set_field_height(flk, xr.fh);
+
+		return bool_true;
+	}
+	else
+	{
+		return bool_false;
+	}
 }
 
-static int _designer_get_object_attrs(widget_t wt, void* obj, tchar_t* buf, int max)
+static int _formctrl_get_object_attrs(widget_t wt, void* obj, tchar_t* buf, int max)
 {
 	return dom_node_format_attributes((link_t_ptr)obj, buf, max);
 }
 
-static void _designer_set_object_attrs(widget_t wt, void* obj, const tchar_t* buf, int len)
+static bool_t _formctrl_set_object_attrs(widget_t wt, void* obj, const tchar_t* buf, int len)
 {
+	tchar_t token[KEY_LEN] = {0};
+
+	split_attributes_title(buf, len, token, KEY_LEN);
+
+	if(!is_form_field_class(token)) return bool_false;
+
 	dom_node_parse_attributes((link_t_ptr)obj, buf, len);
-}
-
-static bool_t _designer_delete_object(widget_t wt, void* obj)
-{
-	link_t_ptr form = formctrl_fetch(wt);
-	link_t_ptr flk = (link_t_ptr)obj;
-
-	delete_field(flk);
 
 	return bool_true;
 }
 
-static void* _designer_insert_object(widget_t wt, const tchar_t* attrs, int len)
+static bool_t _formctrl_delete_object(widget_t wt, void* obj)
+{
+	link_t_ptr form = formctrl_fetch(wt);
+	link_t_ptr flk = (link_t_ptr)obj;
+
+	if (is_form_field(form, flk))
+	{
+		delete_field(flk);
+		return bool_true;
+	}else
+	{
+		return bool_false;
+	}
+}
+
+static void* _formctrl_insert_object(widget_t wt, const tchar_t* attrs, int len)
 {
 	link_t_ptr form = formctrl_fetch(wt);
 	tchar_t type[KEY_LEN] = {0};
@@ -146,7 +200,7 @@ static void* _designer_insert_object(widget_t wt, const tchar_t* attrs, int len)
 	link_t_ptr flk;
 
 	klen = split_attributes_title(attrs, len, type, KEY_LEN);
-	if(!klen) return NULL;
+	if(!is_form_field_class(type)) return NULL;
 	
 	flk = insert_field(form, type);
 	if(flk)
@@ -157,23 +211,29 @@ static void* _designer_insert_object(widget_t wt, const tchar_t* attrs, int len)
 	return (void*)flk;
 }
 
-static bool_t _designer_get_object_selected(widget_t wt, void* obj)
+static bool_t _formctrl_get_object_selected(widget_t wt, void* obj)
 {
 	link_t_ptr form = formctrl_fetch(wt);
 	link_t_ptr flk = (link_t_ptr)obj;
 
-	return get_field_selected(flk);
+	if (is_form_field(form, flk))
+		return get_field_selected(flk);
+	else
+		return bool_false;
 }
 
-static void _designer_set_object_selected(widget_t wt, void* obj, bool_t b)
+static void _formctrl_set_object_selected(widget_t wt, void* obj, bool_t b)
 {
 	link_t_ptr form = formctrl_fetch(wt);
 	link_t_ptr flk = (link_t_ptr)obj;
 
-	set_field_selected(flk, b);
+	if (is_form_field(form, flk))
+	{
+		set_field_selected(flk, b);
+	}
 }
 
-static void _designer_all_object_selected(widget_t wt, bool_t b)
+static void _formctrl_all_object_selected(widget_t wt, bool_t b)
 {
 	link_t_ptr form = formctrl_fetch(wt);
 	link_t_ptr flk;
@@ -186,15 +246,22 @@ static void _designer_all_object_selected(widget_t wt, bool_t b)
 	}
 }
 
-static void* _designer_get_next_object(widget_t wt, void* obj)
+static void* _formctrl_get_next_group(widget_t wt, void* grp)
+{
+	link_t_ptr form = formctrl_fetch(wt);
+
+	return (void*)((grp == LINK_FIRST)? form : NULL);
+}
+
+static void* _formctrl_get_next_object(widget_t wt, void* grp, void* obj)
 {
 	link_t_ptr form = formctrl_fetch(wt);
 	link_t_ptr flk = (link_t_ptr)obj;
 
-	return (void*)get_next_field(form, flk);
+	return (grp == form)? (void*)get_next_field(form, flk) : NULL;
 }
 
-static void _designer_get_group_rect(widget_t wt, int gid, xrect_t* pxr)
+static void _formctrl_get_group_rect(widget_t wt, int gid, xrect_t* pxr)
 {
 	link_t_ptr form = formctrl_fetch(wt);
 	link_t_ptr flk;
@@ -237,7 +304,7 @@ static void _designer_get_group_rect(widget_t wt, int gid, xrect_t* pxr)
 	widget_rect_to_pt(wt, pxr);
 }
 
-static dword_t _designer_retrive_document(widget_t wt, byte_t* buf, dword_t max)
+static dword_t _formctrl_retrive_document(widget_t wt, byte_t* buf, dword_t max)
 {
 	link_t_ptr form = formctrl_fetch(wt);
 
@@ -248,52 +315,60 @@ static dword_t _designer_retrive_document(widget_t wt, byte_t* buf, dword_t max)
 #endif
 }
 
-static void _designer_restore_document(widget_t wt, const byte_t* buf, dword_t len)
+static bool_t _formctrl_restore_document(widget_t wt, const byte_t* buf, dword_t len)
 {
 	link_t_ptr form = formctrl_detach(wt);
-
+	bool_t b;
 #ifdef _UNICODE
-	parse_dom_doc_from_bytes(form, buf, len, DEF_UCS);
+	b = parse_dom_doc_from_bytes(form, buf, len, DEF_UCS);
 #else
-	parse_dom_doc_from_bytes(form, buf, len, DEF_MBS);
+	b = parse_dom_doc_from_bytes(form, buf, len, DEF_MBS);
 #endif
 
 	formctrl_attach(wt, form);
+
+	return b;
 }
 
-static void _designer_render_document(widget_t wt, drawing_interface* pif)
+static void _formctrl_render_document(widget_t wt, drawing_interface* pci)
 {
 	link_t_ptr form = formctrl_fetch(wt);
 
 	set_form_design(form, 1);
-	draw_form_page(pif, form, 1);
+	draw_form_page(pci, form, 1);
 	set_form_design(form, 0);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
 
 designer_interface desg_formctrl = {
-	.pf_get_obj_point = _designer_get_object_point,
-	.pf_set_obj_point = _designer_set_object_point,
-	.pf_get_obj_size = _designer_get_object_size,
-	.pf_set_obj_size = _designer_set_object_size,
-	.pf_get_obj_rect = _designer_get_object_rect,
-	.pf_set_obj_rect = _designer_set_object_rect,
+	.with_ruler = bool_true,
+	.with_opera = WITH_SIZE_WIDTH | WITH_SIZE_HEIGHT | WITH_DRAG_FOCUSED | WITH_DRAG_SELECTED | WITH_MOUSE_GROUPED,
+	
+	.pf_get_point_scale = _formctrl_get_point_scale,
+	
+	.pf_get_obj_point = _formctrl_get_object_point,
+	.pf_set_obj_point = _formctrl_set_object_point,
+	.pf_get_obj_size = _formctrl_get_object_size,
+	.pf_set_obj_size = _formctrl_set_object_size,
+	.pf_get_obj_rect = _formctrl_get_object_rect,
+	.pf_set_obj_rect = _formctrl_set_object_rect,
 
-	.pf_get_obj_attrs = _designer_get_object_attrs,
-	.pf_set_obj_attrs = _designer_set_object_attrs,
+	.pf_get_obj_attrs = _formctrl_get_object_attrs,
+	.pf_set_obj_attrs = _formctrl_set_object_attrs,
 
-	.pf_get_obj_selected = _designer_get_object_selected,
-	.pf_set_obj_selected = _designer_set_object_selected,
-	.pf_all_obj_selected = _designer_all_object_selected,
+	.pf_get_obj_selected = _formctrl_get_object_selected,
+	.pf_set_obj_selected = _formctrl_set_object_selected,
+	.pf_all_obj_selected = _formctrl_all_object_selected,
 
-	.pf_get_next_obj = _designer_get_next_object,
+	.pf_get_next_grp = _formctrl_get_next_group,
+	.pf_get_next_obj = _formctrl_get_next_object,
 
-	.pf_ins_obj = _designer_insert_object,
-	.pf_del_obj = _designer_delete_object,
+	.pf_ins_obj = _formctrl_insert_object,
+	.pf_del_obj = _formctrl_delete_object,
 
-	.pf_retrive_doc = _designer_retrive_document,
-	.pf_restore_doc = _designer_restore_document,
-	.pf_render_doc = _designer_render_document
+	.pf_retrive_doc = _formctrl_retrive_document,
+	.pf_restore_doc = _formctrl_restore_document,
+	.pf_render_doc = _formctrl_render_document
 };
 

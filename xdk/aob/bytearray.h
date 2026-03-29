@@ -70,7 +70,8 @@ EXP_API int bytes_size(byte_t** sa);
 @INPUT short max: the size of buffer.
 @RETURN short: return characters copyed.
 */
-EXP_API byte_t bytes_byte(byte_t** sa, int index);
+EXP_API byte_t get_byte(byte_t** sa, int index);
+EXP_API byte_t get_byte_safe(byte_t** sa, int index, byte_t def);
 
 EXP_API int bytes_copy(byte_t** sa, int index, byte_t* buf, int max);
 

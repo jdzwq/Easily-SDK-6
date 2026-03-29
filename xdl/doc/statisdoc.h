@@ -456,6 +456,9 @@ LICENSE.GPL3 for more details.
 */
 #define get_xax_state(xlk)								(get_dom_node_mask(xlk) & 0x0000000F)
 
+#define is_statis_xaxset(nlk)					((0 == xscmp(get_dom_node_name_ptr(nlk),DOC_STATIS_XAXSET))? 1: 0)
+#define is_statis_yaxset(nlk)					((0 == xscmp(get_dom_node_name_ptr(nlk),DOC_STATIS_YAXSET))? 1: 0)
+#define is_statis_gaxset(nlk)					((0 == xscmp(get_dom_node_name_ptr(nlk),DOC_STATIS_GAXSET))? 1: 0)
 
 #ifdef	__cplusplus
 extern "C" {

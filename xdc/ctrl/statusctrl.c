@@ -41,7 +41,8 @@ typedef struct _status_delta_t{
 #define GETSTATUSDELTA(ph) 		(status_delta_t*)widget_get_user_delta(ph)
 #define SETSTATUSDELTA(ph,ptd)	 widget_set_user_delta(ph,(vword_t)ptd)
 
-/**************************************************************************************************/
+/***********************************************************************/
+
 static void _statusctrl_title_rect(widget_t widget, xrect_t* pxr)
 {
 	status_delta_t* ptd = GETSTATUSDELTA(widget);
@@ -80,7 +81,8 @@ static void _statusctrl_reset_page(widget_t widget)
 	widget_reset_paging(widget, pw, ph, pw, ph, 0, 0);
 }
 
-/**************************************************************************************************/
+/***********************************************************************/
+
 int noti_status_owner(widget_t widget, unsigned int code, link_t_ptr status, link_t_ptr ilk, void* data)
 {
 	status_delta_t* ptd = GETSTATUSDELTA(widget);
@@ -173,7 +175,7 @@ void noti_status_item_changed(widget_t widget, link_t_ptr plk)
 	widget_erase(widget, &xr);
 }
 
-/****************************************************************************************/
+/***********************************************************************/
 
 int hand_status_create(widget_t widget, void* data)
 {
@@ -417,7 +419,7 @@ void hand_status_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	parse_xcolor(&xc_core, xb.color);
 	lighten_xcolor(&xc_brim, DEF_SOFT_DARKEN);
 
-	(*ifv.pf_gradient_rect)(ifv.ctx, &xc_brim, &xc_core, GDI_ATTR_GRADIENT_VERT, &xr);
+	(*ifv.drw->pf_gradient_rect)(ifv.ctx, &xc_brim, &xc_core, GDI_ATTR_GRADIENT_VERT, &xr);
 
 	draw_status(&ifc, ptd->status);
 
@@ -434,17 +436,17 @@ void hand_status_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 		draw_progress(&ifc, &xc, &xr_step, ptd->n_step);
 
 		xr.fx += xr_step.fw;
-		(ifc.pf_draw_text)(ifc.ctx, &xa, &xr, get_status_title_ptr(ptd->status), -1);
+		(ifc.drw->pf_draw_text)(ifc.ctx, &xa, &xr, get_status_title_ptr(ptd->status), -1);
 	}
 	else
 	{
-		(ifc.pf_draw_text)(ifc.ctx, &xa, &xr, get_status_title_ptr(ptd->status), -1);
+		(ifc.drw->pf_draw_text)(ifc.ctx, &xa, &xr, get_status_title_ptr(ptd->status), -1);
 	}
 
 	end_canvas_paint(canv, dc, pxr);
 }
 
-/*******************************************************************************************/
+/***********************************************************************/
 
 widget_t statusctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, widget_t wparent)
 {

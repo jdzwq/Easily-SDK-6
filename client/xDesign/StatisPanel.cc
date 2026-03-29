@@ -71,15 +71,28 @@ bool_t	StatisPanel_SaveFile(widget_t widget, const tchar_t* szFile);
 bool_t	StatisPanel_OpenFile(widget_t widget, const tchar_t* szFile);
 
 /*****************************************************************************************************/
+void StatisPanel_SetDirty(widget_t widget, bool_t bDirty)
+{
+	StatisPanelDelta* pdt = GETSTATISPANELDELTA(widget);
+
+	designer_set_dirty(pdt->hStatis, bDirty);
+}
+
+bool_t StatisPanel_GetDirty(widget_t widget)
+{
+	StatisPanelDelta* pdt = GETSTATISPANELDELTA(widget);
+
+	return designer_get_dirty(pdt->hStatis);
+}
 
 void StatisPanel_Switch(widget_t widget)
 {
 	StatisPanelDelta* pdt = GETSTATISPANELDELTA(widget);
 
-	if (!statisctrl_get_dirty(pdt->hStatis))
+	if (!StatisPanel_GetDirty(widget))
 		return;
 
-	dword_t rt = ShowMsg(MSGBTN_YES | MSGBTN_NO | MSGICO_TIP, _T("文件尚未保存，是否保存文件？"));
+	dword_t rt = ShowMsg(MSGBTN_YES | MSGBTN_NO | MSGBTN_CANCEL | MSGICO_TIP, _T("文件尚未保存，是否保存文件？"));
 
 	switch (rt)
 	{
@@ -87,7 +100,7 @@ void StatisPanel_Switch(widget_t widget)
 		widget_send_command(widget, 0, IDA_FILE_SAVE, NULL);
 		break;
 	case MSGBTN_NO:
-		statisctrl_set_dirty(pdt->hStatis, 0);
+		StatisPanel_SetDirty(widget, 0);
 		break;
 	}
 }
@@ -155,7 +168,7 @@ bool_t StatisPanel_SaveFile(widget_t widget, const tchar_t* szFile)
 		return 0;
 	}
 
-	statisctrl_set_dirty(pdt->hStatis, 0);
+	StatisPanel_SetDirty(widget, 0);
 
 	xscpy(pdt->szFile, szFile);
 
@@ -196,7 +209,7 @@ void StatisPanel_OnSave(widget_t widget)
 
 	if (StatisPanel_SaveFile(widget, szFile))
 	{
-		statisctrl_set_dirty(pdt->hStatis, 0);
+		StatisPanel_SetDirty(widget, 0);
 	}
 }
 
@@ -448,35 +461,19 @@ void StatisPanel_OnDelete(widget_t widget)
 	LINKPTR ptrStatis = statisctrl_fetch(pdt->hStatis);
 	XDK_ASSERT(ptrStatis);
 
-	LINKPTR ptrGax = statisctrl_get_focus_gax(pdt->hStatis);
-	if (ptrGax)
+	LINKPTR ptrObj = (LINKPTR)designer_get_focused(pdt->hStatis);
+
+	if (ptrObj && is_statis_gax(ptrStatis, ptrObj))
 	{
-		delete_gax(ptrGax);
+		delete_gax(ptrObj);
+		statisctrl_redraw(pdt->hStatis, 1);
+		return;
+	}else if (ptrObj && is_statis_yax(ptrStatis, ptrObj))
+	{
+		delete_yax(ptrObj);
 		statisctrl_redraw(pdt->hStatis, 1);
 		return;
 	}
-
-	statisctrl_set_focus_coor(pdt->hStatis, NULL, NULL);
-
-	bool_t bRedraw = 0;
-	LINKPTR nlk,ylk = get_next_yax(ptrStatis, LINK_FIRST);
-	while (ylk)
-	{
-		nlk = get_next_yax(ptrStatis, ylk);
-		if (get_yax_selected(ylk))
-		{
-			delete_yax(ylk);
-			ylk = nlk;
-
-			bRedraw = 1;
-			continue;
-		}
-
-		ylk = nlk;
-	}
-
-	if (bRedraw)
-		statisctrl_redraw(pdt->hStatis, 1);
 }
 
 void StatisPanel_OnCopy(widget_t widget)
@@ -518,22 +515,16 @@ void StatisPanel_OnSelectAttr(widget_t widget, const tchar_t* attr_name, const t
 	StatisPanelDelta* pdt = GETSTATISPANELDELTA(widget);
 
 	LINKPTR ptrStatis = statisctrl_fetch(pdt->hStatis);
-	LINKPTR ptrYax = statisctrl_get_focus_yax(pdt->hStatis);
+	LINKPTR ptrObj = (LINKPTR)designer_get_focused(pdt->hStatis);
 
-	statisctrl_set_dirty(pdt->hStatis, 1);
+	StatisPanel_SetDirty(widget, 1);
 
 	tchar_t style[CSS_LEN + 1] = { 0 };
 
-	LINKPTR ylk = get_next_yax(ptrStatis, LINK_FIRST);
-	while (ylk)
+	if (ptrObj && is_statis_yax(ptrStatis, ptrObj))
 	{
-		if (ylk == ptrYax || get_yax_selected(ylk))
-		{
-			//write_style_attr(get_yax_style_ptr(ylk), -1, attr_name, -1, attr_val, -1, style, CSS_LEN);
-			//set_yax_style(ylk, style);
-		}
-
-		ylk = get_next_yax(ptrStatis, ylk);
+		//write_style_attr(get_yax_style_ptr(ptrObj), -1, attr_name, -1, attr_val, -1, style, CSS_LEN);
+		//set_yax_style(ptrObj, style);
 	}
 
 	statisctrl_redraw(pdt->hStatis, 1);
@@ -621,7 +612,7 @@ void StatisPanel_OnInsertGax(widget_t widget)
 
 	LINKPTR ptrStatis = statisctrl_fetch(pdt->hStatis);
 
-	statisctrl_set_dirty(pdt->hStatis, 1);
+	StatisPanel_SetDirty(widget, 1);
 
 	LINKPTR glk = insert_gax(ptrStatis, LINK_LAST);
 
@@ -633,11 +624,16 @@ void StatisPanel_OnInsertYax(widget_t widget)
 	StatisPanelDelta* pdt = GETSTATISPANELDELTA(widget);
 
 	LINKPTR ptrStatis = statisctrl_fetch(pdt->hStatis);
-	LINKPTR ptrPos = statisctrl_get_focus_yax(pdt->hStatis);
+	LINKPTR ptrObj = (LINKPTR)designer_get_focused(pdt->hStatis);
 
-	statisctrl_set_dirty(pdt->hStatis, 1);
+	StatisPanel_SetDirty(widget, 1);
 
-	ptrPos = (ptrPos)? get_prev_yax(ptrStatis, ptrPos) : LINK_LAST;
+	LINKPTR ptrPos;
+
+	if(ptrObj && is_statis_yax(ptrStatis, ptrObj))
+		ptrPos = (ptrObj)? get_prev_yax(ptrStatis, ptrObj) : LINK_LAST;
+	else
+		ptrPos = LINK_LAST;
 	
 	LINKPTR ylk = insert_yax(ptrStatis,ptrPos);
 
@@ -695,17 +691,25 @@ void StatisPanel_OnInsertXax(widget_t widget)
 void StatisPanel_OnDeleteXax(widget_t widget)
 {
 	StatisPanelDelta* pdt = GETSTATISPANELDELTA(widget);
+	LINKPTR ptrStatis = statisctrl_fetch(pdt->hStatis);
 
-	LINKPTR ptrXax = statisctrl_get_focus_xax(pdt->hStatis);
-	if (ptrXax)
+	LINKPTR ptrObj = (LINKPTR)designer_get_focused(pdt->hStatis);
+	if (ptrObj && is_statis_xax(ptrStatis, ptrObj))
+	{
+		designer_set_focused(pdt->hStatis, NULL);
+
+		delete_xax(ptrObj);
 		statisctrl_redraw(pdt->hStatis, 1);
+	}
 }
 
 void StatisPanel_OnEraseXaxs(widget_t widget)
 {
 	StatisPanelDelta* pdt = GETSTATISPANELDELTA(widget);
-
 	LINKPTR ptrStatis = statisctrl_fetch(pdt->hStatis);
+
+	designer_set_focused(pdt->hStatis, NULL);
+
 	clear_statis_xaxset(ptrStatis);
 	statisctrl_redraw(pdt->hStatis, 1);
 }
@@ -739,13 +743,12 @@ void StatisPanel_OnAttributes(widget_t widget)
 	properctrl_redraw(pdt->hProper);
 
 	LINKPTR ptrStatis = statisctrl_fetch(pdt->hStatis);
-	LINKPTR ptrGax = statisctrl_get_focus_gax(pdt->hStatis);
-	LINKPTR ptrYax = statisctrl_get_focus_yax(pdt->hStatis);
+	LINKPTR ptrObj = (LINKPTR)designer_get_focused(pdt->hStatis);
 
-	if (ptrGax)
-		properbag_write_gax_attributes(ptrProper, ptrGax);
-	else if (ptrYax)
-		properbag_write_yax_attributes(ptrProper, ptrYax);
+	if (ptrObj && is_statis_gax(ptrStatis, ptrObj))
+		properbag_write_gax_attributes(ptrProper, ptrObj);
+	else if (ptrObj && is_statis_yax(ptrStatis, ptrObj))
+		properbag_write_yax_attributes(ptrProper, ptrObj);
 	else
 		properbag_write_statis_attributes(ptrProper, ptrStatis);
 
@@ -787,10 +790,10 @@ void StatisPanel_Title_OnItemChanged(widget_t widget, NOTICE_TITLE* pnt)
 
 	int n_id = xstol(get_title_item_id_ptr(pnt->item));
 
-	widget_post_command(widget, n_id, 0, NULL);
+	widget_post_command(widget, 0, n_id, NULL);
 }
 
-void StatisPanel_Statis_OnLBClick(widget_t widget, NOTICE_STATIS* pnf)
+void StatisPanel_Statis_OnLBClick(widget_t widget, NOTICE_DESIGN* pnf)
 {
 	StatisPanelDelta* pdt = GETSTATISPANELDELTA(widget);
 
@@ -799,10 +802,10 @@ void StatisPanel_Statis_OnLBClick(widget_t widget, NOTICE_STATIS* pnf)
 		return;
 
 	int n_id = xstol(get_title_item_id_ptr(ptrItem));
-	widget_post_command(widget, n_id, 0, NULL);
+	widget_post_command(widget, 0, n_id, NULL);
 }
 
-void StatisPanel_Statis_OnYaxSize(widget_t widget, NOTICE_STATIS* pnf)
+void StatisPanel_Statis_OnSized(widget_t widget, NOTICE_DESIGN* pnf)
 {
 	StatisPanelDelta* pdt = GETSTATISPANELDELTA(widget);
 
@@ -811,10 +814,10 @@ void StatisPanel_Statis_OnYaxSize(widget_t widget, NOTICE_STATIS* pnf)
 		return;
 
 	int n_id = xstol(get_title_item_id_ptr(ptrItem));
-	widget_post_command(widget, n_id, 0, NULL);
+	widget_post_command(widget, 0, n_id, NULL);
 }
 
-void StatisPanel_Statis_OnYaxMove(widget_t widget, NOTICE_STATIS* pnf)
+void StatisPanel_Statis_OnMoved(widget_t widget, NOTICE_DESIGN* pnf)
 {
 	StatisPanelDelta* pdt = GETSTATISPANELDELTA(widget);
 
@@ -831,25 +834,24 @@ void StatisPanel_Proper_OnEntityUpdate(widget_t widget, NOTICE_PROPER* pnp)
 	int n_id = xstol(get_title_item_id_ptr(ptrItem));
 
 	LINKPTR ptrStatis = statisctrl_fetch(pdt->hStatis);
-	LINKPTR ptrYax = statisctrl_get_focus_yax(pdt->hStatis);
-	LINKPTR ptrGax = statisctrl_get_focus_gax(pdt->hStatis);
+	LINKPTR ptrObj = (LINKPTR)designer_get_focused(pdt->hStatis);
 
 	tchar_t sz_style[CSS_LEN + 1] = { 0 };
 
-	if (ptrGax)
+	if (ptrObj && is_statis_gax(ptrStatis, ptrObj))
 	{
 		if (n_id == IDA_ATTRIBUTES)
 		{
-			properbag_read_gax_attributes(pnp->proper, ptrGax);
+			properbag_read_gax_attributes(pnp->proper, ptrObj);
 		}
 
 		statisctrl_redraw(pdt->hStatis, 1);
 	}
-	else if (ptrYax)
+	else if (ptrObj && is_statis_yax(ptrStatis, ptrObj))
 	{
 		if (n_id == IDA_ATTRIBUTES)
 		{
-			properbag_read_yax_attributes(pnp->proper, ptrYax);
+			properbag_read_yax_attributes(pnp->proper, ptrObj);
 		}
 		
 		statisctrl_redraw(pdt->hStatis, 1);
@@ -904,6 +906,8 @@ int StatisPanel_OnCreate(widget_t widget, void* data)
 
 	widget_set_user_id(pdt->hStatis, IDC_STATISPANEL_STATIS);
 	widget_set_owner(pdt->hStatis, widget);
+
+	hand_designer_create(pdt->hStatis, &desg_statisctrl);
 
 	set_split_item_delta(ilkStatis, pdt->hStatis);
 	widget_show(pdt->hStatis, WS_SHOW_NORMAL);
@@ -976,6 +980,8 @@ void StatisPanel_OnDestroy(widget_t widget)
 
 	if (widget_is_valid(pdt->hStatis))
 	{
+		hand_designer_destroy(pdt->hStatis);
+
 		LINKPTR ptrStatis = statisctrl_detach(pdt->hStatis);
 		if (ptrStatis)
 			destroy_statis_doc(ptrStatis);
@@ -1012,7 +1018,7 @@ int StatisPanel_OnClose(widget_t widget)
 
 	StatisPanel_Switch(widget);
 
-	return (statisctrl_get_dirty(pdt->hStatis)) ? 1 : 0;
+	return (StatisPanel_GetDirty(widget)) ? 1 : 0;
 }
 
 void StatisPanel_OnSetFocus(widget_t widget, widget_t hOrg)
@@ -1266,7 +1272,7 @@ void StatisPanel_OnParentCommand(widget_t widget, int code, vword_t data)
 	}
 	else if (code == COMMAND_REMOVE)
 	{
-		statisctrl_set_dirty(pdt->hStatis, 0);
+		StatisPanel_SetDirty(widget, 0);
 	}
 }
 
@@ -1426,20 +1432,17 @@ void StatisPanel_OnNotice(widget_t widget, LPNOTICE phdr)
 
 	if (phdr->user == IDC_STATISPANEL_STATIS)
 	{
-		NOTICE_STATIS* pnf = (NOTICE_STATIS*)phdr;
+		NOTICE_DESIGN* pnf = (NOTICE_DESIGN*)phdr;
 		switch (pnf->code)
 		{
-		case NC_STATISCALCED:
-			break;
-		case NC_YAXCALCED:
-			break;
-		case NC_XAXCALCED:
-			break;
-		case NC_STATISLBCLK:
+		case NC_OBJECT_LBCLICK:
 			StatisPanel_Statis_OnLBClick(widget, pnf);
 			break;
-		case NC_YAXDRAG:
-			StatisPanel_Statis_OnYaxMove(widget, pnf);
+		case NC_OBJECT_SIZED:
+			StatisPanel_Statis_OnSized(widget, pnf);
+			break;
+		case NC_OBJECT_DROP:
+			StatisPanel_Statis_OnMoved(widget, pnf);
 			break;
 		}
 	}
@@ -1451,7 +1454,7 @@ void StatisPanel_OnNotice(widget_t widget, LPNOTICE phdr)
 		case NC_PROPERCALCED:
 			break;
 		case NC_ENTITYCOMMIT:
-			statisctrl_set_dirty(pdt->hStatis, 1);
+			StatisPanel_SetDirty(widget, 1);
 			break;
 		case NC_ENTITYUPDATE:
 			StatisPanel_Proper_OnEntityUpdate(widget, pnp);

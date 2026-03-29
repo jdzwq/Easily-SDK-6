@@ -164,7 +164,7 @@ int calc_calendar_hint(link_t_ptr ptr, const xpoint_t* ppt, link_t_ptr* pilk)
 	return nHit;
 }
 
-void draw_calendar(const drawing_interface* pif, link_t_ptr ptr)
+void draw_calendar(const drawing_interface* pci, link_t_ptr ptr)
 {
 	xrect_t xr;
 	xbrush_t xb = { 0 };
@@ -177,7 +177,7 @@ void draw_calendar(const drawing_interface* pif, link_t_ptr ptr)
 	const tchar_t* style;
 	bool_t b_print;
 
-	const canvbox_t* pbox = (canvbox_t*)(&pif->rect);
+	const canvbox_t* pbox = (canvbox_t*)(&pci->rect);
 
 	float pw, ph, ic, iw, ih, th;
 	tchar_t sz_token[DATE_LEN + 1];
@@ -193,7 +193,7 @@ void draw_calendar(const drawing_interface* pif, link_t_ptr ptr)
 	ih = (get_calendar_height(ptr) - th) / CALENDAR_ROW;
 	ic = iw / 2;
 
-	b_print = (pif->tag == _CANVAS_PRINTER) ? 1 : 0;
+	b_print = (pci->tag == _CANVAS_PRINTER) ? 1 : 0;
 
 	default_xfont(&xf);
 	default_xface(&xa);
@@ -206,20 +206,19 @@ void draw_calendar(const drawing_interface* pif, link_t_ptr ptr)
 	parse_xface_from_style(&xa, style);
 	if (!b_print)
 	{
-		format_xcolor(&pif->pclrs->clr_txt, xa.text_color);
-		(*pif->pf_set_xfont)(pif->ctx, &xf);
+		format_xcolor(&pci->pclrs->clr_txt, xa.text_color);
 	}
 
 	parse_xbrush_from_style(&xb, style);
 	if (!b_print)
 	{
-		format_xcolor(&pif->pclrs->clr_bkg, xb.color);
+		format_xcolor(&pci->pclrs->clr_bkg, xb.color);
 	}
 
 	/*parse_xpen_from_style(&xp, style);
 	if (!b_print)
 	{
-		format_xcolor(&pif->pclrs->clr_frg, xp.color);
+		format_xcolor(&pci->pclrs->clr_frg, xp.color);
 	}*/
 
 	xscpy(xp.color, xb.color);
@@ -228,12 +227,14 @@ void draw_calendar(const drawing_interface* pif, link_t_ptr ptr)
 
 	if (!b_print)
 	{
-		xmem_copy((void*)&xc, (void*)&pif->pclrs->clr_ico, sizeof(xcolor_t));
+		xmem_copy((void*)&xc, (void*)&pci->pclrs->clr_ico, sizeof(xcolor_t));
 	}
 	else
 	{
 		parse_xcolor(&xc, xa.text_color);
 	}
+
+	(*pci->drw->pf_set_xfont)(pci->ctx, &xf);
 
 	//title
 	ltoxs(xstol(xf.size) + 2, xf.size, INT_LEN);
@@ -247,7 +248,7 @@ void draw_calendar(const drawing_interface* pif, link_t_ptr ptr)
 	parse_date(&dt, get_calendar_today_ptr(ptr));
 	xsprintf(sz_token, _T("%d年%02d月"), dt.year, dt.mon);
 
-	(*pif->pf_draw_text)(pif->ctx, &xa, &xr, sz_token, -1);
+	(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, sz_token, -1);
 
 	xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_CENTER);
 
@@ -260,20 +261,20 @@ void draw_calendar(const drawing_interface* pif, link_t_ptr ptr)
 	xr.fh = CALENDAR_BAR_SPAN;
 	ft_offset_rect(&xr, pbox->fx, pbox->fy);
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
-	(*pif->pf_draw_text)(pif->ctx, &xa, &xr, _T("日"), -1);
+	(*pci->drw->pf_draw_rect)(pci->ctx, &xp, NULL, &xr);
+	(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, _T("日"), -1);
 
 	xr.fx += ic;
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
-	(*pif->pf_draw_text)(pif->ctx, &xa, &xr, _T("周"), -1);
+	(*pci->drw->pf_draw_rect)(pci->ctx, &xp, NULL, &xr);
+	(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, _T("周"), -1);
 
 	xr.fx += ic;
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
-	(*pif->pf_draw_text)(pif->ctx, &xa, &xr, _T("月"), -1);
+	(*pci->drw->pf_draw_rect)(pci->ctx, &xp, NULL, &xr);
+	(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, _T("月"), -1);
 
 	xr.fx += ic;
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
-	(*pif->pf_draw_text)(pif->ctx, &xa, &xr, _T("年"), -1);
+	(*pci->drw->pf_draw_rect)(pci->ctx, &xp, NULL, &xr);
+	(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, _T("年"), -1);
 
 	xr.fx = pw - 2 * ic;
 	xr.fy = th / 2 - CALENDAR_BAR_SPAN;
@@ -281,9 +282,9 @@ void draw_calendar(const drawing_interface* pif, link_t_ptr ptr)
 	xr.fh = CALENDAR_BAR_SPAN;
 	ft_offset_rect(&xr, pbox->fx, pbox->fy);
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pci->drw->pf_draw_rect)(pci->ctx, &xp, NULL, &xr);
 	ft_center_rect(&xr, DEF_SMALL_ICON, DEF_SMALL_ICON);
-	draw_gizmo(pif, &xc, &xr, GDI_ATTR_GIZMO_PREV);
+	draw_gizmo(pci, &xc, &xr, GDI_ATTR_GIZMO_PREV);
 
 	xr.fx = pw - ic / 2;
 	xr.fy = th / 2 - CALENDAR_BAR_SPAN;
@@ -291,9 +292,9 @@ void draw_calendar(const drawing_interface* pif, link_t_ptr ptr)
 	xr.fh = CALENDAR_BAR_SPAN;
 	ft_offset_rect(&xr, pbox->fx, pbox->fy);
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pci->drw->pf_draw_rect)(pci->ctx, &xp, NULL, &xr);
 	ft_center_rect(&xr, DEF_SMALL_ICON, DEF_SMALL_ICON);
-	draw_gizmo(pif, &xc, &xr, GDI_ATTR_GIZMO_NEXT);
+	draw_gizmo(pci, &xc, &xr, GDI_ATTR_GIZMO_NEXT);
 
 	xr.fx = pw - ic / 2 * 3;
 	xr.fy = th / 2 - CALENDAR_BAR_SPAN;
@@ -301,8 +302,8 @@ void draw_calendar(const drawing_interface* pif, link_t_ptr ptr)
 	xr.fh = CALENDAR_BAR_SPAN;
 	ft_offset_rect(&xr, pbox->fx, pbox->fy);
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
-	(*pif->pf_draw_text)(pif->ctx, &xa, &xr, _T("今天"), -1);
+	(*pci->drw->pf_draw_rect)(pci->ctx, &xp, NULL, &xr);
+	(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, _T("今天"), -1);
 
 	//week bar
 	xr.fx = 0;
@@ -311,7 +312,7 @@ void draw_calendar(const drawing_interface* pif, link_t_ptr ptr)
 	xr.fh = CALENDAR_BAR_SPAN;
 	ft_offset_rect(&xr, pbox->fx, pbox->fy);
 
-	(*pif->pf_draw_text)(pif->ctx, &xa, &xr, _T("周日"), -1);
+	(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, _T("周日"), -1);
 
 	xr.fx += iw;
 	xr.fy = th - CALENDAR_BAR_SPAN;
@@ -319,7 +320,7 @@ void draw_calendar(const drawing_interface* pif, link_t_ptr ptr)
 	xr.fh = CALENDAR_BAR_SPAN;
 	ft_offset_rect(&xr, pbox->fx, pbox->fy);
 
-	(*pif->pf_draw_text)(pif->ctx, &xa, &xr, _T("周一"), -1);
+	(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, _T("周一"), -1);
 
 	xr.fx += iw;
 	xr.fy = th - CALENDAR_BAR_SPAN;
@@ -327,7 +328,7 @@ void draw_calendar(const drawing_interface* pif, link_t_ptr ptr)
 	xr.fh = CALENDAR_BAR_SPAN;
 	ft_offset_rect(&xr, pbox->fx, pbox->fy);
 
-	(*pif->pf_draw_text)(pif->ctx, &xa, &xr, _T("周二"), -1);
+	(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, _T("周二"), -1);
 
 	xr.fx += iw;
 	xr.fy = th - CALENDAR_BAR_SPAN;
@@ -335,7 +336,7 @@ void draw_calendar(const drawing_interface* pif, link_t_ptr ptr)
 	xr.fh = CALENDAR_BAR_SPAN;
 	ft_offset_rect(&xr, pbox->fx, pbox->fy);
 
-	(*pif->pf_draw_text)(pif->ctx, &xa, &xr, _T("周三"), -1);
+	(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, _T("周三"), -1);
 
 	xr.fx += iw;
 	xr.fy = th - CALENDAR_BAR_SPAN;
@@ -343,7 +344,7 @@ void draw_calendar(const drawing_interface* pif, link_t_ptr ptr)
 	xr.fh = CALENDAR_BAR_SPAN;
 	ft_offset_rect(&xr, pbox->fx, pbox->fy);
 
-	(*pif->pf_draw_text)(pif->ctx, &xa, &xr, _T("周四"), -1);
+	(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, _T("周四"), -1);
 
 	xr.fx += iw;
 	xr.fy = th - CALENDAR_BAR_SPAN;
@@ -351,7 +352,7 @@ void draw_calendar(const drawing_interface* pif, link_t_ptr ptr)
 	xr.fh = CALENDAR_BAR_SPAN;
 	ft_offset_rect(&xr, pbox->fx, pbox->fy);
 
-	(*pif->pf_draw_text)(pif->ctx, &xa, &xr, _T("周五"), -1);
+	(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, _T("周五"), -1);
 
 	xr.fx += iw;
 	xr.fy = th - CALENDAR_BAR_SPAN;
@@ -359,7 +360,7 @@ void draw_calendar(const drawing_interface* pif, link_t_ptr ptr)
 	xr.fh = CALENDAR_BAR_SPAN;
 	ft_offset_rect(&xr, pbox->fx, pbox->fy);
 
-	(*pif->pf_draw_text)(pif->ctx, &xa, &xr, _T("周六"), -1);
+	(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, _T("周六"), -1);
 
 	xr.fx = 0;
 	xr.fy = th;
@@ -367,13 +368,13 @@ void draw_calendar(const drawing_interface* pif, link_t_ptr ptr)
 	xr.fh = ph - th;
 	ft_offset_rect(&xr, pbox->fx, pbox->fy);
 
-	//(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	//(*pci->drw->pf_draw_rect)(pci->ctx, &xp, NULL, &xr);
 
 	parse_date(&dt, get_calendar_today_ptr(ptr));
 	fill_calendar(&ca, &dt);
 
 	ltoxs(xstol(xf.size) - 2, xf.size, INT_LEN);
-	(*pif->pf_set_xfont)(pif->ctx, &xf);
+	(*pci->drw->pf_set_xfont)(pci->ctx, &xf);
 	xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_FAR);
 
 	lighten_xbrush(&xb, DEF_SOFT_DARKEN);
@@ -389,9 +390,9 @@ void draw_calendar(const drawing_interface* pif, link_t_ptr ptr)
 			ft_offset_rect(&xr, pbox->fx, pbox->fy);
 
 			if (!j || j == 6)
-				(*pif->pf_draw_rect)(pif->ctx, &xp, &xb, &xr);
+				(*pci->drw->pf_draw_rect)(pci->ctx, &xp, &xb, &xr);
 			else
-				(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+				(*pci->drw->pf_draw_rect)(pci->ctx, &xp, NULL, &xr);
 
 			if (ca.calen_days[i][j])
 			{
@@ -402,7 +403,7 @@ void draw_calendar(const drawing_interface* pif, link_t_ptr ptr)
 				ft_offset_rect(&xr, pbox->fx, pbox->fy);
 
 				xsprintf(sz_token, _T("%d日"), ca.calen_days[i][j]);
-				(*pif->pf_draw_text)(pif->ctx, &xa, &xr, sz_token, -1);
+				(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, sz_token, -1);
 			}
 		}
 	}

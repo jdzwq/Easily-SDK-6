@@ -26,7 +26,7 @@ LICENSE.GPL3 for more details.
 
 #include "mpap.h"
 
-#include "../xdgobj.h"
+#include "../xdgmgc.h"
 
 
 typedef struct _mem_paper_t{

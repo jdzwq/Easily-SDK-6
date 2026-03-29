@@ -168,6 +168,7 @@ void hand_navibox_lbutton_up(widget_t widget, const xpoint_t* pxp)
 {
 	navibox_delta_t* ptd = GETNAVIBOXDELTA(widget);
 	measure_interface im = { 0 };
+	const xfont_t* pxf;
 
 	xpoint_t pt;
 	int hint;
@@ -177,9 +178,10 @@ void hand_navibox_lbutton_up(widget_t widget, const xpoint_t* pxp)
 
 	widget_point_to_mm(widget, &pt);
 
+	pxf = widget_get_xfont_ptr(widget);
 	get_canvas_measure(widget_get_canvas(widget), &im);
 
-	hint = calc_navibox_hint(&im, &pt);
+	hint = calc_navibox_hint(&im, pxf, &pt);
 
 	if (hint == NAVIBOX_HINT_HOME)
 		navibox_on_home(widget);
@@ -229,7 +231,9 @@ void hand_navibox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	
 	xcolor_t xc_brim, xc_core;
 	const color_mod_t *pclrs;
+	const xfont_t* pxf;
 
+	pxf = widget_get_xfont_ptr(widget);
 	pclrs = widget_get_color_mode_ptr(widget);
 	xmem_copy((void*)&xc_brim, (void*)&(pclrs->clr_bkg), sizeof(xcolor_t));
 	xmem_copy((void*)&xc_core, (void*)&(pclrs->clr_bkg), sizeof(xcolor_t));
@@ -248,11 +252,11 @@ void hand_navibox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 
 	lighten_xcolor(&xc_brim, DEF_SOFT_DARKEN);
 
-	(*ifv.pf_gradient_rect)(ifv.ctx, &xc_brim, &xc_core, GDI_ATTR_GRADIENT_VERT, &xr);
+	(*ifv.drw->pf_gradient_rect)(ifv.ctx, &xc_brim, &xc_core, GDI_ATTR_GRADIENT_VERT, &xr);
 
 	ns.keyboxed = widget_is_valid(ptd->keybox);
 
-	draw_navibox(&ifc, &ns);
+	draw_navibox(&ifc, pxf, &ns);
 
 	end_canvas_paint(canv, dc, pxr);
 }
@@ -290,12 +294,14 @@ void navibox_popup_size(widget_t widget, xsize_t* pxs)
 {
 	navibox_delta_t* ptd = GETNAVIBOXDELTA(widget);
 	measure_interface im = { 0 };
+	const xfont_t* pxf;
 
 	XDK_ASSERT(ptd != NULL);
 
+	pxf = widget_get_xfont_ptr(widget);
 	get_canvas_measure(widget_get_canvas(widget), &im);
 
-	calc_navibox_size(&im, pxs);
+	calc_navibox_size(&im, pxf, pxs);
 
 	widget_size_to_pt(widget, pxs);
 

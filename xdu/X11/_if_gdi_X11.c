@@ -33,6 +33,85 @@ LICENSE.GPL3 for more details.
 
 fontset_t g_fontset = NULL;
 
+
+static tchar_t *x11_font_name[] = {_T("Fixed")};
+static tchar_t *x11_font_weight[] = {_T("Regular"),_T("Medium"), _T("Bold")};
+static tchar_t *x11_font_style[]  = {_T("Regular"), _T("Italic"), _T("Oblique")};
+static tchar_t *x11_font_size[] = {_T("9"),_T("10"),_T("12"),_T("13"),_T("14"),_T("15"),_T("16"),_T("18"), _T("24") ,_T("26"), _T("36"), _T("42"), _T("54"), _T("63"), _T("72")};
+static tchar_t x11_pattern[] = {_T("%s-%s-%s-%s")};
+//font pattern <family>[-<style>][-<weight>][-<size>]
+//font pattern eg: -misc-fixed-medium-r-normal--10-100-75-75-c-60-iso8859-1
+//font pattern eg: -*-helvetica-*-*-*-*-12-*-*-*-*-*-*
+
+#define default_fixed_pattern	_T("fixed")
+
+static void format_font_pattern(const xfont_t* pxf, tchar_t* buf)
+{
+    const tchar_t* fs_name = NULL;
+    const tchar_t* fs_style = NULL;
+    const tchar_t* fs_weight = NULL;
+	const tchar_t* fs_size = NULL;
+    float pt, px = 0;
+	int i;
+    
+    if(is_null((pxf->family)))
+        fs_name = x11_font_name[0];
+    else
+        fs_name = pxf->family;
+
+	xscpy(buf, fs_name);
+
+	if(xscmp(pxf->style,GDI_ATTR_FONT_STYLE_ITALIC) == 0)
+        fs_style = x11_font_style[1];
+    else if(xscmp(pxf->style,GDI_ATTR_FONT_STYLE_OBLIQUE) == 0)
+        fs_style = x11_font_style[2];
+    else
+        fs_style = NULL;
+
+	if(fs_style)
+	{
+		xscat(buf, _T("-"));
+		xscat(buf, fs_style);
+	}
+    
+    if(xstol(pxf->weight) >= 700)
+        fs_weight = x11_font_weight[2];
+    else if(xstol(pxf->weight) >= 400)
+        fs_weight = x11_font_weight[1];
+    else
+        fs_weight = NULL;
+
+	if(fs_weight)
+	{
+		xscat(buf, _T("-"));
+		xscat(buf, fs_weight);
+	}
+
+	if(!is_null(pxf->size))
+	{
+		pt = xstof(pxf->size);
+		font_metric_by_pt(pt, NULL, &px);
+    
+		for(i = 0; i< 15; i++)
+		{
+			if((int)px <= xstol(x11_font_size[i]))
+				break;
+		}
+		if(i == 15) i--;
+	
+		fs_size = x11_font_size[i];
+	}else
+	{
+		fs_size = NULL;
+	}
+
+	if(fs_size)
+	{
+		xscat(buf, _T("-"));
+		xscat(buf, fs_size);
+	}
+}
+
 static void DPtoLP(visual_t rdc, XPoint* pt,int n)
 {
 	int i;
@@ -1212,9 +1291,9 @@ void _gdi_text_out(visual_t rdc, const xface_t* pxa, const xpoint_t* ppt, const 
 	if(len < 0) len = xslen(txt);
 	if(!len) return;
 
-	_gdi_font_size(rdc, &xs);
-	pt.y += xs.h;
-	DPtoLP(rdc,&pt,1);
+	//_gdi_font_size(rdc, &xs);
+	//pt.y += xs.h;
+	DPtoLP(rdc, &pt, 1);
 
 	xft_font = (XftFont*)fst->font_object;
 
@@ -1235,7 +1314,7 @@ void _gdi_text_out(visual_t rdc, const xface_t* pxa, const xpoint_t* ppt, const 
     XftDrawDestroy(xft_draw);
 }
 
-void _gdi_text_rect(visual_t rdc, const xface_t* pxa, const tchar_t* txt, int len, xrect_t* prt)
+void _gdi_text_rect(visual_t rdc, const xfont_t* pxf, const xface_t* pxa, const tchar_t* txt, int len, xrect_t* prt)
 {
 	X11_context_t* ctx = TypePtrFromHead(X11_context_t, rdc);
 
@@ -1244,8 +1323,21 @@ void _gdi_text_rect(visual_t rdc, const xface_t* pxa, const tchar_t* txt, int le
 	xsize_t se;
 	int w, h, maxw = 0;
 
+	fontset_t fnt;
+
 	if(len < 0) len = xslen(txt);
 	if(!len) return;
+
+	if(pxf)
+	{
+		fnt = _gdi_create_fontset(pxf);
+	}
+	else
+	{
+		fnt = ctx->fontset;
+	}
+
+	if(!fnt) return;
 
 	w = 0;
 	h = 0;
@@ -1255,7 +1347,7 @@ void _gdi_text_rect(visual_t rdc, const xface_t* pxa, const tchar_t* txt, int le
 		c = peek_word((txt + total), pch);
 		total += c;
 
-		_gdi_word_size(ctx->fontset, pch, c, &se);
+		_gdi_word_size(fnt, pch, c, &se);
 
 		if (!h)
 		{
@@ -1320,21 +1412,46 @@ void _gdi_text_rect(visual_t rdc, const xface_t* pxa, const tchar_t* txt, int le
 
 	prt->h = h;
 	if (!prt->w) prt->w = maxw;
+
+	if(pxf) 
+	{
+		_gdi_destroy_fontset(fnt);
+	}
 }
 
-void _gdi_text_size(visual_t rdc, const tchar_t* txt, int len, xsize_t* pxs)
+void _gdi_text_size(visual_t rdc, const xfont_t* pxf, const tchar_t* txt, int len, xsize_t* pxs)
 {
 	X11_context_t* ctx = TypePtrFromHead(X11_context_t, rdc);
 	X11_fontset_t* fst = TypePtrFromHead(X11_fontset_t, ctx->fontset);
 	XftFont* xft_font;
 	XGlyphInfo exten = {0};
+	tchar_t font_token[1024] = {0};
 
 	if(len < 0) len = xslen(txt);
 	if(!len) return;
 
-	xft_font = (XftFont*)fst->font_object;
+	if(pxf)
+	{
+		format_font_pattern(pxf, font_token);
+		xft_font = XftFontOpenName(g_display, DefaultScreen(g_display), font_token);
+		if (!xft_font)
+		{
+			xft_font = XftFontOpenName(g_display, DefaultScreen(g_display), default_fixed_pattern);
+		}
+	}
+	else
+	{
+		xft_font = (XftFont *)fst->font_object;
+	}
+
+	if(!xft_font) return;
 
 	XftTextExtentsUtf8(g_display, xft_font, (const FcChar8*)txt, len, &exten);
+
+	if(pxf)
+	{
+		XftFontClose(g_display, xft_font);
+	}
 
 	pxs->w = exten.width;
 	pxs->h = exten.height;
@@ -1639,86 +1756,7 @@ void _gdi_fill_region(visual_t rdc, const xbrush_t* pxb, res_rgn_t rgn)
 }
 #endif
 
-
-static tchar_t *x11_font_name[] = {_T("Fixed")};
-static tchar_t *x11_font_weight[] = {_T("Regular"),_T("Medium"), _T("Bold")};
-static tchar_t *x11_font_style[]  = {_T("Regular"), _T("Italic"), _T("Oblique")};
-static tchar_t *x11_font_size[] = {_T("9"),_T("10"),_T("12"),_T("13"),_T("14"),_T("15"),_T("16"),_T("18"), _T("24") ,_T("26"), _T("36"), _T("42"), _T("54"), _T("63"), _T("72")};
-static tchar_t x11_pattern[] = {_T("%s-%s-%s-%s")};
-//font pattern <family>[-<style>][-<weight>][-<size>]
-//font pattern eg: -misc-fixed-medium-r-normal--10-100-75-75-c-60-iso8859-1
-//font pattern eg: -*-helvetica-*-*-*-*-12-*-*-*-*-*-*
-
-#define default_fixed_pattern	_T("fixed")
-
-static void format_font_pattern(const xfont_t* pxf, tchar_t* buf)
-{
-    const tchar_t* fs_name = NULL;
-    const tchar_t* fs_style = NULL;
-    const tchar_t* fs_weight = NULL;
-	const tchar_t* fs_size = NULL;
-    float pt, px = 0;
-	int i;
-    
-    if(is_null((pxf->family)))
-        fs_name = x11_font_name[0];
-    else
-        fs_name = pxf->family;
-
-	xscpy(buf, fs_name);
-
-	if(xscmp(pxf->style,GDI_ATTR_FONT_STYLE_ITALIC) == 0)
-        fs_style = x11_font_style[1];
-    else if(xscmp(pxf->style,GDI_ATTR_FONT_STYLE_OBLIQUE) == 0)
-        fs_style = x11_font_style[2];
-    else
-        fs_style = NULL;
-
-	if(fs_style)
-	{
-		xscat(buf, _T("-"));
-		xscat(buf, fs_style);
-	}
-    
-    if(xstol(pxf->weight) >= 700)
-        fs_weight = x11_font_weight[2];
-    else if(xstol(pxf->weight) >= 400)
-        fs_weight = x11_font_weight[1];
-    else
-        fs_weight = NULL;
-
-	if(fs_weight)
-	{
-		xscat(buf, _T("-"));
-		xscat(buf, fs_weight);
-	}
-
-	if(!is_null(pxf->size))
-	{
-		pt = xstof(pxf->size);
-		font_metric_by_pt(pt, NULL, &px);
-    
-		for(i = 0; i< 15; i++)
-		{
-			if((int)px <= xstol(x11_font_size[i]))
-				break;
-		}
-		if(i == 15) i--;
-	
-		fs_size = x11_font_size[i];
-	}else
-	{
-		fs_size = NULL;
-	}
-
-	if(fs_size)
-	{
-		xscat(buf, _T("-"));
-		xscat(buf, fs_size);
-	}
-}
-
-void _gdi_font_size(visual_t rdc, xsize_t* pxs)
+void _gdi_font_size(visual_t rdc, const xfont_t* pxf, xsize_t* pxs)
 {
 	X11_context_t* ctx = TypePtrFromHead(X11_context_t, rdc);
 	X11_fontset_t* fst = TypePtrFromHead(X11_fontset_t, ctx->fontset);
@@ -1726,13 +1764,36 @@ void _gdi_font_size(visual_t rdc, xsize_t* pxs)
 	double size = 0.0;
 	XGlyphInfo exten = {0};
 
-	xft_font = (XftFont*)fst->font_object;
-	if(xft_font->pattern)
+	tchar_t font_token[1024] = {0};
+	
+	if(pxf)
+	{
+		format_font_pattern(pxf, font_token);
+		xft_font = XftFontOpenName(g_display, DefaultScreen(g_display), font_token);
+		if (!xft_font)
+		{
+			xft_font = XftFontOpenName(g_display, DefaultScreen(g_display), default_fixed_pattern);
+		}
+	}
+	else
+	{
+		xft_font = (XftFont *)fst->font_object;
+	}
+
+	if(!xft_font) return;
+	
+	if (xft_font->pattern)
 	{
 		FcPatternGetDouble(xft_font->pattern, FC_SIZE, 0, &size);
-	}else
+	}
+	else
 	{
 		size = (xft_font->ascent + xft_font->descent) / 2;
+	}
+
+	if(pxf)
+	{
+		XftFontClose(g_display, xft_font);
 	}
 
 	pxs->w = LOGPTPERMM;

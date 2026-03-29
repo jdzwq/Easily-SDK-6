@@ -27,7 +27,7 @@ LICENSE.GPL3 for more details.
 #include "mfnt.h"
 #include "mpix.h"
 
-#include "../xdgobj.h"
+#include "../xdgmgc.h"
 
 typedef struct _font_internal_t{
 	handle_head head;

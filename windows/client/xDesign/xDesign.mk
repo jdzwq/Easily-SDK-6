@@ -28,7 +28,7 @@ DATABASE = $(OBJ_PATH)/$(MODULE).pdb
 INSTRUMENT = $(OBJ_PATH)/$(MODULE).pgd
 
 CC = cl.exe
-CFLAGS = /c /GL /W3 /Zc:wchar_t /Zi /Od /Fd"$(PDB_PATH)/vc140.pdb" /fp:precise \
+CFLAGS = /c /GL /TP /W3 /Zc:wchar_t /Zi /Od /Fd"$(PDB_PATH)/vc140.pdb" /fp:precise \
 	/D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "_UNICODE" /D "UNICODE" \
 	/errorReport:prompt /WX- /Zc:forScope /RTC1 /Gd /MTd \
 	/Fa"$(OBJ_PATH)/" /EHsc /nologo /Fo"$(OBJ_PATH)/" /Fp"$(OBJ_PATH)/$(MODULE).pch"

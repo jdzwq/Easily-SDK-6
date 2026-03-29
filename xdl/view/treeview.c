@@ -75,7 +75,7 @@ float calc_tree_height(link_t_ptr ptr)
 	return _calc_tree_child_height(ptr, ptr);
 }
 
-float calc_tree_width(const measure_interface* pif, link_t_ptr ptr)
+float calc_tree_width(const measure_interface* pmc, link_t_ptr ptr)
 {
 	link_t_ptr ilk;
 	link_t_ptr st = NULL;
@@ -89,14 +89,13 @@ float calc_tree_width(const measure_interface* pif, link_t_ptr ptr)
 
 	default_xfont(&xf);
 	parse_xfont_from_style(&xf, get_tree_style_ptr(ptr));
-	(*pif->pf_set_xfont)(pif->ctx, &xf);
 
 	ilk = get_tree_first_child_item(ptr);
 	while (ilk)
 	{
 		token = get_tree_item_title_ptr(ilk);
 
-		(*pif->pf_measure_size)(pif->ctx, token, -1, &xs);
+		(*pmc->mea->pf_measure_size)(pmc->ctx, &xf, token, -1, &xs);
 
 		if (get_tree_item_showcheck(ilk))
 			xs.fw += ic;
@@ -346,7 +345,7 @@ int calc_tree_hint(const xpoint_t* ppt, link_t_ptr ptr, link_t_ptr* pilk)
 	return hint;
 }
 
-void draw_tree(const drawing_interface* pif, link_t_ptr ptr)
+void draw_tree(const drawing_interface* pci, link_t_ptr ptr)
 {
 	link_t_ptr ilk;
 	link_t_ptr st = NULL;
@@ -363,14 +362,14 @@ void draw_tree(const drawing_interface* pif, link_t_ptr ptr)
 	bool_t b_print;
 	float px, py, pw, ph;
 
-	const canvbox_t* pbox = (canvbox_t*)(&pif->rect);
+	const canvbox_t* pbox = (canvbox_t*)(&pci->rect);
 
 	px = pbox->fx;
 	py = pbox->fy;
 	pw = pbox->fw;
 	ph = pbox->fh;
 
-	b_print = (pif->tag == _CANVAS_PRINTER) ? 1 : 0;
+	b_print = (pci->tag == _CANVAS_PRINTER) ? 1 : 0;
 
 	default_xpen(&xp);
 	default_xbrush(&xb);
@@ -382,22 +381,22 @@ void draw_tree(const drawing_interface* pif, link_t_ptr ptr)
 	parse_xface_from_style(&xa, style);
 	if (!b_print)
 	{
-		format_xcolor(&pif->pclrs->clr_txt, xa.text_color);
+		format_xcolor(&pci->pclrs->clr_txt, xa.text_color);
 	}
 
 	parse_xfont_from_style(&xf, style);
-	(*pif->pf_set_xfont)(pif->ctx, &xf);
+	(*pci->drw->pf_set_xfont)(pci->ctx, &xf);
 
 	/*parse_xpen_from_style(&xp, style);
 	if (!b_print)
 	{
-		format_xcolor(&pif->pclrs->clr_frg, xp.color);
+		format_xcolor(&pci->pclrs->clr_frg, xp.color);
 	}*/
 
 	parse_xbrush_from_style(&xb, style);
 	if (!b_print)
 	{
-		format_xcolor(&pif->pclrs->clr_bkg, xb.color);
+		format_xcolor(&pci->pclrs->clr_bkg, xb.color);
 	}
 
 	xscpy(xp.color, xb.color);
@@ -406,12 +405,12 @@ void draw_tree(const drawing_interface* pif, link_t_ptr ptr)
 
 	if (!b_print)
 	{
-		format_xcolor(&pif->pclrs->clr_msk, xi.color);
+		format_xcolor(&pci->pclrs->clr_msk, xi.color);
 	}
 
 	if (!b_print)
 	{
-		xmem_copy((void*)&xc, (void*)&pif->pclrs->clr_ico, sizeof(xcolor_t));
+		xmem_copy((void*)&xc, (void*)&pci->pclrs->clr_ico, sizeof(xcolor_t));
 	}
 	else
 	{
@@ -439,7 +438,7 @@ void draw_tree(const drawing_interface* pif, link_t_ptr ptr)
 	xscpy(xb_bar.style, GDI_ATTR_FILL_STYLE_GRADIENT);
 	xscpy(xb_bar.gradient, GDI_ATTR_GRADIENT_HORZ);
 
-	(*pif->pf_draw_rect)(pif->ctx, NULL, &xb_bar, &xr_text);
+	(*pci->drw->pf_draw_rect)(pci->ctx, NULL, &xb_bar, &xr_text);
 
 	xr_image.fx = total_indent;
 	xr_image.fw = ic;
@@ -447,14 +446,14 @@ void draw_tree(const drawing_interface* pif, link_t_ptr ptr)
 	xr_image.fh = th;
 
 	ft_center_rect(&xr_image, DEF_SMALL_ICON, DEF_SMALL_ICON);
-	draw_gizmo(pif, &xc, &xr_image, get_tree_title_icon_ptr(ptr));
+	draw_gizmo(pci, &xc, &xr_image, get_tree_title_icon_ptr(ptr));
 
 	xr_text.fx = total_indent + ic;
 	xr_text.fw = pw - ic;
 	xr_text.fy = total_height;
 	xr_text.fh = th;
 
-	(*pif->pf_draw_text)(pif->ctx, &xa, &xr_text, get_tree_title_ptr(ptr), -1);
+	(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr_text, get_tree_title_ptr(ptr), -1);
 
 	total_height += th;
 
@@ -470,7 +469,7 @@ void draw_tree(const drawing_interface* pif, link_t_ptr ptr)
 		if ( !is_null(icon))
 		{
 			ft_center_rect(&xr_image, DEF_SMALL_ICON, DEF_SMALL_ICON);
-			draw_gizmo(pif, &xc, &xr_image, get_tree_item_icon_ptr(ilk));
+			draw_gizmo(pci, &xc, &xr_image, get_tree_item_icon_ptr(ilk));
 		}
 		else
 		{
@@ -478,11 +477,11 @@ void draw_tree(const drawing_interface* pif, link_t_ptr ptr)
 
 			if (!get_tree_item_collapsed(ilk))
 			{
-				draw_gizmo(pif, &xc_check, &xr_image, GDI_ATTR_GIZMO_MINUS);
+				draw_gizmo(pci, &xc_check, &xr_image, GDI_ATTR_GIZMO_MINUS);
 			}
 			else
 			{
-				draw_gizmo(pif, &xc_check, &xr_image, GDI_ATTR_GIZMO_PLUS);
+				draw_gizmo(pci, &xc_check, &xr_image, GDI_ATTR_GIZMO_PLUS);
 			}
 		}
 
@@ -499,11 +498,11 @@ void draw_tree(const drawing_interface* pif, link_t_ptr ptr)
 			
 			if (get_tree_item_checked(ilk))
 			{
-				draw_gizmo(pif, &xc_check, &xr_check, GDI_ATTR_GIZMO_CHECKED);
+				draw_gizmo(pci, &xc_check, &xr_check, GDI_ATTR_GIZMO_CHECKED);
 			}
 			else
 			{
-				draw_gizmo(pif, &xc_check, &xr_check, GDI_ATTR_GIZMO_CHECKBOX);
+				draw_gizmo(pci, &xc_check, &xr_check, GDI_ATTR_GIZMO_CHECKBOX);
 			}
 
 			xr_text.fx = total_indent + ic * 2;
@@ -519,7 +518,7 @@ void draw_tree(const drawing_interface* pif, link_t_ptr ptr)
 			xr_text.fh = ih;
 		}
 
-		(*pif->pf_draw_text)(pif->ctx, &xa, &xr_text, get_tree_item_title_ptr(ilk), -1);
+		(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr_text, get_tree_item_title_ptr(ilk), -1);
 
 		total_height += ih;
 		if (!get_tree_item_collapsed(ilk) && get_tree_first_child_item(ilk))

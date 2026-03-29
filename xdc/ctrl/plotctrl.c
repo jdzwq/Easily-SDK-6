@@ -41,7 +41,7 @@ typedef struct _plot_delta_t{
 #define GETPLOTDELTA(ph) 		(plot_delta_t*)widget_get_user_delta(ph)
 #define SETPLOTDELTA(ph,ptd)		widget_set_user_delta(ph,(vword_t)ptd)
 
-/************************************************************************************************/
+/***********************************************************************/
 
 static void _plotctrl_reset_page(widget_t widget)
 {
@@ -81,7 +81,8 @@ static void _plotctrl_reset_page(widget_t widget)
 	widget_reset_scroll(widget, 0);
 }
 
-/*********************************************control event**************************************/
+/***********************************************************************/
+
 int noti_plot_owner(widget_t widget, unsigned int code, link_t_ptr plot, void* data)
 {
 	plot_delta_t* ptd = GETPLOTDELTA(widget);
@@ -120,7 +121,8 @@ void noti_plot_reset_scroll(widget_t widget, bool_t bUpdate)
 			widget_close(ptd->hsc, 0);
 	}
 }
-/********************************************************************************************/
+
+/***********************************************************************/
 
 int hand_plot_create(widget_t widget, void* data)
 {
@@ -329,7 +331,7 @@ void hand_plot_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	widget_get_canv_rect(widget, (canvbox_t*)&(ifc.rect));
 	ifc.pclrs = pclrs;
 
-	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
+	(*ifv.drw->pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
 
 	if (widget_can_paging(widget))
 	{
@@ -346,7 +348,7 @@ void hand_plot_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	end_canvas_paint(canv, dc, pxr);
 }
 
-/*****************************************************************************************************/
+/***********************************************************************/
 
 widget_t plotctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, widget_t wparent)
 {

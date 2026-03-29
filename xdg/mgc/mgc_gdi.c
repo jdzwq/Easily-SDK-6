@@ -32,7 +32,7 @@ LICENSE.GPL3 for more details.
 #include "mfnt.h"
 #include "mclr.h"
 
-#include "../xdgobj.h"
+#include "../xdgmgc.h"
 #include "../xdgutil.h"
 
 static void calc_penmode(const xpen_t* pxp, int* fs, int* ds)
@@ -1920,14 +1920,14 @@ void mgc_draw_text(canvas_t canv, const xface_t *pxa, const xrect_t *pxr, const 
 	mgc_draw_text_raw(view, pxa, &xr, txt, len);
 }
 
-void mgc_text_rect_raw(visual_t mgc, const xface_t *pxa, const tchar_t *txt, int len, xrect_t *pxr)
+void mgc_measure_rect_raw(visual_t mgc, const xfont_t* pxf, const xface_t *pxa, const tchar_t *txt, int len, xrect_t *pxr)
 {
 	device_t hand;
 	int rop;
 	mem_device_ptr pdev;
 
 	mem_font_ptr pmf;
-	fontset_t ft;
+	fontset_t fnt = NULL;
 	int n = 0, total = 0;
 	tchar_t pch[CHS_LEN + 1] = {0};
 	xsize_t se;
@@ -1943,13 +1943,18 @@ void mgc_text_rect_raw(visual_t mgc, const xface_t *pxa, const tchar_t *txt, int
 
 	len = words_count(txt, len);
 
-	pmf = mgc_get_font_interface(mgc, &ft);
+	pmf = mgc_get_font_interface(mgc, &fnt);
 	if(!pmf)
 	{
 		raise_user_error(_T("mgc_text_rect"), _T("font interface"));
 	}
 
-	if(!ft)
+	if(pxf)
+	{
+		fnt = (*pmf->createFontSet)(pxf);
+	}
+
+	if(!fnt)
 	{
 		raise_user_error(_T("mgc_text_rect"), _T("unknown font"));
 	}
@@ -1961,7 +1966,7 @@ void mgc_text_rect_raw(visual_t mgc, const xface_t *pxa, const tchar_t *txt, int
 	{
 		total += peek_word((txt + total), pch);
 
-		(*pmf->getCharSize)(ft, pch, &se);
+		(*pmf->getCharSize)(fnt, pch, &se);
 
 		if (!h)
 		{
@@ -2027,12 +2032,35 @@ void mgc_text_rect_raw(visual_t mgc, const xface_t *pxa, const tchar_t *txt, int
 	pxr->h = h;
 	if (!pxr->w) pxr->w = maxw;
 
+	if(pxf)
+	{
+		(*pmf->destroyFontSet)(fnt);
+	}
+
 	END_CATCH;
 
 	return;
 ONERROR:
 
 	return;
+}
+
+void mgc_measure_rect(canvas_t canv, const xfont_t* pxf, const xface_t *pxa, const tchar_t *txt, int len, xrect_t *pxr)
+{
+	visual_t view;
+
+	view = mgc_get_canvas_visual(canv);
+
+	mgc_rect_mm_to_pt(canv, pxr);
+
+	mgc_measure_rect_raw(view, pxf, pxa, txt, len, pxr);
+
+	mgc_rect_pt_to_mm(canv, pxr);
+}
+
+void mgc_text_rect_raw(visual_t mgc, const xface_t *pxa, const tchar_t *txt, int len, xrect_t *pxr)
+{
+	mgc_measure_rect_raw(mgc, NULL, pxa, txt, len, pxr);
 }
 
 void mgc_text_rect(canvas_t canv, const xface_t *pxa, const tchar_t *txt, int len, xrect_t *pxr)
@@ -2048,14 +2076,14 @@ void mgc_text_rect(canvas_t canv, const xface_t *pxa, const tchar_t *txt, int le
 	mgc_rect_pt_to_mm(canv, pxr);
 }
 
-void mgc_text_size_raw(visual_t mgc, const tchar_t *txt, int len, xsize_t *pxs)
+void mgc_measure_size_raw(visual_t mgc, const xfont_t* pxf, const tchar_t *txt, int len, xsize_t *pxs)
 {
 	device_t hand;
 	int rop;
 	mem_device_ptr pdev;
 
 	mem_font_ptr pmf;
-	fontset_t ft;
+	fontset_t fnt = NULL;
 	int n;
 	xsize_t se;
 
@@ -2070,13 +2098,18 @@ void mgc_text_size_raw(visual_t mgc, const tchar_t *txt, int len, xsize_t *pxs)
 	if (len < 0)
 		len = xslen(txt);
 
-	pmf = mgc_get_font_interface(mgc, &ft);
+	pmf = mgc_get_font_interface(mgc, &fnt);
 	if(!pmf)
 	{
 		raise_user_error(_T("mgc_text_size"), _T("font interface"));
 	}
 
-	if(!ft)
+	if(pxf)
+	{
+		fnt = (*pmf->createFontSet)(pxf);
+	}
+
+	if(!fnt)
 	{
 		raise_user_error(_T("mgc_text_size"), _T("unknown font"));
 	}
@@ -2087,7 +2120,7 @@ void mgc_text_size_raw(visual_t mgc, const tchar_t *txt, int len, xsize_t *pxs)
 	n = 0;
 	while (n < len)
 	{
-		(*pmf->getCharSize)(ft, (txt + n), &se);
+		(*pmf->getCharSize)(fnt, (txt + n), &se);
 
 		pxs->w += se.w;
 		if (pxs->h < se.h)
@@ -2100,12 +2133,35 @@ void mgc_text_size_raw(visual_t mgc, const tchar_t *txt, int len, xsize_t *pxs)
 #endif
 	}
 
+	if(pxf)
+	{
+		(*pmf->destroyFontSet)(fnt);
+	}
+
 	END_CATCH;
 
 	return;
 ONERROR:
 
 	return;
+}
+
+void mgc_measure_size(canvas_t canv, const xfont_t* pxf, const tchar_t *txt, int len, xsize_t *pxs)
+{
+	visual_t view;
+
+	view = mgc_get_canvas_visual(canv);
+
+	mgc_size_mm_to_pt(canv, pxs);
+
+	mgc_measure_size_raw(view, pxf, txt, len, pxs);
+
+	mgc_size_pt_to_mm(canv, pxs);
+}
+
+void mgc_text_size_raw(visual_t mgc, const tchar_t *txt, int len, xsize_t *pxs)
+{
+	mgc_measure_size_raw(mgc, NULL, txt, len, pxs);
 }
 
 void mgc_text_size(canvas_t canv, const tchar_t *txt, int len, xsize_t *pxs)
@@ -2121,7 +2177,7 @@ void mgc_text_size(canvas_t canv, const tchar_t *txt, int len, xsize_t *pxs)
 	mgc_size_pt_to_mm(canv, pxs);
 }
 
-void mgc_font_size_raw(visual_t mgc, xsize_t *pxs)
+void mgc_measure_font_raw(visual_t mgc, const xfont_t* pxf, xsize_t *pxs)
 {
 	device_t hand;
 	int rop;
@@ -2145,9 +2201,24 @@ void mgc_font_size_raw(visual_t mgc, xsize_t *pxs)
 		raise_user_error(_T("mgc_text_size"), _T("font interface"));
 	}
 
+	if(pxf)
+	{
+		fnt = (*pmf->createFontSet)(pxf);
+	}
+
+	if(!fnt)
+	{
+		raise_user_error(_T("mgc_text_size"), _T("unknown font"));
+	}
+
 	(*pmf->getFontMetrix)(fnt, NULL, &fm);
 	pxs->w = fm.width;
 	pxs->h = fm.height;
+
+	if(pxf)
+	{
+		(*pmf->destroyFontSet)(fnt);
+	}
 
 	END_CATCH;
 
@@ -2155,6 +2226,22 @@ void mgc_font_size_raw(visual_t mgc, xsize_t *pxs)
 ONERROR:
 
 	return;
+}
+
+void mgc_measure_font(canvas_t canv, const xfont_t* pxf, xsize_t *pxs)
+{
+	visual_t view;
+
+	view = mgc_get_canvas_visual(canv);
+
+	mgc_measure_font_raw(view, pxf, pxs);
+
+	mgc_size_pt_to_mm(canv, pxs);
+}
+
+void mgc_font_size_raw(visual_t mgc, xsize_t *pxs)
+{
+	mgc_measure_font_raw(mgc, NULL, pxs);
 }
 
 void mgc_font_size(canvas_t canv, xsize_t *pxs)

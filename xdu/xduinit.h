@@ -28,7 +28,6 @@ LICENSE.GPL3 for more details.
 #define	_XDUINIT_H
 
 #include "xdudef.h"
-#include "xduinf.h"
 
 typedef struct _xdu_mou_t{
 	bool_t		if_ok;
@@ -38,12 +37,12 @@ typedef struct _xdu_mou_t{
 	if_context_t if_context;
 #endif
 
-#ifdef XDU_SUPPORT_CLIPBOARD
-	if_clipboard_t	if_clipboard;
-#endif
-
 #ifdef XDU_SUPPORT_WIDGET
 	if_widget_t		if_widget;
+#endif
+
+#ifdef XDU_SUPPORT_CLIPBOARD
+	if_clipboard_t	if_clipboard;
 #endif
 
 #ifdef XDU_SUPPORT_SHELL

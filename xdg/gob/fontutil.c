@@ -26,7 +26,7 @@ LICENSE.GPL3 for more details.
 
 #include "fontutil.h"
 
-#include "../xdgobj.h"
+#include "../xdgmgc.h"
 
 typedef struct _font_map_t{
 	tchar_t cn_font[16];

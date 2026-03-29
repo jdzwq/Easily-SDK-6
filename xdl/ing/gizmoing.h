@@ -34,13 +34,13 @@ LICENSE.GPL3 for more details.
 extern "C" {
 #endif
 
-EXP_API void	draw_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* pxr, const tchar_t* iname);
+EXP_API void	draw_gizmo(const drawing_interface* pci, const xcolor_t* pxc, const xrect_t* pxr, const tchar_t* iname);
 
 #if defined(_DEBUG) || defined(DEBUG)
 
-EXP_API void test_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* pxr);
+EXP_API void test_gizmo(const drawing_interface* pci, const xcolor_t* pxc, const xrect_t* pxr);
 
-EXP_API void test_color(const drawing_interface* pif, const xrect_t* pxr);
+EXP_API void test_color(const drawing_interface* pci, const xrect_t* pxr);
 
 #endif
 

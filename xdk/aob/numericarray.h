@@ -71,6 +71,7 @@ EXP_API int get_numeric_array_size(double** sa);
 @RETURN int: return characters copyed.
 */
 EXP_API double get_numeric(double** sa, int index);
+EXP_API double get_numeric_safe(double** sa, int index, double def);
 
 EXP_API int copy_numeric(double** sa, int index, double* buf, int max);
 

@@ -29,17 +29,18 @@ LICENSE.GPL3 for more details.
 #include "../xdcobj.h"
 
 typedef struct _widget_exten_t{
-	xrect_t vb;
-	xrect_t cb;
-	xsize_t sc;
-
-	link_t_ptr menu;
-	canvas_t canv;
+	canvas_t canv; 		//widget canvas
+	link_t_ptr menu; 	//widget menu
+	xrect_t vb;			//widget viewbox
+	xrect_t cb; 		//widget canvbox
+	xsize_t sc; 		//widget scroll size
 
 	union{
 		splitor_t splitor;
 		docker_t docker;
 	};
+
+	xfont_t xf;
 }widget_exten_t;
 
 #define GETEXTENSTRUCT(wt)			(widget_exten_t*)widget_get_core_delta(wt)
@@ -132,7 +133,7 @@ void  widget_menu_item_rect(widget_t wt, int iid, xrect_t* pxr)
 	while (ilk)
 	{
 		text = get_menu_item_title_ptr(ilk);
-		(*ifv.pf_text_size)(ifv.ctx, text, -1, &xs);
+		(*ifv.drw->pf_text_size)(ifv.ctx, text, -1, &xs);
 
 		xrItem.w = xr.h + xs.w;
 
@@ -637,6 +638,33 @@ bool_t widget_point_corner(widget_t wt, const xpoint_t* ppt)
 	return pt_in_rect(ppt, &rt);
 }
 
+void widget_set_xfont(widget_t wt, const xfont_t* pxf)
+{
+	widget_exten_t* pwt = GETEXTENSTRUCT(wt);
+
+	XDK_ASSERT(pwt != NULL);
+
+	xmem_copy((void*)(&pwt->xf), (void*)pxf, sizeof(xfont_t));
+}
+
+void widget_get_xfont(widget_t wt, xfont_t* pxf)
+{
+	widget_exten_t* pwt = GETEXTENSTRUCT(wt);
+
+	XDK_ASSERT(pwt != NULL);
+
+	xmem_copy((void*)pxf, (void*)(&pwt->xf), sizeof(xfont_t));
+}
+
+const xfont_t* widget_get_xfont_ptr(widget_t wt)
+{
+	widget_exten_t* pwt = GETEXTENSTRUCT(wt);
+
+	XDK_ASSERT(pwt != NULL);
+
+	return (&pwt->xf);
+}
+
 /************************************default widget handler**************************************************/
 
 void widget_hand_create(widget_t wt)
@@ -652,6 +680,8 @@ void widget_hand_create(widget_t wt)
 	rdc = widget_client_context(wt);
 	pwt->canv = create_display_canvas(rdc);
 	widget_release_context(wt, rdc);
+
+	default_widget_xfont(&pwt->xf);
 
 	SETEXTENSTRUCT(wt, pwt);
 
@@ -676,20 +706,20 @@ void widget_hand_paint(widget_t wt, visual_t rdc, const tchar_t* gradient)
 		xmem_copy((void*)&xc_core, (void*)&(pclrs->clr_bkg), sizeof(xcolor_t));
 		lighten_xcolor(&xc_core, DEF_SOFT_DARKEN);
 
-		(*ifv.pf_gradient_rect)(ifv.ctx, &xc_core, &xc_brim, GDI_ATTR_GRADIENT_VERT, &xr);
+		(*ifv.drw->pf_gradient_rect)(ifv.ctx, &xc_core, &xc_brim, GDI_ATTR_GRADIENT_VERT, &xr);
 	}else if(compare_text(gradient,-1,GDI_ATTR_GRADIENT_HORZ,-1,1) == 0)
 	{
 		xmem_copy((void*)&xc_brim, (void*)&(pclrs->clr_bkg), sizeof(xcolor_t));
 		xmem_copy((void*)&xc_core, (void*)&(pclrs->clr_bkg), sizeof(xcolor_t));
 		lighten_xcolor(&xc_core, DEF_SOFT_DARKEN);
 
-		(*ifv.pf_gradient_rect)(ifv.ctx, &xc_core, &xc_brim, GDI_ATTR_GRADIENT_HORZ, &xr);
+		(*ifv.drw->pf_gradient_rect)(ifv.ctx, &xc_core, &xc_brim, GDI_ATTR_GRADIENT_HORZ, &xr);
 	}else
 	{
 		default_xbrush(&xb);
 		format_xcolor(&pclrs->clr_bkg, xb.color);
 
-		(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
+		(*ifv.drw->pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
 	}
 }
 

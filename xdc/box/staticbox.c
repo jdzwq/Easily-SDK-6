@@ -140,9 +140,9 @@ void hand_staticbox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 
 	get_visual_interface(rdc, &ifv);
 
-	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
+	(*ifv.drw->pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
 
-	(*ifv.pf_draw_text)(ifv.ctx, &xa, &xr, ptd->text, -1);
+	(*ifv.drw->pf_draw_text)(ifv.ctx, &xa, &xr, ptd->text, -1);
 
 	end_canvas_paint(canv, dc, pxr);
 }

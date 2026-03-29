@@ -27,7 +27,7 @@ LICENSE.GPL3 for more details.
 #ifndef _XDUINF_H
 #define	_XDUINF_H
 
-#include "xdudef.h"
+#include "../xdudef.h"
 
 
 #ifdef XDU_SUPPORT_SHELL
@@ -79,13 +79,13 @@ typedef void(*PF_GDI_DRAW_POLYGON)(visual_t, const xpen_t*, const xbrush_t*, con
 typedef void(*PF_GDI_DRAW_ROUND)(visual_t, const xpen_t*, const xbrush_t*, const xrect_t*, const xsize_t*);
 typedef void(*PF_GDI_DRAW_ELLIPSE)(visual_t, const xpen_t*, const xbrush_t*, const xrect_t*);
 typedef void(*PF_GDI_DRAW_PIE)(visual_t, const xpen_t*, const xbrush_t*, const xrect_t*, double, double);
-typedef void(*PF_GDI_SET_XFONT)(visual_t, const xfont_t*);
-typedef void(*PF_GDI_GET_XFONT)(visual_t, xfont_t*);
-typedef void(*PF_GDI_FONT_SIZE)(visual_t, xsize_t*);
 typedef void(*PF_GDI_DRAW_TEXT)(visual_t, const xface_t*, const xrect_t*, const tchar_t*, int);
 typedef void(*PF_GDI_TEXT_OUT)(visual_t, const xface_t*, const xpoint_t*, const tchar_t*, int);
-typedef void(*PF_GDI_TEXT_SIZE)(visual_t, const tchar_t*, int, xsize_t*);
-typedef void(*PF_GDI_TEXT_RECT)(visual_t, const xface_t*, const tchar_t*, int, xrect_t*);
+typedef void(*PF_GDI_SET_XFONT)(visual_t, const xfont_t*);
+typedef void(*PF_GDI_GET_XFONT)(visual_t, xfont_t*);
+typedef void(*PF_GDI_FONT_SIZE)(visual_t, const xfont_t*, xsize_t*);
+typedef void(*PF_GDI_TEXT_SIZE)(visual_t, const xfont_t*, const tchar_t*, int, xsize_t*);
+typedef void(*PF_GDI_TEXT_RECT)(visual_t, const xfont_t*, const xface_t*, const tchar_t*, int, xrect_t*);
 typedef void(*PF_GDI_DRAW_IMAGE)(visual_t, bitmap_t, const xcolor_t*, const xrect_t*);
 typedef void(*PF_GDI_DRAW_BITMAP)(visual_t, bitmap_t, const xpoint_t*);
 typedef void(*PF_GDI_GRADIENT_RECT)(visual_t, const xcolor_t* xc_brim, const xcolor_t* xc_core, const tchar_t* gradient, const xrect_t*);
@@ -432,31 +432,6 @@ typedef struct _if_widget_t{
 extern "C" {
 #endif
 
-#ifdef XDU_SUPPORT_SHELL
-	EXP_API void xdu_impl_shell(if_shell_t* pif);
-#endif /*XDU_SUPPORT_SHELL*/
-
-#ifdef XDU_SUPPORT_CONTEXT
-	EXP_API void xdu_impl_context(if_context_t* pif);
-	EXP_API void xdu_impl_context_graphic(if_context_t* pif);
-#ifdef XDU_SUPPORT_CONTEXT_REGION
-	EXP_API void xdu_impl_context_region(if_context_t* pif);
-#endif
-#ifdef XDU_SUPPORT_CONTEXT_BITMAP
-	EXP_API void xdu_impl_context_bitmap(if_context_t* pif);
-#endif
-#ifdef XDU_SUPPORT_CONTEXT_PRINTER
-	EXP_API void xdu_impl_context_printer(if_context_t* pif);
-#endif
-#endif /*XDU_SUPPORT_CONTEXT*/
-
-#ifdef XDU_SUPPORT_CLIPBOARD
-	EXP_API void xdu_impl_clipboard(if_clipboard_t* pif);
-#endif
-
-#ifdef XDU_SUPPORT_WIDGET
-	EXP_API void xdu_impl_widget(if_widget_t* pif);
-#endif
 
 #ifdef	__cplusplus
 }

@@ -256,7 +256,7 @@ void hand_splitor_paint(splitor_t* ptd, visual_t rdc)
 
 	get_visual_interface(rdc, &ifv);
 
-	(*ifv.pf_draw_rect)(ifv.ctx, &xp, NULL, &xr);
+	(*ifv.drw->pf_draw_rect)(ifv.ctx, &xp, NULL, &xr);
 
 	ilk = ptd->split;
 	while (ilk)
@@ -268,11 +268,11 @@ void hand_splitor_paint(splitor_t* ptd, visual_t rdc)
 
 			if (compare_text(get_split_item_layer_ptr(ilk), -1, ATTR_LAYER_HORZ, -1, 1) == 0)
 			{
-				(*ifv.pf_gradient_rect)(ifv.ctx, &xc_brim, &xc_core, GDI_ATTR_GRADIENT_VERT, &xr);
+				(*ifv.drw->pf_gradient_rect)(ifv.ctx, &xc_brim, &xc_core, GDI_ATTR_GRADIENT_VERT, &xr);
 			}
 			else
 			{
-				(*ifv.pf_gradient_rect)(ifv.ctx, &xc_brim, &xc_core, GDI_ATTR_GRADIENT_HORZ, &xr);
+				(*ifv.drw->pf_gradient_rect)(ifv.ctx, &xc_brim, &xc_core, GDI_ATTR_GRADIENT_HORZ, &xr);
 			}
 		}
 

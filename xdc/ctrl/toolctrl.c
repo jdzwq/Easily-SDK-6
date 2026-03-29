@@ -40,7 +40,8 @@ typedef struct _tool_delta_t{
 #define GETTOOLDELTA(ph) 		(tool_delta_t*)widget_get_user_delta(ph)
 #define SETTOOLDELTA(ph,ptd)	widget_set_user_delta(ph,(vword_t)ptd)
 
-/********************************************************************************************************/
+/***********************************************************************/
+
 static void _toolctrl_item_rect(widget_t widget, link_t_ptr ilk, xrect_t* pxr)
 {
 	tool_delta_t* ptd = GETTOOLDELTA(widget);
@@ -79,7 +80,8 @@ static void _toolctrl_reset_page(widget_t widget)
 	widget_reset_paging(widget, pw, ph, pw, ph, 0, 0);
 }
 
-/*********************************************************************************************************/
+/***********************************************************************/
+
 int noti_tool_owner(widget_t widget, unsigned int code, link_t_ptr tool, link_t_ptr ilk, void* data)
 {
 	tool_delta_t* ptd = GETTOOLDELTA(widget);
@@ -192,7 +194,8 @@ void noti_tool_group_expand(widget_t widget, link_t_ptr glk)
 	widget_erase(widget, &xr);
 }
 
-/*******************************************************************************/
+/***********************************************************************/
+
 int hand_tool_create(widget_t widget, void* data)
 {
 	tool_delta_t* ptd;
@@ -478,7 +481,7 @@ void hand_tool_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	end_canvas_paint(canv, dc, pxr);
 }
 
-/*******************************************************************************************/
+/***********************************************************************/
 
 widget_t toolctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, widget_t wparent)
 {

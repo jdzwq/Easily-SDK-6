@@ -29,27 +29,42 @@ LICENSE.GPL3 for more details.
 
 #include "../xdcdef.h"
 
+typedef void(*PF_GET_POINT_SCALE)(widget_t wt, int* pcx, int* pcy);
+
 typedef void(*PF_GET_OBJECT_POINT)(widget_t wt, void* obj, xpoint_t* ppt);
-typedef void(*PF_SET_OBJECT_POINT)(widget_t wt, void* obj, const xpoint_t* ppt);
+typedef bool_t(*PF_SET_OBJECT_POINT)(widget_t wt, void* obj, const xpoint_t* ppt);
 typedef void(*PF_GET_OBJECT_SIZE)(widget_t wt, void* obj, xsize_t* pxs);
-typedef void(*PF_SET_OBJECT_SIZE)(widget_t wt, void* obj, const xsize_t* pxs);
+typedef bool_t(*PF_SET_OBJECT_SIZE)(widget_t wt, void* obj, const xsize_t* pxs);
 typedef void(*PF_GET_OBJECT_RECT)(widget_t wt, void* obj, xrect_t* pxr);
-typedef void(*PF_SET_OBJECT_RECT)(widget_t wt, void* obj, const xrect_t* pxr);
+typedef bool_t(*PF_SET_OBJECT_RECT)(widget_t wt, void* obj, const xrect_t* pxr);
 typedef int(*PF_GET_OBJECT_ATTRS)(widget_t wt, void* obj, tchar_t* buf, int max);
-typedef void(*PF_SET_OBJECT_ATTRS)(widget_t wt, void* obj, const tchar_t* buf, int len);
+typedef bool_t(*PF_SET_OBJECT_ATTRS)(widget_t wt, void* obj, const tchar_t* buf, int len);
 
 typedef bool_t(*PF_DEL_OBJECT)(widget_t wt, void* obj);
 typedef void*(*PF_INS_OBJECT)(widget_t wt, const tchar_t* attrs, int len);
 typedef bool_t(*PF_GET_OBJECT_SELECTED)(widget_t wt, void* obj);
 typedef void(*PF_SET_OBJECT_SELECTED)(widget_t wt, void* obj, bool_t b);
 typedef void(*PF_ALL_OBJECT_SELECTED)(widget_t wt, bool_t b);
-typedef void*(*PF_GET_NEXT_OBJECT)(widget_t wt, void* obj);
+
+typedef void*(*PF_GET_NEXT_GROP)(widget_t wt, void* grp);
+typedef void*(*PF_GET_NEXT_OBJECT)(widget_t wt, void* grp, void* obj);
 
 typedef dword_t(*PF_RETRIVE_DOCUMENT)(widget_t wt, byte_t* buf, dword_t max);
-typedef void(*PF_RESTORE_DOCUMENT)(widget_t wt, const byte_t* buf, dword_t len);
-typedef void(*PF_RENDER_DOCUMENT)(widget_t wt, drawing_interface* pif);
+typedef bool_t(*PF_RESTORE_DOCUMENT)(widget_t wt, const byte_t* buf, dword_t len);
+typedef void(*PF_RENDER_DOCUMENT)(widget_t wt, drawing_interface* pci);
+
+#define WITH_SIZE_WIDTH		0x00000001
+#define WITH_SIZE_HEIGHT	0x00000002
+#define WITH_DRAG_FOCUSED	0x00000010
+#define WITH_DRAG_SELECTED	0x00000020
+#define WITH_MOUSE_GROUPED	0x00000100
 
 typedef struct _designer_interface{
+	bool_t with_ruler;
+	dword_t with_opera;
+	
+	PF_GET_POINT_SCALE pf_get_point_scale;
+	
 	PF_GET_OBJECT_POINT pf_get_obj_point;
 	PF_SET_OBJECT_POINT pf_set_obj_point;
 	PF_GET_OBJECT_SIZE	pf_get_obj_size;
@@ -64,6 +79,7 @@ typedef struct _designer_interface{
 	PF_SET_OBJECT_SELECTED pf_set_obj_selected;
 	PF_ALL_OBJECT_SELECTED pf_all_obj_selected;
 
+	PF_GET_NEXT_GROP pf_get_next_grp;
 	PF_GET_NEXT_OBJECT pf_get_next_obj;
 
 	PF_INS_OBJECT	pf_ins_obj;
@@ -81,6 +97,15 @@ extern "C" {
 
 EXP_API designer_interface desg_formctrl;
 
+EXP_API designer_interface desg_diagramctrl;
+
+EXP_API designer_interface desg_dialogctrl;
+
+EXP_API designer_interface desg_gridctrl;
+
+EXP_API designer_interface desg_statisctrl;
+
+EXP_API designer_interface desg_topogctrl;
 
 #ifdef	__cplusplus
 }

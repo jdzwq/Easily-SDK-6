@@ -109,9 +109,9 @@ void _editbox_auto_resize(widget_t widget)
 
 	get_visual_interface(ptd->textor.cdc, &ifv);
 
-	(*ifv.pf_font_size)(ifv.ctx, &xs);
+	(*ifv.drw->pf_font_size)(ifv.ctx, &xs);
 	cx = xs.w;
-	(*ifv.pf_text_size)(ifv.ctx, string_ptr(vs), string_len(vs), &xs);
+	(*ifv.drw->pf_text_size)(ifv.ctx, string_ptr(vs), string_len(vs), &xs);
 
 	if (xs.w + cx > xr.w)
 	{

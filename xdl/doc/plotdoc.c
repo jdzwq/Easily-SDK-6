@@ -517,7 +517,7 @@ void set_plot_y_grades(link_t_ptr ptr, double** sa)
 		sub = insert_dom_node(nlk, LINK_LAST);
 		set_dom_node_name(sub, DOC_PLOT_Y_GRADE, -1);
 
-		numtoxs(get_numeric(sa, i), numstr, NUM_LEN);
+		numtoxs(get_numeric_safe(sa, i, 0), numstr, NUM_LEN);
 		set_dom_node_text(sub, numstr, -1);
 	}
 }
@@ -627,7 +627,7 @@ void set_plot_y_bases(link_t_ptr ptr, double** sa)
 		sub = insert_dom_node(nlk, LINK_LAST);
 		set_dom_node_name(sub, DOC_PLOT_Y_BASE, -1);
 
-		numtoxs(get_numeric(sa, i), numstr, NUM_LEN);
+		numtoxs(get_numeric_safe(sa, i, 0), numstr, NUM_LEN);
 		set_dom_node_text(sub, numstr, -1);
 	}
 }
@@ -737,7 +737,7 @@ void set_plot_y_steps(link_t_ptr ptr, double** sa)
 		sub = insert_dom_node(nlk, LINK_LAST);
 		set_dom_node_name(sub, DOC_PLOT_Y_STEP, -1);
 
-		numtoxs(get_numeric(sa, i), numstr, NUM_LEN);
+		numtoxs(get_numeric_safe(sa, i, 0), numstr, NUM_LEN);
 		set_dom_node_text(sub, numstr, -1);
 	}
 }

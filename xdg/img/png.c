@@ -28,7 +28,7 @@ LICENSE.GPL3 for more details.
 
 #include <setjmp.h>
 
-#include "../xdgobj.h"
+#include "../xdgmgc.h"
 #include "../xdgoem.h"
 
 typedef struct _io_buffer{

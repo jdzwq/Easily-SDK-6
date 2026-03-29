@@ -28,12 +28,12 @@ LICENSE.GPL3 for more details.
 #include "../xdlgdi.h"
 
 
-void calc_datebox_size(const measure_interface* pim, xsize_t* pxs)
+void calc_datebox_size(const measure_interface* pmc, const xfont_t* pxf, xsize_t* pxs)
 {
 	xsize_t xs;
 	float fx, fy;
 
-	(*pim->pf_measure_font)(pim->ctx, &xs);
+	(*pmc->mea->pf_measure_font)(pmc->ctx, pxf, &xs);
 
 	fx = (xs.fw > DEF_TOUCH_SPAN) ? xs.fw : DEF_TOUCH_SPAN;
 	fy = (xs.fh > DEF_TOUCH_SPAN) ? xs.fh : DEF_TOUCH_SPAN;
@@ -42,14 +42,14 @@ void calc_datebox_size(const measure_interface* pim, xsize_t* pxs)
 	pxs->fh = fy * (CALENDAR_ROW + 2);
 }
 
-void calc_datebox_day_rect(const measure_interface* pim, const xdate_t* pdt, xrect_t* pxr)
+void calc_datebox_day_rect(const measure_interface* pmc, const xfont_t* pxf, const xdate_t* pdt, xrect_t* pxr)
 {
 	int i, j;
 	xsize_t xs;
 	float fx, fy;
 	calendar_t ca = { 0 };
 
-	(*pim->pf_measure_font)(pim->ctx, &xs);
+	(*pmc->mea->pf_measure_font)(pmc->ctx, pxf, &xs);
 
 	fx = (xs.fw > DEF_TOUCH_SPAN) ? xs.fw : DEF_TOUCH_SPAN;
 	fy = (xs.fh > DEF_TOUCH_SPAN) ? xs.fh : DEF_TOUCH_SPAN;
@@ -81,7 +81,7 @@ void calc_datebox_day_rect(const measure_interface* pim, const xdate_t* pdt, xre
 	}
 }
 
-int	calc_datebox_hint(const measure_interface* pim, const xpoint_t* ppt, const xdate_t* pdt, int* pday)
+int	calc_datebox_hint(const measure_interface* pmc, const xfont_t* pxf, const xpoint_t* ppt, const xdate_t* pdt, int* pday)
 {
 	xrect_t xr;
 	int i, j;
@@ -89,7 +89,7 @@ int	calc_datebox_hint(const measure_interface* pim, const xpoint_t* ppt, const x
 	float fx, fy;
 	calendar_t ca = { 0 };
 
-	(*pim->pf_measure_font)(pim->ctx, &xs);
+	(*pmc->mea->pf_measure_font)(pmc->ctx, pxf, &xs);
 
 	fx = (xs.fw > DEF_TOUCH_SPAN) ? xs.fw : DEF_TOUCH_SPAN;
 	fy = (xs.fh > DEF_TOUCH_SPAN) ? xs.fh : DEF_TOUCH_SPAN;
@@ -147,7 +147,7 @@ int	calc_datebox_hint(const measure_interface* pim, const xpoint_t* ppt, const x
 	return DATEBOX_HINT_NONE;
 }
 
-void draw_datebox(const drawing_interface* pif, const xdate_t* pdt)
+void draw_datebox(const drawing_interface* pci, const xfont_t* pxf, const xdate_t* pdt)
 {
 	xface_t xa;
 	xpen_t xp;
@@ -161,9 +161,10 @@ void draw_datebox(const drawing_interface* pif, const xdate_t* pdt)
 	float mx, my;
 	calendar_t ca = { 0 };
 
-	const canvbox_t* pbox = (canvbox_t*)(&pif->rect);
+	const canvbox_t* pbox = (canvbox_t*)(&pci->rect);
 
-	(*pif->pf_font_size)(pif->ctx, &xs);
+	(*pci->drw->pf_set_xfont)(pci->ctx, pxf);
+	(*pci->drw->pf_font_size)(pci->ctx, &xs);
 
 	mx = (xs.fw > DEF_TOUCH_SPAN) ? xs.fw : DEF_TOUCH_SPAN;
 	my = (xs.fh > DEF_TOUCH_SPAN) ? xs.fh : DEF_TOUCH_SPAN;
@@ -172,10 +173,10 @@ void draw_datebox(const drawing_interface* pif, const xdate_t* pdt)
 	xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_CENTER);
 	xscpy(xa.line_align, GDI_ATTR_TEXT_ALIGN_CENTER);
 
-	b_print = (pif->tag == _CANVAS_PRINTER) ? 1 : 0;
+	b_print = (pci->tag == _CANVAS_PRINTER) ? 1 : 0;
 	if (!b_print)
 	{
-		format_xcolor(&pif->pclrs->clr_txt, xa.text_color);
+		format_xcolor(&pci->pclrs->clr_txt, xa.text_color);
 	}
 
 	default_xpen(&xp);
@@ -188,20 +189,20 @@ void draw_datebox(const drawing_interface* pif, const xdate_t* pdt)
 	xr.fy = pbox->fy;
 	xr.fw = mx;
 	xr.fh = my;
-	(*pif->pf_draw_text)(pif->ctx, &xa, &xr, _T("<"), -1);
+	(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, _T("<"), -1);
 
 	xr.fx = pbox->fx + mx;
 	xr.fw = mx * (CALENDAR_COL - 2);
 	xr.fy = pbox->fy;
 	xr.fh = my;
 	xsprintf(token, CB_FORMAT_YEARMONTH, pdt->year, pdt->mon);
-	(*pif->pf_draw_text)(pif->ctx, &xa, &xr, token, -1);
+	(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, token, -1);
 
 	xr.fx = pbox->fx + mx * (CALENDAR_COL -1);
 	xr.fy = pbox->fy;
 	xr.fw = mx;
 	xr.fh = my;
-	(*pif->pf_draw_text)(pif->ctx, &xa, &xr, _T(">"), -1);
+	(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, _T(">"), -1);
 
 #ifdef XDK_SUPPORT_DATE
 	fill_calendar(&ca, pdt);
@@ -214,7 +215,7 @@ void draw_datebox(const drawing_interface* pif, const xdate_t* pdt)
 		xr.fy = pbox->fy + my;
 		xr.fh = my;
 
-		(*pif->pf_draw_text)(pif->ctx, &xa, &xr, ca.calen_week[i], -1);
+		(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, ca.calen_week[i], -1);
 	}
 
 	for (i = 0; i < CALENDAR_ROW; i++)
@@ -229,25 +230,25 @@ void draw_datebox(const drawing_interface* pif, const xdate_t* pdt)
 			if (ca.calen_days[i][j])
 			{
 				xsprintf(token, _T("%d"), ca.calen_days[i][j]);
-				(*pif->pf_draw_text)(pif->ctx, &xa, &xr, token, -1);
+				(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, token, -1);
 			}
 
 			if (pdt->day && pdt->day == ca.calen_days[i][j])
 			{
 				ft_expand_rect(&xr, -1, -1);
-				(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+				(*pci->drw->pf_draw_rect)(pci->ctx, &xp, NULL, &xr);
 			}
 		}
 	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-void calc_timebox_size(const measure_interface* pim, xsize_t* pxs)
+void calc_timebox_size(const measure_interface* pmc, const xfont_t* pxf, xsize_t* pxs)
 {
 	xsize_t xs;
 	float fx, fy;
 
-	(*pim->pf_measure_font)(pim->ctx, &xs);
+	(*pmc->mea->pf_measure_font)(pmc->ctx, pxf, &xs);
 
 	fx = (xs.fw > DEF_TOUCH_SPAN) ? xs.fw : DEF_TOUCH_SPAN;
 	fy = (xs.fh > DEF_TOUCH_SPAN) ? xs.fh : DEF_TOUCH_SPAN;
@@ -256,13 +257,13 @@ void calc_timebox_size(const measure_interface* pim, xsize_t* pxs)
 	pxs->fh = (float)(fy * 3);
 }
 
-int	calc_timebox_hint(const measure_interface* pim, const xpoint_t* ppt)
+int	calc_timebox_hint(const measure_interface* pmc, const xfont_t* pxf, const xpoint_t* ppt)
 {
 	xrect_t xr;
 	xsize_t xs;
 	float mx, my;
 
-	(*pim->pf_measure_font)(pim->ctx, &xs);
+	(*pmc->mea->pf_measure_font)(pmc->ctx, pxf, &xs);
 
 	mx = (xs.fw > DEF_TOUCH_SPAN) ? xs.fw : DEF_TOUCH_SPAN;
 	my = (xs.fh > DEF_TOUCH_SPAN) ? xs.fh : DEF_TOUCH_SPAN;
@@ -405,7 +406,7 @@ int	calc_timebox_hint(const measure_interface* pim, const xpoint_t* ppt)
 	return TIMEBOX_HINT_NONE;
 }
 
-void draw_timebox(const drawing_interface* pif, const xdate_t* ptt)
+void draw_timebox(const drawing_interface* pci, const xfont_t* pxf, const xdate_t* ptt)
 {
 	xface_t xa;
 	xpen_t xp;
@@ -418,16 +419,16 @@ void draw_timebox(const drawing_interface* pif, const xdate_t* ptt)
 	xsize_t xs;
 	float mx, my;
 
-	const canvbox_t* pbox = (canvbox_t*)(&pif->rect);
+	const canvbox_t* pbox = (canvbox_t*)(&pci->rect);
 
 	default_xface(&xa);
 	xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_CENTER);
 	xscpy(xa.line_align, GDI_ATTR_TEXT_ALIGN_CENTER);
 
-	b_print = (pif->tag == _CANVAS_PRINTER) ? 1 : 0;
+	b_print = (pci->tag == _CANVAS_PRINTER) ? 1 : 0;
 	if (!b_print)
 	{
-		format_xcolor(&pif->pclrs->clr_txt, xa.text_color);
+		format_xcolor(&pci->pclrs->clr_txt, xa.text_color);
 	}
 
 	default_xpen(&xp);
@@ -436,7 +437,8 @@ void draw_timebox(const drawing_interface* pif, const xdate_t* ptt)
 	parse_xcolor(&xc, xp.color);
 	lighten_xpen(&xp, DEF_HARD_DARKEN);
 
-	(*pif->pf_font_size)(pif->ctx, &xs);
+	(*pci->drw->pf_set_xfont)(pci->ctx, pxf);
+	(*pci->drw->pf_font_size)(pci->ctx, &xs);
 
 	mx = (xs.fw > DEF_TOUCH_SPAN) ? xs.fw : DEF_TOUCH_SPAN;
 	my = (xs.fh > DEF_TOUCH_SPAN) ? xs.fh : DEF_TOUCH_SPAN;
@@ -446,175 +448,175 @@ void draw_timebox(const drawing_interface* pif, const xdate_t* ptt)
 	xr.fw = mx;
 	xr.fh = my;
 	xsprintf(token, _T("%02d"), ptt->year - 2000);
-	(*pif->pf_draw_text)(pif->ctx, &xa, &xr, token, -1);
+	(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, token, -1);
 
 	xr.fx = pbox->fx;
 	xr.fy = pbox->fy + my;
 	xr.fw = mx;
 	xr.fh = my;
 	xsprintf(token, _T("%02d"), ptt->hour);
-	(*pif->pf_draw_text)(pif->ctx, &xa, &xr, token, -1);
+	(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, token, -1);
 
 	xr.fx = pbox->fx;
 	xr.fy = (float)(pbox->fy + my * 2);
 	xr.fw = mx;
 	xr.fh = my;
-	(*pif->pf_draw_text)(pif->ctx, &xa, &xr, _T("时"), -1);
+	(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, _T("时"), -1);
 
 	xr.fx = (float)(pbox->fx + mx * 1.5);
 	xr.fy = pbox->fy;
 	xr.fw = mx;
 	xr.fh = my;
 	xsprintf(token, _T("%02d"), ptt->mon);
-	(*pif->pf_draw_text)(pif->ctx, &xa, &xr, token, -1);
+	(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, token, -1);
 
 	xr.fx = (float)(pbox->fx + mx * 1.5);
 	xr.fy = pbox->fy + my;
 	xr.fw = mx;
 	xr.fh = my;
 	xsprintf(token, _T("%02d"), ptt->min);
-	(*pif->pf_draw_text)(pif->ctx, &xa, &xr, token, -1);
+	(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, token, -1);
 
 	xr.fx = (float)(pbox->fx + mx * 1.5);
 	xr.fy = (float)(pbox->fy + my * 2);
 	xr.fw = mx;
 	xr.fh = my;
-	(*pif->pf_draw_text)(pif->ctx, &xa, &xr, _T("分"), -1);
+	(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, _T("分"), -1);
 
 	xr.fx = (float)(pbox->fx + mx * 3);
 	xr.fy = pbox->fy;
 	xr.fw = mx;
 	xr.fh = my;
 	xsprintf(token, _T("%02d"), ptt->day);
-	(*pif->pf_draw_text)(pif->ctx, &xa, &xr, token, -1);
+	(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, token, -1);
 
 	xr.fx = (float)(pbox->fx + mx * 3);
 	xr.fy = (float)(pbox->fy + my);
 	xr.fw = mx;
 	xr.fh = my;
 	xsprintf(token, _T("%02d"), ptt->sec);
-	(*pif->pf_draw_text)(pif->ctx, &xa, &xr, token, -1);
+	(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, token, -1);
 
 	xr.fx = (float)(pbox->fx + mx * 3);
 	xr.fy = (float)(pbox->fy + my * 2);
 	xr.fw = mx;
 	xr.fh = my;
-	(*pif->pf_draw_text)(pif->ctx, &xa, &xr, _T("秒"), -1);
+	(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, _T("秒"), -1);
 
 	xr.fx = (float)(pbox->fx + mx);
 	xr.fy = pbox->fy;
 	xr.fw = (float)(mx / 2);
 	xr.fh = (float)(my / 2);
 	ft_center_rect(&xr, DEF_SMALL_ICON, DEF_SMALL_ICON);
-	draw_gizmo(pif, &xc, &xr, GDI_ATTR_GIZMO_UP);
+	draw_gizmo(pci, &xc, &xr, GDI_ATTR_GIZMO_UP);
 
 	xr.fx = (float)(pbox->fx + mx);
 	xr.fy = (float)(pbox->fy + my / 2);
 	xr.fw = (float)(mx / 2);
 	xr.fh = (float)(my / 2);
 	ft_center_rect(&xr, DEF_SMALL_ICON, DEF_SMALL_ICON);
-	draw_gizmo(pif, &xc, &xr, GDI_ATTR_GIZMO_DOWN);
+	draw_gizmo(pci, &xc, &xr, GDI_ATTR_GIZMO_DOWN);
 
 	xr.fx = (float)(pbox->fx + mx);
 	xr.fy = (float)(pbox->fy + my);
 	xr.fw = (float)(mx / 2);
 	xr.fh = (float)(my / 2);
 	ft_center_rect(&xr, DEF_SMALL_ICON, DEF_SMALL_ICON);
-	draw_gizmo(pif, &xc, &xr, GDI_ATTR_GIZMO_UP);
+	draw_gizmo(pci, &xc, &xr, GDI_ATTR_GIZMO_UP);
 
 	xr.fx = (float)(pbox->fx + mx);
 	xr.fy = (float)(pbox->fy + my * 1.5);
 	xr.fw = (float)(mx / 2);
 	xr.fh = (float)(my / 2);
 	ft_center_rect(&xr, DEF_SMALL_ICON, DEF_SMALL_ICON);
-	draw_gizmo(pif, &xc, &xr, GDI_ATTR_GIZMO_DOWN);
+	draw_gizmo(pci, &xc, &xr, GDI_ATTR_GIZMO_DOWN);
 
 	xr.fx = (float)(pbox->fx + mx);
 	xr.fy = (float)(pbox->fy + my * 2);
 	xr.fw = (float)(mx / 2);
 	xr.fh = my;
 	ft_center_rect(&xr, DEF_SMALL_ICON, DEF_SMALL_ICON);
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pci->drw->pf_draw_rect)(pci->ctx, &xp, NULL, &xr);
 
 	xr.fx = (float)(pbox->fx + mx * 2.5);
 	xr.fy = pbox->fy;
 	xr.fw = (float)(mx / 2);
 	xr.fh = (float)(my / 2);
 	ft_center_rect(&xr, DEF_SMALL_ICON, DEF_SMALL_ICON);
-	draw_gizmo(pif, &xc, &xr, GDI_ATTR_GIZMO_UP);
+	draw_gizmo(pci, &xc, &xr, GDI_ATTR_GIZMO_UP);
 
 	xr.fx = (float)(pbox->fx + mx * 2.5);
 	xr.fy = (float)(pbox->fy + my / 2);
 	xr.fw = (float)(mx / 2);
 	xr.fh = (float)(my / 2);
 	ft_center_rect(&xr, DEF_SMALL_ICON, DEF_SMALL_ICON);
-	draw_gizmo(pif, &xc, &xr, GDI_ATTR_GIZMO_DOWN);
+	draw_gizmo(pci, &xc, &xr, GDI_ATTR_GIZMO_DOWN);
 
 	xr.fx = (float)(pbox->fx + mx * 2.5);
 	xr.fy = (float)(pbox->fy + my);
 	xr.fw = (float)(mx / 2);
 	xr.fh = (float)(my / 2);
 	ft_center_rect(&xr, DEF_SMALL_ICON, DEF_SMALL_ICON);
-	draw_gizmo(pif, &xc, &xr, GDI_ATTR_GIZMO_UP);
+	draw_gizmo(pci, &xc, &xr, GDI_ATTR_GIZMO_UP);
 
 	xr.fx = (float)(pbox->fx + mx * 2.5);
 	xr.fy = (float)(pbox->fy + my * 1.5);
 	xr.fw = (float)(mx / 2);
 	xr.fh = (float)(my / 2);
 	ft_center_rect(&xr, DEF_SMALL_ICON, DEF_SMALL_ICON);
-	draw_gizmo(pif, &xc, &xr, GDI_ATTR_GIZMO_DOWN);
+	draw_gizmo(pci, &xc, &xr, GDI_ATTR_GIZMO_DOWN);
 
 	xr.fx = (float)(pbox->fx + mx * 2.5);
 	xr.fy = (float)(pbox->fy + my * 2);
 	xr.fw = (float)(mx / 2);
 	xr.fh = my;
 	ft_center_rect(&xr, DEF_SMALL_ICON, DEF_SMALL_ICON);
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pci->drw->pf_draw_rect)(pci->ctx, &xp, NULL, &xr);
 
 	xr.fx = (float)(pbox->fx + mx * 4);
 	xr.fy = pbox->fy;
 	xr.fw = (float)(mx / 2);
 	xr.fh = (float)(my / 2);
 	ft_center_rect(&xr, DEF_SMALL_ICON, DEF_SMALL_ICON);
-	draw_gizmo(pif, &xc, &xr, GDI_ATTR_GIZMO_UP);
+	draw_gizmo(pci, &xc, &xr, GDI_ATTR_GIZMO_UP);
 
 	xr.fx = (float)(pbox->fx + mx * 4);
 	xr.fy = (float)(pbox->fy + my / 2);
 	xr.fw = (float)(mx / 2);
 	xr.fh = (float)(my / 2);
 	ft_center_rect(&xr, DEF_SMALL_ICON, DEF_SMALL_ICON);
-	draw_gizmo(pif, &xc, &xr, GDI_ATTR_GIZMO_DOWN);
+	draw_gizmo(pci, &xc, &xr, GDI_ATTR_GIZMO_DOWN);
 
 	xr.fx = (float)(pbox->fx + mx * 4);
 	xr.fy = (float)(pbox->fy + my);
 	xr.fw = (float)(mx / 2);
 	xr.fh = (float)(my / 2);
 	ft_center_rect(&xr, DEF_SMALL_ICON, DEF_SMALL_ICON);
-	draw_gizmo(pif, &xc, &xr, GDI_ATTR_GIZMO_UP);
+	draw_gizmo(pci, &xc, &xr, GDI_ATTR_GIZMO_UP);
 
 	xr.fx = (float)(pbox->fx + mx * 4);
 	xr.fy = (float)(pbox->fy + my * 1.5);
 	xr.fw = (float)(mx / 2);
 	xr.fh = (float)(my / 2);
 	ft_center_rect(&xr, DEF_SMALL_ICON, DEF_SMALL_ICON);
-	draw_gizmo(pif, &xc, &xr, GDI_ATTR_GIZMO_DOWN);
+	draw_gizmo(pci, &xc, &xr, GDI_ATTR_GIZMO_DOWN);
 
 	xr.fx = (float)(pbox->fx + mx * 4);
 	xr.fy = (float)(pbox->fy + my * 2);
 	xr.fw = (float)mx / 2;
 	xr.fh = my;
 	ft_center_rect(&xr, DEF_SMALL_ICON, DEF_SMALL_ICON);
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pci->drw->pf_draw_rect)(pci->ctx, &xp, NULL, &xr);
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////
-void calc_listbox_size(const measure_interface* pim, link_t_ptr ptr, xsize_t* pxs)
+void calc_listbox_size(const measure_interface* pmc, const xfont_t* pxf, link_t_ptr ptr, xsize_t* pxs)
 {
 	link_t_ptr ent;
 
 	xsize_t xs;
 	float mx, my;
 
-	(*pim->pf_measure_font)(pim->ctx, &xs);
+	(*pmc->mea->pf_measure_font)(pmc->ctx, pxf, &xs);
 
 	mx = (xs.fw > DEF_TOUCH_SPAN) ? xs.fw : DEF_TOUCH_SPAN;
 	my = (xs.fh > DEF_TOUCH_SPAN) ? xs.fh : DEF_TOUCH_SPAN;
@@ -630,7 +632,7 @@ void calc_listbox_size(const measure_interface* pim, link_t_ptr ptr, xsize_t* px
 			continue;
 		}
 
-		(*pim->pf_measure_size)(pim->ctx, get_string_entity_val_ptr(ent), -1, &xs);
+		(*pmc->mea->pf_measure_size)(pmc->ctx, pxf, get_string_entity_val_ptr(ent), -1, &xs);
 
 		if (pxs->fw < xs.fw)
 			pxs->fw = xs.fw;
@@ -641,14 +643,14 @@ void calc_listbox_size(const measure_interface* pim, link_t_ptr ptr, xsize_t* px
 	}
 }
 
-int calc_listbox_hint(const measure_interface* pim, const xpoint_t* ppt, link_t_ptr ptr, link_t_ptr* pilk)
+int calc_listbox_hint(const measure_interface* pmc, const xfont_t* pxf, const xpoint_t* ppt, link_t_ptr ptr, link_t_ptr* pilk)
 {
 	link_t_ptr ent;
 	xrect_t xr;
 	xsize_t xs;
 	float mx, my;
 
-	(*pim->pf_measure_font)(pim->ctx, &xs);
+	(*pmc->mea->pf_measure_font)(pmc->ctx, pxf, &xs);
 
 	mx = (xs.fw > DEF_TOUCH_SPAN) ? xs.fw : DEF_TOUCH_SPAN;
 	my = (xs.fh > DEF_TOUCH_SPAN) ? xs.fh : DEF_TOUCH_SPAN;
@@ -667,7 +669,7 @@ int calc_listbox_hint(const measure_interface* pim, const xpoint_t* ppt, link_t_
 			continue;
 		}
 
-		(*pim->pf_measure_size)(pim->ctx, get_string_entity_val_ptr(ent), -1, &xs);
+		(*pmc->mea->pf_measure_size)(pmc->ctx, pxf, get_string_entity_val_ptr(ent), -1, &xs);
 
 		if (xr.fw < xs.fw)
 			xr.fw = xs.fw;
@@ -687,14 +689,14 @@ int calc_listbox_hint(const measure_interface* pim, const xpoint_t* ppt, link_t_
 	return LISTBOX_HINT_NONE;
 }
 
-void calc_listbox_item_rect(const measure_interface* pim, link_t_ptr ptr, link_t_ptr ilk, xrect_t* pxr)
+void calc_listbox_item_rect(const measure_interface* pmc, const xfont_t* pxf, link_t_ptr ptr, link_t_ptr ilk, xrect_t* pxr)
 {
 	link_t_ptr ent;
 	xrect_t xr;
 	xsize_t xs;
 	float mx, my;
 
-	(*pim->pf_measure_font)(pim->ctx, &xs);
+	(*pmc->mea->pf_measure_font)(pmc->ctx, pxf, &xs);
 
 	mx = (xs.fw > DEF_TOUCH_SPAN) ? xs.fw : DEF_TOUCH_SPAN;
 	my = (xs.fh > DEF_TOUCH_SPAN) ? xs.fh : DEF_TOUCH_SPAN;
@@ -713,7 +715,7 @@ void calc_listbox_item_rect(const measure_interface* pim, link_t_ptr ptr, link_t
 			continue;
 		}
 
-		(*pim->pf_measure_size)(pim->ctx, get_string_entity_val_ptr(ent), -1, &xs);
+		(*pmc->mea->pf_measure_size)(pmc->ctx, pxf, get_string_entity_val_ptr(ent), -1, &xs);
 
 		if (xr.fw < xs.fw)
 			xr.fw = xs.fw;
@@ -731,7 +733,7 @@ void calc_listbox_item_rect(const measure_interface* pim, link_t_ptr ptr, link_t
 	xmem_zero((void*)pxr, sizeof(xrect_t));
 }
 
-void draw_listbox(const drawing_interface* pif, link_t_ptr ptr)
+void draw_listbox(const drawing_interface* pci, const xfont_t* pxf, link_t_ptr ptr)
 {
 	link_t_ptr ent;
 	xface_t xa;
@@ -741,9 +743,10 @@ void draw_listbox(const drawing_interface* pif, link_t_ptr ptr)
 	xsize_t xs;
 	float mx, my;
 
-	const canvbox_t* pbox = (canvbox_t*)(&pif->rect);
+	const canvbox_t* pbox = (canvbox_t*)(&pci->rect);
 
-	(*pif->pf_font_size)(pif->ctx, &xs);
+	(*pci->drw->pf_set_xfont)(pci->ctx, pxf);
+	(*pci->drw->pf_font_size)(pci->ctx, &xs);
 
 	mx = (xs.fw > DEF_TOUCH_SPAN) ? xs.fw : DEF_TOUCH_SPAN;
 	my = (xs.fh > DEF_TOUCH_SPAN) ? xs.fh : DEF_TOUCH_SPAN;
@@ -752,10 +755,10 @@ void draw_listbox(const drawing_interface* pif, link_t_ptr ptr)
 	xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_NEAR);
 	xscpy(xa.line_align, GDI_ATTR_TEXT_ALIGN_CENTER);
 
-	b_print = (pif->tag == _CANVAS_PRINTER) ? 1 : 0;
+	b_print = (pci->tag == _CANVAS_PRINTER) ? 1 : 0;
 	if (!b_print)
 	{
-		format_xcolor(&pif->pclrs->clr_txt, xa.text_color);
+		format_xcolor(&pci->pclrs->clr_txt, xa.text_color);
 	}
 
 	xr.fx = pbox->fx;
@@ -772,7 +775,7 @@ void draw_listbox(const drawing_interface* pif, link_t_ptr ptr)
 			continue;
 		}
 
-		(*pif->pf_draw_text)(pif->ctx, &xa, &xr, get_string_entity_val_ptr(ent), -1);
+		(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, get_string_entity_val_ptr(ent), -1);
 
 		xr.fy += my;
 		ent = get_string_next_entity(ptr, ent);
@@ -780,13 +783,13 @@ void draw_listbox(const drawing_interface* pif, link_t_ptr ptr)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void calc_dropbox_size(const measure_interface* pim, link_t_ptr ptr, xsize_t* pxs)
+void calc_dropbox_size(const measure_interface* pmc, const xfont_t* pxf, link_t_ptr ptr, xsize_t* pxs)
 {
 	link_t_ptr ent;
 	xsize_t xs;
 	float mx, my;
 
-	(*pim->pf_measure_font)(pim->ctx, &xs);
+	(*pmc->mea->pf_measure_font)(pmc->ctx, pxf, &xs);
 
 	mx = (xs.fw > DEF_TOUCH_SPAN) ? xs.fw : DEF_TOUCH_SPAN;
 	my = (xs.fh > DEF_TOUCH_SPAN) ? xs.fh : DEF_TOUCH_SPAN;
@@ -803,7 +806,7 @@ void calc_dropbox_size(const measure_interface* pim, link_t_ptr ptr, xsize_t* px
 			continue;
 		}
 
-		(*pim->pf_measure_size)(pim->ctx, get_string_entity_val_ptr(ent), -1, &xs);
+		(*pmc->mea->pf_measure_size)(pmc->ctx, pxf, get_string_entity_val_ptr(ent), -1, &xs);
 
 		if (pxs->fw < xs.fw)
 			pxs->fw = xs.fw;
@@ -816,14 +819,14 @@ void calc_dropbox_size(const measure_interface* pim, link_t_ptr ptr, xsize_t* px
 	pxs->fw += mx;
 }
 
-int calc_dropbox_hint(const measure_interface* pim, const xpoint_t* ppt, link_t_ptr ptr, link_t_ptr* pilk)
+int calc_dropbox_hint(const measure_interface* pmc, const xfont_t* pxf, const xpoint_t* ppt, link_t_ptr ptr, link_t_ptr* pilk)
 {
 	link_t_ptr ent;
 	xrect_t xr;
 	xsize_t xs;
 	float mx, my;
 
-	(*pim->pf_measure_font)(pim->ctx, &xs);
+	(*pmc->mea->pf_measure_font)(pmc->ctx, pxf, &xs);
 
 	mx = (xs.fw > DEF_TOUCH_SPAN) ? xs.fw : DEF_TOUCH_SPAN;
 	my = (xs.fh > DEF_TOUCH_SPAN) ? xs.fh : DEF_TOUCH_SPAN;
@@ -842,7 +845,7 @@ int calc_dropbox_hint(const measure_interface* pim, const xpoint_t* ppt, link_t_
 			continue;
 		}
 
-		(*pim->pf_measure_size)(pim->ctx, get_string_entity_val_ptr(ent), -1, &xs);
+		(*pmc->mea->pf_measure_size)(pmc->ctx, pxf, get_string_entity_val_ptr(ent), -1, &xs);
 
 		if (xr.fw < xs.fw)
 			xr.fw = xs.fw;
@@ -862,14 +865,14 @@ int calc_dropbox_hint(const measure_interface* pim, const xpoint_t* ppt, link_t_
 	return DROPBOX_HINT_NONE;
 }
 
-void calc_dropbox_item_rect(const measure_interface* pim, link_t_ptr ptr, link_t_ptr ilk, xrect_t* pxr)
+void calc_dropbox_item_rect(const measure_interface* pmc, const xfont_t* pxf, link_t_ptr ptr, link_t_ptr ilk, xrect_t* pxr)
 {
 	link_t_ptr ent;
 	xrect_t xr;
 	xsize_t xs;
 	float mx, my;
 
-	(*pim->pf_measure_font)(pim->ctx, &xs);
+	(*pmc->mea->pf_measure_font)(pmc->ctx, pxf, &xs);
 
 	mx = (xs.fw > DEF_TOUCH_SPAN) ? xs.fw : DEF_TOUCH_SPAN;
 	my = (xs.fh > DEF_TOUCH_SPAN) ? xs.fh : DEF_TOUCH_SPAN;
@@ -888,7 +891,7 @@ void calc_dropbox_item_rect(const measure_interface* pim, link_t_ptr ptr, link_t
 			continue;
 		}
 
-		(*pim->pf_measure_size)(pim->ctx, get_string_entity_val_ptr(ent), -1, &xs);
+		(*pmc->mea->pf_measure_size)(pmc->ctx, pxf, get_string_entity_val_ptr(ent), -1, &xs);
 
 		if (xr.fw < xs.fw)
 			xr.fw = xs.fw;
@@ -906,7 +909,7 @@ void calc_dropbox_item_rect(const measure_interface* pim, link_t_ptr ptr, link_t
 	xmem_zero((void*)pxr, sizeof(xrect_t));
 }
 
-void draw_dropbox(const drawing_interface* pif, link_t_ptr ptr)
+void draw_dropbox(const drawing_interface* pci, const xfont_t* pxf, link_t_ptr ptr)
 {
 	link_t_ptr ent;
 	xface_t xa;
@@ -916,9 +919,10 @@ void draw_dropbox(const drawing_interface* pif, link_t_ptr ptr)
 	xsize_t xs;
 	float mx, my;
 
-	const canvbox_t* pbox = (canvbox_t*)(&pif->rect);
+	const canvbox_t* pbox = (canvbox_t*)(&pci->rect);
 
-	(*pif->pf_font_size)(pif->ctx, &xs);
+	(*pci->drw->pf_set_xfont)(pci->ctx, pxf);
+	(*pci->drw->pf_font_size)(pci->ctx, &xs);
 
 	mx = (xs.fw > DEF_TOUCH_SPAN) ? xs.fw : DEF_TOUCH_SPAN;
 	my = (xs.fh > DEF_TOUCH_SPAN) ? xs.fh : DEF_TOUCH_SPAN;
@@ -927,10 +931,10 @@ void draw_dropbox(const drawing_interface* pif, link_t_ptr ptr)
 	xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_NEAR);
 	xscpy(xa.line_align, GDI_ATTR_TEXT_ALIGN_CENTER);
 
-	b_print = (pif->tag == _CANVAS_PRINTER) ? 1 : 0;
+	b_print = (pci->tag == _CANVAS_PRINTER) ? 1 : 0;
 	if (!b_print)
 	{
-		format_xcolor(&pif->pclrs->clr_txt, xa.text_color);
+		format_xcolor(&pci->pclrs->clr_txt, xa.text_color);
 	}
 
 	xr.fx = pbox->fx;
@@ -947,14 +951,14 @@ void draw_dropbox(const drawing_interface* pif, link_t_ptr ptr)
 			continue;
 		}
 
-		(*pif->pf_draw_text)(pif->ctx, &xa, &xr, get_string_entity_val_ptr(ent), -1);
+		(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, get_string_entity_val_ptr(ent), -1);
 
 		xr.fy += my;
 		ent = get_string_next_entity(ptr, ent);
 	}
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void draw_pushbox(const drawing_interface* pif, const tchar_t* text)
+void draw_pushbox(const drawing_interface* pci, const xfont_t* pxf, const tchar_t* text)
 {
 	xface_t xa;
 	xpen_t xp;
@@ -962,16 +966,18 @@ void draw_pushbox(const drawing_interface* pif, const tchar_t* text)
 	xrect_t xr;
 	bool_t b_print;
 
-	const canvbox_t* pbox = (canvbox_t*)(&pif->rect);
+	const canvbox_t* pbox = (canvbox_t*)(&pci->rect);
 
 	default_xface(&xa);
 	xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_CENTER);
 	xscpy(xa.line_align, GDI_ATTR_TEXT_ALIGN_CENTER);
 
-	b_print = (pif->tag == _CANVAS_PRINTER) ? 1 : 0;
+	(*pci->drw->pf_set_xfont)(pci->ctx, pxf);
+
+	b_print = (pci->tag == _CANVAS_PRINTER) ? 1 : 0;
 	if (!b_print)
 	{
-		format_xcolor(&pif->pclrs->clr_txt, xa.text_color);
+		format_xcolor(&pci->pclrs->clr_txt, xa.text_color);
 	}
 
 	default_xpen(&xp);
@@ -985,18 +991,18 @@ void draw_pushbox(const drawing_interface* pif, const tchar_t* text)
 	xr.fw = pbox->fw;
 	xr.fh = pbox->fh;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pci->drw->pf_draw_rect)(pci->ctx, &xp, NULL, &xr);
 
-	(*pif->pf_draw_text)(pif->ctx, &xa, &xr, text, -1);
+	(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, text, -1);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-void calc_radiobox_size(const measure_interface* pim, xsize_t* pxs)
+void calc_radiobox_size(const measure_interface* pmc, const xfont_t* pxf, xsize_t* pxs)
 {
 	xsize_t xs;
 	float mx, my;
 
-	(*pim->pf_measure_font)(pim->ctx, &xs);
+	(*pmc->mea->pf_measure_font)(pmc->ctx, pxf, &xs);
 
 	mx = (xs.fw > DEF_TOUCH_SPAN) ? xs.fw : DEF_TOUCH_SPAN;
 	my = (xs.fh > DEF_TOUCH_SPAN) ? xs.fh : DEF_TOUCH_SPAN;
@@ -1005,13 +1011,13 @@ void calc_radiobox_size(const measure_interface* pim, xsize_t* pxs)
 	pxs->fh = my;
 }
 
-int calc_radiobox_hint(const measure_interface* pim, const xpoint_t* ppt)
+int calc_radiobox_hint(const measure_interface* pmc, const xfont_t* pxf, const xpoint_t* ppt)
 {
 	xrect_t xr;
 	xsize_t xs;
 	float mx, my;
 
-	(*pim->pf_measure_font)(pim->ctx, &xs);
+	(*pmc->mea->pf_measure_font)(pmc->ctx, pxf, &xs);
 
 	mx = (xs.fw > DEF_TOUCH_SPAN) ? xs.fw : DEF_TOUCH_SPAN;
 	my = (xs.fh > DEF_TOUCH_SPAN) ? xs.fh : DEF_TOUCH_SPAN;
@@ -1035,7 +1041,7 @@ int calc_radiobox_hint(const measure_interface* pim, const xpoint_t* ppt)
 	return RADIOBOX_HINT_NONE;
 }
 
-void draw_radiobox(const drawing_interface* pif, bool_t b_on)
+void draw_radiobox(const drawing_interface* pci, const xfont_t* pxf, bool_t b_on)
 {
 	xface_t xa;
 	xpen_t xp;
@@ -1047,23 +1053,23 @@ void draw_radiobox(const drawing_interface* pif, bool_t b_on)
 	xsize_t xs;
 	float mx, my;
 
-	const canvbox_t* pbox = (canvbox_t*)(&pif->rect);
+	const canvbox_t* pbox = (canvbox_t*)(&pci->rect);
 
 	default_xface(&xa);
 	xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_CENTER);
 	xscpy(xa.line_align, GDI_ATTR_TEXT_ALIGN_CENTER);
 
-	b_print = (pif->tag == _CANVAS_PRINTER) ? 1 : 0;
+	b_print = (pci->tag == _CANVAS_PRINTER) ? 1 : 0;
 	if (!b_print)
 	{
-		format_xcolor(&pif->pclrs->clr_txt, xa.text_color);
+		format_xcolor(&pci->pclrs->clr_txt, xa.text_color);
 	}
 
 	default_xbrush(&xb);
 
 	if (!b_print)
 	{
-		format_xcolor(&pif->pclrs->clr_bkg, xb.color);
+		format_xcolor(&pci->pclrs->clr_bkg, xb.color);
 	}
 
 	default_xpen(&xp);
@@ -1077,7 +1083,8 @@ void draw_radiobox(const drawing_interface* pif, bool_t b_on)
 	lighten_xbrush(&xb, DEF_SOFT_DARKEN);
 	lighten_xbrush(&xb_on, DEF_HARD_DARKEN);
 
-	(*pif->pf_font_size)(pif->ctx, &xs);
+	(*pci->drw->pf_set_xfont)(pci->ctx, pxf);
+	(*pci->drw->pf_font_size)(pci->ctx, &xs);
 
 	mx = (xs.fw > DEF_TOUCH_SPAN) ? xs.fw : DEF_TOUCH_SPAN;
 	my = (xs.fh > DEF_TOUCH_SPAN) ? xs.fh : DEF_TOUCH_SPAN;
@@ -1088,21 +1095,21 @@ void draw_radiobox(const drawing_interface* pif, bool_t b_on)
 		xr.fy = pbox->fy;
 		xr.fw = mx;
 		xr.fh = my;
-		(*pif->pf_draw_rect)(pif->ctx, NULL, &xb_on, &xr);
+		(*pci->drw->pf_draw_rect)(pci->ctx, NULL, &xb_on, &xr);
 
 		xr.fx = pbox->fx;
 		xr.fy = pbox->fy;
 		xr.fw = mx;
 		xr.fh = my;
-		(*pif->pf_draw_ellipse)(pif->ctx, NULL, &xb_on, &xr);
+		(*pci->drw->pf_draw_ellipse)(pci->ctx, NULL, &xb_on, &xr);
 
 		xr.fx = pbox->fx + mx;
 		xr.fy = pbox->fy;
 		xr.fw = mx;
 		xr.fh = my;
-		(*pif->pf_draw_ellipse)(pif->ctx, &xp, &xb, &xr);
+		(*pci->drw->pf_draw_ellipse)(pci->ctx, &xp, &xb, &xr);
 
-		(*pif->pf_draw_text)(pif->ctx, &xa, &xr, _T("开"), -1);
+		(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, _T("开"), -1);
 	}
 	else
 	{
@@ -1110,31 +1117,31 @@ void draw_radiobox(const drawing_interface* pif, bool_t b_on)
 		xr.fy = pbox->fy;
 		xr.fw = mx;
 		xr.fh = my;
-		(*pif->pf_draw_rect)(pif->ctx, NULL, &xb, &xr);
+		(*pci->drw->pf_draw_rect)(pci->ctx, NULL, &xb, &xr);
 
 		xr.fx = pbox->fx + mx;
 		xr.fy = pbox->fy;
 		xr.fw = mx;
 		xr.fh = my;
-		(*pif->pf_draw_ellipse)(pif->ctx, NULL, &xb, &xr);
+		(*pci->drw->pf_draw_ellipse)(pci->ctx, NULL, &xb, &xr);
 
 		xr.fx = pbox->fx;
 		xr.fy = pbox->fy;
 		xr.fw = mx;
 		xr.fh = my;
-		(*pif->pf_draw_ellipse)(pif->ctx, &xp, &xb, &xr);
+		(*pci->drw->pf_draw_ellipse)(pci->ctx, &xp, &xb, &xr);
 
-		(*pif->pf_draw_text)(pif->ctx, &xa, &xr, _T("关"), -1);
+		(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, _T("关"), -1);
 	}
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
-void calc_checkbox_size(const measure_interface* pim, xsize_t* pxs)
+void calc_checkbox_size(const measure_interface* pmc, const xfont_t* pxf, xsize_t* pxs)
 {
 	xsize_t xs;
 	float mx, my;
 
-	(*pim->pf_measure_font)(pim->ctx, &xs);
+	(*pmc->mea->pf_measure_font)(pmc->ctx, pxf, &xs);
 
 	mx = (xs.fw > DEF_TOUCH_SPAN) ? xs.fw : DEF_TOUCH_SPAN;
 	my = (xs.fh > DEF_TOUCH_SPAN) ? xs.fh : DEF_TOUCH_SPAN;
@@ -1143,7 +1150,7 @@ void calc_checkbox_size(const measure_interface* pim, xsize_t* pxs)
 	pxs->fh = my;
 }
 
-void draw_checkbox(const drawing_interface* pif, bool_t b_on)
+void draw_checkbox(const drawing_interface* pci, const xfont_t* pxf, bool_t b_on)
 {
 	xface_t xa;
 	xpen_t xp;
@@ -1155,22 +1162,22 @@ void draw_checkbox(const drawing_interface* pif, bool_t b_on)
 	xsize_t xs;
 	float mx, my;
 
-	const canvbox_t* pbox = (canvbox_t*)(&pif->rect);
+	const canvbox_t* pbox = (canvbox_t*)(&pci->rect);
 
 	default_xface(&xa);
 	xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_CENTER);
 	xscpy(xa.line_align, GDI_ATTR_TEXT_ALIGN_CENTER);
 
-	b_print = (pif->tag == _CANVAS_PRINTER) ? 1 : 0;
+	b_print = (pci->tag == _CANVAS_PRINTER) ? 1 : 0;
 	if (!b_print)
 	{
-		format_xcolor(&pif->pclrs->clr_txt, xa.text_color);
+		format_xcolor(&pci->pclrs->clr_txt, xa.text_color);
 	}
 
 	default_xbrush(&xb);
 	if (!b_print)
 	{
-		format_xcolor(&pif->pclrs->clr_bkg, xb.color);
+		format_xcolor(&pci->pclrs->clr_bkg, xb.color);
 	}
 
 	default_xpen(&xp);
@@ -1179,7 +1186,8 @@ void draw_checkbox(const drawing_interface* pif, bool_t b_on)
 	parse_xcolor(&xc, xp.color);
 	lighten_xpen(&xp, DEF_HARD_DARKEN);
 
-	(*pif->pf_font_size)(pif->ctx, &xs);
+	(*pci->drw->pf_set_xfont)(pci->ctx, pxf);
+	(*pci->drw->pf_font_size)(pci->ctx, &xs);
 
 	mx = (xs.fw > DEF_TOUCH_SPAN) ? xs.fw : DEF_TOUCH_SPAN;
 	my = (xs.fh > DEF_TOUCH_SPAN) ? xs.fh : DEF_TOUCH_SPAN;
@@ -1190,21 +1198,21 @@ void draw_checkbox(const drawing_interface* pif, bool_t b_on)
 	xr.fh = pbox->fh;
 	ft_center_rect(&xr, DEF_SMALL_ICON, DEF_SMALL_ICON);
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pci->drw->pf_draw_rect)(pci->ctx, &xp, NULL, &xr);
 
 	if (b_on)
 	{
-		draw_gizmo(pif, &xc, &xr, GDI_ATTR_GIZMO_CHECKED);
+		draw_gizmo(pci, &xc, &xr, GDI_ATTR_GIZMO_CHECKED);
 	}
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
-void calc_slidebox_size(const measure_interface* pim, xsize_t* pxs)
+void calc_slidebox_size(const measure_interface* pmc, const xfont_t* pxf, xsize_t* pxs)
 {
 	xsize_t xs;
 	float mx, my;
 
-	(*pim->pf_measure_font)(pim->ctx, &xs);
+	(*pmc->mea->pf_measure_font)(pmc->ctx, pxf, &xs);
 
 	mx = (xs.fw > DEF_TOUCH_SPAN) ? xs.fw : DEF_TOUCH_SPAN;
 	my = (xs.fh > DEF_TOUCH_SPAN) ? xs.fh : DEF_TOUCH_SPAN;
@@ -1213,13 +1221,13 @@ void calc_slidebox_size(const measure_interface* pim, xsize_t* pxs)
 	pxs->fh = my;
 }
 
-int calc_slidebox_hint(const measure_interface* pim, const xpoint_t* ppt)
+int calc_slidebox_hint(const measure_interface* pmc, const xfont_t* pxf, const xpoint_t* ppt)
 {
 	xsize_t xs;
 	float mx, my;
 	int pos;
 
-	(*pim->pf_measure_font)(pim->ctx, &xs);
+	(*pmc->mea->pf_measure_font)(pmc->ctx, pxf, &xs);
 
 	mx = (xs.fw > DEF_TOUCH_SPAN) ? xs.fw : DEF_TOUCH_SPAN;
 	my = (xs.fh > DEF_TOUCH_SPAN) ? xs.fh : DEF_TOUCH_SPAN;
@@ -1234,12 +1242,12 @@ int calc_slidebox_hint(const measure_interface* pim, const xpoint_t* ppt)
 	return pos;
 }
 
-void calc_slidebox_button_rect(const measure_interface* pim, int pos, xrect_t* pxr)
+void calc_slidebox_button_rect(const measure_interface* pmc, const xfont_t* pxf, int pos, xrect_t* pxr)
 {
 	xsize_t xs;
 	float mx, my;
 
-	(*pim->pf_measure_font)(pim->ctx, &xs);
+	(*pmc->mea->pf_measure_font)(pmc->ctx, pxf, &xs);
 
 	mx = (xs.fw > DEF_TOUCH_SPAN) ? xs.fw : DEF_TOUCH_SPAN;
 	my = (xs.fh > DEF_TOUCH_SPAN) ? xs.fh : DEF_TOUCH_SPAN;
@@ -1250,7 +1258,7 @@ void calc_slidebox_button_rect(const measure_interface* pim, int pos, xrect_t* p
 	pxr->fh = my;
 }
 
-void draw_slidebox(const drawing_interface* pif, int pos)
+void draw_slidebox(const drawing_interface* pci, const xfont_t* pxf, int pos)
 {
 	xface_t xa;
 	xpen_t xp;
@@ -1263,15 +1271,15 @@ void draw_slidebox(const drawing_interface* pif, int pos)
 	xsize_t xs;
 	float mx, my, cur;
 
-	const canvbox_t* pbox = (canvbox_t*)(&pif->rect);
+	const canvbox_t* pbox = (canvbox_t*)(&pci->rect);
 
 	default_xface(&xa);
 	xscpy(xa.line_align, GDI_ATTR_TEXT_ALIGN_CENTER);
 
-	b_print = (pif->tag == _CANVAS_PRINTER) ? 1 : 0;
+	b_print = (pci->tag == _CANVAS_PRINTER) ? 1 : 0;
 	if (!b_print)
 	{
-		format_xcolor(&pif->pclrs->clr_txt, xa.text_color);
+		format_xcolor(&pci->pclrs->clr_txt, xa.text_color);
 	}
 
 	default_xpen(&xp);
@@ -1283,7 +1291,8 @@ void draw_slidebox(const drawing_interface* pif, int pos)
 	default_xbrush(&xb);
 	xscpy(xb.color, xp.color);
 
-	(*pif->pf_font_size)(pif->ctx, &xs);
+	(*pci->drw->pf_set_xfont)(pci->ctx, pxf);
+	(*pci->drw->pf_font_size)(pci->ctx, &xs);
 
 	mx = (xs.fw > DEF_TOUCH_SPAN) ? xs.fw : DEF_TOUCH_SPAN;
 	my = (xs.fh > DEF_TOUCH_SPAN) ? xs.fh : DEF_TOUCH_SPAN;
@@ -1294,7 +1303,7 @@ void draw_slidebox(const drawing_interface* pif, int pos)
 	xr.fy = pbox->fy + my / 2 - 2;
 	xr.fw = mx * 10;
 	xr.fh = 2;
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pci->drw->pf_draw_rect)(pci->ctx, &xp, NULL, &xr);
 
 	if (pos > 0 && pos < 100)
 	{
@@ -1302,7 +1311,7 @@ void draw_slidebox(const drawing_interface* pif, int pos)
 		xr.fy = pbox->fy + my / 2 - 2;
 		xr.fw = cur;
 		xr.fh = 2;
-		(*pif->pf_draw_rect)(pif->ctx, &xp, &xb, &xr);
+		(*pci->drw->pf_draw_rect)(pci->ctx, &xp, &xb, &xr);
 
 		xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_CENTER);
 		ltoxs(pos, token, INT_LEN);
@@ -1310,7 +1319,7 @@ void draw_slidebox(const drawing_interface* pif, int pos)
 		xr.fy = pbox->fy;
 		xr.fw = mx;
 		xr.fh = my / 2;
-		(*pif->pf_draw_text)(pif->ctx, &xa, &xr, token, -1);
+		(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, token, -1);
 	}
 
 	xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_NEAR);
@@ -1319,7 +1328,7 @@ void draw_slidebox(const drawing_interface* pif, int pos)
 	xr.fy = pbox->fy + my / 2;
 	xr.fw = mx;
 	xr.fh = my / 2;
-	(*pif->pf_draw_text)(pif->ctx, &xa, &xr, token, -1);
+	(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, token, -1);
 
 	xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_FAR);
 	ltoxs(100, token, INT_LEN);
@@ -1327,22 +1336,22 @@ void draw_slidebox(const drawing_interface* pif, int pos)
 	xr.fy = pbox->fy + my / 2;
 	xr.fw = mx;
 	xr.fh = my / 2;
-	(*pif->pf_draw_text)(pif->ctx, &xa, &xr, token, -1);
+	(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, token, -1);
 
 	xr.fx = pbox->fx + cur - mx / 4;
 	xr.fy = pbox->fy + my / 2;
 	xr.fw = mx / 2;
 	xr.fh = my / 2;
-	draw_gizmo(pif, &xc, &xr, GDI_ATTR_GIZMO_UP);
+	draw_gizmo(pci, &xc, &xr, GDI_ATTR_GIZMO_UP);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
-void calc_spinbox_size(const measure_interface* pim, xsize_t* pxs)
+void calc_spinbox_size(const measure_interface* pmc, const xfont_t* pxf, xsize_t* pxs)
 {
 	xsize_t xs;
 	float mx, my;
 
-	(*pim->pf_measure_font)(pim->ctx, &xs);
+	(*pmc->mea->pf_measure_font)(pmc->ctx, pxf, &xs);
 
 	mx = (xs.fw > DEF_TOUCH_SPAN) ? xs.fw : DEF_TOUCH_SPAN;
 	my = (xs.fh > DEF_TOUCH_SPAN) ? xs.fh : DEF_TOUCH_SPAN;
@@ -1351,13 +1360,13 @@ void calc_spinbox_size(const measure_interface* pim, xsize_t* pxs)
 	pxs->fh = my;
 }
 
-int calc_spinbox_hint(const measure_interface* pim, const xpoint_t* ppt)
+int calc_spinbox_hint(const measure_interface* pmc, const xfont_t* pxf, const xpoint_t* ppt)
 {
 	xsize_t xs;
 	float mx, my;
 	xrect_t xr;
 
-	(*pim->pf_measure_font)(pim->ctx, &xs);
+	(*pmc->mea->pf_measure_font)(pmc->ctx, pxf, &xs);
 
 	mx = (xs.fw > DEF_TOUCH_SPAN) ? xs.fw : DEF_TOUCH_SPAN;
 	my = (xs.fh > DEF_TOUCH_SPAN) ? xs.fh : DEF_TOUCH_SPAN;
@@ -1381,7 +1390,7 @@ int calc_spinbox_hint(const measure_interface* pim, const xpoint_t* ppt)
 	return SPINBOX_HINT_NONE;
 }
 
-void draw_spinbox(const drawing_interface* pif, int cur)
+void draw_spinbox(const drawing_interface* pci, const xfont_t* pxf, int cur)
 {
 	xface_t xa;
 	xpen_t xp;
@@ -1393,16 +1402,16 @@ void draw_spinbox(const drawing_interface* pif, int cur)
 	float mx, my;
 	tchar_t token[INT_LEN + 1];
 
-	const canvbox_t* pbox = (canvbox_t*)(&pif->rect);
+	const canvbox_t* pbox = (canvbox_t*)(&pci->rect);
 
 	default_xface(&xa);
 	xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_CENTER);
 	xscpy(xa.line_align, GDI_ATTR_TEXT_ALIGN_CENTER);
 
-	b_print = (pif->tag == _CANVAS_PRINTER) ? 1 : 0;
+	b_print = (pci->tag == _CANVAS_PRINTER) ? 1 : 0;
 	if (!b_print)
 	{
-		format_xcolor(&pif->pclrs->clr_txt, xa.text_color);
+		format_xcolor(&pci->pclrs->clr_txt, xa.text_color);
 	}
 
 	default_xpen(&xp);
@@ -1411,7 +1420,8 @@ void draw_spinbox(const drawing_interface* pif, int cur)
 	parse_xcolor(&xc, xp.color);
 	lighten_xpen(&xp, DEF_HARD_DARKEN);
 
-	(*pif->pf_font_size)(pif->ctx, &xs);
+	(*pci->drw->pf_set_xfont)(pci->ctx, pxf);
+	(*pci->drw->pf_font_size)(pci->ctx, &xs);
 
 	mx = (xs.fw > DEF_TOUCH_SPAN) ? xs.fw : DEF_TOUCH_SPAN;
 	my = (xs.fh > DEF_TOUCH_SPAN) ? xs.fh : DEF_TOUCH_SPAN;
@@ -1421,30 +1431,30 @@ void draw_spinbox(const drawing_interface* pif, int cur)
 	xr.fw = mx;
 	xr.fh = my;
 	ltoxs(cur, token, INT_LEN);
-	(*pif->pf_draw_text)(pif->ctx, &xa, &xr, token, -1);
+	(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, token, -1);
 
 	xr.fx = pbox->fx + mx;
 	xr.fy = pbox->fy;
 	xr.fw = mx / 2;
 	xr.fh = my / 2;
 	ft_center_rect(&xr, DEF_SMALL_ICON, DEF_SMALL_ICON);
-	draw_gizmo(pif, &xc, &xr, GDI_ATTR_GIZMO_UP);
+	draw_gizmo(pci, &xc, &xr, GDI_ATTR_GIZMO_UP);
 
 	xr.fx = pbox->fx + mx;
 	xr.fy = pbox->fy + my / 2;
 	xr.fw = mx / 2;
 	xr.fh = my / 2;
 	ft_center_rect(&xr, DEF_SMALL_ICON, DEF_SMALL_ICON);
-	draw_gizmo(pif, &xc, &xr, GDI_ATTR_GIZMO_DOWN);
+	draw_gizmo(pci, &xc, &xr, GDI_ATTR_GIZMO_DOWN);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
-void calc_navibox_size(const measure_interface* pim, xsize_t* pxs)
+void calc_navibox_size(const measure_interface* pmc, const xfont_t* pxf, xsize_t* pxs)
 {
 	xsize_t xs;
 	float mx, my;
 
-	(*pim->pf_measure_font)(pim->ctx, &xs);
+	(*pmc->mea->pf_measure_font)(pmc->ctx, pxf, &xs);
 
 	mx = (xs.fw > DEF_TOUCH_SPAN) ? xs.fw : DEF_TOUCH_SPAN;
 	my = (xs.fh > DEF_TOUCH_SPAN) ? xs.fh : DEF_TOUCH_SPAN;
@@ -1453,14 +1463,14 @@ void calc_navibox_size(const measure_interface* pim, xsize_t* pxs)
 	pxs->fh = my;
 }
 
-int calc_navibox_hint(const measure_interface* pim, const xpoint_t* ppt)
+int calc_navibox_hint(const measure_interface* pmc, const xfont_t* pxf, const xpoint_t* ppt)
 {
 	xsize_t xs = { 0 };
 	xrect_t xr = { 0 };
 	float mx = 0;
 	float my = 0;
 
-	(*pim->pf_measure_font)(pim->ctx, &xs);
+	(*pmc->mea->pf_measure_font)(pmc->ctx, pxf, &xs);
 
 	mx = (xs.fw > DEF_TOUCH_SPAN) ? xs.fw : DEF_TOUCH_SPAN;
 	my = (xs.fh > DEF_TOUCH_SPAN) ? xs.fh : DEF_TOUCH_SPAN;
@@ -1508,7 +1518,7 @@ int calc_navibox_hint(const measure_interface* pim, const xpoint_t* ppt)
 	return NAVIBOX_HINT_NONE;
 }
 
-void draw_navibox(const drawing_interface* pif, const NAVISTATE* pns)
+void draw_navibox(const drawing_interface* pci, const xfont_t* pxf, const NAVISTATE* pns)
 {
 	xcolor_t xc;
 	xrect_t xr;
@@ -1517,15 +1527,16 @@ void draw_navibox(const drawing_interface* pif, const NAVISTATE* pns)
 	xsize_t xs;
 	float mx, my;
 
-	const canvbox_t* pbox = (canvbox_t*)(&pif->rect);
+	const canvbox_t* pbox = (canvbox_t*)(&pci->rect);
 
-	b_print = (pif->tag == _CANVAS_PRINTER) ? 1 : 0;
+	b_print = (pci->tag == _CANVAS_PRINTER) ? 1 : 0;
 	if (!b_print)
 	{
-		xmem_copy((void*)&xc, (void*)&(pif->pclrs->clr_txt), sizeof(xcolor_t));
+		xmem_copy((void*)&xc, (void*)&(pci->pclrs->clr_txt), sizeof(xcolor_t));
 	}
 
-	(*pif->pf_font_size)(pif->ctx, &xs);
+	(*pci->drw->pf_set_xfont)(pci->ctx, pxf);
+	(*pci->drw->pf_font_size)(pci->ctx, &xs);
 
 	mx = (xs.fw > DEF_TOUCH_SPAN) ? xs.fw : DEF_TOUCH_SPAN;
 	my = (xs.fh > DEF_TOUCH_SPAN) ? xs.fh : DEF_TOUCH_SPAN;
@@ -1535,28 +1546,28 @@ void draw_navibox(const drawing_interface* pif, const NAVISTATE* pns)
 	xr.fw = mx;
 	xr.fh = my;
 	ft_center_rect(&xr, DEF_SMALL_ICON, DEF_SMALL_ICON);
-	draw_gizmo(pif, &xc, &xr, GDI_ATTR_GIZMO_FIRST);
+	draw_gizmo(pci, &xc, &xr, GDI_ATTR_GIZMO_FIRST);
 
 	xr.fx = pbox->fx + mx;
 	xr.fy = pbox->fy;
 	xr.fw = mx;
 	xr.fh = my;
 	ft_center_rect(&xr, DEF_SMALL_ICON, DEF_SMALL_ICON);
-	draw_gizmo(pif, &xc, &xr, GDI_ATTR_GIZMO_PREV);
+	draw_gizmo(pci, &xc, &xr, GDI_ATTR_GIZMO_PREV);
 
 	xr.fx = pbox->fx + mx * 2;
 	xr.fy = pbox->fy;
 	xr.fw = mx;
 	xr.fh = my;
 	ft_center_rect(&xr, DEF_SMALL_ICON, DEF_SMALL_ICON);
-	draw_gizmo(pif, &xc, &xr, GDI_ATTR_GIZMO_NEXT);
+	draw_gizmo(pci, &xc, &xr, GDI_ATTR_GIZMO_NEXT);
 
 	xr.fx = pbox->fx + mx * 3;
 	xr.fy = pbox->fy;
 	xr.fw = mx;
 	xr.fh = my;
 	ft_center_rect(&xr, DEF_SMALL_ICON, DEF_SMALL_ICON);
-	draw_gizmo(pif, &xc, &xr, GDI_ATTR_GIZMO_LAST);
+	draw_gizmo(pci, &xc, &xr, GDI_ATTR_GIZMO_LAST);
 
 	xr.fx = pbox->fx + mx * 4;
 	xr.fy = pbox->fy;
@@ -1564,18 +1575,18 @@ void draw_navibox(const drawing_interface* pif, const NAVISTATE* pns)
 	xr.fh = my;
 	ft_center_rect(&xr, DEF_SMALL_ICON, DEF_SMALL_ICON);
 	if (pns && pns->keyboxed)
-		draw_gizmo(pif, &xc, &xr, GDI_ATTR_GIZMO_KEYBOXED);
+		draw_gizmo(pci, &xc, &xr, GDI_ATTR_GIZMO_KEYBOXED);
 	else
-		draw_gizmo(pif, &xc, &xr, GDI_ATTR_GIZMO_KEYBOX);
+		draw_gizmo(pci, &xc, &xr, GDI_ATTR_GIZMO_KEYBOX);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
-void calc_vertbox_size(const measure_interface* pim, xsize_t* pxs)
+void calc_vertbox_size(const measure_interface* pmc, const xfont_t* pxf, xsize_t* pxs)
 {
 	xsize_t xs;
 	float mx, my;
 
-	(*pim->pf_measure_font)(pim->ctx, &xs);
+	(*pmc->mea->pf_measure_font)(pmc->ctx, pxf, &xs);
 
 	mx = (xs.fw > DEF_TOUCH_SPAN) ? xs.fw : DEF_TOUCH_SPAN;
 	my = (xs.fh > DEF_TOUCH_SPAN) ? xs.fh : DEF_TOUCH_SPAN;
@@ -1584,14 +1595,14 @@ void calc_vertbox_size(const measure_interface* pim, xsize_t* pxs)
 	pxs->fh = my * 4;
 }
 
-int calc_vertbox_hint(const measure_interface* pim, const xpoint_t* ppt)
+int calc_vertbox_hint(const measure_interface* pmc, const xfont_t* pxf, const xpoint_t* ppt)
 {
 	xsize_t xs = { 0 };
 	xrect_t xr = { 0 };
 	float mx = 0;
 	float my = 0;
 
-	(*pim->pf_measure_font)(pim->ctx, &xs);
+	(*pmc->mea->pf_measure_font)(pmc->ctx, pxf, &xs);
 
 	mx = (xs.fw > DEF_TOUCH_SPAN) ? xs.fw : DEF_TOUCH_SPAN;
 	my = (xs.fh > DEF_TOUCH_SPAN) ? xs.fh : DEF_TOUCH_SPAN;
@@ -1631,7 +1642,7 @@ int calc_vertbox_hint(const measure_interface* pim, const xpoint_t* ppt)
 	return VERTBOX_HINT_NONE;
 }
 
-void draw_vertbox(const drawing_interface* pif)
+void draw_vertbox(const drawing_interface* pci, const xfont_t* pxf)
 {
 	xcolor_t xc;
 	xrect_t xr;
@@ -1640,15 +1651,16 @@ void draw_vertbox(const drawing_interface* pif)
 	xsize_t xs;
 	float mx, my;
 
-	const canvbox_t* pbox = (canvbox_t*)(&pif->rect);
+	const canvbox_t* pbox = (canvbox_t*)(&pci->rect);
 
-	b_print = (pif->tag == _CANVAS_PRINTER) ? 1 : 0;
+	b_print = (pci->tag == _CANVAS_PRINTER) ? 1 : 0;
 	if (!b_print)
 	{
-		xmem_copy((void*)&xc, (void*)&(pif->pclrs->clr_txt), sizeof(xcolor_t));
+		xmem_copy((void*)&xc, (void*)&(pci->pclrs->clr_txt), sizeof(xcolor_t));
 	}
 
-	(*pif->pf_font_size)(pif->ctx, &xs);
+	(*pci->drw->pf_set_xfont)(pci->ctx, pxf);
+	(*pci->drw->pf_font_size)(pci->ctx, &xs);
 
 	mx = (xs.fw > DEF_TOUCH_SPAN) ? xs.fw : DEF_TOUCH_SPAN;
 	my = (xs.fh > DEF_TOUCH_SPAN) ? xs.fh : DEF_TOUCH_SPAN;
@@ -1658,37 +1670,37 @@ void draw_vertbox(const drawing_interface* pif)
 	xr.fw = mx;
 	xr.fh = my;
 	ft_center_rect(&xr, DEF_MIDD_ICON, DEF_MIDD_ICON);
-	draw_gizmo(pif, &xc, &xr, GDI_ATTR_GIZMO_BEGIN);
+	draw_gizmo(pci, &xc, &xr, GDI_ATTR_GIZMO_BEGIN);
 
 	xr.fx = pbox->fx;
 	xr.fy = pbox->fy + my;
 	xr.fw = mx;
 	xr.fh = my;
 	ft_center_rect(&xr, DEF_MIDD_ICON, DEF_MIDD_ICON);
-	draw_gizmo(pif, &xc, &xr, GDI_ATTR_GIZMO_UP);
+	draw_gizmo(pci, &xc, &xr, GDI_ATTR_GIZMO_UP);
 
 	xr.fx = pbox->fx;
 	xr.fy = pbox->fy + my * 2;
 	xr.fw = mx;
 	xr.fh = my;
 	ft_center_rect(&xr, DEF_MIDD_ICON, DEF_MIDD_ICON);
-	draw_gizmo(pif, &xc, &xr, GDI_ATTR_GIZMO_DOWN);
+	draw_gizmo(pci, &xc, &xr, GDI_ATTR_GIZMO_DOWN);
 
 	xr.fx = pbox->fx;
 	xr.fy = pbox->fy + my * 3;
 	xr.fw = mx;
 	xr.fh = my;
 	ft_center_rect(&xr, DEF_MIDD_ICON, DEF_MIDD_ICON);
-	draw_gizmo(pif, &xc, &xr, GDI_ATTR_GIZMO_END);
+	draw_gizmo(pci, &xc, &xr, GDI_ATTR_GIZMO_END);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
-void calc_horzbox_size(const measure_interface* pim, xsize_t* pxs)
+void calc_horzbox_size(const measure_interface* pmc, const xfont_t* pxf, xsize_t* pxs)
 {
 	xsize_t xs;
 	float mx, my;
 
-	(*pim->pf_measure_font)(pim->ctx, &xs);
+	(*pmc->mea->pf_measure_font)(pmc->ctx, pxf, &xs);
 
 	mx = (xs.fw > DEF_TOUCH_SPAN) ? xs.fw : DEF_TOUCH_SPAN;
 	my = (xs.fh > DEF_TOUCH_SPAN) ? xs.fh : DEF_TOUCH_SPAN;
@@ -1697,14 +1709,14 @@ void calc_horzbox_size(const measure_interface* pim, xsize_t* pxs)
 	pxs->fh = my;
 }
 
-int calc_horzbox_hint(const measure_interface* pim, const xpoint_t* ppt)
+int calc_horzbox_hint(const measure_interface* pmc, const xfont_t* pxf, const xpoint_t* ppt)
 {
 	xsize_t xs = { 0 };
 	xrect_t xr = { 0 };
 	float mx = 0;
 	float my = 0;
 
-	(*pim->pf_measure_font)(pim->ctx, &xs);
+	(*pmc->mea->pf_measure_font)(pmc->ctx, pxf, &xs);
 
 	mx = (xs.fw > DEF_TOUCH_SPAN) ? xs.fw : DEF_TOUCH_SPAN;
 	my = (xs.fh > DEF_TOUCH_SPAN) ? xs.fh : DEF_TOUCH_SPAN;
@@ -1744,7 +1756,7 @@ int calc_horzbox_hint(const measure_interface* pim, const xpoint_t* ppt)
 	return HORZBOX_HINT_NONE;
 }
 
-void draw_horzbox(const drawing_interface* pif)
+void draw_horzbox(const drawing_interface* pci, const xfont_t* pxf)
 {
 	xcolor_t xc;
 	xrect_t xr;
@@ -1753,15 +1765,16 @@ void draw_horzbox(const drawing_interface* pif)
 	xsize_t xs;
 	float mx, my;
 
-	const canvbox_t* pbox = (canvbox_t*)(&pif->rect);
+	const canvbox_t* pbox = (canvbox_t*)(&pci->rect);
 
-	b_print = (pif->tag == _CANVAS_PRINTER) ? 1 : 0;
+	b_print = (pci->tag == _CANVAS_PRINTER) ? 1 : 0;
 	if (!b_print)
 	{
-		xmem_copy((void*)&xc, (void*)&(pif->pclrs->clr_txt), sizeof(xcolor_t));
+		xmem_copy((void*)&xc, (void*)&(pci->pclrs->clr_txt), sizeof(xcolor_t));
 	}
 
-	(*pif->pf_font_size)(pif->ctx, &xs);
+	(*pci->drw->pf_set_xfont)(pci->ctx, pxf);
+	(*pci->drw->pf_font_size)(pci->ctx, &xs);
 
 	mx = (xs.fw > DEF_TOUCH_SPAN) ? xs.fw : DEF_TOUCH_SPAN;
 	my = (xs.fh > DEF_TOUCH_SPAN) ? xs.fh : DEF_TOUCH_SPAN;
@@ -1771,38 +1784,38 @@ void draw_horzbox(const drawing_interface* pif)
 	xr.fw = mx;
 	xr.fh = my;
 	ft_center_rect(&xr, DEF_MIDD_ICON, DEF_MIDD_ICON);
-	draw_gizmo(pif, &xc, &xr, GDI_ATTR_GIZMO_FIRST);
+	draw_gizmo(pci, &xc, &xr, GDI_ATTR_GIZMO_FIRST);
 
 	xr.fx = pbox->fx + mx;
 	xr.fy = pbox->fy;
 	xr.fw = mx;
 	xr.fh = my;
 	ft_center_rect(&xr, DEF_MIDD_ICON, DEF_MIDD_ICON);
-	draw_gizmo(pif, &xc, &xr, GDI_ATTR_GIZMO_PREV);
+	draw_gizmo(pci, &xc, &xr, GDI_ATTR_GIZMO_PREV);
 
 	xr.fx = pbox->fx + mx * 2;
 	xr.fy = pbox->fy;
 	xr.fw = mx;
 	xr.fh = my;
 	ft_center_rect(&xr, DEF_MIDD_ICON, DEF_MIDD_ICON);
-	draw_gizmo(pif, &xc, &xr, GDI_ATTR_GIZMO_NEXT);
+	draw_gizmo(pci, &xc, &xr, GDI_ATTR_GIZMO_NEXT);
 
 	xr.fx = pbox->fx+ mx * 3;
 	xr.fy = pbox->fy;
 	xr.fw = mx;
 	xr.fh = my;
 	ft_center_rect(&xr, DEF_MIDD_ICON, DEF_MIDD_ICON);
-	draw_gizmo(pif, &xc, &xr, GDI_ATTR_GIZMO_LAST);
+	draw_gizmo(pci, &xc, &xr, GDI_ATTR_GIZMO_LAST);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
-void calc_iconbox_size(const measure_interface* pim, const tchar_t* layer, const tchar_t* align, link_t_ptr str, xsize_t* pxs)
+void calc_iconbox_size(const measure_interface* pmc, const xfont_t* pxf, const tchar_t* layer, const tchar_t* align, link_t_ptr str, xsize_t* pxs)
 {
 	xsize_t xs;
 	float mx, my;
 	int n;
 
-	(*pim->pf_measure_font)(pim->ctx, &xs);
+	(*pmc->mea->pf_measure_font)(pmc->ctx, pxf, &xs);
 
 	mx = (xs.fw > DEF_TOUCH_SPAN) ? xs.fw : DEF_TOUCH_SPAN;
 	my = (xs.fh > DEF_TOUCH_SPAN) ? xs.fh : DEF_TOUCH_SPAN;
@@ -1821,14 +1834,14 @@ void calc_iconbox_size(const measure_interface* pim, const tchar_t* layer, const
 	}
 }
 
-void calc_iconbox_item_rect(const measure_interface* pim, const tchar_t* layer, const tchar_t* align, const xsize_t* pxs, link_t_ptr str, link_t_ptr ilk, xrect_t* pxr)
+void calc_iconbox_item_rect(const measure_interface* pmc, const xfont_t* pxf, const tchar_t* layer, const tchar_t* align, const xsize_t* pxs, link_t_ptr str, link_t_ptr ilk, xrect_t* pxr)
 {
 	xsize_t xs;
 	float mx, my, span;
 	xrect_t xr;
 	link_t_ptr ent;
 
-	(*pim->pf_measure_font)(pim->ctx, &xs);
+	(*pmc->mea->pf_measure_font)(pmc->ctx, pxf, &xs);
 
 	mx = (xs.fw > DEF_TOUCH_SPAN) ? xs.fw : DEF_TOUCH_SPAN;
 	my = (xs.fh > DEF_TOUCH_SPAN) ? xs.fh : DEF_TOUCH_SPAN;
@@ -1909,14 +1922,14 @@ void calc_iconbox_item_rect(const measure_interface* pim, const tchar_t* layer, 
 	xmem_zero((void*)pxr, sizeof(xrect_t));
 }
 
-int calc_iconbox_hint(const measure_interface* pim, const tchar_t* layer, const tchar_t* align, const xsize_t* pxs, const xpoint_t* ppt, link_t_ptr str, link_t_ptr* pilk)
+int calc_iconbox_hint(const measure_interface* pmc, const xfont_t* pxf, const tchar_t* layer, const tchar_t* align, const xsize_t* pxs, const xpoint_t* ppt, link_t_ptr str, link_t_ptr* pilk)
 {
 	xsize_t xs;
 	float mx, my, span;
 	xrect_t xr;
 	link_t_ptr ent;
 
-	(*pim->pf_measure_font)(pim->ctx, &xs);
+	(*pmc->mea->pf_measure_font)(pmc->ctx, pxf, &xs);
 
 	mx = (xs.fw > DEF_TOUCH_SPAN) ? xs.fw : DEF_TOUCH_SPAN;
 	my = (xs.fh > DEF_TOUCH_SPAN) ? xs.fh : DEF_TOUCH_SPAN;
@@ -1998,7 +2011,7 @@ int calc_iconbox_hint(const measure_interface* pim, const tchar_t* layer, const 
 	return ICONBOX_HINT_NONE;
 }
 
-void draw_iconbox(const drawing_interface* pif, const tchar_t* layer, const tchar_t* align, link_t_ptr str)
+void draw_iconbox(const drawing_interface* pci, const xfont_t* pxf, const tchar_t* layer, const tchar_t* align, link_t_ptr str)
 {
 	xcolor_t xc;
 	xrect_t xr;
@@ -2009,15 +2022,16 @@ void draw_iconbox(const drawing_interface* pif, const tchar_t* layer, const tcha
 
 	link_t_ptr ent;
 
-	const canvbox_t* pbox = (canvbox_t*)(&pif->rect);
+	const canvbox_t* pbox = (canvbox_t*)(&pci->rect);
 
-	b_print = (pif->tag == _CANVAS_PRINTER) ? 1 : 0;
+	b_print = (pci->tag == _CANVAS_PRINTER) ? 1 : 0;
 	if (!b_print)
 	{
-		xmem_copy((void*)&xc, (void*)&(pif->pclrs->clr_txt), sizeof(xcolor_t));
+		xmem_copy((void*)&xc, (void*)&(pci->pclrs->clr_txt), sizeof(xcolor_t));
 	}
 
-	(*pif->pf_font_size)(pif->ctx, &xs);
+	(*pci->drw->pf_set_xfont)(pci->ctx, pxf);
+	(*pci->drw->pf_font_size)(pci->ctx, &xs);
 
 	mx = (xs.fw > DEF_TOUCH_SPAN) ? xs.fw : DEF_TOUCH_SPAN;
 	my = (xs.fh > DEF_TOUCH_SPAN) ? xs.fh : DEF_TOUCH_SPAN;
@@ -2092,7 +2106,7 @@ void draw_iconbox(const drawing_interface* pif, const tchar_t* layer, const tcha
 		}
 
 		ft_center_rect(&xr, DEF_SMALL_ICON, DEF_SMALL_ICON);
-		draw_gizmo(pif, &xc, &xr, get_string_entity_val_ptr(ent));
+		draw_gizmo(pci, &xc, &xr, get_string_entity_val_ptr(ent));
 		
 		ent = get_string_next_entity(str, ent);
 	}
@@ -2200,14 +2214,14 @@ link_t_ptr calc_wordsbox_item(link_t_ptr ptr, int page, int index)
 	return (index) ? NULL : ilk;
 }
 
-void calc_wordsbox_size(const measure_interface* pim, link_t_ptr ptr, xsize_t* pxs)
+void calc_wordsbox_size(const measure_interface* pmc, const xfont_t* pxf, link_t_ptr ptr, xsize_t* pxs)
 {
 	xsize_t xs;
 	float mx, my, mw = 0;
 	int n = 0;
 	link_t_ptr ilk;
 
-	(*pim->pf_measure_font)(pim->ctx, &xs);
+	(*pmc->mea->pf_measure_font)(pmc->ctx, pxf, &xs);
 
 	mx = (xs.fw > DEF_TOUCH_SPAN) ? xs.fw : DEF_TOUCH_SPAN;
 	my = (xs.fh > DEF_TOUCH_SPAN) ? xs.fh : DEF_TOUCH_SPAN;
@@ -2215,7 +2229,7 @@ void calc_wordsbox_size(const measure_interface* pim, link_t_ptr ptr, xsize_t* p
 	ilk = get_words_next_visible_item(ptr, LINK_FIRST);
 	while (ilk)
 	{
-		(*pim->pf_measure_size)(pim->ctx, get_words_item_text_ptr(ilk), -1, &xs);
+		(*pmc->mea->pf_measure_size)(pmc->ctx, pxf, get_words_item_text_ptr(ilk), -1, &xs);
 
 		if (mw < xs.fw)
 			mw = xs.fw;
@@ -2231,14 +2245,14 @@ void calc_wordsbox_size(const measure_interface* pim, link_t_ptr ptr, xsize_t* p
 	pxs->fh = n * my;
 }
 
-void calc_wordsbox_item_rect(const measure_interface* pim, link_t_ptr ptr, int page, link_t_ptr plk, xrect_t* pxr)
+void calc_wordsbox_item_rect(const measure_interface* pmc, const xfont_t* pxf, link_t_ptr ptr, int page, link_t_ptr plk, xrect_t* pxr)
 {
 	link_t_ptr ilk, filk, lilk;
 	xrect_t xr;
 	xsize_t xs;
 	float mx, my;
 
-	(*pim->pf_measure_font)(pim->ctx, &xs);
+	(*pmc->mea->pf_measure_font)(pmc->ctx, pxf, &xs);
 
 	mx = (xs.fw > DEF_TOUCH_SPAN) ? xs.fw : DEF_TOUCH_SPAN;
 	my = (xs.fh > DEF_TOUCH_SPAN) ? xs.fh : DEF_TOUCH_SPAN;
@@ -2251,7 +2265,7 @@ void calc_wordsbox_item_rect(const measure_interface* pim, link_t_ptr ptr, int p
 	ilk = filk;
 	while (ilk)
 	{
-		(*pim->pf_measure_size)(pim->ctx, get_words_item_text_ptr(ilk), -1, &xs);
+		(*pmc->mea->pf_measure_size)(pmc->ctx, pxf, get_words_item_text_ptr(ilk), -1, &xs);
 		xr.fx = 0;
 		xr.fw = (mx > xs.fw) ? (mx * 2) : (xs.fw + mx);
 
@@ -2271,14 +2285,14 @@ void calc_wordsbox_item_rect(const measure_interface* pim, link_t_ptr ptr, int p
 	xmem_zero((void*)pxr, sizeof(xrect_t));
 }
 
-int calc_wordsbox_hint(const measure_interface* pim, const xpoint_t* ppt, link_t_ptr ptr, int page, link_t_ptr* pilk)
+int calc_wordsbox_hint(const measure_interface* pmc, const xfont_t* pxf, const xpoint_t* ppt, link_t_ptr ptr, int page, link_t_ptr* pilk)
 {
 	link_t_ptr ilk, filk, lilk;
 	xrect_t xr;
 	xsize_t xs;
 	float mx, my;
 
-	(*pim->pf_measure_font)(pim->ctx, &xs);
+	(*pmc->mea->pf_measure_font)(pmc->ctx, pxf, &xs);
 
 	mx = (xs.fw > DEF_TOUCH_SPAN) ? xs.fw : DEF_TOUCH_SPAN;
 	my = (xs.fh > DEF_TOUCH_SPAN) ? xs.fh : DEF_TOUCH_SPAN;
@@ -2291,7 +2305,7 @@ int calc_wordsbox_hint(const measure_interface* pim, const xpoint_t* ppt, link_t
 	ilk = filk;
 	while (ilk)
 	{
-		(*pim->pf_measure_size)(pim->ctx, get_words_item_text_ptr(ilk), -1, &xs);
+		(*pmc->mea->pf_measure_size)(pmc->ctx, pxf, get_words_item_text_ptr(ilk), -1, &xs);
 		xr.fx = 0;
 		xr.fw = (mx > xs.fw) ? (mx * 2) : (xs.fw + mx);
 
@@ -2312,7 +2326,7 @@ int calc_wordsbox_hint(const measure_interface* pim, const xpoint_t* ppt, link_t
 	return WORDSBOX_HINT_NONE;
 }
 
-void draw_wordsbox(const drawing_interface* pif, link_t_ptr ptr, int page)
+void draw_wordsbox(const drawing_interface* pci, const xfont_t* pxf, link_t_ptr ptr, int page)
 {
 	xface_t xa;
 	xrect_t xr;
@@ -2325,9 +2339,10 @@ void draw_wordsbox(const drawing_interface* pif, link_t_ptr ptr, int page)
 	xsize_t xs;
 	float mx, my;
 
-	const canvbox_t* pbox = (canvbox_t*)(&pif->rect);
+	const canvbox_t* pbox = (canvbox_t*)(&pci->rect);
 
-	(*pif->pf_font_size)(pif->ctx, &xs);
+	(*pci->drw->pf_set_xfont)(pci->ctx, pxf);
+	(*pci->drw->pf_font_size)(pci->ctx, &xs);
 
 	mx = (xs.fw > DEF_TOUCH_SPAN) ? xs.fw : DEF_TOUCH_SPAN;
 	my = (xs.fh > DEF_TOUCH_SPAN) ? xs.fh : DEF_TOUCH_SPAN;
@@ -2336,10 +2351,10 @@ void draw_wordsbox(const drawing_interface* pif, link_t_ptr ptr, int page)
 	xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_NEAR);
 	xscpy(xa.line_align, GDI_ATTR_TEXT_ALIGN_CENTER);
 
-	b_print = (pif->tag == _CANVAS_PRINTER) ? 1 : 0;
+	b_print = (pci->tag == _CANVAS_PRINTER) ? 1 : 0;
 	if (!b_print)
 	{
-		format_xcolor(&pif->pclrs->clr_txt, xa.text_color);
+		format_xcolor(&pci->pclrs->clr_txt, xa.text_color);
 	}
 
 	xr.fy = pbox->fy;
@@ -2355,12 +2370,12 @@ void draw_wordsbox(const drawing_interface* pif, link_t_ptr ptr, int page)
 		xr.fw = mx;
 		xsprintf(token, _T("%d. "), ++index);
 
-		(*pif->pf_draw_text)(pif->ctx, &xa, &xr, token, -1);
+		(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, token, -1);
 
 		xr.fx = pbox->fx + mx;
 		xr.fw = pbox->fw - mx;
 
-		(*pif->pf_draw_text)(pif->ctx, &xa, &xr, get_words_item_text_ptr(ilk), -1);
+		(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, get_words_item_text_ptr(ilk), -1);
 
 		if (ilk == lilk)
 			break;

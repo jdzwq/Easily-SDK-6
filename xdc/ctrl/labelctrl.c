@@ -46,6 +46,7 @@ typedef struct label_delta_t{
 #define SETLABELDELTA(ph,ptd) widget_set_user_delta(ph,(vword_t)ptd)
 
 /********************************************************************************************/
+
 static void _labelctrl_item_rect(widget_t widget, link_t_ptr ilk, xrect_t* pxr)
 {
 	label_delta_t* ptd = GETLABELDELTA(widget);
@@ -238,6 +239,8 @@ void noti_label_item_drop(widget_t widget, const xpoint_t* pxp)
 {
 	label_delta_t* ptd = GETLABELDELTA(widget);
 	xpoint_t pt;
+	xrect_t xr;
+	LINKPTR root, plk;
 
 	XDK_ASSERT(ptd->item);
 
@@ -248,6 +251,33 @@ void noti_label_item_drop(widget_t widget, const xpoint_t* pxp)
 		widget_set_capture(widget, 0);
 	}
 	widget_set_cursor(widget, CURSOR_ARROW);
+
+	pt.x = pxp->x;
+	pt.y = pxp->y;
+	widget_point_to_mm(widget, &pt);
+
+	plk = NULL;
+	calc_label_hint(&pt, ptd->label, 1, &plk);
+
+	if (plk != ptd->item)
+	{
+		root = get_dom_child_node_root(get_label_itemset(ptd->label));
+
+		if (plk)
+		{
+			switch_link_before(root, plk, ptd->item);
+		}
+		else
+		{
+			calc_label_item_rect(ptd->label, 1, ptd->item, &xr);
+			widget_rect_to_pt(widget, &xr);
+
+			if (pxp->x < xr.x)
+				switch_link_first(root, ptd->item);
+			else
+				switch_link_last(root, ptd->item);
+		}
+	}
 
 	pt.x = pxp->x;
 	pt.y = pxp->y;
@@ -614,7 +644,7 @@ void hand_label_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	widget_get_canv_rect(widget, (canvbox_t*)&(ifc.rect));
 	ifc.pclrs = pclrs;
 
-	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
+	(*ifv.drw->pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
 
 	draw_label(&ifc, ptd->label, ptd->cur_page);
 
@@ -636,7 +666,6 @@ widget_t labelctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* p
 	if_dispatch_t ev = { 0 };
 
 	EVENT_BEGIN_DISPATH(&ev)
-
 		EVENT_ON_CREATE(hand_label_create)
 		EVENT_ON_DESTROY(hand_label_destroy)
 
@@ -658,9 +687,6 @@ widget_t labelctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* p
 		EVENT_ON_LBUTTON_UP(hand_label_lbutton_up)
 		EVENT_ON_RBUTTON_DOWN(hand_label_rbutton_down)
 		EVENT_ON_RBUTTON_UP(hand_label_rbutton_up)
-
-		
-
 	EVENT_END_DISPATH
 
 	return widget_create(wname, wstyle, pxr, wparent, &ev);

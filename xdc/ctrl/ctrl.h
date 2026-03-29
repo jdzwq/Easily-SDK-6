@@ -184,8 +184,8 @@ typedef enum{
 
 	NC_FIELDHOVER,
 
-	NC_FIELDUNFOCUS,
-	NC_FIELDFOCUSED,
+	NC_FIELDSETFOCUS,
+	NC_FIELDKILLFOCUS,
 
 	NC_FIELDEDITING,
 	NC_FIELDUPDATE,
@@ -431,9 +431,6 @@ typedef enum{
 	NC_GRIDDBCLK,
 
 	NC_COLHOVER,
-	NC_COLCHANGING,
-	NC_COLCHANGED,
-	NC_COLSELECTED,
 
 	NC_CELLSETFOCUS,
 	NC_CELLKILLFOCUS,
@@ -447,20 +444,13 @@ typedef enum{
 	NC_ROWCALCED,
 	NC_GRIDCALCED,
 
+	NC_COLSELECTED,
+
 	NC_ROWCHANGING,
 	NC_ROWCHANGED,
 	NC_ROWCHECKED,
 	NC_ROWINSERT,
-	NC_ROWDELETE,
-
-	NC_ROWSIZING,
-	NC_ROWSIZED,
-	NC_ROWDRAG,
-	NC_ROWDROP,
-	NC_COLSIZING,
-	NC_COLSIZED,
-	NC_COLDRAG,
-	NC_COLDROP
+	NC_ROWDELETE
 }GRID_NOTICE_CODE;
 
 /*
@@ -795,11 +785,6 @@ typedef enum{
 	NC_YAXSIZING,
 	NC_YAXSIZED,
 
-	NC_XAXDRAG,
-	NC_XAXDROP,
-	NC_YAXDRAG,
-	NC_YAXDROP,
-
 	NC_STATISCALCED,
 	NC_YAXCALCED,
 	NC_XAXCALCED
@@ -1061,17 +1046,11 @@ typedef enum{
 
 	NC_DIALOGITEMHOVER,
 
-	NC_DIALOGITEMCHANGING,
-	NC_DIALOGITEMCHANGED,
-	NC_DIALOGITEMSELECTED,
+	NC_DIALOGITEMSETFOCUS,
+	NC_DIALOGITEMKILLFOCUS,
 
 	NC_DIALOGITEMCALCED,
-	NC_DIALOGCALCED,
-
-	NC_DIALOGITEMDRAG,
-	NC_DIALOGITEMDROP,
-	NC_DIALOGITEMSIZING,
-	NC_DIALOGITEMSIZED,
+	NC_DIALOGCALCED
 }DIALOG_NOTICE_CODE;
 
 /*
@@ -1197,8 +1176,6 @@ typedef enum{
 	NC_CALENDARDAILYCALCED,
 	NC_CALENDARCALCED,
 
-	NC_CALENDARDAILYDRAG,
-	NC_CALENDARDAILYDROP,
 	NC_CALENDARDAILYSIZING,
 	NC_CALENDARDAILYSIZED,
 }CALENDAR_NOTICE_CODE;
@@ -1318,17 +1295,11 @@ typedef enum{
 
 	NC_DIAGRAMENTITYHOVER,
 
-	NC_DIAGRAMENTITYCHANGING,
-	NC_DIAGRAMENTITYCHANGED,
-	NC_DIAGRAMENTITYSELECTED,
+	NC_DIAGRAMENTITYSETFOCUS,
+	NC_DIAGRAMENTITYKILLFOCUS,
 
 	NC_DIAGRAMENTITYCALCED,
-	NC_DIAGRAMCALCED,
-
-	NC_DIAGRAMENTITYDRAG,
-	NC_DIAGRAMENTITYDROP,
-	NC_DIAGRAMENTITYSIZING,
-	NC_DIAGRAMENTITYSIZED,
+	NC_DIAGRAMCALCED
 }DIAGRAM_NOTICE_CODE;
 
 /*
@@ -1599,9 +1570,6 @@ typedef enum{
 	NC_TOPOGSPOTCHANGING,
 	NC_TOPOGSPOTCHANGED,
 	NC_TOPOGSPOTSELECTED,
-
-	NC_TOPOGSPOTDRAG,
-	NC_TOPOGSPOTDROP,
 
 	NC_TOPOGCALCED,
 	NC_TOPOGSPOTCALCED
@@ -1876,143 +1844,6 @@ EXP_API dword_t photoctrl_get_bitmap(widget_t widget, byte_t* buf, dword_t max);
 @RETURN void: none.
 */
 EXP_API void photoctrl_commit(widget_t widget);
-
-/********************************bitmap control***************************************************************/
-typedef struct _NOTICE_MODEL{
-	widget_t widget;
-	unsigned int id;
-	unsigned int code;
-
-	link_t_ptr anno;
-	link_t_ptr arti;
-
-	visual_t rdc;
-	void* data;
-
-	int ret;
-}NOTICE_MODEL;
-
-typedef enum{
-	NC_MODELLBCLK,
-	NC_MODELRBCLK,
-	NC_MODELDBCLK,
-
-	NC_MODELANNOCHANGING,
-	NC_MODELANNOCHANGED,
-	NC_MODELANNOSIZING,
-	NC_MODELANNOSIZED,
-	NC_MODELANNODRAG,
-	NC_MODELANNODROP,
-
-	NC_MODELANNOEDITING,
-	NC_MODELANNOUPDATE,
-	NC_MODELANNOCOMMIT,
-	NC_MODELANNOROLLBACK,
-
-	NC_MODELFACEDRAW
-}MODEL_NOTICE_CODE;
-
-/*
-@FUNCTION modelctrl_create: create a model widget.
-@INPUT const tchar_t* wname: the widget title.
-@INPUT dword_t style: the widget style.
-@INPUT const xrect_t* pxr: the widget rect.
-@INPUT widget_t owner: the owner widget.
-@RETURN widget_t: return the new widget resource handle.
-*/
-EXP_API widget_t modelctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, widget_t wparent);
-
-/*
-@FUNCTION modelctrl_attach: attach a model document to widget.
-@INPUT widget_t widget: the model widget.
-@INPUT link_t_ptr ptr: the model document.
-@RETURN void: none.
-*/
-EXP_API void	modelctrl_attach(widget_t widget, link_t_ptr ptr);
-
-/*
-@FUNCTION modelctrl_detach: detach the model document from widget.
-@INPUT widget_t widget: the model widget.
-@RETURN link_t_ptr: the model link component if exist, otherwise return NULL.
-*/
-EXP_API link_t_ptr modelctrl_detach(widget_t widget);
-
-/*
-@FUNCTION modelctrl_fetch: get the model document from widget.
-@INPUT widget_t widget: the model widget.
-@RETURN link_t_ptr: the model link component if exist, otherwise return NULL.
-*/
-EXP_API link_t_ptr modelctrl_fetch(widget_t widget);
-
-/*
-@FUNCTION modelctrl_redraw: redraw model widget.
-@INPUT widget_t widget: the model widget.
-@RETURN void: none.
-*/
-EXP_API void modelctrl_redraw(widget_t widget);
-
-/*
-@FUNCTION modelctrl_set_focus_arti: set focus to the arti.
-@INPUT widget_t widget: the model widget.
-@INPUT link_t_ptr ilk: the arti link component.
-@RETURN bool_t: return nonzero for being the arti focused, otherwise return zero.
-*/
-EXP_API bool_t modelctrl_set_focus_arti(widget_t widget, link_t_ptr ilk);
-
-/*
-@FUNCTION modelctrl_get_focus_arti: get focus arti in model widget.
-@INPUT widget_t widget: the model widget.
-@RETURN link_t_ptr: return the focused arti link component if exists, otherwise return NULL.
-*/
-EXP_API link_t_ptr modelctrl_get_focus_arti(widget_t widget);
-
-/*
-@FUNCTION modelctrl_get_lock: get the model widget is locked.
-@INPUT widget_t widget: the model widget.
-@RETURN bool_t: return nonzero for being model locked, otherwise return zero.
-*/
-EXP_API bool_t modelctrl_get_lock(widget_t widget);
-
-/*
-@FUNCTION modelctrl_set_lock: set the model widget is locked.
-@INPUT widget_t widget: the model widget.
-@INPUT bool_t b_lock: nonzero for locking the model, zero for unlocking.
-@RETURN void: none.
-*/
-EXP_API void modelctrl_set_lock(widget_t widget, bool_t b_lock);
-
-/*
-@FUNCTION modelctrl_get_dirty: get model is dirty.
-@INPUT widget_t widget: the model widget.
-@RETURN bool_t: return nonzero for beging dirty.
-*/
-EXP_API bool_t modelctrl_get_dirty(widget_t widget);
-
-/*
-@FUNCTION modelctrl_set_dirty: set model is dirty in design mode.
-@INPUT widget_t widget: the model widget.
-@INPUT bool_t b_dirty: nonzero for setting dirty, zero for cleaning.
-@RETURN void: none.
-*/
-EXP_API void modelctrl_set_dirty(widget_t widget, bool_t bDirty);
-
-/*
-@FUNCTION modelctrl_set_object: set a object bytes data to model widget.
-@INPUT widget_t widget: the model widget.
-@INPUT const byte_t* data: the object bytes data.
-@INPUT dword_t size: the bytes of object data.
-@RETURN void: none.
-*/
-EXP_API void modelctrl_set_object(widget_t widget, const byte_t* data, dword_t size);
-
-/*
-@FUNCTION modelctrl_get_object: copy the object bytes data from model widget.
-@INPUT widget_t widget: the model widget.
-@OUTPUT byte_t* buf: the bytes buffer.
-@INPUT dword_t max: the buffer size in bytes.
-@RETURN dword_t: return the bytes copyed.
-*/
-EXP_API dword_t modelctrl_get_object(widget_t widget, byte_t* buf, dword_t max);
 
 /***********************************table control*******************************************************************/
 typedef struct _NOTICE_TABLE{
@@ -2408,8 +2239,6 @@ typedef enum{
 
 	NC_LISTITEMEXPAND,
 	NC_LISTITEMCOLLAPSE,
-	NC_LISTITEMDRAG,
-	NC_LISTITEMDROP,
 
 	NC_LISTCALCED,
 	NC_LISTITEMCALCED

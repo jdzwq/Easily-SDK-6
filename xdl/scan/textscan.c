@@ -33,8 +33,9 @@ typedef struct _text_scan_context{
 	int pos;
 	tchar_t pch[ESC_LEN + 1];
 
-	const measure_interface* pmi;
+	const measure_interface* pmv;
 	const xface_t* pxa;
+	const xfont_t* pxf;
 }text_scan_context;
 
 bool_t call_string_is_paging(void* ctx)
@@ -55,7 +56,7 @@ int call_string_next_page(void* ctx)
 int call_string_next_words(void* ctx, tchar_t** ppch, xsize_t* pse, bool_t* pins, bool_t* pdel, bool_t* psel, bool_t* patom)
 {
 	text_scan_context* pscan = (text_scan_context*)ctx;
-	measure_interface* pif = pscan->pmi;
+	measure_interface* pmv = pscan->pmv;
 	int n;
 	xsize_t xs;
 
@@ -77,7 +78,7 @@ int call_string_next_words(void* ctx, tchar_t** ppch, xsize_t* pse, bool_t* pins
 	}
 	else
 	{
-		(*pif->pf_measure_size)(pif->ctx, pscan->pch, n, &xs);
+		(*pmv->mea->pf_measure_size)(pmv->ctx, pscan->pxf, pscan->pch, n, &xs);
 
 		if (xs.w)
 			pse->w = xs.w;
@@ -139,14 +140,15 @@ void call_string_object_attr(void* ctx, void* pobj, object_attr_t* pret)
 	}
 }
 
-void scan_var_text(string_t vs, const measure_interface* pif, const viewbox_t* pvb, const xface_t* pxa, bool_t paged, PF_SCAN_TEXTOR_CALLBACK pf, void* pp)
+void scan_var_text(string_t vs, const measure_interface* pmv, const viewbox_t* pvb, const xfont_t* pxf, const xface_t* pxa, bool_t paged, PF_SCAN_TEXTOR_CALLBACK pf, void* pp)
 {
 	text_scan_context ro = { 0 };
 	words_scan_interface it = { 0 };
 
 	ro.vs = vs;
-	ro.pmi = pif;
+	ro.pmv = pmv;
 	ro.pxa = pxa;
+	ro.pxf = pxf;
 
 	it.ctx = (void*)&ro;
 	it.pf_is_paging = call_string_is_paging;
@@ -162,7 +164,7 @@ void scan_var_text(string_t vs, const measure_interface* pif, const viewbox_t* p
 		it.pf_break_page = call_string_break_page;
 	}
 
-	scan_object_text(pif, pvb, &it, pf, pp);
+	scan_object_text(pmv, pvb, &it, pf, pp);
 }
 
 
@@ -175,8 +177,9 @@ typedef struct _FIXSTRWORDOPERATOR{
 	int len,pos;
 	tchar_t pch[ESC_LEN + 1];
 
-	const measure_interface* pmi;
+	const measure_interface* pmv;
 	const xface_t* pxa;
+	const xfont_t* pxf;
 }FIXSTRWORDOPERATOR;
 
 bool_t call_fixstr_is_paging(void* ctx)
@@ -197,7 +200,7 @@ int call_fixstr_next_page(void* ctx)
 int call_fixstr_next_words(void* ctx, tchar_t** ppch, xsize_t* pse, bool_t* pins, bool_t* pdel, bool_t* psel, bool_t* patom)
 {
 	FIXSTRWORDOPERATOR* pscan = (FIXSTRWORDOPERATOR*)ctx;
-	measure_interface* pif = pscan->pmi;
+	measure_interface* pmv = pscan->pmv;
 	int n;
 	xsize_t xs;
 
@@ -226,7 +229,7 @@ int call_fixstr_next_words(void* ctx, tchar_t** ppch, xsize_t* pse, bool_t* pins
 	}
 	else
 	{
-		(*pif->pf_measure_size)(pif->ctx, pscan->pch, n, &xs);
+		(*pmv->mea->pf_measure_size)(pmv->ctx, pscan->pxf, pscan->pch, n, &xs);
 
 		if (xs.w)
 			pse->w = xs.w;
@@ -296,7 +299,7 @@ void call_fixstr_object_attr(void* ctx, void* pobj, object_attr_t* pret)
 	}
 }
 
-void scan_fix_text(tchar_t* buf, int size, const measure_interface* pif, const viewbox_t* pvb, const xface_t* pxa, bool_t paged, PF_SCAN_TEXTOR_CALLBACK pf, void* pp)
+void scan_fix_text(tchar_t* buf, int size, const measure_interface* pmv, const viewbox_t* pvb, const xfont_t* pxf, const xface_t* pxa, bool_t paged, PF_SCAN_TEXTOR_CALLBACK pf, void* pp)
 {
 	FIXSTRWORDOPERATOR ro = { 0 };
 	words_scan_interface it = { 0 };
@@ -304,8 +307,9 @@ void scan_fix_text(tchar_t* buf, int size, const measure_interface* pif, const v
 	ro.buf = buf;
 	ro.size = size;
 	ro.len = xslen(buf);
-	ro.pmi = pif;
+	ro.pmv = pmv;
 	ro.pxa = pxa;
+	ro.pxf = pxf;
 
 	it.ctx = (void*)&ro;
 	it.pf_is_paging = call_fixstr_is_paging;
@@ -321,5 +325,5 @@ void scan_fix_text(tchar_t* buf, int size, const measure_interface* pif, const v
 		it.pf_break_page = call_fixstr_break_page;
 	}
 
-	scan_object_text(pif, pvb, &it, pf, pp);
+	scan_object_text(pmv, pvb, &it, pf, pp);
 }

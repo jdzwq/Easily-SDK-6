@@ -48,7 +48,7 @@ typedef struct _plot_t{
 	tchar_t** x_colors;
 }plot_t;
 
-static void _plot_calendar(const drawing_interface* pif, const plot_t* plt, matrix_t mt)
+static void _plot_calendar(const drawing_interface* pci, const plot_t* plt, matrix_t mt)
 {
 	xbrush_t xb, xb_dot;
 	xpen_t xp, xp_dot;
@@ -77,7 +77,7 @@ static void _plot_calendar(const drawing_interface* pif, const plot_t* plt, matr
 	tchar_t week[NUM_LEN + 1] = { 0 };
 	tchar_t solar[NUM_LEN + 1] = { 0 };
 
-	const canvbox_t* pbox = (canvbox_t*)(&pif->rect);
+	const canvbox_t* pbox = (canvbox_t*)(&pci->rect);
 
 	default_xface(&xa);
 	xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_CENTER);
@@ -135,7 +135,7 @@ static void _plot_calendar(const drawing_interface* pif, const plot_t* plt, matr
 
 	sa[4] = _T('Z');
 
-	(*pif->pf_draw_path)(pif->ctx, &xp, &xb, sa, pa, 9);
+	(*pci->drw->pf_draw_path)(pci->ctx, &xp, &xb, sa, pa, 9);
 
 	//the outer frame
 	lighten_xbrush(&xb, DEF_HARD_LIGHTEN);
@@ -174,7 +174,7 @@ static void _plot_calendar(const drawing_interface* pif, const plot_t* plt, matr
 
 	sa[6] = _T('Z');
 
-	(*pif->pf_draw_path)(pif->ctx, &xp, &xb, sa, pa, 11);
+	(*pci->drw->pf_draw_path)(pci->ctx, &xp, &xb, sa, pa, 11);
 
 	//the inner frame
 	color = get_string_ptr(plt->y_colors, 0);
@@ -209,7 +209,7 @@ static void _plot_calendar(const drawing_interface* pif, const plot_t* plt, matr
 
 	sa[4] = _T('Z');
 
-	(*pif->pf_draw_path)(pif->ctx, &xp_dot, &xb_dot, sa, pa, 5);
+	(*pci->drw->pf_draw_path)(pci->ctx, &xp_dot, &xb_dot, sa, pa, 5);
 
 	label = get_string_ptr(plt->x_labels, 0);
 	if (is_null(label))
@@ -221,27 +221,27 @@ static void _plot_calendar(const drawing_interface* pif, const plot_t* plt, matr
 
 	font_metric_by_pt(dy, NULL, &px);
 	ftoxs(px, xf_dot.size, NUM_LEN);
-	(*pif->pf_set_xfont)(pif->ctx, &xf_dot);
+	(*pci->drw->pf_set_xfont)(pci->ctx, &xf_dot);
 	xscpy(xa.text_color, xb_dot.color);
 
 	xr_dot.fx = xr.fx + dx;
 	xr_dot.fy = xr.fy;
 	xr_dot.fw = xr.fw - 2 * dx;
 	xr_dot.fh = dy;
-	(*pif->pf_draw_text)(pif->ctx, &xa, &xr_dot, year, -1);
+	(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr_dot, year, -1);
 
 	font_metric_by_pt(xr.fh / 4, NULL, &px);
 	ftoxs(px, xf.size, NUM_LEN);
-	(*pif->pf_set_xfont)(pif->ctx, &xf);
+	(*pci->drw->pf_set_xfont)(pci->ctx, &xf);
 
-	(*pif->pf_text_size)(pif->ctx, month, -1, &xs);
+	(*pci->drw->pf_text_size)(pci->ctx, month, -1, &xs);
 	pt.fx = xr.fx + (xr.fw - xs.fw) / 2;
 	pt.fy = xr.fy + xr.fh / 2 - xs.fh;
-	(*pif->pf_text_out)(pif->ctx, &xa, &pt, month, -1);
+	(*pci->drw->pf_text_out)(pci->ctx, &xa, &pt, month, -1);
 
 	pt.fy = xr.fy + xr.fh / 2;
-	(*pif->pf_text_out)(pif->ctx, &xa, &pt, day, -1);
-	(*pif->pf_text_size)(pif->ctx, day, -1, &xs);
+	(*pci->drw->pf_text_out)(pci->ctx, &xa, &pt, day, -1);
+	(*pci->drw->pf_text_size)(pci->ctx, day, -1, &xs);
 
 	font_metric_by_pt(xr.fh / 6, NULL, &px);
 	if (px < 6.0f)
@@ -250,58 +250,58 @@ static void _plot_calendar(const drawing_interface* pif, const plot_t* plt, matr
 
 	pt.fx += xs.fw;
 	pt.fy += xs.fh;
-	(*pif->pf_text_size)(pif->ctx, week, -1, &xs);
+	(*pci->drw->pf_text_size)(pci->ctx, week, -1, &xs);
 	pt.fy -= xs.fh;
-	(*pif->pf_text_out)(pif->ctx, &xa, &pt, week, -1);
+	(*pci->drw->pf_text_out)(pci->ctx, &xa, &pt, week, -1);
 
 	font_metric_by_pt(xr.fh / 4, NULL, &px);
 	ftoxs(px, xf.size, NUM_LEN);
 
 	i = xslen(solar) / 2;
-	(*pif->pf_text_size)(pif->ctx, solar, i, &xs);
+	(*pci->drw->pf_text_size)(pci->ctx, solar, i, &xs);
 	pt.fx = xr.fx + dx;
 	pt.fy = xr.fy + dy + dx;
-	(*pif->pf_text_out)(pif->ctx, &xa, &pt, solar, i);
+	(*pci->drw->pf_text_out)(pci->ctx, &xa, &pt, solar, i);
 
 	font_metric_by_pt(xr.fh / 6, NULL, &px);
 	if (px < 6.0f)
 		px = 6.0f;
 	ftoxs(px, xf.size, NUM_LEN);
-	(*pif->pf_set_xfont)(pif->ctx, &xf);
+	(*pci->drw->pf_set_xfont)(pci->ctx, &xf);
 
 	pt.fx += xs.fw;
 	pt.fy += xs.fh;
-	(*pif->pf_text_size)(pif->ctx, (solar + i), -1, &xs);
+	(*pci->drw->pf_text_size)(pci->ctx, (solar + i), -1, &xs);
 	pt.fy -= xs.fh;
-	(*pif->pf_text_out)(pif->ctx, &xa, &pt, (solar + i), -1);
+	(*pci->drw->pf_text_out)(pci->ctx, &xa, &pt, (solar + i), -1);
 
 	font_metric_by_pt(xr.fh / 4, NULL, &px);
 	ftoxs(px, xf.size, NUM_LEN);
 	xscpy(xf.weight, GDI_ATTR_FONT_WEIGHT_BOLD);
-	(*pif->pf_set_xfont)(pif->ctx, &xf);
+	(*pci->drw->pf_set_xfont)(pci->ctx, &xf);
 
 	label = get_string_ptr(plt->y_labels, 0);
-	(*pif->pf_text_size)(pif->ctx, label, -1, &xs);
+	(*pci->drw->pf_text_size)(pci->ctx, label, -1, &xs);
 	xr_dot.fx = xr.fx + dx;
 	xr_dot.fy = xr.fy + xr.fh - dx - xs.fh;
 	xr_dot.fw = xr.fw - 2 * dx;
 	xr_dot.fh = xs.fh;
-	(*pif->pf_draw_text)(pif->ctx, &xa, &xr_dot, label, -1);
+	(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr_dot, label, -1);
 
 	xr_dot.fx = xr.fx + xr.fw / 4 - dy / 4;
 	xr_dot.fy = xr.fy + dy / 2 - dy / 4;
 	xr_dot.fw = dy / 2;
 	xr_dot.fh = dy / 2;
-	(*pif->pf_draw_ellipse)(pif->ctx, &xp, &xb_dot, &xr_dot);
+	(*pci->drw->pf_draw_ellipse)(pci->ctx, &xp, &xb_dot, &xr_dot);
 
 	xr_dot.fx = xr.fx + xr.fw * 3 / 4 - dy / 4;
 	xr_dot.fy = xr.fy + dy / 2 - dy / 4;
 	xr_dot.fw = dy / 2;
 	xr_dot.fh = dy / 2;
-	(*pif->pf_draw_ellipse)(pif->ctx, &xp, &xb_dot, &xr_dot);
+	(*pci->drw->pf_draw_ellipse)(pci->ctx, &xp, &xb_dot, &xr_dot);
 }
 
-static void _plot_indicator(const drawing_interface* pif, const plot_t* plt, matrix_t mt)
+static void _plot_indicator(const drawing_interface* pci, const plot_t* plt, matrix_t mt)
 {
 	xbrush_t xb, xb_dot;
 	xpen_t xp, xp_dot;
@@ -321,7 +321,7 @@ static void _plot_indicator(const drawing_interface* pif, const plot_t* plt, mat
 	const tchar_t* color;
 	tchar_t numstr[NUM_LEN + 1] = { 0 };
 
-	const canvbox_t* pbox = (canvbox_t*)(&pif->rect);
+	const canvbox_t* pbox = (canvbox_t*)(&pci->rect);
 
 	default_xface(&xa);
 	xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_CENTER);
@@ -330,7 +330,7 @@ static void _plot_indicator(const drawing_interface* pif, const plot_t* plt, mat
 	default_xfont(&xf);
 	xsprintf(xf.size, _T("%s"), GDI_ATTR_FONT_SIZE_FOOTER);
 	parse_xfont_from_style(&xf, plt->style);
-	(*pif->pf_set_xfont)(pif->ctx, &xf);
+	(*pci->drw->pf_set_xfont)(pci->ctx, &xf);
 
 	default_xpen(&xp);
 	parse_xpen_from_style(&xp, plt->style);
@@ -384,7 +384,7 @@ static void _plot_indicator(const drawing_interface* pif, const plot_t* plt, mat
 			xr.fw = dx;
 			xr.fy = middy - dy;
 			xr.fh = dy;
-			(*pif->pf_draw_text)(pif->ctx, &xa, &xr, label, -1);
+			(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, label, -1);
 
 			shape = get_string_ptr(plt->y_shapes, j);
 			if (is_null(shape))
@@ -394,12 +394,12 @@ static void _plot_indicator(const drawing_interface* pif, const plot_t* plt, mat
 			xr.fw = dx - 2.0f;
 			xr.fy = middy;
 			xr.fh = dy - 1.0f;
-			draw_shape(pif, &xp_dot, &xb_dot, &xr, shape);
+			draw_shape(pci, &xp_dot, &xb_dot, &xr, shape);
 		}
 	}
 }
 
-static void _plot_thermometer(const drawing_interface* pif, const plot_t* plt, matrix_t mt)
+static void _plot_thermometer(const drawing_interface* pci, const plot_t* plt, matrix_t mt)
 {
 	xbrush_t xb, xb_dot;
 	xpen_t xp, xp_dot;
@@ -422,7 +422,7 @@ static void _plot_thermometer(const drawing_interface* pif, const plot_t* plt, m
 
 	tchar_t numstr[NUM_LEN + 1] = { 0 };
 
-	const canvbox_t* pbox = (canvbox_t*)(&pif->rect);
+	const canvbox_t* pbox = (canvbox_t*)(&pci->rect);
 
 	double y_base, y_step;
 	double dbl;
@@ -481,7 +481,7 @@ static void _plot_thermometer(const drawing_interface* pif, const plot_t* plt, m
 
 		xscpy(xp.style, GDI_ATTR_STROKE_STYLE_SOLID);
 
-		(*pif->pf_set_xfont)(pif->ctx, &xf);
+		(*pci->drw->pf_set_xfont)(pci->ctx, &xf);
 
 		//outside, from left top
 		sa[0] = _T('M');
@@ -514,7 +514,7 @@ static void _plot_thermometer(const drawing_interface* pif, const plot_t* plt, m
 
 		sa[5] = _T('Z');
 
-		(*pif->pf_draw_path)(pif->ctx, &xp, &xb, sa, pa, 10);
+		(*pci->drw->pf_draw_path)(pci->ctx, &xp, &xb, sa, pa, 10);
 
 		color = get_string_ptr(plt->x_colors, i);
 		if (!is_null(color))
@@ -531,9 +531,9 @@ static void _plot_thermometer(const drawing_interface* pif, const plot_t* plt, m
 
 		middx = zerox + dx / 2;
 
-		y_step = get_numeric(plt->y_steps, i);
-		y_base = get_numeric(plt->y_bases, i);
-		dbl = matrix_get_value(mt, 0, i);
+		y_step = get_numeric_safe(plt->y_steps, i, 0);
+		y_base = get_numeric_safe(plt->y_bases, i, 0);
+		dbl = matrix_get_value_safe(mt, 0, i, 0);
 
 		if (IS_VALID_DOUBLE(dbl) && IS_VALID_DOUBLE(y_base) && IS_VALID_DOUBLE(y_step) && !IS_ZERO_DOUBLE(y_step))
 			maxdy = zeroy - dd - (float)((dbl - y_base) / (y_step) * dr);
@@ -571,7 +571,7 @@ static void _plot_thermometer(const drawing_interface* pif, const plot_t* plt, m
 
 		sa[5] = _T('Z');
 
-		(*pif->pf_draw_path)(pif->ctx, &xp_dot, &xb_dot, sa, pa, 9);
+		(*pci->drw->pf_draw_path)(pci->ctx, &xp_dot, &xb_dot, sa, pa, 9);
 
 		//x labels
 		label = get_string_ptr(plt->x_labels, i);
@@ -580,24 +580,24 @@ static void _plot_thermometer(const drawing_interface* pif, const plot_t* plt, m
 		xr.fw = dx;
 		xr.fy = zeroy + 2 * dd;
 		xr.fh = dd;
-		(*pif->pf_draw_text)(pif->ctx, &xa, &xr, label, -1);
+		(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, label, -1);
 
 		xscpy(xp.style, GDI_ATTR_STROKE_STYLE_DASHDASH);
 
-		dbl = get_numeric(plt->y_bases, i);
+		dbl = get_numeric_safe(plt->y_bases, i, 0);
 
 		for (j = 1; j <= y_ruler; j++)
 		{
-			(*pif->pf_set_xfont)(pif->ctx, &xf_dot);
+			(*pci->drw->pf_set_xfont)(pci->ctx, &xf_dot);
 
 			pt1.fx = zerox + dx / 3 - 2.5f;
 			pt1.fy = zeroy - j * dr;
 			pt2.fx = zerox + dx / 3 - 0.5f;
 			pt2.fy = zeroy - j * dr;
-			(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+			(*pci->drw->pf_draw_line)(pci->ctx, &xp, &pt1, &pt2);
 
 			if (IS_VALID_DOUBLE(dbl))
-				dbl += get_numeric(plt->y_steps, i);
+				dbl += get_numeric_safe(plt->y_steps, i, 0);
 
 			xr.fx = zerox + 2 * dx / 3 + 0.5f;
 			xr.fw = 2 * dx / 3 - 0.5f;
@@ -607,12 +607,12 @@ static void _plot_thermometer(const drawing_interface* pif, const plot_t* plt, m
 				xsprintf(numstr, _T("%.2f"), dbl);
 			else
 				xscpy(numstr, _T("N"));
-			(*pif->pf_draw_text)(pif->ctx, &xa_dot, &xr, numstr, -1);
+			(*pci->drw->pf_draw_text)(pci->ctx, &xa_dot, &xr, numstr, -1);
 		}
 	}
 }
 
-static void _plot_bargram(const drawing_interface* pif, const plot_t* plt, matrix_t mt)
+static void _plot_bargram(const drawing_interface* pci, const plot_t* plt, matrix_t mt)
 {
 	xbrush_t xb, xb_dot;
 	xpen_t xp, xp_dot;
@@ -633,7 +633,7 @@ static void _plot_bargram(const drawing_interface* pif, const plot_t* plt, matri
 	const tchar_t* color;
 	tchar_t numstr[NUM_LEN + 1] = { 0 };
 
-	const canvbox_t* pbox = (canvbox_t*)(&pif->rect);
+	const canvbox_t* pbox = (canvbox_t*)(&pci->rect);
 
 	double dbl, dbr;
 	double y_base, y_step;
@@ -644,7 +644,7 @@ static void _plot_bargram(const drawing_interface* pif, const plot_t* plt, matri
 	default_xfont(&xf);
 	xsprintf(xf.size, _T("%s"), GDI_ATTR_FONT_SIZE_FOOTER);
 	parse_xfont_from_style(&xf, plt->style);
-	(*pif->pf_set_xfont)(pif->ctx, &xf);
+	(*pci->drw->pf_set_xfont)(pci->ctx, &xf);
 
 	default_xpen(&xp);
 	parse_xpen_from_style(&xp, plt->style);
@@ -679,8 +679,6 @@ static void _plot_bargram(const drawing_interface* pif, const plot_t* plt, matri
 	//bar
 	for (i = 0; i < x_count; i++)
 	{
-		(*pif->pf_set_xfont)(pif->ctx, &xf);
-
 		middy = pbox->fy + i * dy + dy / 2;
 		middx = pbox->fx + pbox->fw / 2;
 
@@ -691,25 +689,24 @@ static void _plot_bargram(const drawing_interface* pif, const plot_t* plt, matri
 		xr.fw = dx - dd;
 		xr.fh = dd;
 
-		(*pif->pf_set_xfont)(pif->ctx, &xf);
-		(*pif->pf_text_size)(pif->ctx, label, -1, &xs);
+		(*pci->drw->pf_text_size)(pci->ctx, label, -1, &xs);
 		pk.fx = xr.fx;
 		pk.fy = xr.fy - xs.fh;
-		(*pif->pf_text_out)(pif->ctx, &xa, &pk, label, -1);
+		(*pci->drw->pf_text_out)(pci->ctx, &xa, &pk, label, -1);
 
 		xr_pi.fx = xr.fx - dd / 2;
 		xr_pi.fy = xr.fy;
 		xr_pi.fw = dd;
 		xr_pi.fh = xr.fh;
-		(*pif->pf_draw_pie)(pif->ctx, &xp, &xb, &xr_pi, 3 * XPI / 2, XPI / 2);
+		(*pci->drw->pf_draw_pie)(pci->ctx, &xp, &xb, &xr_pi, 3 * XPI / 2, XPI / 2);
 
-		(*pif->pf_draw_rect)(pif->ctx, &xp, &xb, &xr);
+		(*pci->drw->pf_draw_rect)(pci->ctx, &xp, &xb, &xr);
 
 		xr_pi.fx = xr.fx + xr.fw - dd / 2;
 		xr_pi.fy = xr.fy;
 		xr_pi.fw = dd;
 		xr_pi.fh = xr.fh;
-		(*pif->pf_draw_pie)(pif->ctx, &xp, &xb, &xr_pi, XPI / 2, - XPI / 2);
+		(*pci->drw->pf_draw_pie)(pci->ctx, &xp, &xb, &xr_pi, XPI / 2, - XPI / 2);
 
 		color = get_string_ptr(plt->x_colors, i);
 		if (!is_null(color))
@@ -725,9 +722,9 @@ static void _plot_bargram(const drawing_interface* pif, const plot_t* plt, matri
 			lighten_xbrush(&xb_dot, DEF_SOFT_DARKEN);
 		}
 
-		y_base = get_numeric(plt->y_bases, i);
-		y_step = get_numeric(plt->y_steps, i);
-		dbl = matrix_get_value(mt, i, 0);
+		y_base = get_numeric_safe(plt->y_bases, i, 0);
+		y_step = get_numeric_safe(plt->y_steps, i, 0);
+		dbl = matrix_get_value_safe(mt, i, 0, 0);
 
 		if (IS_VALID_DOUBLE(dbl) && IS_VALID_DOUBLE(y_base) && IS_VALID_DOUBLE(y_step) && !IS_ZERO_DOUBLE(y_step))
 			dbr = ((dbl - y_base) / y_step);
@@ -743,25 +740,25 @@ static void _plot_bargram(const drawing_interface* pif, const plot_t* plt, matri
 		xr_pi.fy = xr.fy;
 		xr_pi.fw = dr;
 		xr_pi.fh = xr.fh;
-		(*pif->pf_draw_pie)(pif->ctx, &xp_dot, &xb_dot, &xr_pi, XPI / 2, 3 * XPI / 2);
+		(*pci->drw->pf_draw_pie)(pci->ctx, &xp_dot, &xb_dot, &xr_pi, XPI / 2, 3 * XPI / 2);
 
-		(*pif->pf_draw_rect)(pif->ctx, &xp_dot, &xb_dot, &xr);
+		(*pci->drw->pf_draw_rect)(pci->ctx, &xp_dot, &xb_dot, &xr);
 
 		xr_pi.fx = xr.fx + xr.fw - dr / 2;
 		xr_pi.fy = xr.fy;
 		xr_pi.fw = dr;
 		xr_pi.fh = xr.fh;
-		(*pif->pf_draw_pie)(pif->ctx, &xp_dot, &xb_dot, &xr_pi, 3 * XPI / 2, 5 * XPI / 2);
+		(*pci->drw->pf_draw_pie)(pci->ctx, &xp_dot, &xb_dot, &xr_pi, 3 * XPI / 2, 5 * XPI / 2);
 
 		xsprintf(numstr, _T("%.2f%"), dbr * 100);
-		(*pif->pf_text_size)(pif->ctx, numstr, -1, &xs);
+		(*pci->drw->pf_text_size)(pci->ctx, numstr, -1, &xs);
 		pk.fx = xr.fx + xr.fw + dr / 2 + 0.5f;
 		pk.fy = xr.fy + (xr.fh - xs.fh) / 2;
-		(*pif->pf_text_out)(pif->ctx, &xa, &pk, numstr, -1);
+		(*pci->drw->pf_text_out)(pci->ctx, &xa, &pk, numstr, -1);
 	}
 }
 
-static void _plot_contragram(const drawing_interface* pif, const plot_t* plt, matrix_t mt)
+static void _plot_contragram(const drawing_interface* pci, const plot_t* plt, matrix_t mt)
 {
 	xbrush_t xb, xb_dot;
 	xpen_t xp, xp_dot;
@@ -783,7 +780,7 @@ static void _plot_contragram(const drawing_interface* pif, const plot_t* plt, ma
 	const tchar_t* color;
 	tchar_t numstr[NUM_LEN + 1] = { 0 };
 
-	const canvbox_t* pbox = (canvbox_t*)(&pif->rect);
+	const canvbox_t* pbox = (canvbox_t*)(&pci->rect);
 
 	double db1,db2, dbr;
 
@@ -793,7 +790,7 @@ static void _plot_contragram(const drawing_interface* pif, const plot_t* plt, ma
 	default_xfont(&xf);
 	xsprintf(xf.size, _T("%s"), GDI_ATTR_FONT_SIZE_FOOTER);
 	parse_xfont_from_style(&xf, plt->style);
-	(*pif->pf_set_xfont)(pif->ctx, &xf);
+	(*pci->drw->pf_set_xfont)(pci->ctx, &xf);
 
 	default_xpen(&xp);
 	parse_xpen_from_style(&xp, plt->style);
@@ -866,7 +863,7 @@ static void _plot_contragram(const drawing_interface* pif, const plot_t* plt, ma
 
 		sa[9] = _T('Z');
 
-		(*pif->pf_draw_path)(pif->ctx, &xp, &xb, sa, pa, 13);
+		(*pci->drw->pf_draw_path)(pci->ctx, &xp, &xb, sa, pa, 13);
 
 		//the center splitor
 		xr.fx = middx - dd + 0.5f;
@@ -876,7 +873,7 @@ static void _plot_contragram(const drawing_interface* pif, const plot_t* plt, ma
 
 		xscpy(xb_dot.color, xb.color);
 		lighten_xbrush(&xb_dot, DEF_SOFT_DARKEN);
-		(*pif->pf_draw_ellipse)(pif->ctx, NULL, &xb_dot, &xr);
+		(*pci->drw->pf_draw_ellipse)(pci->ctx, NULL, &xb_dot, &xr);
 
 		//the left label
 		label = get_string_ptr(plt->y_labels, 0);
@@ -887,7 +884,7 @@ static void _plot_contragram(const drawing_interface* pif, const plot_t* plt, ma
 		xr.fh = dd;
 
 		xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_FAR);
-		(*pif->pf_draw_text)(pif->ctx, &xa, &xr, label, -1);
+		(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, label, -1);
 
 		//the right label
 		label = get_string_ptr(plt->y_labels, 1);
@@ -898,7 +895,7 @@ static void _plot_contragram(const drawing_interface* pif, const plot_t* plt, ma
 		xr.fh = dd;
 
 		xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_NEAR);
-		(*pif->pf_draw_text)(pif->ctx, &xa, &xr, label, -1);
+		(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, label, -1);
 
 		//the title
 		label = get_string_ptr(plt->x_labels, i);
@@ -909,7 +906,7 @@ static void _plot_contragram(const drawing_interface* pif, const plot_t* plt, ma
 		xr.fh = dd;
 
 		xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_CENTER);
-		(*pif->pf_draw_text)(pif->ctx, &xa, &xr, label, -1);
+		(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, label, -1);
 
 		//the inner bar
 		color = get_string_ptr(plt->y_colors, 0);
@@ -926,8 +923,8 @@ static void _plot_contragram(const drawing_interface* pif, const plot_t* plt, ma
 			lighten_xbrush(&xb_dot, DEF_SOFT_DARKEN);
 		}
 
-		db1 = matrix_get_value(mt, i, 0);
-		db2 = get_numeric(plt->y_bases, 0);
+		db1 = matrix_get_value_safe(mt, i, 0, 0);
+		db2 = get_numeric_safe(plt->y_bases, 0, 0);
 
 		if (IS_VALID_DOUBLE(db1) && IS_VALID_DOUBLE(db2) && (!IS_ZERO_DOUBLE(db1) || !IS_ZERO_DOUBLE(db2)))
 			dbr = ((db1) / (db2));
@@ -962,7 +959,7 @@ static void _plot_contragram(const drawing_interface* pif, const plot_t* plt, ma
 
 		sa[5] = _T('Z');
 
-		(*pif->pf_draw_path)(pif->ctx, &xp_dot, &xb_dot, sa, pa, 7);
+		(*pci->drw->pf_draw_path)(pci->ctx, &xp_dot, &xb_dot, sa, pa, 7);
 
 		//the left indicator text
 		xr.fx = middx - dx + dd;
@@ -972,7 +969,7 @@ static void _plot_contragram(const drawing_interface* pif, const plot_t* plt, ma
 
 		xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_NEAR);
 		xsprintf(numstr, _T("%.2f%c"), dbr * 100, _T('%'));
-		(*pif->pf_draw_text)(pif->ctx, &xa, &xr, numstr, -1);
+		(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, numstr, -1);
 
 		color = get_string_ptr(plt->y_colors, 1);
 		if (!is_null(color))
@@ -988,8 +985,8 @@ static void _plot_contragram(const drawing_interface* pif, const plot_t* plt, ma
 			lighten_xbrush(&xb_dot, DEF_SOFT_DARKEN);
 		}
 
-		db1 = matrix_get_value(mt, i, 1);
-		db2 = get_numeric(plt->y_bases, 1);
+		db1 = matrix_get_value_safe(mt, i, 1, 0);
+		db2 = get_numeric_safe(plt->y_bases, 1, 0);
 
 		if (IS_VALID_DOUBLE(db1) && IS_VALID_DOUBLE(db2) && (!IS_ZERO_DOUBLE(db1) || !IS_ZERO_DOUBLE(db2)))
 			dbr = ((db1) / (db2));
@@ -1024,7 +1021,7 @@ static void _plot_contragram(const drawing_interface* pif, const plot_t* plt, ma
 
 		sa[5] = _T('Z');
 
-		(*pif->pf_draw_path)(pif->ctx, &xp_dot, &xb_dot, sa, pa, 7);
+		(*pci->drw->pf_draw_path)(pci->ctx, &xp_dot, &xb_dot, sa, pa, 7);
 
 		//the right indicator text
 		xr.fx = middx;
@@ -1034,11 +1031,11 @@ static void _plot_contragram(const drawing_interface* pif, const plot_t* plt, ma
 
 		xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_FAR);
 		xsprintf(numstr, _T("%.2f%c"), dbr * 100, _T('%'));
-		(*pif->pf_draw_text)(pif->ctx, &xa, &xr, numstr, -1);
+		(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, numstr, -1);
 	}
 }
 
-static void _plot_balancegram(const drawing_interface* pif, const plot_t* plt, matrix_t mt)
+static void _plot_balancegram(const drawing_interface* pci, const plot_t* plt, matrix_t mt)
 {
 	xbrush_t xb, xb_dot;
 	xpen_t xp, xp_dot;
@@ -1064,7 +1061,7 @@ static void _plot_balancegram(const drawing_interface* pif, const plot_t* plt, m
 	const tchar_t* color;
 	tchar_t numstr[NUM_LEN + 1] = { 0 };
 
-	const canvbox_t* pbox = (canvbox_t*)(&pif->rect);
+	const canvbox_t* pbox = (canvbox_t*)(&pci->rect);
 
 	double db1, db2, dbr;
 
@@ -1105,7 +1102,7 @@ static void _plot_balancegram(const drawing_interface* pif, const plot_t* plt, m
 
 	for (i = 0; i < x_count; i++)
 	{
-		(*pif->pf_set_xfont)(pif->ctx, &xf);
+		(*pci->drw->pf_set_xfont)(pci->ctx, &xf);
 
 		middy = pbox->fy + i * 2 * dy + dy / 2;
 		middx = pbox->fx + pbox->fw / 2;
@@ -1115,7 +1112,7 @@ static void _plot_balancegram(const drawing_interface* pif, const plot_t* plt, m
 		xr.fy = middy;
 		xr.fw = 5.0f;
 		xr.fh = 5.0f;
-		(*pif->pf_draw_triangle)(pif->ctx, &xp, &xb, &xr, GDI_ATTR_ORIENT_TOP);
+		(*pci->drw->pf_draw_triangle)(pci->ctx, &xp, &xb, &xr, GDI_ATTR_ORIENT_TOP);
 
 		//the left arm label
 		label = get_string_ptr(plt->x_labels, i);
@@ -1126,10 +1123,10 @@ static void _plot_balancegram(const drawing_interface* pif, const plot_t* plt, m
 		xr.fh = dd;
 
 		xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_CENTER);
-		(*pif->pf_draw_text)(pif->ctx, &xa, &xr, label, -1);
+		(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, label, -1);
 
-		db1 = matrix_get_value(mt, i, 0);
-		db2 = matrix_get_value(mt, i, 1);
+		db1 = matrix_get_value_safe(mt, i, 0, 0);
+		db2 = matrix_get_value_safe(mt, i, 1, 0);
 
 		if (IS_ZERO_DOUBLE(db1) && IS_ZERO_DOUBLE(db2))
 			dbr = 0;
@@ -1190,37 +1187,37 @@ static void _plot_balancegram(const drawing_interface* pif, const plot_t* plt, m
 		k3.fy = pa[0].fy;
 
 		xsprintf(xp.size, _T("%d"), xstol(xp.size) + 2);
-		(*pif->pf_draw_line)(pif->ctx, &xp, &pt, &pk);
+		(*pci->drw->pf_draw_line)(pci->ctx, &xp, &pt, &pk);
 
 		xsprintf(xp.size, _T("%d"), xstol(xp.size) - 2);
 		xr.fx = middx - 0.5f;
 		xr.fy = middy - 0.5f;
 		xr.fw = 1.0f;
 		xr.fh = 1.0f;
-		(*pif->pf_draw_ellipse)(pif->ctx, &xp, &xb, &xr);
+		(*pci->drw->pf_draw_ellipse)(pci->ctx, &xp, &xb, &xr);
 
 		xsprintf(xp.size, _T("%d"), xstol(xp.size) - 2);
 		xscpy(xp.style, GDI_ATTR_STROKE_STYLE_DASHDASH);
 
-		(*pif->pf_draw_line)(pif->ctx, &xp, &pt, &t1);
+		(*pci->drw->pf_draw_line)(pci->ctx, &xp, &pt, &t1);
 
-		(*pif->pf_draw_line)(pif->ctx, &xp, &pt, &t2);
+		(*pci->drw->pf_draw_line)(pci->ctx, &xp, &pt, &t2);
 
 		xr.fx = pt.fx - 0.5f;
 		xr.fy = pt.fy - 0.5f;
 		xr.fw = 1.0f;
 		xr.fh = 1.0f;
-		(*pif->pf_draw_ellipse)(pif->ctx, &xp, &xb, &xr);
+		(*pci->drw->pf_draw_ellipse)(pci->ctx, &xp, &xb, &xr);
 
-		(*pif->pf_draw_line)(pif->ctx, &xp, &pk, &k1);
+		(*pci->drw->pf_draw_line)(pci->ctx, &xp, &pk, &k1);
 
-		(*pif->pf_draw_line)(pif->ctx, &xp, &pk, &k2);
+		(*pci->drw->pf_draw_line)(pci->ctx, &xp, &pk, &k2);
 
 		xr.fx = pk.fx - 0.5f;
 		xr.fy = pk.fy - 0.5f;
 		xr.fw = 1.0f;
 		xr.fh = 1.0f;
-		(*pif->pf_draw_ellipse)(pif->ctx, &xp, &xb, &xr);
+		(*pci->drw->pf_draw_ellipse)(pci->ctx, &xp, &xb, &xr);
 
 		xscpy(xp.style, GDI_ATTR_STROKE_STYLE_SOLID);
 
@@ -1245,7 +1242,7 @@ static void _plot_balancegram(const drawing_interface* pif, const plot_t* plt, m
 		pa[6].fx = t1.fx;
 		pa[6].fy = t1.fy;
 
-		(*pif->pf_draw_path)(pif->ctx, &xp, &xb, sa, pa, 7);
+		(*pci->drw->pf_draw_path)(pci->ctx, &xp, &xb, sa, pa, 7);
 
 		color = get_string_ptr(plt->y_colors, 0);
 		if (!is_null(color))
@@ -1272,17 +1269,17 @@ static void _plot_balancegram(const drawing_interface* pif, const plot_t* plt, m
 		xr.fh = (t2.fy - pt.fy);
 		ft_center_rect(&xr, (float)(xr.fw * dbr), (float)(xr.fh * dbr));
 		xr.fy = t1.fy - xr.fh - (t3.fy - t2.fy) * 2;
-		(*pif->pf_draw_triangle)(pif->ctx, &xp_dot, &xb_dot, &xr, ATTR_ORITATION_TOP);
+		(*pci->drw->pf_draw_triangle)(pci->ctx, &xp_dot, &xb_dot, &xr, ATTR_ORITATION_TOP);
 
 		//the left label
 		label = get_string_ptr(plt->y_labels, 0);
-		(*pif->pf_text_size)(pif->ctx, label, -1, &xs);
+		(*pci->drw->pf_text_size)(pci->ctx, label, -1, &xs);
 
 		xr.fx = t2.fx + (t1.fx - t2.fx - xs.fw) / 2;
 		xr.fy = t3.fy + 1.0f;
 		xr.fw = xs.fw;
 		xr.fh = dr;
-		(*pif->pf_text_out)(pif->ctx, &xa, RECTPOINT(&xr), label, -1);
+		(*pci->drw->pf_text_out)(pci->ctx, &xa, RECTPOINT(&xr), label, -1);
 
 		//the right tray
 		sa[0] = _T('M');
@@ -1305,7 +1302,7 @@ static void _plot_balancegram(const drawing_interface* pif, const plot_t* plt, m
 		pa[6].fx = k1.fx;
 		pa[6].fy = k1.fy;
 
-		(*pif->pf_draw_path)(pif->ctx, &xp, &xb, sa, pa, 7);
+		(*pci->drw->pf_draw_path)(pci->ctx, &xp, &xb, sa, pa, 7);
 
 		color = get_string_ptr(plt->y_colors, 1);
 		if (!is_null(color))
@@ -1332,21 +1329,21 @@ static void _plot_balancegram(const drawing_interface* pif, const plot_t* plt, m
 		xr.fh = (k2.fy - pk.fy);
 		ft_center_rect(&xr, (float)(xr.fw * dbr), (float)(xr.fh * dbr));
 		xr.fy = k1.fy - xr.fh - (k3.fy - k2.fy) * 2;
-		(*pif->pf_draw_triangle)(pif->ctx, &xp_dot, &xb_dot, &xr, ATTR_ORITATION_TOP);
+		(*pci->drw->pf_draw_triangle)(pci->ctx, &xp_dot, &xb_dot, &xr, ATTR_ORITATION_TOP);
 
 		//the right label
 		label = get_string_ptr(plt->y_labels, 1);
-		(*pif->pf_text_size)(pif->ctx, label, -1, &xs);
+		(*pci->drw->pf_text_size)(pci->ctx, label, -1, &xs);
 
 		xr.fx = k2.fx + (k1.fx - k2.fx - xs.fw) / 2;
 		xr.fy = k3.fy + 1.0f;
 		xr.fw = xs.fw;
 		xr.fh = dr;
-		(*pif->pf_text_out)(pif->ctx, &xa, RECTPOINT(&xr), label, -1);
+		(*pci->drw->pf_text_out)(pci->ctx, &xa, RECTPOINT(&xr), label, -1);
 	}
 }
 
-static void _plot_kpigram(const drawing_interface* pif, const plot_t* plt, matrix_t mt)
+static void _plot_kpigram(const drawing_interface* pci, const plot_t* plt, matrix_t mt)
 {
 	xbrush_t xb, xb_dot;
 	xpen_t xp, xp_dot;
@@ -1374,7 +1371,7 @@ static void _plot_kpigram(const drawing_interface* pif, const plot_t* plt, matri
 
 	tchar_t numstr[NUM_LEN + 1] = { 0 };
 
-	const canvbox_t* pbox = (canvbox_t*)(&pif->rect);
+	const canvbox_t* pbox = (canvbox_t*)(&pci->rect);
 
 	double dbl;
 	double y_base, y_step, y_grade;
@@ -1391,7 +1388,7 @@ static void _plot_kpigram(const drawing_interface* pif, const plot_t* plt, matri
 
 	default_xfont(&xf);
 	xsprintf(xf.size, _T("%s"), GDI_ATTR_FONT_SIZE_FOOTER);
-	(*pif->pf_set_xfont)(pif->ctx, &xf);
+	(*pci->drw->pf_set_xfont)(pci->ctx, &xf);
 
 	default_xpen(&xp_dot);
 	xscpy(xp_dot.size, xp.size);
@@ -1445,16 +1442,16 @@ static void _plot_kpigram(const drawing_interface* pif, const plot_t* plt, matri
 	{
 		stage = get_string_ptr(plt->y_stages, i);
 
-		y_base = get_numeric(plt->y_bases, 0);
-		y_step = get_numeric(plt->y_steps, 0);
-		y_grade = get_numeric(plt->y_grades, i);
+		y_base = get_numeric_safe(plt->y_bases, 0, 0);
+		y_step = get_numeric_safe(plt->y_steps, 0, 0);
+		y_grade = get_numeric_safe(plt->y_grades, i, 0);
 
 		datay = (float)((y_grade - y_base) / y_step) * dy;
 
-		(*pif->pf_text_size)(pif->ctx, stage, -1, &xs);
+		(*pci->drw->pf_text_size)(pci->ctx, stage, -1, &xs);
 		pt1.fx = zerox - xs.fw;
 		pt1.fy = zeroy - datay - xs.fh / 2;
-		(*pif->pf_text_out)(pif->ctx, &xa, &pt1, stage, -1);
+		(*pci->drw->pf_text_out)(pci->ctx, &xa, &pt1, stage, -1);
 
 		color = get_string_ptr(plt->y_colors, i);
 		if (!is_null(color))
@@ -1466,7 +1463,7 @@ static void _plot_kpigram(const drawing_interface* pif, const plot_t* plt, matri
 		pt1.fy = zeroy - datay;
 		pt2.fx = zerox + y_count * dx;
 		pt2.fy = zeroy - datay;
-		(*pif->pf_draw_line)(pif->ctx, &xp_dot, &pt1, &pt2);
+		(*pci->drw->pf_draw_line)(pci->ctx, &xp_dot, &pt1, &pt2);
 
 		origy = datay;
 	}
@@ -1480,11 +1477,11 @@ static void _plot_kpigram(const drawing_interface* pif, const plot_t* plt, matri
 		xr.fw = dx;
 		xr.fy = zeroy;
 		xr.fh = dy / 2;
-		(*pif->pf_draw_text)(pif->ctx, &xa, &xr, label, -1);
+		(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, label, -1);
 
-		y_base = get_numeric(plt->y_bases, j);
-		y_step = get_numeric(plt->y_steps, j);
-		dbl = matrix_get_value(mt, 0, j);
+		y_base = get_numeric_safe(plt->y_bases, j, 0);
+		y_step = get_numeric_safe(plt->y_steps, j, 0);
+		dbl = matrix_get_value_safe(mt, 0, j, 0);
 
 		if (IS_VALID_DOUBLE(dbl) && IS_VALID_DOUBLE(y_base) && IS_VALID_DOUBLE(y_step) && !IS_ZERO_DOUBLE(y_step))
 			datay = (float)((dbl - y_base) / y_step) * dy;
@@ -1553,7 +1550,7 @@ static void _plot_kpigram(const drawing_interface* pif, const plot_t* plt, matri
 			pa[10].fx = zerox + (j + 1) * dx;
 			pa[10].fy = zeroy;
 
-			(*pif->pf_draw_path)(pif->ctx, &xp, &xb, sa, pa, 11);
+			(*pci->drw->pf_draw_path)(pci->ctx, &xp, &xb, sa, pa, 11);
 		}
 
 		if (IS_VALID_DOUBLE(dbl))
@@ -1565,11 +1562,11 @@ static void _plot_kpigram(const drawing_interface* pif, const plot_t* plt, matri
 		xr.fw = dx;
 		xr.fy = zeroy - datay - dy / 2;
 		xr.fh = dy / 2;
-		(*pif->pf_draw_text)(pif->ctx, &xa, &xr, numstr, -1);
+		(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, numstr, -1);
 	}
 }
 
-static void _plot_taskgram(const drawing_interface* pif, const plot_t* plt, matrix_t mt)
+static void _plot_taskgram(const drawing_interface* pci, const plot_t* plt, matrix_t mt)
 {
 	xbrush_t xb, xb_dot;
 	xpen_t xp, xp_dot;
@@ -1592,7 +1589,7 @@ static void _plot_taskgram(const drawing_interface* pif, const plot_t* plt, matr
 	const tchar_t* color;
 	tchar_t numstr[NUM_LEN + 1] = { 0 };
 
-	const canvbox_t* pbox = (canvbox_t*)(&pif->rect);
+	const canvbox_t* pbox = (canvbox_t*)(&pci->rect);
 
 	double dbl;
 
@@ -1602,7 +1599,7 @@ static void _plot_taskgram(const drawing_interface* pif, const plot_t* plt, matr
 
 	default_xfont(&xf);
 	xsprintf(xf.size, _T("%s"), GDI_ATTR_FONT_SIZE_FOOTER);
-	(*pif->pf_set_xfont)(pif->ctx, &xf);
+	(*pci->drw->pf_set_xfont)(pci->ctx, &xf);
 
 	default_xpen(&xp);
 	parse_xpen_from_style(&xp, plt->style);
@@ -1649,7 +1646,7 @@ static void _plot_taskgram(const drawing_interface* pif, const plot_t* plt, matr
 		xr.fw = dy;
 		xr.fy = zeroy - (i + 1) * dy;
 		xr.fh = dy;
-		(*pif->pf_draw_text)(pif->ctx, &xa, &xr, label, -1);
+		(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, label, -1);
 
 		color = get_string_ptr(plt->y_colors, i);
 		if (!is_null(color))
@@ -1669,7 +1666,7 @@ static void _plot_taskgram(const drawing_interface* pif, const plot_t* plt, matr
 		pt1.fy = zeroy - (i + 1) * dy;
 		pt2.fx = zerox + x_count * dx;
 		pt2.fy = zeroy - (i + 1) * dy;
-		//(*pif->pf_draw_line)(pif->ctx, &xp_dot, &pt1, &pt2);
+		//(*pci->drw->pf_draw_line)(pci->ctx, &xp_dot, &pt1, &pt2);
 	}
 
 	//task rect
@@ -1681,7 +1678,7 @@ static void _plot_taskgram(const drawing_interface* pif, const plot_t* plt, matr
 		xr.fw = dx;
 		xr.fy = zeroy;
 		xr.fh = dy / 2;
-		(*pif->pf_draw_text)(pif->ctx, &xa, &xr, label, -1);
+		(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, label, -1);
 
 		color = get_string_ptr(plt->x_colors, i);
 		if (!is_null(color))
@@ -1693,7 +1690,7 @@ static void _plot_taskgram(const drawing_interface* pif, const plot_t* plt, matr
 
 		for (j = 0; j < y_count; j++)
 		{
-			dbl = matrix_get_value(mt, i, j);
+			dbl = matrix_get_value_safe(mt, i, j, 0);
 			if (!IS_VALID_DOUBLE(dbl))
 				dbl = 0;
 
@@ -1706,17 +1703,17 @@ static void _plot_taskgram(const drawing_interface* pif, const plot_t* plt, matr
 
 			if ((int)dbl)
 			{
-				(*pif->pf_draw_rect)(pif->ctx, &xp_dot, &xb_dot, &xr);
+				(*pci->drw->pf_draw_rect)(pci->ctx, &xp_dot, &xb_dot, &xr);
 			}
 			else
 			{
-				(*pif->pf_draw_rect)(pif->ctx, &xp_dot, NULL, &xr);
+				(*pci->drw->pf_draw_rect)(pci->ctx, &xp_dot, NULL, &xr);
 			}
 		}
 	}
 }
 
-static void _plot_scattergram(const drawing_interface* pif, const plot_t* plt, matrix_t mt)
+static void _plot_scattergram(const drawing_interface* pci, const plot_t* plt, matrix_t mt)
 {
 	xbrush_t xb, xb_dot;
 	xpen_t xp, xp_dot;
@@ -1739,7 +1736,7 @@ static void _plot_scattergram(const drawing_interface* pif, const plot_t* plt, m
 	const tchar_t* color;
 	tchar_t numstr[NUM_LEN + 1] = { 0 };
 
-	const canvbox_t* pbox = (canvbox_t*)(&pif->rect);
+	const canvbox_t* pbox = (canvbox_t*)(&pci->rect);
 
 	double dbl;
 	double y_base, y_step;
@@ -1750,7 +1747,7 @@ static void _plot_scattergram(const drawing_interface* pif, const plot_t* plt, m
 	default_xfont(&xf);
 	xsprintf(xf.size, _T("%s"), GDI_ATTR_FONT_SIZE_FOOTER);
 	parse_xfont_from_style(&xf, plt->style);
-	(*pif->pf_set_xfont)(pif->ctx, &xf);
+	(*pci->drw->pf_set_xfont)(pci->ctx, &xf);
 
 	default_xpen(&xp);
 	parse_xpen_from_style(&xp, plt->style);
@@ -1804,7 +1801,7 @@ static void _plot_scattergram(const drawing_interface* pif, const plot_t* plt, m
 	pt1.fy = zeroy - y_ruler * dy;
 	pt2.fx = zerox;
 	pt2.fy = zeroy;
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+	(*pci->drw->pf_draw_line)(pci->ctx, &xp, &pt1, &pt2);
 
 	//y ruler and labels
 	for (i = 0; i< y_count; i++)
@@ -1816,16 +1813,16 @@ static void _plot_scattergram(const drawing_interface* pif, const plot_t* plt, m
 		xr.fw = dd;
 		xr.fy = zeroy - y_ruler * dy;
 		xr.fh = dy / 2;
-		(*pif->pf_draw_text)(pif->ctx, &xa, &xr, label, -1);
+		(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, label, -1);
 
 		//top bar line
 		pt1.fx = zerox - (i + 1) * dd;
 		pt1.fy = zeroy - y_ruler * dy + dy / 2;
 		pt2.fx = zerox - i * dd;
 		pt2.fy = zeroy - y_ruler * dy + dy / 2;
-		(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+		(*pci->drw->pf_draw_line)(pci->ctx, &xp, &pt1, &pt2);
 
-		dbl = get_numeric(plt->y_bases, i); 
+		dbl = get_numeric_safe(plt->y_bases, i, 0); 
 
 		for (j = y_ruler / 2 + 1; j < y_ruler; j++)
 		{
@@ -1835,11 +1832,11 @@ static void _plot_scattergram(const drawing_interface* pif, const plot_t* plt, m
 				pt1.fy = zeroy - j * dy;
 				pt2.fx = zerox;
 				pt2.fy = zeroy - j * dy;
-				(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+				(*pci->drw->pf_draw_line)(pci->ctx, &xp, &pt1, &pt2);
 			}
 
 			if (IS_VALID_DOUBLE(dbl))
-				dbl += get_numeric(plt->y_steps, i);
+				dbl += get_numeric_safe(plt->y_steps, i, 0);
 
 			xr.fx = zerox - (i + 1) * dd;
 			xr.fw = dd;
@@ -1850,10 +1847,10 @@ static void _plot_scattergram(const drawing_interface* pif, const plot_t* plt, m
 			else
 				xscpy(numstr, _T("N"));
 
-			(*pif->pf_draw_text)(pif->ctx, &xa, &xr, numstr, -1);
+			(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, numstr, -1);
 		}
 
-		dbl = get_numeric(plt->y_bases, i);
+		dbl = get_numeric_safe(plt->y_bases, i, 0);
 		for (j = y_ruler / 2; j > 0; j--)
 		{
 			if (!i)
@@ -1862,7 +1859,7 @@ static void _plot_scattergram(const drawing_interface* pif, const plot_t* plt, m
 				pt1.fy = zeroy - j * dy;
 				pt2.fx = zerox;
 				pt2.fy = zeroy - j * dy;
-				(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+				(*pci->drw->pf_draw_line)(pci->ctx, &xp, &pt1, &pt2);
 			}
 
 			xr.fx = zerox - (i + 1) * dd;
@@ -1873,9 +1870,9 @@ static void _plot_scattergram(const drawing_interface* pif, const plot_t* plt, m
 				xsprintf(numstr, _T("%.2f"), dbl);
 			else
 				xscpy(numstr, _T("N"));
-			(*pif->pf_draw_text)(pif->ctx, &xa, &xr, numstr, -1);
+			(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, numstr, -1);
 
-			dbl -= get_numeric(plt->y_steps, i);
+			dbl -= get_numeric_safe(plt->y_steps, i, 0);
 		}
 
 		// the y color indicator
@@ -1898,7 +1895,7 @@ static void _plot_scattergram(const drawing_interface* pif, const plot_t* plt, m
 		xr.fy = zeroy - dy / 2;
 		xr.fh = dy / 2;
 		ft_center_rect(&xr, 2.5f, 2.5f);
-		(*pif->pf_draw_rect)(pif->ctx, &xp_dot, &xb_dot, &xr);
+		(*pci->drw->pf_draw_rect)(pci->ctx, &xp_dot, &xb_dot, &xr);
 	}
 
 	//x axis
@@ -1906,7 +1903,7 @@ static void _plot_scattergram(const drawing_interface* pif, const plot_t* plt, m
 	pt1.fy = zeroy;
 	pt2.fx = zerox + x_ruler * dx;
 	pt2.fy = zeroy;
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+	(*pci->drw->pf_draw_line)(pci->ctx, &xp, &pt1, &pt2);
 
 	//x middle axis
 	pt1.fx = zerox;
@@ -1915,7 +1912,7 @@ static void _plot_scattergram(const drawing_interface* pif, const plot_t* plt, m
 	pt2.fy = middy;
 	xscpy(xp_dot.color, xp.color);
 	xscpy(xp_dot.style, GDI_ATTR_STROKE_STYLE_DASH);
-	(*pif->pf_draw_line)(pif->ctx, &xp_dot, &pt1, &pt2);
+	(*pci->drw->pf_draw_line)(pci->ctx, &xp_dot, &pt1, &pt2);
 
 	//x ruler and labels
 	for (i = 1; i <= x_ruler; i++)
@@ -1926,7 +1923,7 @@ static void _plot_scattergram(const drawing_interface* pif, const plot_t* plt, m
 			pt1.fy = zeroy;
 			pt2.fx = zerox + i * dx;
 			pt2.fy = zeroy + 2.0f;
-			(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+			(*pci->drw->pf_draw_line)(pci->ctx, &xp, &pt1, &pt2);
 		}
 
 		label = get_string_ptr(plt->x_labels, i - 1);
@@ -1935,7 +1932,7 @@ static void _plot_scattergram(const drawing_interface* pif, const plot_t* plt, m
 		xr.fw = dx;
 		xr.fy = zeroy;
 		xr.fh = dy / 2;
-		(*pif->pf_draw_text)(pif->ctx, &xa, &xr, label, -1);
+		(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, label, -1);
 	}
 
 	//scatter dot
@@ -1953,9 +1950,9 @@ static void _plot_scattergram(const drawing_interface* pif, const plot_t* plt, m
 
 		for (j = 0; j < matrix_get_rows(mt); j++)
 		{
-			y_base = get_numeric(plt->y_bases, i);
-			y_step = get_numeric(plt->y_steps, i);
-			dbl = matrix_get_value(mt, j, i);
+			y_base = get_numeric_safe(plt->y_bases, i, 0);
+			y_step = get_numeric_safe(plt->y_steps, i, 0);
+			dbl = matrix_get_value_safe(mt, j, i, 0);
 
 			pt1.fx = zerox + (j + 1) * dx - dx / 2;
 			if (IS_VALID_DOUBLE(dbl) && IS_VALID_DOUBLE(y_base) && IS_VALID_DOUBLE(y_step) && !IS_ZERO_DOUBLE(y_step))
@@ -1967,12 +1964,12 @@ static void _plot_scattergram(const drawing_interface* pif, const plot_t* plt, m
 			xr.fy = pt1.fy - 1.0f;
 			xr.fw = 2.0f;
 			xr.fh = 2.0f;
-			(*pif->pf_draw_ellipse)(pif->ctx, NULL, &xb_dot, &xr);
+			(*pci->drw->pf_draw_ellipse)(pci->ctx, NULL, &xb_dot, &xr);
 		}
 	}
 }
 
-static void _plot_mediangram(const drawing_interface* pif, const plot_t* plt, matrix_t mt)
+static void _plot_mediangram(const drawing_interface* pci, const plot_t* plt, matrix_t mt)
 {
 	xbrush_t xb, xb_dot;
 	xpen_t xp, xp_dot;
@@ -1999,7 +1996,7 @@ static void _plot_mediangram(const drawing_interface* pif, const plot_t* plt, ma
 	const tchar_t* stage;
 	tchar_t numstr[NUM_LEN + 1] = { 0 };
 
-	const canvbox_t* pbox = (canvbox_t*)(&pif->rect);
+	const canvbox_t* pbox = (canvbox_t*)(&pci->rect);
 
 	double db_val,db_min,db_mid,db_max;
 	double y_base, y_step, y_grade;
@@ -2011,7 +2008,7 @@ static void _plot_mediangram(const drawing_interface* pif, const plot_t* plt, ma
 	default_xfont(&xf);
 	xsprintf(xf.size, _T("%s"), GDI_ATTR_FONT_SIZE_FOOTER);
 	parse_xfont_from_style(&xf, plt->style);
-	(*pif->pf_set_xfont)(pif->ctx, &xf);
+	(*pci->drw->pf_set_xfont)(pci->ctx, &xf);
 
 	default_xpen(&xp);
 	parse_xpen_from_style(&xp, plt->style);
@@ -2060,20 +2057,20 @@ static void _plot_mediangram(const drawing_interface* pif, const plot_t* plt, ma
 	pt1.fy = zeroy - y_ruler * dy;
 	pt2.fx = zerox;
 	pt2.fy = zeroy;
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+	(*pci->drw->pf_draw_line)(pci->ctx, &xp, &pt1, &pt2);
 
 	//the y ruler
 	db_val = 0;
 	for (j = 1; j <= y_ruler; j++)
 	{
 		if (IS_VALID_DOUBLE(db_val))
-			db_val += get_numeric(plt->y_steps, 0);
+			db_val += get_numeric_safe(plt->y_steps, 0, 0);
 
 		pt1.fx = zerox - 2.0f;
 		pt1.fy = zeroy - j * dy;
 		pt2.fx = zerox;
 		pt2.fy = zeroy - j * dy;
-		(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+		(*pci->drw->pf_draw_line)(pci->ctx, &xp, &pt1, &pt2);
 
 		xr.fx = zerox - dx;
 		xr.fw = dx;
@@ -2085,7 +2082,7 @@ static void _plot_mediangram(const drawing_interface* pif, const plot_t* plt, ma
 		else
 			xscpy(numstr, _T("N"));
 
-		(*pif->pf_draw_text)(pif->ctx, &xa, &xr, numstr, -1);
+		(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, numstr, -1);
 	}
 
 	xscpy(xp.style, GDI_ATTR_STROKE_STYLE_DASHDASH);
@@ -2094,16 +2091,16 @@ static void _plot_mediangram(const drawing_interface* pif, const plot_t* plt, ma
 	{
 		stage = get_string_ptr(plt->y_stages, i);
 
-		y_base = get_numeric(plt->y_bases, 0);
-		y_step = get_numeric(plt->y_steps, 0);
-		y_grade = get_numeric(plt->y_grades, i);
+		y_base = get_numeric_safe(plt->y_bases, 0, 0);
+		y_step = get_numeric_safe(plt->y_steps, 0, 0);
+		y_grade = get_numeric_safe(plt->y_grades, i, 0);
 
 		grady = (float)((y_grade - y_base) / y_step) * dy;
 
-		(*pif->pf_text_size)(pif->ctx, stage, -1, &xs);
+		(*pci->drw->pf_text_size)(pci->ctx, stage, -1, &xs);
 		pt1.fx = zerox + x_ruler * dx - xs.fw;
 		pt1.fy = zeroy - grady - xs.fh;
-		(*pif->pf_text_out)(pif->ctx, &xa, &pt1, stage, -1);
+		(*pci->drw->pf_text_out)(pci->ctx, &xa, &pt1, stage, -1);
 
 		color = get_string_ptr(plt->y_colors, 0);
 		if (!is_null(color))
@@ -2115,7 +2112,7 @@ static void _plot_mediangram(const drawing_interface* pif, const plot_t* plt, ma
 		pt1.fy = zeroy - grady;
 		pt2.fx = zerox + x_ruler * dx;
 		pt2.fy = zeroy - grady;
-		(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+		(*pci->drw->pf_draw_line)(pci->ctx, &xp, &pt1, &pt2);
 	}
 
 	xscpy(xp.style, GDI_ATTR_STROKE_STYLE_SOLID);
@@ -2125,7 +2122,7 @@ static void _plot_mediangram(const drawing_interface* pif, const plot_t* plt, ma
 	pt1.fy = zeroy;
 	pt2.fx = zerox + x_ruler * dx;
 	pt2.fy = zeroy;
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+	(*pci->drw->pf_draw_line)(pci->ctx, &xp, &pt1, &pt2);
 
 	//x ruler and labels
 	for (i = 1; i <= x_ruler; i++)
@@ -2136,7 +2133,7 @@ static void _plot_mediangram(const drawing_interface* pif, const plot_t* plt, ma
 			pt1.fy = zeroy;
 			pt2.fx = zerox + i * dx;
 			pt2.fy = zeroy + 2.0f;
-			(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+			(*pci->drw->pf_draw_line)(pci->ctx, &xp, &pt1, &pt2);
 		}
 
 		label = get_string_ptr(plt->x_labels, i - 1);
@@ -2145,7 +2142,7 @@ static void _plot_mediangram(const drawing_interface* pif, const plot_t* plt, ma
 		xr.fw = dx;
 		xr.fy = zeroy;
 		xr.fh = dy / 2;
-		(*pif->pf_draw_text)(pif->ctx, &xa, &xr, label, -1);
+		(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, label, -1);
 	}
 
 	pa1 = (xpoint_t*)xmem_alloc(sizeof(xpoint_t) * matrix_get_rows(mt));
@@ -2153,13 +2150,13 @@ static void _plot_mediangram(const drawing_interface* pif, const plot_t* plt, ma
 	//median rect
 	for (i = 0; i < matrix_get_rows(mt); i++)
 	{
-		y_base = get_numeric(plt->y_bases, 0);
-		y_step = get_numeric(plt->y_steps, 0);
+		y_base = get_numeric_safe(plt->y_bases, 0, 0);
+		y_step = get_numeric_safe(plt->y_steps, 0, 0);
 
-		db_val = matrix_get_value(mt, i, 0);
-		db_min = matrix_get_value(mt, i, 1);
-		db_mid = matrix_get_value(mt, i, 2);
-		db_max = matrix_get_value(mt, i, 3);
+		db_val = matrix_get_value_safe(mt, i, 0, 0);
+		db_min = matrix_get_value_safe(mt, i, 1, 0);
+		db_mid = matrix_get_value_safe(mt, i, 2, 0);
+		db_max = matrix_get_value_safe(mt, i, 3, 0);
 
 		if (IS_VALID_DOUBLE(db_max) && IS_VALID_DOUBLE(y_base) && IS_VALID_DOUBLE(y_step) && !IS_ZERO_DOUBLE(y_step))
 			fr = (float)((db_val - y_base) / (y_step));
@@ -2200,27 +2197,27 @@ static void _plot_mediangram(const drawing_interface* pif, const plot_t* plt, ma
 
 		ft_expand_rect(&xr, (dd - dx) / 2, 0);
 
-		(*pif->pf_draw_rect)(pif->ctx, &xp, &xb, &xr);
+		(*pci->drw->pf_draw_rect)(pci->ctx, &xp, &xb, &xr);
 
 		if (IS_VALID_DOUBLE(db_max))
 			xsprintf(numstr, _T("%.f"), db_val);
 		else
 			xscpy(numstr, _T("N"));
 
-		(*pif->pf_text_size)(pif->ctx, numstr, -1, &xs);
+		(*pci->drw->pf_text_size)(pci->ctx, numstr, -1, &xs);
 		pt1.fx = xr.fx + (xr.fw - xs.fw) / 2;
 		pt1.fy = xr.fy - xs.fh;
-		(*pif->pf_text_out)(pif->ctx, &xa, &pt1, numstr, -1);
+		(*pci->drw->pf_text_out)(pci->ctx, &xa, &pt1, numstr, -1);
 
 		if (IS_VALID_DOUBLE(db_min))
 			xsprintf(numstr, _T("%.f"), db_mid);
 		else
 			xscpy(numstr, _T("N"));
 
-		(*pif->pf_text_size)(pif->ctx, numstr, -1, &xs);
+		(*pci->drw->pf_text_size)(pci->ctx, numstr, -1, &xs);
 		pt2.fx = xr.fx + (xr.fw - xs.fw) / 2;
 		pt2.fy = xr.fy + xr.fh;
-		(*pif->pf_text_out)(pif->ctx, &xa, &pt2, numstr, -1);
+		(*pci->drw->pf_text_out)(pci->ctx, &xa, &pt2, numstr, -1);
 	}
 
 	color = get_string_ptr(plt->y_colors, 0);
@@ -2236,7 +2233,7 @@ static void _plot_mediangram(const drawing_interface* pif, const plot_t* plt, ma
 		xscpy(xb_dot.color, xb.color);
 	}
 
-	(*pif->pf_draw_curve)(pif->ctx, &xp_dot, pa1, matrix_get_rows(mt));
+	(*pci->drw->pf_draw_curve)(pci->ctx, &xp_dot, pa1, matrix_get_rows(mt));
 
 	for (i = 0; i < matrix_get_rows(mt); i++)
 	{
@@ -2245,7 +2242,7 @@ static void _plot_mediangram(const drawing_interface* pif, const plot_t* plt, ma
 		xr.fw = 2.0f;
 		xr.fh = 2.0f;
 
-		(*pif->pf_draw_ellipse)(pif->ctx, &xp_dot, &xb_dot, &xr);
+		(*pci->drw->pf_draw_ellipse)(pci->ctx, &xp_dot, &xb_dot, &xr);
 	}
 
 	xr.fx = zerox;
@@ -2253,13 +2250,13 @@ static void _plot_mediangram(const drawing_interface* pif, const plot_t* plt, ma
 	xr.fw = dy;
 	xr.fh = dy;
 	ft_center_rect(&xr, 2.0f, 2.0f);
-	(*pif->pf_draw_rect)(pif->ctx, &xp_dot, &xb_dot, &xr);
+	(*pci->drw->pf_draw_rect)(pci->ctx, &xp_dot, &xb_dot, &xr);
 
 	xr.fx = zerox + dy;
 	xr.fy = zeroy - dy * (y_ruler + 1);
 	xr.fw = dx;
 	xr.fh = dy;
-	(*pif->pf_draw_text)(pif->ctx, &xa, &xr, _T("得分值"), -1);
+	(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, _T("得分值"), -1);
 
 	color = get_string_ptr(plt->y_colors, 1);
 	if (!is_null(color))
@@ -2274,7 +2271,7 @@ static void _plot_mediangram(const drawing_interface* pif, const plot_t* plt, ma
 		xscpy(xb_dot.color, xb.color);
 	}
 
-	(*pif->pf_draw_curve)(pif->ctx, &xp_dot, pa2, matrix_get_rows(mt));
+	(*pci->drw->pf_draw_curve)(pci->ctx, &xp_dot, pa2, matrix_get_rows(mt));
 
 	for (i = 0; i < matrix_get_rows(mt); i++)
 	{
@@ -2283,7 +2280,7 @@ static void _plot_mediangram(const drawing_interface* pif, const plot_t* plt, ma
 		xr.fw = 2.0f;
 		xr.fh = 2.0f;
 
-		(*pif->pf_draw_ellipse)(pif->ctx, &xp_dot, &xb_dot, &xr);
+		(*pci->drw->pf_draw_ellipse)(pci->ctx, &xp_dot, &xb_dot, &xr);
 	}
 
 	xr.fx = zerox + dy + dx;
@@ -2291,19 +2288,19 @@ static void _plot_mediangram(const drawing_interface* pif, const plot_t* plt, ma
 	xr.fw = dy;
 	xr.fh = dy;
 	ft_center_rect(&xr, 2.0f, 2.0f);
-	(*pif->pf_draw_rect)(pif->ctx, &xp_dot, &xb_dot, &xr);
+	(*pci->drw->pf_draw_rect)(pci->ctx, &xp_dot, &xb_dot, &xr);
 
 	xr.fx = zerox + 2 * dy + dx;
 	xr.fy = zeroy - dy * (y_ruler + 1);
 	xr.fw = dx;
 	xr.fh = dy;
-	(*pif->pf_draw_text)(pif->ctx, &xa, &xr, _T("中位值"), -1);
+	(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, _T("中位值"), -1);
 
 	xmem_free(pa1);
 	xmem_free(pa2);
 }
 
-static void _plot_histogram(const drawing_interface* pif, const plot_t* plt, matrix_t mt)
+static void _plot_histogram(const drawing_interface* pci, const plot_t* plt, matrix_t mt)
 {
 	xbrush_t xb, xb_dot;
 	xpen_t xp, xp_dot;
@@ -2329,7 +2326,7 @@ static void _plot_histogram(const drawing_interface* pif, const plot_t* plt, mat
 	const tchar_t* stage;
 	tchar_t numstr[NUM_LEN + 1] = { 0 };
 
-	const canvbox_t* pbox = (canvbox_t*)(&pif->rect);
+	const canvbox_t* pbox = (canvbox_t*)(&pci->rect);
 
 	double dbl;
 	double y_base, y_step, y_grade;
@@ -2341,7 +2338,7 @@ static void _plot_histogram(const drawing_interface* pif, const plot_t* plt, mat
 	default_xfont(&xf);
 	xsprintf(xf.size, _T("%s"), GDI_ATTR_FONT_SIZE_FOOTER);
 	parse_xfont_from_style(&xf, plt->style);
-	(*pif->pf_set_xfont)(pif->ctx, &xf);
+	(*pci->drw->pf_set_xfont)(pci->ctx, &xf);
 
 	default_xpen(&xp);
 	parse_xpen_from_style(&xp, plt->style);
@@ -2401,7 +2398,7 @@ static void _plot_histogram(const drawing_interface* pif, const plot_t* plt, mat
 	pt1.fy = zeroy - y_ruler * dy;
 	pt2.fx = zerox;
 	pt2.fy = zeroy;
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+	(*pci->drw->pf_draw_line)(pci->ctx, &xp, &pt1, &pt2);
 
 	//y ruler and labels
 	for (i = 0; i < y_count; i++)
@@ -2413,15 +2410,15 @@ static void _plot_histogram(const drawing_interface* pif, const plot_t* plt, mat
 		xr.fw = dd;
 		xr.fy = zeroy - y_ruler * dy;
 		xr.fh = dy / 2;
-		(*pif->pf_draw_text)(pif->ctx, &xa, &xr, label, -1);
+		(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, label, -1);
 
 		pt1.fx = zerox - (i + 1) * dd;
 		pt1.fy = zeroy - y_ruler * dy + dy / 2;
 		pt2.fx = zerox - i * dd;
 		pt2.fy = zeroy - y_ruler * dy + dy / 2;
-		(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+		(*pci->drw->pf_draw_line)(pci->ctx, &xp, &pt1, &pt2);
 
-		dbl = get_numeric(plt->y_bases, i);
+		dbl = get_numeric_safe(plt->y_bases, i, 0);
 
 		for (j = y_ruler / 2 + 1; j < y_ruler; j++)
 		{
@@ -2431,11 +2428,11 @@ static void _plot_histogram(const drawing_interface* pif, const plot_t* plt, mat
 				pt1.fy = zeroy - j * dy;
 				pt2.fx = zerox;
 				pt2.fy = zeroy - j * dy;
-				(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+				(*pci->drw->pf_draw_line)(pci->ctx, &xp, &pt1, &pt2);
 			}
 
 			if (IS_VALID_DOUBLE(dbl))
-				dbl += get_numeric(plt->y_steps, i);
+				dbl += get_numeric_safe(plt->y_steps, i, 0);
 
 			xr.fx = zerox - (i + 1) * dd;
 			xr.fw = dd;
@@ -2446,10 +2443,10 @@ static void _plot_histogram(const drawing_interface* pif, const plot_t* plt, mat
 			else
 				xscpy(numstr, _T("N"));
 
-			(*pif->pf_draw_text)(pif->ctx, &xa, &xr, numstr, -1);
+			(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, numstr, -1);
 		}
 
-		dbl = get_numeric(plt->y_bases, i);
+		dbl = get_numeric_safe(plt->y_bases, i, 0);
 
 		for (j = y_ruler / 2; j > 0; j--)
 		{
@@ -2459,7 +2456,7 @@ static void _plot_histogram(const drawing_interface* pif, const plot_t* plt, mat
 				pt1.fy = zeroy - j * dy;
 				pt2.fx = zerox;
 				pt2.fy = zeroy - j * dy;
-				(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+				(*pci->drw->pf_draw_line)(pci->ctx, &xp, &pt1, &pt2);
 			}
 
 			xr.fx = zerox - (i + 1) * dd;
@@ -2470,10 +2467,10 @@ static void _plot_histogram(const drawing_interface* pif, const plot_t* plt, mat
 				xsprintf(numstr, _T("%.2f"), dbl);
 			else
 				xscpy(numstr, _T("N"));
-			(*pif->pf_draw_text)(pif->ctx, &xa, &xr, numstr, -1);
+			(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, numstr, -1);
 
 			if (IS_VALID_DOUBLE(dbl))
-				dbl -= get_numeric(plt->y_steps, i);
+				dbl -= get_numeric_safe(plt->y_steps, i, 0);
 		}
 
 		color = get_string_ptr(plt->y_colors, i);
@@ -2496,7 +2493,7 @@ static void _plot_histogram(const drawing_interface* pif, const plot_t* plt, mat
 		xr.fh = dd;
 		ft_center_rect(&xr, 2.0f, 2.0f);
 		xr.fy = zeroy - xr.fh;
-		(*pif->pf_draw_rect)(pif->ctx, &xp_dot, &xb_dot, &xr);
+		(*pci->drw->pf_draw_rect)(pci->ctx, &xp_dot, &xb_dot, &xr);
 	}
 
 	xscpy(xp_dot.style, GDI_ATTR_STROKE_STYLE_DASHDASH);
@@ -2505,16 +2502,16 @@ static void _plot_histogram(const drawing_interface* pif, const plot_t* plt, mat
 	{
 		stage = get_string_ptr(plt->y_stages, i);
 
-		y_base = get_numeric(plt->y_bases, 0);
-		y_step = get_numeric(plt->y_steps, 0);
-		y_grade = get_numeric(plt->y_grades, i);
+		y_base = get_numeric_safe(plt->y_bases, 0, 0);
+		y_step = get_numeric_safe(plt->y_steps, 0, 0);
+		y_grade = get_numeric_safe(plt->y_grades, i, 0);
 
 		grady = (float)((y_grade - y_base) / y_step) * dy;
 
-		(*pif->pf_text_size)(pif->ctx, stage, -1, &xs);
+		(*pci->drw->pf_text_size)(pci->ctx, stage, -1, &xs);
 		pt1.fx = zerox + x_ruler * dx - xs.fw;
 		pt1.fy = middy - grady - xs.fh;
-		(*pif->pf_text_out)(pif->ctx, &xa, &pt1, stage, -1);
+		(*pci->drw->pf_text_out)(pci->ctx, &xa, &pt1, stage, -1);
 
 		color = get_string_ptr(plt->y_colors, 0);
 		if (!is_null(color))
@@ -2526,7 +2523,7 @@ static void _plot_histogram(const drawing_interface* pif, const plot_t* plt, mat
 		pt1.fy = middy - grady;
 		pt2.fx = zerox + x_ruler * dx;
 		pt2.fy = middy - grady;
-		(*pif->pf_draw_line)(pif->ctx, &xp_dot, &pt1, &pt2);
+		(*pci->drw->pf_draw_line)(pci->ctx, &xp_dot, &pt1, &pt2);
 	}
 
 	xscpy(xp_dot.style, GDI_ATTR_STROKE_STYLE_SOLID);
@@ -2536,14 +2533,14 @@ static void _plot_histogram(const drawing_interface* pif, const plot_t* plt, mat
 	pt1.fy = zeroy;
 	pt2.fx = zerox + x_ruler * dx;
 	pt2.fy = zeroy;
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+	(*pci->drw->pf_draw_line)(pci->ctx, &xp, &pt1, &pt2);
 
 	//x middle axis
 	pt1.fx = zerox;
 	pt1.fy = middy;
 	pt2.fx = zerox + x_ruler * dx;
 	pt2.fy = middy;
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+	(*pci->drw->pf_draw_line)(pci->ctx, &xp, &pt1, &pt2);
 
 	//x ruler and labels
 	for (i = 1; i <= x_ruler; i++)
@@ -2554,7 +2551,7 @@ static void _plot_histogram(const drawing_interface* pif, const plot_t* plt, mat
 			pt1.fy = zeroy;
 			pt2.fx = zerox + i * dx;
 			pt2.fy = zeroy + 2.0f;
-			(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+			(*pci->drw->pf_draw_line)(pci->ctx, &xp, &pt1, &pt2);
 		}
 
 		label = get_string_ptr(plt->x_labels, i - 1);
@@ -2563,7 +2560,7 @@ static void _plot_histogram(const drawing_interface* pif, const plot_t* plt, mat
 		xr.fw = dx;
 		xr.fy = zeroy;
 		xr.fh = dy / 2;
-		(*pif->pf_draw_text)(pif->ctx, &xa, &xr, label, -1);
+		(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, label, -1);
 	}
 
 	//histo rect
@@ -2584,9 +2581,9 @@ static void _plot_histogram(const drawing_interface* pif, const plot_t* plt, mat
 				xscpy(xb_dot.color, xb.color);
 			}
 
-			y_base = get_numeric(plt->y_bases, j);
-			y_step = get_numeric(plt->y_steps, j);
-			dbl = matrix_get_value(mt, i, j);
+			y_base = get_numeric_safe(plt->y_bases, j, 0);
+			y_step = get_numeric_safe(plt->y_steps, j, 0);
+			dbl = matrix_get_value_safe(mt, i, j, 0);
 
 			if (IS_VALID_DOUBLE(dbl) && IS_VALID_DOUBLE(y_base) && IS_VALID_DOUBLE(y_step) && !IS_ZERO_DOUBLE(y_step))
 				fr = (float)((dbl - y_base) / (y_step));
@@ -2613,7 +2610,7 @@ static void _plot_histogram(const drawing_interface* pif, const plot_t* plt, mat
 
 			ft_expand_rect(&xr, -0.5f, 0);
 
-			(*pif->pf_draw_rect)(pif->ctx, &xp_dot, &xb_dot, &xr);
+			(*pci->drw->pf_draw_rect)(pci->ctx, &xp_dot, &xb_dot, &xr);
 
 			if (fr >= 0)
 			{
@@ -2630,12 +2627,12 @@ static void _plot_histogram(const drawing_interface* pif, const plot_t* plt, mat
 				xsprintf(numstr, _T("%.f"), dbl);
 			else
 				xscpy(numstr, _T("N"));
-			(*pif->pf_draw_text)(pif->ctx, &xa, &xr, numstr, -1);
+			(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, numstr, -1);
 		}
 	}
 }
 
-static void _plot_trendgram(const drawing_interface* pif, const plot_t* plt, matrix_t mt)
+static void _plot_trendgram(const drawing_interface* pci, const plot_t* plt, matrix_t mt)
 {
 	xbrush_t xb, xb_dot;
 	xpen_t xp, xp_dot;
@@ -2662,7 +2659,7 @@ static void _plot_trendgram(const drawing_interface* pif, const plot_t* plt, mat
 	const tchar_t* shape;
 	tchar_t numstr[NUM_LEN + 1] = { 0 };
 
-	const canvbox_t* pbox = (canvbox_t*)(&pif->rect);
+	const canvbox_t* pbox = (canvbox_t*)(&pci->rect);
 
 	double dbl;
 	double y_grade, y_base, y_step;
@@ -2674,7 +2671,7 @@ static void _plot_trendgram(const drawing_interface* pif, const plot_t* plt, mat
 	default_xfont(&xf);
 	xsprintf(xf.size, _T("%s"), GDI_ATTR_FONT_SIZE_FOOTER);
 	parse_xfont_from_style(&xf, plt->style);
-	(*pif->pf_set_xfont)(pif->ctx, &xf);
+	(*pci->drw->pf_set_xfont)(pci->ctx, &xf);
 
 	default_xpen(&xp);
 	parse_xpen_from_style(&xp, plt->style);
@@ -2725,7 +2722,7 @@ static void _plot_trendgram(const drawing_interface* pif, const plot_t* plt, mat
 	pt1.fy = zeroy - y_ruler * dy;
 	pt2.fx = zerox;
 	pt2.fy = zeroy;
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+	(*pci->drw->pf_draw_line)(pci->ctx, &xp, &pt1, &pt2);
 
 	//vert ruler and labels
 	for (i = 0; i < y_count; i++)
@@ -2736,9 +2733,9 @@ static void _plot_trendgram(const drawing_interface* pif, const plot_t* plt, mat
 		xr.fw = dd;
 		xr.fy = zeroy - y_ruler * dy;
 		xr.fh = dy / 2;
-		(*pif->pf_draw_text)(pif->ctx, &xa, &xr, label, -1);
+		(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, label, -1);
 
-		dbl = get_numeric(plt->y_bases, i);
+		dbl = get_numeric_safe(plt->y_bases, i, 0);
 
 		for (j = y_ruler / 2 + 1; j < y_ruler; j++)
 		{
@@ -2748,11 +2745,11 @@ static void _plot_trendgram(const drawing_interface* pif, const plot_t* plt, mat
 				pt1.fy = zeroy - j * dy;
 				pt2.fx = zerox;
 				pt2.fy = zeroy - j * dy;
-				(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+				(*pci->drw->pf_draw_line)(pci->ctx, &xp, &pt1, &pt2);
 			}
 
 			if (IS_VALID_DOUBLE(dbl))
-				dbl += get_numeric(plt->y_steps, i);
+				dbl += get_numeric_safe(plt->y_steps, i,0);
 
 			xr.fx = zerox - (i + 1) * dd;
 			xr.fw = dd;
@@ -2762,10 +2759,10 @@ static void _plot_trendgram(const drawing_interface* pif, const plot_t* plt, mat
 				xsprintf(numstr, _T("%.2f"), dbl);
 			else
 				xscpy(numstr, _T("N"));
-			(*pif->pf_draw_text)(pif->ctx, &xa, &xr, numstr, -1);
+			(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, numstr, -1);
 		}
 
-		dbl = get_numeric(plt->y_bases, i);
+		dbl = get_numeric_safe(plt->y_bases, i, 0);
 
 		for (j = y_ruler / 2; j > 0; j--)
 		{
@@ -2775,7 +2772,7 @@ static void _plot_trendgram(const drawing_interface* pif, const plot_t* plt, mat
 				pt1.fy = zeroy - j * dy;
 				pt2.fx = zerox;
 				pt2.fy = zeroy - j * dy;
-				(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+				(*pci->drw->pf_draw_line)(pci->ctx, &xp, &pt1, &pt2);
 			}
 
 			xr.fx = zerox - (i + 1) * dd;
@@ -2786,9 +2783,9 @@ static void _plot_trendgram(const drawing_interface* pif, const plot_t* plt, mat
 				xsprintf(numstr, _T("%.2f"), dbl);
 			else
 				xscpy(numstr, _T("N"));
-			(*pif->pf_draw_text)(pif->ctx, &xa, &xr, numstr, -1);
+			(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, numstr, -1);
 
-			dbl -= get_numeric(plt->y_steps, i);
+			dbl -= get_numeric_safe(plt->y_steps, i, 0);
 		}
 
 		//y colors
@@ -2816,21 +2813,21 @@ static void _plot_trendgram(const drawing_interface* pif, const plot_t* plt, mat
 		shape = get_string_ptr(plt->y_shapes, i);
 
 		if (compare_text(shape, -1, _T("ellipse"), -1, 1) == 0)
-			(*pif->pf_draw_ellipse)(pif->ctx, &xp_dot, &xb_dot, &xr);
+			(*pci->drw->pf_draw_ellipse)(pci->ctx, &xp_dot, &xb_dot, &xr);
 		else if (compare_text(shape, -1, _T("rect"), -1, 1) == 0)
-			(*pif->pf_draw_rect)(pif->ctx, &xp_dot, &xb_dot, &xr);
+			(*pci->drw->pf_draw_rect)(pci->ctx, &xp_dot, &xb_dot, &xr);
 		else if (compare_text(shape, -1, _T("round"), -1, 1) == 0)
-			(*pif->pf_draw_round)(pif->ctx, &xp_dot, &xb_dot, &xr, NULL);
+			(*pci->drw->pf_draw_round)(pci->ctx, &xp_dot, &xb_dot, &xr, NULL);
 		else if (compare_text(shape, -1, _T("left-triangle"), -1, 1) == 0)
-			(*pif->pf_draw_triangle)(pif->ctx, &xp_dot, &xb_dot, &xr, ATTR_ORITATION_LEFT);
+			(*pci->drw->pf_draw_triangle)(pci->ctx, &xp_dot, &xb_dot, &xr, ATTR_ORITATION_LEFT);
 		else if (compare_text(shape, -1, _T("right-triangle"), -1, 1) == 0)
-			(*pif->pf_draw_triangle)(pif->ctx, &xp_dot, &xb_dot, &xr, ATTR_ORITATION_RIGHT);
+			(*pci->drw->pf_draw_triangle)(pci->ctx, &xp_dot, &xb_dot, &xr, ATTR_ORITATION_RIGHT);
 		else if (compare_text(shape, -1, _T("top-triangle"), -1, 1) == 0)
-			(*pif->pf_draw_triangle)(pif->ctx, &xp_dot, &xb_dot, &xr, ATTR_ORITATION_TOP);
+			(*pci->drw->pf_draw_triangle)(pci->ctx, &xp_dot, &xb_dot, &xr, ATTR_ORITATION_TOP);
 		else if (compare_text(shape, -1, _T("bottom-triangle"), -1, 1) == 0)
-			(*pif->pf_draw_triangle)(pif->ctx, &xp_dot, &xb_dot, &xr, ATTR_ORITATION_BOTTOM);
+			(*pci->drw->pf_draw_triangle)(pci->ctx, &xp_dot, &xb_dot, &xr, ATTR_ORITATION_BOTTOM);
 		else
-			(*pif->pf_draw_ellipse)(pif->ctx, &xp_dot, &xb_dot, &xr);
+			(*pci->drw->pf_draw_ellipse)(pci->ctx, &xp_dot, &xb_dot, &xr);
 	}
 
 	//horz axis
@@ -2838,7 +2835,7 @@ static void _plot_trendgram(const drawing_interface* pif, const plot_t* plt, mat
 	pt1.fy = zeroy;
 	pt2.fx = zerox + (x_ruler + 1) * dx;
 	pt2.fy = zeroy;
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+	(*pci->drw->pf_draw_line)(pci->ctx, &xp, &pt1, &pt2);
 
 	//horz stage axis
 	miny = zeroy;
@@ -2855,9 +2852,9 @@ static void _plot_trendgram(const drawing_interface* pif, const plot_t* plt, mat
 		else
 			xscpy(xp_dot.color, xp.color);
 
-		y_grade = get_numeric(plt->y_grades, i);
-		y_base = get_numeric(plt->y_bases, i);
-		y_step = get_numeric(plt->y_steps, i);
+		y_grade = get_numeric_safe(plt->y_grades, i, 0);
+		y_base = get_numeric_safe(plt->y_bases, i, 0);
+		y_step = get_numeric_safe(plt->y_steps, i, 0);
 
 		pt1.fx = zerox;
 		if (IS_VALID_DOUBLE(y_grade) && IS_VALID_DOUBLE(y_base) && IS_VALID_DOUBLE(y_step) && !IS_ZERO_DOUBLE(y_step))
@@ -2867,7 +2864,7 @@ static void _plot_trendgram(const drawing_interface* pif, const plot_t* plt, mat
 
 		pt2.fx = zerox + (x_ruler + 1) * dx;
 		pt2.fy = pt1.fy;
-		(*pif->pf_draw_line)(pif->ctx, &xp_dot, &pt1, &pt2);
+		(*pci->drw->pf_draw_line)(pci->ctx, &xp_dot, &pt1, &pt2);
 
 		if (miny > pt1.fy)
 			miny = pt1.fy;
@@ -2889,11 +2886,11 @@ static void _plot_trendgram(const drawing_interface* pif, const plot_t* plt, mat
 			else
 				xscat((numstr + n), _T(" N"));
 
-			(*pif->pf_text_size)(pif->ctx, numstr, -1, &xs);
+			(*pci->drw->pf_text_size)(pci->ctx, numstr, -1, &xs);
 
 			pt1.fx = pt2.fx - xs.fw;
 			pt1.fy = pt2.fy - xs.fh;
-			(*pif->pf_text_out)(pif->ctx, &xa, &pt1, numstr, -1);
+			(*pci->drw->pf_text_out)(pci->ctx, &xa, &pt1, numstr, -1);
 		}
 	}
 
@@ -2924,9 +2921,9 @@ static void _plot_trendgram(const drawing_interface* pif, const plot_t* plt, mat
 
 		for (j = 0; j < matrix_get_rows(mt); j++)
 		{
-			y_base = get_numeric(plt->y_bases, i);
-			y_step = get_numeric(plt->y_steps, i);
-			dbl = matrix_get_value(mt, j, i);
+			y_base = get_numeric_safe(plt->y_bases, i, 0);
+			y_step = get_numeric_safe(plt->y_steps, i, 0);
+			dbl = matrix_get_value_safe(mt, j, i, 0);
 
 			pa[j].fx = zerox + (j + 1) * dx - dx / 2;
 			if (IS_VALID_DOUBLE(dbl) && IS_VALID_DOUBLE(y_base) && IS_VALID_DOUBLE(y_step) && !IS_ZERO_DOUBLE(y_step))
@@ -2935,7 +2932,7 @@ static void _plot_trendgram(const drawing_interface* pif, const plot_t* plt, mat
 				pa[j].fy = middy;
 		}
 
-		(*pif->pf_draw_curve)(pif->ctx, &xp_dot, pa, matrix_get_rows(mt));
+		(*pci->drw->pf_draw_curve)(pci->ctx, &xp_dot, pa, matrix_get_rows(mt));
 
 		for (j = 0; j < matrix_get_rows(mt);j++)
 		{
@@ -2945,21 +2942,21 @@ static void _plot_trendgram(const drawing_interface* pif, const plot_t* plt, mat
 			xr.fh = 2.0f;
 
 			if (compare_text(shape, -1, _T("ellipse"), -1, 1) == 0)
-				(*pif->pf_draw_ellipse)(pif->ctx, &xp_dot, &xb_dot, &xr);
+				(*pci->drw->pf_draw_ellipse)(pci->ctx, &xp_dot, &xb_dot, &xr);
 			else if (compare_text(shape, -1, _T("rect"), -1, 1) == 0)
-				(*pif->pf_draw_rect)(pif->ctx, &xp_dot, &xb_dot, &xr);
+				(*pci->drw->pf_draw_rect)(pci->ctx, &xp_dot, &xb_dot, &xr);
 			else if (compare_text(shape, -1, _T("round"), -1, 1) == 0)
-				(*pif->pf_draw_round)(pif->ctx, &xp_dot, &xb_dot, &xr, NULL);
+				(*pci->drw->pf_draw_round)(pci->ctx, &xp_dot, &xb_dot, &xr, NULL);
 			else if (compare_text(shape, -1, _T("left-triangle"), -1, 1) == 0)
-				(*pif->pf_draw_triangle)(pif->ctx, &xp_dot, &xb_dot, &xr, ATTR_ORITATION_LEFT);
+				(*pci->drw->pf_draw_triangle)(pci->ctx, &xp_dot, &xb_dot, &xr, ATTR_ORITATION_LEFT);
 			else if (compare_text(shape, -1, _T("right-triangle"), -1, 1) == 0)
-				(*pif->pf_draw_triangle)(pif->ctx, &xp_dot, &xb_dot, &xr, ATTR_ORITATION_RIGHT);
+				(*pci->drw->pf_draw_triangle)(pci->ctx, &xp_dot, &xb_dot, &xr, ATTR_ORITATION_RIGHT);
 			else if (compare_text(shape, -1, _T("top-triangle"), -1, 1) == 0)
-				(*pif->pf_draw_triangle)(pif->ctx, &xp_dot, &xb_dot, &xr, ATTR_ORITATION_TOP);
+				(*pci->drw->pf_draw_triangle)(pci->ctx, &xp_dot, &xb_dot, &xr, ATTR_ORITATION_TOP);
 			else if (compare_text(shape, -1, _T("bottom-triangle"), -1, 1) == 0)
-				(*pif->pf_draw_triangle)(pif->ctx, &xp_dot, &xb_dot, &xr, ATTR_ORITATION_BOTTOM);
+				(*pci->drw->pf_draw_triangle)(pci->ctx, &xp_dot, &xb_dot, &xr, ATTR_ORITATION_BOTTOM);
 			else
-				(*pif->pf_draw_ellipse)(pif->ctx, &xp_dot, &xb_dot, &xr);
+				(*pci->drw->pf_draw_ellipse)(pci->ctx, &xp_dot, &xb_dot, &xr);
 		}
 	}
 
@@ -2979,14 +2976,14 @@ static void _plot_trendgram(const drawing_interface* pif, const plot_t* plt, mat
 			xr.fw = dx;
 			xr.fy = zeroy - y_ruler * dy;
 			xr.fh = y_ruler * dy;
-			(*pif->pf_draw_rect)(pif->ctx, NULL, &xb, &xr);
+			(*pci->drw->pf_draw_rect)(pci->ctx, NULL, &xb, &xr);
 		}
 
 		pt1.fx = zerox + (i + 1) * dx;
 		pt1.fy = zeroy;
 		pt2.fx = zerox + (i + 1) * dx;
 		pt2.fy = zeroy + 2.0f;
-		(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+		(*pci->drw->pf_draw_line)(pci->ctx, &xp, &pt1, &pt2);
 
 		label = get_string_ptr(plt->x_labels, i);
 
@@ -2994,11 +2991,11 @@ static void _plot_trendgram(const drawing_interface* pif, const plot_t* plt, mat
 		xr.fw = dx;
 		xr.fy = zeroy;
 		xr.fh = dy / 2;
-		(*pif->pf_draw_text)(pif->ctx, &xa, &xr, label, -1);
+		(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, label, -1);
 	}
 }
 
-static void _plot_pantogram(const drawing_interface* pif, const plot_t* plt, matrix_t mt)
+static void _plot_pantogram(const drawing_interface* pci, const plot_t* plt, matrix_t mt)
 {
 	xbrush_t xb, xb_dot;
 	xpen_t xp, xp_dot;
@@ -3017,7 +3014,7 @@ static void _plot_pantogram(const drawing_interface* pif, const plot_t* plt, mat
 	const tchar_t* color;
 	tchar_t numstr[NUM_LEN + 1] = { 0 };
 
-	const canvbox_t* pbox = (canvbox_t*)(&pif->rect);
+	const canvbox_t* pbox = (canvbox_t*)(&pci->rect);
 
 	double nxtd, pred;
 	double dbl;
@@ -3030,7 +3027,7 @@ static void _plot_pantogram(const drawing_interface* pif, const plot_t* plt, mat
 	default_xfont(&xf);
 	xsprintf(xf.size, _T("%s"), GDI_ATTR_FONT_SIZE_FOOTER);
 	parse_xfont_from_style(&xf, plt->style);
-	(*pif->pf_set_xfont)(pif->ctx, &xf);
+	(*pci->drw->pf_set_xfont)(pci->ctx, &xf);
 
 	default_xpen(&xp);
 	parse_xpen_from_style(&xp, plt->style);
@@ -3066,13 +3063,13 @@ static void _plot_pantogram(const drawing_interface* pif, const plot_t* plt, mat
 	{
 		for (j = 0; j < matrix_get_cols(mt); j++)
 		{
-			total += matrix_get_value(mt, i, j);
+			total += matrix_get_value_safe(mt, i, j, 0);
 		}
 	}
 
 	if (IS_ZERO_DOUBLE(total))
 	{
-		(*pif->pf_draw_pie)(pif->ctx, &xp_dot, NULL, &xr_pi, 0, 3 * XPI / 2);
+		(*pci->drw->pf_draw_pie)(pci->ctx, &xp_dot, NULL, &xr_pi, 0, 3 * XPI / 2);
 	}
 
 	nxtd = 0.0;
@@ -3081,7 +3078,7 @@ static void _plot_pantogram(const drawing_interface* pif, const plot_t* plt, mat
 		total = 0;
 		for (j = 0; j < matrix_get_cols(mt); j++)
 		{
-			total += matrix_get_value(mt, i, j);
+			total += matrix_get_value_safe(mt, i, j, 0);
 		}
 
 		for (j = 0; j < matrix_get_cols(mt); j++)
@@ -3095,7 +3092,7 @@ static void _plot_pantogram(const drawing_interface* pif, const plot_t* plt, mat
 
 			pred = nxtd;
 
-			dbl = matrix_get_value(mt, i, j);
+			dbl = matrix_get_value_safe(mt, i, j, 0);
 
 			if (IS_VALID_DOUBLE(dbl) && !IS_ZERO_DOUBLE(total))
 				fr = (float)(dbl / total);
@@ -3105,13 +3102,13 @@ static void _plot_pantogram(const drawing_interface* pif, const plot_t* plt, mat
 			nxtd = pred + (float)(2 * XPI *  fr);
 			if (pred != nxtd)
 			{
-				(*pif->pf_draw_pie)(pif->ctx, &xp_dot, &xb_dot, &xr_pi, pred, nxtd);
+				(*pci->drw->pf_draw_pie)(pci->ctx, &xp_dot, &xb_dot, &xr_pi, pred, nxtd);
 
 				rl.fs = rr - dd;
 				rs.fs = rr - 2* dd;
 				ft_calc_sector(&pt, rl.fs, rs.fs, (pred + nxtd) / 2, (pred + nxtd) / 2, pa, 4);
 
-				(*pif->pf_draw_line)(pif->ctx, &xp_dot, &pa[0], &pa[2]);
+				(*pci->drw->pf_draw_line)(pci->ctx, &xp_dot, &pa[0], &pa[2]);
 
 				if (pa[0].fx > pt.fx)
 				{
@@ -3136,14 +3133,14 @@ static void _plot_pantogram(const drawing_interface* pif, const plot_t* plt, mat
 					pa[3].fy = pa[0].fy;
 				}
 
-				(*pif->pf_draw_line)(pif->ctx, &xp_dot, &pa[0], &pa[1]);
+				(*pci->drw->pf_draw_line)(pci->ctx, &xp_dot, &pa[0], &pa[1]);
 
 				xr.fx = pa[2].fx;
 				xr.fw = 2 * dd;
 				xr.fy = pa[2].fy;
 				xr.fh = dd;
 				xsprintf(numstr, _T("%.2f%"), fr * 100);
-				(*pif->pf_draw_text)(pif->ctx, &xa, &xr, numstr, -1);
+				(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, numstr, -1);
 
 				label = get_string_ptr(plt->y_labels, j);
 
@@ -3151,14 +3148,14 @@ static void _plot_pantogram(const drawing_interface* pif, const plot_t* plt, mat
 				xr.fw = 2 * dd;
 				xr.fy = pa[3].fy;
 				xr.fh = dd;
-				(*pif->pf_draw_text)(pif->ctx, &xa, &xr, label, -1);
+				(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, label, -1);
 			}
 		}
 	}
 }
 
 
-static void _plot_radargram(const drawing_interface* pif, const plot_t* plt, matrix_t mt)
+static void _plot_radargram(const drawing_interface* pci, const plot_t* plt, matrix_t mt)
 {
 	xbrush_t xb, xb_dot;
 	xpen_t xp, xp_dot;
@@ -3184,7 +3181,7 @@ static void _plot_radargram(const drawing_interface* pif, const plot_t* plt, mat
 	const tchar_t* color;
 	tchar_t numstr[NUM_LEN + 1] = { 0 };
 
-	const canvbox_t* pbox = (canvbox_t*)(&pif->rect);
+	const canvbox_t* pbox = (canvbox_t*)(&pci->rect);
 
 	double dbl;
 	double y_base, y_step;
@@ -3196,7 +3193,7 @@ static void _plot_radargram(const drawing_interface* pif, const plot_t* plt, mat
 	default_xfont(&xf);
 	xsprintf(xf.size, _T("%s"), GDI_ATTR_FONT_SIZE_FOOTER);
 	parse_xfont_from_style(&xf, plt->style);
-	(*pif->pf_set_xfont)(pif->ctx, &xf);
+	(*pci->drw->pf_set_xfont)(pci->ctx, &xf);
 
 	default_xpen(&xp);
 	parse_xpen_from_style(&xp, plt->style);
@@ -3247,11 +3244,11 @@ static void _plot_radargram(const drawing_interface* pif, const plot_t* plt, mat
 		xr.fy = middy - dd * (y_ruler + 1) + (i + 1) * (dd / 2);
 		pk.fx = xr.fx + dd / 2;
 		pk.fy = xr.fy;
-		(*pif->pf_draw_line)(pif->ctx, &xp_dot, RECTPOINT(&xr), &pk);
+		(*pci->drw->pf_draw_line)(pci->ctx, &xp_dot, RECTPOINT(&xr), &pk);
 
 		xr.fx += (dd / 2 + 0.5f);
 		xr.fy -= dd / 2;
-		(*pif->pf_draw_text)(pif->ctx, &xa, &xr, label, -1);
+		(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, label, -1);
 		xr.fx -= (dd / 2 + 0.5f);
 		xr.fy += dd / 2;
 	}
@@ -3268,7 +3265,7 @@ static void _plot_radargram(const drawing_interface* pif, const plot_t* plt, mat
 		lighten_xbrush(&xb_dot, DEF_SOFT_DARKEN);
 
 		xn.fs = dd * i;
-		(*pif->pf_draw_equilagon)(pif->ctx, &xp_dot, &xb_dot, &pt, &xn, y_count);
+		(*pci->drw->pf_draw_equilagon)(pci->ctx, &xp_dot, &xb_dot, &pt, &xn, y_count);
 	}
 
 	//vectex labels
@@ -3278,11 +3275,11 @@ static void _plot_radargram(const drawing_interface* pif, const plot_t* plt, mat
 
 	for (i = 0; i < y_count; i++)
 	{
-		(*pif->pf_draw_line)(pif->ctx, &xp, &pt, &(pa[i]));
+		(*pci->drw->pf_draw_line)(pci->ctx, &xp, &pt, &(pa[i]));
 
 		label = get_string_ptr(plt->y_labels, i);
 
-		(*pif->pf_text_size)(pif->ctx, label, -1, &xs);
+		(*pci->drw->pf_text_size)(pci->ctx, label, -1, &xs);
 
 		qa = ft_quadrant(&pt, &pa[i], 0);
 		switch (qa)
@@ -3305,7 +3302,7 @@ static void _plot_radargram(const drawing_interface* pif, const plot_t* plt, mat
 			break;
 		}
 
-		(*pif->pf_text_out)(pif->ctx, &xa, &pk, label, -1);
+		(*pci->drw->pf_text_out)(pci->ctx, &xa, &pk, label, -1);
 
 		for (j = 1; j <= y_ruler; j++)
 		{
@@ -3315,8 +3312,8 @@ static void _plot_radargram(const drawing_interface* pif, const plot_t* plt, mat
 			pk.fx = pt.fx + dx;
 			pk.fy = pt.fy + dy;
 
-			y_base = get_numeric(plt->y_bases, i);
-			y_step = get_numeric(plt->y_steps, i);
+			y_base = get_numeric_safe(plt->y_bases, i, 0);
+			y_step = get_numeric_safe(plt->y_steps, i, 0);
 
 			if (j == y_ruler)
 			{
@@ -3325,7 +3322,7 @@ static void _plot_radargram(const drawing_interface* pif, const plot_t* plt, mat
 				else
 					xscpy(numstr, _T(""));
 
-				(*pif->pf_text_size)(pif->ctx, numstr, -1, &xs);
+				(*pci->drw->pf_text_size)(pci->ctx, numstr, -1, &xs);
 
 				switch (qa)
 				{
@@ -3343,7 +3340,7 @@ static void _plot_radargram(const drawing_interface* pif, const plot_t* plt, mat
 					break;
 				}
 
-				(*pif->pf_text_out)(pif->ctx, &xa, &pk, numstr, -1);
+				(*pci->drw->pf_text_out)(pci->ctx, &xa, &pk, numstr, -1);
 			}
 		}
 	}
@@ -3374,9 +3371,9 @@ static void _plot_radargram(const drawing_interface* pif, const plot_t* plt, mat
 
 		for (j = 0; j < matrix_get_cols(mt); j++)
 		{
-			y_base = get_numeric(plt->y_bases, j);
-			y_step = get_numeric(plt->y_steps, j);
-			dbl = matrix_get_value(mt, i, j);
+			y_base = get_numeric_safe(plt->y_bases, j, 0);
+			y_step = get_numeric_safe(plt->y_steps, j, 0);
+			dbl = matrix_get_value_safe(mt, i, j, 0);
 
 			if (IS_VALID_DOUBLE(dbl) && IS_VALID_DOUBLE(y_base) && IS_VALID_DOUBLE(y_step) && !IS_ZERO_DOUBLE(y_step))
 				fr = (float)((dbl - y_base) / (y_step * y_ruler));
@@ -3397,7 +3394,7 @@ static void _plot_radargram(const drawing_interface* pif, const plot_t* plt, mat
 			else
 				xscpy(numstr, _T(""));
 
-			(*pif->pf_text_size)(pif->ctx, numstr, -1, &xs);
+			(*pci->drw->pf_text_size)(pci->ctx, numstr, -1, &xs);
 
 			qa = ft_quadrant(&pt, &pa[j], 0);
 
@@ -3421,19 +3418,19 @@ static void _plot_radargram(const drawing_interface* pif, const plot_t* plt, mat
 				break;
 			}
 
-			(*pif->pf_text_out)(pif->ctx, &xa, &pk, numstr, -1);
+			(*pci->drw->pf_text_out)(pci->ctx, &xa, &pk, numstr, -1);
 		}
 
 		pa[j].fx = pa[0].fx;
 		pa[j].fy = pa[0].fy;
 
-		(*pif->pf_draw_polygon)(pif->ctx, &xp_dot, &xb_dot, pa, j + 1);
+		(*pci->drw->pf_draw_polygon)(pci->ctx, &xp_dot, &xb_dot, pa, j + 1);
 	}
 
 	xmem_free(pa);
 }
 
-static void _plot_fuelgram(const drawing_interface* pif, const plot_t* plt, matrix_t mt)
+static void _plot_fuelgram(const drawing_interface* pci, const plot_t* plt, matrix_t mt)
 {
 	xbrush_t xb, xb_dot;
 	xpen_t xp, xp_dot;
@@ -3457,7 +3454,7 @@ static void _plot_fuelgram(const drawing_interface* pif, const plot_t* plt, matr
 	const tchar_t* label;
 	tchar_t numstr[NUM_LEN + 1] = { 0 };
 
-	const canvbox_t* pbox = (canvbox_t*)(&pif->rect);
+	const canvbox_t* pbox = (canvbox_t*)(&pci->rect);
 
 	double dbl;
 	double y_base, y_step;
@@ -3469,7 +3466,7 @@ static void _plot_fuelgram(const drawing_interface* pif, const plot_t* plt, matr
 	default_xfont(&xf);
 	xsprintf(xf.size, _T("%s"), GDI_ATTR_FONT_SIZE_FOOTER);
 	parse_xfont_from_style(&xf, plt->style);
-	(*pif->pf_set_xfont)(pif->ctx, &xf);
+	(*pci->drw->pf_set_xfont)(pci->ctx, &xf);
 
 	default_xpen(&xp);
 	parse_xpen_from_style(&xp, plt->style);
@@ -3545,7 +3542,7 @@ static void _plot_fuelgram(const drawing_interface* pif, const plot_t* plt, matr
 			rs.fs = rl.fs - dd;
 			fang = 4 * XPI / 5 + j * dr;
 			tang = fang + dr;
-			(*pif->pf_draw_sector)(pif->ctx, &xp, &xb_dot, &pt, &rl, &rs, fang, tang);
+			(*pci->drw->pf_draw_sector)(pci->ctx, &xp, &xb_dot, &pt, &rl, &rs, fang, tang);
 
 			for (k = 0; k < 10; k++)
 			{
@@ -3561,11 +3558,11 @@ static void _plot_fuelgram(const drawing_interface* pif, const plot_t* plt, matr
 				}
 				ft_calc_sector(&pt, rl.fs, rs.fs, fang + (dr / 10), fang + k * (dr / 10), pa, 4);
 
-				(*pif->pf_draw_line)(pif->ctx, &xp_dot, &(pa[1]), &(pa[2]));
+				(*pci->drw->pf_draw_line)(pci->ctx, &xp_dot, &(pa[1]), &(pa[2]));
 			}
 
-			y_base = get_numeric(plt->y_bases, i);
-			y_step = get_numeric(plt->y_steps, i);
+			y_base = get_numeric_safe(plt->y_bases, i, 0);
+			y_step = get_numeric_safe(plt->y_steps, i, 0);
 
 			rl.fs = xr.fw / 2 - dd;
 			rs.fs = rl.fs - dd / 2;
@@ -3575,7 +3572,7 @@ static void _plot_fuelgram(const drawing_interface* pif, const plot_t* plt, matr
 				xsprintf(numstr, _T("%.f"), y_base + y_step * (j));
 			else
 				xscpy(numstr, _T(""));
-			(*pif->pf_text_out)(pif->ctx, &xa, &(pa[2]), numstr, -1);
+			(*pci->drw->pf_text_out)(pci->ctx, &xa, &(pa[2]), numstr, -1);
 		}
 
 		//pointer
@@ -3584,9 +3581,9 @@ static void _plot_fuelgram(const drawing_interface* pif, const plot_t* plt, matr
 
 		ft_expand_rect(&xr, -2 * dd, -2 * dd);
 
-		y_base = get_numeric(plt->y_bases, i);
-		y_step = get_numeric(plt->y_steps, i);
-		dbl = matrix_get_value(mt, i, 0);
+		y_base = get_numeric_safe(plt->y_bases, i, 0);
+		y_step = get_numeric_safe(plt->y_steps, i, 0);
+		dbl = matrix_get_value_safe(mt, i, 0, 0);
 
 		rl.fs = xr.fw / 2;
 		rs.fs = rl.fs - rr;
@@ -3621,13 +3618,13 @@ static void _plot_fuelgram(const drawing_interface* pif, const plot_t* plt, matr
 		tang = fang + XPI / 20;
 		ft_calc_sector(&pt, rl.fs, rs.fs, tang, tang, pa + 3, 1);
 
-		(*pif->pf_draw_polygon)(pif->ctx, &xp, &xb, pa, 4);
+		(*pci->drw->pf_draw_polygon)(pci->ctx, &xp, &xb, pa, 4);
 
 		xr.fx = middx - 2.0f;
 		xr.fy = middy - 2.0f;
 		xr.fw = 4.0f;
 		xr.fh = 4.0f;
-		(*pif->pf_draw_ellipse)(pif->ctx, &xp, &xb, &xr);
+		(*pci->drw->pf_draw_ellipse)(pci->ctx, &xp, &xb, &xr);
 
 		if (IS_VALID_DOUBLE(dbl))
 			xsprintf(numstr, _T("%04d"), (int)dbl);
@@ -3640,9 +3637,9 @@ static void _plot_fuelgram(const drawing_interface* pif, const plot_t* plt, matr
 			xr.fw = dd / 2;
 			xr.fy = middy + dd;
 			xr.fh = dd / 2;
-			//(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+			//(*pci->drw->pf_draw_rect)(pci->ctx, &xp, NULL, &xr);
 
-			(*pif->pf_draw_text)(pif->ctx, &xa, &xr, (numstr + k + 2), 1);
+			(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, (numstr + k + 2), 1);
 		}
 
 		label = get_string_ptr(plt->y_labels, i);
@@ -3651,23 +3648,23 @@ static void _plot_fuelgram(const drawing_interface* pif, const plot_t* plt, matr
 		xr.fw = 2 * dd;
 		xr.fy = middy + 2 * dd;
 		xr.fh = dd;
-		(*pif->pf_draw_text)(pif->ctx, &xa, &xr, label, -1);
+		(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, label, -1);
 	}
 }
 
-static void _plot_topoggram(const drawing_interface* pif, const plot_t* plt, matrix_t mt)
+static void _plot_topoggram(const drawing_interface* pci, const plot_t* plt, matrix_t mt)
 {
 
 }
 
 
-static void _plot_contourgram(const drawing_interface* pif, const plot_t* plt, matrix_t mt)
+static void _plot_contourgram(const drawing_interface* pci, const plot_t* plt, matrix_t mt)
 {
 
 }
 /********************************************************************************************************************/
 
-void draw_plot(const drawing_interface* pif, link_t_ptr ptr)
+void draw_plot(const drawing_interface* pci, link_t_ptr ptr)
 {
 	plot_t po = { 0 };
 	int rows, cols;
@@ -3675,6 +3672,7 @@ void draw_plot(const drawing_interface* pif, link_t_ptr ptr)
 	const tchar_t* type;
 	tchar_t* matrix;
 	int len;
+	void *tmp;
 
 	type = get_plot_type_ptr(ptr);
 
@@ -3722,44 +3720,49 @@ void draw_plot(const drawing_interface* pif, link_t_ptr ptr)
 	if (!cols) cols = 1;
 
 	mt = matrix_alloc(rows, cols);
+	tmp = xmem_alloc(matrix_need_size(rows, cols));
+	matrix_attach(mt, tmp);
 	matrix_parse(mt, matrix, -1);
+
 	xsfree(matrix);
 
 	if (compare_text(type, -1, ATTR_PLOT_TYPE_CALENDAR, -1, 1) == 0)
-		_plot_calendar(pif, &po, mt);
+		_plot_calendar(pci, &po, mt);
 	else if (compare_text(type, -1, ATTR_PLOT_TYPE_INDICATOR, -1, 1) == 0)
-		_plot_indicator(pif, &po, mt);
+		_plot_indicator(pci, &po, mt);
 	else if (compare_text(type, -1, ATTR_PLOT_TYPE_THERMOMETER, -1, 1) == 0)
-		_plot_thermometer(pif, &po, mt);
+		_plot_thermometer(pci, &po, mt);
 	else if (compare_text(type, -1, ATTR_PLOT_TYPE_CONTRAGRAM, -1, 1) == 0)
-		_plot_contragram(pif, &po, mt);
+		_plot_contragram(pci, &po, mt);
 	else if (compare_text(type, -1, ATTR_PLOT_TYPE_BALANCEGRAM, -1, 1) == 0)
-		_plot_balancegram(pif, &po, mt);
+		_plot_balancegram(pci, &po, mt);
 	else if (compare_text(type, -1, ATTR_PLOT_TYPE_BARGRAM, -1, 1) == 0)
-		_plot_bargram(pif, &po, mt);
+		_plot_bargram(pci, &po, mt);
 	else if (compare_text(type, -1, ATTR_PLOT_TYPE_KPIGRAM, -1, 1) == 0)
-		_plot_kpigram(pif, &po, mt);
+		_plot_kpigram(pci, &po, mt);
 	else if (compare_text(type, -1, ATTR_PLOT_TYPE_TRENDGRAM, -1, 1) == 0)
-		_plot_trendgram(pif, &po, mt);
+		_plot_trendgram(pci, &po, mt);
 	else if (compare_text(type, -1, ATTR_PLOT_TYPE_SCATTERGRAM, -1, 1) == 0)
-		_plot_scattergram(pif, &po, mt);
+		_plot_scattergram(pci, &po, mt);
 	else if (compare_text(type, -1, ATTR_PLOT_TYPE_PANTOGRAM, -1, 1) == 0)
-		_plot_pantogram(pif, &po, mt);
+		_plot_pantogram(pci, &po, mt);
 	else if (compare_text(type, -1, ATTR_PLOT_TYPE_HISTOGRAM, -1, 1) == 0)
-		_plot_histogram(pif, &po, mt);
+		_plot_histogram(pci, &po, mt);
 	else if (compare_text(type, -1, ATTR_PLOT_TYPE_MEDIANGRAM, -1, 1) == 0)
-		_plot_mediangram(pif, &po, mt);
+		_plot_mediangram(pci, &po, mt);
 	else if (compare_text(type, -1, ATTR_PLOT_TYPE_RADARGRAM, -1, 1) == 0)
-		_plot_radargram(pif, &po, mt);
+		_plot_radargram(pci, &po, mt);
 	else if (compare_text(type, -1, ATTR_PLOT_TYPE_FUELGRAM, -1, 1) == 0)
-		_plot_fuelgram(pif, &po, mt);
+		_plot_fuelgram(pci, &po, mt);
 	else if (compare_text(type, -1, ATTR_PLOT_TYPE_TASKGRAM, -1, 1) == 0)
-		_plot_taskgram(pif, &po, mt);
+		_plot_taskgram(pci, &po, mt);
 	else if (compare_text(type, -1, ATTR_PLOT_TYPE_TOPOGGGRAM, -1, 1) == 0)
-		_plot_topoggram(pif, &po, mt);
+		_plot_topoggram(pci, &po, mt);
 	else if (compare_text(type, -1, ATTR_PLOT_TYPE_CONTOURGRAM, -1, 1) == 0)
-		_plot_contourgram(pif, &po, mt);
+		_plot_contourgram(pci, &po, mt);
 
+	tmp = matrix_detach(mt);
+	xmem_free(tmp);
 	matrix_free(mt);
 
 	xsfree(po.style);

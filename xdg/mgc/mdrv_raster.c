@@ -26,7 +26,7 @@ LICENSE.GPL3 for more details.
 
 #include "mdrv.h"
 
-#include "../xdgobj.h"
+#include "../xdgmgc.h"
 
 PIXELVAL raster_opera(RASTER_MODE rop, PIXELVAL dst, PIXELVAL src)
 {

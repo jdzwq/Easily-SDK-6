@@ -209,6 +209,7 @@ LICENSE.GPL3 for more details.
 */
 #define get_dialog_item_selected(flk)					get_dom_node_mask_check(flk,MSK_CHECKED) 
 
+#define is_dialog_item_class(token)						((get_options_value(DOC_DIALOG_ITEM_OPTIONS,-1,OPT_ITEMFEED,OPT_LINEFEED,token,NULL,MAX_LONG) > 0)? 1 : 0)
 
 #ifdef	__cplusplus
 extern "C" {

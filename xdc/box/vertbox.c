@@ -241,9 +241,11 @@ void hand_vertbox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	xrect_t xr;
 
 	const color_mod_t *pclrs;
+	const xfont_t *pxf;
 	xbrush_t xb;
 	xcolor_t xc_brim, xc_core;
 
+	pxf = widget_get_xfont_ptr(widget);
 	pclrs = widget_get_color_mode_ptr(widget);
 	default_xbrush(&xb);
 	format_xcolor(&(pclrs->clr_bkg), xb.color);
@@ -262,13 +264,13 @@ void hand_vertbox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	widget_get_canv_rect(widget, (canvbox_t*)&(ifc.rect));
 	ifc.pclrs = pclrs;
 
-	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
+	(*ifv.drw->pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
 
 	_vertbox_bar_rect(widget, &xr);
 
 	lighten_xcolor(&xc_brim, DEF_MIDD_LIGHTEN);
 
-	(*ifv.pf_gradient_rect)(ifv.ctx, &xc_brim, &xc_core, GDI_ATTR_GRADIENT_HORZ, &xr);
+	(*ifv.drw->pf_gradient_rect)(ifv.ctx, &xc_brim, &xc_core, GDI_ATTR_GRADIENT_HORZ, &xr);
 
 	end_canvas_paint(canv, dc, pxr);
 }
@@ -302,12 +304,14 @@ void vertbox_popup_size(widget_t widget, xsize_t* pxs)
 {
 	vertbox_delta_t* ptd = GETVERTBOXDELTA(widget);
 	measure_interface im = { 0 };
+	const xfont_t* pxf;
 
 	XDK_ASSERT(ptd != NULL);
 
+	pxf = widget_get_xfont_ptr(widget);
 	get_canvas_measure(widget_get_canvas(widget), &im);
 
-	calc_vertbox_size(&im, pxs);
+	calc_vertbox_size(&im, pxf, pxs);
 
 	widget_size_to_pt(widget, pxs);
 

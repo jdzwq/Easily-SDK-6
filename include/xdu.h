@@ -5,8 +5,8 @@
 #include "../xdu/xdudef.h"
 #include "../xdu/xduinit.h"
 #include "../xdu/xduutil.h"
-#include "../xdu/xduinf.h"
 #include "../xdu/xduimp.h"
+#include "../xdu/xdugdi.h"
 
 #ifdef _OS_WINDOWS
 #pragma comment(lib,"xdu.lib")

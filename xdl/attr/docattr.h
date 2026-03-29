@@ -137,6 +137,10 @@
 #define DOC_FORM_PLOT			_T("plot-field")
 #define DOC_FORM_IMAGES			_T("images-field")
 #define DOC_FORM_PAGENUM		_T("pagenum-field")
+#define DOC_FORM_FIELD_OPTIONS  _T("shape-field~ShapeField;text-field~TextField;rich-field~RichField;\
+    tag-field~TagField;memo-field~MemoField;label-field~LabelField;code-field~CodeField;photo-field~PhotoField;\
+    href-field~HrefField;check-field~CheckField;table-field~TableField;grid-field~GridField;statis-field~StatisField;\
+    form-field~FormField;plot-field~PlotField;images-field~ImagesField;pagenum-field~PagenumField;")
 
 #define DOC_DIAGRAM				_T("diagram")
 #define DOC_DIAGRAM_PROCESS		_T("process")
@@ -144,6 +148,7 @@
 #define DOC_DIAGRAM_SHEET		_T("sheet")
 #define DOC_DIAGRAM_JUDGE		_T("judge")
 #define DOC_DIAGRAM_JOINT		_T("joint")
+#define DOC_DIAGRAM_ENRITY_OPTIONS  _T("process~Process;document~Document;sheet~Sheet;judge~Judge;joint~Joint;")
 
 #define DOC_GRID				_T("grid")
 #define DOC_GRID_COLSET			_T("colset")
@@ -222,19 +227,22 @@
 #define DOC_CALENDAR			_T("calendar")
 
 #define DOC_DIALOG				_T("dialog")
-#define DOC_DIALOG_STATICBOX	_T("StaticBox")
-#define DOC_DIALOG_EDITBOX		_T("EditBox")
-#define DOC_DIALOG_LISTBOX		_T("ListBox")
-#define DOC_DIALOG_NAVIBOX		_T("NaviBox")
-#define DOC_DIALOG_SPINBOX		_T("SpinBox")
-#define DOC_DIALOG_SLIDEBOX		_T("SlideBox")
-#define DOC_DIALOG_RADIOBOX		_T("RadioBox")
-#define DOC_DIALOG_CHECKBOX		_T("CheckBox")
-#define DOC_DIALOG_DATEBOX		_T("DateBox")
-#define DOC_DIALOG_TIMEBOX		_T("TimeBox")
-#define DOC_DIALOG_SHAPEBOX		_T("ShapeBox")
-#define DOC_DIALOG_PUSHBOX		_T("PushBox")
-#define DOC_DIALOG_USERBOX		_T("UserBox")
+#define DOC_DIALOG_STATICBOX	_T("static-box")
+#define DOC_DIALOG_EDITBOX		_T("edit-box")
+#define DOC_DIALOG_LISTBOX		_T("list-box")
+#define DOC_DIALOG_NAVIBOX		_T("navi-box")
+#define DOC_DIALOG_SPINBOX		_T("spin-box")
+#define DOC_DIALOG_SLIDEBOX		_T("slide-box")
+#define DOC_DIALOG_RADIOBOX		_T("radio-box")
+#define DOC_DIALOG_CHECKBOX		_T("check-box")
+#define DOC_DIALOG_DATEBOX		_T("date-box")
+#define DOC_DIALOG_TIMEBOX		_T("time-box")
+#define DOC_DIALOG_SHAPEBOX		_T("shape-box")
+#define DOC_DIALOG_PUSHBOX		_T("push-box")
+#define DOC_DIALOG_USERBOX		_T("user-box")
+#define DOC_DIALOG_ITEM_OPTIONS _T("static-box~StaticBox;edit-box~EditBox;list-box~ListBox;navi-box~NaviBox;\
+    spin-box~SpinBox;slide-box~SlideBox;radio-box~RadioBox;check-box~CheckBox;date-box~DateBox;\
+    time-box~TimeBox;shape-box~ShapeBox;push-box~PushBox;user-box~UserBox;")
 
 #define DOC_EVENT				_T("event")
 #define DOC_EVENT_ID			_T("ID")

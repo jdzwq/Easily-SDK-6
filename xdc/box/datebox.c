@@ -88,7 +88,9 @@ void datebox_on_select_day(widget_t widget, int day)
 
 	noti_datebox_command(widget, COMMAND_UPDATE, (vword_t)NULL);
 }
-/**************************************************************************************************/
+
+/***********************************************************************/
+
 int hand_datebox_create(widget_t widget, void* data)
 {
 	datebox_delta_t* ptd = GETDATEBOXDELTA(widget);
@@ -96,7 +98,7 @@ int hand_datebox_create(widget_t widget, void* data)
 	widget_hand_create(widget);
 
 	ptd = (datebox_delta_t*)xmem_alloc(sizeof(datebox_delta_t));
-
+	
 	SETDATEBOXDELTA(widget, ptd);
 
 	get_loc_date(&ptd->dt);
@@ -129,16 +131,19 @@ void hand_datebox_lbutton_up(widget_t widget, const xpoint_t* pxp)
 	xpoint_t pt;
 	int hint;
 	int day;
+	const xfont_t* pxf;
 
 	pt.x = pxp->x;
 	pt.y = pxp->y;
 
 	widget_point_to_mm(widget, &pt);
 
+	pxf = widget_get_xfont_ptr(widget);
+
 	get_canvas_measure(widget_get_canvas(widget), &im);
 
 	day = 0;
-	hint = calc_datebox_hint(&im, &pt, &ptd->dt, &day);
+	hint = calc_datebox_hint(&im, pxf, &pt, &ptd->dt, &day);
 
 	if (hint == DATEBOX_HINT_PREV)
 		datebox_on_prev_month(widget);
@@ -187,11 +192,14 @@ void hand_datebox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	drawing_interface ifv = {0};
 
 	const color_mod_t *pclrs;
+	const xfont_t* pxf;
 	xbrush_t xb;
 
 	pclrs = widget_get_color_mode_ptr(widget);
 	default_xbrush(&xb);
 	format_xcolor(&(pclrs->clr_bkg), xb.color);
+
+	pxf = widget_get_xfont_ptr(widget);
 
 	widget_get_client_rect(widget, &xr);
 
@@ -205,9 +213,9 @@ void hand_datebox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	widget_get_canv_rect(widget, (canvbox_t*)&(ifc.rect));
 	ifc.pclrs = pclrs;
 
-	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
+	(*ifv.drw->pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
 
-	draw_datebox(&ifc, &ptd->dt);
+	draw_datebox(&ifc, pxf, &ptd->dt);
 
 	end_canvas_paint(canv, dc, pxr);
 }
@@ -238,12 +246,15 @@ void datebox_popup_size(widget_t widget, xsize_t* pxs)
 {
 	datebox_delta_t* ptd = GETDATEBOXDELTA(widget);
 	measure_interface im = { 0 };
+	const xfont_t* pxf;
 
 	XDK_ASSERT(ptd != NULL);
 
+	pxf = widget_get_xfont_ptr(widget);
+
 	get_canvas_measure(widget_get_canvas(widget), &im);
 
-	calc_datebox_size(&im, pxs);
+	calc_datebox_size(&im, pxf, pxs);
 
 	widget_size_to_pt(widget, pxs);
 

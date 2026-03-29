@@ -46,14 +46,16 @@ void _iconbox_item_rect(widget_t widget, link_t_ptr ent, xrect_t* pxr)
 	measure_interface im = { 0 };
 	xsize_t xs;
 	canvbox_t cb;
+	const xfont_t* pxf;
 
+	pxf = widget_get_xfont_ptr(widget);
 	get_canvas_measure(widget_get_canvas(widget), &im);
 
 	widget_get_canv_rect(widget, &cb);
 	xs.fw = cb.fw;
 	xs.fh = cb.fh;
 
-	calc_iconbox_item_rect(&im, ptd->layer, ptd->align, &xs, ptd->string, ent, pxr);
+	calc_iconbox_item_rect(&im, pxf, ptd->layer, ptd->align, &xs, ptd->string, ent, pxr);
 	widget_rect_to_mm(widget, pxr);
 }
 
@@ -63,10 +65,13 @@ static void _iconbox_reset_page(widget_t widget)
 	int pw, ph, vw, vh, lw, lh;
 	xrect_t xr;
 	xsize_t xs;
+	const xfont_t* pxf;
 
 	canvas_t canv;
 	drawing_interface ifc = { 0 };
 	measure_interface im = { 0 };
+
+	pxf = widget_get_xfont_ptr(widget);
 
 	widget_get_client_rect(widget, &xr);
 	pw = xr.w;
@@ -75,8 +80,8 @@ static void _iconbox_reset_page(widget_t widget)
 	canv = widget_get_canvas(widget);
 	get_canvas_interface(widget, &ifc);
 
-	(ifc.pf_get_measure)(ifc.ctx, &im);
-	(ifc.pf_font_size)(ifc.ctx, &xs);
+	(ifc.drw->pf_get_measure)(ifc.ctx, &im);
+	(ifc.drw->pf_font_size)(ifc.ctx, &xs);
 
 	widget_size_to_pt(widget, &xs);
 	lw = xs.w;
@@ -84,7 +89,7 @@ static void _iconbox_reset_page(widget_t widget)
 
 	if (ptd->string)
 	{
-		calc_iconbox_size(&im, ptd->layer, ptd->align, ptd->string, &xs);
+		calc_iconbox_size(&im, pxf, ptd->layer, ptd->align, ptd->string, &xs);
 		widget_size_to_pt(widget, &xs);
 		vw = xs.w;
 		vh = xs.h;
@@ -161,14 +166,16 @@ void hand_iconbox_lbutton_up(widget_t widget, const xpoint_t* pxp)
 	xpoint_t pt;
 	xsize_t xs;
 	canvbox_t cb;
+	const xfont_t* pxf;
 
 	link_t_ptr ilk = NULL;
 	int hint;
 
 	pt.x = pxp->x;
 	pt.y = pxp->y;
-
 	widget_point_to_mm(widget, &pt);
+
+	pxf = widget_get_xfont_ptr(widget);
 
 	get_canvas_measure(widget_get_canvas(widget), &im);
 
@@ -176,7 +183,7 @@ void hand_iconbox_lbutton_up(widget_t widget, const xpoint_t* pxp)
 	xs.fw = cb.fw;
 	xs.fh = cb.fh;
 
-	hint = calc_iconbox_hint(&im, ptd->layer, ptd->align, &xs, &pt, ptd->string, &ilk);
+	hint = calc_iconbox_hint(&im, pxf, ptd->layer, ptd->align, &xs, &pt, ptd->string, &ilk);
 
 	if (hint == ICONBOX_HINT_ITEM)
 	{
@@ -220,7 +227,10 @@ void hand_iconbox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	drawing_interface ifv = {0};
 
 	const color_mod_t *pclrs;
+	const xfont_t* pxf;
 	xbrush_t xb;
+
+	pxf = widget_get_xfont_ptr(widget);
 
 	pclrs = widget_get_color_mode_ptr(widget);
 	default_xbrush(&xb);
@@ -238,9 +248,9 @@ void hand_iconbox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	widget_get_canv_rect(widget, (canvbox_t*)&(ifc.rect));
 	ifc.pclrs = pclrs;
 
-	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
+	(*ifv.drw->pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
 
-	draw_iconbox(&ifc, ptd->layer, ptd->align, ptd->string);
+	draw_iconbox(&ifc, pxf, ptd->layer, ptd->align, ptd->string);
 
 	end_canvas_paint(canv, dc, pxr);
 }
@@ -318,12 +328,14 @@ void iconbox_popup_size(widget_t widget, xsize_t* pxs)
 {
 	iconbox_delta_t* ptd = GETICONBOXDELTA(widget);
 	measure_interface im = { 0 };
+	const xfont_t* pxf;
 
 	XDK_ASSERT(ptd != NULL);
 
+	pxf = widget_get_xfont_ptr(widget);
 	get_canvas_measure(widget_get_canvas(widget), &im);
 
-	calc_iconbox_size(&im, ptd->layer, ptd->align, ptd->string, pxs);
+	calc_iconbox_size(&im, pxf, ptd->layer, ptd->align, ptd->string, pxs);
 
 	widget_size_to_pt(widget, pxs);
 

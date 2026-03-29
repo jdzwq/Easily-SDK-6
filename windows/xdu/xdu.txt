@@ -13,8 +13,7 @@ E:\Easily-temp\windows\xdu\x86\Debug/impcontext.c \
 E:\Easily-temp\windows\xdu\x86\Debug/impgdi.c \
 E:\Easily-temp\windows\xdu\x86\Debug/impshell.c \
 E:\Easily-temp\windows\xdu\x86\Debug/impwidget.c \
-E:\Easily-temp\windows\xdu\x86\Debug/gdiinf.c \
-E:\Easily-temp\windows\xdu\x86\Debug/xduinf.c \
+E:\Easily-temp\windows\xdu\x86\Debug/wgcinf.c \
 E:\Easily-temp\windows\xdu\x86\Debug/xduinit.c \
 E:\Easily-temp\windows\xdu\x86\Debug/xdunc.c \
 E:\Easily-temp\windows\xdu\x86\Debug/xduutil.c \

@@ -26,7 +26,7 @@ LICENSE.GPL3 for more details.
 
 #include "clrext.h"
 
-#include "../xdgobj.h"
+#include "../xdgmgc.h"
 
 typedef struct _color_map_t{
 	tchar_t en_color[32];

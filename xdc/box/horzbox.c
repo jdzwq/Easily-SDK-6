@@ -263,13 +263,13 @@ void hand_horzbox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	widget_get_canv_rect(widget, (canvbox_t*)&(ifc.rect));
 	ifc.pclrs = pclrs;
 
-	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
+	(*ifv.drw->pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
 
 	_horzbox_bar_rect(widget, &xr);
 
 	lighten_xcolor(&xc_brim, DEF_MIDD_LIGHTEN);
 
-	(*ifv.pf_gradient_rect)(ifv.ctx, &xc_brim, &xc_core, GDI_ATTR_GRADIENT_VERT, &xr);
+	(*ifv.drw->pf_gradient_rect)(ifv.ctx, &xc_brim, &xc_core, GDI_ATTR_GRADIENT_VERT, &xr);
 
 	end_canvas_paint(canv, dc, pxr);
 }
@@ -303,12 +303,14 @@ void horzbox_popup_size(widget_t widget, xsize_t* pxs)
 {
 	horzbox_delta_t* ptd = GETHORZBOXDELTA(widget);
 	measure_interface im = { 0 };
+	const xfont_t* pxf;
 
 	XDK_ASSERT(ptd != NULL);
 
+	pxf = widget_get_xfont_ptr(widget);
 	get_canvas_measure(widget_get_canvas(widget), &im);
 
-	calc_horzbox_size(&im, pxs);
+	calc_horzbox_size(&im, pxf, pxs);
 
 	widget_size_to_pt(widget, pxs);
 

@@ -30,7 +30,7 @@ LICENSE.GPL3 for more details.
 #include "../xdlutil.h"
 
 
-static void _draw_round(const drawing_interface* pif, const xpen_t* pxp, const xpoint_t* pps, const xpoint_t* ppt, double angle)
+static void _draw_round(const drawing_interface* pci, const xpen_t* pxp, const xpoint_t* pps, const xpoint_t* ppt, double angle)
 {
 	xbrush_t xb;
 	xrect_t xr;
@@ -46,10 +46,10 @@ static void _draw_round(const drawing_interface* pif, const xpen_t* pxp, const x
 	xr.fw = 2 * rr;
 	xr.fh = 2 * rr;
 
-	(*pif->pf_draw_ellipse)(pif->ctx, pxp, &xb, &xr);
+	(*pci->drw->pf_draw_ellipse)(pci->ctx, pxp, &xb, &xr);
 }
 
-static void _draw_arrow(const drawing_interface* pif, const xpen_t* pxp, const xpoint_t* pps, const xpoint_t* ppt, double angle)
+static void _draw_arrow(const drawing_interface* pci, const xpen_t* pxp, const xpoint_t* pps, const xpoint_t* ppt, double angle)
 {
 	xbrush_t xb;
 
@@ -116,10 +116,10 @@ static void _draw_arrow(const drawing_interface* pif, const xpen_t* pxp, const x
 
 	sa[5] = _T('Z');
 
-	(*pif->pf_draw_path)(pif->ctx, pxp, &xb, sa, pa, 5);
+	(*pci->drw->pf_draw_path)(pci->ctx, pxp, &xb, sa, pa, 5);
 }
 
-static void _draw_square(const drawing_interface* pif, const xpen_t* pxp, const xpoint_t* pps, const xpoint_t* ppt, double angle)
+static void _draw_square(const drawing_interface* pci, const xpen_t* pxp, const xpoint_t* pps, const xpoint_t* ppt, double angle)
 {
 	xbrush_t xb;
 
@@ -190,22 +190,22 @@ static void _draw_square(const drawing_interface* pif, const xpen_t* pxp, const 
 
 	sa[4] = _T('Z');
 
-	(*pif->pf_draw_path)(pif->ctx, pxp, &xb, sa, pa, 4);
+	(*pci->drw->pf_draw_path)(pci->ctx, pxp, &xb, sa, pa, 4);
 }
 
-void draw_linecap(const drawing_interface* pif, const xpen_t* pxp, const xpoint_t* pps, const xpoint_t* ppt, double angle, const tchar_t* cap)
+void draw_linecap(const drawing_interface* pci, const xpen_t* pxp, const xpoint_t* pps, const xpoint_t* ppt, double angle, const tchar_t* cap)
 {
 	if (compare_text(cap, -1, GDI_ATTR_STROKE_LINECAP_ARROW, -1, 1) == 0)
 	{
-		_draw_arrow(pif, pxp, pps, ppt, angle);
+		_draw_arrow(pci, pxp, pps, ppt, angle);
 	}
 	else if (compare_text(cap, -1, GDI_ATTR_STROKE_LINECAP_SQUARE, -1, 1) == 0)
 	{
-		_draw_square(pif, pxp, pps, ppt, angle);
+		_draw_square(pci, pxp, pps, ppt, angle);
 	}
 	else if (compare_text(cap, -1, GDI_ATTR_STROKE_LINECAP_ROUND, -1, 1) == 0)
 	{
-		_draw_round(pif, pxp, pps, ppt, angle);
+		_draw_round(pci, pxp, pps, ppt, angle);
 	}
 }
 

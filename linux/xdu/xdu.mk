@@ -33,7 +33,7 @@ DIRS = $(wildcard \
 	$(SRC_PATH)/*.c \
 	$(SRC_PATH)/X11/*.c \
 	$(SRC_PATH)/imp/*.c \
-	$(SRC_PATH)/inf/*.c )
+	$(SRC_PATH)/gdi/*.c )
 SRCS = $(notdir $(DIRS))
 COBS = $(patsubst %.c, %.o, $(SRCS))
 OBJS = $(addprefix $(OBJ_PATH)/,$(COBS))
@@ -44,7 +44,7 @@ $(OBJ_PATH)/%.o : $(SRC_PATH)/X11/%.c
 $(OBJ_PATH)/%.o : $(SRC_PATH)/imp/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(SYS_PATH) -I $(XFT_PATH) -I $(INC_PATH) -I $(SRC_PATH)
 
-$(OBJ_PATH)/%.o : $(SRC_PATH)/inf/%.c
+$(OBJ_PATH)/%.o : $(SRC_PATH)/gdi/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(SYS_PATH) -I $(XFT_PATH) -I $(INC_PATH) -I $(SRC_PATH)
 
 $(OBJ_PATH)/%.o : $(SRC_PATH)/%.c

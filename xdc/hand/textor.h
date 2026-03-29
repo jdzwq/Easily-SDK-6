@@ -55,7 +55,7 @@ typedef enum{
 	_TEXTOR_PRESS_ACCEPT = 2
 }TEXTOR_PRESS;
 
-typedef void(*PF_SCAN_TEXT)(void* data, measure_interface* pif, const viewbox_t* pvb, const xface_t* pxa, bool_t paged, PF_SCAN_TEXTOR_CALLBACK pf, void* pp);
+typedef void(*PF_SCAN_TEXT)(void* data, measure_interface* pmv, const viewbox_t* pvb, const xface_t* pxa, bool_t paged, PF_SCAN_TEXTOR_CALLBACK pf, void* pp);
 typedef int(*PF_GET_TEXT)(void* data, tchar_t* buf, int max);
 typedef void(*PF_SET_TEXT)(void* data, const tchar_t* buf, int len);
 typedef bool_t(*PF_GET_PAGING)(widget_t wt, xsize_t* pse);

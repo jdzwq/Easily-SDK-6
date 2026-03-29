@@ -67,11 +67,25 @@ bool_t	TopogPanel_SaveFile(widget_t widget, const tchar_t* szFile);
 bool_t	TopogPanel_OpenFile(widget_t widget, const tchar_t* szFile);
 
 /*****************************************************************************************************/
+void TopogPanel_SetDirty(widget_t widget, bool_t bDirty)
+{
+	TopogPanelDelta* pdt = GETTOPOGPANELDELTA(widget);
+
+	designer_set_dirty(pdt->hTopog, bDirty);
+}
+
+bool_t TopogPanel_GetDirty(widget_t widget)
+{
+	TopogPanelDelta* pdt = GETTOPOGPANELDELTA(widget);
+
+	return designer_get_dirty(pdt->hTopog);
+}
+
 void TopogPanel_Switch(widget_t widget)
 {
 	TopogPanelDelta* pdt = GETTOPOGPANELDELTA(widget);
 
-	if (!topogctrl_get_dirty(pdt->hTopog))
+	if (!TopogPanel_GetDirty(widget))
 		return;
 
 	dword_t rt = ShowMsg(MSGBTN_YES | MSGBTN_NO | MSGICO_TIP, _T("文件尚未保存，是否保存文件？"));
@@ -82,23 +96,9 @@ void TopogPanel_Switch(widget_t widget)
 		widget_send_command(widget, 0, IDA_FILE_SAVE, NULL);
 		break;
 	case MSGBTN_NO:
-		topogctrl_set_dirty(pdt->hTopog, 0);
+		TopogPanel_SetDirty(widget, 0);
 		break;
 	}
-}
-
-void TopogPanel_SetDirty(widget_t widget, bool_t bDirty)
-{
-	TopogPanelDelta* pdt = GETTOPOGPANELDELTA(widget);
-
-	topogctrl_set_dirty(pdt->hTopog, bDirty);
-}
-
-bool_t TopogPanel_GetDirty(widget_t widget)
-{
-	TopogPanelDelta* pdt = GETTOPOGPANELDELTA(widget);
-
-	return topogctrl_get_dirty(pdt->hTopog);
 }
 
 /***************************************************************************************************************/
@@ -124,10 +124,10 @@ void TopogPanel_OnInsert(widget_t widget)
 {
 	TopogPanelDelta* pdt = GETTOPOGPANELDELTA(widget);
 
-	topogctrl_set_dirty(pdt->hTopog, 1);
+	TopogPanel_SetDirty(widget, 1);
 
 	LINKPTR ptrTopog = topogctrl_fetch(pdt->hTopog);
-	LINKPTR ptrPos = topogctrl_get_focus_spot(pdt->hTopog);
+	LINKPTR ptrPos = (LINKPTR)designer_get_focused(pdt->hTopog);
 
 	if (!ptrPos)
 		ptrPos = LINK_LAST;
@@ -152,11 +152,11 @@ void TopogPanel_OnDelete(widget_t widget)
 
 	XDK_ASSERT(ptrTopog);
 
-	topogctrl_set_dirty(pdt->hTopog, 1);
+	TopogPanel_SetDirty(widget, 1);
 
-	LINKPTR ptrSpot = topogctrl_get_focus_spot(pdt->hTopog);
+	LINKPTR ptrSpot = (LINKPTR)designer_get_focused(pdt->hTopog);
 
-	topogctrl_set_focus_spot(pdt->hTopog, NULL);
+	designer_set_focused(pdt->hTopog, NULL);
 
 	bool_t bRedraw = 0;
 	LINKPTR nlk, ilk = get_topog_next_spot(ptrTopog, LINK_FIRST);
@@ -262,10 +262,18 @@ void TopogPanel_OnAttributes(widget_t widget)
 	properctrl_redraw(pdt->hProper);
 
 	LINKPTR ptrTopog = topogctrl_fetch(pdt->hTopog);
-	LINKPTR ptrSpot = topogctrl_get_focus_spot(pdt->hTopog);
+	LINKPTR ptrSpot = (LINKPTR)designer_get_focused(pdt->hTopog);
 
-	int row = -1, col = -1;
-	topogctrl_get_focus_dot(pdt->hTopog, &row, &col);
+	int row,col; 
+	if(ptrSpot)
+	{
+		row = get_topog_spot_row(ptrSpot);
+		col = get_topog_spot_col(ptrSpot);
+	}else
+	{
+		row = -1;
+		col = -1;
+	}
 
 	if (ptrSpot)
 		properbag_write_topog_spot_attributes(ptrProper, ptrSpot);
@@ -286,7 +294,7 @@ void TopogPanel_OnStyleSheet(widget_t widget)
 	properctrl_redraw(pdt->hProper);
 
 	LINKPTR ptrTopog = topogctrl_fetch(pdt->hTopog);
-	LINKPTR ptrSpot = topogctrl_get_focus_spot(pdt->hTopog);
+	LINKPTR ptrSpot = (LINKPTR)designer_get_focused(pdt->hTopog);
 
 	if (ptrSpot)
 		properbag_parse_stylesheet(ptrProper, get_topog_spot_style_ptr(ptrSpot));
@@ -313,13 +321,14 @@ void TopogPanel_Title_OnItemChanged(widget_t widget, NOTICE_TITLE* pnt)
 
 	int n_id = xstol(get_title_item_id_ptr(pnt->item));
 
-	widget_post_command(widget, n_id, 0, NULL);
+	widget_post_command(widget, 0, n_id, NULL);
 }
 
-void TopogPanel_Topog_OnRBClick(widget_t widget, NOTICE_TOPOG* pnf)
+void TopogPanel_Topog_OnRBClick(widget_t widget, NOTICE_DESIGN* pnf)
 {
 	TopogPanelDelta* pdt = GETTOPOGPANELDELTA(widget);
 
+	LINKPTR ptrSpot = (LINKPTR)pnf->object;
 	xpoint_t* ppt = (xpoint_t*)pnf->data;
 
 	xrect_t xr = { 0 };
@@ -344,7 +353,7 @@ void TopogPanel_Topog_OnRBClick(widget_t widget, NOTICE_TOPOG* pnf)
 	set_menu_item_iid(mlk, IDA_EDIT_DETACH);
 	set_menu_item_title(mlk, _T("撤离图像"));
 
-	if (pnf->spot)
+	if (ptrSpot)
 	{
 		mlk = insert_menu_item(ptrMenu, LINK_LAST);
 		set_menu_item_iid(mlk, IDA_EDIT_COPY);
@@ -378,7 +387,7 @@ void TopogPanel_Topog_OnRBClick(widget_t widget, NOTICE_TOPOG* pnf)
 	destroy_menu_doc(ptrMenu);
 }
 
-void TopogPanel_Topog_OnLBClick(widget_t widget, NOTICE_TOPOG* pnf)
+void TopogPanel_Topog_OnLBClick(widget_t widget, NOTICE_DESIGN* pnf)
 {
 	TopogPanelDelta* pdt = GETTOPOGPANELDELTA(widget);
 
@@ -387,10 +396,10 @@ void TopogPanel_Topog_OnLBClick(widget_t widget, NOTICE_TOPOG* pnf)
 		return;
 
 	int n_id = xstol(get_title_item_id_ptr(ptrItem));
-	widget_post_command(widget, n_id, 0, NULL);
+	widget_post_command(widget, 0, n_id, NULL);
 }
 
-void TopogPanel_Topog_OnSpotDrop(widget_t widget, NOTICE_TOPOG* pnf)
+void TopogPanel_Topog_OnMoved(widget_t widget, NOTICE_DESIGN* pnf)
 {
 	TopogPanelDelta* pdt = GETTOPOGPANELDELTA(widget);
 
@@ -399,7 +408,7 @@ void TopogPanel_Topog_OnSpotDrop(widget_t widget, NOTICE_TOPOG* pnf)
 		return;
 
 	int n_id = xstol(get_title_item_id_ptr(ptrItem));
-	widget_post_command(widget, n_id, 0, NULL);
+	widget_post_command(widget, 0, n_id, NULL);
 }
 
 void TopogPanel_Proper_OnEntityUpdate(widget_t widget, NOTICE_PROPER* pnp)
@@ -413,7 +422,7 @@ void TopogPanel_Proper_OnEntityUpdate(widget_t widget, NOTICE_PROPER* pnp)
 	int n_id = xstol(get_title_item_id_ptr(ptrItem));
 
 	LINKPTR ptrTopog = topogctrl_fetch(pdt->hTopog);
-	LINKPTR ptrSpot = topogctrl_get_focus_spot(pdt->hTopog);
+	LINKPTR ptrSpot = (LINKPTR)designer_get_focused(pdt->hTopog);
 
 	tchar_t sz_style[CSS_LEN + 1] = { 0 };
 
@@ -545,7 +554,7 @@ void TopogPanel_OnSave(widget_t widget)
 
 	if (TopogPanel_SaveFile(widget, szFile))
 	{
-		topogctrl_set_dirty(pdt->hTopog, 0);
+		TopogPanel_SetDirty(widget, 0);
 	}
 }
 
@@ -671,6 +680,8 @@ int TopogPanel_OnCreate(widget_t widget, void* data)
 	widget_set_user_id(pdt->hTopog, IDC_TOPOGPANEL_TOPOG);
 	widget_set_owner(pdt->hTopog, widget);
 
+	hand_designer_create(pdt->hTopog, &desg_topogctrl);
+
 	set_split_item_delta(ilkTopog, pdt->hTopog);
 	widget_show(pdt->hTopog, WS_SHOW_NORMAL);
 
@@ -744,6 +755,8 @@ void TopogPanel_OnDestroy(widget_t widget)
 
 	if (widget_is_valid(pdt->hTopog))
 	{
+		hand_designer_destroy(pdt->hTopog);
+
 		LINKPTR ptrTopog = topogctrl_detach(pdt->hTopog);
 		if (ptrTopog)
 			destroy_topog_doc(ptrTopog);
@@ -906,7 +919,7 @@ void TopogPanel_OnParentCommand(widget_t widget, int code, vword_t data)
 	}
 	else if (code == COMMAND_REMOVE)
 	{
-		topogctrl_set_dirty(pdt->hTopog, 0);
+		TopogPanel_SetDirty(widget, 0);
 	}
 }
 
@@ -981,21 +994,17 @@ void TopogPanel_OnNotice(widget_t widget, LPNOTICE phdr)
 
 	if (phdr->user == IDC_TOPOGPANEL_TOPOG)
 	{
-		NOTICE_TOPOG* pnf = (NOTICE_TOPOG*)phdr;
+		NOTICE_DESIGN* pnf = (NOTICE_DESIGN*)phdr;
 		switch (pnf->code)
 		{
-		case NC_TOPOGCALCED:
-			break;
-		case NC_TOPOGSPOTCALCED:
-			break;
-		case NC_TOPOGLBCLK:
+		case NC_OBJECT_LBCLICK:
 			TopogPanel_Topog_OnLBClick(widget, pnf);
 			break;
-		case NC_TOPOGRBCLK:
+		case NC_OBJECT_RBCLICK:
 			TopogPanel_Topog_OnRBClick(widget, pnf);
 			break;
-		case NC_TOPOGSPOTDROP:
-			TopogPanel_Topog_OnSpotDrop(widget, pnf);
+		case NC_OBJECT_DROP:
+			TopogPanel_Topog_OnMoved(widget, pnf);
 			break;
 		}
 	}
@@ -1007,7 +1016,7 @@ void TopogPanel_OnNotice(widget_t widget, LPNOTICE phdr)
 		case NC_PROPERCALCED:
 			break;
 		case NC_ENTITYCOMMIT:
-			topogctrl_set_dirty(pdt->hTopog, 1);
+			TopogPanel_SetDirty(widget, 1);
 			break;
 		case NC_ENTITYUPDATE:
 			TopogPanel_Proper_OnEntityUpdate(widget, pnp);

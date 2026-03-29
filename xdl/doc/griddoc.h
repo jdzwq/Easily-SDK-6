@@ -133,13 +133,13 @@ LICENSE.GPL3 for more details.
 */
 #define set_grid_height(ptr,n)								set_dom_node_attr_float(ptr,ATTR_HEIGHT,n)
 /*
-@PROPER titleHeight: float.
-@GET get_grid_title_height: get the grid title bar height in millimeter.
+@PROPER height: float.
+@GET get_grid_title_height: get the grid title height.
 */
 #define get_grid_title_height(ptr)							get_dom_node_attr_float(ptr,ATTR_TITLE_HEIGHT)
 /*
-@PROPER titleHeight: float.
-@SET set_grid_title_height: set the grid title bar height in millimeter.
+@PROPER height: float.
+@SET set_grid_title_height: set the grid title height.
 */
 #define set_grid_title_height(ptr,n)						set_dom_node_attr_float(ptr,ATTR_TITLE_HEIGHT,n)
 /*
@@ -716,6 +716,9 @@ LICENSE.GPL3 for more details.
 @GET get_row_hidden: get the row hidden.
 */
 #define get_row_hidden(rlk)									get_dom_node_mask_check(rlk,MSK_HIDDEN)
+
+#define is_grid_colset(nlk)					((0 == xscmp(get_dom_node_name_ptr(nlk),DOC_GRID_COLSET))? 1: 0)
+#define is_grid_rowset(nlk)					((0 == xscmp(get_dom_node_name_ptr(nlk),DOC_GRID_ROWSET))? 1: 0)
 
 #ifdef	__cplusplus
 extern "C" {

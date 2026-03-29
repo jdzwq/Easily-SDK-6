@@ -41,7 +41,6 @@ typedef struct _list_delta_t{
 	widget_t hsc;
 	widget_t vsc;
 
-	bool_t b_drag;
 	bool_t b_lock;
 
 	tchar_t help[MAX_HELP + 1];
@@ -181,6 +180,7 @@ void _listctrl_find(widget_t widget, const tchar_t* token)
 }
 
 /************************************control event**********************************************/
+
 int noti_list_owner(widget_t widget, unsigned int code, link_t_ptr list, link_t_ptr ilk, void* data)
 {
 	list_delta_t* ptd = GETLISTDELTA(widget);
@@ -368,46 +368,6 @@ void noti_list_item_expand(widget_t widget, link_t_ptr plk)
 	noti_list_owner(widget, NC_LISTITEMEXPAND, ptd->list, plk, NULL);
 }
 
-void noti_list_item_drag(widget_t widget, int x, int y)
-{
-	list_delta_t* ptd = GETLISTDELTA(widget);
-	xpoint_t pt;
-
-	XDK_ASSERT(ptd->item);
-
-	ptd->b_drag = 1;
-
-	if (widget_can_focus(widget))
-	{
-		widget_set_capture(widget, 1);
-	}
-	widget_set_cursor(widget,CURSOR_HAND);
-
-	pt.x = x;
-	pt.y = y;
-	noti_list_owner(widget, NC_LISTITEMDRAG, ptd->list, ptd->item, (void*)&pt);
-}
-
-void noti_list_item_drop(widget_t widget, int x, int y)
-{
-	list_delta_t* ptd = GETLISTDELTA(widget);
-	xpoint_t pt;
-
-	XDK_ASSERT(ptd->item);
-
-	ptd->b_drag = 0;
-
-	if (widget_can_focus(widget))
-	{
-		widget_set_capture(widget, 0);
-	}
-	widget_set_cursor(widget, CURSOR_ARROW);
-
-	pt.x = x;
-	pt.y = y;
-	noti_list_owner(widget, NC_LISTITEMDROP,ptd->list, ptd->item, (void*)&pt);
-}
-
 void noti_list_begin_edit(widget_t widget)
 {
 	list_delta_t* ptd = GETLISTDELTA(widget);
@@ -526,6 +486,7 @@ void noti_list_reset_scroll(widget_t widget, bool_t bUpdate)
 			widget_close(ptd->hsc, 0);
 	}
 }
+
 /********************************************************************************************************/
 
 int hand_list_create(widget_t widget, void* data)
@@ -671,24 +632,12 @@ void hand_list_mouse_move(widget_t widget, dword_t dw, const xpoint_t* pxp)
 	if (!ptd->list)
 		return;
 
-	if (ptd->b_drag)
-		return;
-
 	pt.x = pxp->x;
 	pt.y = pxp->y;
 	widget_point_to_mm(widget, &pt);
 
 	plk = NULL;
 	nHint = calc_list_hint(&pt, ptd->list, ptd->parent, &plk);
-
-	if (nHint == LIST_HINT_ITEM && plk == ptd->item && !(dw & KS_WITH_CONTROL))
-	{
-		if (dw & MS_WITH_LBUTTON)
-		{
-			noti_list_item_drag(widget, pxp->x, pxp->y);
-			return;
-		}
-	}
 
 	if (nHint == LIST_HINT_ITEM && !ptd->hover && plk)
 	{
@@ -811,12 +760,6 @@ void hand_list_lbutton_up(widget_t widget, const xpoint_t* pxp)
 
 	if (!ptd->list)
 		return;
-
-	if (ptd->b_drag)
-	{
-		noti_list_item_drop(widget, pxp->x, pxp->y);
-		return;
-	}
 
 	pt.x = pxp->x;
 	pt.y = pxp->y;
@@ -978,7 +921,7 @@ void hand_list_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	widget_get_canv_rect(widget, (canvbox_t*)&(ifc.rect));
 	ifc.pclrs = pclrs;
 
-	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
+	(*ifv.drw->pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
 
 	draw_list_child(&ifc, ptd->list, ptd->parent);
 

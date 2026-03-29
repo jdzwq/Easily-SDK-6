@@ -5,9 +5,9 @@
 
 	@author ZhangWenQuan, JianDe HangZhou ZheJiang China, Mail: powersuite@hotmaol.com
 
-	@doc svg interface document
+	@doc mgc interface document
 
-	@module	svginf.h | interface file
+	@module	mgcinf.h | interface file
 
 	@devnote 张文权 2021.01 - 2021.12	v6.0
 ***********************************************************************/
@@ -24,37 +24,25 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
 LICENSE.GPL3 for more details.
 ***********************************************************************/
 
-#ifndef _SVGINF_H
-#define _SVGINF_H
+#ifndef _MGCINF_H
+#define _MGCINF_H
 
-#include "../xdldef.h"
-
+#include "../xdgdef.h"
 
 #ifdef	__cplusplus
 extern "C" {
 #endif
 
-/*
-@FUNCTION create_svg_interface: create svg canvas interface.
-@INPUT canvas_t canv: the svg canvas object.
-@RETURN drawing_interface*: if succeeds return svg canvas interface struct, fails return NULL.
-*/
-EXP_API void svg_get_canvas_interface(canvas_t canv, drawing_interface* pif);
+EXP_API void 	mgc_get_canvas_interface(canvas_t canv, drawing_interface* pci);
 
-/*
-@FUNCTION create_visual_interface: create svg view interface.
-@INPUT visual_t view: the context object.
-@RETURN if_viewING_t*: if succeeds return view interface struct, fails return NULL.
-*/
-EXP_API void svg_get_visual_interface(visual_t visu, drawing_interface* pif);
+EXP_API void 	mgc_get_visual_interface(visual_t visu, drawing_interface* pvi);
 
-EXP_API void	svg_get_visual_measure(visual_t view, measure_interface* pim);
+EXP_API void	mgc_get_visual_measure(visual_t view, measure_interface* pmv);
 
-EXP_API void	svg_get_canvas_measure(canvas_t canv, measure_interface* pim);
+EXP_API void	mgc_get_canvas_measure(canvas_t canv, measure_interface* pmc);
 
 #ifdef	__cplusplus
 }
 #endif
-
 
 #endif /*MGCIML_H*/

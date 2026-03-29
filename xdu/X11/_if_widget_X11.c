@@ -36,10 +36,10 @@ XIM     g_xim = (XIM)0;
                         | EnterWindowMask |	LeaveWindowMask | PointerMotionMask| PointerMotionHintMask \
                         | KeymapStateMask \
 						| ExposureMask \
+						| FocusChangeMask \
 						| VisibilityChangeMask \
 						| StructureNotifyMask \
 						| SubstructureNotifyMask \
-						| FocusChangeMask \
 						| PropertyChangeMask \
 						| ColormapChangeMask \
 						| OwnerGrabButtonMask)
@@ -1161,10 +1161,7 @@ static int _message_dispatch(XEvent* pmsg)
 				if(pxw->disable) break;
 				if(pxw->style & WD_STYLE_NOACTIVE) break;
 
-				XGetInputFocus(g_display, &org, &rev);
-				if(org == pxw->self) break;
-
-				XSetInputFocus(g_display, pxw->self, RevertToPointerRoot, CurrentTime);
+				XSetInputFocus(g_display, pxw->self, RevertToNone, CurrentTime);
 				break;
 			}
 
@@ -1238,7 +1235,6 @@ widget_t _widget_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr
 	Atom atom, atoms[2] = {0};
 	XWMHints *hints = NULL;
 
-	XWindowAttributes rattr = {0};
 	Colormap clrmap;
 	XColor clr;
 	unsigned long bkg_pixel, frg_pixel;
@@ -1348,10 +1344,6 @@ widget_t _widget_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr
 		XFree(hints);
 	}
 
-	XGetWindowAttributes(g_display, win, &rattr);
-	//bkg_pixel = wattr.background_pixel;
-    //frg_pixel = wattr.border_pixel;
-
 	pxw = (X11_widget_t*)xmem_alloc_handle(sizeof(X11_widget_t));
 
 	pxw->head.tag = _HANDLE_WIDGET;
@@ -1394,9 +1386,17 @@ widget_t _widget_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr
 	pxw->clrs.clr_txt.b = clr.blue >> 8;
 	pxw->clrs.clr_txt.a = 255;
 
+	pxw->clrs.clr_ico.r = clr.red >> 8;
+	pxw->clrs.clr_ico.g = clr.green >> 8;
+	pxw->clrs.clr_ico.b = clr.blue >> 8;
+	pxw->clrs.clr_ico.a = 255;
+
 	if(wstyle & WD_STYLE_EDITOR)
 	{
-		pxw->xic = XCreateIC(g_xim, XNInputStyle, XIMPreeditNothing | XIMStatusNothing, XNClientWindow, win, XNFocusWindow, win, NULL);
+		pxw->xic = XCreateIC(g_xim, XNInputStyle, XIMPreeditNothing | XIMStatusNothing, 
+			XNClientWindow, par, 
+			XNFocusWindow, win, 
+			NULL);
 	}
 
 	SETXDUSTRUCT(win, pxw);

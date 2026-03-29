@@ -52,9 +52,7 @@ typedef struct _tree_redraw_param{
 #define GETTREEDELTA(ph) 		(tree_delta_t*)widget_get_user_delta(ph)
 #define SETTREEDELTA(ph,ptd)	widget_set_user_delta(ph,(vword_t)ptd)
 
-
-/*********************************************control event**************************************/
-
+/***********************************************************************/
 
 static void _treectrl_item_rect(widget_t widget, link_t_ptr ilk, xrect_t* pxr)
 {
@@ -175,7 +173,8 @@ static void _treectrl_ensure_visible(widget_t widget)
 	widget_ensure_visible(widget, &xr, 1);
 }
 
-/******************************************************************************************/
+/***********************************************************************/
+
 int noti_tree_owner(widget_t widget, unsigned int code, link_t_ptr tree, link_t_ptr ilk, void* data)
 {
 	tree_delta_t* ptd = GETTREEDELTA(widget);
@@ -489,7 +488,8 @@ void noti_tree_reset_scroll(widget_t widget, bool_t bUpdate)
 			widget_close(ptd->vsc, 0);
 	}
 }
-/********************************************************************************************/
+
+/***********************************************************************/
 
 int hand_tree_create(widget_t widget, void* data)
 {
@@ -889,7 +889,7 @@ void hand_tree_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	widget_get_canv_rect(widget, (canvbox_t*)&(ifc.rect));
 	ifc.pclrs = pclrs;
 
-	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
+	(*ifv.drw->pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
 
 	draw_tree(&ifc, ptd->tree);
 
@@ -910,7 +910,7 @@ void hand_tree_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	end_canvas_paint(canv, dc, pxr);
 }
 
-/*****************************************************************************************************/
+/***********************************************************************/
 
 widget_t treectrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, widget_t wparent)
 {

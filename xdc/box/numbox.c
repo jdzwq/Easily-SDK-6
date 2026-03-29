@@ -228,7 +228,7 @@ void hand_numbox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	
 	get_visual_interface(rdc, &ifv);
 
-	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb_focus, &xr);
+	(*ifv.drw->pf_draw_rect)(ifv.ctx, NULL, &xb_focus, &xr);
 
 	for (i = 0; i < NUMBOX_COUNT; i++)
 	{
@@ -252,22 +252,22 @@ void hand_numbox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 		}
 
 		if (ptd->index == i)
-			(*ifv.pf_draw_round)(ifv.ctx, NULL, &xb_focus, &xr_focus, NULL);
+			(*ifv.drw->pf_draw_round)(ifv.ctx, NULL, &xb_focus, &xr_focus, NULL);
 		else
-			(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb_bark, &xr_focus);
+			(*ifv.drw->pf_draw_rect)(ifv.ctx, NULL, &xb_bark, &xr_focus);
 
 		tk[0] = NUMBOX_DATA[i];
 
 		if (tk[0] == _T('\n'))
-			(*ifv.pf_draw_text)(ifv.ctx, &xa, &xr, _T("√"), -1);
+			(*ifv.drw->pf_draw_text)(ifv.ctx, &xa, &xr, _T("√"), -1);
 		else if (tk[0] == _T('-'))
-			(*ifv.pf_draw_text)(ifv.ctx, &xa, &xr, _T("CE"), -1);
+			(*ifv.drw->pf_draw_text)(ifv.ctx, &xa, &xr, _T("CE"), -1);
 		else
 		{
 			if (ptd->index == i)
-				(*ifv.pf_draw_text)(ifv.ctx, &xa, &xr, tk, -1);
+				(*ifv.drw->pf_draw_text)(ifv.ctx, &xa, &xr, tk, -1);
 			else
-				(*ifv.pf_draw_text)(ifv.ctx, &xa, &xr, tk, -1);
+				(*ifv.drw->pf_draw_text)(ifv.ctx, &xa, &xr, tk, -1);
 		}
 	}
 

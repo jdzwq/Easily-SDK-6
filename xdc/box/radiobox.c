@@ -88,15 +88,17 @@ void hand_radiobox_lbutton_up(widget_t widget, const xpoint_t* pxp)
 	measure_interface im = { 0 };
 	xpoint_t pt;
 	int hint;
+	const xfont_t* pxf;
 
 	pt.x = pxp->x;
 	pt.y = pxp->y;
 
 	widget_point_to_mm(widget, &pt);
 
+	pxf = widget_get_xfont_ptr(widget);
 	get_canvas_measure(widget_get_canvas(widget), &im);
 
-	hint = calc_radiobox_hint(&im, &pt);
+	hint = calc_radiobox_hint(&im, pxf, &pt);
 
 	if (hint == RADIOBOX_HINT_ON)
 	{
@@ -148,8 +150,10 @@ void hand_radiobox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	drawing_interface ifv = {0};
 
 	const color_mod_t *pclrs;
+	const xfont_t* pxf;
 	xbrush_t xb;
 
+	pxf = widget_get_xfont_ptr(widget);
 	pclrs = widget_get_color_mode_ptr(widget);
 	default_xbrush(&xb);
 	format_xcolor(&(pclrs->clr_bkg), xb.color);
@@ -166,9 +170,9 @@ void hand_radiobox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	widget_get_canv_rect(widget, (canvbox_t*)&(ifc.rect));
 	ifc.pclrs = pclrs;
 
-	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
+	(*ifv.drw->pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
 
-	draw_radiobox(&ifc, ptd->on);
+	draw_radiobox(&ifc, pxf, ptd->on);
 
 	end_canvas_paint(canv, dc, pxr);
 }
@@ -199,12 +203,14 @@ void radiobox_popup_size(widget_t widget, xsize_t* pxs)
 {
 	radiobox_delta_t* ptd = GETRADIOBOXDELTA(widget);
 	measure_interface im = { 0 };
+	const xfont_t* pxf;
 
 	XDK_ASSERT(ptd != NULL);
 
+	pxf = widget_get_xfont_ptr(widget);
 	get_canvas_measure(widget_get_canvas(widget), &im);
 
-	calc_radiobox_size(&im, pxs);
+	calc_radiobox_size(&im, pxf, pxs);
 
 	widget_size_to_pt(widget, pxs);
 

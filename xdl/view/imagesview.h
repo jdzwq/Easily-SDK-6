@@ -53,7 +53,7 @@ extern "C" {
 
 	EXP_API int	calc_images_hint(const xpoint_t* ppt, link_t_ptr ptr, link_t_ptr* pilk);
 
-	EXP_API void draw_images(const drawing_interface* pcanv, link_t_ptr ptr);
+	EXP_API void draw_images(const drawing_interface* pci, link_t_ptr ptr);
 
 #ifdef	__cplusplus
 }

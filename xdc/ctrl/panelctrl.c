@@ -235,6 +235,7 @@ static void _panelctrl_ensure_visible(widget_t widget)
 }
 
 /*************************************************************************/
+
 int noti_panel_owner(widget_t widget, unsigned int code, link_t_ptr arch, link_t_ptr item, void* data)
 {
 	panel_delta_t* ptd = GETPANELDELTA(widget);
@@ -347,7 +348,9 @@ void noti_panel_reset_scroll(widget_t widget, bool_t bUpdate)
 			widget_close(ptd->vsc, 0);
 	}
 }
+
 /********************************************************************************************/
+
 int hand_panel_create(widget_t widget, void* data)
 {
 	panel_delta_t* ptd;
@@ -685,7 +688,7 @@ void hand_panel_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	widget_get_canv_rect(widget, (canvbox_t*)&(ifc.rect));
 	ifc.pclrs = pclrs;
 
-	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
+	(*ifv.drw->pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
 
 	widget_get_view_rect(widget, &vb);
 
@@ -717,7 +720,7 @@ void hand_panel_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 			pt[8].x = 0;
 			pt[8].y = xr.y + ptd->title_height;
 
-			(*ifv.pf_draw_polyline)(ifv.ctx, &xp, pt, 9);
+			(*ifv.drw->pf_draw_polyline)(ifv.ctx, &xp, pt, 9);
 		}
 
 		xr_icon.x = xr.x;
@@ -732,7 +735,7 @@ void hand_panel_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 		xr_icon.y = xr.y;
 		xr_icon.w = ptd->item_width - 12;
 		xr_icon.h = ptd->title_height;
-		(*ifv.pf_draw_text)(ifv.ctx, &xa, &xr_icon, title, -1);
+		(*ifv.drw->pf_draw_text)(ifv.ctx, &xa, &xr_icon, title, -1);
 
 		xr.x += ptd->item_width;
 

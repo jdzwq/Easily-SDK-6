@@ -110,7 +110,9 @@ static void _calendarctrl_ensure_visible(widget_t widget)
 
 	widget_ensure_visible(widget, &xr, 1);
 }
+
 /*********************************************************************************************************/
+
 int noti_calendar_owner(widget_t widget, unsigned int code, link_t_ptr ptr, link_t_ptr ilk, void* data)
 {
 	calendar_delta_t* ptd = GETCALENDARDELTA(widget);
@@ -253,6 +255,7 @@ void noti_calendar_daily_hover(widget_t widget, int x, int y)
 }
 
 /*******************************************************************************/
+
 int hand_calendar_create(widget_t widget, void* data)
 {
 	calendar_delta_t* ptd;
@@ -574,7 +577,7 @@ void hand_calendar_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 		if (get_calendar_daily_selected(ilk))
 		{
 			_calendarctrl_daily_rect(widget, ilk, &xr);
-			(*ifv.pf_alphablend_rect)(ifv.ctx, &xc, &xr, ALPHA_TRANS);
+			(*ifv.drw->pf_alphablend_rect)(ifv.ctx, &xc, &xr, ALPHA_TRANS);
 		}
 		ilk = get_calendar_next_daily(ptd->calendar, ilk);
 	}

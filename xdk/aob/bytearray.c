@@ -67,7 +67,7 @@ int bytes_size(byte_t** sa)
 	return (*(int*)(sa + 1));
 }
 
-byte_t bytes_byte(byte_t** sa, int index)
+byte_t get_byte(byte_t** sa, int index)
 {
 	byte_t* pa = *sa;
 	int size;
@@ -77,6 +77,19 @@ byte_t bytes_byte(byte_t** sa, int index)
 	XDK_ASSERT(index >= 0 && index < size);
 
 	return pa[index];
+}
+
+byte_t get_byte_safe(byte_t** sa, int index, byte_t def)
+{
+	byte_t* pa = *sa;
+	int size;
+
+	size = (int)(*(int*)(sa + 1));
+
+	if(index >= 0 && index < size)
+		return pa[index];
+	else
+		return def;
 }
 
 int bytes_copy(byte_t** sa, int index, byte_t* buf, int max)

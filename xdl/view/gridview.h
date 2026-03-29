@@ -32,8 +32,6 @@ LICENSE.GPL3 for more details.
 
 typedef enum{
 	GRID_HINT_NONE,
-	GRID_HINT_MENU,
-	GRID_HINT_TITLE,
 	GRID_HINT_NULBAR,
 	GRID_HINT_COLBAR,
 	GRID_HINT_ROWBAR,
@@ -56,15 +54,15 @@ EXP_API int calc_grid_row_page(link_t_ptr ptr, link_t_ptr rlk);
 
 EXP_API int calc_grid_pages(link_t_ptr ptr);
 
-EXP_API int calc_grid_cell_rect(link_t_ptr ptr, int page, link_t_ptr rlk, link_t_ptr clk, xrect_t* pxr);
+EXP_API float calc_grid_col_height(link_t_ptr ptr, int page);
 
-EXP_API int calc_grid_row_rect(link_t_ptr ptr, int page, link_t_ptr rlk, xrect_t* pxr);
+EXP_API float calc_grid_row_width(link_t_ptr ptr);
 
-EXP_API int calc_grid_col_rect(link_t_ptr ptr, int page, link_t_ptr rlk, link_t_ptr clk, xrect_t* pxr);
+EXP_API bool_t calc_grid_cell_rect(link_t_ptr ptr, int page, link_t_ptr rlk, link_t_ptr clk, xrect_t* pxr);
 
 EXP_API int calc_grid_hint(const xpoint_t* ppt, link_t_ptr ptr, int page, link_t_ptr* prlk, link_t_ptr* pclk);
 
-EXP_API void draw_grid_page(const drawing_interface* pcanv, link_t_ptr ptr, int page);
+EXP_API void draw_grid_page(const drawing_interface* pci, link_t_ptr ptr, int page);
 
 #ifdef	__cplusplus
 }

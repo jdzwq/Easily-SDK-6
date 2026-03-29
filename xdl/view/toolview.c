@@ -275,7 +275,7 @@ int calc_tool_point_hint(const xpoint_t* ppt, link_t_ptr ptr, link_t_ptr* pglk, 
 	return nHint;
 }
 
-void draw_tool(const drawing_interface* pif, link_t_ptr ptr)
+void draw_tool(const drawing_interface* pci, link_t_ptr ptr)
 {
 	link_t_ptr glk, ilk;
 	xrect_t xrGroup, xrTitle, xrItem, xrClip;
@@ -293,16 +293,14 @@ void draw_tool(const drawing_interface* pif, link_t_ptr ptr)
 	const tchar_t* show;
 	int count;
 
-	const canvbox_t* pbox = (canvbox_t*)(&pif->rect);
-
-	XDK_ASSERT(pif != NULL);
+	const canvbox_t* pbox = (canvbox_t*)(&pci->rect);
 
 	px = pbox->fx;
 	py = pbox->fy;
 	pw = pbox->fw;
 	ph = pbox->fh;
 
-	b_print = (pif->tag == _CANVAS_PRINTER) ? 1 : 0;
+	b_print = (pci->tag == _CANVAS_PRINTER) ? 1 : 0;
 
 	style = get_tool_style_ptr(ptr);
 
@@ -314,27 +312,27 @@ void draw_tool(const drawing_interface* pif, link_t_ptr ptr)
 	parse_xface_from_style(&xa, style);
 	if (!b_print)
 	{
-		format_xcolor(&pif->pclrs->clr_txt, xa.text_color);
+		format_xcolor(&pci->pclrs->clr_txt, xa.text_color);
 	}
 
 	parse_xfont_from_style(&xf, style);
-	(*pif->pf_set_xfont)(pif->ctx, &xf);
+	(*pci->drw->pf_set_xfont)(pci->ctx, &xf);
 
 	parse_xbrush_from_style(&xb, style);
 	if (!b_print)
 	{
-		format_xcolor(&pif->pclrs->clr_bkg, xb.color);
+		format_xcolor(&pci->pclrs->clr_bkg, xb.color);
 	}
 
 	parse_xpen_from_style(&xp, style);
 	if (!b_print)
 	{
-		format_xcolor(&pif->pclrs->clr_frg, xp.color);
+		format_xcolor(&pci->pclrs->clr_frg, xp.color);
 	}
 
 	if (!b_print)
 	{
-		xmem_copy((void*)&xc, (void*)&pif->pclrs->clr_ico, sizeof(xcolor_t));
+		xmem_copy((void*)&xc, (void*)&pci->pclrs->clr_ico, sizeof(xcolor_t));
 	}
 	else
 	{
@@ -343,7 +341,7 @@ void draw_tool(const drawing_interface* pif, link_t_ptr ptr)
 
 	if (!b_print)
 	{
-		format_xcolor(&pif->pclrs->clr_msk, xi.color);
+		format_xcolor(&pci->pclrs->clr_msk, xi.color);
 	}
 
 	xmem_copy((void*)&xb_group, (void*)&xb, sizeof(xbrush_t));
@@ -360,7 +358,7 @@ void draw_tool(const drawing_interface* pif, link_t_ptr ptr)
 			ft_offset_rect(&xrGroup, px, py);
 			ft_expand_rect(&xrGroup, -DEF_SPLIT_FEED, -DEF_SPLIT_FEED);
 
-			(*pif->pf_draw_round)(pif->ctx, &xp, &xb_group, &xrGroup, NULL);
+			(*pci->drw->pf_draw_round)(pci->ctx, &xp, &xb_group, &xrGroup, NULL);
 
 			calc_tool_group_title_rect(ptr, glk, &xrTitle);
 			ft_offset_rect(&xrTitle, px, py);
@@ -371,9 +369,9 @@ void draw_tool(const drawing_interface* pif, link_t_ptr ptr)
 			xmem_copy((void*)&xrClip, (void*)&xrGroup, sizeof(xrect_t));
 			ft_clip_rect(&xrClip, &xrTitle);
 
-			(*pif->pf_draw_rect)(pif->ctx, &xp, &xb, &xrClip);
+			(*pci->drw->pf_draw_rect)(pci->ctx, &xp, &xb, &xrClip);
 
-			(*pif->pf_draw_text)(pif->ctx, &xa, &xrTitle, get_tool_group_title_ptr(glk), -1);
+			(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xrTitle, get_tool_group_title_ptr(glk), -1);
 
 			if (get_tool_group_collapsed(glk))
 			{
@@ -381,7 +379,7 @@ void draw_tool(const drawing_interface* pif, link_t_ptr ptr)
 				xrTitle.fw = xrTitle.fh;
 
 				ft_center_rect(&xrTitle, DEF_SMALL_ICON, DEF_SMALL_ICON);
-				draw_gizmo(pif, &xc, &xrTitle, GDI_ATTR_GIZMO_OMIT);
+				draw_gizmo(pci, &xc, &xrTitle, GDI_ATTR_GIZMO_OMIT);
 			}
 		}
 
@@ -399,21 +397,21 @@ void draw_tool(const drawing_interface* pif, link_t_ptr ptr)
 			if (compare_text(show, -1, ATTR_SHOW_IMAGEONLY, -1, 0) == 0)
 			{
 				ft_center_rect(&xrItem, DEF_SMALL_ICON, DEF_SMALL_ICON);
-				draw_gizmo(pif, &xc, &xrItem, get_tool_item_icon_ptr(ilk));
+				draw_gizmo(pci, &xc, &xrItem, get_tool_item_icon_ptr(ilk));
 			}
 			else if (compare_text(show, -1, ATTR_SHOW_TEXTONLY, -1, 0) == 0)
 			{
-				(*pif->pf_draw_text)(pif->ctx, &xa, &xrItem, get_tool_item_title_ptr(ilk), -1);
+				(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xrItem, get_tool_item_title_ptr(ilk), -1);
 			}
 			else
 			{
 				xrItem.fh /= 2;
 				xrItem.fy += xrItem.fh;
-				(*pif->pf_draw_text)(pif->ctx, &xa, &xrItem, get_tool_item_title_ptr(ilk), -1);
+				(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xrItem, get_tool_item_title_ptr(ilk), -1);
 
 				xrItem.fy -= xrItem.fh;
 				ft_center_rect(&xrItem, DEF_SMALL_ICON, DEF_SMALL_ICON);
-				draw_gizmo(pif, &xc, &xrItem, get_tool_item_icon_ptr(ilk));
+				draw_gizmo(pci, &xc, &xrItem, get_tool_item_icon_ptr(ilk));
 			}
 
 			count++;

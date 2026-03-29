@@ -34,7 +34,7 @@ LICENSE.GPL3 for more details.
 extern "C" {
 #endif
 
-	EXP_API void draw_shape(const drawing_interface* pif, const xpen_t* pxp, const xbrush_t* pxb, const xrect_t* prt, const tchar_t* shape);
+	EXP_API void draw_shape(const drawing_interface* pci, const xpen_t* pxp, const xbrush_t* pxb, const xrect_t* prt, const tchar_t* shape);
 
 
 #ifdef	__cplusplus

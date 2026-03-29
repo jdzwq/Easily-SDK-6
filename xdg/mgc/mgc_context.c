@@ -32,7 +32,7 @@ LICENSE.GPL3 for more details.
 #include "mfnt.h"
 #include "mclr.h"
 
-#include "../xdgobj.h"
+#include "../xdgmgc.h"
 #include "../xdgutil.h"
 
 

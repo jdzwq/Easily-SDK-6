@@ -129,6 +129,17 @@ EXP_API void matrix_set_value(matrix_t mat, int row, int col, double db);
 EXP_API double matrix_get_value(matrix_t mat, int row, int col);
 
 /**********************************************************************
+@FUNCTION: get the matrix element value in safe way.
+@INPUT: the matrix struct.
+@INPUT: zero based row index.
+@INPUT: zero based col index.
+@INPUT: defaule value for return.
+@RETURN: return the element value if exists, otherwise default returned.
+@NOTE: data block must be attached.
+***********************************************************************/
+EXP_API double matrix_get_value_safe(matrix_t mat, int row, int col, double def);
+
+/**********************************************************************
 @FUNCTION: parse matrix element value from string.
 @INPUT: the matrix struct.
 @INPUT: string token, number separated by space.

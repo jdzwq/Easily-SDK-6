@@ -496,7 +496,7 @@ void hand_msgdlg_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	widget_size_to_pt(widget, &xs);
 
 	xr.h -= xs.h;
-	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
+	(*ifv.drw->pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
 	xr.h += xs.h;
 
 	xr_bar.x = xr.x;
@@ -505,21 +505,21 @@ void hand_msgdlg_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	xr_bar.h = xs.h;
 
 	lighten_xbrush(&xb, DEF_MIDD_DARKEN);
-	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr_bar);
+	(*ifv.drw->pf_draw_rect)(ifv.ctx, NULL, &xb, &xr_bar);
 
 	pt1.x = xr.x;
 	pt1.y = xr.y + xr.h - xs.h;
 	pt2.x = xr.x + xr.w;
 	pt2.y = xr.y + xr.h - xs.h;
 
-	//(*ifv.pf_draw_line)(ifv.ctx, &xp, &pt1, &pt2);
+	//(*ifv.drw->pf_draw_line)(ifv.ctx, &xp, &pt1, &pt2);
 
 	xr_txt.x = xr.x + xs.w;
 	xr_txt.y = xr.y;
 	xr_txt.w = xr.w - 2 * xs.w;
 	xr_txt.h = xr.h - xs.h;
 
-	(*ifv.pf_draw_text)(ifv.ctx, &xa, &xr_txt, ptd->text, -1);
+	(*ifv.drw->pf_draw_text)(ifv.ctx, &xa, &xr_txt, ptd->text, -1);
 
 	end_canvas_paint(canv, dc, pxr);
 }

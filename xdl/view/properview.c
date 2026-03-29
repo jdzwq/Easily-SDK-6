@@ -233,7 +233,7 @@ int calc_proper_hint(const xpoint_t* ppt, link_t_ptr ptr, link_t_ptr* psec, link
 	return hint;
 }
 
-void draw_proper(const drawing_interface* pif, link_t_ptr ptr)
+void draw_proper(const drawing_interface* pci, link_t_ptr ptr)
 {
 	link_t_ptr sec, ent;
 	xrect_t xr, xr_draw;
@@ -248,11 +248,9 @@ void draw_proper(const drawing_interface* pif, link_t_ptr ptr)
 	bool_t b_print;
 	float px, py, pw, ph;
 
-	const canvbox_t* pbox = (canvbox_t*)(&pif->rect);
+	const canvbox_t* pbox = (canvbox_t*)(&pci->rect);
 
-	XDK_ASSERT(pif);
-
-	b_print = (pif->tag == _CANVAS_PRINTER) ? 1 : 0;
+	b_print = (pci->tag == _CANVAS_PRINTER) ? 1 : 0;
 
 	ih = get_proper_item_height(ptr);
 	iw = get_proper_item_span(ptr);
@@ -271,24 +269,24 @@ void draw_proper(const drawing_interface* pif, link_t_ptr ptr)
 	style = get_proper_style_ptr(ptr);
 
 	parse_xfont_from_style(&xf, style);
-	(*pif->pf_set_xfont)(pif->ctx, &xf);
+	(*pci->drw->pf_set_xfont)(pci->ctx, &xf);
 
 	parse_xface_from_style(&xa, style);	
 	if (!b_print)
 	{
-		format_xcolor(&pif->pclrs->clr_txt, xa.text_color);
+		format_xcolor(&pci->pclrs->clr_txt, xa.text_color);
 	}
 
 	parse_xbrush_from_style(&xb, style);
 	if (!b_print)
 	{
-		format_xcolor(&pif->pclrs->clr_bkg, xb.color);
+		format_xcolor(&pci->pclrs->clr_bkg, xb.color);
 	}
 
 	/*parse_xpen_from_style(&xp, style);
 	if (!b_print)
 	{
-		format_xcolor(&pif->pclrs->clr_frg, xp.color);
+		format_xcolor(&pci->pclrs->clr_frg, xp.color);
 	}*/
 
 	xscpy(xp.color, xb.color);
@@ -297,12 +295,12 @@ void draw_proper(const drawing_interface* pif, link_t_ptr ptr)
 
 	if (!b_print)
 	{
-		format_xcolor(&pif->pclrs->clr_msk, xi.color);
+		format_xcolor(&pci->pclrs->clr_msk, xi.color);
 	}
 
 	if (!b_print)
 	{
-		xmem_copy((void*)&xc, (void*)&pif->pclrs->clr_ico, sizeof(xcolor_t));
+		xmem_copy((void*)&xc, (void*)&pci->pclrs->clr_ico, sizeof(xcolor_t));
 	}
 	else
 	{
@@ -330,11 +328,11 @@ void draw_proper(const drawing_interface* pif, link_t_ptr ptr)
 
 		if (is_null(shape))
 		{
-			(*pif->pf_draw_rect)(pif->ctx, NULL, &xb_bar, &xr_draw);
+			(*pci->drw->pf_draw_rect)(pci->ctx, NULL, &xb_bar, &xr_draw);
 		}
 		else
 		{
-			(*pif->pf_draw_rect)(pif->ctx, &xp, &xb_bar, &xr_draw);
+			(*pci->drw->pf_draw_rect)(pci->ctx, &xp, &xb_bar, &xr_draw);
 		}
 
 		xr_draw.fx = xr.fx;
@@ -344,7 +342,7 @@ void draw_proper(const drawing_interface* pif, link_t_ptr ptr)
 
 		ft_center_rect(&xr_draw, DEF_SMALL_ICON, DEF_SMALL_ICON);
 
-		draw_gizmo(pif, &xc, &xr_draw, get_section_icon_ptr(sec));
+		draw_gizmo(pci, &xc, &xr_draw, get_section_icon_ptr(sec));
 
 		xr_draw.fx = xr.fx + xr.fw - ic;
 		xr_draw.fw = ic;
@@ -354,11 +352,11 @@ void draw_proper(const drawing_interface* pif, link_t_ptr ptr)
 
 		if (!get_section_collapsed(sec))
 		{
-			draw_gizmo(pif, &xc, &xr_draw, GDI_ATTR_GIZMO_EXPAND);
+			draw_gizmo(pci, &xc, &xr_draw, GDI_ATTR_GIZMO_EXPAND);
 		}
 		else
 		{
-			draw_gizmo(pif, &xc, &xr_draw, GDI_ATTR_GIZMO_COLLAPSE);
+			draw_gizmo(pci, &xc, &xr_draw, GDI_ATTR_GIZMO_COLLAPSE);
 		}
 
 		xr_draw.fx = xr.fx + ic;
@@ -366,7 +364,7 @@ void draw_proper(const drawing_interface* pif, link_t_ptr ptr)
 		xr_draw.fy = xr.fy;
 		xr_draw.fh = ih;
 
-		(*pif->pf_draw_text)(pif->ctx, &xa, &xr_draw, get_section_name_ptr(sec), -1);
+		(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr_draw, get_section_name_ptr(sec), -1);
 
 		xr.fy += ih;
 
@@ -387,7 +385,7 @@ void draw_proper(const drawing_interface* pif, link_t_ptr ptr)
 
 			if (!is_null(shape))
 			{
-				draw_shape(pif, &xp, NULL, &xr_draw, shape);
+				draw_shape(pci, &xp, NULL, &xr_draw, shape);
 			}
 
 			//val shape
@@ -398,7 +396,7 @@ void draw_proper(const drawing_interface* pif, link_t_ptr ptr)
 
 			if (!is_null(shape))
 			{
-				draw_shape(pif, &xp, NULL, &xr_draw, shape);
+				draw_shape(pci, &xp, NULL, &xr_draw, shape);
 			}
 
 			//key image
@@ -409,7 +407,7 @@ void draw_proper(const drawing_interface* pif, link_t_ptr ptr)
 
 			ft_center_rect(&xr_draw, DEF_SMALL_ICON, DEF_SMALL_ICON);
 
-			draw_gizmo(pif, &xc, &xr_draw, get_entity_icon_ptr(ent));
+			draw_gizmo(pci, &xc, &xr_draw, get_entity_icon_ptr(ent));
 
 			//key text
 			xr_draw.fx = xr.fx + ic;
@@ -417,7 +415,7 @@ void draw_proper(const drawing_interface* pif, link_t_ptr ptr)
 			xr_draw.fy = xr.fy;
 			xr_draw.fh = ih;
 
-			(*pif->pf_draw_text)(pif->ctx, &xa, &xr_draw, get_entity_name_ptr(ent), -1);
+			(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr_draw, get_entity_name_ptr(ent), -1);
 
 			//val text
 			xr_draw.fx = xr.fx + iw;
@@ -425,7 +423,7 @@ void draw_proper(const drawing_interface* pif, link_t_ptr ptr)
 			xr_draw.fy = xr.fy;
 			xr_draw.fh = ih;
 
-			(*pif->pf_draw_text)(pif->ctx, &xa, &xr_draw, get_entity_options_text_ptr(ent), -1);
+			(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr_draw, get_entity_options_text_ptr(ent), -1);
 
 			xr.fy += ih;
 			ent = get_next_entity(sec, ent);

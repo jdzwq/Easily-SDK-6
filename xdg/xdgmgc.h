@@ -1,6 +1,6 @@
 ﻿
-#ifndef _XGCOBJ_H
-#define _XGCOBJ_H
+#ifndef _XDGMGC_H
+#define _XDGMGC_H
 
 #include "gob/clrext.h"
 #include "gob/clrutil.h"
@@ -31,4 +31,4 @@
 #include "img/jpg.h"
 #include "img/png.h"
 
-#endif //_XGCOBJ_H
+#endif //_XDGMGC_H

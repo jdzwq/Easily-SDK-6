@@ -33,7 +33,6 @@ E:\Easily-temp\windows\xdc\x86\Release/imagesctrl.c \
 E:\Easily-temp\windows\xdc\x86\Release/labelctrl.c \
 E:\Easily-temp\windows\xdc\x86\Release/listctrl.c \
 E:\Easily-temp\windows\xdc\x86\Release/memoctrl.c \
-E:\Easily-temp\windows\xdc\x86\Release/modelctrl.c \
 E:\Easily-temp\windows\xdc\x86\Release/notesctrl.c \
 E:\Easily-temp\windows\xdc\x86\Release/ownerctrl.c \
 E:\Easily-temp\windows\xdc\x86\Release/panelctrl.c \
@@ -41,7 +40,7 @@ E:\Easily-temp\windows\xdc\x86\Release/photoctrl.c \
 E:\Easily-temp\windows\xdc\x86\Release/plotctrl.c \
 E:\Easily-temp\windows\xdc\x86\Release/properctrl.c \
 E:\Easily-temp\windows\xdc\x86\Release/richctrl.c \
-E:\Easily-temp\windows\xdc\x86\Release/staticctrl.c \
+E:\Easily-temp\windows\xdc\x86\Release/statisctrl.c \
 E:\Easily-temp\windows\xdc\x86\Release/statusctrl.c \
 E:\Easily-temp\windows\xdc\x86\Release/svgctrl.c \
 E:\Easily-temp\windows\xdc\x86\Release/tablectrl.c \
@@ -72,5 +71,10 @@ E:\Easily-temp\windows\xdc\x86\Release/designer.c \
 E:\Easily-temp\windows\xdc\x86\Release/docker.c \
 E:\Easily-temp\windows\xdc\x86\Release/splitor.c \
 E:\Easily-temp\windows\xdc\x86\Release/textor.c \
+E:\Easily-temp\windows\xdc\x86\Release/diagramdesg.c \
+E:\Easily-temp\windows\xdc\x86\Release/dialogdesg.c \
 E:\Easily-temp\windows\xdc\x86\Release/formdesg.c \
+E:\Easily-temp\windows\xdc\x86\Release/griddesg.c \
+E:\Easily-temp\windows\xdc\x86\Release/statisdesg.c \
+E:\Easily-temp\windows\xdc\x86\Release/topogdesg.c \
 E:\Easily-temp\windows\xdc\x86\Release/menu.c \

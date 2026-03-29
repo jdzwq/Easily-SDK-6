@@ -103,6 +103,8 @@ LICENSE.GPL3 for more details.
 #define get_diagram_entity_selected(flk)					get_dom_node_mask_check(flk,MSK_CHECKED) 
 
 /*********************************************************************************************************/
+#define is_diagram_entity_class(token)						((get_options_value(DOC_DIAGRAM_ENRITY_OPTIONS,-1,OPT_ITEMFEED,OPT_LINEFEED,token,NULL,MAX_LONG) > 0)? 1 : 0)
+
 #ifdef	__cplusplus
 extern "C" {
 #endif

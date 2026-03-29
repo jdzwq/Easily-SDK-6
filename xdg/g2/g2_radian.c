@@ -26,7 +26,7 @@ LICENSE.GPL3 for more details.
 
 #include "g2.h"
 
-#include "../xdgobj.h"
+#include "../xdgmgc.h"
 
 int arc_quadrant(double arc)
 {

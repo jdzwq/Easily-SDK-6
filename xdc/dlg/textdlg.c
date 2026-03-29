@@ -219,7 +219,7 @@ void hand_textdlg_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 
 	get_visual_interface(rdc, &ifv);
 
-	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
+	(*ifv.drw->pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
 
 	xs.fw = TEXTDLG_BUTTON_WIDTH;
 	xs.fh = TEXTDLG_BUTTON_HEIGHT;
@@ -232,7 +232,7 @@ void hand_textdlg_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 
 	lighten_xcolor(&xc_brim, DEF_MIDD_DARKEN);
 
-	(*ifv.pf_gradient_rect)(ifv.ctx, &xc_brim, &xc_core, GDI_ATTR_GRADIENT_VERT, &xr_bar);
+	(*ifv.drw->pf_gradient_rect)(ifv.ctx, &xc_brim, &xc_core, GDI_ATTR_GRADIENT_VERT, &xr_bar);
 
 	end_canvas_paint(canv, dc, pxr);
 }

@@ -25,8 +25,8 @@ LICENSE.GPL3 for more details.
 ***********************************************************************/
 
 
-#ifndef _MSGINF_H
-#define	_MSGINF_H
+#ifndef _EDIINF_H
+#define	_EDIINF_H
 
 #include "../xdudef.h"
 
@@ -200,5 +200,5 @@ typedef struct _if_dispatch_t{
 
 #endif /*XDU_SUPPORT_WIDGET*/
 
-#endif	/* _MSGINF_H */
+#endif	/* _EDIINF_H */
 

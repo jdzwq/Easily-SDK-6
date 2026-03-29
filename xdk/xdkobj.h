@@ -32,7 +32,6 @@
 #include "dob/stringtable.h"
 #include "dob/wordstable.h"
 #include "dob/actable.h"
-#include "dob/undotable.h"
 
 #include "expr/expres.h"
 #include "expr/macro.h"

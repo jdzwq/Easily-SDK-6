@@ -30,7 +30,7 @@ LICENSE.GPL3 for more details.
 
 #define NOTESVIEW_SPAN_PLUS		10
 
-float calc_notes_height(const measure_interface* pif, link_t_ptr ptr)
+float calc_notes_height(const measure_interface* pmc, const xfont_t* pxf, link_t_ptr ptr)
 {
 	float ph = 0.0f;
 	xsize_t xs;
@@ -42,9 +42,9 @@ float calc_notes_height(const measure_interface* pif, link_t_ptr ptr)
 	default_xface(&xa);
 	xscpy(xa.text_wrap, GDI_ATTR_TEXT_WRAP_WORDBREAK);
 
-	(*pif->pf_measure_font)(pif->ctx, &xs);
+	(*pmc->mea->pf_measure_font)(pmc->ctx, pxf, &xs);
 	tw = (float)(xs.fw * 8);
-	th = (float)(xs.fh * 1.25);
+	th = (float)(xs.fh * xstof(xa.line_height));
 
 	ph = 0;
 	ilk = get_arch_first_child_item(ptr);
@@ -57,9 +57,9 @@ float calc_notes_height(const measure_interface* pif, link_t_ptr ptr)
 		if (compare_text(get_notes_type_ptr(doc), -1, ATTR_NOTES_TEXT, -1, 0) == 0)
 		{
 			xr.fx = xr.fy = 0;
-			xr.fw = pif->rect.fw - tw;
+			xr.fw = pmc->rect.fw - tw;
 			xr.fh = th;
-			(*pif->pf_measure_rect)(pif->ctx, &xa, get_notes_text_ptr(doc), -1, &xr);
+			(*pmc->mea->pf_measure_rect)(pmc->ctx, pxf, &xa, get_notes_text_ptr(doc), -1, &xr);
 
 			ph += xr.fh;
 		}
@@ -74,7 +74,7 @@ float calc_notes_height(const measure_interface* pif, link_t_ptr ptr)
 	return ph;
 }
 
-float calc_notes_width(const measure_interface* pif, link_t_ptr ptr)
+float calc_notes_width(const measure_interface* pmc, const xfont_t* pxf, link_t_ptr ptr)
 {
 	float pw = 0.0f;
 	xsize_t xs;
@@ -85,9 +85,9 @@ float calc_notes_width(const measure_interface* pif, link_t_ptr ptr)
 	default_xface(&xa);
 	xscpy(xa.text_wrap, GDI_ATTR_TEXT_WRAP_WORDBREAK);
 
-	(*pif->pf_measure_font)(pif->ctx, &xs);
+	(*pmc->mea->pf_measure_font)(pmc->ctx, pxf, &xs);
 	tw = (float)(xs.fw * 8);
-	th = (float)(xs.fh * 1.25);
+	th = (float)(xs.fh * xstof(xa.line_height));
 
 	ilk = get_arch_first_child_item(ptr);
 	while (ilk)
@@ -98,7 +98,7 @@ float calc_notes_width(const measure_interface* pif, link_t_ptr ptr)
 
 		if (compare_text(get_notes_type_ptr(doc),-1,ATTR_NOTES_TEXT,-1,0) == 0)
 		{
-			(*pif->pf_measure_size)(pif->ctx, get_notes_text_ptr(doc), -1, &xs);
+			(*pmc->mea->pf_measure_size)(pmc->ctx, pxf, get_notes_text_ptr(doc), -1, &xs);
 			if (pw < xs.w)
 				pw = xs.w;
 		}
@@ -113,7 +113,7 @@ float calc_notes_width(const measure_interface* pif, link_t_ptr ptr)
 	return pw;
 }
 
-void calc_notes_item_rect(const measure_interface* pif, link_t_ptr ptr, link_t_ptr plk, xrect_t* pxr)
+void calc_notes_item_rect(const measure_interface* pmc, const xfont_t* pxf, link_t_ptr ptr, link_t_ptr plk, xrect_t* pxr)
 {
 	xsize_t xs;
 	xrect_t xr;
@@ -124,9 +124,9 @@ void calc_notes_item_rect(const measure_interface* pif, link_t_ptr ptr, link_t_p
 	default_xface(&xa);
 	xscpy(xa.text_wrap, GDI_ATTR_TEXT_WRAP_WORDBREAK);
 
-	(*pif->pf_measure_font)(pif->ctx, &xs);
+	(*pmc->mea->pf_measure_font)(pmc->ctx, pxf, &xs);
 	tw = (float)(xs.fw * 8);
-	th = (float)(xs.fh * 1.25);
+	th = (float)(xs.fh * xstof(xa.line_height));
 
 	ilk = get_arch_first_child_item(ptr);
 	while (ilk)
@@ -138,9 +138,9 @@ void calc_notes_item_rect(const measure_interface* pif, link_t_ptr ptr, link_t_p
 		if (compare_text(get_notes_type_ptr(doc), -1, ATTR_NOTES_TEXT, -1, 0) == 0)
 		{
 			xr.fx = xr.fy = 0;
-			xr.fw = pif->rect.fw - tw;
+			xr.fw = pmc->rect.fw - tw;
 			xr.fh = th;
-			(*pif->pf_measure_rect)(pif->ctx, &xa, get_notes_text_ptr(doc), -1, &xr);
+			(*pmc->mea->pf_measure_rect)(pmc->ctx, pxf, &xa, get_notes_text_ptr(doc), -1, &xr);
 
 			ph += xr.fh;
 		}
@@ -162,7 +162,7 @@ void calc_notes_item_rect(const measure_interface* pif, link_t_ptr ptr, link_t_p
 	}
 }
 
-int	calc_notes_hint(const measure_interface* pif, const xpoint_t* ppt, link_t_ptr ptr, link_t_ptr* pplk)
+int	calc_notes_hint(const measure_interface* pmc, const xfont_t* pxf, const xpoint_t* ppt, link_t_ptr ptr, link_t_ptr* pplk)
 {
 	xrect_t xr;
 	xsize_t xs;
@@ -177,9 +177,9 @@ int	calc_notes_hint(const measure_interface* pif, const xpoint_t* ppt, link_t_pt
 	*pplk = NULL;
 	hint = _NOTES_HINT_NONE;
 
-	(*pif->pf_measure_font)(pif->ctx, &xs);
+	(*pmc->mea->pf_measure_font)(pmc->ctx, pxf, &xs);
 	tw = (float)(xs.fw * 8);
-	th = (float)(xs.fh * 1.25);
+	th = (float)(xs.fh * xstof(xa.line_height));
 
 	ilk = get_arch_first_child_item(ptr);
 	while (ilk)
@@ -188,8 +188,8 @@ int	calc_notes_hint(const measure_interface* pif, const xpoint_t* ppt, link_t_pt
 
 		XDK_ASSERT(is_notes_doc(doc));
 
-		xr.fx = pif->rect.fx + pif->rect.fw - th;
-		xr.fy = pif->rect.fy + ph;
+		xr.fx = pmc->rect.fx + pmc->rect.fw - th;
+		xr.fy = pmc->rect.fy + ph;
 		xr.fw = th;
 		xr.fh = th;
 		if (ft_in_rect(ppt, &xr))
@@ -199,8 +199,8 @@ int	calc_notes_hint(const measure_interface* pif, const xpoint_t* ppt, link_t_pt
 			break;
 		}
 
-		xr.fx = pif->rect.fx;
-		xr.fy = pif->rect.fy + ph;
+		xr.fx = pmc->rect.fx;
+		xr.fy = pmc->rect.fy + ph;
 		xr.fw = tw;
 		xr.fh = th;
 		if (ft_in_rect(ppt, &xr))
@@ -210,9 +210,9 @@ int	calc_notes_hint(const measure_interface* pif, const xpoint_t* ppt, link_t_pt
 			break;
 		}
 
-		xr.fx = pif->rect.fx + tw;
-		xr.fy = pif->rect.fy + ph;
-		xr.fw = pif->rect.fw - tw;
+		xr.fx = pmc->rect.fx + tw;
+		xr.fy = pmc->rect.fy + ph;
+		xr.fw = pmc->rect.fw - tw;
 		xr.fh = th;
 		if (ft_in_rect(ppt, &xr))
 		{
@@ -224,9 +224,9 @@ int	calc_notes_hint(const measure_interface* pif, const xpoint_t* ppt, link_t_pt
 		if (compare_text(get_notes_type_ptr(doc), -1, ATTR_NOTES_TEXT, -1, 0) == 0)
 		{
 			xr.fx = xr.fy = 0;
-			xr.fw = pif->rect.fw - tw;
+			xr.fw = pmc->rect.fw - tw;
 			xr.fh = th;
-			(*pif->pf_measure_rect)(pif->ctx, &xa, get_notes_text_ptr(doc), -1, &xr);
+			(*pmc->mea->pf_measure_rect)(pmc->ctx, pxf, &xa, get_notes_text_ptr(doc), -1, &xr);
 
 			ph += xr.fh;
 		}
@@ -236,9 +236,9 @@ int	calc_notes_hint(const measure_interface* pif, const xpoint_t* ppt, link_t_pt
 			ph += xr.fh;
 		}
 
-		xr.fx = pif->rect.fx + tw;
-		xr.fy = pif->rect.fy + ph + th;
-		xr.fw = pif->rect.fw - tw;
+		xr.fx = pmc->rect.fx + tw;
+		xr.fy = pmc->rect.fy + ph + th;
+		xr.fw = pmc->rect.fw - tw;
 		if (pt_in_rect(ppt, &xr))
 		{
 			*pplk = ilk;
@@ -252,9 +252,9 @@ int	calc_notes_hint(const measure_interface* pif, const xpoint_t* ppt, link_t_pt
 	return hint;
 }
 
-void draw_notes(const drawing_interface* pif, const xpen_t* pxp, const xbrush_t* pxb, link_t_ptr ptr, link_t_ptr plk)
+void draw_notes(const drawing_interface* pci, const xfont_t* pxf, const xpen_t* pxp, const xbrush_t* pxb, link_t_ptr ptr, link_t_ptr plk)
 {
-	const canvbox_t* pbox = (canvbox_t*)(&pif->rect);
+	const canvbox_t* pbox = (canvbox_t*)(&pci->rect);
 	xcolor_t xc;
 	xrect_t xr, xr_btn, xr_txt;
 	xsize_t xs;
@@ -268,18 +268,18 @@ void draw_notes(const drawing_interface* pif, const xpen_t* pxp, const xbrush_t*
 	default_xface(&xa);
 	xscpy(xa.text_wrap, GDI_ATTR_TEXT_WRAP_WORDBREAK);
 
-	xr.fx = pif->rect.fx;
-	xr.fy = pif->rect.fy;
-	xr.fw = pif->rect.fw;
+	xr.fx = pci->rect.fx;
+	xr.fy = pci->rect.fy;
+	xr.fw = pci->rect.fw;
 
 	get_loc_date(&dt);
 
 	parse_xcolor(&xc, pxp->color);
 	lighten_xcolor(&xc, DEF_SOFT_DARKEN);
 
-	(*pif->pf_font_size)(pif->ctx, &xs);
+	(*pci->drw->pf_font_size)(pci->ctx, &xs);
 	tw = ((float)xs.w * 8);
-	th = ((float)xs.h * 1.25);
+	th = ((float)xs.h * xstof(xa.line_height));
 
 	ilk = get_arch_first_child_item(ptr);
 	while (ilk)
@@ -288,10 +288,10 @@ void draw_notes(const drawing_interface* pif, const xpen_t* pxp, const xbrush_t*
 
 		xr_btn.fx = xr.fx;
 		xr_btn.fy = xr.fy;
-		xr_btn.fw = pif->rect.fw;
+		xr_btn.fw = pci->rect.fw;
 		xr_btn.fh = th;
 
-		//(*pif->pf_draw_rect)(pif->ctx, NULL, &xb_bar, &xr_btn);
+		//(*pci->drw->pf_draw_rect)(pci->ctx, NULL, &xb_bar, &xr_btn);
 
 		xr_btn.fx = xr.fx;
 		xr_btn.fy = xr.fy;
@@ -301,12 +301,12 @@ void draw_notes(const drawing_interface* pif, const xpen_t* pxp, const xbrush_t*
 		if (ilk == plk)
 		{
 			ft_center_rect(&xr_btn, 5, 5);
-			draw_gizmo(pif, &xc, &xr_btn, GDI_ATTR_GIZMO_GUIDER);
+			draw_gizmo(pci, &xc, &xr_btn, GDI_ATTR_GIZMO_GUIDER);
 		}
 		else
 		{
 			ft_center_rect(&xr_btn, 5, 5);
-			draw_gizmo(pif, &xc, &xr_btn, GDI_ATTR_GIZMO_NEXT);
+			draw_gizmo(pci, &xc, &xr_btn, GDI_ATTR_GIZMO_NEXT);
 		}
 
 		if (!is_null(get_notes_time_ptr(doc)))
@@ -321,29 +321,29 @@ void draw_notes(const drawing_interface* pif, const xpen_t* pxp, const xbrush_t*
 				xsprintf(token, _T("%d/%d %02d:%02d"), dt.day,dt.mon,dt.hour, dt.min);
 			}
 
-			(*pif->pf_text_size)(pif->ctx, token, -1, &xs);
+			(*pci->drw->pf_text_size)(pci->ctx, token, -1, &xs);
 
 			xr_txt.fx = xr.fx + 2 * th;
 			xr_txt.fy = xr.fy;
-			xr_txt.fw = pif->rect.fw - 4 * th;
+			xr_txt.fw = pci->rect.fw - 4 * th;
 			xr_txt.fh = th;
 
-			(*pif->pf_draw_text)(pif->ctx, &xa, &xr_txt, token, -1);
+			(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr_txt, token, -1);
 		}
 		else
 		{
 			xsprintf(token, _T("今天 %02d:%02d"), dt.hour, dt.min);
-			(*pif->pf_text_size)(pif->ctx, token, -1, &xs);
+			(*pci->drw->pf_text_size)(pci->ctx, token, -1, &xs);
 		}
 
 		if (compare_text(get_notes_type_ptr(doc), -1, ATTR_NOTES_TEXT, -1, 0) == 0)
 		{
 			xr_txt.fx = xr.fx + xs.fw + 2 * th;
 			xr_txt.fy = xr.fy;
-			xr_txt.fw = pif->rect.fw - xs.fw - 3 * th;
+			xr_txt.fw = pci->rect.fw - xs.fw - 3 * th;
 			xr_txt.fh = th;
 
-			(*pif->pf_draw_text)(pif->ctx, &xa, &xr_txt, get_notes_text_ptr(doc), -1);
+			(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr_txt, get_notes_text_ptr(doc), -1);
 		}
 		else
 		{
@@ -353,7 +353,7 @@ void draw_notes(const drawing_interface* pif, const xpen_t* pxp, const xbrush_t*
 			xr_btn.fh = NOTESVIEW_SPAN_PLUS * tw;
 
 			ft_center_rect(&xr_btn, 2.5, 2.5);
-			draw_gizmo(pif, &xc, &xr_btn, GDI_ATTR_GIZMO_FIXED);
+			draw_gizmo(pci, &xc, &xr_btn, GDI_ATTR_GIZMO_FIXED);
 		}
 
 		pt_cur.fx = xr.fx + th / 2;
@@ -361,16 +361,16 @@ void draw_notes(const drawing_interface* pif, const xpen_t* pxp, const xbrush_t*
 
 		if (!is_first_link(ilk))
 		{
-			(*pif->pf_draw_line)(pif->ctx, pxp, &pt_cur, &pt_org);
+			(*pci->drw->pf_draw_line)(pci->ctx, pxp, &pt_cur, &pt_org);
 		}
 
 		if (compare_text(get_notes_type_ptr(doc), -1, ATTR_NOTES_TEXT, -1, 0) == 0)
 		{
 			xr_txt.fx = 0;
 			xr_txt.fy = 0;
-			xr_txt.fw = pif->rect.fw - tw;
+			xr_txt.fw = pci->rect.fw - tw;
 			xr_txt.fh = tw;
-			(*pif->pf_text_rect)(pif->ctx, &xa, token, -1, &xr_txt);
+			(*pci->drw->pf_text_rect)(pci->ctx, &xa, token, -1, &xr_txt);
 
 			ph += xr.fh;
 		}
@@ -382,9 +382,9 @@ void draw_notes(const drawing_interface* pif, const xpen_t* pxp, const xbrush_t*
 
 		xr_txt.fx = xr.fx + tw;
 		xr_txt.fy = xr.fy + ph;
-		xr_txt.fw = pif->rect.fw - th;
+		xr_txt.fw = pci->rect.fw - th;
 		xr_txt.fh = xr.fh;
-		(*pif->pf_draw_text)(pif->ctx, &xa, &xr_txt, get_notes_text_ptr(doc), -1);
+		(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr_txt, get_notes_text_ptr(doc), -1);
 
 		pt_org.fx = pt_cur.fx;
 		pt_org.fy = pt_cur.fy;

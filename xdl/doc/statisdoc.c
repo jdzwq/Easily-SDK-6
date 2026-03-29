@@ -63,7 +63,7 @@ link_t_ptr get_statis_xaxset(link_t_ptr ptr)
 	plk = get_dom_first_child_node(ptr);
 	while(plk)
 	{
-		if(0 == xscmp(get_dom_node_name_ptr(plk),DOC_STATIS_XAXSET))
+		if(is_statis_xaxset(plk))
 			return plk;
 
 		plk = get_dom_next_sibling_node(plk);
@@ -79,7 +79,7 @@ link_t_ptr get_statis_yaxset(link_t_ptr ptr)
 	plk = get_dom_first_child_node(ptr);
 	while(plk)
 	{
-		if(0 == xscmp(get_dom_node_name_ptr(plk),DOC_STATIS_YAXSET))
+		if(is_statis_yaxset(plk))
 			return plk;
 
 		plk = get_dom_next_sibling_node(plk);
@@ -95,7 +95,7 @@ link_t_ptr get_statis_gaxset(link_t_ptr ptr)
 	plk = get_dom_first_child_node(ptr);
 	while (plk)
 	{
-		if (0 == xscmp(get_dom_node_name_ptr(plk), DOC_STATIS_GAXSET))
+		if(is_statis_gaxset(plk))
 			return plk;
 
 		plk = get_dom_next_sibling_node(plk);
@@ -183,17 +183,17 @@ bool_t is_statis_doc(link_t_ptr ptr)
 
 bool_t is_statis_gax(link_t_ptr ptr, link_t_ptr glk)
 {
-	return is_dom_child_node(ptr, glk);
+	return is_dom_child_node(get_statis_gaxset(ptr), glk);
 }
 
 bool_t is_statis_xax(link_t_ptr ptr,link_t_ptr xlk)
 {
-	return is_dom_child_node(ptr,xlk);
+	return is_dom_child_node(get_statis_xaxset(ptr), xlk);
 }
 
 bool_t is_statis_yax(link_t_ptr ptr,link_t_ptr ylk)
 {
-	return is_dom_child_node(ptr,ylk);
+	return is_dom_child_node(get_statis_yaxset(ptr), ylk);
 }
 
 link_t_ptr insert_gax(link_t_ptr ptr, link_t_ptr pos)

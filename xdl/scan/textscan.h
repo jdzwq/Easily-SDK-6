@@ -35,9 +35,9 @@ LICENSE.GPL3 for more details.
 extern "C" {
 #endif
 
-EXP_API void scan_var_text(string_t vs, const measure_interface* pim, const viewbox_t* pvb, const xface_t* pxa, bool_t paged, PF_SCAN_TEXTOR_CALLBACK pf, void* pp);
+EXP_API void scan_var_text(string_t vs, const measure_interface* pmv, const viewbox_t* pvb, const xfont_t* pxf, const xface_t* pxa, bool_t paged, PF_SCAN_TEXTOR_CALLBACK pf, void* pp);
 
-EXP_API void scan_fix_text(tchar_t* text, int size, const measure_interface* pim, const viewbox_t* pvb, const xface_t* pxa, bool_t paged, PF_SCAN_TEXTOR_CALLBACK pf, void* pp);
+EXP_API void scan_fix_text(tchar_t* text, int size, const measure_interface* pmv, const viewbox_t* pvb, const xfont_t* pxf, const xface_t* pxa, bool_t paged, PF_SCAN_TEXTOR_CALLBACK pf, void* pp);
 
 #ifdef	__cplusplus
 }

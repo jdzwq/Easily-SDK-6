@@ -28,7 +28,7 @@ LICENSE.GPL3 for more details.
 
 #include <setjmp.h>
 
-#include "../xdgobj.h"
+#include "../xdgmgc.h"
 #include "../xdgoem.h"
 
 struct xjpeg_error_mgr {

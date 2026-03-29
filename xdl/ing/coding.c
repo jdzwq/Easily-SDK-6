@@ -29,7 +29,7 @@ LICENSE.GPL3 for more details.
 #include "../xdlgdi.h"
 
 
-void draw_code128(const drawing_interface* pif, const xcolor_t* pxc, xrect_t* prt, const tchar_t* text, int len)
+void draw_code128(const drawing_interface* pci, const xcolor_t* pxc, xrect_t* prt, const tchar_t* text, int len)
 {
 	int black, span;
 	dword_t i;
@@ -93,7 +93,7 @@ void draw_code128(const drawing_interface* pif, const xcolor_t* pxc, xrect_t* pr
 
 		if (black && pxc)
 		{
-			(*pif->pf_draw_rect)(pif->ctx, NULL, &xb, &rt);
+			(*pci->drw->pf_draw_rect)(pci->ctx, NULL, &xb, &rt);
 		}
 
 		rt.fx += rt.fw;
@@ -104,7 +104,7 @@ void draw_code128(const drawing_interface* pif, const xcolor_t* pxc, xrect_t* pr
 	prt->fw = rt.fx + unit - prt->fx;
 }
 
-void draw_pdf417(const drawing_interface* pif, const xcolor_t* pxc, xrect_t* prt, const tchar_t* text, int len)
+void draw_pdf417(const drawing_interface* pci, const xcolor_t* pxc, xrect_t* prt, const tchar_t* text, int len)
 {
 	int black;
 	int rows, cols;
@@ -178,7 +178,7 @@ void draw_pdf417(const drawing_interface* pif, const xcolor_t* pxc, xrect_t* prt
 
 				if (black && pxc)
 				{
-					(*pif->pf_draw_rect)(pif->ctx, NULL, &xb, &rt);
+					(*pci->drw->pf_draw_rect)(pci->ctx, NULL, &xb, &rt);
 				}
 
 				b = b >> 1;
@@ -192,7 +192,7 @@ void draw_pdf417(const drawing_interface* pif, const xcolor_t* pxc, xrect_t* prt
 	prt->fh = rt.fy + rt.fh + unit - prt->fy;
 }
 
-void draw_qrcode(const drawing_interface* pif, const xcolor_t* pxc, xrect_t* prt, const tchar_t* text, int len)
+void draw_qrcode(const drawing_interface* pci, const xcolor_t* pxc, xrect_t* prt, const tchar_t* text, int len)
 {
 	int black;
 	int rows, cols;
@@ -267,7 +267,7 @@ void draw_qrcode(const drawing_interface* pif, const xcolor_t* pxc, xrect_t* prt
 
 				if (black && pxc)
 				{
-					(*pif->pf_draw_rect)(pif->ctx, NULL, &xb, &rt);
+					(*pci->drw->pf_draw_rect)(pci->ctx, NULL, &xb, &rt);
 				}
 
 				b = b >> 1;

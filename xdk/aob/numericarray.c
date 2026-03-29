@@ -79,6 +79,19 @@ double get_numeric(double** sa, int index)
 	return pa[index];
 }
 
+double get_numeric_safe(double** sa, int index, double def)
+{
+	double* pa = *sa;
+	int size;
+
+	size = (int)(*(int*)(sa + 1));
+
+	if(index >= 0 && index < size)
+		return pa[index];
+	else
+		return def;
+}
+
 int copy_numeric(double** sa, int index, double* buf, int max)
 {
 	double* pa = *sa;

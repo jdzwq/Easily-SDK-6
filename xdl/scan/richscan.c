@@ -47,8 +47,9 @@ typedef struct _rich_scan_context{
 	float indent;
 	int place;
 
-	const measure_interface* pmi;
+	const measure_interface* pmv;
 	const xface_t* pxa;
+	const xfont_t* pxf;
 }rich_scan_context;
 
 #define RICHWORD_INDICATOR_NEXT_NODE	-4
@@ -210,7 +211,7 @@ int call_rich_next_page(void* ctx)
 int call_rich_next_words(void* ctx, tchar_t** ppch, xsize_t* pse, bool_t* pins, bool_t* pdel, bool_t* psel, bool_t* patom)
 {
 	rich_scan_context* pscan = (rich_scan_context*)ctx;
-	measure_interface* pif = pscan->pmi;
+	measure_interface* pmv = pscan->pmv;
 	int n;
 	xsize_t xs = { 0 };
 
@@ -298,7 +299,7 @@ int call_rich_next_words(void* ctx, tchar_t** ppch, xsize_t* pse, bool_t* pins, 
 			}
 			else
 			{
-				(*pif->pf_measure_size)(pif->ctx, pscan->pch, n, &xs);
+				(*pmv->mea->pf_measure_size)(pmv->ctx, pscan->pxf, pscan->pch, n, &xs);
 
 				if (xs.w)
 					pse->w = xs.w;
@@ -387,7 +388,7 @@ int call_rich_next_words(void* ctx, tchar_t** ppch, xsize_t* pse, bool_t* pins, 
 				}
 				else
 				{
-					(*pif->pf_measure_size)(pif->ctx, pscan->pch, n, &xs);
+					(*pmv->mea->pf_measure_size)(pmv->ctx, pscan->pxf, pscan->pch, n, &xs);
 
 					if (xs.w)
 						pse->w = xs.w;
@@ -451,7 +452,7 @@ int call_rich_next_words(void* ctx, tchar_t** ppch, xsize_t* pse, bool_t* pins, 
 int call_rich_insert_words(void* ctx, tchar_t* pch, xsize_t* pse)
 {
 	rich_scan_context* pscan = (rich_scan_context*)ctx;
-	measure_interface* pif = pscan->pmi;
+	measure_interface* pmv = pscan->pmv;
 	int n = 0;
 	xsize_t xs = { 0 };
 
@@ -488,7 +489,7 @@ int call_rich_insert_words(void* ctx, tchar_t* pch, xsize_t* pse)
 		}
 		else
 		{
-			(*pif->pf_measure_size)(pif->ctx, pch, n, &xs);
+			(*pmv->mea->pf_measure_size)(pmv->ctx, pscan->pxf, pch, n, &xs);
 
 			if (!xs.w)
 				xs.w = pse->w;
@@ -559,14 +560,15 @@ void call_rich_object_attr(void* ctx, void* pobj, object_attr_t* pret)
 	}
 }
 
-void scan_rich_text(link_t_ptr ptr, const measure_interface* pif, const viewbox_t* pvb, const xface_t* pxa, bool_t paged, PF_SCAN_TEXTOR_CALLBACK pf, void* pp)
+void scan_rich_text(link_t_ptr ptr, const measure_interface* pmv, const viewbox_t* pvb, const xfont_t* pxf, const xface_t* pxa, bool_t paged, PF_SCAN_TEXTOR_CALLBACK pf, void* pp)
 {
 	rich_scan_context ro = { 0 };
 	words_scan_interface it = { 0 };
 
 	ro.rich = ptr;
-	ro.pmi = pif;
+	ro.pmv = pmv;
 	ro.pxa = pxa;
+	ro.pxf = pxf;
 	ro.permm = LOGPTPERMM;
 
 	it.ctx = (void*)&ro;
@@ -588,5 +590,5 @@ void scan_rich_text(link_t_ptr ptr, const measure_interface* pif, const viewbox_
 		call_rich_next_page((void*)&ro);
 	}
 	
-	scan_object_text(pif, pvb, &it, pf, pp);
+	scan_object_text(pmv, pvb, &it, pf, pp);
 }

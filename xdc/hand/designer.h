@@ -47,7 +47,10 @@ typedef enum{
 	NC_OBJECT_SELECTED = 105,
 	NC_OBJECT_UNSELECT = 106,
 	NC_OBJECT_CHANGING = 107,
-	NC_OBJECT_CHANGED = 108
+	NC_OBJECT_CHANGED = 108,
+	NC_OBJECT_LBCLICK = 109,
+	NC_OBJECT_DBCLICK = 110,
+	NC_OBJECT_RBCLICK = 111
 }DESIGN_NOTI_CODE;
 
 typedef struct _NOTICE_DESIGN{
@@ -87,6 +90,8 @@ EXP_API bool_t designer_get_dirty(widget_t widget);
 EXP_API void designer_set_dirty(widget_t widget, bool_t b_dirty);
 
 EXP_API void* designer_get_focused(widget_t widget);
+
+EXP_API bool_t designer_set_focused(widget_t widget, void* obj);
 
 #ifdef	__cplusplus
 }

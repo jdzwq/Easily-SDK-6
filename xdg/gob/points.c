@@ -26,7 +26,7 @@ LICENSE.GPL3 for more details.
 
 #include "points.h"
 
-#include "../xdgobj.h"
+#include "../xdgmgc.h"
 
 
 int ft_parse_points_from_token(xpoint_t* ppt, int max, const tchar_t* token, int len)

@@ -40,6 +40,9 @@ typedef struct _richctrl_delta_t{
 
 	int chs;
 	tchar_t pch[CHS_LEN + 1];
+
+	xface_t xa;
+	xfont_t xf;
 }richctrl_delta_t;
 
 #define GETRICHCTRLDELTA(ph) 	(richctrl_delta_t*)widget_get_user_delta(ph)
@@ -85,6 +88,21 @@ static bool_t _richctrl_get_paging(widget_t widget, xsize_t* pse)
 		return 0;
 	}
 }
+
+static const xfont_t* _richctrl_get_xfont_ptr(widget_t widget)
+{
+	richctrl_delta_t* ptd = GETRICHCTRLDELTA(widget);
+
+	return &(ptd->xf);
+}
+
+static const xface_t* _richctrl_get_xface_ptr(widget_t widget)
+{
+	richctrl_delta_t* ptd = GETRICHCTRLDELTA(widget);
+
+	return &(ptd->xa);
+}
+
 /********************************************************************************************/
 int noti_richctrl_owner(widget_t widget, unsigned int code, link_t_ptr ptr, link_t_ptr nlk, void* data)
 {
@@ -129,6 +147,7 @@ void noti_richctrl_reset_scroll(widget_t widget, bool_t bUpdate)
 int hand_richctrl_create(widget_t widget, void* data)
 {
 	richctrl_delta_t* ptd;
+	color_mod_t clrs;
 
 	widget_hand_create(widget);
 
@@ -144,7 +163,16 @@ int hand_richctrl_create(widget_t widget, void* data)
 	ptd->textor.pf_get_text = _richctrl_get_text;
 	ptd->textor.pf_set_text = _richctrl_set_text;
 	ptd->textor.pf_get_paging = _richctrl_get_paging;
+	ptd->textor.pf_get_xfont_ptr = _richctrl_get_xfont_ptr;
+	ptd->textor.pf_get_xface_ptr = _richctrl_get_xface_ptr;
 	ptd->textor.max_undo = 1024;
+
+	ptd->textor.page = 1;
+
+	widget_get_color_mode(widget, &clrs);
+	default_textor_xface(&ptd->xa);
+	format_xcolor(&(clrs.clr_txt), ptd->xa.text_color);
+	default_textor_xfont(&ptd->xf);
 
 	ptd->b_lock = 1;
 

@@ -37,240 +37,17 @@ typedef struct _topog_delta_t{
 	widget_t hsc;
 	widget_t vsc;
 
-	bool_t b_drag;
 	int org_x, org_y;
 	int row, col;
 
 	ximage_t img;
-
-	link_t_ptr stack;
 }topog_delta_t;
 
 
 #define GETTOPOGDELTA(ph) 	(topog_delta_t*)widget_get_user_delta(ph)
 #define SETTOPOGDELTA(ph,ptd) widget_set_user_delta(ph,(vword_t)ptd)
 
-/*****************************************************************************/
-static void _topogctrl_done(widget_t widget)
-{
-	topog_delta_t* ptd = GETTOPOGDELTA(widget);
-	byte_t* buf;
-	dword_t len;
-
-	XDK_ASSERT(ptd && ptd->topog);
-
-#ifdef _UNICODE
-	len = format_dom_doc_to_bytes(ptd->topog, NULL, MAX_LONG, DEF_UCS);
-#else
-	len = format_dom_doc_to_bytes(ptd->topog, NULL, MAX_LONG, DEF_MBS);
-#endif
-
-	buf = (byte_t*)xmem_alloc(len + sizeof(tchar_t));
-
-#ifdef _UNICODE
-	format_dom_doc_to_bytes(ptd->topog, buf, len, DEF_UCS);
-#else
-	format_dom_doc_to_bytes(ptd->topog, buf, len, DEF_MBS);
-#endif
-
-	push_stack_node(ptd->stack, (void*)buf);
-}
-
-static void _topogctrl_undo(widget_t widget)
-{
-	topog_delta_t* ptd = GETTOPOGDELTA(widget);
-	void* p;
-	int len;
-
-	XDK_ASSERT(ptd && ptd->topog);
-
-	p = pop_stack_node(ptd->stack);
-	if (p)
-	{
-		clear_topog_doc(ptd->topog);
-
-		len = xslen((tchar_t*)p);
-
-#ifdef _UNICODE
-		parse_dom_doc_from_bytes(ptd->topog, (byte_t*)p, len * sizeof(tchar_t), DEF_UCS);
-#else
-		parse_dom_doc_from_bytes(ptd->topog, (byte_t*)p, len * sizeof(tchar_t), DEF_MBS);
-#endif
-
-		xmem_free(p);
-
-		topogctrl_redraw(widget);
-	}
-}
-
-static void _topogctrl_discard(widget_t widget)
-{
-	topog_delta_t* ptd = GETTOPOGDELTA(widget);
-	void* p;
-
-	XDK_ASSERT(ptd && ptd->stack);
-
-	p = pop_stack_node(ptd->stack);
-	if (p)
-	{
-		xmem_free(p);
-	}
-}
-
-static void _topogctrl_clean(widget_t widget)
-{
-	topog_delta_t* ptd = GETTOPOGDELTA(widget);
-	void* p;
-
-	XDK_ASSERT(ptd && ptd->stack);
-
-	while (p = pop_stack_node(ptd->stack))
-	{
-		xmem_free(p);
-	}
-}
-
-static bool_t _topogctrl_copy(widget_t widget)
-{
-	topog_delta_t* ptd = GETTOPOGDELTA(widget);
-	dword_t len;
-	byte_t* buf;
-	link_t_ptr dom, nlk, ilk;
-
-	XDK_ASSERT(ptd && ptd->topog);
-
-	if (!get_topog_spot_selected_count(ptd->topog))
-		return 0;
-
-	dom = create_topog_doc();
-	ilk = get_topog_next_spot(ptd->topog, LINK_FIRST);
-	while (ilk)
-	{
-		if (get_topog_spot_selected(ilk))
-		{
-			nlk = insert_topog_spot(dom, LINK_LAST);
-			copy_dom_node(nlk, ilk);
-		}
-
-		ilk = get_topog_next_spot(ptd->topog, ilk);
-	}
-
-#ifdef _UNICODE
-	len = format_dom_doc_to_bytes(dom, NULL, MAX_LONG, DEF_UCS);
-#else
-	len = format_dom_doc_to_bytes(dom, NULL, MAX_LONG, DEF_MBS);
-#endif
-
-	buf = (byte_t*)xmem_alloc(len);
-
-#ifdef _UNICODE
-	format_dom_doc_to_bytes(dom, buf, len, DEF_UCS);
-#else
-	format_dom_doc_to_bytes(dom, buf, len, DEF_MBS);
-#endif
-
-	if (!clipboard_put(widget, DEF_CB_FORMAT, buf, len))
-	{
-		xmem_free(buf);
-
-		destroy_topog_doc(dom);
-
-		return 0;
-	}
-
-	xmem_free(buf);
-
-	destroy_topog_doc(dom);
-	return 1;
-}
-
-static bool_t _topogctrl_cut(widget_t widget)
-{
-	topog_delta_t* ptd = GETTOPOGDELTA(widget);
-	link_t_ptr nxt, ilk;
-
-	XDK_ASSERT(ptd && ptd->topog);
-
-	if (!_topogctrl_copy(widget))
-		return 0;
-
-	ilk = get_topog_next_spot(ptd->topog, LINK_FIRST);
-	while (ilk)
-	{
-		nxt = get_topog_next_spot(ptd->topog, ilk);
-
-		if (get_topog_spot_selected(ilk))
-		{
-			delete_topog_spot(ilk);
-		}
-		ilk = nxt;
-	}
-
-	topogctrl_redraw(widget);
-
-	return 1;
-}
-
-static bool_t _topogctrl_paste(widget_t widget)
-{
-	topog_delta_t* ptd = GETTOPOGDELTA(widget);
-	dword_t len;
-	byte_t* buf;
-	link_t_ptr dom, nlk;
-
-	int row, col;
-	tchar_t sz_name[RES_LEN + 1] = { 0 };
-
-	XDK_ASSERT(ptd && ptd->topog);
-
-	len = clipboard_get(widget, DEF_CB_FORMAT, NULL, MAX_LONG);
-	if (!len)
-	{
-		return 0;
-	}
-
-	buf = (byte_t*)xmem_alloc(len);
-	len = clipboard_get(widget, DEF_CB_FORMAT, buf, len);
-
-	dom = create_dom_doc();
-#ifdef _UNICODE
-	if (!parse_dom_doc_from_bytes(dom, buf, len, DEF_UCS))
-#else
-	if (!parse_dom_doc_from_bytes(dom, buf, len, DEF_MBS))
-#endif
-	{
-		xmem_free(buf);
-
-		destroy_dom_doc(dom);
-		return 0;
-	}
-
-	xmem_free(buf);
-
-	if (!is_topog_doc(dom))
-	{
-		destroy_dom_doc(dom);
-		return 0;
-	}
-
-	while (nlk = get_topog_next_spot(dom, LINK_FIRST))
-	{
-		nlk = detach_dom_node(get_topog_spotset(dom), nlk);
-		attach_dom_node(get_topog_spotset(ptd->topog), LINK_LAST, nlk);
-
-		xsprintf(sz_name, _T("spot%d"), get_topog_spot_count(ptd->topog));
-		set_topog_spot_name(nlk, sz_name);
-
-		col = get_topog_spot_col(nlk);
-		row = get_topog_spot_row(nlk) + 2;
-
-		set_topog_spot_col(nlk, col);
-		set_topog_spot_row(nlk, row);
-	}
-
-	destroy_dom_doc(dom);
-	return 1;
-}
+/***********************************************************************/
 
 static void _topogctrl_spot_rect(widget_t widget, link_t_ptr ilk, xrect_t* pxr)
 {
@@ -301,6 +78,7 @@ static void _topogctrl_reset_matrix(widget_t widget, int row, int col)
 	matrix_t mt = NULL;
 	bool_t b;
 	tchar_t* buf;
+	void* tmp;
 	int len;
 
 	if (!ptd->topog)
@@ -316,6 +94,8 @@ static void _topogctrl_reset_matrix(widget_t widget, int row, int col)
 		return;
 
 	mt = matrix_alloc(rows, cols);
+	tmp = xmem_alloc(matrix_need_size(rows, cols));
+	matrix_attach(mt, tmp);
 
 	matrix_parse(mt, get_topog_matrix_ptr(ptd->topog), -1);
 
@@ -326,6 +106,8 @@ static void _topogctrl_reset_matrix(widget_t widget, int row, int col)
 	buf = xsalloc(len + 1);
 	len = matrix_format(mt, buf, len);
 
+	tmp = matrix_detach(mt);
+	xmem_free(tmp);
 	matrix_free(mt);
 
 	set_topog_matrix(ptd->topog, buf, len);
@@ -376,8 +158,8 @@ static void _topogctrl_reset_page(widget_t widget)
 	widget_reset_scroll(widget, 0);
 }
 
+/***********************************************************************/
 
-/*****************************************************************************/
 int noti_topog_owner(widget_t widget, unsigned int code, link_t_ptr topog, link_t_ptr spot, int row, int col, void* data)
 {
 	topog_delta_t* ptd = GETTOPOGDELTA(widget);
@@ -531,85 +313,6 @@ void noti_topog_spot_hover(widget_t widget, int x, int y)
 	noti_topog_owner(widget, NC_TOPOGSPOTHOVER, ptd->topog, ptd->hover, get_topog_spot_row(ptd->hover), get_topog_spot_col(ptd->hover), (void*)&xp);
 }
 
-void noti_topog_spot_drag(widget_t widget, int x, int y)
-{
-	topog_delta_t* ptd = GETTOPOGDELTA(widget);
-	xpoint_t pt;
-
-	XDK_ASSERT(ptd->spot);
-
-	ptd->b_drag = (bool_t)1;
-	ptd->org_x = x;
-	ptd->org_y = y;
-
-	if (widget_can_focus(widget))
-	{
-		widget_set_capture(widget, 1);
-	}
-	widget_set_cursor(widget, CURSOR_HAND);
-
-	pt.x = x;
-	pt.y = y;
-	noti_topog_owner(widget, NC_TOPOGSPOTDRAG, ptd->topog, ptd->spot, ptd->row, ptd->col, (void*)&pt);
-}
-
-void noti_topog_spot_drop(widget_t widget, int x, int y)
-{
-	topog_delta_t* ptd = GETTOPOGDELTA(widget);
-	xpoint_t pt;
-	xsize_t xs;
-	int cx, cy;
-
-	XDK_ASSERT(ptd->spot);
-
-	ptd->b_drag = (bool_t)0;
-
-	if (widget_can_focus(widget))
-	{
-		widget_set_capture(widget, 0);
-	}
-	widget_set_cursor(widget, CURSOR_ARROW);
-
-	xs.fw = get_topog_rx(ptd->topog);
-	xs.fh = get_topog_ry(ptd->topog);
-
-	widget_size_to_pt(widget, &xs);
-
-	if (!xs.w || !xs.h)
-		return;
-
-	cx = x - ptd->org_x;
-	cy = y - ptd->org_y;
-
-	cx /= xs.w;
-	cy /= xs.h;
-
-	if (!cx && !cy)
-		return;
-
-	cx += get_topog_spot_col(ptd->spot);
-	cy += get_topog_spot_row(ptd->spot);
-
-	if (cx < 0 || cy < 0)
-		return;
-
-	if (cx >= get_topog_cols(ptd->topog) || cy >= get_topog_rows(ptd->topog))
-		return;
-
-	_topogctrl_done(widget);
-
-	set_topog_spot_col(ptd->spot, cx);
-	set_topog_spot_row(ptd->spot, cy);
-	ptd->row = cy;
-	ptd->col = cx;
-
-	widget_erase(widget, NULL);
-
-	pt.x = x;
-	pt.y = y;
-	noti_topog_owner(widget, NC_TOPOGSPOTDROP, ptd->topog, ptd->spot, ptd->row, ptd->col, (void*)&pt);
-}
-
 void noti_topog_reset_scroll(widget_t widget, bool_t bUpdate)
 {
 	topog_delta_t* ptd = GETTOPOGDELTA(widget);
@@ -630,7 +333,9 @@ void noti_topog_reset_scroll(widget_t widget, bool_t bUpdate)
 			widget_close(ptd->hsc, 0);
 	}
 }
-/*****************************************************************************/
+
+/***********************************************************************/
+
 int hand_topogctrl_create(widget_t widget, void* data)
 {
 	topog_delta_t* ptd = GETTOPOGDELTA(widget);
@@ -641,8 +346,6 @@ int hand_topogctrl_create(widget_t widget, void* data)
 	xmem_zero((void*)ptd, sizeof(topog_delta_t));
 
 	xmem_zero((void*)&ptd->img, sizeof(ximage_t));
-
-	ptd->stack = create_stack_table();
 
 	SETTOPOGDELTA(widget, ptd);
 
@@ -660,9 +363,6 @@ void hand_topogctrl_destroy(widget_t widget)
 
 	if (widget_is_valid(ptd->vsc))
 		widget_destroy(ptd->vsc);
-
-	_topogctrl_clean(widget);
-	destroy_stack_table(ptd->stack);
 
 	if (ptd->img.source)
 		xsfree(ptd->img.source);
@@ -685,9 +385,6 @@ void hand_topogctrl_mouse_move(widget_t widget, dword_t dw, const xpoint_t* pxp)
 	if (!ptd->topog)
 		return;
 
-	if (ptd->b_drag)
-		return;
-
 	pt.x = pxp->x;
 	pt.y = pxp->y;
 	widget_point_to_mm(widget, &pt);
@@ -707,11 +404,6 @@ void hand_topogctrl_mouse_move(widget_t widget, dword_t dw, const xpoint_t* pxp)
 	else if (nHint != TOPOG_HINT_SPOT && ptd->hover)
 	{
 		noti_topog_spot_leave(widget);
-	}
-
-	if (topog_is_design(ptd->topog) && nHint == TOPOG_HINT_SPOT && ilk == ptd->spot && (dw & MS_WITH_LBUTTON) && !(dw & KS_WITH_CONTROL))
-	{
-		noti_topog_spot_drag(widget, pxp->x, pxp->y);
 	}
 }
 
@@ -753,33 +445,6 @@ void hand_topogctrl_lbutton_down(widget_t widget, const xpoint_t* pxp)
 	{
 		widget_set_focus(widget);
 	}
-
-	if (!topog_is_design(ptd->topog))
-		return;
-
-	pt.x = pxp->x;
-	pt.y = pxp->y;
-	widget_point_to_mm(widget, &pt);
-
-	ilk = NULL;
-	row = col = -1;
-	nHint = calc_topog_hint(&pt, ptd->topog, &ilk, &row, &col);
-	bRe = (ilk == ptd->spot) ? 1 : 0;
-
-	if (nHint == TOPOG_HINT_SPOT)
-	{
-		if (widget_key_state(widget, KS_WITH_CONTROL))
-		{
-			noti_topog_spot_selected(widget, ilk);
-		}
-	}
-	else if (nHint == TOPOG_HINT_NONE)
-	{
-		if (!widget_key_state(widget, KS_WITH_CONTROL))
-		{
-			noti_topog_reset_select(widget);
-		}
-	}
 }
 
 void hand_topogctrl_lbutton_up(widget_t widget, const xpoint_t* pxp)
@@ -795,12 +460,6 @@ void hand_topogctrl_lbutton_up(widget_t widget, const xpoint_t* pxp)
 	if (!ptd->topog)
 		return;
 
-	if (ptd->b_drag)
-	{
-		noti_topog_spot_drop(widget, pxp->x, pxp->y);
-		return;
-	}
-
 	pt.x = pxp->x;
 	pt.y = pxp->y;
 	widget_point_to_mm(widget, &pt);
@@ -808,17 +467,6 @@ void hand_topogctrl_lbutton_up(widget_t widget, const xpoint_t* pxp)
 	ilk = NULL;
 	row = col = -1;
 	nHint = calc_topog_hint(&pt, ptd->topog, &ilk, &row, &col);
-
-	if (topog_is_design(ptd->topog))
-	{
-		bRe = (row == ptd->row && ptd->col == col) ? 1 : 0;
-
-		if (widget_key_state(widget, KS_WITH_CONTROL))
-		{
-			_topogctrl_reset_matrix(widget, row, col);
-			return;
-		}
-	}
 
 	bRe = (ilk == ptd->spot) ? 1 : 0;
 
@@ -935,121 +583,21 @@ void hand_topogctrl_keydown(widget_t widget, dword_t ks, int nKey)
 {
 	topog_delta_t* ptd = GETTOPOGDELTA(widget);
 
-	int row, col, m;
-	int rows, cols;
-	bool_t b_design;
-	link_t_ptr slk;
-
 	if (!ptd->topog)
 		return;
 
-	b_design = topog_is_design(ptd->topog);
-
-	if (b_design)
+	if (nKey == KEY_TAB)
 	{
-		if (ptd->spot && (nKey == KEY_UP || nKey == KEY_DOWN || nKey == KEY_LEFT || nKey == KEY_RIGHT))
-		{
-			m = 1;
-
-			//noti_topog_owner(widget, NC_FIELDDRAG, ptd->topog, ptd->spot, ptd->row, ptd->col, NULL);
-
-			_topogctrl_done(widget);
-
-			rows = get_topog_rows(ptd->topog);
-			cols = get_topog_cols(ptd->topog);
-
-			slk = get_topog_next_spot(ptd->topog, LINK_FIRST);
-			while (slk)
-			{
-				if (slk != ptd->spot && !get_topog_spot_selected(slk))
-				{
-					slk = get_topog_next_spot(ptd->topog, slk);
-					continue;
-				}
-
-				col = get_topog_spot_col(slk);
-				row = get_topog_spot_row(slk);
-
-				switch (nKey)
-				{
-				case KEY_DOWN:
-					row = (row + m < rows) ? row + m : row;
-					break;
-				case KEY_UP:
-					row = (row - m < 0) ? row : row - m;
-					break;
-				case KEY_LEFT:
-					col = (col - m < 0) ? col : col - m;
-					break;
-				case KEY_RIGHT:
-					col = (col + m < cols)? col + m : col;
-					break;
-				}
-
-				set_topog_spot_col(slk, col);
-				set_topog_spot_row(slk, row);
-				ptd->row = row;
-				ptd->col = col;
-
-				slk = get_topog_next_spot(ptd->spot, slk);
-			}
-
-			widget_erase(widget, NULL);
-
-			noti_topog_owner(widget, NC_TOPOGSPOTDROP, ptd->topog, ptd->spot, ptd->row, ptd->col, NULL);
-		}
-		else if ((nKey == _T('z') || nKey == _T('Z')) && widget_key_state(widget, KS_WITH_CONTROL))
-		{
-			_topogctrl_undo(widget);
-		}
-		else if ((nKey == _T('c') || nKey == _T('C')) && widget_key_state(widget, KS_WITH_CONTROL))
-		{
-			_topogctrl_copy(widget);
-		}
-		else if ((nKey == _T('x') || nKey == _T('X')) && widget_key_state(widget, KS_WITH_CONTROL))
-		{
-			_topogctrl_done(widget);
-
-			if (!_topogctrl_cut(widget))
-			{
-				_topogctrl_discard(widget);
-			}
-		}
-		else if ((nKey == _T('v') || nKey == _T('V')) && widget_key_state(widget, KS_WITH_CONTROL))
-		{
-			_topogctrl_done(widget);
-
-			if (!_topogctrl_paste(widget))
-			{
-				_topogctrl_discard(widget);
-			}
-		}
+		topogctrl_tabskip(widget, TABORDER_RIGHT);
 	}
-	else
+	else if (nKey == KEY_LEFT || nKey == KEY_UP) // KEY_LEFT KEY_UP
 	{
-		if (nKey == KEY_TAB)
-		{
-			topogctrl_tabskip(widget,TABORDER_RIGHT);
-		}
-		else if (nKey == KEY_LEFT || nKey == KEY_UP) //KEY_LEFT KEY_UP
-		{
-			topogctrl_tabskip(widget,TABORDER_LEFT);
-		}
-		else if (nKey == KEY_RIGHT || nKey == KEY_DOWN) //KEY_RIGHT KEY_DOWN
-		{
-			topogctrl_tabskip(widget,TABORDER_RIGHT);
-		}
+		topogctrl_tabskip(widget, TABORDER_LEFT);
 	}
-}
-
-void hand_topogctrl_copy(widget_t widget)
-{
-	topog_delta_t* ptd = GETTOPOGDELTA(widget);
-
-	if (!ptd->topog)
-		return;
-
-	
+	else if (nKey == KEY_RIGHT || nKey == KEY_DOWN) // KEY_RIGHT KEY_DOWN
+	{
+		topogctrl_tabskip(widget, TABORDER_RIGHT);
+	}
 }
 
 void hand_topogctrl_size(widget_t widget, int code, const xsize_t* prs)
@@ -1108,44 +656,25 @@ void hand_topogctrl_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	widget_get_canv_rect(widget, (canvbox_t*)&(ifc.rect));
 	ifc.pclrs = pclrs;
 	
-	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
+	(*ifv.drw->pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
 
 	if (ptd->img.source)
 	{
 		format_xcolor(&(pclrs->clr_msk), ptd->img.color);
 
-		(ifc.pf_draw_image)(ifc.ctx, &(ptd->img), (xrect_t*)&(ifc.rect));
+		(ifc.drw->pf_draw_image)(ifc.ctx, &(ptd->img), (xrect_t*)&(ifc.rect));
 	}
 
 	if (ptd->topog)
 	{
 		draw_topog(&ifc, ptd->topog);
-
-		if (topog_is_design(ptd->topog) && ptd->spot)
-		{
-			widget_get_view_rect(widget, (viewbox_t*)(&ifv.rect));
-
-			_topogctrl_spot_rect(widget, ptd->spot, &xr);
-
-			pt_expand_rect(&xr, DEF_INNER_FEED, DEF_INNER_FEED);
-
-			if (get_topog_spot_selected(ptd->spot))
-			{
-				parse_xcolor(&xc, DEF_ALPHA_COLOR);
-				(*ifv.pf_alphablend_rect)(ifv.ctx, &xc, &xr, ALPHA_TRANS);
-			}
-			else
-			{
-				parse_xcolor(&xc, DEF_ENABLE_COLOR);
-				draw_focus_raw(&ifv, &xc, &xr, ALPHA_TRANS);
-			}
-		}
 	}
 
 	end_canvas_paint(canv, dc, pxr);
 }
 
-/***************************************************************************************/
+/***********************************************************************/
+
 widget_t topogctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr, widget_t wparent)
 {
 	if_dispatch_t ev = { 0 };
@@ -1406,10 +935,7 @@ bool_t topogctrl_get_dirty(widget_t widget)
 	if (!ptd->topog)
 		return 0;
 
-	if (!topog_is_design(ptd->topog))
-		return 0;
-
-	return (peek_stack_node(ptd->stack, -1)) ? 1 : 0;
+	return 0;
 }
 
 void topogctrl_set_dirty(widget_t widget, bool_t bDirty)
@@ -1420,14 +946,6 @@ void topogctrl_set_dirty(widget_t widget, bool_t bDirty)
 
 	if (!ptd->topog)
 		return;
-
-	if (!topog_is_design(ptd->topog))
-		return;
-
-	if (bDirty)
-		_topogctrl_done(widget);
-	else
-		_topogctrl_clean(widget);
 }
 
 bool_t topogctrl_set_bitmap(widget_t widget, bitmap_t bmp)

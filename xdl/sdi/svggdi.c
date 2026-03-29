@@ -753,7 +753,7 @@ void svg_draw_text(canvas_t canv, const xface_t* pxa, const xrect_t* pxr, const 
 	svg_draw_text_raw(view, pxa, &xr, txt, len);
 }
 
-void svg_text_rect_raw(visual_t view, const xface_t* pxa, const tchar_t* txt, int len, xrect_t* pxr)
+void svg_measure_rect_raw(visual_t view, const xfont_t* pxf, const xface_t* pxa, const tchar_t* txt, int len, xrect_t* pxr)
 {
 	svg_visual_t* pview = TypePtrFromHead(svg_visual_t, view);
 	int n, m = 0, total = 0, w = 0, h = 0;
@@ -766,7 +766,11 @@ void svg_text_rect_raw(visual_t view, const xface_t* pxa, const tchar_t* txt, in
 	if (is_null(txt) || !len)
 		return;
 
-	font_metric_by_pt(xstof(pview->xf.size), &pm, &px);
+	if(pxf)
+		font_metric_by_pt(xstof(pxf->size), &pm, &px);
+	else
+		font_metric_by_pt(xstof(pview->xf.size), &pm, &px);
+
 	h = ROUNDINT(px);
 	m = 0;
 	while (total < len)
@@ -788,6 +792,20 @@ void svg_text_rect_raw(visual_t view, const xface_t* pxa, const tchar_t* txt, in
 	pxr->h = h;
 }
 
+void svg_measure_rect(canvas_t canv, const xfont_t* pxf, const xface_t* pxa, const tchar_t* txt, int len, xrect_t* pxr)
+{
+	visual_t view = svg_get_canvas_visual(canv);
+
+	svg_measure_rect_raw(view, pxf, pxa, txt, len, pxr);
+
+	svg_rect_pt_to_mm(canv, pxr);
+}
+
+void svg_text_rect_raw(visual_t view, const xface_t* pxa, const tchar_t* txt, int len, xrect_t* pxr)
+{
+	svg_measure_rect_raw(view, NULL, pxa, txt, len, pxr);
+}
+
 void svg_text_rect(canvas_t canv, const xface_t* pxa, const tchar_t* txt, int len, xrect_t* pxr)
 {
 	visual_t view = svg_get_canvas_visual(canv);
@@ -797,7 +815,7 @@ void svg_text_rect(canvas_t canv, const xface_t* pxa, const tchar_t* txt, int le
 	svg_rect_pt_to_mm(canv, pxr);
 }
 
-void svg_text_size_raw(visual_t view, const tchar_t* txt, int len, xsize_t* pxs)
+void svg_measure_size_raw(visual_t view, const xfont_t* pxf, const tchar_t* txt, int len, xsize_t* pxs)
 {
 	svg_visual_t* pview = TypePtrFromHead(svg_visual_t, view);
 	float pm, mm = 0.0f;
@@ -805,7 +823,10 @@ void svg_text_size_raw(visual_t view, const tchar_t* txt, int len, xsize_t* pxs)
 	byte_t chs[5];
 	tchar_t pch[CHS_LEN + 1] = { 0 };
 
-	font_metric_by_pt(xstof(pview->xf.size), &pm, NULL);
+	if(pxf)
+		font_metric_by_pt(xstof(pxf->size), &pm, NULL);
+	else
+		font_metric_by_pt(xstof(pview->xf.size), &pm, NULL);
 
 	if (len < 0)
 		len = xslen(txt);
@@ -841,6 +862,20 @@ void svg_text_size_raw(visual_t view, const tchar_t* txt, int len, xsize_t* pxs)
 	pxs->h = svg_mm_to_pt_raw(view, pm * 1.2f, 0) - svg_mm_to_pt_raw(view, 0, 0);
 }
 
+void svg_measure_size(canvas_t canv, const xfont_t* pxf, const tchar_t* txt, int len, xsize_t* pxs)
+{
+	visual_t view = svg_get_canvas_visual(canv);
+
+	svg_measure_size_raw(view, pxf, txt, len, pxs);
+
+	svg_size_pt_to_mm(canv, pxs);
+}
+
+void svg_text_size_raw(visual_t view, const tchar_t* txt, int len, xsize_t* pxs)
+{
+	svg_measure_size_raw(view, NULL, txt, len, pxs);
+}
+
 void svg_text_size(canvas_t canv, const tchar_t* txt, int len, xsize_t* pxs)
 {
 	visual_t view = svg_get_canvas_visual(canv);
@@ -850,15 +885,32 @@ void svg_text_size(canvas_t canv, const tchar_t* txt, int len, xsize_t* pxs)
 	svg_size_pt_to_mm(canv, pxs);
 }
 
-void svg_font_size_raw(visual_t view, xsize_t* pxs)
+void svg_measure_font_raw(visual_t view, const xfont_t* pxf, xsize_t* pxs)
 {
 	svg_visual_t* pview = TypePtrFromHead(svg_visual_t, view);
 	float mm;
 
-	font_metric_by_pt(xstof(pview->xf.size), &mm, NULL);
+	if(pxf)
+		font_metric_by_pt(xstof(pxf->size), &mm, NULL);
+	else
+		font_metric_by_pt(xstof(pview->xf.size), &mm, NULL);
 
 	pxs->w = svg_mm_to_pt_raw(view, mm, 1) - svg_mm_to_pt_raw(view, 0, 1);
 	pxs->h = svg_mm_to_pt_raw(view, mm, 0) - svg_mm_to_pt_raw(view, 0, 0);
+}
+
+void svg_measure_font(canvas_t canv, const xfont_t* pxf, xsize_t* pxs)
+{
+	visual_t view = svg_get_canvas_visual(canv);
+
+	svg_measure_font_raw(view, pxf, pxs);
+
+	svg_size_pt_to_mm(canv, pxs);
+}
+
+void svg_font_size_raw(visual_t view, xsize_t* pxs)
+{
+	svg_measure_font_raw(view, NULL, pxs);
 }
 
 void svg_font_size(canvas_t canv, xsize_t* pxs)

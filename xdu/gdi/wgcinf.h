@@ -5,9 +5,9 @@
 
 	@author ZhangWenQuan, JianDe HangZhou ZheJiang China, Mail: powersuite@hotmaol.com
 
-	@doc canvas interface document
+	@doc windows graphic interface document
 
-	@module	gdiinf.h | interface file
+	@module	wgcinf.h | interface file
 
 	@devnote 张文权 2021.01 - 2021.12	v6.0
 ***********************************************************************/
@@ -24,8 +24,8 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
 LICENSE.GPL3 for more details.
 ***********************************************************************/
 
-#ifndef _GDIINF_H
-#define _GDIINF_H
+#ifndef _WGCINF_H
+#define _WGCINF_H
 
 #include "../xdudef.h"
 
@@ -35,13 +35,13 @@ LICENSE.GPL3 for more details.
 extern "C" {
 #endif
 
-EXP_API void get_canvas_interface(canvas_t canv, drawing_interface* pif);
+EXP_API void get_canvas_interface(canvas_t canv, drawing_interface* pci);
 
-EXP_API void get_visual_interface(visual_t visu, drawing_interface* piv);
+EXP_API void get_visual_interface(visual_t visu, drawing_interface* pvi);
 
-EXP_API void get_visual_measure(visual_t view, measure_interface* pim);
+EXP_API void get_visual_measure(visual_t view, measure_interface* pmv);
 
-EXP_API void get_canvas_measure(canvas_t canv, measure_interface* pim);
+EXP_API void get_canvas_measure(canvas_t canv, measure_interface* pmc);
 
 #ifdef	__cplusplus
 }
@@ -49,4 +49,4 @@ EXP_API void get_canvas_measure(canvas_t canv, measure_interface* pim);
 
 #endif /*XDU_SUPPORT_CONTEXT*/
 
-#endif /*_GDIFACE_H*/
+#endif /*_WGCINF_H*/

@@ -26,7 +26,7 @@ LICENSE.GPL3 for more details.
 
 #include "mpix.h"
 
-#include "../xdgobj.h"
+#include "../xdgmgc.h"
 
 static const unsigned char bitmask[8] = { 0x7f, 0xbf, 0xdf, 0xef, 0xf7, 0xfb, 0xfd, 0xfe };
 

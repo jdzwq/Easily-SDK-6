@@ -255,6 +255,10 @@ EXP_API void	widget_ensure_visible(widget_t wt, const xrect_t* pxr, bool_t scrol
 */
 EXP_API bool_t	widget_point_corner(widget_t wt, const xpoint_t* ppt);
 
+EXP_API void widget_set_xfont(widget_t wt, const xfont_t* pxf);
+EXP_API void widget_get_xfont(widget_t wt, xfont_t* pxf);
+EXP_API const xfont_t* widget_get_xfont_ptr(widget_t wt);
+
 /******************************widget event implement*****************************************************/
 
 EXP_API void	widget_hand_create(widget_t wt);

@@ -30,7 +30,7 @@ LICENSE.GPL3 for more details.
 #include "../xdldoc.h"
 
 
-void draw_svg(const drawing_interface* pif, const xrect_t* pbox, link_t_ptr ptr)
+void draw_svg(const drawing_interface* pci, const xrect_t* pbox, link_t_ptr ptr)
 {
 	link_t_ptr ilk;
 	int count;
@@ -80,7 +80,7 @@ void draw_svg(const drawing_interface* pif, const xrect_t* pbox, link_t_ptr ptr)
 			pt[0].fy += pbox->fy;
 			pt[1].fx += pbox->fx;
 			pt[1].fy += pbox->fy;
-			(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+			(*pci->drw->pf_draw_line)(pci->ctx, &xp, &pt[0], &pt[1]);
 		}
 		else if (compare_text(sz_name, -1, SVG_NODE_RECT, -1, 1) == 0)
 		{
@@ -98,9 +98,9 @@ void draw_svg(const drawing_interface* pif, const xrect_t* pbox, link_t_ptr ptr)
 			xr.fy += pbox->fy;
 
 			if (b_round)
-				(*pif->pf_draw_round)(pif->ctx, &xp, &xb, &xr, NULL);
+				(*pci->drw->pf_draw_round)(pci->ctx, &xp, &xb, &xr, NULL);
 			else
-				(*pif->pf_draw_rect)(pif->ctx, &xp, &xb, &xr);
+				(*pci->drw->pf_draw_rect)(pci->ctx, &xp, &xb, &xr);
 		}
 		else if (compare_text(sz_name, -1, SVG_NODE_ELLIPSE, -1, 1) == 0)
 		{
@@ -111,7 +111,7 @@ void draw_svg(const drawing_interface* pif, const xrect_t* pbox, link_t_ptr ptr)
 
 			xr.fx += pbox->fx;
 			xr.fy += pbox->fy;
-			(*pif->pf_draw_ellipse)(pif->ctx, &xp, &xb, &xr);
+			(*pci->drw->pf_draw_ellipse)(pci->ctx, &xp, &xb, &xr);
 		}
 		else if (compare_text(sz_name, -1, SVG_NODE_POLYLINE, -1, 1) == 0)
 		{
@@ -130,7 +130,7 @@ void draw_svg(const drawing_interface* pif, const xrect_t* pbox, link_t_ptr ptr)
 					ppt[i].fx += pbox->fx;
 					ppt[i].fy += pbox->fy;
 				}
-				(*pif->pf_draw_polyline)(pif->ctx, &xp, ppt, count);
+				(*pci->drw->pf_draw_polyline)(pci->ctx, &xp, ppt, count);
 
 				xmem_free(ppt);
 			}
@@ -152,7 +152,7 @@ void draw_svg(const drawing_interface* pif, const xrect_t* pbox, link_t_ptr ptr)
 					ppt[i].fx += pbox->fx;
 					ppt[i].fy += pbox->fy;
 				}
-				(*pif->pf_draw_polygon)(pif->ctx, &xp, &xb, ppt, count);
+				(*pci->drw->pf_draw_polygon)(pci->ctx, &xp, &xb, ppt, count);
 
 				xmem_free(ppt);
 			}
@@ -162,20 +162,20 @@ void draw_svg(const drawing_interface* pif, const xrect_t* pbox, link_t_ptr ptr)
 			xmem_zero((void*)&xf, sizeof(xfont_t));
 			xmem_zero((void*)&xa, sizeof(xface_t));
 			sz_text = read_text_from_svg_node(ilk, &xf, &xa, &xr);
-			(*pif->pf_set_xfont)(pif->ctx, &xf);
+			(*pci->drw->pf_set_xfont)(pci->ctx, &xf);
 			svg_rect_pt_to_mm(canv, &xr);
 
 			xr.fx += pbox->fx;
 			xr.fy += pbox->fy;
 			if (xr.h)
 			{
-				(*pif->pf_draw_text)(pif->ctx, &xa, &xr, sz_text, -1);
+				(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, sz_text, -1);
 			}
 			else
 			{
 				pt[0].fx = xr.fx;
 				pt[0].fy = xr.fy;
-				(*pif->pf_text_out)(pif->ctx, &xa, &pt[0], sz_text, -1);
+				(*pci->drw->pf_text_out)(pci->ctx, &xa, &pt[0], sz_text, -1);
 			}
 		}
 		else if (compare_text(sz_name, -1, SVG_NODE_PATH, -1, 1) == 0)
@@ -190,7 +190,7 @@ void draw_svg(const drawing_interface* pif, const xrect_t* pbox, link_t_ptr ptr)
 				xr.fx += pbox->fx;
 				xr.fy += pbox->fy;
 
-				(*pif->pf_draw_pie)(pif->ctx, &xp, &xb, &xr, fang, tang);
+				(*pci->drw->pf_draw_pie)(pci->ctx, &xp, &xb, &xr, fang, tang);
 			}
 			else if (svg_node_is_arc(ilk))
 			{
@@ -207,7 +207,7 @@ void draw_svg(const drawing_interface* pif, const xrect_t* pbox, link_t_ptr ptr)
 
 				svg_size_pt_to_mm(canv, &xs);
 
-				(*pif->pf_draw_arc)(pif->ctx, &xp, &pt[0], &pt[1], &xs, sflag, lflag);
+				(*pci->drw->pf_draw_arc)(pci->ctx, &xp, &pt[0], &pt[1], &xs, sflag, lflag);
 			}
 			else
 			{
@@ -219,7 +219,7 @@ void draw_svg(const drawing_interface* pif, const xrect_t* pbox, link_t_ptr ptr)
 				xr.fx += pbox->fx;
 				xr.fy += pbox->fy;
 
-				(*pif->pf_draw_path)(pif->ctx, &xp, &xb, aa, pa, pn);
+				(*pci->drw->pf_draw_path)(pci->ctx, &xp, &xb, aa, pa, pn);
 			}
 		}
 		else if (compare_text(sz_name, -1, SVG_NODE_IMAGE, -1, 1) == 0)
@@ -231,7 +231,7 @@ void draw_svg(const drawing_interface* pif, const xrect_t* pbox, link_t_ptr ptr)
 			xr.fx += pbox->fx;
 			xr.fy += pbox->fy;
 
-			(*pif->pf_draw_image)(pif->ctx, &xi, &xr);
+			(*pci->drw->pf_draw_image)(pci->ctx, &xi, &xr);
 		}
 		else if (compare_text(sz_name, -1, SVG_NODE_IMAGE, -1, 1) == 0)
 		{
@@ -242,7 +242,7 @@ void draw_svg(const drawing_interface* pif, const xrect_t* pbox, link_t_ptr ptr)
 			xr.fx += pbox->fx;
 			xr.fy += pbox->fy;
 
-			(*pif->pf_draw_image)(pif->ctx, &xi, &xr);
+			(*pci->drw->pf_draw_image)(pci->ctx, &xi, &xr);
 		}
 
 		if (get_svg_first_child_node(ilk))

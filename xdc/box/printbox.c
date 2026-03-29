@@ -28,8 +28,6 @@ LICENSE.GPL3 for more details.
 
 #include "../xdcobj.h"
 
-
-
 #define SVG_LINE_FEED		(int)100
 
 typedef struct _print_delta_t{
@@ -52,6 +50,7 @@ static int _printbox_calc_pages(widget_t widget)
 	xrect_t xr;
 	int pages = 0;
 	xface_t xa = {0};
+	xfont_t xf = {0};
 
 	canvas_t canv;
 	drawing_interface ifc = {0};
@@ -75,13 +74,15 @@ static int _printbox_calc_pages(widget_t widget)
 	{
 		default_xface(&xa);
 		xscpy(xa.text_wrap, GDI_ATTR_TEXT_WRAP_WORDBREAK);
-		pages = calc_rich_pages(&ifc, &xa, &xr, ptd->sheet);
+		default_textor_xfont(&xf);
+		pages = calc_rich_pages(&ifc, &xf, &xa, &xr, ptd->sheet);
 	}
 	else if (is_memo_doc(ptd->sheet))
 	{
 		default_xface(&xa);
 		xscpy(xa.text_wrap, GDI_ATTR_TEXT_WRAP_WORDBREAK);
-		pages = calc_rich_pages(&ifc, &xa, &xr, ptd->sheet);
+		default_textor_xfont(&xf);
+		pages = calc_rich_pages(&ifc, &xf, &xa, &xr, ptd->sheet);
 	}
 
 	return pages;
@@ -340,6 +341,7 @@ void hand_print_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	xbrush_t xb;
 	xcolor_t xc;
 	xface_t xa;
+	xfont_t xf;
 
 	if (!ptd->sheet) return;
 
@@ -351,6 +353,7 @@ void hand_print_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	default_xface(&xa);
 	xscpy(xa.text_wrap, GDI_ATTR_TEXT_WRAP_WORDBREAK);
 	format_xcolor(&(pclrs->clr_txt), xa.text_color);
+	default_textor_xfont(&xf);
 
 	widget_get_client_rect(widget, &xr);
 
@@ -364,7 +367,7 @@ void hand_print_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	widget_get_canv_rect(widget, (canvbox_t*)&(ifc.rect));
 	ifc.pclrs = pclrs;
 
-	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
+	(*ifv.drw->pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
 
 	if (widget_can_paging(widget))
 	{
@@ -389,11 +392,11 @@ void hand_print_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 		}
 		else if (is_rich_doc(ptd->sheet))
 		{
-			draw_rich_text(&ifc, &xa, (xrect_t*)&(ifc.rect), ptd->sheet, ptd->page);
+			draw_rich_text(&ifc, &xf, &xa, (xrect_t*)&(ifc.rect), ptd->sheet, ptd->page);
 		}
 		else if (is_memo_doc(ptd->sheet))
 		{
-			draw_memo_text(&ifc, &xa, (xrect_t*)&(ifc.rect), ptd->sheet, ptd->page);
+			draw_memo_text(&ifc, &xf, &xa, (xrect_t*)&(ifc.rect), ptd->sheet, ptd->page);
 		}
 	}
 

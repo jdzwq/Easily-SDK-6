@@ -125,7 +125,7 @@ void hand_shapebox_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	widget_get_canv_rect(widget, (canvbox_t*)&(ifc.rect));
 	ifc.pclrs = widget_get_color_mode_ptr(widget);
 
-	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &ptd->xb, &xr);
+	(*ifv.drw->pf_draw_rect)(ifv.ctx, NULL, &ptd->xb, &xr);
 
 	draw_shape(&ifc, &ptd->xp, &ptd->xb, (xrect_t*)&(ifc.rect), ptd->shape);
 

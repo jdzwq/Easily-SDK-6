@@ -26,7 +26,7 @@ LICENSE.GPL3 for more details.
 
 #include "mdrv.h"
 
-#include "../xdgobj.h"
+#include "../xdgmgc.h"
 
 typedef struct _gray_driver_t{
 	handle_head head;

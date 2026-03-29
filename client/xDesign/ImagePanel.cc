@@ -275,7 +275,7 @@ void ImagePanel_Title_OnItemChanged(widget_t widget, NOTICE_TITLE* pnt)
 
 	int n_id = xstol(get_title_item_id_ptr(pnt->item));
 
-	widget_post_command(widget, n_id, 0, NULL);
+	widget_post_command(widget, 0, n_id, NULL);
 }
 
 void ImagePanel_Image_OnRBClick(widget_t widget, NOTICE_IMAGES* pnf)
@@ -329,7 +329,7 @@ void ImagePanel_Image_OnLBClick(widget_t widget, NOTICE_IMAGES* pnf)
 		return;
 
 	int n_id = xstol(get_title_item_id_ptr(ptrItem));
-	widget_post_command(widget, n_id, 0, NULL);
+	widget_post_command(widget, 0, n_id, NULL);
 }
 
 void ImagePanel_Proper_OnEntityUpdate(widget_t widget, NOTICE_PROPER* pnp)

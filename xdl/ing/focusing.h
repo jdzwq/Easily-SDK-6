@@ -42,7 +42,7 @@ extern "C" {
 @INPUT int deep: the alphablend level: 0~255, the predefined value is ALPHA_SOLID, ALPHA_SOFT, ALPHA_TRANS.
 @RETURN void: none.
 */
-EXP_API void	draw_select_raw(const drawing_interface* piv, const xcolor_t* pxc, const xrect_t* prt, int deep);
+EXP_API void	draw_select_raw(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt, int deep);
 
 /*
 @FUNCTION draw_focus_raw: draw focus frame in memory or device context using points coordinate.
@@ -52,7 +52,7 @@ EXP_API void	draw_select_raw(const drawing_interface* piv, const xcolor_t* pxc, 
 @INPUT int deep: the alphablend level: 0~255, the predefined value is ALPHA_SOLID, ALPHA_SOFT, ALPHA_TRANS.
 @RETURN void: none.
 */
-EXP_API void	draw_focus_raw(const drawing_interface* piv, const xcolor_t* pxc, const xrect_t* prt, int deep);
+EXP_API void	draw_focus_raw(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt, int deep);
 
 /*
 @FUNCTION draw_feed_raw: draw feed frame in memory or device context using points coordinate.
@@ -62,7 +62,7 @@ EXP_API void	draw_focus_raw(const drawing_interface* piv, const xcolor_t* pxc, c
 @INPUT int deep: the alphablend level: 0~255, the predefined value is ALPHA_SOLID, ALPHA_SOFT, ALPHA_TRANS.
 @RETURN void: none.
 */
-EXP_API void	draw_feed_raw(const drawing_interface* piv, const xcolor_t* pxc, const xrect_t* prt, int deep);
+EXP_API void	draw_feed_raw(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt, int deep);
 
 /*
 @FUNCTION draw_sizing_raw: draw feed frame in memory or device context using points coordinate.
@@ -72,7 +72,7 @@ EXP_API void	draw_feed_raw(const drawing_interface* piv, const xcolor_t* pxc, co
 @INPUT int deep: the alphablend level: 0~255, the predefined value is ALPHA_SOLID, ALPHA_SOFT, ALPHA_TRANS.
 @RETURN void: none.
 */
-EXP_API void	draw_sizing_raw(const drawing_interface* piv, const xcolor_t* pxc, const xrect_t* prt, int deep, dword_t pos);
+EXP_API void	draw_sizing_raw(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt, int deep, dword_t pos);
 
 
 

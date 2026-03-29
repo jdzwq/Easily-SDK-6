@@ -858,17 +858,39 @@ void _gdi_text_out(visual_t rdc, const xface_t* pxa, const xpoint_t* ppt, const 
     CFRelease(attrString);
 }
 
-void _gdi_text_rect(visual_t rdc, const xface_t* pxa, const tchar_t* txt, int len, xrect_t* pxr)
+void _gdi_text_rect(visual_t rdc, const xfont_t* pxf, const xface_t* pxa, const tchar_t* txt, int len, xrect_t* pxr)
 {
 	cocoa_context_t* ctx = (rdc)? TypePtrFromHead(cocoa_context_t, rdc) : NULL;
 	cocoa_fontset_t* fnt = (rdc)? TypePtrFromHead(cocoa_fontset_t, ctx->fontset) : TypePtrFromHead(cocoa_fontset_t, g_fontset);
 
+	CTFontRef cfFont;
+
 	if(len < 0) len = xslen(txt);
-	if(!len) return;
 
-	CTFontRef cfFont = fnt->font_object;
+	if(pxf)
+	{
+		float pt = xstof(pxf->size);
+		CGFloat size = ScalePt(pt, 1);
+    	CFStringRef cfFamily = CFStringCreateWithCString(NULL, pxf->family, kCFStringEncodingUTF8); 
+    	cfFont = CTFontCreateWithName(cfFamily, size, NULL);
+		CFRelease(cfFamily);
+	}else
+	{
+		cfFont = fnt->font_object;
+	}
 
-	CGFloat ascent,descent,leading;
+	CGFloat ascent = 0.0, descent = 0.0, leading = 0.0;
+
+	if(!len) 
+	{
+		ascent = CTFontGetAscent(cfFont);
+		descent = CTFontGetDescent(cfFont);
+		pxr->h = (int)(ascent + descent);
+		pxr->w = 0;
+
+		if(pxf) CFRelease(cfFont);
+		return;
+	}
 
 	int c, n = 0, total = 0;
 	tchar_t pch[CHS_LEN + 1] = {0};
@@ -961,37 +983,59 @@ void _gdi_text_rect(visual_t rdc, const xface_t* pxa, const tchar_t* txt, int le
 
 	pxr->h = h;
 	if (!pxr->w) pxr->w = maxw;
+
+	if(pxf) CFRelease(cfFont);
 }
 
-void _gdi_text_size(visual_t rdc, const tchar_t* txt, int len, xsize_t* pxs)
+void _gdi_text_size(visual_t rdc, const xfont_t* pxf, const tchar_t* txt, int len, xsize_t* pxs)
 {
 	cocoa_context_t* ctx = (rdc)? TypePtrFromHead(cocoa_context_t, rdc) : NULL;
 	cocoa_fontset_t* fnt = (rdc)? TypePtrFromHead(cocoa_fontset_t, ctx->fontset) : TypePtrFromHead(cocoa_fontset_t, g_fontset);
+	
+	CTFontRef cfFont;
 
 	if(len < 0) len = xslen(txt);
-	if(!len) {
+
+	if(pxf)
+	{
+		float pt = xstof(pxf->size);
+		CGFloat size = ScalePt(pt, 1);
+    	CFStringRef cfFamily = CFStringCreateWithCString(NULL, pxf->family, kCFStringEncodingUTF8); 
+    	cfFont = CTFontCreateWithName(cfFamily, size, NULL);
+		CFRelease(cfFamily);
+	}else
+	{
+		cfFont = fnt->font_object;
+	}
+
+	CGFloat ascent = 0.0, descent = 0.0, leading = 0.0;
+
+	if(!len) 
+	{
+		ascent = CTFontGetAscent(cfFont);
+		descent = CTFontGetDescent(cfFont);
+		pxs->h = (int)(ascent + descent);
 		pxs->w = 0;
-		pxs->h = 0;
+
+		if(pxf) CFRelease(cfFont);
 		return;
 	}
 
 	CFStringRef cfString = CFStringCreateWithBytes(kCFAllocatorDefault, (const UInt8*)txt,(CFIndex)len, kCFStringEncodingUTF8, false);
-
-	CTFontRef cfFont = fnt->font_object;
-
     CFMutableAttributedStringRef attrString = CFAttributedStringCreateMutable(kCFAllocatorDefault, 0);
     CFAttributedStringReplaceString(attrString, CFRangeMake(0, 0), cfString);
     CFAttributedStringSetAttribute(attrString, CFRangeMake(0, CFStringGetLength(cfString)), kCTFontAttributeName, cfFont);
 
     CTLineRef cfLine = CTLineCreateWithAttributedString(attrString);
 
-    CGFloat ascent = 0.0, descent = 0.0, leading = 0.0;
     CGFloat width = CTLineGetTypographicBounds(cfLine, &ascent, &descent, &leading);
     CGFloat height = ascent + descent;
 
 	CFRelease(cfString);
     CFRelease(cfLine);
     CFRelease(attrString);
+
+	if(pxf) CFRelease(cfFont);
 
     pxs->w = (int)(width + 0.5);
 	pxs->h = (int)(height + 0.5);
@@ -1221,14 +1265,26 @@ void _gdi_get_xfont(visual_t rdc, xfont_t* pxf)
 	CFStringGetCString(orgFamily, pxf->family, FNT_LEN, kCFStringEncodingUTF8);
 }
 
-void _gdi_font_size(visual_t rdc, xsize_t* pxs)
+void _gdi_font_size(visual_t rdc, const xfont_t* pxf, xsize_t* pxs)
 {
 	cocoa_context_t* ctx = (rdc)? TypePtrFromHead(cocoa_context_t, rdc) : NULL;
 	cocoa_fontset_t* fnt = (rdc)? TypePtrFromHead(cocoa_fontset_t, ctx->fontset) : TypePtrFromHead(cocoa_fontset_t, g_fontset);
 
-	CTFontRef cfFont = fnt->font_object;
-	CGFloat cfSize = CTFontGetSize(cfFont);
+	CTFontRef cfFont;
+	
+	if(pxf)
+	{
+		float pt = xstof(pxf->size);
+		CGFloat size = ScalePt(pt, 1);
+    	CFStringRef cfFamily = CFStringCreateWithCString(NULL, pxf->family, kCFStringEncodingUTF8); 
+    	cfFont = CTFontCreateWithName(cfFamily, size, NULL);
+		CFRelease(cfFamily);
+	}else
+	{
+		cfFont = fnt->font_object;
+	}
 
+	CGFloat cfSize = CTFontGetSize(cfFont);
     CGFloat ascent = CTFontGetAscent(cfFont);
     CGFloat descent = CTFontGetDescent(cfFont);
     CGFloat leading = CTFontGetLeading(cfFont);
@@ -1236,6 +1292,8 @@ void _gdi_font_size(visual_t rdc, xsize_t* pxs)
 
 	pxs->h = (int)(ascent + descent);
 	pxs->w = LOGPTPERMM;
+
+	if(pxf) CFRelease(cfFont);
 }
 
 fontset_t _gdi_get_fontset(visual_t rdc)

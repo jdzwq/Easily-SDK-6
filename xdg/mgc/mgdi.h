@@ -274,15 +274,21 @@ EXP_API void	mgc_text_out_raw(visual_t mgc, const xface_t* pxa, const xpoint_t* 
 */
 EXP_API void	mgc_text_size(canvas_t canv, const tchar_t* txt, int len, xsize_t* pxs);
 EXP_API void	mgc_text_size_raw(visual_t mgc, const tchar_t* txt, int len, xsize_t* pxs);
+EXP_API void	mgc_measure_size(canvas_t canv, const xfont_t* pxf, const tchar_t* txt, int len, xsize_t* pxs);
+EXP_API void	mgc_measure_size_raw(visual_t mgc, const xfont_t* pxf, const tchar_t* txt, int len, xsize_t* pxs);
 
 EXP_API void	mgc_text_rect(canvas_t canv, const xface_t* pxa, const tchar_t* txt, int len, xrect_t* pxr);
 EXP_API void	mgc_text_rect_raw(visual_t mgc, const xface_t* pxa, const tchar_t* txt, int len, xrect_t* pxr);
+EXP_API void	mgc_measure_rect(canvas_t canv, const xfont_t* pxf, const xface_t* pxa, const tchar_t* txt, int len, xrect_t* pxr);
+EXP_API void	mgc_measure_rect_raw(visual_t mgc, const xfont_t* pxf, const xface_t* pxa, const tchar_t* txt, int len, xrect_t* pxr);
 
 EXP_API void	mgc_text_indicate_raw(visual_t mgc, const xface_t* pxa, const tchar_t* str, int len, const xrect_t* pxr, xrect_t*pa, int n);
 EXP_API void	mgc_text_indicate(canvas_t canv, const xface_t* pxa, const tchar_t* str, int len, const xrect_t* pxr, xrect_t*pa, int n);
 
 EXP_API void	mgc_font_size(canvas_t canv, xsize_t* pxs);
 EXP_API void	mgc_font_size_raw(visual_t mgc, xsize_t* pxs);
+EXP_API void	mgc_measure_font(canvas_t canv, const xfont_t* pxf, xsize_t* pxs);
+EXP_API void	mgc_measure_font_raw(visual_t mgc, const xfont_t* pxf, xsize_t* pxs);
 
 /*
 @FUNCTION mgc_color_out: output color sequence in mgc canvas using millimeter coordinate.

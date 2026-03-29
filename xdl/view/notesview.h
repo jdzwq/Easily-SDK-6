@@ -42,15 +42,15 @@ typedef enum{
 extern "C" {
 #endif
 
-	EXP_API float calc_notes_height(const measure_interface* pif, link_t_ptr ptr);
+	EXP_API float calc_notes_height(const measure_interface* pmc, const xfont_t* pxf, link_t_ptr ptr);
 
-	EXP_API float calc_notes_width(const measure_interface* pif, link_t_ptr ptr);
+	EXP_API float calc_notes_width(const measure_interface* pmc, const xfont_t* pxf, link_t_ptr ptr);
 
-	EXP_API void calc_notes_item_rect(const measure_interface* pif, link_t_ptr ptr, link_t_ptr plk, xrect_t* pxr);
+	EXP_API void calc_notes_item_rect(const measure_interface* pmc, const xfont_t* pxf, link_t_ptr ptr, link_t_ptr plk, xrect_t* pxr);
 
-	EXP_API int	calc_notes_hint(const measure_interface* pif, const xpoint_t* ppt, link_t_ptr ptr, link_t_ptr* pplk);
+	EXP_API int	calc_notes_hint(const measure_interface* pmc, const xfont_t* pxf, const xpoint_t* ppt, link_t_ptr ptr, link_t_ptr* pplk);
 
-	EXP_API void draw_notes(const drawing_interface* pif, const xpen_t* pxp, const xbrush_t* pxb, link_t_ptr ptr, link_t_ptr plk);
+	EXP_API void draw_notes(const drawing_interface* pci, const xfont_t* pxf, const xpen_t* pxp, const xbrush_t* pxb, link_t_ptr ptr, link_t_ptr plk);
 
 #ifdef	__cplusplus
 }

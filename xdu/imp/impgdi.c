@@ -26,7 +26,6 @@ LICENSE.GPL3 for more details.
 
 #include "impgdi.h"
 
-#include "../xduinf.h"
 #include "../xduimp.h"
 #include "../xduinit.h"
 
@@ -522,7 +521,7 @@ void text_rect_raw(visual_t rdc, const xface_t* pxa, const tchar_t* txt, int len
 
 	pif = PROCESS_CONTEXT_INTERFACE;
 
-	(*pif->pf_gdi_text_rect)(rdc, pxa, txt, len, pxr);
+	(*pif->pf_gdi_text_rect)(rdc, NULL, pxa, txt, len, pxr);
 }
 
 void text_rect(canvas_t canv, const xface_t* pxa, const tchar_t* txt, int len, xrect_t* pxr)
@@ -534,13 +533,31 @@ void text_rect(canvas_t canv, const xface_t* pxa, const tchar_t* txt, int len, x
 	rect_pt_to_mm(canv, pxr);
 }
 
+void measure_rect_raw(visual_t rdc, const xfont_t* pxf, const xface_t* pxa, const tchar_t* txt, int len, xrect_t* pxr)
+{
+	if_context_t *pif;
+
+	pif = PROCESS_CONTEXT_INTERFACE;
+
+	(*pif->pf_gdi_text_rect)(rdc, pxf, pxa, txt, len, pxr);
+}
+
+void measure_rect(canvas_t canv, const xfont_t* pxf, const xface_t* pxa, const tchar_t* txt, int len, xrect_t* pxr)
+{
+	visual_t rdc = get_canvas_visual(canv);
+
+	measure_rect_raw(rdc, pxf, pxa, txt, len, pxr);
+
+	rect_pt_to_mm(canv, pxr);
+}
+
 void text_size_raw(visual_t rdc, const tchar_t* txt, int len, xsize_t* pxs)
 {
 	if_context_t *pif;
 
 	pif = PROCESS_CONTEXT_INTERFACE;
 
-	(*pif->pf_gdi_text_size)(rdc, txt, len, pxs);
+	(*pif->pf_gdi_text_size)(rdc, NULL, txt, len, pxs);
 }
 
 void text_size(canvas_t canv, const tchar_t* txt, int len, xsize_t* pxs)
@@ -551,7 +568,29 @@ void text_size(canvas_t canv, const tchar_t* txt, int len, xsize_t* pxs)
 
 	pif = PROCESS_CONTEXT_INTERFACE;
 
-	(*pif->pf_gdi_text_size)(rdc, txt, len, pxs);
+	(*pif->pf_gdi_text_size)(rdc, NULL, txt, len, pxs);
+
+	size_pt_to_mm(canv, pxs);
+}
+
+void measure_size_raw(visual_t rdc, const xfont_t* pxf, const tchar_t* txt, int len, xsize_t* pxs)
+{
+	if_context_t *pif;
+
+	pif = PROCESS_CONTEXT_INTERFACE;
+
+	(*pif->pf_gdi_text_size)(rdc, pxf, txt, len, pxs);
+}
+
+void measure_size(canvas_t canv, const xfont_t* pxf, const tchar_t* txt, int len, xsize_t* pxs)
+{
+	visual_t rdc = get_canvas_visual(canv);
+
+	if_context_t *pif;
+
+	pif = PROCESS_CONTEXT_INTERFACE;
+
+	(*pif->pf_gdi_text_size)(rdc, pxf, txt, len, pxs);
 
 	size_pt_to_mm(canv, pxs);
 }
@@ -562,7 +601,7 @@ void font_size_raw(visual_t rdc, xsize_t* pxs)
 
 	pif = PROCESS_CONTEXT_INTERFACE;
 
-	(*pif->pf_gdi_font_size)(rdc, pxs);
+	(*pif->pf_gdi_font_size)(rdc, NULL, pxs);
 }
 
 void font_size(canvas_t canv, xsize_t* pxs)
@@ -573,7 +612,29 @@ void font_size(canvas_t canv, xsize_t* pxs)
 
 	pif = PROCESS_CONTEXT_INTERFACE;
 
-	(*pif->pf_gdi_font_size)(rdc, pxs);
+	(*pif->pf_gdi_font_size)(rdc, NULL, pxs);
+
+	size_pt_to_mm(canv, pxs);
+}
+
+void measure_font_raw(visual_t rdc, const xfont_t* pxf, xsize_t* pxs)
+{
+	if_context_t *pif;
+
+	pif = PROCESS_CONTEXT_INTERFACE;
+
+	(*pif->pf_gdi_font_size)(rdc, pxf, pxs);
+}
+
+void measure_font(canvas_t canv, const xfont_t* pxf, xsize_t* pxs)
+{
+	visual_t rdc = get_canvas_visual(canv);
+
+	if_context_t *pif;
+
+	pif = PROCESS_CONTEXT_INTERFACE;
+
+	(*pif->pf_gdi_font_size)(rdc, pxf, pxs);
 
 	size_pt_to_mm(canv, pxs);
 }

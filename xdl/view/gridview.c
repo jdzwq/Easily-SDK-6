@@ -113,7 +113,7 @@ void call_grid_cur_item(void* param, link_t_ptr* p_xlk, link_t_ptr* p_ylk)
 static int _grid_rows_persubfield(link_t_ptr ptr)
 {
 	int rowsperpage;
-	float fh, ch, rh, th;
+	float fh, th, ch, rh;
 	bool_t b_sum;
 
 	fh = get_grid_height(ptr);
@@ -135,7 +135,7 @@ static int _grid_rows_persubfield(link_t_ptr ptr)
 static int _grid_rows_perpage(link_t_ptr ptr)
 {
 	int rowsperpage;
-	float fh, ch, rh, th;
+	float ch, th, rh, fh;
 	bool_t b_sum;
 	int ns;
 
@@ -274,23 +274,22 @@ float calc_grid_page_height(link_t_ptr ptr, int page)
 	pages = calc_grid_pages(ptr);
 
 	if (get_grid_showsum(ptr) && page == pages)
-		th += rh;
+		ch += (th + rh);
 
 	ns = _grid_rows_persubfield(ptr);
 
 	if (page < pages)
-		return ns * rh + th + ch;
+		return ns * rh + ch;
 
 	rlk_first = rlk_last = NULL;
 	calc_grid_row_scope(ptr, page, &rlk_first, &rlk_last);
 
-	th += ch;
 	rlk = rlk_first;
 	while (rlk && ns)
 	{
 		if (get_row_visible(rlk))
 		{
-			th += rh;
+			ch += rh;
 			ns--;
 		}
 
@@ -300,26 +299,26 @@ float calc_grid_page_height(link_t_ptr ptr, int page)
 		rlk = get_next_row(ptr, rlk);
 	}
 
-	return th;
+	return ch;
 }
 
-int calc_grid_cell_rect(link_t_ptr ptr, int page, link_t_ptr rlk, link_t_ptr clk, xrect_t* pxr)
+bool_t calc_grid_cell_rect(link_t_ptr ptr, int page, link_t_ptr rlk, link_t_ptr clk, xrect_t* pxr)
 {
 	link_t_ptr row, col;
 	link_t_ptr rlk_first, rlk_last;
-	float th, rw, ch, rh;
+	float rw, th, ch, rh;
 	float xm, ym;
 	int i, sub, ns;
 
 	xmem_zero((void*)pxr, sizeof(xrect_t));
 
+	th = get_grid_title_height(ptr);
 	ch = get_grid_colbar_height(ptr);
 	rh = get_grid_rowbar_height(ptr);
 	rw = get_grid_rowbar_width(ptr);
-	th = get_grid_title_height(ptr);
 
 	if (rlk && !get_row_visible(rlk))
-		return 0;
+		return bool_false;
 
 	if (!rlk)
 		ym = th;
@@ -337,7 +336,7 @@ int calc_grid_cell_rect(link_t_ptr ptr, int page, link_t_ptr rlk, link_t_ptr clk
 		pxr->fw = rw;
 		pxr->fy = ym;
 		pxr->fh = ch;
-		return 1;
+		return bool_true;
 	}
 
 	ns = _grid_rows_persubfield(ptr);
@@ -407,51 +406,35 @@ int calc_grid_cell_rect(link_t_ptr ptr, int page, link_t_ptr rlk, link_t_ptr clk
 	if (row != rlk || col != clk)
 	{
 		xmem_zero((void*)pxr, sizeof(xrect_t));
-		return 0;
+		return bool_false;
 	}
 
-	return 1;
+	return bool_true;
 }
 
-int calc_grid_row_rect(link_t_ptr ptr, int page, link_t_ptr rlk, xrect_t* pxr)
+float calc_grid_row_width(link_t_ptr ptr)
 {
-	link_t_ptr clk;
-
-	clk = get_next_visible_col(ptr, LINK_FIRST);
-
-	if (!calc_grid_cell_rect(ptr, page, rlk, clk, pxr))
-		return 0;
-
-	pxr->fx -= get_grid_rowbar_width(ptr);
-	pxr->fw = _grid_width_persubfield(ptr);
-
-	return 1;
+	return _grid_width_persubfield(ptr);
 }
 
-int calc_grid_col_rect(link_t_ptr ptr, int page, link_t_ptr rlk, link_t_ptr clk, xrect_t* pxr)
+float calc_grid_col_height(link_t_ptr ptr, int page)
 {
-	if (!calc_grid_cell_rect(ptr, page, rlk, clk, pxr))
-		return 0;
-
-	pxr->fy = get_grid_title_height(ptr);
-	pxr->fh = calc_grid_page_height(ptr, page) - get_grid_title_height(ptr);
-
-	return 1;
+	return calc_grid_page_height(ptr, page) - get_grid_title_height(ptr);
 }
 
 int calc_grid_hint(const xpoint_t* ppt, link_t_ptr ptr, int page, link_t_ptr* prlk, link_t_ptr* pclk)
 {
 	link_t_ptr row, col;
 	link_t_ptr rlk_first, rlk_last;
-	float th, rw, cw, ch, rh, gw;
+	float rw, cw, th, ch, rh, gw;
 	float mx, my, w, h;
 	int i, sub, ns;
 	int hint;
 
+	th = get_grid_title_height(ptr);
 	ch = get_grid_colbar_height(ptr);
 	rh = get_grid_rowbar_height(ptr);
 	rw = get_grid_rowbar_width(ptr);
-	th = get_grid_title_height(ptr);
 
 	mx = ppt->fx;
 	my = ppt->fy;
@@ -465,19 +448,7 @@ int calc_grid_hint(const xpoint_t* ppt, link_t_ptr ptr, int page, link_t_ptr* pr
 		return hint;
 	}
 
-	if (mx < rw && my < th)
-	{
-		hint = GRID_HINT_MENU;
-		return hint;
-	}
-
-	if (mx >= rw && my < th)
-	{
-		hint = GRID_HINT_TITLE;
-		return hint;
-	}
-
-	if (mx < rw - DEF_SPLIT_FEED && my < th + ch - DEF_SPLIT_FEED)
+	if (mx < rw - DEF_SPLIT_FEED && my < ch - DEF_SPLIT_FEED)
 	{
 		hint = GRID_HINT_NULBAR;
 		return hint;
@@ -535,7 +506,6 @@ int calc_grid_hint(const xpoint_t* ppt, link_t_ptr ptr, int page, link_t_ptr* pr
 
 	for (i = 0; i < sub; i++)
 	{
-		h = th;
 		w = rw + i * gw;
 
 		col = get_next_visible_col(ptr, LINK_FIRST);
@@ -574,7 +544,7 @@ int calc_grid_hint(const xpoint_t* ppt, link_t_ptr ptr, int page, link_t_ptr* pr
 	return hint;
 }
 
-void draw_grid_page(const drawing_interface* pif, link_t_ptr ptr, int page)
+void draw_grid_page(const drawing_interface* pci, link_t_ptr ptr, int page)
 {
 	link_t_ptr clk, rlk;
 	link_t_ptr rlk_first, rlk_last;
@@ -596,7 +566,7 @@ void draw_grid_page(const drawing_interface* pif, link_t_ptr ptr, int page)
 	float px, py, pw, ph, gw, cw, tw;
 	int i, ns, rs;
 
-	const canvbox_t* pbox = (canvbox_t*)(&pif->rect);
+	const canvbox_t* pbox = (canvbox_t*)(&pci->rect);
 
 	px = pbox->fx;
 	py = pbox->fy;
@@ -615,7 +585,7 @@ void draw_grid_page(const drawing_interface* pif, link_t_ptr ptr, int page)
 
 	b_design = grid_is_design(ptr);
 
-	b_print = (pif->tag == _CANVAS_PRINTER) ? 1 : 0;
+	b_print = (pci->tag == _CANVAS_PRINTER) ? 1 : 0;
 
 	default_xpen(&xp);
 	default_xbrush(&xb);
@@ -627,13 +597,13 @@ void draw_grid_page(const drawing_interface* pif, link_t_ptr ptr, int page)
 	parse_xbrush_from_style(&xb, style);
 	if (!b_print)
 	{
-		format_xcolor(&pif->pclrs->clr_bkg, xb.color);
+		format_xcolor(&pci->pclrs->clr_bkg, xb.color);
 	}
 
 	/*parse_xpen_from_style(&xp, style);
 	if (!b_print)
 	{
-		format_xcolor(&pif->pclrs->clr_frg, xp.color);
+		format_xcolor(&pci->pclrs->clr_frg, xp.color);
 	}*/
 
 	xscpy(xp.color, xb.color);
@@ -644,13 +614,13 @@ void draw_grid_page(const drawing_interface* pif, link_t_ptr ptr, int page)
 	parse_xfont_from_style(&xf, style);
 	if (!b_print)
 	{
-		format_xcolor(&pif->pclrs->clr_txt, xa.text_color);
-		(*pif->pf_set_xfont)(pif->ctx, &xf);
+		format_xcolor(&pci->pclrs->clr_txt, xa.text_color);
 	}
+	(*pci->drw->pf_set_xfont)(pci->ctx, &xf);
 
 	if (!b_print)
 	{
-		format_xcolor(&pif->pclrs->clr_msk, xi.color);
+		format_xcolor(&pci->pclrs->clr_msk, xi.color);
 	}
 
 	xmem_copy((void*)&xb_bar, (void*)&xb, sizeof(xbrush_t));
@@ -681,14 +651,15 @@ void draw_grid_page(const drawing_interface* pif, link_t_ptr ptr, int page)
 	rs = _grid_rows_persubfield(ptr);
 
 	//draw title bar
-	if (th)
+	if(th)
 	{
 		xrBar.fx = px + rw;
 		xrBar.fy = py;
 		xrBar.fw = pw - rw;
 		xrBar.fh = th;
 
-		(*pif->pf_draw_text)(pif->ctx, &xa, &xrBar, get_grid_title_ptr(ptr), -1);
+		xscpy(xa.text_align, ATTR_ALIGNMENT_NEAR);
+		(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xrBar, get_grid_title_ptr(ptr), -1);
 	}
 
 	//draw null bar
@@ -699,13 +670,13 @@ void draw_grid_page(const drawing_interface* pif, link_t_ptr ptr, int page)
 		xrBar.fy = th + py;
 		xrBar.fh = ch;
 
-		draw_shape(pif, &xp, &xb_bar, &xrBar, shape);
+		draw_shape(pci, &xp, &xb_bar, &xrBar, shape);
 
 		if (b_showcheck && get_rowset_checked(ptr))
 		{
 			xmem_copy((void*)&xrCheck, (void*)&xrBar, sizeof(xrect_t));
 			ft_center_rect(&xrCheck, DEF_SMALL_ICON, DEF_SMALL_ICON);
-			draw_gizmo(pif, &xc_check, &xrCheck, GDI_ATTR_GIZMO_CHECKED);
+			draw_gizmo(pci, &xc_check, &xrCheck, GDI_ATTR_GIZMO_CHECKED);
 		}
 	}
 
@@ -730,16 +701,16 @@ void draw_grid_page(const drawing_interface* pif, link_t_ptr ptr, int page)
 				parse_xfont_from_style(&xf, style);
 				if (!b_print)
 				{
-					format_xcolor(&pif->pclrs->clr_txt, xa.text_color);
-					(*pif->pf_set_xfont)(pif->ctx, &xf);
+					format_xcolor(&pci->pclrs->clr_txt, xa.text_color);
 				}
+				(*pci->drw->pf_set_xfont)(pci->ctx, &xf);
 
 				xrBar.fw = get_col_width(clk);
 
-				draw_shape(pif, &xp, &xb_bar, &xrBar, shape);
+				draw_shape(pci, &xp, &xb_bar, &xrBar, shape);
 
 				token = get_col_title_ptr(clk);
-				(*pif->pf_draw_text)(pif->ctx, &xa, &xrBar, token, -1);
+				(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xrBar, token, -1);
 
 				xrBar.fx += xrBar.fw;
 				clk = get_next_visible_col(ptr, clk);
@@ -767,13 +738,13 @@ void draw_grid_page(const drawing_interface* pif, link_t_ptr ptr, int page)
 			}
 			i++;
 
-			draw_shape(pif, &xp, &xb_bar, &xrBar, shape);
+			draw_shape(pci, &xp, &xb_bar, &xrBar, shape);
 
 			if (b_showcheck && get_row_checked(rlk))
 			{
 				xmem_copy((void*)&xrCheck, (void*)&xrBar, sizeof(xrect_t));
 				ft_center_rect(&xrCheck, DEF_SMALL_ICON, DEF_SMALL_ICON);
-				draw_gizmo(pif, &xc_check, &xrCheck, GDI_ATTR_GIZMO_CHECKED);
+				draw_gizmo(pci, &xc_check, &xrCheck, GDI_ATTR_GIZMO_CHECKED);
 			}
 
 			if (rlk_last == rlk)
@@ -789,11 +760,11 @@ void draw_grid_page(const drawing_interface* pif, link_t_ptr ptr, int page)
 	{
 		xrBar.fy += xrBar.fh;
 
-		draw_shape(pif, &xp, &xb_bar, &xrBar, shape);
+		draw_shape(pci, &xp, &xb_bar, &xrBar, shape);
 
 		xmem_copy((void*)&xrCheck, (void*)&xrBar, sizeof(xrect_t));
 		ft_center_rect(&xrCheck, DEF_SMALL_ICON, DEF_SMALL_ICON);
-		draw_gizmo(pif, &xc_check, &xrCheck, GDI_ATTR_GIZMO_SUM);
+		draw_gizmo(pci, &xc_check, &xrCheck, GDI_ATTR_GIZMO_SUM);
 	}
 
 	//draw cell
@@ -832,14 +803,14 @@ void draw_grid_page(const drawing_interface* pif, link_t_ptr ptr, int page)
 		{
 			if (!b_print)
 			{
-				format_xcolor(&pif->pclrs->clr_txt, xa.text_color);
+				format_xcolor(&pci->pclrs->clr_txt, xa.text_color);
 			}
 
 			rstyle = get_row_style_ptr(rlk);
 			if (!is_null(rstyle))
 			{
 				parse_xfont_from_style(&xf, rstyle);
-				(*pif->pf_set_xfont)(pif->ctx, &xf);
+				(*pci->drw->pf_set_xfont)(pci->ctx, &xf);
 			}
 			
 			if (i == rs)
@@ -855,31 +826,31 @@ void draw_grid_page(const drawing_interface* pif, link_t_ptr ptr, int page)
 
 			if (n_stepdraw && b_tag)
 			{
-				draw_shape(pif, &xp, &xb_step, &xrCell, shape);
+				draw_shape(pci, &xp, &xb_step, &xrCell, shape);
 				if (n_stepdraw == 1)
 					b_tag = 0;
 			}
 			else
 			{
-				draw_shape(pif, &xp, NULL, &xrCell, shape);
+				draw_shape(pci, &xp, NULL, &xrCell, shape);
 				if (n_stepdraw == 1)
 					b_tag = 1;
 			}
 
 			if (get_col_password(clk))
 			{
-				draw_pass(pif, &xa, &xrCell, get_cell_text_ptr(rlk, clk), -1);
+				draw_pass(pci, &xa, &xrCell, get_cell_text_ptr(rlk, clk), -1);
 			}
 			else if (compare_text(type, -1, ATTR_DATA_TYPE_BINARY, -1, 0) == 0)
 			{
 				parse_ximage_from_source(&xi, get_cell_text_ptr(rlk,clk));
 
-				(*pif->pf_draw_image)(pif->ctx, &xi, &xrCell);
+				(*pci->drw->pf_draw_image)(pci->ctx, &xi, &xrCell);
 			}
 			else
 			{
 				token = get_cell_options_text_ptr(rlk, clk);
-				draw_data(pif, &xa, &xrCell, token, -1, get_col_data_dig(clk), type, colfmt, zeronull, wrapable);
+				draw_data(pci, &xa, &xrCell, token, -1, get_col_data_dig(clk), type, colfmt, zeronull, wrapable);
 			}
 
 			if (rlk_last == rlk)
@@ -893,11 +864,11 @@ void draw_grid_page(const drawing_interface* pif, link_t_ptr ptr, int page)
 		{
 			xrCell.fy += xrCell.fh;
 
-			draw_shape(pif, &xp, &xb_bar, &xrCell, shape);
+			draw_shape(pci, &xp, &xb_bar, &xrCell, shape);
 
 			token = get_col_sum_text_ptr(clk);
 
-			draw_data(pif, &xa, &xrCell, token, -1, get_col_data_dig(clk), type, colfmt, zeronull, wrapable);
+			draw_data(pci, &xa, &xrCell, token, -1, get_col_data_dig(clk), type, colfmt, zeronull, wrapable);
 		}
 
 		tw += cw;

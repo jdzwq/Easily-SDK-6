@@ -26,7 +26,7 @@ LICENSE.GPL3 for more details.
 
 #include "dot.h"
 
-#include "../xdgobj.h"
+#include "../xdgmgc.h"
 
 int dot_exclude(int slic_mask, const xrect_t* pxr, const xpoint_t* obj_points, int pn, xpoint_t* ppt_buff, int buff_size)
 {

@@ -158,7 +158,7 @@ int calc_anno_hint(const xpoint_t* ppt, link_t_ptr ptr, link_t_ptr* pplk, int* p
 	return ANNO_HINT_NONE;
 }
 
-void draw_anno(const drawing_interface* pif, link_t_ptr ptr)
+void draw_anno(const drawing_interface* pci, link_t_ptr ptr)
 {
 	link_t_ptr ilk;
 	xbrush_t xb = { 0 };
@@ -176,7 +176,7 @@ void draw_anno(const drawing_interface* pif, link_t_ptr ptr)
 	const tchar_t* type;
 	tchar_t token[RES_LEN + 1];
 
-	const canvbox_t* pbox = (canvbox_t*)(&pif->rect);
+	const canvbox_t* pbox = (canvbox_t*)(&pci->rect);
 
 	default_xface(&xa);
 	default_xfont(&xf);
@@ -205,7 +205,7 @@ void draw_anno(const drawing_interface* pif, link_t_ptr ptr)
 			{
 				parse_xfont_from_style(&xf, style);
 				parse_xface_from_style(&xa, style);
-				(*pif->pf_set_xfont)(pif->ctx, &xf);
+				(*pci->drw->pf_set_xfont)(pci->ctx, &xf);
 			}
 
 			xr.fx = ppt[0].fx;
@@ -213,7 +213,7 @@ void draw_anno(const drawing_interface* pif, link_t_ptr ptr)
 			xr.fw = ppt[1].fx - ppt[0].fx;
 			xr.fh = ppt[1].fy - ppt[0].fy;
 
-			(*pif->pf_draw_text)(pif->ctx, &xa, &xr, get_anno_arti_text_ptr(ilk), -1);
+			(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, get_anno_arti_text_ptr(ilk), -1);
 		}
 		else if (compare_text(type, -1, ATTR_ANNO_TYPE_ICON, -1, 0) == 0)
 		{
@@ -228,7 +228,7 @@ void draw_anno(const drawing_interface* pif, link_t_ptr ptr)
 			xr.fw = ppt[1].fx - ppt[0].fx;
 			xr.fh = ppt[1].fy - ppt[0].fy;
 
-			draw_gizmo(pif, &xc, &xr, get_anno_arti_text_ptr(ilk));
+			draw_gizmo(pci, &xc, &xr, get_anno_arti_text_ptr(ilk));
 		}
 		else if (compare_text(type, -1, ATTR_ANNO_TYPE_CIRCLE, -1, 0) == 0)
 		{
@@ -242,7 +242,7 @@ void draw_anno(const drawing_interface* pif, link_t_ptr ptr)
 			xr.fw = ppt[1].fx - ppt[0].fx;
 			xr.fh = ppt[1].fy - ppt[0].fy;
 
-			(*pif->pf_draw_ellipse)(pif->ctx, &xp, NULL, &xr);
+			(*pci->drw->pf_draw_ellipse)(pci->ctx, &xp, NULL, &xr);
 		}
 		else if (compare_text(type, -1, ATTR_ANNO_TYPE_ANCHOR, -1, 0) == 0)
 		{
@@ -256,13 +256,13 @@ void draw_anno(const drawing_interface* pif, link_t_ptr ptr)
 			xr.fy = ppt[0].fy - DEF_ANNO_SPAN;
 			xr.fw = 2;
 			xr.fh = 2;
-			(*pif->pf_draw_ellipse)(pif->ctx, &xp, &xb, &xr);
+			(*pci->drw->pf_draw_ellipse)(pci->ctx, &xp, &xb, &xr);
 
 			pt1.fx = ppt[0].fx;
 			pt1.fy = ppt[0].fy;
 			pt2.fx = ppt[0].fx;
 			pt2.fy = ppt[0].fy - DEF_ANNO_SPAN + 2;
-			(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+			(*pci->drw->pf_draw_line)(pci->ctx, &xp, &pt1, &pt2);
 		}
 		else if (compare_text(type, -1, ATTR_ANNO_TYPE_RANGE, -1, 0) == 0)
 		{
@@ -276,13 +276,13 @@ void draw_anno(const drawing_interface* pif, link_t_ptr ptr)
 			xr.fy = ppt[0].fy - (float)0.5;
 			xr.fw = 1;
 			xr.fh = 1;
-			(*pif->pf_draw_ellipse)(pif->ctx, &xp, &xb, &xr);
+			(*pci->drw->pf_draw_ellipse)(pci->ctx, &xp, &xb, &xr);
 
 			xr.fx = ppt[1].fx - (float)0.5;
 			xr.fy = ppt[1].fy - (float)0.5;
 			xr.fw = 1;
 			xr.fh = 1;
-			(*pif->pf_draw_ellipse)(pif->ctx, &xp, &xb, &xr);
+			(*pci->drw->pf_draw_ellipse)(pci->ctx, &xp, &xb, &xr);
 
 			xscpy(xp.style, GDI_ATTR_STROKE_STYLE_DASHDASH);
 
@@ -290,11 +290,11 @@ void draw_anno(const drawing_interface* pif, link_t_ptr ptr)
 			pt1.fy = ppt[0].fy;
 			pt2.fx = ppt[1].fx;
 			pt2.fy = ppt[1].fy;
-			(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+			(*pci->drw->pf_draw_line)(pci->ctx, &xp, &pt1, &pt2);
 
 			parse_xfont_from_style(&xf, style);
 			xscpy(xf.style, GDI_ATTR_FONT_STYLE_ITALIC);
-			(*pif->pf_set_xfont)(pif->ctx, &xf);
+			(*pci->drw->pf_set_xfont)(pci->ctx, &xf);
 
 			a1 = (ppt[1].fx - ppt[0].fx);// *pdt->dblX;
 			a2 = (ppt[1].fy - ppt[0].fy);// *pdt->dblY;
@@ -305,18 +305,18 @@ void draw_anno(const drawing_interface* pif, link_t_ptr ptr)
 			//pt1.fx = xr.fx + xr.fw / 2;
 			//pt1.fy = xr.fy + xr.fh / 2 - 5;
 			//xsprintf(token, _T("W: %.1fmm"), a1);
-			//(*pif->pf_text_out)(pif->ctx, &xa, &pt1, token, -1);
+			//(*pci->drw->pf_text_out)(pci->ctx, &xa, &pt1, token, -1);
 
 			//pt1.fx = xr.fx + xr.fw / 2;
 			//pt1.fy = xr.fy + xr.fh / 2;
 			//xsprintf(token, _T("H: %.1fmm"), a2);
-			//(*pif->pf_text_out)(pif->ctx, &xa, &pt1, token, -1);
+			//(*pci->drw->pf_text_out)(pci->ctx, &xa, &pt1, token, -1);
 
 			a1 = sqrt(a1 * a1 + a2 * a2);
 			xsprintf(token, _T("%.1fmm"), a1);
 			pt1.fx = xr.fx + xr.fw / 2;
 			pt1.fy = xr.fy + xr.fh / 2 - 10;
-			(*pif->pf_text_out)(pif->ctx, &xa, &pt1, token, -1);
+			(*pci->drw->pf_text_out)(pci->ctx, &xa, &pt1, token, -1);
 		}
 		else if (compare_text(type, -1, ATTR_ANNO_TYPE_ANGLE, -1, 0) == 0)
 		{
@@ -330,25 +330,25 @@ void draw_anno(const drawing_interface* pif, link_t_ptr ptr)
 			pt1.fy = ppt[0].fy;
 			pt2.fx = ppt[1].fx;
 			pt2.fy = ppt[1].fy;
-			(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+			(*pci->drw->pf_draw_line)(pci->ctx, &xp, &pt1, &pt2);
 
 			pt1.fx = ppt[0].fx;
 			pt1.fy = ppt[0].fy;
 			pt2.fx = ppt[2].fx;
 			pt2.fy = ppt[2].fy;
-			(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+			(*pci->drw->pf_draw_line)(pci->ctx, &xp, &pt1, &pt2);
 
 			xr.fx = ppt[1].fx - (float)0.5;
 			xr.fy = ppt[1].fy - (float)0.5;
 			xr.fw = 1;
 			xr.fh = 1;
-			(*pif->pf_draw_ellipse)(pif->ctx, &xp, &xb, &xr);
+			(*pci->drw->pf_draw_ellipse)(pci->ctx, &xp, &xb, &xr);
 
 			xr.fx = ppt[2].fx - (float)0.5;
 			xr.fy = ppt[2].fy - (float)0.5;
 			xr.fw = 1;
 			xr.fh = 1;
-			(*pif->pf_draw_ellipse)(pif->ctx, &xp, &xb, &xr);
+			(*pci->drw->pf_draw_ellipse)(pci->ctx, &xp, &xb, &xr);
 
 			xr.fx = ppt[0].fx - 2;
 			xr.fy = ppt[0].fy - 2;
@@ -368,11 +368,11 @@ void draw_anno(const drawing_interface* pif, link_t_ptr ptr)
 			if (ppt[0].fy < ppt[2].fy && ppt[2].fx < ppt[0].fx)
 				a2 = -XPI + a2;
 
-			//(*pif->pf_draw_arc)(pif->ctx, &xp, &ppt[0], 2, 2, a1, a2);
+			//(*pci->drw->pf_draw_arc)(pci->ctx, &xp, &ppt[0], 2, 2, a1, a2);
 
 			parse_xfont_from_style(&xf, style);
 			xscpy(xf.style, GDI_ATTR_FONT_STYLE_ITALIC);
-			(*pif->pf_set_xfont)(pif->ctx, &xf);
+			(*pci->drw->pf_set_xfont)(pci->ctx, &xf);
 
 			a1 = (a2 - a1) / XPI * 180;
 			if (a1 < 0)
@@ -384,7 +384,7 @@ void draw_anno(const drawing_interface* pif, link_t_ptr ptr)
 
 			pt1.fx = xr.fx + xr.fw / 2;
 			pt1.fy = xr.fy + xr.fh / 2 - 3;
-			(*pif->pf_text_out)(pif->ctx, &xa, &pt1, token, -1);
+			(*pci->drw->pf_text_out)(pci->ctx, &xa, &pt1, token, -1);
 		}
 	
 		xmem_free(ppt);

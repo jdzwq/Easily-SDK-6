@@ -50,7 +50,7 @@ static int CALLBACK _fix_text_calc_rect(int scan, void* object, object_attr_t* a
 	return _SCANNER_OPERA_NEXT;
 }
 
-void calc_text_rect_raw(const drawing_interface* piv, const xface_t* pxa, const tchar_t* sz_text, int sz_len, xrect_t* pxr)
+void calc_text_rect_raw(const drawing_interface* pvi, const xfont_t* pxf, const xface_t* pxa, const tchar_t* sz_text, int sz_len, xrect_t* pxr)
 {
 	FIXTEXT_SCAN tt = { 0 };
 	measure_interface im = { 0 };
@@ -63,32 +63,32 @@ void calc_text_rect_raw(const drawing_interface* piv, const xface_t* pxa, const 
 	if (sz_text)
 		sz_len++;
 
-	(*piv->pf_get_measure)(piv->ctx, &im);
+	(*pvi->drw->pf_get_measure)(pvi->ctx, &im);
 
 	vb.px = pxr->x;vb.py = pxr->y;vb.pw = pxr->w;vb.ph = pxr->h;
-	scan_fix_text((tchar_t*)sz_text, sz_len, &im, &vb, pxa, 0, _fix_text_calc_rect, (void*)&tt);
+	scan_fix_text((tchar_t*)sz_text, sz_len, &im, &vb, pxf, pxa, 0, _fix_text_calc_rect, (void*)&tt);
 
 	xmem_copy((void*)pxr, (void*)&tt.xr, sizeof(xrect_t));
 }
 
-void calc_text_rect(const drawing_interface* pif, const xface_t* pxa, const tchar_t* txt, int len, xrect_t* pxr)
+void calc_text_rect(const drawing_interface* pci, const xfont_t* pxf, const xface_t* pxa, const tchar_t* txt, int len, xrect_t* pxr)
 {
 	xrect_t xr = { 0 };
 	visual_t visu;
 	drawing_interface iv = { 0 };
 
-	visu = (*pif->pf_get_visual_handle)(pif->ctx);
-	(*pif->pf_get_visual_interface)(visu, &iv);
+	visu = (*pci->drw->pf_get_visual_handle)(pci->ctx);
+	(*pci->drw->pf_get_visual_interface)(visu, &iv);
 
-	calc_text_rect_raw(&iv, pxa, txt, len, &xr);
+	calc_text_rect_raw(&iv, pxf, pxa, txt, len, &xr);
 
-	(*pif->pf_rect_pt_to_mm)(pif->ctx, &xr);
+	(*pci->drw->pf_rect_pt_to_mm)(pci->ctx, &xr);
 
 	xmem_copy((void*)pxr, (void*)&xr, sizeof(xrect_t));
 }
 
 typedef struct _VARTEXT_DRAW{
-	const drawing_interface* piv;
+	const drawing_interface* pvi;
 	int page;
 }VARTEXT_DRAW;
 
@@ -104,7 +104,7 @@ static int CALLBACK _var_text_calc_draw(int scan, void* object, object_attr_t* a
 		pt.x = ptm->cur_x;
 		pt.y = ptm->cur_y;
 
-		(*(ptt->piv->pf_text_out))(ptt->piv->ctx, pxa, &pt, cur_char, cur_count);
+		(*(ptt->pvi->drw->pf_text_out))(ptt->pvi->ctx, pxa, &pt, cur_char, cur_count);
 		break;
 	case _SCANNER_STATE_END:
 		return _SCANNER_OPERA_STOP;
@@ -113,38 +113,38 @@ static int CALLBACK _var_text_calc_draw(int scan, void* object, object_attr_t* a
 	return _SCANNER_OPERA_NEXT;
 }
 
-void draw_var_text_raw(const drawing_interface* piv, const xface_t* pxa, const xrect_t* pxr, string_t data)
+void draw_var_text_raw(const drawing_interface* pvi, const xfont_t* pxf, const xface_t* pxa, const xrect_t* pxr, string_t data)
 {
 	VARTEXT_DRAW tt = { 0 };
 	measure_interface im = { 0 };
 	viewbox_t vb;
 
-	tt.piv = piv;
+	tt.pvi = pvi;
 	tt.page = 0;
 
-	(*piv->pf_get_measure)(piv->ctx, &im);
+	(*pvi->drw->pf_get_measure)(pvi->ctx, &im);
 
 	vb.px = pxr->x;vb.py = pxr->y;vb.pw = pxr->w;vb.ph = pxr->h;
-	scan_var_text(data, &im, &vb, pxa, 0, _var_text_calc_draw, (void*)&tt);
+	scan_var_text(data, &im, &vb, pxf, pxa, 0, _var_text_calc_draw, (void*)&tt);
 }
 
-void draw_var_text(const drawing_interface* pif, const xface_t* pxa, const xrect_t* pxr, string_t var)
+void draw_var_text(const drawing_interface* pci, const xfont_t* pxf, const xface_t* pxa, const xrect_t* pxr, string_t var)
 {
 	xrect_t xr;
 	visual_t visu;
 	drawing_interface iv = { 0 };
 
 	xmem_copy((void*)&xr, (void*)pxr, sizeof(xrect_t));
-	(*pif->pf_rect_mm_to_pt)(pif->ctx, &xr);
+	(*pci->drw->pf_rect_mm_to_pt)(pci->ctx, &xr);
 
-	visu = (*pif->pf_get_visual_handle)(pif->ctx);
-	(*pif->pf_get_visual_interface)(visu, &iv);
+	visu = (*pci->drw->pf_get_visual_handle)(pci->ctx);
+	(*pci->drw->pf_get_visual_interface)(visu, &iv);
 
-	draw_var_text_raw(&iv, pxa, &xr, var);
+	draw_var_text_raw(&iv, pxf, pxa, &xr, var);
 }
 
 typedef struct _TAGTEXT_DRAW{
-	const drawing_interface* piv;
+	const drawing_interface* pvi;
 	int page;
 }TAGTEXT_DRAW;
 
@@ -165,7 +165,7 @@ static int CALLBACK _tag_text_calc_draw(int scan, void* object, object_attr_t* a
 		pt.x = ptm->cur_x;
 		pt.y = ptm->cur_y;
 
-		(*(ptt->piv->pf_text_out))(ptt->piv->ctx, pxa, &pt, cur_char, cur_count);
+		(*(ptt->pvi->drw->pf_text_out))(ptt->pvi->ctx, pxa, &pt, cur_char, cur_count);
 		break;
 	case _SCANNER_STATE_NEWPAGE:
 	case _SCANNER_STATE_END:
@@ -175,34 +175,34 @@ static int CALLBACK _tag_text_calc_draw(int scan, void* object, object_attr_t* a
 	return _SCANNER_OPERA_NEXT;
 }
 
-void draw_tag_text_raw(const drawing_interface* piv, const xface_t* pxa, const xrect_t* pxr, link_t_ptr data, int page)
+void draw_tag_text_raw(const drawing_interface* pvi, const xfont_t* pxf, const xface_t* pxa, const xrect_t* pxr, link_t_ptr data, int page)
 {
 	TAGTEXT_DRAW tt = { 0 };
 	measure_interface im = { 0 };
 	viewbox_t vb;
 
-	tt.piv = piv;
+	tt.pvi = pvi;
 	tt.page = page;
 
-	(*piv->pf_get_measure)(piv->ctx, &im);
+	(*pvi->drw->pf_get_measure)(pvi->ctx, &im);
 
 	vb.px = pxr->x;vb.py = pxr->y;vb.pw = pxr->w;vb.ph = pxr->h;
-	scan_tag_text(data, &im, &vb, pxa, 1, _tag_text_calc_draw, (void*)&tt);
+	scan_tag_text(data, &im, &vb, pxf, pxa, 1, _tag_text_calc_draw, (void*)&tt);
 }
 
-void draw_tag_text(const drawing_interface* pif, const xface_t* pxa, const xrect_t* pxr, link_t_ptr tag, int page)
+void draw_tag_text(const drawing_interface* pci, const xfont_t* pxf, const xface_t* pxa, const xrect_t* pxr, link_t_ptr tag, int page)
 {
 	xrect_t xr;
 	visual_t visu;
 	drawing_interface iv = { 0 };
 
 	xmem_copy((void*)&xr, (void*)pxr, sizeof(xrect_t));
-	(*pif->pf_rect_mm_to_pt)(pif->ctx, &xr);
+	(*pci->drw->pf_rect_mm_to_pt)(pci->ctx, &xr);
 
-	visu = (*pif->pf_get_visual_handle)(pif->ctx);
-	(*pif->pf_get_visual_interface)(visu, &iv);
+	visu = (*pci->drw->pf_get_visual_handle)(pci->ctx);
+	(*pci->drw->pf_get_visual_interface)(visu, &iv);
 
-	draw_tag_text_raw(&iv, pxa, &xr, tag, page);
+	draw_tag_text_raw(&iv, pxf, pxa, &xr, tag, page);
 }
 
 typedef struct _TAGTEXT_PAGE{
@@ -223,7 +223,7 @@ static int CALLBACK _tag_text_calc_pages(int scan, void* object, object_attr_t* 
 	return _SCANNER_OPERA_NEXT;
 }
 
-int calc_tag_pages_raw(const drawing_interface* piv, const xface_t* pxa, const xrect_t* pxr, link_t_ptr data)
+int calc_tag_pages_raw(const drawing_interface* pvi, const xfont_t* pxf, const xface_t* pxa, const xrect_t* pxr, link_t_ptr data)
 {
 	TAGTEXT_PAGE tt = { 0 };
 	measure_interface im = { 0 };
@@ -231,31 +231,31 @@ int calc_tag_pages_raw(const drawing_interface* piv, const xface_t* pxa, const x
 
 	tt.pages = 1;
 
-	(*piv->pf_get_measure)(piv->ctx, &im);
+	(*pvi->drw->pf_get_measure)(pvi->ctx, &im);
 
 	vb.px = pxr->x;vb.py = pxr->y;vb.pw = pxr->w;vb.ph = pxr->h;
-	scan_tag_text(data, &im, &vb, pxa, 1, _tag_text_calc_pages, (void*)&tt);
+	scan_tag_text(data, &im, &vb, pxf, pxa, 1, _tag_text_calc_pages, (void*)&tt);
 
 	return tt.pages;
 }
 
-int calc_tag_pages(const drawing_interface* pif, const xface_t* pxa, const xrect_t* pxr, link_t_ptr tag)
+int calc_tag_pages(const drawing_interface* pci, const xfont_t* pxf, const xface_t* pxa, const xrect_t* pxr, link_t_ptr tag)
 {
 	xrect_t xr;
 	visual_t visu;
 	drawing_interface iv = { 0 };
 
 	xmem_copy((void*)&xr, (void*)pxr, sizeof(xrect_t));
-	(*pif->pf_rect_mm_to_pt)(pif->ctx, &xr);
+	(*pci->drw->pf_rect_mm_to_pt)(pci->ctx, &xr);
 
-	visu = (*pif->pf_get_visual_handle)(pif->ctx);
-	(*pif->pf_get_visual_interface)(visu, &iv);
+	visu = (*pci->drw->pf_get_visual_handle)(pci->ctx);
+	(*pci->drw->pf_get_visual_interface)(visu, &iv);
 
-	return calc_tag_pages_raw(&iv, pxa, &xr, tag);
+	return calc_tag_pages_raw(&iv, pxf, pxa, &xr, tag);
 }
 
 typedef struct _MEMOTEXT_DRAW{
-	const drawing_interface* piv;
+	const drawing_interface* pvi;
 	int page;
 }MEMOTEXT_DRAW;
 
@@ -263,6 +263,7 @@ static int CALLBACK _memo_text_calc_draw(int scan, void* object, object_attr_t* 
 {
 	MEMOTEXT_DRAW* ptt = (MEMOTEXT_DRAW*)pp;
 	xpoint_t pt;
+	const xfont_t* pxf = *(attr->ppxf);
 	const xface_t* pxa = *(attr->ppxa);
 
 	if (page < ptt->page)
@@ -276,7 +277,7 @@ static int CALLBACK _memo_text_calc_draw(int scan, void* object, object_attr_t* 
 		pt.x = ptm->cur_x;
 		pt.y = ptm->cur_y;
 
-		(*(ptt->piv->pf_text_out))(ptt->piv->ctx, pxa, &pt, cur_char, cur_count);
+		(*(ptt->pvi->drw->pf_text_out))(ptt->pvi->ctx, pxa, &pt, cur_char, cur_count);
 		break;
 	case _SCANNER_STATE_NEWPAGE:
 	case _SCANNER_STATE_END:
@@ -286,34 +287,34 @@ static int CALLBACK _memo_text_calc_draw(int scan, void* object, object_attr_t* 
 	return _SCANNER_OPERA_NEXT;
 }
 
-void draw_memo_text_raw(const drawing_interface* piv, const xface_t* pxa, const xrect_t* pxr, link_t_ptr data, int page)
+void draw_memo_text_raw(const drawing_interface* pvi, const xfont_t* pxf, const xface_t* pxa, const xrect_t* pxr, link_t_ptr data, int page)
 {
 	MEMOTEXT_DRAW tt = { 0 };
 	measure_interface im = { 0 };
 	viewbox_t vb;
 
-	tt.piv = piv;
+	tt.pvi = pvi;
 	tt.page = page;
 
-	(*piv->pf_get_measure)(piv->ctx, &im);
+	(*pvi->drw->pf_get_measure)(pvi->ctx, &im);
 
 	vb.px = pxr->x;vb.py = pxr->y;vb.pw = pxr->w;vb.ph = pxr->h;
-	scan_memo_text(data, &im, &vb, pxa, 1, _memo_text_calc_draw, (void*)&tt);
+	scan_memo_text(data, &im, &vb, pxf, pxa, 1, _memo_text_calc_draw, (void*)&tt);
 }
 
-void draw_memo_text(const drawing_interface* pif, const xface_t* pxa, const xrect_t* pxr, link_t_ptr memo, int page)
+void draw_memo_text(const drawing_interface* pci, const xfont_t* pxf, const xface_t* pxa, const xrect_t* pxr, link_t_ptr memo, int page)
 {
 	xrect_t xr;
 	visual_t visu;
 	drawing_interface iv = { 0 };
 
 	xmem_copy((void*)&xr, (void*)pxr, sizeof(xrect_t));
-	(*pif->pf_rect_mm_to_pt)(pif->ctx, &xr);
+	(*pci->drw->pf_rect_mm_to_pt)(pci->ctx, &xr);
 
-	visu = (*pif->pf_get_visual_handle)(pif->ctx);
-	(*pif->pf_get_visual_interface)(visu, &iv);
+	visu = (*pci->drw->pf_get_visual_handle)(pci->ctx);
+	(*pci->drw->pf_get_visual_interface)(visu, &iv);
 
-	draw_memo_text_raw(&iv, pxa, &xr, memo, page);
+	draw_memo_text_raw(&iv, pxf, pxa, &xr, memo, page);
 }
 
 typedef struct _MEMOTEXT_PAGE{
@@ -334,7 +335,7 @@ static int CALLBACK _memo_text_calc_pages(int scan, void* object, object_attr_t*
 	return _SCANNER_OPERA_NEXT;
 }
 
-int calc_memo_pages_raw(const drawing_interface* piv, const xface_t* pxa, const xrect_t* pxr, link_t_ptr data)
+int calc_memo_pages_raw(const drawing_interface* pvi, const xfont_t* pxf, const xface_t* pxa, const xrect_t* pxr, link_t_ptr data)
 {
 	MEMOTEXT_PAGE tt = { 0 };
 	measure_interface im = { 0 };
@@ -342,31 +343,31 @@ int calc_memo_pages_raw(const drawing_interface* piv, const xface_t* pxa, const 
 
 	tt.pages = 1;
 
-	(*piv->pf_get_measure)(piv->ctx, &im);
+	(*pvi->drw->pf_get_measure)(pvi->ctx, &im);
 
 	vb.px = pxr->x;vb.py = pxr->y;vb.pw = pxr->w;vb.ph = pxr->h;
-	scan_memo_text(data, &im, &vb, pxa, 1, _memo_text_calc_pages, (void*)&tt);
+	scan_memo_text(data, &im, &vb, pxf, pxa, 1, _memo_text_calc_pages, (void*)&tt);
 
 	return tt.pages;
 }
 
-int calc_memo_pages(const drawing_interface* pif, const xface_t* pxa, const xrect_t* pxr, link_t_ptr memo)
+int calc_memo_pages(const drawing_interface* pci, const xfont_t* pxf, const xface_t* pxa, const xrect_t* pxr, link_t_ptr memo)
 {
 	xrect_t xr;
 	visual_t visu;
 	drawing_interface iv = { 0 };
 
 	xmem_copy((void*)&xr, (void*)pxr, sizeof(xrect_t));
-	(*pif->pf_rect_mm_to_pt)(pif->ctx, &xr);
+	(*pci->drw->pf_rect_mm_to_pt)(pci->ctx, &xr);
 
-	visu = (*pif->pf_get_visual_handle)(pif->ctx);
-	(*pif->pf_get_visual_interface)(visu, &iv);
+	visu = (*pci->drw->pf_get_visual_handle)(pci->ctx);
+	(*pci->drw->pf_get_visual_interface)(visu, &iv);
 
-	return calc_memo_pages_raw(&iv, pxa, &xr, memo);
+	return calc_memo_pages_raw(&iv, pxf, pxa, &xr, memo);
 }
 
 typedef struct _RICHTEXT_DRAW{
-	const drawing_interface* piv;
+	const drawing_interface* pvi;
 	int page;
 }RICHTEXT_DRAW;
 
@@ -390,7 +391,7 @@ static int CALLBACK _rich_text_calc_draw(int scan, void* object, object_attr_t* 
 		pt.x = ptm->cur_x;
 		pt.y = ptm->cur_y;
 
-		(*(ptt->piv->pf_text_out))(ptt->piv->ctx, pxa, &pt, cur_char, cur_count);
+		(*(ptt->pvi->drw->pf_text_out))(ptt->pvi->ctx, pxa, &pt, cur_char, cur_count);
 		break;
 	case _SCANNER_STATE_NEWPAGE:
 	case _SCANNER_STATE_END:
@@ -400,34 +401,34 @@ static int CALLBACK _rich_text_calc_draw(int scan, void* object, object_attr_t* 
 	return _SCANNER_OPERA_NEXT;
 }
 
-void draw_rich_text_raw(const drawing_interface* piv, const xface_t* pxa, const xrect_t* pxr, link_t_ptr data, int page)
+void draw_rich_text_raw(const drawing_interface* pvi, const xfont_t* pxf, const xface_t* pxa, const xrect_t* pxr, link_t_ptr data, int page)
 {
 	RICHTEXT_DRAW tt = { 0 };
 	measure_interface im = { 0 };
 	viewbox_t vb;
 
-	tt.piv = piv;
+	tt.pvi = pvi;
 	tt.page = page;
 
-	(*piv->pf_get_measure)(piv->ctx, &im);
+	(*pvi->drw->pf_get_measure)(pvi->ctx, &im);
 
 	vb.px = pxr->x;vb.py = pxr->y;vb.pw = pxr->w;vb.ph = pxr->h;
-	scan_rich_text(data, &im, &vb, pxa, 1, _rich_text_calc_draw, (void*)&tt);
+	scan_rich_text(data, &im, &vb, pxf, pxa, 1, _rich_text_calc_draw, (void*)&tt);
 }
 
-void draw_rich_text(const drawing_interface* pif, const xface_t* pxa, const xrect_t* pxr, link_t_ptr rich, int page)
+void draw_rich_text(const drawing_interface* pci, const xfont_t* pxf, const xface_t* pxa, const xrect_t* pxr, link_t_ptr rich, int page)
 {
 	xrect_t xr;
 	visual_t visu;
 	drawing_interface iv = { 0 };
 
 	xmem_copy((void*)&xr, (void*)pxr, sizeof(xrect_t));
-	(*pif->pf_rect_mm_to_pt)(pif->ctx, &xr);
+	(*pci->drw->pf_rect_mm_to_pt)(pci->ctx, &xr);
 
-	visu = (*pif->pf_get_visual_handle)(pif->ctx);
-	(*pif->pf_get_visual_interface)(visu, &iv);
+	visu = (*pci->drw->pf_get_visual_handle)(pci->ctx);
+	(*pci->drw->pf_get_visual_interface)(visu, &iv);
 
-	draw_rich_text_raw(&iv, pxa, &xr, rich, page);
+	draw_rich_text_raw(&iv, pxf, pxa, &xr, rich, page);
 }
 
 typedef struct _RICHTEXT_PAGE{
@@ -448,7 +449,7 @@ static int CALLBACK _rich_text_calc_pages(int scan, void* object, object_attr_t*
 	return _SCANNER_OPERA_NEXT;
 }
 
-int calc_rich_pages_raw(const drawing_interface* piv, const xface_t* pxa, const xrect_t* pxr, link_t_ptr data)
+int calc_rich_pages_raw(const drawing_interface* pvi, const xfont_t* pxf, const xface_t* pxa, const xrect_t* pxr, link_t_ptr data)
 {
 	RICHTEXT_PAGE tt = { 0 };
 	measure_interface im = { 0 };
@@ -456,25 +457,25 @@ int calc_rich_pages_raw(const drawing_interface* piv, const xface_t* pxa, const 
 
 	tt.pages = 1;
 
-	(*piv->pf_get_measure)(piv->ctx, &im);
+	(*pvi->drw->pf_get_measure)(pvi->ctx, &im);
 
 	vb.px = pxr->x;vb.py = pxr->y;vb.pw = pxr->w;vb.ph = pxr->h;
-	scan_rich_text(data, &im, &vb, pxa, 1, _rich_text_calc_pages, (void*)&tt);
+	scan_rich_text(data, &im, &vb, pxf, pxa, 1, _rich_text_calc_pages, (void*)&tt);
 
 	return tt.pages;
 }
 
-int calc_rich_pages(const drawing_interface* pif, const xface_t* pxa, const xrect_t* pxr, link_t_ptr rich)
+int calc_rich_pages(const drawing_interface* pci, const xfont_t* pxf, const xface_t* pxa, const xrect_t* pxr, link_t_ptr rich)
 {
 	xrect_t xr;
 	visual_t visu;
 	drawing_interface iv = { 0 };
 
 	xmem_copy((void*)&xr, (void*)pxr, sizeof(xrect_t));
-	(*pif->pf_rect_mm_to_pt)(pif->ctx, &xr);
+	(*pci->drw->pf_rect_mm_to_pt)(pci->ctx, &xr);
 
-	visu = (*pif->pf_get_visual_handle)(pif->ctx);
-	(*pif->pf_get_visual_interface)(visu, &iv);
+	visu = (*pci->drw->pf_get_visual_handle)(pci->ctx);
+	(*pci->drw->pf_get_visual_interface)(visu, &iv);
 
-	return calc_rich_pages_raw(&iv, pxa, &xr, rich);
+	return calc_rich_pages_raw(&iv, pxf, pxa, &xr, rich);
 }

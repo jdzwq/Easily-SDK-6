@@ -1111,8 +1111,8 @@ void MainFrame_ToolBar_OnLBClick(widget_t widget, NOTICE_TOOL* pnt)
 	if (!pnt->item)
 		return;
 
-	int code = xstol(get_tool_item_id_ptr(pnt->item));
-	int cid = widget_get_user_id(widget);
+	int cid = xstol(get_tool_item_id_ptr(pnt->item));
+	int code = 0;
 
 	toolctrl_get_item_rect(pdt->hToolBar, pnt->item, &xr);
 	pt.x = xr.x;
@@ -1156,7 +1156,6 @@ void MainFrame_TitleBar_OnItemDelete(widget_t widget, NOTICE_TITLE* pnt)
 	if (!widget_is_valid(hPanel))
 		return;
 
-	widget_show(hPanel, WS_SHOW_HIDE);
 	widget_close(hPanel, 0);
 
 	if (widget_is_valid(hPanel))
@@ -2084,11 +2083,10 @@ void MainFrame_OnMenuCommand(widget_t widget, int code, int cid, vword_t data)
 	widget_t hPanel = MainFrame_GetActivePanel(widget);
 	if (hPanel)
 	{
-		if (widget_send_command(hPanel, code, cid, data))
-			return;
+		widget_send_command(hPanel, code, cid, data);
 	}
 
-	switch (code)
+	switch (cid)
 	{
 	case IDA_PROJECT_OPEN:
 		MainFrame_OpenProject(widget);

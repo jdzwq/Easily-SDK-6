@@ -29,8 +29,301 @@ LICENSE.GPL3 for more details.
 
 #include "xdkstd.h"
 #include "xdkimp.h"
+#include "xdkloc.h"
 
-xdk_mou_t g_xdk_mou = { 0 };
+//xdk_mou_t g_xdk_mou = { 0 };
+
+xdk_mou_t g_xdk_mou = {
+	.if_ok = bool_false,
+	.if_opt = 0,
+	.if_big = 0,
+
+#ifdef XDK_SUPPORT_THREAD
+		.thread_id = 0,
+		.tls_thr_zero = 0,
+		.tls_thr_zone = 0,
+		.tls_thr_jump = 0,
+		.tls_thr_dump = 0,
+#else
+		.pif_zone = NULL,
+		.pif_jump = NULL,
+		.pif_dump = NULL,
+#endif //XDK_SUPPORT_THREAD
+
+#ifdef XDK_SUPPORT_MEMO
+	.if_memo.pf_local_alloc = _local_alloc,
+	.if_memo.pf_local_alloc = _local_alloc,
+	.if_memo.pf_local_realloc = _local_realloc,
+	.if_memo.pf_local_free = _local_free,
+
+#ifdef XDK_SUPPORT_MEMO_HEAP
+	.if_memo.pf_process_heap = _process_heapo,
+	.if_memo.pf_heap_create = _heapo_create,
+	.if_memo.pf_heap_destroy = _heapo_destroy,
+	.if_memo.pf_heap_clean = _heapo_clean,
+	.if_memo.pf_heap_alloc = _heapo_alloc,
+	.if_memo.pf_heap_realloc = _heapo_realloc,
+	.if_memo.pf_heap_free = _heapo_free,
+	.if_memo.pf_heap_zero = _heapo_zero,
+#endif
+
+#ifdef XDK_SUPPORT_MEMO_PAGE
+	.if_memo.pf_page_alloc = _paged_alloc,
+	.if_memo.pf_page_realloc = _paged_realloc,
+	.if_memo.pf_page_free = _paged_free,
+	.if_memo.pf_page_lock = _paged_lock,
+	.if_memo.pf_page_size = _paged_size,
+	.if_memo.pf_page_unlock = _paged_unlock,
+#endif
+
+#ifdef XDK_SUPPORT_MEMO_CACHE
+	.if_memo.pf_cache_open = _cache_open,
+	.if_memo.pf_cache_close = _cache_close,
+	.if_memo.pf_cache_write = _cache_write,
+	.if_memo.pf_cache_read = _cache_read,
+	.if_memo.pf_cache_protect = _cache_protect,
+#endif
+#endif //XDK_SUPPORT_MEMO
+
+#ifdef XDK_SUPPORT_ERROR
+	.if_error.pf_error_text = _error_text,
+	.if_error.pf_error_exit = _error_exit,
+	.if_error.pf_error_debug = _error_debug,
+	.if_error.pf_error_print = _error_print,
+#endif //XDK_SUPPORT_ERROR
+
+#ifdef XDK_SUPPORT_MBCS
+	.if_mbcs.pf_utf_to_ucs = c_utf_to_ucs,
+	.if_mbcs.pf_ucs_to_utf = c_ucs_to_utf,
+	.if_mbcs.pf_gbk_to_ucs = c_gbk_to_ucs,
+	.if_mbcs.pf_ucs_to_gbk = c_ucs_to_gbk,
+#endif //XDK_SUPPORT_MBCS
+
+#ifdef XDK_SUPPORT_ASYNC
+	.if_async.pf_async_init = _async_init,
+	.if_async.pf_async_uninit = _async_uninit,
+#endif //XDK_SUPPORT_ASYNC
+
+#ifdef XDK_SUPPORT_DATE
+	.if_date.pf_get_loc_date = _get_loc_date,
+	.if_date.pf_get_utc_date = _get_utc_date,
+	.if_date.pf_mak_loc_week = _mak_loc_week,
+	.if_date.pf_mak_utc_week = _mak_utc_week,
+	.if_date.pf_loc_date_to_utc = _loc_date_to_utc,
+	.if_date.pf_utc_date_to_loc = _utc_date_to_loc,
+	.if_date.pf_get_times = _get_times,
+	.if_date.pf_get_ticks = _get_ticks,
+	.if_date.pf_get_timestamp = _get_timestamp,
+	.if_date.pf_utc_date_from_times = _utc_date_from_times,
+	.if_date.pf_utc_date_from_ticks = _utc_date_from_ticks,
+	.if_date.pf_utc_date_from_timestamp = _utc_date_from_timestamp,
+#endif //XDK_SUPPORT_DATE
+
+#ifdef XDK_SUPPORT_THREAD
+	.if_thread.pf_thread_begin = _thread_begin,
+	.if_thread.pf_thread_end = _thread_end,
+	.if_thread.pf_thread_sleep = _thread_sleep,
+	.if_thread.pf_thread_yield = _thread_yield,
+	.if_thread.pf_thread_get_id = _thread_get_id,
+	.if_thread.pf_thread_create_tls = _thread_create_tls,
+	.if_thread.pf_thread_destroy_tls = _thread_destroy_tls,
+	.if_thread.pf_thread_get_tls = _thread_get_tls,
+	.if_thread.pf_thread_set_tls = _thread_set_tls,
+	.if_thread.pf_thread_join = _thread_join,
+    .if_thread.pf_thread_safe = _thread_safe,
+#ifdef XDK_SUPPORT_THREAD_EVENT
+	.if_thread.pf_event_create = _event_create,
+	.if_thread.pf_event_destroy = _event_destroy,
+	.if_thread.pf_event_sign = _event_sign,
+	.if_thread.pf_event_wait = _event_wait,
+#endif
+#ifdef XDK_SUPPORT_THREAD_CRITI
+	.if_thread.pf_criti_create = _criti_create,
+	.if_thread.pf_criti_destroy = _criti_destroy,
+	.if_thread.pf_criti_enter = _criti_enter,
+	.if_thread.pf_criti_leave = _criti_leave,
+	.if_thread.pf_criti_query = _criti_query,
+#endif
+#ifdef XDK_SUPPORT_THREAD_MUTEX
+	.if_thread.pf_mutex_create = _mutex_create,
+	.if_thread.pf_mutex_destroy = _mutex_destroy,
+	.if_thread.pf_mutex_open = _mutex_open,
+	.if_thread.pf_mutex_close = _mutex_close,
+	.if_thread.pf_mutex_lock = _mutex_lock,
+	.if_thread.pf_mutex_unlock = _mutex_unlock,
+#endif
+#ifdef XDK_SUPPORT_THREAD_SEMAP
+	.if_thread.pf_semap_create = _semap_create,
+	.if_thread.pf_semap_destroy = _semap_destroy,
+	.if_thread.pf_semap_open = _semap_open,
+	.if_thread.pf_semap_close = _semap_close,
+	.if_thread.pf_semap_lock = _semap_lock,
+	.if_thread.pf_semap_unlock = _semap_unlock,
+#endif
+#ifdef XDK_SUPPORT_THREAD_QUEUE
+	.if_thread.pf_queue_create = _queue_create,
+	.if_thread.pf_queue_destroy = _queue_destroy,
+	.if_thread.pf_queue_wait = _queue_wait,
+#endif
+#endif //XDK_SUPPORT_THREAD
+
+#ifdef XDK_SUPPORT_TIMER
+	.if_timer.pf_create_timer_queue = _create_timer_queue,
+	.if_timer.pf_destroy_timer_queue = _destroy_timer_queue,
+	.if_timer.pf_create_timer = _create_timer,
+	.if_timer.pf_destroy_timer = _destroy_timer,
+	.if_timer.pf_alter_timer = _alter_timer,
+#endif //XDK_SUPPORT_TIMER
+
+#ifdef XDK_SUPPORT_RANDOM
+	.if_random.pf_system_srand = _system_srand,
+	.if_random.pf_system_rand32 = _system_rand32,
+	.if_random.pf_system_rand64 = _system_rand64,
+#endif //XDK_SUPPORT_RANDOM
+
+#ifdef XDK_SUPPORT_SOCK
+	.if_socket.pf_socket_startup = _socket_startup,
+	.if_socket.pf_socket_cleanup = _socket_cleanup,
+	.if_socket.pf_socket_tcp = _socket_tcp,
+	.if_socket.pf_socket_udp = _socket_udp,
+	.if_socket.pf_socket_icmp = _socket_icmp,
+	.if_socket.pf_socket_close = _socket_close,
+	.if_socket.pf_socket_wait = _socket_wait,
+	.if_socket.pf_socket_shutdown = _socket_shutdown,
+	.if_socket.pf_socket_connect = _socket_connect,
+	.if_socket.pf_socket_bind = _socket_bind,
+	.if_socket.pf_socket_sendto = _socket_sendto,
+	.if_socket.pf_socket_recvfrom = _socket_recvfrom,
+	.if_socket.pf_socket_recv = _socket_recv,
+	.if_socket.pf_socket_send = _socket_send,
+	.if_socket.pf_socket_setopt = _socket_setopt,
+	.if_socket.pf_socket_getopt = _socket_getopt,
+	.if_socket.pf_socket_set_linger = _socket_set_linger,
+	.if_socket.pf_socket_set_sndbuf = _socket_set_sndbuf,
+	.if_socket.pf_socket_set_rcvbuf = _socket_set_rcvbuf,
+	.if_socket.pf_socket_set_nonblk = _socket_set_nonblk,
+	.if_socket.pf_socket_get_nonblk = _socket_get_nonblk,
+	.if_socket.pf_fill_addr = _fill_addr,
+	.if_socket.pf_conv_addr = _conv_addr,
+	.if_socket.pf_host_addr = _host_addr,
+	.if_socket.pf_socket_peer = _socket_peer,
+	.if_socket.pf_socket_addr = _socket_addr,
+	.if_socket.pf_socket_accept = _socket_accept,
+	.if_socket.pf_socket_listen = _socket_listen,
+	.if_socket.pf_socket_dupli = _socket_dupli,
+	.if_socket.pf_socket_share = _socket_share,
+	.if_socket.pf_socket_write = _socket_write,
+	.if_socket.pf_socket_read = _socket_read,
+	.if_socket.pf_socket_error = _socket_error,
+#endif //XDK_SUPPORT_SOCK
+
+#ifdef XDK_SUPPORT_PIPE
+	.if_pipe.pf_pipe_srv = _pipe_srv,
+	.if_pipe.pf_pipe_listen = _pipe_listen,
+	.if_pipe.pf_pipe_stop = _pipe_stop,
+	.if_pipe.pf_pipe_cli = _pipe_cli,
+	.if_pipe.pf_pipe_close = _pipe_close,
+	.if_pipe.pf_pipe_wait = _pipe_wait,
+	.if_pipe.pf_pipe_read = _pipe_read,
+	.if_pipe.pf_pipe_write = _pipe_write,
+	.if_pipe.pf_pipe_flush = _pipe_flush,
+#endif //XDK_SUPPORT_PIPE
+
+#ifdef XDK_SUPPORT_SHARE
+	.if_share.pf_share_srv = _share_srv,
+	.if_share.pf_share_cli = _share_cli,
+	.if_share.pf_share_close = _share_close,
+	.if_share.pf_share_write = _share_write,
+	.if_share.pf_share_read = _share_read,
+	.if_share.pf_share_lock = _share_lock,
+	.if_share.pf_share_unlock = _share_unlock,
+#endif //XDK_SUPPORT_SHARE
+
+#ifdef XDK_SUPPORT_FILE
+	.if_file.pf_file_open = _file_open,
+	.if_file.pf_file_close = _file_close,
+	.if_file.pf_file_size = _file_size,
+	.if_file.pf_file_read = _file_read,
+	.if_file.pf_file_read_range = _file_read_range,
+	.if_file.pf_file_write_range = _file_write_range,
+	.if_file.pf_file_lock_range = _file_lock_range,
+	.if_file.pf_file_unlock_range = _file_unlock_range,
+	.if_file.pf_file_write = _file_write,
+	.if_file.pf_file_flush = _file_flush,
+	.if_file.pf_file_truncate = _file_truncate,
+	.if_file.pf_file_seek_begin = _file_seek_begin,
+	.if_file.pf_file_seek_end = _file_seek_end,
+	.if_file.pf_file_seek_bytes = _file_seek_bytes,
+	.if_file.pf_file_seek_lines = _file_seek_lines,
+	.if_file.pf_file_peek_line = _file_peek_line,
+	.if_file.pf_file_read_line = _file_read_line,
+	.if_file.pf_file_write_line = _file_write_line,
+	.if_file.pf_file_delete = _file_delete,
+	.if_file.pf_file_rename = _file_rename,
+	.if_file.pf_file_info = _file_info,
+	.if_file.pf_directory_open = _directory_open,
+	.if_file.pf_file_settime = _file_settime,
+	.if_file.pf_file_gettime = _file_gettime,
+#ifdef XDK_SUPPORT_FILE_FIND
+	.if_file.pf_file_find_first = _file_find_first,
+	.if_file.pf_file_find_next = _file_find_next,
+	.if_file.pf_file_find_close = _file_find_close,
+#endif
+#endif //XDK_SUPPORT_FILE
+
+#ifdef XDK_SUPPORT_COMM
+	.if_comm.pf_default_comm_mode = _default_comm_mode,
+	.if_comm.pf_set_comm_mode = _set_comm_mode,
+	.if_comm.pf_get_comm_mode = _get_comm_mode,
+	.if_comm.pf_comm_listen = _comm_listen,
+	.if_comm.pf_comm_open = _comm_open,
+	.if_comm.pf_comm_close = _comm_close,
+	.if_comm.pf_comm_read = _comm_read,
+	.if_comm.pf_comm_write = _comm_write,
+	.if_comm.pf_comm_flush = _comm_flush,
+#endif //XDK_SUPPORT_COMM
+
+#ifdef XDK_SUPPORT_CONS
+	.if_cons.pf_cons_alloc = _cons_alloc,
+	.if_cons.pf_cons_free = _cons_free,
+	.if_cons.pf_cons_sigaction = _cons_sigaction,
+	.if_cons.pf_cons_read = _cons_read,
+	.if_cons.pf_cons_write = _cons_write,
+	.if_cons.pf_cons_flush = _cons_flush,
+	.if_cons.pf_cons_stdin = _cons_stdin,
+	.if_cons.pf_cons_stdout = _cons_stdout,
+#endif //XDK_SUPPORT_CONS
+
+#ifdef XDK_SUPPORT_PROCESS
+	.if_process.pf_free_library = _free_library,
+	.if_process.pf_get_address = _get_address,
+	.if_process.pf_load_library = _load_library,
+	.if_process.pf_get_curpath = _get_curpath,
+	.if_process.pf_get_runpath = _get_runpath,
+	.if_process.pf_create_process = _create_process,
+	.if_process.pf_release_process = _release_process,
+	.if_process.pf_process_wait_run = _process_wait_run,
+	.if_process.pf_process_wait_exit = _process_wait_exit,
+    .if_process.pf_process_safe = _process_safe,
+	.if_process.pf_process_dupli = _process_dupli,
+	.if_process.pf_process_alloc = _process_alloc,
+	.if_process.pf_process_free = _process_free,
+	.if_process.pf_process_write = _process_write,
+	.if_process.pf_process_read = _process_read,
+	.if_process.pf_release_handle = _release_handle,
+	.if_process.pf_inherit_handle = _inherit_handle,
+	.if_process.pf_read_profile = _read_profile,
+	.if_process.pf_write_profile = _write_profile,
+	.if_process.pf_get_envvar = _get_envvar,
+	.if_process.pf_system_info = _system_info,
+#endif //XDK_SUPPORT_PROCESS
+
+#ifdef XDK_SUPPORT_MEMO_DUMP
+		.dump_crit = 0,
+		.dump_link = {0}
+#endif //XDK_SUPPORT_MEMO_DUMP
+};
+
 
 jmp_buf* thread_jump_buff(void)
 {
@@ -47,7 +340,7 @@ jmp_buf* thread_jump_buff(void)
 
 static void _action_pipe(int sig)
 {
-    
+    NOP;
 }
 
 void xdk_thread_init(int master)
@@ -261,9 +554,9 @@ void xdk_thread_uninit(int error)
 	else
 		(*piv->pf_heap_clean)(heap);
 		
-#else /*XDK_SUPPORT_MEMO_HEAP*/
+#else 
 	(*piv->pf_local_free)((void*)pzn);
-#endif
+#endif //XDK_SUPPORT_MEMO_HEAP
 
 	(*pit->pf_thread_set_tls)(g_xdk_mou.tls_thr_zone, 0);
 }
@@ -306,101 +599,8 @@ void xdk_process_init(dword_t opt)
 	g_xdk_mou.if_big = _is_big_endian();
     
 #ifdef XDK_SUPPORT_PROCESS
-    xdk_impl_process(&g_xdk_mou.if_process);
-    
     pro = PROCESS_PROCESS_INTERFACE;
     (*pro->pf_process_safe)();
-#endif
-
-	xdk_impl_memo_local(&g_xdk_mou.if_memo);
-
-#ifdef XDK_SUPPORT_MEMO_HEAP
-	xdk_impl_memo_heap(&g_xdk_mou.if_memo);
-#endif
-
-#ifdef XDK_SUPPORT_MEMO_PAGE
-	xdk_impl_memo_page(&g_xdk_mou.if_memo);
-#endif
-
-#ifdef XDK_SUPPORT_MEMO_CACHE
-	xdk_impl_memo_cache(&g_xdk_mou.if_memo);
-#endif
-
-#ifdef XDK_SUPPORT_ERROR
-	xdk_impl_error(&g_xdk_mou.if_error);
-#endif
-
-#ifdef XDK_SUPPORT_MBCS
-	xdk_impl_mbcs(&g_xdk_mou.if_mbcs);
-#endif
-
-#ifdef XDK_SUPPORT_ASYNC
-	xdk_impl_async(&g_xdk_mou.if_async);
-#endif
-
-#ifdef XDK_SUPPORT_THREAD
-	xdk_impl_thread(&g_xdk_mou.if_thread);
-
-#ifdef XDK_SUPPORT_THREAD_EVENT
-	xdk_impl_thread_event(&g_xdk_mou.if_thread);
-#endif
-
-#ifdef XDK_SUPPORT_THREAD_CRITI
-	xdk_impl_thread_criti(&g_xdk_mou.if_thread);
-#endif
-
-#ifdef XDK_SUPPORT_THREAD_MUTEX
-	xdk_impl_thread_mutex(&g_xdk_mou.if_thread);
-#endif
-
-#ifdef XDK_SUPPORT_THREAD_SEMAP
-	xdk_impl_thread_semap(&g_xdk_mou.if_thread);
-#endif
-
-#ifdef XDK_SUPPORT_THREAD_QUEUE
-	xdk_impl_thread_queue(&g_xdk_mou.if_thread);
-#endif
-
-#endif //XDK_SUPPORT_THREAD
-
-#ifdef XDK_SUPPORT_TIMER
-	xdk_impl_timer(&g_xdk_mou.if_timer);
-#endif
-
-#ifdef XDK_SUPPORT_RANDOM
-	xdk_impl_random(&g_xdk_mou.if_random);
-#endif
-
-#ifdef XDK_SUPPORT_FILE
-	xdk_impl_file(&g_xdk_mou.if_file);
-#endif
-
-#ifdef XDK_SUPPORT_FILE_FIND
-	xdk_impl_file_find(&g_xdk_mou.if_file);
-#endif
-
-#ifdef XDK_SUPPORT_SHARE
-	xdk_impl_share(&g_xdk_mou.if_share);
-#endif
-
-#ifdef XDK_SUPPORT_PIPE
-	xdk_impl_pipe(&g_xdk_mou.if_pipe);
-#endif
-
-#ifdef XDK_SUPPORT_COMM
-	xdk_impl_comm(&g_xdk_mou.if_comm);
-#endif
-
-#ifdef XDK_SUPPORT_CONS
-	xdk_impl_cons(&g_xdk_mou.if_cons);
-#endif
-
-#ifdef XDK_SUPPORT_SOCK
-	xdk_impl_socket(&g_xdk_mou.if_socket);
-#endif 
-
-#ifdef XDK_SUPPORT_DATE
-	xdk_impl_date(&g_xdk_mou.if_date);
 #endif
 
 #ifdef XDK_SUPPORT_THREAD
@@ -524,7 +724,8 @@ void xdk_process_uninit()
 
 #endif //XDK_SUPPORT_THREAD
 
-	memset((void*)&g_xdk_mou, 0, sizeof(xdk_mou_t));
+	g_xdk_mou.if_ok = bool_false;
+	g_xdk_mou.if_opt = 0;
 }
 
 #ifdef XDK_SUPPORT_MEMO_HEAP

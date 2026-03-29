@@ -26,7 +26,7 @@
         "name": "(gdb) linux",
         "type": "cppdbg",
         "request": "launch",
-        "program": "/home/jdzwq/Easily-app-6/linux/bin/xDesign",
+        "program": "/home/jdzwq/Easily-app-6/linux/bin/xdc_editor_test",
         "args": [],
         "stopAtEntry": false,
         "cwd": "/home/jdzwq/Easily-app-6/linux/bin",

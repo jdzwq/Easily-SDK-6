@@ -42,8 +42,9 @@ typedef struct _tag_scan_contet{
 
 	int point;
 
-	const measure_interface* pmi;
+	const measure_interface* pmv;
 	const xface_t* pxa;
+	const xfont_t* pxf;
 }tag_scan_contet;
 
 #define TAGWORD_INDICATOR_NEXT_NODE		0
@@ -93,7 +94,7 @@ int call_tag_next_page(void* ctx)
 int call_tag_next_words(void* ctx, tchar_t** ppch, xsize_t* pse, bool_t* pins, bool_t* pdel, bool_t* psel, bool_t* patom)
 {
 	tag_scan_contet* pscan = (tag_scan_contet*)ctx;
-	measure_interface* pif = pscan->pmi;
+	measure_interface* pmv = pscan->pmv;
 	int n;
 	xsize_t xs;
 
@@ -144,7 +145,7 @@ int call_tag_next_words(void* ctx, tchar_t** ppch, xsize_t* pse, bool_t* pins, b
 			}
 			else
 			{
-				(*pif->pf_measure_size)(pif->ctx, pscan->pch, n, &xs);
+				(*pmv->mea->pf_measure_size)(pmv->ctx, pscan->pxf, pscan->pch, n, &xs);
 
 				if (xs.w)
 					pse->w = xs.w;
@@ -174,7 +175,7 @@ int call_tag_next_words(void* ctx, tchar_t** ppch, xsize_t* pse, bool_t* pins, b
 int call_tag_insert_words(void* ctx, tchar_t* pch, xsize_t* pse)
 {
 	tag_scan_contet* pscan = (tag_scan_contet*)ctx;
-	measure_interface* pif = pscan->pmi;
+	measure_interface* pmv = pscan->pmv;
 	int n = 0;
 	xsize_t xs = { 0 };
 	link_t_ptr dlk;
@@ -222,7 +223,7 @@ int call_tag_insert_words(void* ctx, tchar_t* pch, xsize_t* pse)
 		}
 		else
 		{
-			(*pif->pf_measure_size)(pif->ctx, pch, n, &xs);
+			(*pmv->mea->pf_measure_size)(pmv->ctx, pscan->pxf, pch, n, &xs);
 
 			if (!xs.w)
 				xs.w = pse->w;
@@ -356,15 +357,16 @@ void call_tag_object_attr(void* ctx, void* pobj, object_attr_t* pret)
 	}
 }
 
-void scan_tag_text(link_t_ptr ptr, const measure_interface* pif, const viewbox_t* pvb, const xface_t* pxa, bool_t paged, PF_SCAN_TEXTOR_CALLBACK pf, void* pp)
+void scan_tag_text(link_t_ptr ptr, const measure_interface* pmv, const viewbox_t* pvb, const xfont_t* pxf, const xface_t* pxa, bool_t paged, PF_SCAN_TEXTOR_CALLBACK pf, void* pp)
 {
 	tag_scan_contet ro = { 0 };
 	words_scan_interface it = { 0 };
 
 	ro.tag = ptr;
 	ro.nlk = NULL;
-	ro.pmi = pif;
+	ro.pmv = pmv;
 	ro.pxa = pxa;
+	ro.pxf = pxf;
 
 	it.ctx = (void*)&ro;
 	it.pf_is_paging = call_tag_is_paging;
@@ -385,5 +387,5 @@ void scan_tag_text(link_t_ptr ptr, const measure_interface* pif, const viewbox_t
 		call_tag_next_page((void*)&ro);
 	}
 	
-	scan_object_text(pif, pvb, &it, pf, pp);
+	scan_object_text(pmv, pvb, &it, pf, pp);
 }

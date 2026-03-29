@@ -2,7 +2,6 @@
 #ifndef _XDKIMP_H
 #define _XDKIMP_H
 
-#include "imp/platimp.h"
 #include "imp/impjmp.h"
 #include "imp/impmem.h"
 #include "imp/impassert.h"

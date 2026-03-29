@@ -33,7 +33,6 @@ E:\Easily-temp\windows\xdk\x86\Debug/impsock.c \
 E:\Easily-temp\windows\xdk\x86\Debug/impthr.c \
 E:\Easily-temp\windows\xdk\x86\Debug/imptimer.c \
 E:\Easily-temp\windows\xdk\x86\Debug/impuncf.c \
-E:\Easily-temp\windows\xdk\x86\Debug/platimp.c \
 E:\Easily-temp\windows\xdk\x86\Debug/acp_ascii.c \
 E:\Easily-temp\windows\xdk\x86\Debug/acp_gb2312.c \
 E:\Easily-temp\windows\xdk\x86\Debug/acp_help.c \
@@ -94,7 +93,6 @@ E:\Easily-temp\windows\xdk\x86\Debug/multitree.c \
 E:\Easily-temp\windows\xdk\x86\Debug/stacktable.c \
 E:\Easily-temp\windows\xdk\x86\Debug/stringtable.c \
 E:\Easily-temp\windows\xdk\x86\Debug/trietree.c \
-E:\Easily-temp\windows\xdk\x86\Debug/undotable.c \
 E:\Easily-temp\windows\xdk\x86\Debug/wordstable.c \
 E:\Easily-temp\windows\xdk\x86\Debug/netcoap.c \
 E:\Easily-temp\windows\xdk\x86\Debug/netdtls.c \

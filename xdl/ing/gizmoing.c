@@ -38,7 +38,7 @@ LICENSE.GPL3 for more details.
 #define FOUR_SPAN		4 //(float)(4.0f / PDPERMM)
 
 
-void draw_logo_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_logo_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -82,28 +82,28 @@ void draw_logo_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xr
 	xr.h = prt->h / 2 - DOUBLE_SPAN;
 	xs.w = DOUBLE_SPAN;
 	xs.h = DOUBLE_SPAN;
-	(*pif->pf_draw_round)(pif->ctx, &xp, &xb, &xr, &xs);
+	(*pvi->drw->pf_draw_round)(pvi->ctx, &xp, &xb, &xr, &xs);
 
 	xr.x = prt->x + prt->w / 2 + SINGLE_SPAN;
 	xr.y = prt->y;
 	xr.w = prt->w / 2 - DOUBLE_SPAN;
 	xr.h = prt->h / 2 - DOUBLE_SPAN;
-	(*pif->pf_draw_rect)(pif->ctx, &xp, &xb, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, &xb, &xr);
 
 	xr.x = prt->x;
 	xr.y = prt->y + prt->h / 2 + SINGLE_SPAN;
 	xr.w = prt->w / 2 - DOUBLE_SPAN;
 	xr.h = prt->h / 2 - DOUBLE_SPAN;
-	(*pif->pf_draw_rect)(pif->ctx, &xp, &xb, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, &xb, &xr);
 
 	xr.x = prt->x + prt->w / 2 + SINGLE_SPAN;
 	xr.y = prt->y + prt->h / 2 + SINGLE_SPAN;
 	xr.w = prt->w / 2 - DOUBLE_SPAN;
 	xr.h = prt->h / 2 - DOUBLE_SPAN;
-	(*pif->pf_draw_round)(pif->ctx, &xp, &xb, &xr, &xs);
+	(*pvi->drw->pf_draw_round)(pvi->ctx, &xp, &xb, &xr, &xs);
 }
 
-void draw_plus_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_plus_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xrect_t rt;
@@ -142,17 +142,17 @@ void draw_plus_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xr
 	pt[1].x = prt->x + prt->w;
 	pt[1].y = prt->y + prt->h / 2;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &(pt[0]), &(pt[1]));
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &(pt[0]), &(pt[1]));
 
 	pt[0].x = prt->x + prt->w / 2;
 	pt[0].y = prt->y;
 	pt[1].x = prt->x + prt->w / 2;
 	pt[1].y = prt->y + prt->h;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &(pt[0]), &(pt[1]));
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &(pt[0]), &(pt[1]));
 }
 
-void draw_minus_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_minus_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xrect_t rt;
@@ -191,10 +191,10 @@ void draw_minus_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const x
 	pt[1].x = prt->x + prt->w;
 	pt[1].y = prt->y + prt->h / 2;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &(pt[0]), &(pt[1]));
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &(pt[0]), &(pt[1]));
 }
 
-void draw_collapse_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_collapse_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xpoint_t pt1, pt2;
@@ -241,16 +241,16 @@ void draw_collapse_gizmo(const drawing_interface* pif, const xcolor_t* pxc, cons
 	pt1.y = xr.y;
 	pt2.x = xr.x + xr.w;
 	pt2.y = xr.y + xr.h / 2;
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt1, &pt2);
 
 	pt1.x = xr.x + xr.w / 2;
 	pt1.y = xr.y + xr.h;
 	pt2.x = xr.x + xr.w;
 	pt2.y = xr.y + xr.h / 2;
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt1, &pt2);
 }
 
-void draw_expand_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_expand_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xpoint_t pt1, pt2;
@@ -297,16 +297,16 @@ void draw_expand_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const 
 	pt1.y = xr.y + xr.h / 2;
 	pt2.x = xr.x + xr.w / 2;
 	pt2.y = xr.y + xr.h;
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt1, &pt2);
 
 	pt1.x = xr.x + xr.w;
 	pt1.y = xr.y + xr.h / 2;
 	pt2.x = xr.x + xr.w / 2;
 	pt2.y = xr.y + xr.h;
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt1, &pt2);
 }
 
-void draw_begin_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_begin_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -354,17 +354,17 @@ void draw_begin_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const x
 	pt[2].x = prt->x + prt->w / 2;
 	pt[2].y = prt->y + prt->h / 4 + ps;
 
-	(*pif->pf_draw_polygon)(pif->ctx, &xp, &xb, pt, 3);
+	(*pvi->drw->pf_draw_polygon)(pvi->ctx, &xp, &xb, pt, 3);
 
 	pt[0].x = prt->x + prt->w / 4;
 	pt[0].y = prt->y + prt->h / 4;
 	pt[1].x = prt->x + prt->w / 4 * 3;
 	pt[1].y = prt->y + prt->h / 4;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 }
 
-void draw_up_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_up_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -412,10 +412,10 @@ void draw_up_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrec
 	pt[2].x = prt->x + prt->w / 2;
 	pt[2].y = prt->y + prt->h / 4 + ps;
 
-	(*pif->pf_draw_polygon)(pif->ctx, &xp, &xb, pt, 3);
+	(*pvi->drw->pf_draw_polygon)(pvi->ctx, &xp, &xb, pt, 3);
 }
 
-void draw_down_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_down_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -463,10 +463,10 @@ void draw_down_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xr
 	pt[2].x = prt->x + prt->w / 2;
 	pt[2].y = prt->y + prt->h / 4 * 3 - ps;
 
-	(*pif->pf_draw_polygon)(pif->ctx, &xp, &xb, pt, 3);
+	(*pvi->drw->pf_draw_polygon)(pvi->ctx, &xp, &xb, pt, 3);
 }
 
-void draw_end_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_end_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -514,17 +514,17 @@ void draw_end_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xre
 	pt[2].x = prt->x + prt->w / 2;
 	pt[2].y = prt->y + prt->h / 4 * 3 - ps;
 
-	(*pif->pf_draw_polygon)(pif->ctx, &xp, &xb, pt, 3);
+	(*pvi->drw->pf_draw_polygon)(pvi->ctx, &xp, &xb, pt, 3);
 
 	pt[0].x = prt->x + prt->w / 4;
 	pt[0].y = prt->y + prt->h / 4 * 3;
 	pt[1].x = prt->x + prt->w / 4 * 3;
 	pt[1].y = prt->y + prt->h / 4 * 3;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 }
 
-void draw_first_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_first_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -572,17 +572,17 @@ void draw_first_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const x
 	pt[2].x = prt->x + prt->w / 4 + ps;
 	pt[2].y = prt->y + prt->h / 2;
 
-	(*pif->pf_draw_polygon)(pif->ctx, &xp, &xb, pt, 3);
+	(*pvi->drw->pf_draw_polygon)(pvi->ctx, &xp, &xb, pt, 3);
 
 	pt[0].x = prt->x + prt->w / 4;
 	pt[0].y = prt->y + prt->h / 4;
 	pt[1].x = prt->x + prt->w / 4;
 	pt[1].y = prt->y + prt->h / 4 * 3;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 }
 
-void draw_prev_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_prev_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -630,10 +630,10 @@ void draw_prev_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xr
 	pt[2].x = prt->x + prt->w / 4;
 	pt[2].y = prt->y + prt->h / 2;
 
-	(*pif->pf_draw_polygon)(pif->ctx, &xp, &xb, pt, 3);
+	(*pvi->drw->pf_draw_polygon)(pvi->ctx, &xp, &xb, pt, 3);
 }
 
-void draw_next_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_next_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -681,10 +681,10 @@ void draw_next_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xr
 	pt[2].x = prt->x + prt->w / 4 * 3;
 	pt[2].y = prt->y + prt->h / 2;
 
-	(*pif->pf_draw_polygon)(pif->ctx, &xp, &xb, pt, 3);
+	(*pvi->drw->pf_draw_polygon)(pvi->ctx, &xp, &xb, pt, 3);
 }
 
-void draw_last_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_last_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -732,17 +732,17 @@ void draw_last_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xr
 	pt[2].x = prt->x + prt->w / 4 * 3 - ps;
 	pt[2].y = prt->y + prt->h / 2;
 
-	(*pif->pf_draw_polygon)(pif->ctx, &xp, &xb, pt, 3);
+	(*pvi->drw->pf_draw_polygon)(pvi->ctx, &xp, &xb, pt, 3);
 
 	pt[0].x = prt->x + prt->w / 4 * 3;
 	pt[0].y = prt->y + prt->h / 4;
 	pt[1].x = prt->x + prt->w / 4 * 3;
 	pt[1].y = prt->y + prt->h / 4 * 3;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 }
 
-void draw_motion_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_motion_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xrect_t rt, xr;
@@ -784,7 +784,7 @@ void draw_motion_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const 
 	xr.w = prt->w / 2 - 2 * ps;
 	xr.h = prt->h / 2 - 2 * ps;
 
-	(*pif->pf_draw_ellipse)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_ellipse)(pvi->ctx, &xp, NULL, &xr);
 
 	pa[0].x = prt->x + prt->w / 4;
 	pa[0].y = prt->y + prt->h / 2;
@@ -795,7 +795,7 @@ void draw_motion_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const 
 	pa[3].x = prt->x + prt->w;
 	pa[3].y = prt->y + prt->h / 2;
 
-	(*pif->pf_draw_bezier)(pif->ctx, &xp, &pa[0], &pa[1], &pa[2], &pa[3]);
+	(*pvi->drw->pf_draw_bezier)(pvi->ctx, &xp, &pa[0], &pa[1], &pa[2], &pa[3]);
 
 	pa[0].x = prt->x;
 	pa[0].y = prt->y + prt->h;
@@ -806,10 +806,10 @@ void draw_motion_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const 
 	pa[3].x = prt->x + prt->w / 2;
 	pa[3].y = prt->y + prt->h * 3 / 4 + ps;
 
-	(*pif->pf_draw_polyline)(pif->ctx, &xp, pa, 4);
+	(*pvi->drw->pf_draw_polyline)(pvi->ctx, &xp, pa, 4);
 }
 
-void draw_drug_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_drug_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -883,7 +883,7 @@ void draw_drug_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xr
 
 	lighten_xbrush(&xb, DEF_HARD_DARKEN);
 
-	(*pif->pf_draw_path)(pif->ctx, &xp, &xb, ta, pa, 9);
+	(*pvi->drw->pf_draw_path)(pvi->ctx, &xp, &xb, ta, pa, 9);
 
 	ta[0] = _T('M');
 	pa[0].x = prt->x;
@@ -913,10 +913,10 @@ void draw_drug_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xr
 
 	format_xcolor(pxc, xb.color);
 
-	(*pif->pf_draw_path)(pif->ctx, NULL, &xb, ta, pa, 7);
+	(*pvi->drw->pf_draw_path)(pvi->ctx, NULL, &xb, ta, pa, 7);
 }
 
-void draw_male_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_male_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -962,31 +962,31 @@ void draw_male_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xr
 	xr.w = prt->w / 2;
 	xr.h = prt->h / 2;
 
-	(*pif->pf_draw_ellipse)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_ellipse)(pvi->ctx, &xp, NULL, &xr);
 
 	pt1.x = prt->x + prt->w / 2 - ps;
 	pt1.y = prt->y + prt->h / 2 + ps;
 	pt2.x = prt->x + prt->w - ps;
 	pt2.y = prt->y + ps;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt1, &pt2);
 
 	pt1.x = prt->x + prt->w / 2;
 	pt1.y = prt->y + prt->h / 4;
 	pt2.x = prt->x + prt->w - ps;
 	pt2.y = prt->y + ps;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt1, &pt2);
 
 	pt1.x = prt->x + prt->w * 3 / 4;
 	pt1.y = prt->y + prt->h / 2;
 	pt2.x = prt->x + prt->w - ps;
 	pt2.y = prt->y + ps;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt1, &pt2);
 }
 
-void draw_female_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_female_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -1032,24 +1032,24 @@ void draw_female_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const 
 	xr.w = prt->w / 2;
 	xr.h = prt->h / 2;
 
-	(*pif->pf_draw_ellipse)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_ellipse)(pvi->ctx, &xp, NULL, &xr);
 
 	pt1.x = prt->x + prt->w / 2;
 	pt1.y = prt->y + prt->h / 2;
 	pt2.x = prt->x + prt->w / 2;
 	pt2.y = prt->y + prt->h;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt1, &pt2);
 
 	pt1.x = prt->x + prt->w / 4 + ps;
 	pt1.y = prt->y + prt->h * 3 / 4;
 	pt2.x = prt->x + prt->w - prt->w / 4 - ps;
 	pt2.y = prt->y + prt->h * 3 / 4;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt1, &pt2);
 }
 
-void draw_zoomin_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_zoomin_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xrect_t rt, xr;
@@ -1091,24 +1091,24 @@ void draw_zoomin_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const 
 	xr.w = prt->w / 3 * 2 + SINGLE_SPAN;
 	xr.h = prt->h / 3 * 2 + SINGLE_SPAN;
 
-	(*pif->pf_draw_ellipse)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_ellipse)(pvi->ctx, &xp, NULL, &xr);
 
 	pt1.x = xr.x + ps + SINGLE_SPAN;
 	pt1.y = xr.y + xr.h / 2;
 	pt2.x = xr.x + xr.w - ps - SINGLE_SPAN;
 	pt2.y = xr.y + xr.h / 2;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt1, &pt2);
 
 	pt1.x = prt->x + prt->w / 3 * 2;
 	pt1.y = prt->y + prt->h / 3 * 2;
 	pt2.x = prt->x + prt->w;
 	pt2.y = prt->y + prt->h;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt1, &pt2);
 }
 
-void draw_zoomout_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_zoomout_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xrect_t rt, xr;
@@ -1150,31 +1150,31 @@ void draw_zoomout_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const
 	xr.w = prt->w / 3 * 2 + SINGLE_SPAN;
 	xr.h = prt->h / 3 * 2 + SINGLE_SPAN;
 
-	(*pif->pf_draw_ellipse)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_ellipse)(pvi->ctx, &xp, NULL, &xr);
 
 	pt1.x = xr.x + ps + SINGLE_SPAN;
 	pt1.y = xr.y + xr.h / 2;
 	pt2.x = xr.x + xr.w - ps - SINGLE_SPAN;
 	pt2.y = xr.y + xr.h / 2;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt1, &pt2);
 
 	pt1.x = xr.x + xr.w / 2;
 	pt1.y = xr.y + ps + SINGLE_SPAN;
 	pt2.x = xr.x + xr.w / 2;
 	pt2.y = xr.y + xr.h - ps - SINGLE_SPAN;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt1, &pt2);
 
 	pt1.x = prt->x + prt->w / 3 * 2;
 	pt1.y = prt->y + prt->h / 3 * 2;
 	pt2.x = prt->x + prt->w;
 	pt2.y = prt->y + prt->h;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt1, &pt2);
 }
 
-void draw_keybox_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_keybox_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -1221,17 +1221,17 @@ void draw_keybox_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const 
 	xr.h = prt->h - 2 * ps;
 	xs.w = DOUBLE_SPAN;
 	xs.h = DOUBLE_SPAN;
-	(*pif->pf_draw_round)(pif->ctx, &xp, &xb, &xr, &xs);
+	(*pvi->drw->pf_draw_round)(pvi->ctx, &xp, &xb, &xr, &xs);
 
 	xr.x = prt->x + ps;
 	xr.y = prt->y + prt->h / 4;
 	xr.w = prt->w - 2 * ps;
 	xr.h = ps * 2;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, &xb, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, &xb, &xr);
 }
 
-void draw_keyboxed_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_keyboxed_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -1274,38 +1274,38 @@ void draw_keyboxed_gizmo(const drawing_interface* pif, const xcolor_t* pxc, cons
 	xr.w = prt->w + DOUBLE_SPAN;
 	xr.h = prt->h - DOUBLE_SPAN;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, &xb, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, &xb, &xr);
 
 	pt1.x = xr.x;
 	pt1.y = xr.y + DOUBLE_SPAN;
 	pt2.x = xr.x + xr.w;
 	pt2.y = xr.y + DOUBLE_SPAN;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt1, &pt2);
 
 	pt1.x = xr.x;
 	pt1.y = xr.y + FOUR_SPAN;
 	pt2.x = xr.x + xr.w;
 	pt2.y = xr.y + FOUR_SPAN;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt1, &pt2);
 
 	pt1.x = xr.x + THREE_SPAN;
 	pt1.y = xr.y + FOUR_SPAN;
 	pt2.x = xr.x + THREE_SPAN;
 	pt2.y = xr.y + xr.h;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt1, &pt2);
 
 	pt1.x = xr.x + xr.w - THREE_SPAN;
 	pt1.y = xr.y + FOUR_SPAN;
 	pt2.x = xr.x + xr.w - THREE_SPAN;
 	pt2.y = xr.y + xr.h;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt1, &pt2);
 }
 
-void draw_touch_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_touch_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -1348,24 +1348,24 @@ void draw_touch_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const x
 	xr.w = prt->w + DOUBLE_SPAN;
 	xr.h = prt->h + DOUBLE_SPAN;
 
-	(*pif->pf_draw_ellipse)(pif->ctx, &xp, &xb, &xr);
+	(*pvi->drw->pf_draw_ellipse)(pvi->ctx, &xp, &xb, &xr);
 
 	pt1.x = xr.x + xr.w / 2 - THREE_SPAN;
 	pt1.y = xr.y + xr.h / 2 - THREE_SPAN;
 	pt2.x = xr.x + xr.w / 2 + THREE_SPAN;
 	pt2.y = xr.y + xr.h / 2 + THREE_SPAN;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt1, &pt2);
 
 	pt1.x = xr.x + xr.w / 2 - THREE_SPAN;
 	pt1.y = xr.y + xr.h / 2 + THREE_SPAN; 
 	pt2.x = xr.x + xr.w / 2 + THREE_SPAN;
 	pt2.y = xr.y + xr.h / 2 - THREE_SPAN;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt1, &pt2);
 }
 
-void draw_touched_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_touched_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -1411,16 +1411,16 @@ void draw_touched_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const
 	xr.w = prt->w + DOUBLE_SPAN;
 	xr.h = prt->h + DOUBLE_SPAN;
 
-	(*pif->pf_draw_ellipse)(pif->ctx, &xp, &xb, &xr);
+	(*pvi->drw->pf_draw_ellipse)(pvi->ctx, &xp, &xb, &xr);
 
 	pt_expand_rect(&xr, -DOUBLE_SPAN, -DOUBLE_SPAN);
 
 	lighten_xbrush(&xb, 20);
 
-	(*pif->pf_draw_ellipse)(pif->ctx, &xp, &xb, &xr);
+	(*pvi->drw->pf_draw_ellipse)(pvi->ctx, &xp, &xb, &xr);
 }
 
-void draw_close_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_close_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xpoint_t pt1, pt2;
@@ -1468,17 +1468,17 @@ void draw_close_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const x
 	pt2.x = xr.x + xr.w - ps;
 	pt2.y = xr.y + xr.h - ps;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt1, &pt2);
 
 	pt1.x = xr.x + ps;
 	pt1.y = xr.y + xr.h - ps;
 	pt2.x = xr.x + xr.w - ps;
 	pt2.y = xr.y + ps;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt1, &pt2);
 }
 
-void draw_minimize_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_minimize_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -1519,10 +1519,10 @@ void draw_minimize_gizmo(const drawing_interface* pif, const xcolor_t* pxc, cons
 	xr.y = prt->y + prt->h - DOUBLE_SPAN;
 	xr.w = 4;
 	xr.h = 2;
-	(*pif->pf_draw_rect)(pif->ctx, &xp, &xb, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, &xb, &xr);
 }
 
-void draw_maximize_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_maximize_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xrect_t rt, xr;
@@ -1563,7 +1563,7 @@ void draw_maximize_gizmo(const drawing_interface* pif, const xcolor_t* pxc, cons
 	xr.y = prt->y;
 	xr.h = prt->h - (ps + 1);
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, NULL, &xr);
 
 	xr.x = prt->x + (ps + 1);
 	xr.w = prt->w - (ps + 1);
@@ -1575,10 +1575,10 @@ void draw_maximize_gizmo(const drawing_interface* pif, const xcolor_t* pxc, cons
 	else if (xr.w > xr.h)
 		xr.h = xr.w;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, NULL, &xr);
 }
 
-void draw_restore_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_restore_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xrect_t rt, xr;
@@ -1616,10 +1616,10 @@ void draw_restore_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const
 	xr.w = prt->w;
 	xr.h = prt->h;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, NULL, &xr);
 }
 
-void draw_sum_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_sum_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xrect_t rt, xr;
@@ -1678,10 +1678,10 @@ void draw_sum_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xre
 	pt[4].x = xr.x + xr.w - 2 * ps;
 	pt[4].y = xr.y + xr.h - ps;
 
-	(*pif->pf_draw_polyline)(pif->ctx, &xp, pt, 5);
+	(*pvi->drw->pf_draw_polyline)(pvi->ctx, &xp, pt, 5);
 }
 
-void draw_checkbox_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_checkbox_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xrect_t rt, xr;
@@ -1723,10 +1723,10 @@ void draw_checkbox_gizmo(const drawing_interface* pif, const xcolor_t* pxc, cons
 	xr.w = prt->w;
 	xr.h = prt->h;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, NULL, &xr);
 }
 
-void draw_checked_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_checked_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -1773,28 +1773,28 @@ void draw_checked_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const
 	xr.w = prt->w;
 	xr.h = prt->h;
 
-	//(*pif->pf_draw_rect)(pif->ctx, &xp, &xb, &xr);
+	//(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, &xb, &xr);
 
 	pt1.x = xr.x;
 	pt1.y = xr.y + xr.h / 2;
 	pt2.x = xr.x + DOUBLE_SPAN;
 	pt2.y = xr.y + xr.h / 2;
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt1, &pt2);
 
 	pt1.x = xr.x + DOUBLE_SPAN;
 	pt1.y = xr.y + xr.h / 2;
 	pt2.x = xr.x + xr.w / 2;
 	pt2.y = xr.y + xr.h - SINGLE_SPAN;
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt1, &pt2);
 
 	pt1.x = xr.x + xr.w / 2;
 	pt1.y = xr.y + xr.h - SINGLE_SPAN;
 	pt2.x = xr.x + xr.w + DOUBLE_SPAN;
 	pt2.y = xr.y + SINGLE_SPAN;
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt1, &pt2);
 }
 
-void draw_radiobox_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_radiobox_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xrect_t rt, xr;
@@ -1835,10 +1835,10 @@ void draw_radiobox_gizmo(const drawing_interface* pif, const xcolor_t* pxc, cons
 	xr.w = prt->w - 2 * ps;
 	xr.h = prt->h - 2 * ps;
 
-	(*pif->pf_draw_ellipse)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_ellipse)(pvi->ctx, &xp, NULL, &xr);
 }
 
-void draw_radioed_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_radioed_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -1883,10 +1883,10 @@ void draw_radioed_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const
 	xr.w = prt->w - 2 * ps;
 	xr.h = prt->h - 2 * ps;
 
-	(*pif->pf_draw_ellipse)(pif->ctx, &xp, &xb, &xr);
+	(*pvi->drw->pf_draw_ellipse)(pvi->ctx, &xp, &xb, &xr);
 }
 
-void draw_selected_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_selected_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xpoint_t pt1, pt2;
@@ -1929,22 +1929,22 @@ void draw_selected_gizmo(const drawing_interface* pif, const xcolor_t* pxc, cons
 	pt1.y = xr.y + xr.h / 2;
 	pt2.x = xr.x + DOUBLE_SPAN;
 	pt2.y = xr.y + xr.h / 2;
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt1, &pt2);
 
 	pt1.x = xr.x + DOUBLE_SPAN;
 	pt1.y = xr.y + xr.h / 2;
 	pt2.x = xr.x + xr.w / 2;
 	pt2.y = xr.y + xr.h;
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt1, &pt2);
 
 	pt1.x = xr.x + xr.w / 2;
 	pt1.y = xr.y + xr.h;
 	pt2.x = xr.x + xr.w;
 	pt2.y = xr.y;
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt1, &pt2);
 }
 
-void draw_folder_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_folder_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xrect_t rt, xr;
@@ -2000,15 +2000,15 @@ void draw_folder_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const 
 	pt[3].x = xr.x + 3 * xr.w / 4;
 	pt[3].y = xr.y + xr.h / 4;
 
-	(*pif->pf_draw_polyline)(pif->ctx, &xp, pt, 4);
+	(*pvi->drw->pf_draw_polyline)(pvi->ctx, &xp, pt, 4);
 
 	xr.y += xr.h / 4;
 	xr.h -= xr.h / 4;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, NULL, &xr);
 }
 
-void draw_guider_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_guider_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -2069,10 +2069,10 @@ void draw_guider_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const 
 	pt[4].x = xr.x;
 	pt[4].y = xr.y + xr.h / 4 * 3;
 
-	(*pif->pf_draw_polygon)(pif->ctx, &xp, &xb, pt, 5);
+	(*pvi->drw->pf_draw_polygon)(pvi->ctx, &xp, &xb, pt, 5);
 }
 
-void draw_fixed_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_fixed_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xrect_t rt, xr;
@@ -2113,23 +2113,23 @@ void draw_fixed_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const x
 	pt1.y = prt->y + prt->h / 2;
 	pt2.x = prt->x + 4 * ps;
 	pt2.y = prt->y + prt->h / 2;
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt1, &pt2);
 
 	pt1.x = prt->x + 4 * ps;
 	pt1.y = prt->y + prt->h / 4;
 	pt2.x = prt->x + 4 * ps;
 	pt2.y = prt->y + prt->h / 4 * 3;
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt1, &pt2);
 	
 	xr.x = prt->x + 4 * ps;
 	xr.y = prt->y + prt->h / 2 - ps;
 	xr.w = prt->w - 6 * ps;
 	xr.h = 2 * ps;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, NULL, &xr);
 }
 
-void draw_numeric_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_numeric_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xfont_t xf;
 	xface_t xa;
@@ -2169,7 +2169,7 @@ void draw_numeric_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const
 
 	prt = &rt;
 
-	(*pif->pf_draw_ellipse)(pif->ctx, &xp, &xb, prt);
+	(*pvi->drw->pf_draw_ellipse)(pvi->ctx, &xp, &xb, prt);
 
 	font_metric_by_px((float)prt->h, &fs, NULL);
 
@@ -2179,17 +2179,17 @@ void draw_numeric_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const
 	default_xfont(&xf);
 	xscpy(xf.family, GDI_ATTR_FONT_FAMILY_ARIA);
 	ftoxs(fs, xf.size, INT_LEN);
-	(*pif->pf_set_xfont)(pif->ctx, &xf);
+	(*pvi->drw->pf_set_xfont)(pvi->ctx, &xf);
 
 	default_xface(&xa);
 	xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_CENTER);
 	xscpy(xa.line_align, GDI_ATTR_TEXT_ALIGN_CENTER);
 	format_xcolor(pxc, xa.text_color);
 
-	//(*pif->pf_draw_text)(pif->ctx, &xa, prt, no, -1);
+	//(*pvi->drw->pf_draw_text)(pvi->ctx, &xa, prt, no, -1);
 }
 
-void draw_omit_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_omit_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xfont_t xf;
 	xface_t xa;
@@ -2237,17 +2237,17 @@ void draw_omit_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xr
 	default_xfont(&xf);
 	xscpy(xf.family, GDI_ATTR_FONT_FAMILY_ARIA);
 	ftoxs(fs, xf.size, INT_LEN);
-	(*pif->pf_set_xfont)(pif->ctx, &xf);
+	(*pvi->drw->pf_set_xfont)(pvi->ctx, &xf);
 
 	default_xface(&xa);
 	xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_CENTER);
 	xscpy(xa.line_align, GDI_ATTR_TEXT_ALIGN_CENTER);
 	format_xcolor(pxc, xa.text_color);
 
-	(*pif->pf_draw_text)(pif->ctx, &xa, prt, _T("..."), -1);
+	(*pvi->drw->pf_draw_text)(pvi->ctx, &xa, prt, _T("..."), -1);
 }
 
-void draw_doc_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_doc_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xpoint_t pt1, pt2;
@@ -2289,28 +2289,28 @@ void draw_doc_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xre
 	xr.w = prt->w;
 	xr.h = prt->h;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, NULL, &xr);
 
 	pt1.x = xr.x + ps + SINGLE_SPAN;
 	pt1.y = xr.y + xr.h / 4;
 	pt2.x = xr.x + xr.w - ps - SINGLE_SPAN;
 	pt2.y = xr.y + xr.h / 4;
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt1, &pt2);
 
 	pt1.x = xr.x + ps + SINGLE_SPAN;
 	pt1.y = xr.y + xr.h / 2;
 	pt2.x = xr.x + xr.w - ps - SINGLE_SPAN;
 	pt2.y = xr.y + xr.h / 2;
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt1, &pt2);
 
 	pt1.x = xr.x + ps + SINGLE_SPAN;
 	pt1.y = xr.y + xr.h / 4 * 3;
 	pt2.x = xr.x + xr.w / 2 - SINGLE_SPAN;
 	pt2.y = xr.y + xr.h / 4 * 3;
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt1, &pt2);
 }
 
-void draw_new(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_new(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xpoint_t pt[5];
@@ -2363,7 +2363,7 @@ void draw_new(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* 
 	pt[4].x = xr.x + xr.w;
 	pt[4].y = xr.y;
 
-	(*pif->pf_draw_polygon)(pif->ctx, &xp, NULL, pt, 5);
+	(*pvi->drw->pf_draw_polygon)(pvi->ctx, &xp, NULL, pt, 5);
 
 	pt[0].x = xr.x + xr.w / 4 * 3;
 	pt[0].y = xr.y + xr.h - SINGLE_SPAN;
@@ -2372,28 +2372,28 @@ void draw_new(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* 
 	pt[2].x = xr.x + xr.w - SINGLE_SPAN;
 	pt[2].y = xr.y + xr.h / 4 * 3;
 
-	(*pif->pf_draw_polyline)(pif->ctx, &xp, pt, 3);
+	(*pvi->drw->pf_draw_polyline)(pvi->ctx, &xp, pt, 3);
 
 	pt[0].x = xr.x + ps + SINGLE_SPAN;
 	pt[0].y = xr.y + xr.h / 4;
 	pt[1].x = xr.x + xr.w - ps - SINGLE_SPAN;
 	pt[1].y = xr.y + xr.h / 4;
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 
 	pt[0].x = xr.x + ps + SINGLE_SPAN;
 	pt[0].y = xr.y + xr.h / 2;
 	pt[1].x = xr.x + xr.w - ps - SINGLE_SPAN;
 	pt[1].y = xr.y + xr.h / 2;
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 
 	pt[0].x = xr.x + ps + SINGLE_SPAN;
 	pt[0].y = xr.y + xr.h / 4 * 3;
 	pt[1].x = xr.x + xr.w / 2 - SINGLE_SPAN;
 	pt[1].y = xr.y + xr.h / 4 * 3;
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 }
 
-void draw_open_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_open_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -2439,7 +2439,7 @@ void draw_open_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xr
 	xr.w = prt->w - 3 * ps;
 	xr.h = prt->h - ps;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, NULL, &xr);
 
 	pt[0].x = xr.x;
 	pt[0].y = xr.y + xr.h;
@@ -2451,10 +2451,10 @@ void draw_open_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xr
 	pt[3].y = xr.y + xr.h;
 
 	format_xcolor(pxc, xb.color);
-	(*pif->pf_draw_polygon)(pif->ctx, &xp, &xb, pt, 4);
+	(*pvi->drw->pf_draw_polygon)(pvi->ctx, &xp, &xb, pt, 4);
 }
 
-void draw_save_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_save_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -2500,7 +2500,7 @@ void draw_save_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xr
 	xr.w = prt->w / 4;
 	xr.h = prt->h / 4;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, &xb, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, &xb, &xr);
 
 	pt[0].x = prt->x;
 	pt[0].y = prt->y;
@@ -2520,10 +2520,10 @@ void draw_save_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xr
 	pt[7].y = prt->y;
 
 	format_xcolor(pxc, xb.color);
-	(*pif->pf_draw_polygon)(pif->ctx, &xp, &xb, pt, 8);
+	(*pvi->drw->pf_draw_polygon)(pvi->ctx, &xp, &xb, pt, 8);
 }
 
-void draw_saveas_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_saveas_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -2569,7 +2569,7 @@ void draw_saveas_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const 
 	xr.w = prt->w / 4;
 	xr.h = prt->h / 4;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, &xb, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, &xb, &xr);
 
 	pt[0].x = prt->x;
 	pt[0].y = prt->y;
@@ -2591,7 +2591,7 @@ void draw_saveas_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const 
 	pt[8].y = prt->y;
 
 	format_xcolor(pxc, xb.color);
-	(*pif->pf_draw_polygon)(pif->ctx, &xp, &xb, pt, 9);
+	(*pvi->drw->pf_draw_polygon)(pvi->ctx, &xp, &xb, pt, 9);
 
 	pt[0].x = prt->x + prt->w;
 	pt[0].y = prt->y + prt->h;
@@ -2600,10 +2600,10 @@ void draw_saveas_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const 
 	pt[2].x = prt->x + prt->w;
 	pt[2].y = prt->y + prt->h / 2 + FOUR_SPAN;
 
-	(*pif->pf_draw_polygon)(pif->ctx, &xp, &xb, pt, 3);
+	(*pvi->drw->pf_draw_polygon)(pvi->ctx, &xp, &xb, pt, 3);
 }
 
-void draw_schema_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_schema_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -2649,25 +2649,25 @@ void draw_schema_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const 
 	xr.w = prt->w;
 	xr.h = prt->h;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, NULL, &xr);
 
 	pt[0].x = xr.x + ps + SINGLE_SPAN;
 	pt[0].y = xr.y + xr.h / 4;
 	pt[1].x = xr.x + xr.w / 2 - ps - SINGLE_SPAN;
 	pt[1].y = xr.y + xr.h / 4;
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 
 	pt[0].x = xr.x + ps + SINGLE_SPAN;
 	pt[0].y = xr.y + xr.h / 2;
 	pt[1].x = xr.x + xr.w / 2 + ps;
 	pt[1].y = xr.y + xr.h / 2;
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 
 	pt[0].x = xr.x + ps + SINGLE_SPAN;
 	pt[0].y = xr.y + xr.h / 4 * 3;
 	pt[1].x = xr.x + xr.w / 2 - ps - SINGLE_SPAN;
 	pt[1].y = xr.y + xr.h / 4 * 3;
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 
 	pt[0].x = xr.x + xr.w / 2 + ps;
 	pt[0].y = xr.y + xr.h / 2 - ps;
@@ -2676,10 +2676,10 @@ void draw_schema_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const 
 	pt[2].x = xr.x + xr.w / 2 + ps;
 	pt[2].y = xr.y + xr.h / 2 + ps;
 
-	(*pif->pf_draw_polygon)(pif->ctx, &xp, &xb, pt, 3);
+	(*pvi->drw->pf_draw_polygon)(pvi->ctx, &xp, &xb, pt, 3);
 }
 
-void draw_output_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_output_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -2731,7 +2731,7 @@ void draw_output_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const 
 	pt[4].x = prt->x + prt->w;
 	pt[4].y = prt->y + prt->h / 2;
 
-	(*pif->pf_draw_polyline)(pif->ctx, &xp, pt, 5);
+	(*pvi->drw->pf_draw_polyline)(pvi->ctx, &xp, pt, 5);
 
 	pt[0].x = prt->x + prt->w / 4 * 3;
 	pt[0].y = prt->y;
@@ -2740,10 +2740,10 @@ void draw_output_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const 
 	pt[2].x = prt->x + prt->w / 4 * 3;
 	pt[2].y = prt->y + prt->h / 2;
 	
-	(*pif->pf_draw_polygon)(pif->ctx, &xp, &xb, pt, 3);
+	(*pvi->drw->pf_draw_polygon)(pvi->ctx, &xp, &xb, pt, 3);
 }
 
-void draw_input_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_input_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -2799,7 +2799,7 @@ void draw_input_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const x
 	pt[6].x = prt->x + prt->w / 4 * 3;
 	pt[6].y = prt->y + prt->h / 2;
 
-	(*pif->pf_draw_polyline)(pif->ctx, &xp, pt, 7);
+	(*pvi->drw->pf_draw_polyline)(pvi->ctx, &xp, pt, 7);
 
 	pt[0].x = prt->x + prt->w / 4 * 3;
 	pt[0].y = prt->y + prt->h / 4;
@@ -2808,10 +2808,10 @@ void draw_input_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const x
 	pt[2].x = prt->x + prt->w / 4 * 3;
 	pt[2].y = prt->y + prt->h / 4 * 3;
 
-	(*pif->pf_draw_polygon)(pif->ctx, &xp, &xb, pt, 3);
+	(*pvi->drw->pf_draw_polygon)(pvi->ctx, &xp, &xb, pt, 3);
 }
 
-void draw_print_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_print_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -2861,14 +2861,14 @@ void draw_print_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const x
 	pt[3].x = prt->x + prt->w / 4 * 3 + ps;
 	pt[3].y = prt->y;
 
-	(*pif->pf_draw_polygon)(pif->ctx, &xp, NULL, pt, 4);
+	(*pvi->drw->pf_draw_polygon)(pvi->ctx, &xp, NULL, pt, 4);
 
 	xr.x = prt->x;
 	xr.y = prt->y + prt->h / 4 - ps;
 	xr.w = prt->w;
 	xr.h = prt->h / 2 + ps;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, &xb, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, &xb, &xr);
 
 	pt[0].x = prt->x + prt->w / 4;
 	pt[0].y = prt->y + prt->h / 2;
@@ -2879,10 +2879,10 @@ void draw_print_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const x
 	pt[3].x = prt->x + prt->w / 4 * 3;
 	pt[3].y = prt->y + prt->h / 2;
 
-	(*pif->pf_draw_polygon)(pif->ctx, &xp, NULL, pt, 4);
+	(*pvi->drw->pf_draw_polygon)(pvi->ctx, &xp, NULL, pt, 4);
 }
 
-void draw_preview_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_preview_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -2930,10 +2930,10 @@ void draw_preview_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const
 	xs.w = DOUBLE_SPAN;
 	xs.h = DOUBLE_SPAN;
 
-	(*pif->pf_draw_round)(pif->ctx, &xp, &xb, &xr, &xs);
+	(*pvi->drw->pf_draw_round)(pvi->ctx, &xp, &xb, &xr, &xs);
 }
 
-void draw_screen_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_screen_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -2981,7 +2981,7 @@ void draw_screen_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const 
 	xr.h = prt->h / 4 * 3;
 	xs.w = DOUBLE_SPAN;
 	xs.h = DOUBLE_SPAN;
-	(*pif->pf_draw_round)(pif->ctx, &xp, &xb, &xr, &xs);
+	(*pvi->drw->pf_draw_round)(pvi->ctx, &xp, &xb, &xr, &xs);
 
 	xr.x = prt->x + prt->w / 2 - ps;
 	xr.y = prt->y + prt->h / 4 * 3;
@@ -2992,7 +2992,7 @@ void draw_screen_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const 
 
 	lighten_xbrush(&xb, DEF_HARD_DARKEN);
 
-	(*pif->pf_draw_round)(pif->ctx, &xp, &xb, &xr, &xs);
+	(*pvi->drw->pf_draw_round)(pvi->ctx, &xp, &xb, &xr, &xs);
 
 	lighten_xbrush(&xb, DEF_HARD_LIGHTEN);
 
@@ -3003,10 +3003,10 @@ void draw_screen_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const 
 	pt[2].x = prt->x + prt->w / 4 * 3;
 	pt[2].y = prt->y + prt->h;
 
-	(*pif->pf_draw_polygon)(pif->ctx, &xp, &xb, pt, 3);
+	(*pvi->drw->pf_draw_polygon)(pvi->ctx, &xp, &xb, pt, 3);
 }
 
-void draw_execute_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_execute_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -3056,7 +3056,7 @@ void draw_execute_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const
 	pt[3].x = prt->x + prt->w / 2;
 	pt[3].y = prt->y + prt->h / 4;
 
-	(*pif->pf_draw_polyline)(pif->ctx, &xp, pt, 4);
+	(*pvi->drw->pf_draw_polyline)(pvi->ctx, &xp, pt, 4);
 
 	pt[0].x = prt->x + prt->w / 4;
 	pt[0].y = prt->y + prt->h / 4 - 2 * ps;
@@ -3065,7 +3065,7 @@ void draw_execute_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const
 	pt[2].x = prt->x + prt->w / 4 + 3 * ps;
 	pt[2].y = prt->y + prt->h / 4;
 
-	(*pif->pf_draw_polygon)(pif->ctx, &xp, &xb, pt, 3);
+	(*pvi->drw->pf_draw_polygon)(pvi->ctx, &xp, &xb, pt, 3);
 
 	pt[0].x = prt->x + prt->w / 2 + 2 * ps;
 	pt[0].y = prt->y + prt->h / 4;
@@ -3076,7 +3076,7 @@ void draw_execute_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const
 	pt[3].x = prt->x + prt->w / 4 * 3;
 	pt[3].y = prt->y + prt->h / 4 * 3;
 
-	(*pif->pf_draw_polyline)(pif->ctx, &xp, pt, 4);
+	(*pvi->drw->pf_draw_polyline)(pvi->ctx, &xp, pt, 4);
 
 	pt[0].x = prt->x + prt->w / 4 * 3;
 	pt[0].y = prt->y + prt->h / 4 * 3 - 2 * ps;
@@ -3085,10 +3085,10 @@ void draw_execute_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const
 	pt[2].x = prt->x + prt->w / 4 * 3 - 3 * ps;
 	pt[2].y = prt->y + prt->h / 4 * 3;
 
-	(*pif->pf_draw_polygon)(pif->ctx, &xp, &xb, pt, 3);
+	(*pvi->drw->pf_draw_polygon)(pvi->ctx, &xp, &xb, pt, 3);
 }
 
-void draw_selectall_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_selectall_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -3134,13 +3134,13 @@ void draw_selectall_gizmo(const drawing_interface* pif, const xcolor_t* pxc, con
 	xr.w = prt->w;
 	xr.h = prt->h;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, NULL, &xr);
 
 	pt[0].x = xr.x + ps + SINGLE_SPAN;
 	pt[0].y = xr.y + xr.h / 4;
 	pt[1].x = xr.x + xr.w - ps - SINGLE_SPAN;
 	pt[1].y = xr.y + xr.h / 4;
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 
 	lighten_xpen(&xp, DEF_HARD_DARKEN);
 	lighten_xbrush(&xb, DEF_HARD_DARKEN);
@@ -3149,7 +3149,7 @@ void draw_selectall_gizmo(const drawing_interface* pif, const xcolor_t* pxc, con
 	pt[0].y = prt->y + prt->h / 2 + ps;
 	pt[1].x = xr.x + xr.w - ps - SINGLE_SPAN;
 	pt[1].y = xr.y + xr.h - ps - SINGLE_SPAN;
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 
 	pt[0].x = prt->x + prt->w / 2;
 	pt[0].y = prt->y + prt->h / 2;
@@ -3158,10 +3158,10 @@ void draw_selectall_gizmo(const drawing_interface* pif, const xcolor_t* pxc, con
 	pt[2].x = prt->x + prt->w / 4 * 3;
 	pt[2].y = prt->y + prt->h / 4 * 3 - 2 * ps;
 
-	(*pif->pf_draw_polygon)(pif->ctx, &xp, &xb, pt, 3);
+	(*pvi->drw->pf_draw_polygon)(pvi->ctx, &xp, &xb, pt, 3);
 }
 
-void draw_delete_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_delete_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xpoint_t pt[2];
@@ -3203,17 +3203,17 @@ void draw_delete_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const 
 	pt[1].x = prt->x + prt->w - ps;
 	pt[1].y = prt->y + prt->h - ps;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 
 	pt[0].x = prt->x + ps;
 	pt[0].y = prt->y + prt->h - ps;
 	pt[1].x = prt->x + prt->w - ps;
 	pt[1].y = prt->y + ps;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 }
 
-void draw_insert_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_insert_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -3259,21 +3259,21 @@ void draw_insert_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const 
 	xr.w = prt->w;
 	xr.h = prt->h;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, NULL, &xr);
 
 	pt[0].x = prt->x + 2 * ps;
 	pt[0].y = prt->y + prt->h / 4;
 	pt[1].x = prt->x + prt->w - 2 * ps;
 	pt[1].y = prt->y + prt->h / 4;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 
 	pt[0].x = prt->x + 2 * ps;
 	pt[0].y = prt->y + prt->h / 2;
 	pt[1].x = prt->x + prt->w / 2 - 1 * ps;
 	pt[1].y = prt->y + prt->h / 2;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 
 	pt[0].x = prt->x + prt->w - 2 * ps;
 	pt[0].y = prt->y + prt->h / 2 - DOUBLE_SPAN;
@@ -3282,17 +3282,17 @@ void draw_insert_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const 
 	pt[2].x = prt->x + prt->w - 2 * ps - FOUR_SPAN;
 	pt[2].y = prt->y + prt->h / 2;
 
-	(*pif->pf_draw_polygon)(pif->ctx, &xp, &xb, pt, 3);
+	(*pvi->drw->pf_draw_polygon)(pvi->ctx, &xp, &xb, pt, 3);
 
 	pt[0].x = prt->x + 2 * ps;
 	pt[0].y = prt->y + prt->h / 4 * 3 + ps;
 	pt[1].x = prt->x + prt->w - 2 * ps;
 	pt[1].y = prt->y + prt->h / 4 * 3 + ps;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 }
 
-void draw_remove_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_remove_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -3339,45 +3339,45 @@ void draw_remove_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const 
 	xr.w = prt->w;
 	xr.h = prt->h;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, NULL, &xr);
 
 	pt[0].x = prt->x + ps;
 	pt[0].y = prt->y + prt->h / 4;
 	pt[1].x = prt->x + prt->w / 2 - ps;
 	pt[1].y = prt->y + prt->h / 4;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 
 	pt[0].x = prt->x + ps;
 	pt[0].y = prt->y + prt->h / 2;
 	pt[1].x = prt->x + prt->w /2 - ps;
 	pt[1].y = prt->y + prt->h / 2;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 
 	pt[0].x = prt->x + ps;
 	pt[0].y = prt->y + prt->h / 4 * 3 + ps;
 	pt[1].x = prt->x + prt->w - ps;
 	pt[1].y = prt->y + prt->h / 4 * 3 + ps;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 
 	pt[0].x = prt->x + prt->w / 4 * 3 - 2 * ps;
 	pt[0].y = prt->y + prt->h / 2 - 1 * ps;
 	pt[1].x = prt->x + prt->w / 4 * 3 + 2 * ps;
 	pt[1].y = prt->y + prt->h / 2 - 4 * ps;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 
 	pt[0].x = prt->x + prt->w / 4 * 3 - 2 * ps;
 	pt[0].y = prt->y + prt->h / 2 - 4 * ps;
 	pt[1].x = prt->x + prt->w / 4 * 3 + 2 * ps;
 	pt[1].y = prt->y + prt->h / 2 - 1 * ps;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 }
 
-void draw_clear_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_clear_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -3423,59 +3423,59 @@ void draw_clear_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const x
 	xr.w = prt->w;
 	xr.h = prt->h;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, NULL, &xr);
 
 	pt[0].x = prt->x + ps;
 	pt[0].y = prt->y + prt->h / 4;
 	pt[1].x = prt->x + prt->w / 2 - ps;
 	pt[1].y = prt->y + prt->h / 4;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 
 	pt[0].x = prt->x + ps;
 	pt[0].y = prt->y + prt->h / 2;
 	pt[1].x = prt->x + prt->w / 2 - ps;
 	pt[1].y = prt->y + prt->h / 2;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 
 	pt[0].x = prt->x + ps;
 	pt[0].y = prt->y + prt->h / 4 * 3 + ps;
 	pt[1].x = prt->x + prt->w / 2 - ps;
 	pt[1].y = prt->y + prt->h / 4 * 3 + ps;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 
 	pt[0].x = prt->x + prt->w / 4 * 3 - 2 * ps;
 	pt[0].y = prt->y + prt->h / 2 - 1 * ps;
 	pt[1].x = prt->x + prt->w / 4 * 3 + 2 * ps;
 	pt[1].y = prt->y + prt->h / 2 - 4 * ps;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 
 	pt[0].x = prt->x + prt->w / 4 * 3 - 2 * ps;
 	pt[0].y = prt->y + prt->h / 2 - 4 * ps;
 	pt[1].x = prt->x + prt->w / 4 * 3 + 2 * ps;
 	pt[1].y = prt->y + prt->h / 2 - 1 * ps;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 
 	pt[0].x = prt->x + prt->w / 4 * 3 - 2 * ps;
 	pt[0].y = prt->y + prt->h - 4 * ps;
 	pt[1].x = prt->x + prt->w / 4 * 3 + 2 * ps;
 	pt[1].y = prt->y + prt->h - 1 * ps;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 
 	pt[0].x = prt->x + prt->w / 4 * 3 - 2 * ps;
 	pt[0].y = prt->y + prt->h - 1 * ps;
 	pt[1].x = prt->x + prt->w / 4 * 3 + 2 * ps;
 	pt[1].y = prt->y + prt->h - 4 * ps;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 }
 
-void draw_append_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_append_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -3521,45 +3521,45 @@ void draw_append_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const 
 	xr.w = prt->w;
 	xr.h = prt->h;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, NULL, &xr);
 
 	pt[0].x = prt->x + ps;
 	pt[0].y = prt->y + prt->h / 4;
 	pt[1].x = prt->x + prt->w - ps;
 	pt[1].y = prt->y + prt->h / 4;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 
 	pt[0].x = prt->x + ps;
 	pt[0].y = prt->y + prt->h / 2;
 	pt[1].x = prt->x + prt->w / 2 - ps;
 	pt[1].y = prt->y + prt->h / 2;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 
 	pt[0].x = prt->x + ps;
 	pt[0].y = prt->y + prt->h / 4 * 3 + ps;
 	pt[1].x = prt->x + prt->w / 2 - ps;
 	pt[1].y = prt->y + prt->h / 4 * 3 + ps;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 
 	pt[0].x = prt->x + prt->w / 4 * 3 - 2 * ps;
 	pt[0].y = prt->y + prt->h / 2 + 1 * ps;
 	pt[1].x = prt->x + prt->w / 4 * 3 + 2 * ps;
 	pt[1].y = prt->y + prt->h / 2 + 1 * ps;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 
 	pt[0].x = prt->x + prt->w / 4 * 3;
 	pt[0].y = prt->y + prt->h / 2 - 1 * ps;
 	pt[1].x = prt->x + prt->w / 4 * 3;
 	pt[1].y = prt->y + prt->h / 2 + 3 * ps;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 }
 
-void draw_copy_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_copy_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -3605,7 +3605,7 @@ void draw_copy_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xr
 	xr.w = prt->w / 4 * 3;
 	xr.h = prt->h / 4 * 3;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, NULL, &xr);
 
 	pt[0].x = prt->x + prt->w / 4 * 3;
 	pt[0].y = prt->y + prt->h / 4;
@@ -3618,7 +3618,7 @@ void draw_copy_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xr
 	pt[4].x = prt->x + prt->w;
 	pt[4].y = prt->y + prt->h / 2;
 
-	(*pif->pf_draw_polyline)(pif->ctx, &xp, pt, 5);
+	(*pvi->drw->pf_draw_polyline)(pvi->ctx, &xp, pt, 5);
 
 	pt[0].x = prt->x + prt->w / 4 * 3;
 	pt[0].y = prt->y + prt->h / 4 + SINGLE_SPAN;
@@ -3627,10 +3627,10 @@ void draw_copy_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xr
 	pt[2].x = prt->x + prt->w / 4 * 3;
 	pt[2].y = prt->y + prt->h / 2;
 
-	(*pif->pf_draw_polygon)(pif->ctx, &xp, NULL, pt, 3);
+	(*pvi->drw->pf_draw_polygon)(pvi->ctx, &xp, NULL, pt, 3);
 }
 
-void draw_cut_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_cut_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -3682,7 +3682,7 @@ void draw_cut_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xre
 	pt[4].x = prt->x + prt->w;
 	pt[4].y = prt->y + prt->h / 4 * 3;
 
-	(*pif->pf_draw_polyline)(pif->ctx, &xp, pt, 5);
+	(*pvi->drw->pf_draw_polyline)(pvi->ctx, &xp, pt, 5);
 
 	pt[0].x = prt->x + prt->w / 2;
 	pt[0].y = prt->y;
@@ -3691,7 +3691,7 @@ void draw_cut_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xre
 	pt[2].x = prt->x + prt->w;
 	pt[2].y = prt->y + prt->h / 2;
 
-	(*pif->pf_draw_polygon)(pif->ctx, &xp, NULL, pt, 3);
+	(*pvi->drw->pf_draw_polygon)(pvi->ctx, &xp, NULL, pt, 3);
 
 	pt[0].x = prt->x + prt->w / 4;
 	pt[0].y = prt->y;
@@ -3700,10 +3700,10 @@ void draw_cut_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xre
 
 	xscpy(xp.style, GDI_ATTR_STROKE_STYLE_DASH);
 	xscpy(xp.size, _T("1"));
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 }
 
-void draw_paste_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_paste_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -3748,24 +3748,24 @@ void draw_paste_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const x
 	xr.w = prt->w;
 	xr.h = prt->h;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, NULL, &xr);
 
 	xr.x = prt->x + prt->w / 4;
 	xr.y = prt->y + prt->h / 4;
 	xr.w = prt->w / 4;
 	xr.h = prt->h / 4;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, NULL, &xr);
 
 	xr.x = prt->x + prt->w / 2;
 	xr.y = prt->y + prt->h / 2;
 	xr.w = prt->w / 4;
 	xr.h = prt->h / 4;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, &xb, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, &xb, &xr);
 }
 
-void draw_undo_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_undo_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -3811,14 +3811,14 @@ void draw_undo_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xr
 	xr.w = prt->w / 4 * 3;
 	xr.h = prt->h / 4;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, &xb, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, &xb, &xr);
 
 	xr.x = prt->x + prt->w / 4 * 3;
 	xr.y = prt->y + prt->h / 4 * 3;
 	xr.w = prt->w / 4;
 	xr.h = prt->h / 4;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, NULL, &xr);
 
 	pt[0].x = prt->x + prt->w;
 	pt[0].y = prt->y + prt->h;
@@ -3829,7 +3829,7 @@ void draw_undo_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xr
 	pt[3].x = prt->x + prt->w / 4;
 	pt[3].y = prt->y + prt->h / 2;
 
-	(*pif->pf_draw_polyline)(pif->ctx, &xp, pt, 4);
+	(*pvi->drw->pf_draw_polyline)(pvi->ctx, &xp, pt, 4);
 
 	pt[0].x = prt->x + prt->w / 4 - 2 * ps;
 	pt[0].y = prt->y + prt->h / 4;
@@ -3838,10 +3838,10 @@ void draw_undo_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xr
 	pt[2].x = prt->x + prt->w / 4;
 	pt[2].y = prt->y + prt->h / 4 + 3 * ps;
 
-	(*pif->pf_draw_polygon)(pif->ctx, &xp, &xb, pt, 3);
+	(*pvi->drw->pf_draw_polygon)(pvi->ctx, &xp, &xb, pt, 3);
 }
 
-void draw_redo_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_redo_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -3887,14 +3887,14 @@ void draw_redo_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xr
 	xr.w = prt->w / 4 * 3;
 	xr.h = prt->h / 4;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, &xb, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, &xb, &xr);
 
 	xr.x = prt->x + prt->w / 4 * 3;
 	xr.y = prt->y + prt->h / 4 * 3;
 	xr.w = prt->w / 4;
 	xr.h = prt->h / 4;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, NULL, &xr);
 
 	pt[0].x = prt->x;
 	pt[0].y = prt->y + prt->h;
@@ -3905,7 +3905,7 @@ void draw_redo_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xr
 	pt[3].x = prt->x + prt->w / 4 * 3;
 	pt[3].y = prt->y + prt->h / 4;
 
-	(*pif->pf_draw_polyline)(pif->ctx, &xp, pt, 4);
+	(*pvi->drw->pf_draw_polyline)(pvi->ctx, &xp, pt, 4);
 
 	pt[0].x = prt->x + prt->w / 4 * 3 - 2 * ps;
 	pt[0].y = prt->y + prt->h / 4;
@@ -3914,10 +3914,10 @@ void draw_redo_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xr
 	pt[2].x = prt->x + prt->w / 4 * 3;
 	pt[2].y = prt->y + prt->h / 4 + 3 * ps;
 
-	(*pif->pf_draw_polygon)(pif->ctx, &xp, &xb, pt, 3);
+	(*pvi->drw->pf_draw_polygon)(pvi->ctx, &xp, &xb, pt, 3);
 }
 
-void draw_fontname_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_fontname_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -3929,7 +3929,7 @@ void draw_fontname_gizmo(const drawing_interface* pif, const xcolor_t* pxc, cons
 
 	default_xfont(&xf);
 	xscpy(xf.weight, GDI_ATTR_FONT_WEIGHT_BOLD);
-	(*pif->pf_set_xfont)(pif->ctx, &xf);
+	(*pvi->drw->pf_set_xfont)(pvi->ctx, &xf);
 
 	default_xface(&xa);
 	format_xcolor(pxc, xa.text_color);
@@ -3975,17 +3975,17 @@ void draw_fontname_gizmo(const drawing_interface* pif, const xcolor_t* pxc, cons
 	xr.w = prt->w / 2;
 	xr.h = prt->h / 2;
 
-	(*pif->pf_draw_text)(pif->ctx, &xa, &xr, _T("A"), 1);
+	(*pvi->drw->pf_draw_text)(pvi->ctx, &xa, &xr, _T("A"), 1);
 
 	xr.x = prt->x + prt->w / 2;
 	xr.y = prt->y + prt->h / 2;
 	xr.w = prt->w / 2;
 	xr.h = prt->h / 2;
 
-	(*pif->pf_draw_text)(pif->ctx, &xa, &xr, _T("A"), 1);
+	(*pvi->drw->pf_draw_text)(pvi->ctx, &xa, &xr, _T("A"), 1);
 }
 
-void draw_fontsize_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_fontsize_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xrect_t rt, xr;
@@ -3996,7 +3996,7 @@ void draw_fontsize_gizmo(const drawing_interface* pif, const xcolor_t* pxc, cons
 	xface_t xa;
 
 	default_xfont(&xf);
-	(*pif->pf_set_xfont)(pif->ctx, &xf);
+	(*pvi->drw->pf_set_xfont)(pvi->ctx, &xf);
 
 	default_xface(&xa);
 	format_xcolor(pxc, xa.text_color);
@@ -4037,21 +4037,21 @@ void draw_fontsize_gizmo(const drawing_interface* pif, const xcolor_t* pxc, cons
 	pt[1].x = prt->x;
 	pt[1].y = prt->y + 2 * ps;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 
 	pt[0].x = prt->x;
 	pt[0].y = prt->y + ps;
 	pt[1].x = prt->x + prt->w;
 	pt[1].y = prt->y + ps;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 
 	pt[0].x = prt->x + prt->w;
 	pt[0].y = prt->y;
 	pt[1].x = prt->x + prt->w;;
 	pt[1].y = prt->y + 2 * ps;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 
 	xr.x = prt->x;
 	xr.y = prt->y + prt->h / 4;
@@ -4060,10 +4060,10 @@ void draw_fontsize_gizmo(const drawing_interface* pif, const xcolor_t* pxc, cons
 
 	xscpy(xf.weight, GDI_ATTR_FONT_WEIGHT_BOLD);
 	xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_CENTER);
-	(*pif->pf_draw_text)(pif->ctx, &xa, &xr, _T("A"), 1);
+	(*pvi->drw->pf_draw_text)(pvi->ctx, &xa, &xr, _T("A"), 1);
 }
 
-void draw_fontweight_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_fontweight_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xrect_t rt, xr;
@@ -4073,7 +4073,7 @@ void draw_fontweight_gizmo(const drawing_interface* pif, const xcolor_t* pxc, co
 	xface_t xa;
 
 	default_xfont(&xf);
-	(*pif->pf_set_xfont)(pif->ctx, &xf);
+	(*pvi->drw->pf_set_xfont)(pvi->ctx, &xf);
 
 	default_xface(&xa);
 	format_xcolor(pxc, xa.text_color);
@@ -4120,10 +4120,10 @@ void draw_fontweight_gizmo(const drawing_interface* pif, const xcolor_t* pxc, co
 	xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_CENTER);
 	xscpy(xf.weight, GDI_ATTR_FONT_WEIGHT_BOLD);
 
-	(*pif->pf_draw_text)(pif->ctx, &xa, &xr, _T("B"), 1);
+	(*pvi->drw->pf_draw_text)(pvi->ctx, &xa, &xr, _T("B"), 1);
 }
 
-void draw_fontcolor_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_fontcolor_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -4134,7 +4134,7 @@ void draw_fontcolor_gizmo(const drawing_interface* pif, const xcolor_t* pxc, con
 	xface_t xa;
 
 	default_xfont(&xf);
-	(*pif->pf_set_xfont)(pif->ctx, &xf);
+	(*pvi->drw->pf_set_xfont)(pvi->ctx, &xf);
 
 	default_xface(&xa);
 	format_xcolor(pxc, xa.text_color);
@@ -4183,17 +4183,17 @@ void draw_fontcolor_gizmo(const drawing_interface* pif, const xcolor_t* pxc, con
 	xscpy(xf.weight, GDI_ATTR_FONT_WEIGHT_BOLD);
 	xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_CENTER);
 
-	(*pif->pf_draw_text)(pif->ctx, &xa, &xr, _T("A"), 1);
+	(*pvi->drw->pf_draw_text)(pvi->ctx, &xa, &xr, _T("A"), 1);
 
 	xr.x = prt->x + ps;
 	xr.y = prt->y + prt->h / 4 * 3 + ps;
 	xr.w = prt->w - 2 * ps;
 	xr.h = prt->h / 4 - ps;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, &xb, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, &xb, &xr);
 }
 
-void draw_fontstyle_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_fontstyle_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -4204,7 +4204,7 @@ void draw_fontstyle_gizmo(const drawing_interface* pif, const xcolor_t* pxc, con
 	xface_t xa;
 
 	default_xfont(&xf);
-	(*pif->pf_set_xfont)(pif->ctx, &xf);
+	(*pvi->drw->pf_set_xfont)(pvi->ctx, &xf);
 
 	default_xface(&xa);
 	format_xcolor(pxc, xa.text_color);
@@ -4248,7 +4248,7 @@ void draw_fontstyle_gizmo(const drawing_interface* pif, const xcolor_t* pxc, con
 	xr.w = prt->w;
 	xr.h = prt->h;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, NULL, &xr);
 
 	xr.x = prt->x;
 	xr.y = prt->y;
@@ -4259,10 +4259,10 @@ void draw_fontstyle_gizmo(const drawing_interface* pif, const xcolor_t* pxc, con
 	xscpy(xf.decorate, GDI_ATTR_FONT_DECORATE_UNDERLINE);
 	xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_CENTER);
 
-	(*pif->pf_draw_text)(pif->ctx, &xa, &xr, _T("U"), 1);
+	(*pvi->drw->pf_draw_text)(pvi->ctx, &xa, &xr, _T("U"), 1);
 }
 
-void draw_foreground_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_foreground_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -4308,7 +4308,7 @@ void draw_foreground_gizmo(const drawing_interface* pif, const xcolor_t* pxc, co
 	xr.w = 4 * ps;
 	xr.h = prt->h / 2 - ps;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, &xb, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, &xb, &xr);
 
 	pt[0].x = prt->x + prt->w / 4 * 3 - 2 * ps;
 	pt[0].y = prt->y + prt->h / 2 + ps;
@@ -4317,17 +4317,17 @@ void draw_foreground_gizmo(const drawing_interface* pif, const xcolor_t* pxc, co
 	pt[2].x = prt->x + prt->w / 4 * 3;
 	pt[2].y = prt->y + prt->h / 2 + 4 * ps;
 
-	(*pif->pf_draw_polygon)(pif->ctx, &xp, NULL, pt, 3);
+	(*pvi->drw->pf_draw_polygon)(pvi->ctx, &xp, NULL, pt, 3);
 
 	xr.x = prt->x;
 	xr.y = prt->y + prt->h / 4 * 3;
 	xr.w = prt->w / 4;
 	xr.h = prt->h / 4;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, &xb, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, &xb, &xr);
 }
 
-void draw_background_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_background_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -4373,7 +4373,7 @@ void draw_background_gizmo(const drawing_interface* pif, const xcolor_t* pxc, co
 	xr.w = 4 * ps;
 	xr.h = prt->h / 2 - ps;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, &xb, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, &xb, &xr);
 
 	pt[0].x = prt->x + prt->w / 2 - 2 * ps;
 	pt[0].y = prt->y + prt->h / 2 + ps;
@@ -4382,17 +4382,17 @@ void draw_background_gizmo(const drawing_interface* pif, const xcolor_t* pxc, co
 	pt[2].x = prt->x + prt->w / 2;
 	pt[2].y = prt->y + prt->h / 2 + 4 * ps;
 
-	(*pif->pf_draw_polygon)(pif->ctx, &xp, NULL, pt, 3);
+	(*pvi->drw->pf_draw_polygon)(pvi->ctx, &xp, NULL, pt, 3);
 
 	xr.x = prt->x + ps;
 	xr.y = prt->y + prt->h - 2 * ps;
 	xr.w = prt->w - 2 * ps;
 	xr.h = 2 * ps;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, &xb, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, &xb, &xr);
 }
 
-void draw_alignnear_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_alignnear_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xpoint_t pt[2];
@@ -4436,24 +4436,24 @@ void draw_alignnear_gizmo(const drawing_interface* pif, const xcolor_t* pxc, con
 	pt[1].x = prt->x + prt->w / 4 * 3;
 	pt[1].y = prt->y + prt->h / 4;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 
 	pt[0].x = prt->x;
 	pt[0].y = prt->y + prt->h / 2;
 	pt[1].x = prt->x + prt->w / 2;
 	pt[1].y = prt->y + prt->h / 2;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 
 	pt[0].x = prt->x;
 	pt[0].y = prt->y + prt->h / 4 * 3;
 	pt[1].x = prt->x + prt->w;
 	pt[1].y = prt->y + prt->h / 4 * 3;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 }
 
-void draw_aligncenter_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_aligncenter_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xpoint_t pt[2];
@@ -4497,24 +4497,24 @@ void draw_aligncenter_gizmo(const drawing_interface* pif, const xcolor_t* pxc, c
 	pt[1].x = prt->x + prt->w / 4 * 3;
 	pt[1].y = prt->y + prt->h / 4;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 
 	pt[0].x = prt->x;
 	pt[0].y = prt->y + prt->h / 2;
 	pt[1].x = prt->x + prt->w;
 	pt[1].y = prt->y + prt->h / 2;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 
 	pt[0].x = prt->x + prt->w / 4;
 	pt[0].y = prt->y + prt->h / 4 * 3;
 	pt[1].x = prt->x + prt->w / 4 * 3;
 	pt[1].y = prt->y + prt->h / 4 * 3;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 }
 
-void draw_alignfar_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_alignfar_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xpoint_t pt[2];
@@ -4558,24 +4558,24 @@ void draw_alignfar_gizmo(const drawing_interface* pif, const xcolor_t* pxc, cons
 	pt[1].x = prt->x + prt->w;
 	pt[1].y = prt->y + prt->h / 4;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 
 	pt[0].x = prt->x;
 	pt[0].y = prt->y + prt->h / 2;
 	pt[1].x = prt->x + prt->w;
 	pt[1].y = prt->y + prt->h / 2;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 
 	pt[0].x = prt->x + prt->w / 2 - ps;
 	pt[0].y = prt->y + prt->h / 4 * 3;
 	pt[1].x = prt->x + prt->w;
 	pt[1].y = prt->y + prt->h / 4 * 3;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 }
 
-void draw_arrangelept_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_arrangelept_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xrect_t rt, xr;
@@ -4617,7 +4617,7 @@ void draw_arrangelept_gizmo(const drawing_interface* pif, const xcolor_t* pxc, c
 	pt[1].x = prt->x;
 	pt[1].y = prt->y + prt->h;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 
 	ltoxs(xstol(xp.size) - 1, xp.size, INT_LEN);
 
@@ -4626,24 +4626,24 @@ void draw_arrangelept_gizmo(const drawing_interface* pif, const xcolor_t* pxc, c
 	xr.w = prt->w / 4 * 3;
 	xr.h = 2 * ps;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, NULL, &xr);
 
 	xr.x = prt->x + ps + SINGLE_SPAN;
 	xr.y = prt->y + prt->h / 2 - ps;
 	xr.w = prt->w / 2;
 	xr.h = 2 * ps;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, NULL, &xr);
 
 	xr.x = prt->x + ps + SINGLE_SPAN;
 	xr.y = prt->y + prt->h / 4 * 3 - ps;
 	xr.w = prt->w / 4;
 	xr.h = 2 * ps;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, NULL, &xr);
 }
 
-void draw_arrangecenter_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_arrangecenter_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xrect_t rt, xr;
@@ -4685,7 +4685,7 @@ void draw_arrangecenter_gizmo(const drawing_interface* pif, const xcolor_t* pxc,
 	pt[1].x = prt->x + prt->w / 2;
 	pt[1].y = prt->y + prt->h;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 
 	ltoxs(xstol(xp.size) - 1, xp.size, INT_LEN);
 
@@ -4694,24 +4694,24 @@ void draw_arrangecenter_gizmo(const drawing_interface* pif, const xcolor_t* pxc,
 	xr.w = prt->w / 2;
 	xr.h = 2 * ps;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, NULL, &xr);
 
 	xr.x = prt->x + prt->w / 2 - 2 * ps;
 	xr.y = prt->y + prt->h / 2 - ps;
 	xr.w = 4 * ps;
 	xr.h = 2 * ps;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, NULL, &xr);
 
 	xr.x = prt->x + 2 * ps;
 	xr.y = prt->y + prt->h / 4 * 3 - ps;
 	xr.w = prt->w - 4 * ps;
 	xr.h = 2 * ps;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, NULL, &xr);
 }
 
-void draw_arrangeright_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_arrangeright_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xrect_t rt, xr;
@@ -4753,7 +4753,7 @@ void draw_arrangeright_gizmo(const drawing_interface* pif, const xcolor_t* pxc, 
 	pt[1].x = prt->x + prt->w;
 	pt[1].y = prt->y + prt->h;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 
 	ltoxs(xstol(xp.size) - 1, xp.size, INT_LEN);
 
@@ -4762,24 +4762,24 @@ void draw_arrangeright_gizmo(const drawing_interface* pif, const xcolor_t* pxc, 
 	xr.w = 5 * ps;
 	xr.h = 2 * ps;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, NULL, &xr);
 
 	xr.x = prt->x + prt->w - 8 * ps - SINGLE_SPAN;
 	xr.y = prt->y + prt->h / 2 - ps;
 	xr.w = 7 * ps;
 	xr.h = 2 * ps;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, NULL, &xr);
 
 	xr.x = prt->x + prt->w - 4 * ps - SINGLE_SPAN;
 	xr.y = prt->y + prt->h / 4 * 3 - ps;
 	xr.w = 3 * ps;
 	xr.h = 2 * ps;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, NULL, &xr);
 }
 
-void draw_sizehorz_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_sizehorz_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -4825,14 +4825,14 @@ void draw_sizehorz_gizmo(const drawing_interface* pif, const xcolor_t* pxc, cons
 	xr.w = prt->w;
 	xr.h = prt->h / 4;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, &xb, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, &xb, &xr);
 
 	xr.x = prt->x + prt->w / 4;
 	xr.y = prt->y + prt->h / 2;
 	xr.w = prt->w / 2;
 	xr.h = prt->h / 4;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, &xb, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, &xb, &xr);
 
 	ltoxs(xstol(xp.size) - 1, xp.size, INT_LEN);
 	xscpy(xp.style, GDI_ATTR_STROKE_STYLE_DASH);
@@ -4844,7 +4844,7 @@ void draw_sizehorz_gizmo(const drawing_interface* pif, const xcolor_t* pxc, cons
 	pt[2].x = prt->x + prt->w / 4;
 	pt[2].y = prt->y + prt->h / 2 + prt->h / 8;
 
-	(*pif->pf_draw_polyline)(pif->ctx, &xp, pt, 3);
+	(*pvi->drw->pf_draw_polyline)(pvi->ctx, &xp, pt, 3);
 
 	pt[0].x = prt->x + prt->w / 4 * 3;
 	pt[0].y = prt->y + prt->h / 2 + prt->h / 8;
@@ -4853,10 +4853,10 @@ void draw_sizehorz_gizmo(const drawing_interface* pif, const xcolor_t* pxc, cons
 	pt[2].x = prt->x + prt->w;
 	pt[2].y = prt->y + prt->h / 4;
 
-	(*pif->pf_draw_polyline)(pif->ctx, &xp, pt, 3);
+	(*pvi->drw->pf_draw_polyline)(pvi->ctx, &xp, pt, 3);
 }
 
-void draw_sizevert_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_sizevert_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -4902,14 +4902,14 @@ void draw_sizevert_gizmo(const drawing_interface* pif, const xcolor_t* pxc, cons
 	xr.w = prt->w / 4;
 	xr.h = prt->h;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, &xb, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, &xb, &xr);
 
 	xr.x = prt->x;
 	xr.y = prt->y + prt->h / 4;
 	xr.w = prt->w / 4;
 	xr.h = prt->h / 2;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, &xb, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, &xb, &xr);
 
 	ltoxs(xstol(xp.size) - 1, xp.size, INT_LEN);
 	xscpy(xp.style, GDI_ATTR_STROKE_STYLE_DASH);
@@ -4921,7 +4921,7 @@ void draw_sizevert_gizmo(const drawing_interface* pif, const xcolor_t* pxc, cons
 	pt[2].x = prt->x + prt->w / 4 * 3;
 	pt[2].y = prt->y;
 
-	(*pif->pf_draw_polyline)(pif->ctx, &xp, pt, 3);
+	(*pvi->drw->pf_draw_polyline)(pvi->ctx, &xp, pt, 3);
 
 	pt[0].x = prt->x + prt->w / 8;
 	pt[0].y = prt->y + prt->h / 4 * 3;
@@ -4930,10 +4930,10 @@ void draw_sizevert_gizmo(const drawing_interface* pif, const xcolor_t* pxc, cons
 	pt[2].x = prt->x + prt->w / 4 * 3;
 	pt[2].y = prt->y + prt->h;
 
-	(*pif->pf_draw_polyline)(pif->ctx, &xp, pt, 3);
+	(*pvi->drw->pf_draw_polyline)(pvi->ctx, &xp, pt, 3);
 }
 
-void draw_spacehorz_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_spacehorz_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -4979,21 +4979,21 @@ void draw_spacehorz_gizmo(const drawing_interface* pif, const xcolor_t* pxc, con
 	xr.w = 2 * ps;
 	xr.h = prt->h / 4 * 3;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, &xb, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, &xb, &xr);
 
 	xr.x = prt->x + prt->w / 2 - ps;
 	xr.y = prt->y + prt->h / 4;
 	xr.w = 2 * ps;
 	xr.h = prt->h / 4 * 3;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, &xb, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, &xb, &xr);
 
 	xr.x = prt->x + prt->w - 2 * ps;
 	xr.y = prt->y + prt->h / 4;
 	xr.w = 2 * ps;
 	xr.h = prt->h / 4 * 3;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, &xb, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, &xb, &xr);
 
 	ltoxs(xstol(xp.size) - 1, xp.size, INT_LEN);
 	xscpy(xp.style, GDI_ATTR_STROKE_STYLE_DASH);
@@ -5007,7 +5007,7 @@ void draw_spacehorz_gizmo(const drawing_interface* pif, const xcolor_t* pxc, con
 	pt[3].x = prt->x + prt->w / 2 - ps;
 	pt[3].y = prt->y + prt->h / 4;
 
-	(*pif->pf_draw_polyline)(pif->ctx, &xp, pt, 4);
+	(*pvi->drw->pf_draw_polyline)(pvi->ctx, &xp, pt, 4);
 
 	pt[0].x = prt->x + prt->w / 2 + ps;
 	pt[0].y = prt->y + prt->h / 4;
@@ -5018,10 +5018,10 @@ void draw_spacehorz_gizmo(const drawing_interface* pif, const xcolor_t* pxc, con
 	pt[3].x = prt->x + prt->w - 2 * ps;
 	pt[3].y = prt->y + prt->h / 4;
 
-	(*pif->pf_draw_polyline)(pif->ctx, &xp, pt, 4);
+	(*pvi->drw->pf_draw_polyline)(pvi->ctx, &xp, pt, 4);
 }
 
-void draw_spacevert_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_spacevert_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -5067,21 +5067,21 @@ void draw_spacevert_gizmo(const drawing_interface* pif, const xcolor_t* pxc, con
 	xr.w = prt->w / 4 * 3;
 	xr.h = 2 * ps;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, &xb, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, &xb, &xr);
 
 	xr.x = prt->x + prt->w / 4;
 	xr.y = prt->y + prt->h / 2 - ps;
 	xr.w = prt->w / 4 * 3;
 	xr.h = 2 * ps;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, &xb, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, &xb, &xr);
 
 	xr.x = prt->x + prt->w / 4;
 	xr.y = prt->y + prt->h - 2 * ps;
 	xr.w = prt->w / 4 * 3;
 	xr.h = 2 * ps;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, &xb, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, &xb, &xr);
 
 	ltoxs(xstol(xp.size) - 1, xp.size, INT_LEN);
 	xscpy(xp.style, GDI_ATTR_STROKE_STYLE_DASH);
@@ -5095,7 +5095,7 @@ void draw_spacevert_gizmo(const drawing_interface* pif, const xcolor_t* pxc, con
 	pt[3].x = prt->x + prt->w / 4;
 	pt[3].y = prt->y + prt->h / 2 - ps;
 
-	(*pif->pf_draw_polyline)(pif->ctx, &xp, pt, 4);
+	(*pvi->drw->pf_draw_polyline)(pvi->ctx, &xp, pt, 4);
 
 	pt[0].x = prt->x + prt->w / 4;
 	pt[0].y = prt->y + prt->h / 2 + ps;
@@ -5106,10 +5106,10 @@ void draw_spacevert_gizmo(const drawing_interface* pif, const xcolor_t* pxc, con
 	pt[3].x = prt->x + prt->w / 4;
 	pt[3].y = prt->y + prt->h - 2 * ps;
 
-	(*pif->pf_draw_polyline)(pif->ctx, &xp, pt, 4);
+	(*pvi->drw->pf_draw_polyline)(pvi->ctx, &xp, pt, 4);
 }
 
-void draw_edit_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_edit_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -5155,7 +5155,7 @@ void draw_edit_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xr
 	xr.w = 4 * ps;
 	xr.h = prt->h / 2;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, &xb, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, &xb, &xr);
 
 	pt[0].x = prt->x + prt->w / 2 - 2 * ps;
 	pt[0].y = prt->y + prt->h / 2 + 1 * ps + SINGLE_SPAN;
@@ -5164,10 +5164,10 @@ void draw_edit_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xr
 	pt[2].x = prt->x + prt->w / 2;
 	pt[2].y = prt->y + prt->h / 2 + 4 * ps;
 
-	(*pif->pf_draw_polygon)(pif->ctx, &xp, NULL, pt, 3);
+	(*pvi->drw->pf_draw_polygon)(pvi->ctx, &xp, NULL, pt, 3);
 }
 
-void draw_group_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_group_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -5212,14 +5212,14 @@ void draw_group_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const x
 	xr.w = prt->w / 2;
 	xr.h = prt->h / 2;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, NULL, &xr);
 
 	xr.x = prt->x + prt->w / 4 + 2 * ps;
 	xr.y = prt->y + prt->h / 4 + 2 * ps;
 	xr.w = prt->w / 2;
 	xr.h = prt->h / 2;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, NULL, &xr);
 
 	ltoxs(xstol(xp.size) - 1, xp.size, INT_LEN);
 	xscpy(xp.style, GDI_ATTR_STROKE_STYLE_DASH);
@@ -5229,10 +5229,10 @@ void draw_group_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const x
 	xr.w = prt->w;
 	xr.h = prt->h;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, NULL, &xr);
 }
 
-void draw_order_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_order_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -5277,7 +5277,7 @@ void draw_order_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const x
 	xr.w = 3 * ps;
 	xr.h = 3 * ps;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, &xb, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, &xb, &xr);
 
 	xr.x = prt->x + prt->w / 4;
 	xr.y = prt->y + prt->h / 4;
@@ -5285,7 +5285,7 @@ void draw_order_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const x
 	xr.h = prt->h / 2;
 
 	lighten_xpen(&xp, DEF_HARD_DARKEN);
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, NULL, &xr);
 
 	xr.x = prt->x + prt->w / 4 * 3 - (int)(1.5 * (float)ps);
 	xr.y = prt->y + prt->h / 4 * 3 - (int)(1.5 * (float)ps);
@@ -5293,10 +5293,10 @@ void draw_order_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const x
 	xr.h = 3 * ps;
 
 	lighten_xpen(&xp, 0 - DEF_HARD_DARKEN);
-	(*pif->pf_draw_rect)(pif->ctx, &xp, &xb, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, &xb, &xr);
 }
 
-void draw_border_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_border_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xrect_t rt, xr;
@@ -5337,7 +5337,7 @@ void draw_border_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const 
 	xr.y = prt->y;
 	xr.w = prt->w;
 	xr.h = prt->h;
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, NULL, &xr);
 
 	xscpy(xp.style, GDI_ATTR_STROKE_STYLE_DASH);
 
@@ -5346,17 +5346,17 @@ void draw_border_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const 
 	pt[1].x = prt->x + prt->w;
 	pt[1].y = prt->y + prt->h / 2;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 
 	pt[0].x = prt->x + prt->w / 2;
 	pt[0].y = prt->y;
 	pt[1].x = prt->x + prt->w / 2;
 	pt[1].y = prt->y + prt->h;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 }
 
-void draw_shape_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_shape_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -5403,7 +5403,7 @@ void draw_shape_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const x
 	xr.w = prt->w / 2 - 2 * ps;
 	xr.h = prt->h / 2 - 2 * ps;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, NULL, &xr);
 
 	xr.x = prt->x + prt->w / 2 + ps;
 	xr.y = prt->y + ps;
@@ -5411,7 +5411,7 @@ void draw_shape_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const x
 	xr.h = prt->h / 2 - 2 * ps;
 	xs.w = DOUBLE_SPAN;
 	xs.h = DOUBLE_SPAN;
-	(*pif->pf_draw_round)(pif->ctx, &xp, &xb, &xr, &xs);
+	(*pvi->drw->pf_draw_round)(pvi->ctx, &xp, &xb, &xr, &xs);
 
 	pt[0].x = prt->x + prt->w / 4;
 	pt[0].y = prt->y + prt->h / 2 + ps;
@@ -5420,17 +5420,17 @@ void draw_shape_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const x
 	pt[2].x = prt->x + prt->w / 2 - ps;
 	pt[2].y = prt->y + prt->h - ps;
 
-	(*pif->pf_draw_polygon)(pif->ctx, &xp, &xb, pt, 3);
+	(*pvi->drw->pf_draw_polygon)(pvi->ctx, &xp, &xb, pt, 3);
 
 	xr.x = prt->x + prt->w / 2 + ps;
 	xr.y = prt->y + prt->h / 2 + ps;
 	xr.w = prt->w / 2 - 2 * ps;
 	xr.h = prt->h / 2 - 2 * ps;
 
-	(*pif->pf_draw_ellipse)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_ellipse)(pvi->ctx, &xp, NULL, &xr);
 }
 
-void draw_label_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_label_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xfont_t xf;
 	xface_t xa;
@@ -5439,7 +5439,7 @@ void draw_label_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const x
 	default_xfont(&xf);
 	xscpy(xf.style, GDI_ATTR_FONT_STYLE_ITALIC);
 	xscpy(xf.weight, GDI_ATTR_FONT_WEIGHT_BOLD);
-	(*pif->pf_set_xfont)(pif->ctx, &xf);
+	(*pvi->drw->pf_set_xfont)(pvi->ctx, &xf);
 
 	default_xface(&xa);
 	xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_CENTER);
@@ -5474,10 +5474,10 @@ void draw_label_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const x
 	xr.w = prt->w;
 	xr.h = prt->h;
 
-	(*pif->pf_draw_text)(pif->ctx, &xa, &xr, _T("Aa"), -1);
+	(*pvi->drw->pf_draw_text)(pvi->ctx, &xa, &xr, _T("Aa"), -1);
 }
 
-void draw_check_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_check_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xrect_t rt, xr;
@@ -5519,7 +5519,7 @@ void draw_check_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const x
 	xr.w = prt->w;
 	xr.h = prt->h;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, NULL, &xr);
 
 	pt[0].x = prt->x + prt->w / 4 - ps;
 	pt[0].y = prt->y + prt->h / 2;
@@ -5530,10 +5530,10 @@ void draw_check_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const x
 	pt[3].x = prt->x + prt->w - ps;
 	pt[3].y = prt->y + ps;
 
-	(*pif->pf_draw_polyline)(pif->ctx, &xp, pt, 4);
+	(*pvi->drw->pf_draw_polyline)(pvi->ctx, &xp, pt, 4);
 }
 
-void draw_singletext_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_singletext_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -5578,24 +5578,24 @@ void draw_singletext_gizmo(const drawing_interface* pif, const xcolor_t* pxc, co
 	xr.w = prt->w;
 	xr.h = 6 * ps;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, NULL, &xr);
 
 	xr.x = prt->x + prt->w / 4;
 	xr.y = prt->y + prt->h / 2 - ps;
 	xr.w = 2 * ps;
 	xr.h = 2 * ps;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, &xb, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, &xb, &xr);
 
 	xr.x = prt->x + prt->w / 4 + 4 * ps;
 	xr.y = prt->y + prt->h / 2 - ps;
 	xr.w = 2 * ps;
 	xr.h = 2 * ps;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, &xb, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, &xb, &xr);
 }
 
-void draw_multitext_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_multitext_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xpoint_t pt1, pt2;
@@ -5637,28 +5637,28 @@ void draw_multitext_gizmo(const drawing_interface* pif, const xcolor_t* pxc, con
 	xr.w = prt->w;
 	xr.h = prt->h;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, NULL, &xr);
 
 	pt1.x = xr.x + ps + SINGLE_SPAN;
 	pt1.y = xr.y + xr.h / 4;
 	pt2.x = xr.x + xr.w - ps - SINGLE_SPAN;
 	pt2.y = xr.y + xr.h / 4;
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt1, &pt2);
 
 	pt1.x = xr.x + ps + SINGLE_SPAN;
 	pt1.y = xr.y + xr.h / 2;
 	pt2.x = xr.x + xr.w - ps - SINGLE_SPAN;
 	pt2.y = xr.y + xr.h / 2;
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt1, &pt2);
 
 	pt1.x = xr.x + ps + SINGLE_SPAN;
 	pt1.y = xr.y + xr.h / 4 * 3;
 	pt2.x = xr.x + xr.w / 2 - SINGLE_SPAN;
 	pt2.y = xr.y + xr.h / 4 * 3;
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt1, &pt2);
 }
 
-void draw_tag_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_tag_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xrect_t rt, xr;
@@ -5668,7 +5668,7 @@ void draw_tag_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xre
 	xface_t xa;
 
 	default_xfont(&xf);
-	(*pif->pf_set_xfont)(pif->ctx, &xf);
+	(*pvi->drw->pf_set_xfont)(pvi->ctx, &xf);
 
 	default_xface(&xa);
 	xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_CENTER);
@@ -5712,7 +5712,7 @@ void draw_tag_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xre
 	xr.w = prt->w;
 	xr.h = prt->h;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, NULL, &xr);
 
 	xr.x = prt->x;
 	xr.y = prt->y;
@@ -5721,10 +5721,10 @@ void draw_tag_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xre
 
 	xscpy(xf.weight, GDI_ATTR_FONT_WEIGHT_BOLD);
 
-	(*pif->pf_draw_text)(pif->ctx, &xa, &xr, _T("</>"), -1);
+	(*pvi->drw->pf_draw_text)(pvi->ctx, &xa, &xr, _T("</>"), -1);
 }
 
-void draw_memo_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_memo_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xpoint_t pt1, pt2;
@@ -5766,7 +5766,7 @@ void draw_memo_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xr
 	xr.w = prt->w;
 	xr.h = prt->h;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, NULL, &xr);
 
 	xscpy(xp.style, GDI_ATTR_STROKE_STYLE_DASHDASH);
 
@@ -5774,22 +5774,22 @@ void draw_memo_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xr
 	pt1.y = xr.y + xr.h / 4;
 	pt2.x = xr.x + xr.w - ps - SINGLE_SPAN;
 	pt2.y = xr.y + xr.h / 4;
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt1, &pt2);
 
 	pt1.x = xr.x + ps + SINGLE_SPAN;
 	pt1.y = xr.y + xr.h / 2;
 	pt2.x = xr.x + xr.w - ps - SINGLE_SPAN;
 	pt2.y = xr.y + xr.h / 2;
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt1, &pt2);
 
 	pt1.x = xr.x + ps + SINGLE_SPAN;
 	pt1.y = xr.y + xr.h / 4 * 3;
 	pt2.x = xr.x + xr.w / 2 - SINGLE_SPAN;
 	pt2.y = xr.y + xr.h / 4 * 3;
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt1, &pt2);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt1, &pt2);
 }
 
-void draw_photo_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_photo_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -5835,7 +5835,7 @@ void draw_photo_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const x
 	xr.w = prt->w;
 	xr.h = prt->h;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, NULL, &xr);
 
 	xr.x = prt->x + ps + SINGLE_SPAN;
 	xr.y = prt->y + ps + SINGLE_SPAN;
@@ -5844,7 +5844,7 @@ void draw_photo_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const x
 
 	lighten_xbrush(&xb, DEF_SOFT_DARKEN);
 
-	(*pif->pf_draw_ellipse)(pif->ctx, &xp, &xb, &xr);
+	(*pvi->drw->pf_draw_ellipse)(pvi->ctx, &xp, &xb, &xr);
 
 	lighten_xpen(&xp, DEF_SOFT_DARKEN);
 
@@ -5857,10 +5857,10 @@ void draw_photo_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const x
 	pt[3].x = prt->x + prt->w / 4 * 3;
 	pt[3].y = prt->y + prt->h / 4;
 
-	(*pif->pf_draw_polyline)(pif->ctx, &xp, pt, 4);
+	(*pvi->drw->pf_draw_polyline)(pvi->ctx, &xp, pt, 4);
 }
 
-void draw_herf_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_herf_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -5907,24 +5907,24 @@ void draw_herf_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xr
 	xr.w = (int)(2.5 * (float)ps) + SINGLE_SPAN;
 	xr.h = (int)(2.5 * (float)ps) - SINGLE_SPAN;
 
-	(*pif->pf_draw_ellipse)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_ellipse)(pvi->ctx, &xp, NULL, &xr);
 
 	xr.x = prt->x + prt->w / 2 - ps - SINGLE_SPAN;
 	xr.y = prt->y + prt->h / 2 - 1 * ps;
 	xr.w = (int)(2.5 * (float)ps) + SINGLE_SPAN;
 	xr.h = (int)(2.5 * (float)ps) - SINGLE_SPAN;
 
-	(*pif->pf_draw_ellipse)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_ellipse)(pvi->ctx, &xp, NULL, &xr);
 
 	xr.x = prt->x + prt->w / 4 * 3 - ps - SINGLE_SPAN;
 	xr.y = prt->y + prt->h / 2 - 1 * ps;
 	xr.w = (int)(2.5 * (float)ps) + SINGLE_SPAN;
 	xr.h = (int)(2.5 * (float)ps) - SINGLE_SPAN;
 
-	(*pif->pf_draw_ellipse)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_ellipse)(pvi->ctx, &xp, NULL, &xr);
 }
 
-void draw_code_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_code_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -5969,24 +5969,24 @@ void draw_code_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xr
 	xr.w = prt->w / 3 - ps;
 	xr.h = 2 * ps;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, &xb, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, &xb, &xr);
 
 	xr.x = prt->x + prt->w / 3;
 	xr.y = prt->y + prt->h / 2 - ps;
 	xr.w = prt->w / 3 - ps;
 	xr.h = 2 * ps;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, &xb, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, &xb, &xr);
 
 	xr.x = prt->x + prt->w / 3 * 2;
 	xr.y = prt->y + prt->h / 2 - ps;
 	xr.w = prt->w / 3 - ps;
 	xr.h = 2 * ps;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, &xb, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, &xb, &xr);
 }
 
-void draw_table_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_table_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -6031,7 +6031,7 @@ void draw_table_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const x
 	xr.w = prt->w;
 	xr.h = prt->h;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, NULL, &xr);
 
 	xscpy(xp.size, _T("1"));
 
@@ -6040,21 +6040,21 @@ void draw_table_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const x
 	xr.w = 2 * ps;
 	xr.h = 2 * ps;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, NULL, &xr);
 
 	xr.x = prt->x + prt->w / 4 - ps;
 	xr.y = prt->y + prt->h / 2 - ps;
 	xr.w = 2 * ps;
 	xr.h = 2 * ps;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, NULL, &xr);
 
 	xr.x = prt->x + prt->w / 4 - ps;
 	xr.y = prt->y + prt->h / 4 * 3 - ps;
 	xr.w = 2 * ps;
 	xr.h = 2 * ps;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, NULL, &xr);
 
 	lighten_xbrush(&xb, DEF_SOFT_DARKEN);
 
@@ -6063,24 +6063,24 @@ void draw_table_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const x
 	xr.w = prt->w / 2 - ps;
 	xr.h = 2 * ps;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, &xb, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, &xb, &xr);
 
 	xr.x = prt->x + prt->w / 2 - ps;
 	xr.y = prt->y + prt->h / 2 - ps;
 	xr.w = prt->w / 2 - ps;
 	xr.h = 2 * ps;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, &xb, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, &xb, &xr);
 
 	xr.x = prt->x + prt->w / 2 - ps;
 	xr.y = prt->y + prt->h / 4 * 3 - ps;
 	xr.w = prt->w / 2 - ps;
 	xr.h = 2 * ps;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, &xb, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, &xb, &xr);
 }
 
-void draw_rich_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_rich_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xpoint_t pt[5];
@@ -6122,25 +6122,25 @@ void draw_rich_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xr
 	xr.w = prt->w - 2 * ps;
 	xr.h = prt->h - 2 * ps;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, NULL, &xr);
 
 	pt[0].x = xr.x + ps + SINGLE_SPAN;
 	pt[0].y = xr.y + xr.h / 4;
 	pt[1].x = xr.x + xr.w - ps - SINGLE_SPAN;
 	pt[1].y = xr.y + xr.h / 4;
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 
 	pt[0].x = xr.x + ps + SINGLE_SPAN;
 	pt[0].y = xr.y + xr.h / 2;
 	pt[1].x = xr.x + xr.w - ps - SINGLE_SPAN;
 	pt[1].y = xr.y + xr.h / 2;
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 
 	pt[0].x = xr.x + ps + SINGLE_SPAN;
 	pt[0].y = xr.y + xr.h / 4 * 3;
 	pt[1].x = xr.x + xr.w / 2 - SINGLE_SPAN;
 	pt[1].y = xr.y + xr.h / 4 * 3;
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 
 	pt[0].x = xr.x + xr.w / 4;
 	pt[0].y = xr.y + xr.h;
@@ -6153,10 +6153,10 @@ void draw_rich_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xr
 	pt[4].x = xr.x + xr.w;
 	pt[4].y = xr.y + xr.h / 4;
 
-	(*pif->pf_draw_polyline)(pif->ctx, &xp, pt, 5);
+	(*pvi->drw->pf_draw_polyline)(pvi->ctx, &xp, pt, 5);
 }
 
-void draw_grid_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_grid_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -6202,52 +6202,52 @@ void draw_grid_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xr
 	xr.w = prt->w;
 	xr.h = prt->h;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, NULL, &xr);
 
 	pt[0].x = prt->x;
 	pt[0].y = prt->y + prt->h / 4;
 	pt[1].x = prt->x + prt->w;
 	pt[1].y = prt->y + prt->h / 4;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 
 	pt[0].x = prt->x;
 	pt[0].y = prt->y + prt->h / 2;
 	pt[1].x = prt->x + prt->w;
 	pt[1].y = prt->y + prt->h / 2;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 
 	pt[0].x = prt->x;
 	pt[0].y = prt->y + prt->h / 4 * 3;
 	pt[1].x = prt->x + prt->w;
 	pt[1].y = prt->y + prt->h / 4 * 3;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 
 	pt[0].x = prt->x + prt->w / 4;
 	pt[0].y = prt->y + prt->h / 4;
 	pt[1].x = prt->x + prt->w / 4;
 	pt[1].y = prt->y + prt->h / 4 * 3;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 
 	pt[0].x = prt->x + prt->w / 2;
 	pt[0].y = prt->y + prt->h / 4;
 	pt[1].x = prt->x + prt->w / 2;
 	pt[1].y = prt->y + prt->h;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 
 	pt[0].x = prt->x + prt->w / 4 * 3;
 	pt[0].y = prt->y + prt->h / 4;
 	pt[1].x = prt->x + prt->w / 4 * 3;
 	pt[1].y = prt->y + prt->h / 4 * 3;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 }
 
-void draw_graph_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_graph_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xpoint_t pt[5];
@@ -6295,7 +6295,7 @@ void draw_graph_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const x
 	pt[4].x = prt->x + prt->w;
 	pt[4].y = prt->y + prt->h / 2;
 
-	(*pif->pf_draw_curve)(pif->ctx, &xp, pt, 5);
+	(*pvi->drw->pf_draw_curve)(pvi->ctx, &xp, pt, 5);
 
 	pt[0].x = prt->x;
 	pt[0].y = prt->y;
@@ -6305,10 +6305,10 @@ void draw_graph_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const x
 	pt[2].y = prt->y + prt->h;
 
 	xscpy(xp.size, _T("1"));
-	(*pif->pf_draw_polyline)(pif->ctx, &xp, pt, 3);
+	(*pvi->drw->pf_draw_polyline)(pvi->ctx, &xp, pt, 3);
 }
 
-void draw_images_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_images_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -6354,7 +6354,7 @@ void draw_images_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const 
 	xr.w = prt->w - 2 * ps;
 	xr.h = prt->h - 2 * ps;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, NULL, &xr);
 
 	xr.x = prt->x + ps + SINGLE_SPAN;
 	xr.y = prt->y + ps + SINGLE_SPAN;
@@ -6363,7 +6363,7 @@ void draw_images_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const 
 
 	lighten_xbrush(&xb, DEF_SOFT_DARKEN);
 
-	(*pif->pf_draw_ellipse)(pif->ctx, &xp, &xb, &xr);
+	(*pvi->drw->pf_draw_ellipse)(pvi->ctx, &xp, &xb, &xr);
 
 	lighten_xpen(&xp, DEF_SOFT_DARKEN);
 
@@ -6376,7 +6376,7 @@ void draw_images_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const 
 	pt[3].x = prt->x + prt->w / 4 * 3;
 	pt[3].y = prt->y + prt->h / 4;
 
-	(*pif->pf_draw_polyline)(pif->ctx, &xp, pt, 4);
+	(*pvi->drw->pf_draw_polyline)(pvi->ctx, &xp, pt, 4);
 
 	lighten_xpen(&xp, DEF_SOFT_DARKEN);
 
@@ -6387,10 +6387,10 @@ void draw_images_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const 
 	pt[2].x = prt->x + prt->w;
 	pt[2].y = prt->y + prt->h / 4;
 
-	(*pif->pf_draw_polyline)(pif->ctx, &xp, pt, 3);
+	(*pvi->drw->pf_draw_polyline)(pvi->ctx, &xp, pt, 3);
 }
 
-void draw_update_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_update_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -6446,7 +6446,7 @@ void draw_update_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const 
 	xs.h = xr.h / 2;
 
 	//XPI/2 ~2*XPI
-	(*pif->pf_draw_arc)(pif->ctx, &xp, &pt[0], &pt[1], &xs, 1, 1);
+	(*pvi->drw->pf_draw_arc)(pvi->ctx, &xp, &pt[0], &pt[1], &xs, 1, 1);
 
 	pt[0].x = prt->x + prt->w / 2;
 	pt[0].y = prt->y + prt->h / 4 - 1 * ps;
@@ -6455,10 +6455,10 @@ void draw_update_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const 
 	pt[2].x = prt->x + prt->w / 2 + 2 * ps;
 	pt[2].y = prt->y + prt->h / 4;
 
-	(*pif->pf_draw_polygon)(pif->ctx, &xp, &xb, pt, 3);
+	(*pvi->drw->pf_draw_polygon)(pvi->ctx, &xp, &xb, pt, 3);
 }
 
-void draw_fetch_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_fetch_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -6514,7 +6514,7 @@ void draw_fetch_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const x
 	xs.h = xr.h / 2;
 
 	//XPI ~ XPI/2
-	(*pif->pf_draw_arc)(pif->ctx, &xp, &pt[0], &pt[1], &xs, 1, 1);
+	(*pvi->drw->pf_draw_arc)(pvi->ctx, &xp, &pt[0], &pt[1], &xs, 1, 1);
 
 	pt[0].x = prt->x + prt->w / 2;
 	pt[0].y = prt->y + prt->h / 4 * 3 - 1 * ps;
@@ -6523,10 +6523,10 @@ void draw_fetch_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const x
 	pt[2].x = prt->x + prt->w / 2 - 2 * ps;
 	pt[2].y = prt->y + prt->h / 4 * 3;
 
-	(*pif->pf_draw_polygon)(pif->ctx, &xp, &xb, pt, 3);
+	(*pvi->drw->pf_draw_polygon)(pvi->ctx, &xp, &xb, pt, 3);
 }
 
-void draw_fresh_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_fresh_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -6584,7 +6584,7 @@ void draw_fresh_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const x
 	pt[7].x = prt->x + prt->w / 2;
 	pt[7].y = prt->y + prt->h / 4;
 
-	(*pif->pf_draw_polyline)(pif->ctx, &xp, pt, 8);
+	(*pvi->drw->pf_draw_polyline)(pvi->ctx, &xp, pt, 8);
 
 	pt[0].x = prt->x + prt->w / 4;
 	pt[0].y = prt->y + prt->h / 4 - 2 * ps;
@@ -6593,10 +6593,10 @@ void draw_fresh_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const x
 	pt[2].x = prt->x + prt->w / 4 + 3 * ps;
 	pt[2].y = prt->y + prt->h / 4;
 
-	(*pif->pf_draw_polygon)(pif->ctx, &xp, &xb, pt, 3);
+	(*pvi->drw->pf_draw_polygon)(pvi->ctx, &xp, &xb, pt, 3);
 }
 
-void draw_helpc_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_helpc_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xrect_t rt, xr;
@@ -6606,7 +6606,7 @@ void draw_helpc_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const x
 	xface_t xa;
 
 	default_xfont(&xf);
-	(*pif->pf_set_xfont)(pif->ctx, &xf);
+	(*pvi->drw->pf_set_xfont)(pvi->ctx, &xf);
 
 	default_xface(&xa);
 	format_xcolor(pxc, xa.text_color);
@@ -6650,15 +6650,15 @@ void draw_helpc_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const x
 	xr.w = prt->w;
 	xr.h = prt->h;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, NULL, &xr);
 
 	xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_CENTER);
 	xscpy(xf.weight, GDI_ATTR_FONT_WEIGHT_BOLD);
 
-	(*pif->pf_draw_text)(pif->ctx, &xa, &xr, _T("C"), 1);
+	(*pvi->drw->pf_draw_text)(pvi->ctx, &xa, &xr, _T("C"), 1);
 }
 
-void draw_helpp_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_helpp_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xrect_t rt, xr;
@@ -6668,7 +6668,7 @@ void draw_helpp_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const x
 	xface_t xa;
 
 	default_xfont(&xf);
-	(*pif->pf_set_xfont)(pif->ctx, &xf);
+	(*pvi->drw->pf_set_xfont)(pvi->ctx, &xf);
 
 	default_xface(&xa);
 	format_xcolor(pxc, xa.text_color);
@@ -6712,15 +6712,15 @@ void draw_helpp_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const x
 	xr.w = prt->w;
 	xr.h = prt->h;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, NULL, &xr);
 
 	xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_CENTER);
 	xscpy(xf.weight, GDI_ATTR_FONT_WEIGHT_BOLD);
 
-	(*pif->pf_draw_text)(pif->ctx, &xa, &xr, _T("P"), 1);
+	(*pvi->drw->pf_draw_text)(pvi->ctx, &xa, &xr, _T("P"), 1);
 }
 
-void draw_start_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_start_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -6766,7 +6766,7 @@ void draw_start_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const x
 	xr.w = prt->w;
 	xr.h = prt->h;
 
-	(*pif->pf_draw_ellipse)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_ellipse)(pvi->ctx, &xp, NULL, &xr);
 
 	pt[0].x = prt->x + prt->w / 2 - 1 * ps;
 	pt[0].y = prt->y + prt->h / 2 - 1 * ps;
@@ -6775,10 +6775,10 @@ void draw_start_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const x
 	pt[2].x = prt->x + prt->w / 2 - 1 * ps;
 	pt[2].y = prt->y + prt->h / 2 + 1 * ps;
 
-	(*pif->pf_draw_polygon)(pif->ctx, &xp, &xb, pt, 3);
+	(*pvi->drw->pf_draw_polygon)(pvi->ctx, &xp, &xb, pt, 3);
 }
 
-void draw_stop_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_stop_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -6823,17 +6823,17 @@ void draw_stop_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xr
 	xr.w = prt->w;
 	xr.h = prt->h;
 
-	(*pif->pf_draw_ellipse)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_ellipse)(pvi->ctx, &xp, NULL, &xr);
 
 	xr.x = prt->x + prt->w / 2 - ps;
 	xr.y = prt->y + prt->h / 2 - ps;
 	xr.w = 2 * ps;
 	xr.h = 2 * ps;
 
-	(*pif->pf_draw_ellipse)(pif->ctx, &xp, &xb, &xr);
+	(*pvi->drw->pf_draw_ellipse)(pvi->ctx, &xp, &xb, &xr);
 }
 
-void draw_pause_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_pause_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -6879,24 +6879,24 @@ void draw_pause_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const x
 	xr.w = prt->w;
 	xr.h = prt->h;
 
-	(*pif->pf_draw_ellipse)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_ellipse)(pvi->ctx, &xp, NULL, &xr);
 
 	pt[0].x = prt->x + prt->w / 2 - 1 * ps;
 	pt[0].y = prt->y + prt->h / 2 - 1 * ps;
 	pt[1].x = prt->x + prt->w / 2 - 1 * ps;
 	pt[1].y = prt->y + prt->h / 2 + 1 * ps;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 	
 	pt[0].x = prt->x + prt->w / 2 + 1 * ps;
 	pt[0].y = prt->y + prt->h / 2 - 1 * ps;
 	pt[1].x = prt->x + prt->w / 2 + 1 * ps;
 	pt[1].y = prt->y + prt->h / 2 + 1 * ps;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 }
 
-void draw_find_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_find_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -6942,17 +6942,17 @@ void draw_find_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xr
 	xr.w = prt->w / 4 * 3;
 	xr.h = prt->h / 4 * 3;
 
-	(*pif->pf_draw_ellipse)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_ellipse)(pvi->ctx, &xp, NULL, &xr);
 
 	pt[0].x = prt->x + prt->w / 4 * 3;
 	pt[0].y = prt->y + prt->h / 4 * 3;
 	pt[1].x = prt->x + prt->w;
 	pt[1].y = prt->y + prt->h;
 	
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 }
 
-void draw_proper_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_proper_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -7008,7 +7008,7 @@ void draw_proper_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const 
 	xs.h = xr.h / 2;
 
 	//XPI ~ 0
-	(*pif->pf_draw_arc)(pif->ctx, &xp, &pt[0], &pt[1], &xs, 1, 0);
+	(*pvi->drw->pf_draw_arc)(pvi->ctx, &xp, &pt[0], &pt[1], &xs, 1, 0);
 
 	xr.x = prt->x;
 	xr.y = prt->y + prt->h / 4;
@@ -7017,10 +7017,10 @@ void draw_proper_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const 
 	xs.w = DOUBLE_SPAN;
 	xs.h = DOUBLE_SPAN;
 
-	(*pif->pf_draw_round)(pif->ctx, &xp, NULL, &xr, &xs);
+	(*pvi->drw->pf_draw_round)(pvi->ctx, &xp, NULL, &xr, &xs);
 }
 
-void draw_style_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_style_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -7073,7 +7073,7 @@ void draw_style_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const x
 	pt[4].x = prt->x + prt->w;
 	pt[4].y = prt->y + prt->h / 4;
 
-	(*pif->pf_draw_polygon)(pif->ctx, &xp, &xb, pt, 5);
+	(*pvi->drw->pf_draw_polygon)(pvi->ctx, &xp, &xb, pt, 5);
 
 	xr.x = prt->x + prt->w / 4 - 1 * ps;
 	xr.y = prt->y + prt->h / 4 * 3 - 1 * ps;
@@ -7082,10 +7082,10 @@ void draw_style_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const x
 
 	lighten_xbrush(&xb, DEF_HARD_DARKEN);
 
-	(*pif->pf_draw_ellipse)(pif->ctx, &xp, &xb, &xr);
+	(*pvi->drw->pf_draw_ellipse)(pvi->ctx, &xp, &xb, &xr);
 }
 
-void draw_note_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_note_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -7141,10 +7141,10 @@ void draw_note_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xr
 	pt[6].x = prt->x + prt->w;
 	pt[6].y = prt->y;
 
-	(*pif->pf_draw_polygon)(pif->ctx, &xp, NULL, pt, 7);
+	(*pvi->drw->pf_draw_polygon)(pvi->ctx, &xp, NULL, pt, 7);
 }
 
-void draw_book_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_book_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -7207,17 +7207,17 @@ void draw_book_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xr
 	pt[9].x = prt->x;
 	pt[9].y = prt->y + prt->h;
 
-	(*pif->pf_draw_polygon)(pif->ctx, &xp, NULL, pt, 10);
+	(*pvi->drw->pf_draw_polygon)(pvi->ctx, &xp, NULL, pt, 10);
 
 	pt[0].x = prt->x + prt->w / 2;
 	pt[0].y = prt->y + ps;
 	pt[1].x = prt->x + prt->w / 2;
 	pt[1].y = prt->y + prt->h;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 }
 
-void draw_import_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_import_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -7263,7 +7263,7 @@ void draw_import_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const 
 	xr.w = prt->w / 2;
 	xr.h = prt->h / 4;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, &xb, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, &xb, &xr);
 
 	pt[0].x = prt->x + prt->w / 4 - 1 * ps;
 	pt[0].y = prt->y + prt->h / 2;
@@ -7274,7 +7274,7 @@ void draw_import_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const 
 	pt[3].x = prt->x + prt->w / 4 * 3 + 1 * ps;
 	pt[3].y = prt->y + prt->h / 2;
 	
-	(*pif->pf_draw_polyline)(pif->ctx, &xp, pt, 4);
+	(*pvi->drw->pf_draw_polyline)(pvi->ctx, &xp, pt, 4);
 
 	pt[0].x = prt->x + prt->w / 2 - 1 * ps;
 	pt[0].y = prt->y + prt->h / 2;
@@ -7283,17 +7283,17 @@ void draw_import_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const 
 	pt[2].x = prt->x + prt->w / 2;
 	pt[2].y = prt->y + prt->h / 2 + 1 * ps;
 
-	(*pif->pf_draw_polygon)(pif->ctx, &xp, &xb, pt, 3);
+	(*pvi->drw->pf_draw_polygon)(pvi->ctx, &xp, &xb, pt, 3);
 
 	pt[0].x = prt->x + prt->w / 2;
 	pt[0].y = prt->y + prt->h / 2;
 	pt[1].x = prt->x + prt->w / 2;
 	pt[1].y = prt->y + prt->h / 4;
 	
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 }
 
-void draw_export_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_export_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -7339,7 +7339,7 @@ void draw_export_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const 
 	xr.w = prt->w / 2;
 	xr.h = prt->h / 4;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, &xb, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, &xb, &xr);
 
 	pt[0].x = prt->x + prt->w / 4 - 1 * ps;
 	pt[0].y = prt->y + prt->h / 2;
@@ -7350,7 +7350,7 @@ void draw_export_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const 
 	pt[3].x = prt->x + prt->w / 4 * 3 + 1 * ps;
 	pt[3].y = prt->y + prt->h / 2;
 
-	(*pif->pf_draw_polyline)(pif->ctx, &xp, pt, 4);
+	(*pvi->drw->pf_draw_polyline)(pvi->ctx, &xp, pt, 4);
 
 	pt[0].x = prt->x + prt->w / 2 - 1 * ps;
 	pt[0].y = prt->y + prt->h / 2;
@@ -7359,17 +7359,17 @@ void draw_export_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const 
 	pt[2].x = prt->x + prt->w / 2;
 	pt[2].y = prt->y + prt->h / 2 - 1 * ps;
 
-	(*pif->pf_draw_polygon)(pif->ctx, &xp, &xb, pt, 3);
+	(*pvi->drw->pf_draw_polygon)(pvi->ctx, &xp, &xb, pt, 3);
 
 	pt[0].x = prt->x + prt->w / 2;
 	pt[0].y = prt->y + prt->h / 4 * 3;
 	pt[1].x = prt->x + prt->w / 2;
 	pt[1].y = prt->y + prt->h / 2;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 }
 
-void draw_dialog_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_dialog_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -7415,24 +7415,24 @@ void draw_dialog_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const 
 	xr.w = prt->w;
 	xr.h = prt->h;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, NULL, &xr);
 
 	pt[0].x = prt->x;
 	pt[0].y = prt->y + prt->h / 4 + ps;
 	pt[1].x = prt->x + prt->w;
 	pt[1].y = prt->y + prt->h / 4 + ps;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 
 	xr.x = prt->x + prt->w - 2 * ps - SINGLE_SPAN;
 	xr.y = prt->y + ps + SINGLE_SPAN;
 	xr.w = ps;
 	xr.h = ps;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, &xb, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, &xb, &xr);
 }
 
-void draw_calendar_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_calendar_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xrect_t rt, xr;
@@ -7470,31 +7470,31 @@ void draw_calendar_gizmo(const drawing_interface* pif, const xcolor_t* pxc, cons
 	xr.w = prt->w / 4;
 	xr.h = prt->h / 4;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, NULL, &xr);
 
 	xr.x = prt->x + prt->w / 2;
 	xr.y = prt->y;
 	xr.w = prt->w / 4;
 	xr.h = prt->h / 4;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, NULL, &xr);
 
 	xr.x = prt->x;
 	xr.y = prt->y + prt->h / 2;
 	xr.w = prt->w / 4;
 	xr.h = prt->h / 4;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, NULL, &xr);
 
 	xr.x = prt->x + prt->w / 2;
 	xr.y = prt->y + prt->h / 2;
 	xr.w = prt->w / 4;
 	xr.h = prt->h / 4;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, NULL, &xr);
 }
 
-void draw_diagram_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_diagram_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xrect_t rt, xr;
@@ -7536,14 +7536,14 @@ void draw_diagram_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const
 	xr.w = prt->w / 2;
 	xr.h = prt->h / 2;
 
-	(*pif->pf_draw_ellipse)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_ellipse)(pvi->ctx, &xp, NULL, &xr);
 
 	xr.x = prt->x + prt->w / 2;
 	xr.y = prt->y + prt->h / 2;
 	xr.w = prt->w / 2;
 	xr.h = prt->h / 2;
 
-	(*pif->pf_draw_ellipse)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_ellipse)(pvi->ctx, &xp, NULL, &xr);
 
 	pt[0].x = prt->x + prt->w / 4;
 	pt[0].y = prt->y + prt->h / 2;
@@ -7552,10 +7552,10 @@ void draw_diagram_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const
 	pt[2].x = prt->x + prt->w / 2;
 	pt[2].y = prt->y + prt->h / 4 * 3;
 
-	(*pif->pf_draw_polyline)(pif->ctx, &xp, pt, 3);
+	(*pvi->drw->pf_draw_polyline)(pvi->ctx, &xp, pt, 3);
 }
 
-void draw_static_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_static_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xfont_t xf;
 	xface_t xa;
@@ -7563,7 +7563,7 @@ void draw_static_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const 
 
 	default_xfont(&xf);
 	xscpy(xf.weight, GDI_ATTR_FONT_WEIGHT_BOLD);
-	(*pif->pf_set_xfont)(pif->ctx, &xf);
+	(*pvi->drw->pf_set_xfont)(pvi->ctx, &xf);
 
 	default_xface(&xa);
 	format_xcolor(pxc, xa.text_color);
@@ -7598,10 +7598,10 @@ void draw_static_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const 
 	xr.w = prt->w;
 	xr.h = prt->h;
 
-	(*pif->pf_draw_text)(pif->ctx, &xa, &xr, _T("T"), -1);
+	(*pvi->drw->pf_draw_text)(pvi->ctx, &xa, &xr, _T("T"), -1);
 }
 
-void draw_list_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_list_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -7646,45 +7646,45 @@ void draw_list_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xr
 	xr.w = (int)(1.5 * (float)ps);
 	xr.h = (int)(1.5 * (float)ps);
 
-	(*pif->pf_draw_ellipse)(pif->ctx, &xp, &xb, &xr);
+	(*pvi->drw->pf_draw_ellipse)(pvi->ctx, &xp, &xb, &xr);
 
 	xr.x = prt->x + prt->w / 2;
 	xr.y = prt->y + prt->h / 4;
 	xr.w = prt->w / 2;
 	xr.h = (int)(1.5 * (float)ps);
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, &xb, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, &xb, &xr);
 
 	xr.x = prt->x + prt->w / 4 - ps;
 	xr.y = prt->y + prt->h / 2;
 	xr.w = (int)(1.5 * (float)ps);
 	xr.h = (int)(1.5 * (float)ps);
 
-	(*pif->pf_draw_ellipse)(pif->ctx, &xp, &xb, &xr);
+	(*pvi->drw->pf_draw_ellipse)(pvi->ctx, &xp, &xb, &xr);
 
 	xr.x = prt->x + prt->w / 2;
 	xr.y = prt->y + prt->h / 2;
 	xr.w = prt->w / 2;
 	xr.h = (int)(1.5 * (float)ps);
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, &xb, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, &xb, &xr);
 
 	xr.x = prt->x + prt->w / 4 - ps;
 	xr.y = prt->y + prt->h / 4 * 3;
 	xr.w = (int)(1.5 * (float)ps);
 	xr.h = (int)(1.5 * (float)ps);
 
-	(*pif->pf_draw_ellipse)(pif->ctx, &xp, &xb, &xr);
+	(*pvi->drw->pf_draw_ellipse)(pvi->ctx, &xp, &xb, &xr);
 
 	xr.x = prt->x + prt->w / 2;
 	xr.y = prt->y + prt->h / 4 * 3;
 	xr.w = prt->w / 2;
 	xr.h = (int)(1.5 * (float)ps);
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, &xb, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, &xb, &xr);
 }
 
-void draw_navi_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_navi_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -7732,7 +7732,7 @@ void draw_navi_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xr
 	pt[2].x = prt->x + prt->w / 4 + ps;
 	pt[2].y = prt->y + prt->h / 2;
 
-	(*pif->pf_draw_polygon)(pif->ctx, &xp, &xb, pt, 3);
+	(*pvi->drw->pf_draw_polygon)(pvi->ctx, &xp, &xb, pt, 3);
 
 	pt[0].x = prt->x + prt->w / 4 * 3 - ps;
 	pt[0].y = prt->y + prt->h / 2 - ps;
@@ -7741,10 +7741,10 @@ void draw_navi_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xr
 	pt[2].x = prt->x + prt->w / 4 * 3 + ps;
 	pt[2].y = prt->y + prt->h / 2;
 
-	(*pif->pf_draw_polygon)(pif->ctx, &xp, &xb, pt, 3);
+	(*pvi->drw->pf_draw_polygon)(pvi->ctx, &xp, &xb, pt, 3);
 }
 
-void draw_spin_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_spin_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -7763,7 +7763,7 @@ void draw_spin_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xr
 	format_xcolor(pxc, xb.color);
 
 	default_xfont(&xf);
-	(*pif->pf_set_xfont)(pif->ctx, &xf);
+	(*pvi->drw->pf_set_xfont)(pvi->ctx, &xf);
 
 	default_xface(&xa);
 	format_xcolor(pxc, xa.text_color);
@@ -7805,9 +7805,9 @@ void draw_spin_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xr
 	xr.w = prt->w / 2 - SINGLE_SPAN;
 	xr.h = prt->h / 2;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, NULL, &xr);
 
-	(*pif->pf_draw_text)(pif->ctx, &xa, &xr, _T("2"), -1);
+	(*pvi->drw->pf_draw_text)(pvi->ctx, &xa, &xr, _T("2"), -1);
 
 	pt[0].x = prt->x + prt->w / 4 * 3 - ps;
 	pt[0].y = prt->y + prt->h / 2 - SINGLE_SPAN;
@@ -7816,7 +7816,7 @@ void draw_spin_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xr
 	pt[2].x = prt->x + prt->w / 4 * 3;
 	pt[2].y = prt->y + prt->h / 2 - 2 * ps;
 
-	(*pif->pf_draw_polygon)(pif->ctx, &xp, &xb, pt, 3);
+	(*pvi->drw->pf_draw_polygon)(pvi->ctx, &xp, &xb, pt, 3);
 
 	pt[0].x = prt->x + prt->w / 4 * 3 - ps;
 	pt[0].y = prt->y + prt->h / 2 + SINGLE_SPAN;
@@ -7825,10 +7825,10 @@ void draw_spin_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xr
 	pt[2].x = prt->x + prt->w / 4 * 3;
 	pt[2].y = prt->y + prt->h / 2 + 2 * ps;
 
-	(*pif->pf_draw_polygon)(pif->ctx, &xp, &xb, pt, 3);
+	(*pvi->drw->pf_draw_polygon)(pvi->ctx, &xp, &xb, pt, 3);
 }
 
-void draw_slide_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_slide_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xpoint_t pt[3];
@@ -7870,17 +7870,17 @@ void draw_slide_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const x
 	pt[1].x = prt->x + prt->w - ps;
 	pt[1].y = prt->y + prt->h / 2;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 
 	pt[0].x = prt->x + prt->w / 4 + ps;
 	pt[0].y = prt->y + prt->h / 2 - 2 * ps;
 	pt[1].x = prt->x + prt->w / 4 + ps;
 	pt[1].y = prt->y + prt->h / 2 + 2 * ps;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 }
 
-void draw_radio_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_radio_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -7925,14 +7925,14 @@ void draw_radio_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const x
 	xr.w = prt->w - 2 * ps;
 	xr.h = prt->h - 2 * ps;
 
-	(*pif->pf_draw_ellipse)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_ellipse)(pvi->ctx, &xp, NULL, &xr);
 
 	pt_expand_rect(&xr, - 2 * ps, - 2 * ps);
 
-	(*pif->pf_draw_ellipse)(pif->ctx, &xp, &xb, &xr);
+	(*pvi->drw->pf_draw_ellipse)(pvi->ctx, &xp, &xb, &xr);
 }
 
-void draw_date_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_date_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -7950,7 +7950,7 @@ void draw_date_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xr
 	format_xcolor(pxc, xb.color);
 
 	default_xfont(&xf);
-	(*pif->pf_set_xfont)(pif->ctx, &xf);
+	(*pvi->drw->pf_set_xfont)(pvi->ctx, &xf);
 
 	default_xface(&xa);
 	format_xcolor(pxc, xa.text_color);
@@ -7990,33 +7990,33 @@ void draw_date_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xr
 	xr.w = prt->w;
 	xr.h = prt->h / 4;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, NULL, &xr);
 
 	xr.x = prt->x + prt->w / 4 - ps;
 	xr.y = prt->y + prt->h / 4 - ps;
 	xr.w = 2 * ps;
 	xr.h = 2 * ps;
 
-	(*pif->pf_draw_ellipse)(pif->ctx, &xp, &xb, &xr);
+	(*pvi->drw->pf_draw_ellipse)(pvi->ctx, &xp, &xb, &xr);
 
 	xr.x = prt->x + prt->w / 4 * 3 - ps;
 	xr.y = prt->y + prt->h / 4 - ps;
 	xr.w = 2 * ps;
 	xr.h = 2 * ps;
 
-	(*pif->pf_draw_ellipse)(pif->ctx, &xp, &xb, &xr);
+	(*pvi->drw->pf_draw_ellipse)(pvi->ctx, &xp, &xb, &xr);
 
 	xr.x = prt->x;
 	xr.y = prt->y + prt->h / 4;
 	xr.w = prt->w;
 	xr.h = prt->h / 4 * 3;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, NULL, &xr);
 
-	(*pif->pf_draw_text)(pif->ctx, &xa, &xr, _T("23"), -1);
+	(*pvi->drw->pf_draw_text)(pvi->ctx, &xa, &xr, _T("23"), -1);
 }
 
-void draw_time_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_time_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xrect_t rt, xr;
@@ -8058,7 +8058,7 @@ void draw_time_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xr
 	xr.w = prt->w;
 	xr.h = prt->h;
 
-	(*pif->pf_draw_ellipse)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_ellipse)(pvi->ctx, &xp, NULL, &xr);
 
 	pt[0].x = prt->x + prt->w / 2;
 	pt[0].y = prt->y + prt->h / 4;
@@ -8067,10 +8067,10 @@ void draw_time_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xr
 	pt[2].x = prt->x + prt->w / 4 * 3;
 	pt[2].y = prt->y + prt->h / 2;
 
-	(*pif->pf_draw_polyline)(pif->ctx, &xp, pt, 3);
+	(*pvi->drw->pf_draw_polyline)(pvi->ctx, &xp, pt, 3);
 }
 
-void draw_push_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_push_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xrect_t rt, xr;
@@ -8111,10 +8111,10 @@ void draw_push_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xr
 	xr.w = prt->w / 2;
 	xr.h = 4 * ps;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, NULL, &xr);
 }
 
-void draw_person_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_person_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -8162,7 +8162,7 @@ void draw_person_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const 
 	xr.w = prt->w / 2;
 	xr.h = prt->h / 2;
 
-	(*pif->pf_draw_ellipse)(pif->ctx, &xp, &xb, &xr);
+	(*pvi->drw->pf_draw_ellipse)(pvi->ctx, &xp, &xb, &xr);
 
 	ta[0] = _T('M');
 	pa[0].x = prt->x;
@@ -8182,10 +8182,10 @@ void draw_person_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const 
 
 	ta[3] = _T('Z');
 
-	(*pif->pf_draw_path)(pif->ctx, &xp, &xb, ta, pa, 5);
+	(*pvi->drw->pf_draw_path)(pvi->ctx, &xp, &xb, ta, pa, 5);
 }
 
-void draw_user_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_user_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -8232,7 +8232,7 @@ void draw_user_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xr
 	xr.w = prt->w / 4;
 	xr.h = prt->h / 4;
 
-	(*pif->pf_draw_ellipse)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_ellipse)(pvi->ctx, &xp, NULL, &xr);
 
 	ta[0] = _T('M');
 	pa[0].x = prt->x + prt->w / 4;
@@ -8252,14 +8252,14 @@ void draw_user_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xr
 
 	ta[3] = _T('Z');
 
-	(*pif->pf_draw_path)(pif->ctx, &xp, NULL, ta, pa, 5);
+	(*pvi->drw->pf_draw_path)(pvi->ctx, &xp, NULL, ta, pa, 5);
 
 	xr.x = prt->x + prt->w / 4;
 	xr.y = prt->y + prt->h / 2;
 	xr.w = prt->w / 4;
 	xr.h = prt->h / 4;
 
-	(*pif->pf_draw_ellipse)(pif->ctx, &xp, &xb, &xr);
+	(*pvi->drw->pf_draw_ellipse)(pvi->ctx, &xp, &xb, &xr);
 
 	ta[0] = _T('M');
 	pa[0].x = prt->x;
@@ -8279,10 +8279,10 @@ void draw_user_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xr
 
 	ta[3] = _T('Z');
 
-	(*pif->pf_draw_path)(pif->ctx, &xp, &xb, ta, pa, 5);
+	(*pvi->drw->pf_draw_path)(pvi->ctx, &xp, &xb, ta, pa, 5);
 }
 
-void draw_location_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_location_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -8338,7 +8338,7 @@ void draw_location_gizmo(const drawing_interface* pif, const xcolor_t* pxc, cons
 	xs.h = xr.h / 2;
 
 	//XPI ~ 0
-	(*pif->pf_draw_arc)(pif->ctx, &xp, &pt[0], &pt[1], &xs, 1, 0);
+	(*pvi->drw->pf_draw_arc)(pvi->ctx, &xp, &pt[0], &pt[1], &xs, 1, 0);
 
 	pt[0].x = prt->x + prt->w / 4;
 	pt[0].y = prt->y + prt->h / 4;
@@ -8349,17 +8349,17 @@ void draw_location_gizmo(const drawing_interface* pif, const xcolor_t* pxc, cons
 	pt[3].x = prt->x + prt->w / 4 * 3;
 	pt[3].y = prt->y + prt->h / 4;
 
-	(*pif->pf_draw_bezier)(pif->ctx, &xp, &pt[0], &pt[1], &pt[2], &pt[3]);
+	(*pvi->drw->pf_draw_bezier)(pvi->ctx, &xp, &pt[0], &pt[1], &pt[2], &pt[3]);
 
 	xr.x = prt->x + prt->w / 2 - ps;
 	xr.y = prt->y + 2 * ps;
 	xr.w = 2 * ps;
 	xr.h = 2 * ps;
 
-	(*pif->pf_draw_ellipse)(pif->ctx, &xp, &xb, &xr);
+	(*pvi->drw->pf_draw_ellipse)(pvi->ctx, &xp, &xb, &xr);
 }
 
-void draw_trends_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_trends_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -8409,10 +8409,10 @@ void draw_trends_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const 
 	pt[3].x = prt->x + prt->w;
 	pt[3].y = prt->y + prt->h / 4;
 
-	(*pif->pf_draw_polyline)(pif->ctx, &xp, pt, 4);
+	(*pvi->drw->pf_draw_polyline)(pvi->ctx, &xp, pt, 4);
 }
 
-void draw_panto_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_panto_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -8457,16 +8457,16 @@ void draw_panto_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const x
 	xr.w = prt->w;
 	xr.h = prt->h;
 
-	(*pif->pf_draw_ellipse)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_ellipse)(pvi->ctx, &xp, NULL, &xr);
 
-	(*pif->pf_draw_pie)(pif->ctx, &xp, &xb, &xr, 0, XPI / 2);
+	(*pvi->drw->pf_draw_pie)(pvi->ctx, &xp, &xb, &xr, 0, XPI / 2);
 
 	lighten_xbrush(&xb, DEF_HARD_DARKEN);
 
-	(*pif->pf_draw_pie)(pif->ctx, &xp, &xb, &xr, XPI, XPI / 2 * 3);
+	(*pvi->drw->pf_draw_pie)(pvi->ctx, &xp, &xb, &xr, XPI, XPI / 2 * 3);
 }
 
-void draw_scatter_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_scatter_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -8515,31 +8515,31 @@ void draw_scatter_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const
 	pt[3].x = prt->x + prt->w;
 	pt[3].y = prt->y + prt->h;
 
-	(*pif->pf_draw_bezier)(pif->ctx, &xp, &pt[0], &pt[1], &pt[2], &pt[3]);
+	(*pvi->drw->pf_draw_bezier)(pvi->ctx, &xp, &pt[0], &pt[1], &pt[2], &pt[3]);
 
 	xr.x = prt->x + prt->w / 2;
 	xr.y = prt->y + prt->h / 2;
 	xr.w = 2;
 	xr.h = 2;
 
-	(*pif->pf_draw_ellipse)(pif->ctx, &xp, &xb, &xr);
+	(*pvi->drw->pf_draw_ellipse)(pvi->ctx, &xp, &xb, &xr);
 
 	xr.x = prt->x + prt->w / 4;
 	xr.y = prt->y + prt->h / 4 * 3;
 	xr.w = 2;
 	xr.h = 2;
 
-	(*pif->pf_draw_ellipse)(pif->ctx, &xp, &xb, &xr);
+	(*pvi->drw->pf_draw_ellipse)(pvi->ctx, &xp, &xb, &xr);
 
 	xr.x = prt->x + prt->w / 4 * 3;
 	xr.y = prt->y + prt->h / 4 * 3;
 	xr.w = 2;
 	xr.h = 2;
 
-	(*pif->pf_draw_ellipse)(pif->ctx, &xp, &xb, &xr);
+	(*pvi->drw->pf_draw_ellipse)(pvi->ctx, &xp, &xb, &xr);
 }
 
-void draw_density_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_density_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -8583,14 +8583,14 @@ void draw_density_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const
 	xr.w = prt->w / 2;
 	xr.h = prt->h / 2;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, NULL, &xr);
 
 	xr.x = prt->x + prt->w / 2;
 	xr.y = prt->y;
 	xr.w = prt->w / 2;
 	xr.h = prt->h / 2;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, &xb, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, &xb, &xr);
 
 	xr.x = prt->x;
 	xr.y = prt->y + prt->h / 2;
@@ -8598,17 +8598,17 @@ void draw_density_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const
 	xr.h = prt->h / 2;
 
 	lighten_xbrush(&xb, DEF_HARD_DARKEN);
-	(*pif->pf_draw_rect)(pif->ctx, &xp, &xb, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, &xb, &xr);
 
 	xr.x = prt->x + prt->w / 2;
 	xr.y = prt->y + prt->h / 2;
 	xr.w = prt->w / 2;
 	xr.h = prt->h / 2;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, NULL, &xr);
 }
 
-void draw_counter_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_counter_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xrect_t rt, xr;
@@ -8622,7 +8622,7 @@ void draw_counter_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const
 	lighten_xpen(&xp, DEF_HARD_DARKEN);
 
 	default_xfont(&xf);
-	(*pif->pf_set_xfont)(pif->ctx, &xf);
+	(*pvi->drw->pf_set_xfont)(pvi->ctx, &xf);
 
 	default_xface(&xa);
 	format_xcolor(pxc, xa.text_color);
@@ -8662,12 +8662,12 @@ void draw_counter_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const
 	xr.w = prt->w;
 	xr.h = prt->h;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, NULL, &xr);
 
-	(*pif->pf_draw_text)(pif->ctx, &xa, &xr, _T("0"), -1);
+	(*pvi->drw->pf_draw_text)(pvi->ctx, &xa, &xr, _T("0"), -1);
 }
 
-void draw_process_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_process_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xrect_t rt, xr;
@@ -8709,24 +8709,24 @@ void draw_process_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const
 	xr.w = prt->w;
 	xr.h = prt->h / 2;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, NULL, &xr);
 
 	pt[0].x = prt->x + prt->w / 4;
 	pt[0].y = prt->y + prt->h / 4;
 	pt[1].x = prt->x + prt->w / 4;
 	pt[1].y = prt->y + prt->h / 4 * 3;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 
 	pt[0].x = prt->x + prt->w / 4 * 3;
 	pt[0].y = prt->y + prt->h / 4;
 	pt[1].x = prt->x + prt->w / 4 * 3;
 	pt[1].y = prt->y + prt->h / 4 * 3;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 }
 
-void draw_judge_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_judge_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xrect_t rt, xr;
@@ -8741,7 +8741,7 @@ void draw_judge_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const x
 	lighten_xpen(&xp, DEF_HARD_DARKEN);
 
 	default_xfont(&xf);
-	(*pif->pf_set_xfont)(pif->ctx, &xf);
+	(*pvi->drw->pf_set_xfont)(pvi->ctx, &xf);
 
 	default_xface(&xa);
 	format_xcolor(pxc, xa.text_color);
@@ -8785,17 +8785,17 @@ void draw_judge_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const x
 	pt[3].x = prt->x + prt->w;
 	pt[3].y = prt->y + prt->h / 2;
 
-	(*pif->pf_draw_polygon)(pif->ctx, &xp, NULL, pt, 4);
+	(*pvi->drw->pf_draw_polygon)(pvi->ctx, &xp, NULL, pt, 4);
 
 	xr.x = prt->x;
 	xr.y = prt->y;
 	xr.w = prt->w;
 	xr.h = prt->h;
 
-	(*pif->pf_draw_text)(pif->ctx, &xa, &xr, _T("?"), -1);
+	(*pvi->drw->pf_draw_text)(pvi->ctx, &xa, &xr, _T("?"), -1);
 }
 
-void draw_lock_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_lock_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xrect_t rt, xr;
@@ -8839,7 +8839,7 @@ void draw_lock_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xr
 	xr.h = prt->h / 2;
 	xs.w = DOUBLE_SPAN;
 	xs.h = DOUBLE_SPAN;
-	(*pif->pf_draw_round)(pif->ctx, &xp, NULL, &xr, &xs);
+	(*pvi->drw->pf_draw_round)(pvi->ctx, &xp, NULL, &xr, &xs);
 
 	pt[0].x = prt->x + prt->w / 4;
 	pt[0].y = prt->y + prt->h / 4;
@@ -8848,24 +8848,24 @@ void draw_lock_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xr
 	pt[2].x = prt->x + prt->w / 4 * 3;
 	pt[2].y = prt->y + prt->h / 4;
 
-	(*pif->pf_draw_bezier)(pif->ctx, &xp, &pt[0], &pt[1], &pt[1], &pt[2]);
+	(*pvi->drw->pf_draw_bezier)(pvi->ctx, &xp, &pt[0], &pt[1], &pt[1], &pt[2]);
 
 	pt[0].x = prt->x + prt->w / 4;
 	pt[0].y = prt->y + prt->h / 4;
 	pt[1].x = prt->x + prt->w / 4;
 	pt[1].y = prt->y + prt->h / 2;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 
 	pt[0].x = prt->x + prt->w / 4 * 3;
 	pt[0].y = prt->y + prt->h / 4;
 	pt[1].x = prt->x + prt->w / 4 * 3;
 	pt[1].y = prt->y + prt->h / 2;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 }
 
-void draw_unlock_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_unlock_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xrect_t rt, xr;
@@ -8909,7 +8909,7 @@ void draw_unlock_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const 
 	xr.h = prt->h / 2;
 	xs.w = DOUBLE_SPAN;
 	xs.h = DOUBLE_SPAN;
-	(*pif->pf_draw_round)(pif->ctx, &xp, NULL, &xr, &xs);
+	(*pvi->drw->pf_draw_round)(pvi->ctx, &xp, NULL, &xr, &xs);
 
 	pt[0].x = prt->x + prt->w / 4;
 	pt[0].y = prt->y + prt->h / 4;
@@ -8918,17 +8918,17 @@ void draw_unlock_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const 
 	pt[2].x = prt->x + prt->w / 4 * 3;
 	pt[2].y = prt->y + prt->h / 4;
 
-	(*pif->pf_draw_bezier)(pif->ctx, &xp, &pt[0], &pt[1], &pt[1], &pt[2]);
+	(*pvi->drw->pf_draw_bezier)(pvi->ctx, &xp, &pt[0], &pt[1], &pt[1], &pt[2]);
 
 	pt[0].x = prt->x + prt->w / 4;
 	pt[0].y = prt->y + prt->h / 4;
 	pt[1].x = prt->x + prt->w / 4;
 	pt[1].y = prt->y + prt->h / 2;
 
-	(*pif->pf_draw_line)(pif->ctx, &xp, &pt[0], &pt[1]);
+	(*pvi->drw->pf_draw_line)(pvi->ctx, &xp, &pt[0], &pt[1]);
 }
 
-void draw_home_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt)
+void draw_home_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt)
 {
 	xpen_t xp;
 	xbrush_t xb;
@@ -8976,14 +8976,14 @@ void draw_home_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xr
 	pt[2].x = prt->x + prt->w;
 	pt[2].y = prt->y + prt->h / 2;
 
-	(*pif->pf_draw_polygon)(pif->ctx, &xp, &xb, pt, 3);
+	(*pvi->drw->pf_draw_polygon)(pvi->ctx, &xp, &xb, pt, 3);
 
 	xr.x = prt->x + prt->w / 4 + ps;
 	xr.y = prt->y + prt->h / 2 + ps;
 	xr.w = prt->w / 2 - 2 * ps;
 	xr.h = prt->h / 4;
 
-	(*pif->pf_draw_rect)(pif->ctx, &xp, NULL, &xr);
+	(*pvi->drw->pf_draw_rect)(pvi->ctx, &xp, NULL, &xr);
 
 	pt[0].x = prt->x + ps;
 	pt[0].y = prt->y + prt->h / 2;
@@ -8994,11 +8994,11 @@ void draw_home_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xr
 	pt[3].x = prt->x + prt->w - ps;
 	pt[3].y = prt->y + prt->h / 2;
 
-	(*pif->pf_draw_polyline)(pif->ctx, &xp, pt, 4);
+	(*pvi->drw->pf_draw_polyline)(pvi->ctx, &xp, pt, 4);
 }
 
 /********************************************************************************************/
-typedef void(*PF_GIZMO_MAKE)(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* prt);
+typedef void(*PF_GIZMO_MAKE)(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt);
 
 typedef struct _GIZMO_DRAW_TABLE{
 	tchar_t gizmo_name[32];
@@ -9186,19 +9186,18 @@ PF_GIZMO_MAKE find_gizmo_maker(const tchar_t* iname)
 	return _find_gizmo_maker(0, k - 1, iname);
 }
 
-
-void draw_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* pxr, const tchar_t* iname)
+void draw_gizmo(const drawing_interface* pci, const xcolor_t* pxc, const xrect_t* pxr, const tchar_t* iname)
 {
 	PF_GIZMO_MAKE pf;
-	drawing_interface it = { 0 };
 	visual_t visu;
+	drawing_interface it = {0};
 	xrect_t xr;
 
 	xmem_copy((void*)&xr, (void*)pxr, sizeof(xrect_t));
-	(*pif->pf_rect_mm_to_pt)(pif->ctx, &xr);
+	(*pci->drw->pf_rect_mm_to_pt)(pci->ctx, &xr);
 
-	visu = (*pif->pf_get_visual_handle)(pif->ctx);
-	(*pif->pf_get_visual_interface)(visu, &it);
+	visu = (*pci->drw->pf_get_visual_handle)(pci->ctx);
+	(*pci->drw->pf_get_visual_interface)(visu, &it);
 
 	pf = find_gizmo_maker(iname);
 	if (pf)
@@ -9209,7 +9208,7 @@ void draw_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t
 
 #if defined(_DEBUG) || defined(DEBUG)
 
-void test_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t* pxr)
+void test_gizmo(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* pxr)
 {
 	xfont_t xf;
 	xface_t xa;
@@ -9222,13 +9221,13 @@ void test_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t
 	drawing_interface it = { 0 };
 	visual_t visu;
 
-	visu = (*pif->pf_get_visual_handle)(pif->ctx);
-	(*pif->pf_get_visual_interface)(visu, &it);
+	visu = (*pvi->drw->pf_get_visual_handle)(pvi->ctx);
+	(*pvi->drw->pf_get_visual_interface)(visu, &it);
 
 	k = sizeof(g_gizmo_table) / sizeof(GIZMO_DRAW_TABLE);
 
 	default_xfont(&xf);
-	(*pif->pf_set_xfont)(pif->ctx, &xf);
+	(*pvi->drw->pf_set_xfont)(pvi->ctx, &xf);
 
 	default_xface(&xa);
 	format_xcolor(pxc, xa.text_color);
@@ -9262,7 +9261,7 @@ void test_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t
 		xr.w = SMALL_GIZMO + MIDD_GIZMO + LARGE_GIZMO;
 		xr.h = LARGE_GIZMO - MIDD_GIZMO;
 
-		(*it.pf_text_out)(it.ctx, &xa, RECTPOINT(&xr), g_gizmo_table[k].gizmo_name, -1);
+		(*it.drw->pf_text_out)(it.ctx, &xa, RECTPOINT(&xr), g_gizmo_table[k].gizmo_name, -1);
 
 		if (i > 11)
 		{
@@ -9273,7 +9272,7 @@ void test_gizmo(const drawing_interface* pif, const xcolor_t* pxc, const xrect_t
 }
 
 
-void test_color(const drawing_interface* pif, const xrect_t* pxr)
+void test_color(const drawing_interface* pvi, const xrect_t* pxr)
 {
 	xfont_t xf;
 	xface_t xa;
@@ -9293,11 +9292,11 @@ void test_color(const drawing_interface* pif, const xrect_t* pxr)
 	tchar_t en_clr[32] = { 0 };
 	tchar_t cn_clr[32] = { 0 };
 
-	visu = (*pif->pf_get_visual_handle)(pif->ctx);
-	(*pif->pf_get_visual_interface)(visu, &it);
+	visu = (*pvi->drw->pf_get_visual_handle)(pvi->ctx);
+	(*pvi->drw->pf_get_visual_interface)(visu, &it);
 
 	default_xfont(&xf);
-	(*pif->pf_set_xfont)(pif->ctx, &xf);
+	(*pvi->drw->pf_set_xfont)(pvi->ctx, &xf);
 
 	default_xface(&xa);
 
@@ -9317,10 +9316,10 @@ void test_color(const drawing_interface* pif, const xrect_t* pxr)
 		xscpy(xp.color, rgb_clr);
 		xscpy(xb.color, rgb_clr);
 
-		(*(it.pf_draw_rect))(it.ctx, &xp, &xb, &xr);
+		(*(it.drw->pf_draw_rect))(it.ctx, &xp, &xb, &xr);
 
 		xr.x += xr.w;
-		(*it.pf_text_out)(it.ctx, &xa, RECTPOINT(&xr), cn_clr, -1);
+		(*it.drw->pf_text_out)(it.ctx, &xa, RECTPOINT(&xr), cn_clr, -1);
 
 		if (++i > 15)
 		{

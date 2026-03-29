@@ -66,7 +66,8 @@ EXP_API int words_size(sword_t** sa);
 @INPUT short max: the size of buffer.
 @RETURN short: return characters copyed.
 */
-EXP_API sword_t words_byte(sword_t** sa, int index);
+EXP_API sword_t get_words(sword_t** sa, int index);
+EXP_API sword_t get_words_safe(sword_t** sa, int index, sword_t def);
 
 EXP_API int words_copy(sword_t** sa, int index, sword_t* buf, int max);
 

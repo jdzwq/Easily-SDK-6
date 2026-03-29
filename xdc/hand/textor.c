@@ -111,7 +111,7 @@ void _textor_calc_paging(textor_context* ptd, int px, int py, int pw, int ph, bo
 	get_visual_interface(ptd->cdc, &iv);
 
 	tt.piv = &iv;
-	(*(tt.piv->pf_get_measure))(tt.piv->ctx, &it);
+	(*(tt.piv->drw->pf_get_measure))(tt.piv->ctx, &it);
 
 	vb.px = px; vb.py = py; vb.pw = pw; vb.ph = ph;
 	pxa = (*ptd->pf_get_xface_ptr)(ptd->widget);
@@ -194,7 +194,7 @@ void _textor_calc_maxing(textor_context* ptd, int px, int py, int pw, int ph, bo
 	get_visual_interface(ptd->cdc, &iv);
 
 	tt.piv = &iv;
-	(*(tt.piv->pf_get_measure))(tt.piv->ctx, &it);
+	(*(tt.piv->drw->pf_get_measure))(tt.piv->ctx, &it);
 
 	vb.px = px; vb.py = py; vb.pw = pw; vb.ph = ph;
 	pxa = (*ptd->pf_get_xface_ptr)(ptd->widget);
@@ -278,7 +278,7 @@ void _textor_calc_line(textor_context* ptd, int px, int py, int pw, int ph, bool
 
 	get_visual_interface(ptd->cdc, &iv);
 	tt.piv = &iv;
-	(*(tt.piv->pf_get_measure))(tt.piv->ctx, &it);
+	(*(tt.piv->drw->pf_get_measure))(tt.piv->ctx, &it);
 
 	vb.px = px; vb.py = py; vb.pw = pw; vb.ph = ph;
 	pxa = (*ptd->pf_get_xface_ptr)(ptd->widget);
@@ -359,7 +359,7 @@ void _textor_calc_object(textor_context* ptd, int px, int py, int pw, int ph, bo
 
 	get_visual_interface(ptd->cdc, &iv);
 	tt.piv = &iv;
-	(*(tt.piv->pf_get_measure))(tt.piv->ctx, &it);
+	(*(tt.piv->drw->pf_get_measure))(tt.piv->ctx, &it);
 
 	vb.px = px; vb.py = py; vb.pw = pw; vb.ph = ph;
 	pxa = (*ptd->pf_get_xface_ptr)(ptd->widget);
@@ -436,7 +436,7 @@ void _textor_calc_texting(textor_context* ptd, int px, int py, int pw, int ph, b
 
 	get_visual_interface(ptd->cdc, &iv);
 	tt.piv = &iv;
-	(*(tt.piv->pf_get_measure))(tt.piv->ctx, &it);
+	(*(tt.piv->drw->pf_get_measure))(tt.piv->ctx, &it);
 
 	vb.px = px; vb.py = py; vb.pw = pw; vb.ph = ph;
 	pxa = (*ptd->pf_get_xface_ptr)(ptd->widget);
@@ -507,7 +507,7 @@ void _textor_calc_rect(textor_context* ptd, int px, int py, int pw, int ph, bool
 
 	get_visual_interface(ptd->cdc, &iv);
 	tt.piv = &iv;
-	(*(tt.piv->pf_get_measure))(tt.piv->ctx, &it);
+	(*(tt.piv->drw->pf_get_measure))(tt.piv->ctx, &it);
 
 	tt.from_obj = tt.to_obj = object;
 	tt.paged = ptd->paged;
@@ -622,7 +622,7 @@ void _textor_calc_hint(textor_context* ptd, int px, int py, int pw, int ph, bool
 
 	get_visual_interface(ptd->cdc, &iv);
 	tt.piv = &iv;
-	(*(tt.piv->pf_get_measure))(tt.piv->ctx, &it);
+	(*(tt.piv->drw->pf_get_measure))(tt.piv->ctx, &it);
 
 	vb.px = px; vb.py = py; vb.pw = pw; vb.ph = ph;
 	pxa = (*ptd->pf_get_xface_ptr)(ptd->widget);
@@ -697,7 +697,7 @@ void _textor_calc_point(textor_context* ptd, int px, int py, int pw, int ph, boo
 
 	get_visual_interface(ptd->cdc, &iv);
 	tt.piv = &iv;
-	(*(tt.piv->pf_get_measure))(tt.piv->ctx, &it);
+	(*(tt.piv->drw->pf_get_measure))(tt.piv->ctx, &it);
 
 	vb.px = px; vb.py = py; vb.pw = pw; vb.ph = ph;
 	pxa = (*ptd->pf_get_xface_ptr)(ptd->widget);
@@ -827,7 +827,7 @@ void _textor_calc_rowcol(textor_context* ptd, int px, int py, int pw, int ph, bo
 
 	get_visual_interface(ptd->cdc, &iv);
 	tt.piv = &iv;
-	(*(tt.piv->pf_get_measure))(tt.piv->ctx, &it);
+	(*(tt.piv->drw->pf_get_measure))(tt.piv->ctx, &it);
 
 	vb.px = px; vb.py = py; vb.pw = pw; vb.ph = ph;
 	pxa = (*ptd->pf_get_xface_ptr)(ptd->widget);
@@ -906,7 +906,7 @@ int _textor_exec_select(textor_context* ptd, int px, int py, int pw, int ph, boo
 
 	get_visual_interface(ptd->cdc, &iv);
 	tt.piv = &iv;
-	(*(tt.piv->pf_get_measure))(tt.piv->ctx, &it);
+	(*(tt.piv->drw->pf_get_measure))(tt.piv->ctx, &it);
 
 	vb.px = px; vb.py = py; vb.pw = pw; vb.ph = ph;
 	pxa = (*ptd->pf_get_xface_ptr)(ptd->widget);
@@ -976,7 +976,7 @@ int _textor_calc_count(textor_context* ptd, int px, int py, int pw, int ph, bool
 
 	get_visual_interface(ptd->cdc, &iv);
 	tt.piv = &iv;
-	(*(tt.piv->pf_get_measure))(tt.piv->ctx, &it);
+	(*(tt.piv->drw->pf_get_measure))(tt.piv->ctx, &it);
 
 	vb.px = px; vb.py = py; vb.pw = pw; vb.ph = ph;
 	pxa = (*ptd->pf_get_xface_ptr)(ptd->widget);
@@ -1091,7 +1091,7 @@ bool_t _textor_exec_delete(textor_context* ptd, int px, int py, int pw, int ph, 
 
 	get_visual_interface(ptd->cdc, &iv);
 	tt.piv = &iv;
-	(*(tt.piv->pf_get_measure))(tt.piv->ctx, &it);
+	(*(tt.piv->drw->pf_get_measure))(tt.piv->ctx, &it);
 
 	vb.px = px; vb.py = py; vb.pw = pw; vb.ph = ph;
 	pxa = (*ptd->pf_get_xface_ptr)(ptd->widget);
@@ -1216,7 +1216,7 @@ bool_t _textor_exec_insert(textor_context* ptd, int px, int py, int pw, int ph, 
 
 	get_visual_interface(ptd->cdc, &iv);
 	tt.piv = &iv;
-	(*(tt.piv->pf_get_measure))(tt.piv->ctx, &it);
+	(*(tt.piv->drw->pf_get_measure))(tt.piv->ctx, &it);
 
 	vb.px = px; vb.py = py; vb.pw = pw; vb.ph = ph;
 	pxa = (*ptd->pf_get_xface_ptr)(ptd->widget);
@@ -1267,7 +1267,7 @@ static int CALLBACK _on_text_calc_focus(int scan, void* object, object_attr_t* a
 			xr_dot.w = DEF_FOCUS_SPAN;
 			xr_dot.h = DEF_FOCUS_SPAN;
 			parse_xcolor(&xc, DEF_ALPHA_COLOR);
-			(*(ptt->piv->pf_alphablend_rect))(ptt->piv->ctx, &xc, &xr_dot, ALPHA_SOLID);
+			(*(ptt->piv->drw->pf_alphablend_rect))(ptt->piv->ctx, &xc, &xr_dot, ALPHA_SOLID);
 		}
 
 		if (ptt->done && ptt->to_row == cur_row && ptt->to_col == cur_col)
@@ -1280,14 +1280,14 @@ static int CALLBACK _on_text_calc_focus(int scan, void* object, object_attr_t* a
 			xr_reg.w = ptt->to_pt.x - ptt->from_pt.x;
 			xr_reg.h = ptt->to_pt.y - ptt->from_pt.y;
 			parse_xcolor(&xc, DEF_ALPHA_COLOR);
-			(*(ptt->piv->pf_alphablend_rect))(ptt->piv->ctx, &xc, &xr_reg, ALPHA_SOFT);
+			(*(ptt->piv->drw->pf_alphablend_rect))(ptt->piv->ctx, &xc, &xr_reg, ALPHA_SOFT);
 			
 			xr_dot.x = ptt->to_pt.x - DEF_FOCUS_SPAN;
 			xr_dot.y = ptt->to_pt.y;
 			xr_dot.w = DEF_FOCUS_SPAN;
 			xr_dot.h = DEF_FOCUS_SPAN;
 			parse_xcolor(&xc, DEF_ALPHA_COLOR);
-			(*(ptt->piv->pf_alphablend_rect))(ptt->piv->ctx, &xc, &xr_dot, ALPHA_SOLID);
+			(*(ptt->piv->drw->pf_alphablend_rect))(ptt->piv->ctx, &xc, &xr_dot, ALPHA_SOLID);
 			return _SCANNER_OPERA_STOP;
 		}
 
@@ -1303,7 +1303,7 @@ static int CALLBACK _on_text_calc_focus(int scan, void* object, object_attr_t* a
 			xr_reg.w = ptt->to_pt.x - ptt->from_pt.x;
 			xr_reg.h = ptt->to_pt.y - ptt->from_pt.y;
 			parse_xcolor(&xc, DEF_ALPHA_COLOR);
-			(*(ptt->piv->pf_alphablend_rect))(ptt->piv->ctx, &xc, &xr_reg, ALPHA_SOFT);
+			(*(ptt->piv->drw->pf_alphablend_rect))(ptt->piv->ctx, &xc, &xr_reg, ALPHA_SOFT);
 
 			ptt->from_pt.x = ptm->min_x + ptm->char_w;
 			ptt->from_pt.y = ptm->cur_y + ptm->cur_h + ptm->line_h;
@@ -1320,7 +1320,7 @@ static int CALLBACK _on_text_calc_focus(int scan, void* object, object_attr_t* a
 			xr_reg.w = ptt->to_pt.x - ptt->from_pt.x;
 			xr_reg.h = ptt->to_pt.y - ptt->from_pt.y;
 			parse_xcolor(&xc, DEF_ALPHA_COLOR);
-			(*(ptt->piv->pf_alphablend_rect))(ptt->piv->ctx, &xc, &xr_reg, ALPHA_SOFT);
+			(*(ptt->piv->drw->pf_alphablend_rect))(ptt->piv->ctx, &xc, &xr_reg, ALPHA_SOFT);
 
 			ptt->from_pt.x = ptm->min_x + ptm->char_w;
 			ptt->from_pt.y = ptm->cur_y + ptm->cur_h + ptm->line_h;
@@ -1352,7 +1352,7 @@ void _textor_draw_focus_raw(textor_context* ptd, int px, int py, int pw, int ph,
 
 	get_visual_interface(rdc, &iv);
 	tt.piv = &iv;
-	(*(tt.piv->pf_get_measure))(tt.piv->ctx, &it);
+	(*(tt.piv->drw->pf_get_measure))(tt.piv->ctx, &it);
 
 	vb.px = px; vb.py = py; vb.pw = pw; vb.ph = ph;
 	pxa = (*ptd->pf_get_xface_ptr)(ptd->widget);
@@ -1386,9 +1386,9 @@ static int CALLBACK _on_text_calc_paint(int scan, void* object, object_attr_t* a
 			pt1.y = ptm->cur_y;
 
 			if (cur_char && *cur_char == _T('\0'))
-				(*(ptt->piv->pf_text_out))(ptt->piv->ctx, pxa, &pt1, _T("."), 1);
+				(*(ptt->piv->drw->pf_text_out))(ptt->piv->ctx, pxa, &pt1, _T("."), 1);
 			else
-				(*(ptt->piv->pf_text_out))(ptt->piv->ctx, pxa, &pt1, cur_char, cur_count);
+				(*(ptt->piv->drw->pf_text_out))(ptt->piv->ctx, pxa, &pt1, cur_char, cur_count);
 		}
 		break;
 	case _SCANNER_STATE_LINEBREAK:
@@ -1398,7 +1398,7 @@ static int CALLBACK _on_text_calc_paint(int scan, void* object, object_attr_t* a
 			xr.y = ptm->cur_y + ptm->cur_h - 3;
 			xr.w = 3;
 			xr.h = 3;
-			(*(ptt->piv->pf_draw_rect))(ptt->piv->ctx, pxp, NULL, &xr);
+			(*(ptt->piv->drw->pf_draw_rect))(ptt->piv->ctx, pxp, NULL, &xr);
 		}
 		else
 		{
@@ -1406,11 +1406,11 @@ static int CALLBACK _on_text_calc_paint(int scan, void* object, object_attr_t* a
 			pt1.y = ptm->cur_y + ptm->cur_h;
 			pt2.x = pt1.x - 3;
 			pt2.y = pt1.y;
-			(*(ptt->piv->pf_draw_line))(ptt->piv->ctx, pxp, &pt1, &pt2);
+			(*(ptt->piv->drw->pf_draw_line))(ptt->piv->ctx, pxp, &pt1, &pt2);
 
 			pt2.x = pt1.x;
 			pt2.y = pt1.y - 4;
-			(*(ptt->piv->pf_draw_line))(ptt->piv->ctx, pxp, &pt1, &pt2);
+			(*(ptt->piv->drw->pf_draw_line))(ptt->piv->ctx, pxp, &pt1, &pt2);
 		}
 		break;
 	case _SCANNER_STATE_PAGEBREAK:
@@ -1418,7 +1418,7 @@ static int CALLBACK _on_text_calc_paint(int scan, void* object, object_attr_t* a
 		xr.y = ptm->cur_y + ptm->cur_h - 3;
 		xr.w = 3;
 		xr.h = 3;
-		(*(ptt->piv->pf_draw_rect))(ptt->piv->ctx, pxp, pxb, &xr);
+		(*(ptt->piv->drw->pf_draw_rect))(ptt->piv->ctx, pxp, pxb, &xr);
 		break;
 	case _SCANNER_STATE_NEWPAGE:
 		return _SCANNER_OPERA_STOP;
@@ -1429,7 +1429,7 @@ static int CALLBACK _on_text_calc_paint(int scan, void* object, object_attr_t* a
 			xr.y = ptm->cur_y + ptm->cur_h - 3;
 			xr.w = 3;
 			xr.h = 3;
-			(*(ptt->piv->pf_draw_rect))(ptt->piv->ctx, NULL, pxb, &xr);
+			(*(ptt->piv->drw->pf_draw_rect))(ptt->piv->ctx, NULL, pxb, &xr);
 		}
 		return _SCANNER_OPERA_STOP;
 	}
@@ -1459,7 +1459,7 @@ void _textor_draw_text(textor_context* ptd, int px, int py, int pw, int ph, bool
 
 	get_visual_interface(rdc, &iv);
 	tt.piv = &iv;
-	(*(tt.piv->pf_get_measure))(tt.piv->ctx, &it);
+	(*(tt.piv->drw->pf_get_measure))(tt.piv->ctx, &it);
 
 	vb.px = px; vb.py = py; vb.pw = pw; vb.ph = ph;
 	pxa = (*ptd->pf_get_xface_ptr)(ptd->widget);

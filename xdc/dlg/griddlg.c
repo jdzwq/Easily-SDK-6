@@ -273,7 +273,7 @@ void hand_griddlg_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	rdc = begin_canvas_paint(canv, dc, xr.w, xr.h);
 	get_visual_interface(rdc, &ifv);
 
-	(*ifv.pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
+	(*ifv.drw->pf_draw_rect)(ifv.ctx, NULL, &xb, &xr);
 
 	xs.fw = GRIDDLG_BUTTON_WIDTH;
 	xs.fh = GRIDDLG_BUTTON_HEIGHT;
@@ -288,7 +288,7 @@ void hand_griddlg_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
 	parse_xcolor(&xc_core, xb.color);
 	lighten_xcolor(&xc_brim, DEF_MIDD_DARKEN);
 
-	(*ifv.pf_gradient_rect)(ifv.ctx, &xc_brim, &xc_core, GDI_ATTR_GRADIENT_VERT, &xr_bar);
+	(*ifv.drw->pf_gradient_rect)(ifv.ctx, &xc_brim, &xc_core, GDI_ATTR_GRADIENT_VERT, &xr_bar);
 
 	end_canvas_paint(canv, dc, pxr);
 }

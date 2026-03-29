@@ -76,10 +76,6 @@ extern "C" {
 		/*big Endian*/
 		bool_t		if_big;
 
-#ifdef XDK_SUPPORT_MEMO
-		if_memo_t if_memo;
-#endif
-
 #ifdef XDK_SUPPORT_THREAD
 		/*master thread id*/
 		pid_t		thread_id;
@@ -93,6 +89,10 @@ extern "C" {
 		if_jump_t* pif_jump;
 		if_dump_t* pif_dump;
 #endif /*XDK_SUPPORT_THREAD*/
+
+#ifdef XDK_SUPPORT_MEMO
+		if_memo_t if_memo;
+#endif
 
 #ifdef XDK_SUPPORT_ERROR
 		if_error_t	if_error;

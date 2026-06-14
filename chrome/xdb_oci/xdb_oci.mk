@@ -11,9 +11,9 @@ CFLAGS = -g -Wall -fPIC -D _DEBUG
 LFLAGS = -shared -fPIC -pthread
 
 MODULE = xdb_oci
-ARCH = amd64
+ARCH = x86_64
 MAX_VER = 6
-MIN_VER = 0
+MIN_VER = 1
 
 INC_OCI = /usr/local/oracle/instantclient_19c/sdk/include
 LIB_OCI = /usr/local/oracle/instantclient_19c/lib
@@ -24,7 +24,7 @@ INC_PATH = ../../include
 SRC_PATH = ../../xdb
 
 OBJ_PATH = ~/Easily-temp/chrome/$(MODULE)/$(ARCH)
-OUT_PATH = ~/Easily-app-6/chrome/lib
+OUT_PATH = ~/Easily-app-6/chrome/lib/$(ARCH)
 
 TARGET = lib$(MODULE).so.$(MAX_VER).$(MIN_VER).$(ARCH)
 LINKIT = lib$(MODULE).so

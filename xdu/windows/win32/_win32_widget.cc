@@ -2830,13 +2830,15 @@ void winGetScreenSize(xsize_t* pxs)
 	pxs->h = GetSystemMetrics(SM_CYFULLSCREEN);
 }
 
-void winGetDesktopSize(xsize_t* pxs)
+void winGetDesktopRect(xrect_t* pxr)
 {
 	RECT rt;
 
 	SystemParametersInfo(SPI_GETWORKAREA, 0, &rt, 0);
-	pxs->w = rt.right - rt.left;
-	pxs->h = rt.bottom - rt.top;
+	pxr->x = 0;
+	pxr->y = 0;
+	pxr->w = rt.right - rt.left;
+	pxr->h = rt.bottom - rt.top;
 }
 
 void winScreenSizeToMm(xsize_t* pxs)

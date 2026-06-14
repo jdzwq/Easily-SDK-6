@@ -13,7 +13,7 @@ LFLAGS = -shared -fPIC -pthread
 MODULE = xdb_oci
 ARCH = aarch64
 MAX_VER = 6
-MIN_VER = 0
+MIN_VER = 1
 
 #INC_OCI = /usr/local/oracle/instantclient_19c/sdk/include
 INC_OCI = /usr/local/oracle/instantclient_19c/rdbms/public
@@ -25,7 +25,7 @@ INC_PATH = ../../include
 SRC_PATH = ../../xdb
 
 OBJ_PATH = ~/Easily-temp/linux/$(MODULE)/$(ARCH)
-OUT_PATH = ~/Easily-app-6/linux/lib
+OUT_PATH = ~/Easily-app-6/linux/lib/$(ARCH)
 
 TARGET = lib$(MODULE).so.$(MAX_VER).$(MIN_VER).$(ARCH)
 LINKIT = lib$(MODULE).so

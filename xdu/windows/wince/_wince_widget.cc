@@ -2477,13 +2477,15 @@ void wceGetScreenSize(xsize_t* pxs)
 	pxs->h = GetSystemMetrics(SM_CYFULLSCREEN);
 }
 
-void wceGetDesktopSize(xsize_t* pxs)
+void wceGetDesktopRect(xrect_t* pxr)
 {
 	RECT rt;
 
 	SystemParametersInfo(SPI_GETWORKAREA, 0, &rt, 0);
-	pxs->w = rt.right - rt.left;
-	pxs->h = rt.bottom - rt.top;
+	pxr->x = 0;
+	pxr->y = 0;
+	pxr->w = rt.right - rt.left;
+	pxr->h = rt.bottom - rt.top;
 }
 
 void wceScreenSizeToMm(xsize_t* pxs)

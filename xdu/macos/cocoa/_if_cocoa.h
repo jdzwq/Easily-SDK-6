@@ -244,7 +244,7 @@ void coMessagePosition(xpoint_t* pxp);
 void coCalcWidgetBorder(dword_t ws, border_t* pbd);
 void coAdjustWidgetSize(dword_t wstyle, xsize_t* pxs);
 void coGetScreenSize(xsize_t* pxs);
-void coGetDesktopSize(xsize_t* pxs);
+void coGetDesktopRect(xrect_t* pxr);
 void coScreenSizeToMm(xsize_t* pxs);
 void coScreenSizeToPt(xsize_t* pxs);
 

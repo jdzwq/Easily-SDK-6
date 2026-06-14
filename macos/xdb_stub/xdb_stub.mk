@@ -11,7 +11,7 @@ CFLAGS = -g -Wall -fPIC -D _DEBUG
 
 MODULE = xdb_stub
 ARCH = aarch64
-CUR_VER = 26
+CUR_VER = 6
 MAX_VER = 1
 MIN_VER = 0
 
@@ -21,9 +21,9 @@ SRC_PATH = ../../xdb
 LIB_PATH = /usr/local/lib
 
 OBJ_PATH = ~/工程/Easily-temp/macos/$(MODULE)/$(ARCH)
-OUT_PATH = ~/工程/Easily-app-6/macos/lib
+OUT_PATH = ~/工程/Easily-app-6/macos/lib/$(ARCH)
 
-TARGET = lib$(MODULE).$(CUR_VER).$(MAX_VER).$(MIN_VER).dylib
+TARGET = lib$(MODULE).dylib.$(CUR_VER).$(MAX_VER).$(MIN_VER).$(ARCH)
 LINKIT = lib$(MODULE).dylib
 
 LIBS = -lxdk -lxdg -lxdl

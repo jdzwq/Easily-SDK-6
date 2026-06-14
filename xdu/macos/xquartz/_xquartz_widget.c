@@ -2917,10 +2917,12 @@ void xqGetScreenSize(xsize_t* pxs)
     pxs->h = DisplayHeight(g_display, DefaultScreen(g_display));
 }
 
-void xqGetDesktopSize(xsize_t* pxs)
+void xqGetDesktopRect(xrect_t* pxr)
 {
-	pxs->w = DisplayWidth(g_display, DefaultScreen(g_display));
-    pxs->h = DisplayHeight(g_display, DefaultScreen(g_display));
+	pxr->x = 0;
+	pxr->y = 0;
+	pxr->w = DisplayWidth(g_display, DefaultScreen(g_display));
+    pxr->h = DisplayHeight(g_display, DefaultScreen(g_display));
 }
 
 void xqScreenSizeToMm(xsize_t* pxs)

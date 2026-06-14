@@ -249,7 +249,7 @@ void winMessagePosition(xpoint_t* pxp);
 void winCalcWidgetBorder(dword_t ws, border_t* pbd);
 void winAdjustWidgetSize(dword_t wstyle, xsize_t* pxs);
 void winGetScreenSize(xsize_t* pxs);
-void winGetDesktopSize(xsize_t* pxs);
+void winGetDesktopRect(xrect_t* pxr);
 void winScreenSizeToMm(xsize_t* pxs);
 void winScreenSizeToPt(xsize_t* pxs);
 

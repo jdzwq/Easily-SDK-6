@@ -11,7 +11,7 @@ CFLAGS = -g -Wall -fPIC -D _DEBUG
 
 MODULE = xdk
 ARCH = aarch64
-CUR_VER = 26
+CUR_VER = 6
 MAX_VER = 1
 MIN_VER = 0
 
@@ -21,9 +21,9 @@ INC_PATH = ../../include
 SRC_PATH = ../../xdk
 
 OBJ_PATH = ~/工程/Easily-temp/macos/$(MODULE)/$(ARCH)
-OUT_PATH = ~/工程/Easily-app-6/macos/lib
+OUT_PATH = ~/工程/Easily-app-6/macos/lib/$(ARCH)
 
-TARGET = lib$(MODULE).$(CUR_VER).$(MAX_VER).$(MIN_VER).dylib
+TARGET = lib$(MODULE).dylib.$(CUR_VER).$(MAX_VER).$(MIN_VER).$(ARCH)
 LINKIT = lib$(MODULE).dylib
 
 LIBS = -lm -L $(LIB_PATH) -limg -lbar -lcrypt -lzlib

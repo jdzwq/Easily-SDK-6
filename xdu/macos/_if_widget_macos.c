@@ -838,12 +838,12 @@ void _get_screen_size(xsize_t* pxs)
 #endif
 }
 
-void _get_desktop_size(xsize_t* pxs)
+void _get_desktop_rect(xrect_t* pxr)
 {
 #if defined(_COCOA)
-	coGetDesktopSize(pxs);
+	coGetDesktopRect(pxr);
 #elif defined(_XQUARTZ)
-	xqGetDesktopSize(pxs);
+	xqGetDesktopRect(pxr);
 #endif
 }
 

@@ -337,7 +337,7 @@ void xlMessagePosition(xpoint_t* pxp);
 void xlCalcWidgetBorder(dword_t ws, border_t* pbd);
 void xlAdjustWidgetSize(dword_t wstyle, xsize_t* pxs);
 void xlGetScreenSize(xsize_t* pxs);
-void xlGetDesktopSize(xsize_t* pxs);
+void xlGetDesktopRect(xrect_t* pxr);
 void xlScreenSizeToMm(xsize_t* pxs);
 void xlScreenSizeToPt(xsize_t* pxs);
 

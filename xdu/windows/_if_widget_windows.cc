@@ -838,12 +838,12 @@ void _get_screen_size(xsize_t* pxs)
 #endif
 }
 
-void _get_desktop_size(xsize_t* pxs)
+void _get_desktop_rect(xrect_t* pxr)
 {
 #if defined(WINCE)
-	wceGetDesktopSize(pxs);
+	wceGetDesktopRect(pxr);
 #elif defined(WIN32)
-	winGetDesktopSize(pxs);
+	winGetDesktopRect(pxr);
 #endif
 }
 

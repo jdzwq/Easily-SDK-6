@@ -20,7 +20,7 @@ LIB_PATH = ../lib/$(ARCH)
 
 OBJ_PATH = E:\Easily-temp\windows\$(MODULE)\$(ARCH)\Debug
 PDB_PATH = E:\Easily-temp\windows\$(ARCH)
-OUT_PATH = Z:\Easily-app-6\windows\lib
+OUT_PATH = Z:\Easily-app-6\windows\lib\$(ARCH)
 
 TARGET = $(OBJ_PATH)/$(MODULE).dll
 LIBRARY = $(LIB_PATH)/$(MODULE).lib
@@ -75,7 +75,7 @@ install:
 	copy /y $(subst /,\, $(TARGET)) $(OUT_PATH)
 
 uninstall:
-	del $(OUT_PATH)/$(MODULE).dll
+	del $(subst /,\, $(OUT_PATH)/$(MODULE).dll)
 
 .PHONY : clean
 clean:

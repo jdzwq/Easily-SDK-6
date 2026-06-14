@@ -255,7 +255,7 @@ void wceMessagePosition(xpoint_t* pxp);
 void wceCalcWidgetBorder(dword_t ws, border_t* pbd);
 void wceAdjustWidgetSize(dword_t wstyle, xsize_t* pxs);
 void wceGetScreenSize(xsize_t* pxs);
-void wceGetDesktopSize(xsize_t* pxs);
+void wceGetDesktopRect(xrect_t* pxr);
 void wceScreenSizeToMm(xsize_t* pxs);
 void wceScreenSizeToPt(xsize_t* pxs);
 

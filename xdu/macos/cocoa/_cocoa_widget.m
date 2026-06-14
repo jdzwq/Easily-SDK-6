@@ -3634,13 +3634,15 @@ void coGetScreenSize(xsize_t* pxs)
     pxs->h = (int)screenFrame.size.height;
 }}
 
-void coGetDesktopSize(xsize_t* pxs)
+void coGetDesktopRect(xrect_t* pxr)
 {@autoreleasepool {
     NSScreen *mainScreen = [NSScreen mainScreen];
     NSRect visibleFrame = [mainScreen visibleFrame];
 
-    pxs->w = (int)visibleFrame.size.width;
-    pxs->h = (int)visibleFrame.size.height;
+    pxr->x = 0;
+    pxr->y = 0;
+    pxr->w = (int)visibleFrame.size.width;
+    pxr->h = (int)visibleFrame.size.height;
 }}
 
 void coScreenSizeToMm(xsize_t* pxs)

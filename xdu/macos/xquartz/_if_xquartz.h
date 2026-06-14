@@ -336,7 +336,7 @@ void xqMessagePosition(xpoint_t* pxp);
 void xqCalcWidgetBorder(dword_t ws, border_t* pbd);
 void xqAdjustWidgetSize(dword_t wstyle, xsize_t* pxs);
 void xqGetScreenSize(xsize_t* pxs);
-void xqGetDesktopSize(xsize_t* pxs);
+void xqGetDesktopRect(xrect_t* pxr);
 void xqScreenSizeToMm(xsize_t* pxs);
 void xqScreenSizeToPt(xsize_t* pxs);
 

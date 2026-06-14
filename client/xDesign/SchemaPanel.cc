@@ -253,7 +253,7 @@ void SchemaPanel_OnSave(widget_t widget)
 		if (!shell_get_filename(widget, szPath, _T("Schema Xml File(*.schema)\0*.schema\0"), _T("schema"), 1, szPath, PATH_LEN, szFile, PATH_LEN))
 			return;
 
-		xscat(szPath, _T("\\"));
+		xscat(szPath, _T("/"));
 		xscat(szPath, szFile);
 		xscpy(szFile, szPath);
 	}
@@ -282,7 +282,7 @@ void SchemaPanel_OnSaveAs(widget_t widget)
 	if (!shell_get_filename(widget, szPath, _T("Schema Xml File(*.schema)\0*.schema\0"), _T("schema"), 1, szPath, PATH_LEN, szFile, PATH_LEN))
 		return;
 
-	xscat(szPath, _T("\\"));
+	xscat(szPath, _T("/"));
 	xscat(szPath, szFile);
 	xscpy(szFile, szPath);
 
@@ -532,7 +532,6 @@ void SchemaPanel_OnMenuCommand(widget_t widget, int code, int cid, vword_t data)
 		break;
 
 	case IDC_SCHEMAPANEL_MENU:
-		widget_destroy((widget_t)data);
 		if (code)
 		{
 			widget_post_command(widget, code, 0, NULL);

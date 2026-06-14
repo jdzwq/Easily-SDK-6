@@ -265,6 +265,7 @@ typedef void(*PF_WIDGET_LAYOUT)(widget_t);
 typedef void(*PF_WIDGET_ERASE)(widget_t, const xrect_t*);
 typedef void(*PF_WIDGET_ENABLE)(widget_t, bool_t);
 typedef void(*PF_WIDGET_ACTIVE)(widget_t);
+typedef void(*PF_WIDGET_ENABLE_HOVER)(widget_t, bool_t);
 typedef void(*PF_WIDGET_CREATE_CARET)(widget_t, int, int);
 typedef void(*PF_WIDGET_DESTROY_CARET)(widget_t);
 typedef void(*PF_WIDGET_SHOW_CARET)(widget_t, int, int);
@@ -311,7 +312,7 @@ typedef void(*PF_MESSAGE_QUIT)(int);
 typedef void(*PF_CALC_WIDGET_BORDER)(dword_t, border_t*);
 typedef void(*PF_ADJUST_WIDGET_SIZE)(dword_t, xsize_t*);
 typedef void(*PF_GET_SCREEN_SIZE)(xsize_t*);
-typedef void(*PF_GET_DESKTOP_SIZE)(xsize_t*);
+typedef void(*PF_GET_DESKTOP_RECT)(xrect_t*);
 typedef void(*PF_SCREEN_SIZE_TO_PT)(xsize_t*);
 typedef void(*PF_SCREEN_SIZE_TO_MM)(xsize_t*);
 
@@ -371,6 +372,7 @@ typedef struct _if_widget_t{
 	PF_WIDGET_ERASE				pf_widget_erase;
 	PF_WIDGET_ENABLE			pf_widget_enable;
 	PF_WIDGET_ACTIVE			pf_widget_active;
+	PF_WIDGET_ENABLE_HOVER		pf_widget_enable_hover;
 	PF_WIDGET_CREATE_CARET		pf_widget_create_caret;
 	PF_WIDGET_DESTROY_CARET		pf_widget_destroy_caret;
 	PF_WIDGET_SHOW_CARET		pf_widget_show_caret;
@@ -417,7 +419,7 @@ typedef struct _if_widget_t{
 	PF_CALC_WIDGET_BORDER		pf_calc_widget_border;
 	PF_ADJUST_WIDGET_SIZE		pf_adjust_widget_size;
 	PF_GET_SCREEN_SIZE			pf_get_screen_size;
-	PF_GET_DESKTOP_SIZE			pf_get_desktop_size;
+	PF_GET_DESKTOP_RECT			pf_get_desktop_rect;
 	PF_SCREEN_SIZE_TO_PT		pf_screen_size_to_pt;
 	PF_SCREEN_SIZE_TO_MM		pf_screen_size_to_mm;
 

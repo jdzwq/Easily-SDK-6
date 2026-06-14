@@ -12,7 +12,8 @@ LFLAGS = -shared -fPIC -pthread
 
 MODULE = xdg
 ARCH = amd64
-VER = 6
+MAX_VER = 6
+MIN_VER = 0
 
 LIB_PATH = /usr/local/lib
 
@@ -21,7 +22,7 @@ SRC_PATH = ../../xdg
 
 OBJ_PATH = ~/Easily-temp/chrome/$(MODULE)/$(ARCH)
 
-TARGET = lib$(MODULE).so.$(VER)
+TARGET = lib$(MODULE).so.$(MAX_VER).$(MIN_VER).$(ARCH)
 LINKIT = lib$(MODULE).so
 OUT_PATH = ~/Easily-app-6/chrome/lib
 

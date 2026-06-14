@@ -113,7 +113,10 @@ void RichPanel_OnInsert(widget_t widget)
 	LINKPTR ptrRich = richctrl_fetch(pdt->hRich);
 	LINKPTR ptrPos = richctrl_get_focus_anch(pdt->hRich);
 
-	ptrPos = (ptrPos) ? get_rich_prev_anch(ptrRich, ptrPos) : LINK_LAST;
+	if(ptrPos) 
+		ptrPos = get_rich_prev_anch(ptrRich, ptrPos);
+	if(!ptrPos)
+		ptrPos = LINK_LAST;
 
 	LINKPTR ilk = richctrl_insert_anch(pdt->hRich, ptrPos);
 	if (!ilk)
@@ -187,13 +190,15 @@ void RichPanel_Proper_OnEntityUpdate(widget_t widget, NOTICE_PROPER* pnp)
 {
 	RichPanelDelta* pdt = GETRICHPANELDELTA(widget);
 
+	LINKPTR ptrProper = properctrl_fetch(pnp->widget);
+	
 	LINKPTR ptrRich = richctrl_fetch(pdt->hRich);
 	LINKPTR ptrNode = richctrl_get_focus_anch(pdt->hRich);
 
 	if (ptrNode)
-		properbag_read_rich_anch_attributes(pnp->proper, ptrNode);
+		properbag_read_rich_anch_attributes(ptrProper, ptrNode);
 	else
-		properbag_read_rich_attributes(pnp->proper, ptrRich);
+		properbag_read_rich_attributes(ptrProper, ptrRich);
 
 	richctrl_redraw(pdt->hRich);
 }
@@ -288,7 +293,7 @@ void RichPanel_OnSave(widget_t widget)
 		if (!shell_get_filename(widget, szPath, _T("Rich Meta File(*.sheet)\0*.sheet\0"), _T("sheet"), 1, szPath, PATH_LEN, szFile, PATH_LEN))
 			return;
 
-		xscat(szPath, _T("\\"));
+		xscat(szPath, _T("/"));
 		xscat(szPath, szFile);
 		xscpy(szFile, szPath);
 	}
@@ -314,7 +319,7 @@ void RichPanel_OnSaveAs(widget_t widget)
 	if (!shell_get_filename(widget, szPath, _T("Rich Meta File(*.sheet)\0*.sheet\0Svg Image File(*.svg)\0*.svg\0"), _T("sheet"), 1, szPath, PATH_LEN, szFile, PATH_LEN))
 		return;
 
-	xscat(szPath, _T("\\"));
+	xscat(szPath, _T("/"));
 	xscat(szPath, szFile);
 	xscpy(szFile, szPath);
 
@@ -365,7 +370,7 @@ void RichPanel_OnSchema(widget_t widget)
 	if (!shell_get_filename(widget, szPath, _T("xml schema file(*.schema)\0*.schema\0"), _T("schema"), 1, szPath, PATH_LEN, szFile, PATH_LEN))
 		return;
 
-	xscat(szPath, _T("\\"));
+	xscat(szPath, _T("/"));
 	xscat(szPath, szFile);
 	xscpy(szFile, szPath);
 
@@ -394,7 +399,7 @@ void RichPanel_OnExport(widget_t widget)
 	if (!shell_get_filename(widget, szPath, _T("xml data file(*.xml)\0*.xml\0"), _T("xml"), 1, szPath, PATH_LEN, szFile, PATH_LEN))
 		return;
 
-	xscat(szPath, _T("\\"));
+	xscat(szPath, _T("/"));
 	xscat(szPath, szFile);
 	xscpy(szFile, szPath);
 
@@ -427,7 +432,7 @@ void RichPanel_OnImport(widget_t widget)
 	if (!shell_get_filename(widget, szPath, _T("xml data file(*.xml)\0*.xml\0"), _T("xml"), 0, szPath, PATH_LEN, szFile, PATH_LEN))
 		return;
 
-	xscat(szPath, _T("\\"));
+	xscat(szPath, _T("/"));
 	xscat(szPath, szFile);
 	xscpy(szFile, szPath);
 
@@ -524,6 +529,8 @@ int RichPanel_OnCreate(widget_t widget, void* data)
 	LINKPTR ptrProper = create_proper_doc();
 	properctrl_attach(pdt->hProper, ptrProper);
 
+	hand_editor_create(pdt->hProper, &edit_properctrl);
+
 	set_split_item_delta(ilkProper, pdt->hProper);
 	widget_show(pdt->hProper, WS_SHOW_NORMAL);
 
@@ -562,6 +569,8 @@ void RichPanel_OnDestroy(widget_t widget)
 
 	if (widget_is_valid(pdt->hProper))
 	{
+		hand_editor_destroy(pdt->hProper);
+
 		LINKPTR ptrProper = properctrl_detach(pdt->hProper);
 		if (ptrProper)
 			destroy_proper_doc(ptrProper);
@@ -762,7 +771,6 @@ void RichPanel_OnMenuCommand(widget_t widget, int code, int cid, vword_t data)
 		break;
 
 	case IDC_RICHPANEL_MENU:
-		widget_destroy((widget_t)data);
 		if (code)
 		{
 			widget_post_command(widget, code, 0, NULL);

@@ -187,13 +187,13 @@ typedef enum{
 	NC_FIELDSETFOCUS,
 	NC_FIELDKILLFOCUS,
 
-	NC_FIELDEDITING,
-	NC_FIELDUPDATE,
-	NC_FIELDCOMMIT,
-	NC_FIELDROLLBACK,
-
 	NC_FIELDCALCED,
 	NC_FORMCALCED,
+
+	NC_FIELDEDITING,
+	NC_FIELDCOMMIT,
+	NC_FIELDROLLBACK,
+	NC_FIELDUPDATE,
 
 	NC_FIELDGRID,
 	NC_FIELDSTATIS,
@@ -204,6 +204,8 @@ typedef enum{
 	NC_FIELDRICH,
 	NC_FIELDMEMO
 }FORM_NOTICE_CODE;
+
+int noti_form_owner(widget_t widget, unsigned int code, link_t_ptr form, link_t_ptr flk, void* data);
 
 /*
 @FUNCTION formctrl_create: create a form widget.
@@ -406,10 +408,6 @@ EXP_API void formctrl_set_dirty(widget_t widget, bool_t b_dirty);
 EXP_API bool_t formctrl_set_field_text(widget_t widget, link_t_ptr flk, const tchar_t* text);
 
 /***********************************grid control*******************************************************************/
-#define GRID_NOTICE_ACCEPT		0
-#define GRID_NOTICE_REJECT		1
-#define GRID_NOTICE_SKIP		2
-#define GRID_NOTICE_DELETE		3
 
 typedef struct _NOTICE_GRID{
 	widget_t widget;
@@ -435,14 +433,14 @@ typedef enum{
 	NC_CELLSETFOCUS,
 	NC_CELLKILLFOCUS,
 
-	NC_CELLEDITING,
-	NC_CELLUPDATE,
-	NC_CELLCOMMIT,
-	NC_CELLROLLBACK,
-
 	NC_COLCALCED,
 	NC_ROWCALCED,
 	NC_GRIDCALCED,
+
+	NC_CELLEDITING,
+	NC_CELLCOMMIT,
+	NC_CELLROLLBACK,
+	NC_CELLUPDATE,
 
 	NC_COLSELECTED,
 
@@ -452,6 +450,8 @@ typedef enum{
 	NC_ROWINSERT,
 	NC_ROWDELETE
 }GRID_NOTICE_CODE;
+
+int noti_grid_owner(widget_t widget, unsigned int code, link_t_ptr grid, link_t_ptr rlk, link_t_ptr clk, void* data);
 
 /*
 @FUNCTION gridctrl_create: create a grid widget.
@@ -770,9 +770,9 @@ typedef enum{
 	NC_COORKILLFOCUS,
 
 	NC_COOREDITING,
-	NC_COORUPDATE,
 	NC_COORCOMMIT,
 	NC_COORROLLBACK,
+	NC_COORUPDATE,
 
 	NC_XAXCHANGING,
 	NC_XAXCHANGED,
@@ -789,6 +789,8 @@ typedef enum{
 	NC_YAXCALCED,
 	NC_XAXCALCED
 }STATIS_NOTICE_CODE;
+
+int noti_statis_owner(widget_t widget, unsigned int code, link_t_ptr statis, link_t_ptr xlk, link_t_ptr ylk, link_t_ptr glk, void* data);
 
 /*
 @FUNCTION statisctrl_create: create a statis widget.
@@ -1425,13 +1427,15 @@ typedef enum{
 	NC_IMAGEITEMCHECKED,
 
 	NC_IMAGEITEMEDITING,
-	NC_IMAGEITEMUPDATE,
 	NC_IMAGEITEMCOMMIT,
 	NC_IMAGEITEMROLLBACK,
+	NC_IMAGEITEMUPDATE,
 
 	NC_IMAGESCALCED,
 	NC_IMAGEITEMCALCED
 }IMAGES_NOTICE_CODE;
+
+int noti_images_owner(widget_t widget, unsigned int code, link_t_ptr image, link_t_ptr ilk, void* data);
 
 /*
 @FUNCTION imagesctrl_create: create a images widget.
@@ -1510,7 +1514,7 @@ EXP_API link_t_ptr	imagesctrl_get_focus_item(widget_t widget);
 @OUTPUT xrect_t* pxr: the rect struct using int member.
 @RETURN void: none.
 */
-EXP_API void	imagesctrl_get_item_rect(widget_t widget, link_t_ptr ilk, xrect_t* pxr);
+EXP_API void	imagesctrl_get_item_rect(widget_t widget, link_t_ptr ilk, bool_t edit, xrect_t* pxr);
 
 /*
 @FUNCTION imagesctrl_get_lock: get the images widget is locked.
@@ -1721,20 +1725,22 @@ typedef enum{
 	NC_PHOTORBCLK,
 	NC_PHOTODBCLK,
 
-	NC_PHOTOANNOCHANGING,
-	NC_PHOTOANNOCHANGED,
-	NC_PHOTOANNOSIZING,
-	NC_PHOTOANNOSIZED,
-	NC_PHOTOANNODRAG,
-	NC_PHOTOANNODROP,
+	NC_PHOTOARTICHANGING,
+	NC_PHOTOARTICHANGED,
+	NC_PHOTOARTISIZING,
+	NC_PHOTOARTISIZED,
+	NC_PHOTOARTIDRAG,
+	NC_PHOTOARTIDROP,
 
-	NC_PHOTOANNOEDITING,
-	NC_PHOTOANNOUPDATE,
-	NC_PHOTOANNOCOMMIT,
-	NC_PHOTOANNOROLLBACK,
+	NC_PHOTOARTIEDITING,
+	NC_PHOTOARTICOMMIT,
+	NC_PHOTOARTIROLLBACK,
+	NC_PHOTOARTIUPDATE,
 
 	NC_PHOTOFACEDRAW
 }PHOTO_NOTICE_CODE;
+
+int noti_photo_owner(widget_t widget, unsigned int code, link_t_ptr arti, void* data, visual_t rdc);
 
 /*
 @FUNCTION photoctrl_create: create a photo widget.
@@ -1789,6 +1795,11 @@ EXP_API bool_t photoctrl_set_focus_arti(widget_t widget, link_t_ptr ilk);
 @RETURN link_t_ptr: return the focused arti link component if exists, otherwise return NULL.
 */
 EXP_API link_t_ptr photoctrl_get_focus_arti(widget_t widget);
+
+
+EXP_API void photoctrl_get_arti_rect(widget_t widget, link_t_ptr ilk, xrect_t* pxr);
+
+EXP_API bool_t photoctrl_set_arti_text(widget_t widget, link_t_ptr ilk, const tchar_t* text);
 
 /*
 @FUNCTION photoctrl_get_lock: get the photo widget is locked.
@@ -1872,13 +1883,15 @@ typedef enum{
 	NC_TABLEITEMCHANGED,
 
 	NC_TABLEITEMEDITING,
-	NC_TABLEITEMUPDATE,
 	NC_TABLEITEMCOMMIT,
 	NC_TABLEITEMROLLBACK,
+	NC_TABLEITEMUPDATE,
 
 	NC_TABLECALCED,
 	NC_TABLEITEMCALCED
 }TABLE_NOTICE_CODE;
+
+int noti_table_owner(widget_t widget, unsigned int code, link_t_ptr table, link_t_ptr ilk, bool_t onkey, void* data);
 
 /*
 @FUNCTION tablectrl_create: create a string table widget.
@@ -1956,7 +1969,7 @@ EXP_API void	tablectrl_tabskip(widget_t widget, int skip);
 @INPUT link_t_ptr ilk: the item link component.
 @RETURN bool_t: return nonzero for being the item focused, otherwise return zero.
 */
-EXP_API bool_t	tablectrl_set_focus_item(widget_t widget, link_t_ptr ilk);
+EXP_API bool_t	tablectrl_set_focus_item(widget_t widget, link_t_ptr ilk, bool_t onkey);
 
 /*
 @FUNCTION tablectrl_get_focus_item: get focus item in table widget.
@@ -1964,6 +1977,10 @@ EXP_API bool_t	tablectrl_set_focus_item(widget_t widget, link_t_ptr ilk);
 @RETURN link_t_ptr: return the focused item link component if exists, otherwise return NULL.
 */
 EXP_API link_t_ptr tablectrl_get_focus_item(widget_t widget);
+
+EXP_API bool_t tablectrl_get_focus_onkey(widget_t widget);
+
+EXP_API void tablectrl_get_item_rect(widget_t widget, link_t_ptr ilk, bool_t key, xrect_t* pxr);
 
 /*
 @FUNCTION tablectrl_get_lock: get the table widget is locked.
@@ -2011,7 +2028,7 @@ EXP_API link_t_ptr tablectrl_insert_item(widget_t widget, link_t_ptr pos);
 @INPUT const tchar_t* key: the key token.
 @RETURN void: none.
 */
-EXP_API void	tablectrl_set_item_key_text(widget_t widget, link_t_ptr ilk, const tchar_t* key);
+EXP_API bool_t	tablectrl_set_item_key_text(widget_t widget, link_t_ptr ilk, const tchar_t* key);
 
 /*
 @FUNCTION tablectrl_set_item_val_text: set the table item text value.
@@ -2020,7 +2037,7 @@ EXP_API void	tablectrl_set_item_key_text(widget_t widget, link_t_ptr ilk, const 
 @INPUT const tchar_t* val: the value token.
 @RETURN void: none.
 */
-EXP_API void	tablectrl_set_item_val_text(widget_t widget, link_t_ptr ilk, const tchar_t* val);
+EXP_API bool_t	tablectrl_set_item_val_text(widget_t widget, link_t_ptr ilk, const tchar_t* val);
 
 /*
 @FUNCTION tablectrl_set_ratio: set the table item key and value column width ratio.
@@ -2233,9 +2250,9 @@ typedef enum{
 	NC_LISTITEMCHECKED,
 
 	NC_LISTITEMEDITING,
-	NC_LISTITEMUPDATE,
 	NC_LISTITEMCOMMIT,
 	NC_LISTITEMROLLBACK,
+	NC_LISTITEMUPDATE,
 
 	NC_LISTITEMEXPAND,
 	NC_LISTITEMCOLLAPSE,
@@ -2243,6 +2260,8 @@ typedef enum{
 	NC_LISTCALCED,
 	NC_LISTITEMCALCED
 }LIST_NOTICE_CODE;
+
+int noti_list_owner(widget_t widget, unsigned int code, link_t_ptr list, link_t_ptr ilk, void* data);
 
 /*
 @FUNCTION listctrl_create: create a list widget.
@@ -2329,7 +2348,7 @@ EXP_API link_t_ptr	listctrl_get_focus_item(widget_t widget);
 @OUTPUT xrect_t* pxr: the rect struct using int member.
 @RETURN void: none.
 */
-EXP_API void	listctrl_get_item_rect(widget_t widget, link_t_ptr ilk, xrect_t* pxr);
+EXP_API void	listctrl_get_item_rect(widget_t widget, link_t_ptr ilk, bool_t edit, xrect_t* pxr);
 
 /*
 @FUNCTION listctrl_get_lock: get the list widget is locked.
@@ -2396,15 +2415,17 @@ typedef enum{
 	NC_ENTITYCHANGING,
 	NC_ENTITYCHANGED,
 
-	NC_ENTITYEDITING,
-	NC_ENTITYUPDATE,
-	NC_ENTITYCOMMIT,
-	NC_ENTITYROLLBACK,
-
 	NC_PROPERCALCED,
 	NC_SECTIONCALCED,
-	NC_ENTITYCALCED
+	NC_ENTITYCALCED,
+
+	NC_ENTITYEDITING,
+	NC_ENTITYCOMMIT,
+	NC_ENTITYROLLBACK,
+	NC_ENTITYUPDATE
 }PROPER_NOTICE_CODE;
+
+int noti_proper_owner(widget_t widget, unsigned int code, link_t_ptr proper, link_t_ptr slk, link_t_ptr elk, void* data);
 
 /*
 @FUNCTION properctrl_create: create a proper widget.
@@ -2499,7 +2520,7 @@ EXP_API link_t_ptr properctrl_get_focus_entity(widget_t widget);
 @OUTPUT xrect_t* pxr: the rect struct using int member.
 @RETURN void: none.
 */
-EXP_API void	properctrl_get_entity_rect(widget_t widget, link_t_ptr ilk, xrect_t* pxr);
+EXP_API void	properctrl_get_entity_rect(widget_t widget, link_t_ptr ilk, bool_t edit, xrect_t* pxr);
 
 /*
 @FUNCTION properctrl_get_lock: get the proper widget is locked.
@@ -3212,9 +3233,9 @@ typedef enum{
 	NC_TREEITEMCHECKED,
 
 	NC_TREEITEMEDITING,
-	NC_TREEITEMUPDATE,
 	NC_TREEITEMCOMMIT,
 	NC_TREEITEMROLLBACK,
+	NC_TREEITEMUPDATE,
 
 	NC_TREEITEMEXPAND,
 	NC_TREEITEMCOLLAPSE,
@@ -3226,6 +3247,7 @@ typedef enum{
 	NC_TREEITEMCALCED
 }TREE_NOTICE_CODE;
 
+int noti_tree_owner(widget_t widget, unsigned int code, link_t_ptr tree, link_t_ptr ilk, void* data);
 /*
 @FUNCTION treectrl_create: create a tree widget.
 @INPUT const tchar_t* wname: the widget title.
@@ -3311,7 +3333,7 @@ EXP_API link_t_ptr treectrl_get_focus_item(widget_t widget);
 @OUTPUT xrect_t* pxr: the rect struct using int member.
 @RETURN void: none.
 */
-EXP_API void	treectrl_get_item_rect(widget_t widget, link_t_ptr ilk, xrect_t* pxr);
+EXP_API void	treectrl_get_item_rect(widget_t widget, link_t_ptr ilk, bool_t text, xrect_t* pxr);
 
 /*
 @FUNCTION treectrl_get_lock: get the tree widget is locked.

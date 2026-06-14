@@ -34,8 +34,6 @@ LICENSE.GPL3 for more details.
 typedef struct _plot_delta_t{
 	link_t_ptr plot;
 
-	widget_t hsc;
-	widget_t vsc;
 }plot_delta_t;
 
 #define GETPLOTDELTA(ph) 		(plot_delta_t*)widget_get_user_delta(ph)
@@ -101,27 +99,6 @@ int noti_plot_owner(widget_t widget, unsigned int code, link_t_ptr plot, void* d
 	return nf.ret;
 }
 
-void noti_plot_reset_scroll(widget_t widget, bool_t bUpdate)
-{
-	plot_delta_t* ptd = GETPLOTDELTA(widget);
-
-	if (widget_is_valid(ptd->vsc))
-	{
-		if (bUpdate)
-			widget_erase(ptd->vsc, NULL);
-		else
-			widget_close(ptd->vsc, 0);
-	}
-
-	if (widget_is_valid(ptd->hsc))
-	{
-		if (bUpdate)
-			widget_erase(ptd->hsc, NULL);
-		else
-			widget_close(ptd->hsc, 0);
-	}
-}
-
 /***********************************************************************/
 
 int hand_plot_create(widget_t widget, void* data)
@@ -143,12 +120,6 @@ void hand_plot_destroy(widget_t widget)
 	plot_delta_t* ptd = GETPLOTDELTA(widget);
 
 	XDK_ASSERT(ptd != NULL);
-
-	if (widget_is_valid(ptd->hsc))
-		widget_destroy(ptd->hsc);
-
-	if (widget_is_valid(ptd->vsc))
-		widget_destroy(ptd->vsc);
 
 	xmem_free(ptd);
 
@@ -247,55 +218,11 @@ void hand_plot_scroll(widget_t widget, bool_t bHorz, int nLine)
 void hand_plot_wheel(widget_t widget, bool_t bHorz, int nDelta)
 {
 	plot_delta_t* ptd = GETPLOTDELTA(widget);
-	scroll_t scr = { 0 };
-	int nLine;
-	widget_t win;
 
 	if (!ptd->plot)
 		return;
 
-	widget_get_scroll_info(widget, bHorz, &scr);
-
-	if (bHorz)
-		nLine = (nDelta > 0) ? scr.min : -scr.min;
-	else
-		nLine = (nDelta < 0) ? scr.min : -scr.min;
-
-	if (widget_hand_scroll(widget, bHorz, nLine))
-	{
-		if (!bHorz && !(widget_get_style(widget) & WD_STYLE_VSCROLL))
-		{
-			if (!widget_is_valid(ptd->vsc))
-			{
-				ptd->vsc = show_vertbox(widget);
-			}
-			else
-			{
-				widget_erase(ptd->vsc, NULL);
-			}
-		}
-
-		if (bHorz && !(widget_get_style(widget) & WD_STYLE_HSCROLL))
-		{
-			if (!widget_is_valid(ptd->hsc))
-			{
-				ptd->hsc = show_horzbox(widget);
-			}
-			else
-			{
-				widget_erase(ptd->hsc, NULL);
-			}
-		}
-
-		return;
-	}
-
-	win = widget_get_parent(widget);
-
-	if (widget_is_valid(win))
-	{
-		widget_scroll(win, bHorz, nLine);
-	}
+	widget_hand_wheel(widget, bHorz, nDelta);
 }
 
 void hand_plot_paint(widget_t widget, visual_t dc, const xrect_t* pxr)

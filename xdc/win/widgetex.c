@@ -41,6 +41,9 @@ typedef struct _widget_exten_t{
 	};
 
 	xfont_t xf;
+
+	widget_t hsc;
+	widget_t vsc;
 }widget_exten_t;
 
 #define GETEXTENSTRUCT(wt)			(widget_exten_t*)widget_get_core_delta(wt)
@@ -729,6 +732,12 @@ void widget_hand_destroy(widget_t wt)
 
 	if (pwt)
 	{
+		if (widget_is_valid(pwt->hsc))
+			widget_destroy(pwt->hsc);
+
+		if (widget_is_valid(pwt->vsc))
+			widget_destroy(pwt->vsc);
+
 		destroy_display_canvas(pwt->canv);
 
 		xmem_free(pwt);
@@ -792,6 +801,59 @@ bool_t widget_hand_scroll(widget_t wt, bool_t bHorz, int nLine)
 	widget_reset_scroll(wt, bHorz);
 
 	return 1;
+}
+
+void widget_hand_wheel(widget_t wt, bool_t bHorz, int nDelta)
+{
+	widget_exten_t* pwt = GETEXTENSTRUCT(wt);
+
+	scroll_t scr = { 0 };
+	int nLine;
+	widget_t win;
+
+	XDK_ASSERT(pwt != NULL);
+
+	widget_get_scroll_info(wt, bHorz, &scr);
+
+	if (bHorz)
+		nLine = (nDelta > 0) ? scr.min : -scr.min;
+	else
+		nLine = (nDelta < 0) ? scr.min : -scr.min;
+
+	if (widget_hand_scroll(wt, bHorz, nLine))
+	{
+		if (!bHorz && !(widget_get_style(wt) & WD_STYLE_VSCROLL))
+		{
+			if (!widget_is_valid(pwt->vsc))
+			{
+				pwt->vsc = show_vertbox(wt);
+			}
+			else
+			{
+				widget_erase(pwt->vsc, NULL);
+			}
+		}
+
+		if (bHorz && !(widget_get_style(wt) & WD_STYLE_HSCROLL))
+		{
+			if (!widget_is_valid(pwt->hsc))
+			{
+				pwt->hsc = show_horzbox(wt);
+			}
+			else
+			{
+				widget_erase(pwt->hsc, NULL);
+			}
+		}
+	}else
+	{
+		win = widget_get_parent(wt);
+
+		if (widget_is_valid(win))
+		{
+			widget_scroll(win, bHorz, nLine);
+		}
+	}
 }
 
 /************************************default widget splitting dispatch**************************************************/

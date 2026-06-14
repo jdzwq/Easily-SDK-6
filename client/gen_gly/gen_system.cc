@@ -315,8 +315,8 @@ void gen_gly(visual_t vc, glyph_info_t* pgi)
 		else
 		{
 			//save as big endian bytes
-			pch[0] = LIT_GETHBYTE(pgi[i].firstchar);
-			pch[1] = LIT_GETLBYTE(pgi[i].firstchar);
+			pch[0] = LIT_GETSWORDH(pgi[i].firstchar);
+			pch[1] = LIT_GETSWORDL(pgi[i].firstchar);
 		}
 
 		do

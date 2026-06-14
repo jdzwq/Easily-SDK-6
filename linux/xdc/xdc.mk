@@ -12,7 +12,8 @@ LFLAGS = -shared -fPIC -pthread
 
 MODULE = xdc
 ARCH = aarch64
-VER = 6
+MAX_VER = 6
+MIN_VER = 0
 
 LIB_PATH = /usr/local/lib
 
@@ -22,7 +23,7 @@ SRC_PATH = ../../xdc
 OBJ_PATH = ~/Easily-temp/linux/$(MODULE)/$(ARCH)
 OUT_PATH = ~/Easily-app-6/linux/lib
 
-TARGET = lib$(MODULE).so.$(VER)
+TARGET = lib$(MODULE).so.$(MAX_VER).$(MIN_VER).$(ARCH)
 LINKIT = lib$(MODULE).so
 
 LIBS = -lxdk -lxdg -lxdu -lxdl
@@ -31,8 +32,9 @@ DIRS = $(wildcard $(SRC_PATH)/*.c \
 	$(SRC_PATH)/box/*.c \
 	$(SRC_PATH)/ctrl/*.c \
 	$(SRC_PATH)/desg/*.c \
-	$(SRC_PATH)/dlg/*.c \
 	$(SRC_PATH)/edit/*.c \
+	$(SRC_PATH)/dlg/*.c \
+	$(SRC_PATH)/fire/*.c \
 	$(SRC_PATH)/hand/*.c \
 	$(SRC_PATH)/menu/*.c \
 	$(SRC_PATH)/win/*.c )
@@ -55,10 +57,13 @@ $(OBJ_PATH)/%.o : $(SRC_PATH)/ctrl/%.c
 $(OBJ_PATH)/%.o : $(SRC_PATH)/desg/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
 
+$(OBJ_PATH)/%.o : $(SRC_PATH)/edit/%.c
+	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
+
 $(OBJ_PATH)/%.o : $(SRC_PATH)/dlg/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
 
-$(OBJ_PATH)/%.o : $(SRC_PATH)/edit/%.c
+$(OBJ_PATH)/%.o : $(SRC_PATH)/fire/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
 
 $(OBJ_PATH)/%.o : $(SRC_PATH)/hand/%.c

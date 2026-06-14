@@ -133,11 +133,13 @@ void call_string_cur_object(void* ctx, void** pobj)
 void call_string_object_attr(void* ctx, void* pobj, object_attr_t* pret)
 {
 	text_scan_context* pscan = (text_scan_context*)ctx;
+	link_t_ptr plk = (link_t_ptr)pobj;
+	
+	pret->ret |= OBJECT_ATTR_XFONT;
+	pret->pxf = pscan->pxf;
 
-	if(pret->ret & OBJECT_ATTR_XFACE)
-	{
-		*(pret->ppxa) = pscan->pxa;
-	}
+	pret->ret |= OBJECT_ATTR_XFACE;
+	pret->pxa = pscan->pxa;
 }
 
 void scan_var_text(string_t vs, const measure_interface* pmv, const viewbox_t* pvb, const xfont_t* pxf, const xface_t* pxa, bool_t paged, PF_SCAN_TEXTOR_CALLBACK pf, void* pp)
@@ -292,11 +294,13 @@ void call_fixstr_cur_object(void* ctx, void** pobj)
 void call_fixstr_object_attr(void* ctx, void* pobj, object_attr_t* pret)
 {
 	text_scan_context* pscan = (text_scan_context*)ctx;
+	link_t_ptr plk = (link_t_ptr)pobj;
+	
+	pret->ret |= OBJECT_ATTR_XFONT;
+	pret->pxf = pscan->pxf;
 
-	if(pret->ret & OBJECT_ATTR_XFACE)
-	{
-		*(pret->ppxa) = pscan->pxa;
-	}
+	pret->ret |= OBJECT_ATTR_XFACE;
+	pret->pxa = pscan->pxa;
 }
 
 void scan_fix_text(tchar_t* buf, int size, const measure_interface* pmv, const viewbox_t* pvb, const xfont_t* pxf, const xface_t* pxa, bool_t paged, PF_SCAN_TEXTOR_CALLBACK pf, void* pp)

@@ -281,7 +281,7 @@ void FormPanel_OnSave(widget_t widget)
 		if (!shell_get_filename(widget, szPath, _T("Form Meta File(*.sheet)\0*.sheet\0"), _T("sheet"), 1, szPath, PATH_LEN, szFile, PATH_LEN))
 			return;
 
-		xscat(szPath, _T("\\"));
+		xscat(szPath, _T("/"));
 		xscat(szPath, szFile);
 		xscpy(szFile, szPath);
 	}
@@ -310,7 +310,7 @@ void FormPanel_OnSaveAs(widget_t widget)
 	if (!shell_get_filename(widget, szPath, _T("Form Meta File(*.sheet)\0*.sheet\0svg image file(*.svg)\0*.svg\0"), _T("sheet"), 1, szPath, PATH_LEN, szFile, PATH_LEN))
 		return;
 
-	xscat(szPath, _T("\\"));
+	xscat(szPath, _T("/"));
 	xscat(szPath, szFile);
 	xscpy(szFile, szPath);
 
@@ -400,7 +400,7 @@ void FormPanel_OnSchema(widget_t widget)
 	if (!shell_get_filename(widget, szPath, _T("xml schema file(*.schema)\0*.schema\0"), _T("schema"), 1, szPath, PATH_LEN, szFile, PATH_LEN))
 		return;
 
-	xscat(szPath, _T("\\"));
+	xscat(szPath, _T("/"));
 	xscat(szPath, szFile);
 	xscpy(szFile, szPath);
 
@@ -429,7 +429,7 @@ void FormPanel_OnExport(widget_t widget)
 	if (!shell_get_filename(widget, szPath, _T("xml data file(*.xml)\0*.xml\0"), _T("xml"), 1, szPath, PATH_LEN, szFile, PATH_LEN))
 		return;
 
-	xscat(szPath, _T("\\"));
+	xscat(szPath, _T("/"));
 	xscat(szPath, szFile);
 	xscpy(szFile, szPath);
 
@@ -462,7 +462,7 @@ void FormPanel_OnImport(widget_t widget)
 	if (!shell_get_filename(widget, szPath, _T("xml data file(*.xml)\0*.xml\0"), _T("xml"), 0, szPath, PATH_LEN, szFile, PATH_LEN))
 		return;
 
-	xscat(szPath, _T("\\"));
+	xscat(szPath, _T("/"));
 	xscat(szPath, szFile);
 	xscpy(szFile, szPath);
 
@@ -678,7 +678,7 @@ void FormPanel_OnAttach(widget_t widget)
 	if (!shell_get_filename(widget, szPath, szFilter, szExt, 0, szPath, PATH_LEN, szFile, PATH_LEN))
 		return;
 
-	xscat(szPath, _T("\\"));
+	xscat(szPath, _T("/"));
 	xscat(szPath, szFile);
 
 	if (compare_text(fclass, -1, DOC_FORM_HREF, -1, 0) == 0)
@@ -810,8 +810,8 @@ void FormPanel_OnFontName(widget_t widget, void* pv)
 	FormPanelDelta* pdt = GETFORMPANELDELTA(widget);
 	xpoint_t pt;
 	
-	pt.x = GETLDWORD((vword_t)pv);
-	pt.y = GETHDWORD((vword_t)pv);
+	pt.x = GETLWORDL((vword_t)pv);
+	pt.y = GETLWORDH((vword_t)pv);
 
 	fontname_menu(widget, IDC_FORMPANEL_FONTNAME, &pt, WS_LAYOUT_RIGHTBOTTOM);
 }
@@ -821,8 +821,8 @@ void FormPanel_OnFontSize(widget_t widget, void* pv)
 	FormPanelDelta* pdt = GETFORMPANELDELTA(widget);
 	xpoint_t pt;
 	
-	pt.x = GETLDWORD((vword_t)pv);
-	pt.y = GETHDWORD((vword_t)pv);
+	pt.x = GETLWORDL((vword_t)pv);
+	pt.y = GETLWORDH((vword_t)pv);
 
 	fontsize_menu(widget, IDC_FORMPANEL_FONTSIZE, &pt, WS_LAYOUT_RIGHTBOTTOM);
 }
@@ -832,8 +832,8 @@ void FormPanel_OnTextColor(widget_t widget, void* pv)
 	FormPanelDelta* pdt = GETFORMPANELDELTA(widget);
 	xpoint_t pt;
 	
-	pt.x = GETLDWORD((vword_t)pv);
-	pt.y = GETHDWORD((vword_t)pv);
+	pt.x = GETLWORDL((vword_t)pv);
+	pt.y = GETLWORDH((vword_t)pv);
 
 	color_menu(widget, IDC_FORMPANEL_FONTCOLOR, &pt, WS_LAYOUT_RIGHTBOTTOM);
 }
@@ -843,8 +843,8 @@ void FormPanel_OnPaintColor(widget_t widget, void* pv)
 	FormPanelDelta* pdt = GETFORMPANELDELTA(widget);
 	xpoint_t pt;
 	
-	pt.x = GETLDWORD((vword_t)pv);
-	pt.y = GETHDWORD((vword_t)pv);
+	pt.x = GETLWORDL((vword_t)pv);
+	pt.y = GETLWORDH((vword_t)pv);
 
 	color_menu(widget, IDC_FORMPANEL_PAINTCOLOR, &pt, WS_LAYOUT_RIGHTBOTTOM);
 }
@@ -854,8 +854,8 @@ void FormPanel_OnDrawColor(widget_t widget, void* pv)
 	FormPanelDelta* pdt = GETFORMPANELDELTA(widget);
 	xpoint_t pt;
 	
-	pt.x = GETLDWORD((vword_t)pv);
-	pt.y = GETHDWORD((vword_t)pv);
+	pt.x = GETLWORDL((vword_t)pv);
+	pt.y = GETLWORDH((vword_t)pv);
 
 	color_menu(widget, IDC_FORMPANEL_DRAWCOLOR, &pt, WS_LAYOUT_RIGHTBOTTOM);
 }
@@ -865,8 +865,8 @@ void FormPanel_OnFieldShape(widget_t widget, void* pv)
 	FormPanelDelta* pdt = GETFORMPANELDELTA(widget);
 	xpoint_t pt;
 	
-	pt.x = GETLDWORD((vword_t)pv);
-	pt.y = GETHDWORD((vword_t)pv);
+	pt.x = GETLWORDL((vword_t)pv);
+	pt.y = GETLWORDH((vword_t)pv);
 
 	shape_menu(widget, IDC_FORMPANEL_FIELDSHAPE, &pt, WS_LAYOUT_RIGHTBOTTOM);
 }
@@ -1663,6 +1663,8 @@ void FormPanel_Proper_OnEntityUpdate(widget_t widget, NOTICE_PROPER* pnp)
 
 	int n_id = xstol(get_title_item_id_ptr(ptrItem));
 
+	LINKPTR ptrProper = properctrl_fetch(pnp->widget);
+
 	LINKPTR ptrForm = formctrl_fetch(pdt->hForm);
 	LINKPTR ptrField = (LINKPTR)designer_get_focused(pdt->hForm);
 
@@ -1672,11 +1674,11 @@ void FormPanel_Proper_OnEntityUpdate(widget_t widget, NOTICE_PROPER* pnp)
 	{
 		if (n_id == IDA_ATTRIBUTES)
 		{
-			properbag_read_field_attributes(pnp->proper, ptrField);
+			properbag_read_field_attributes(ptrProper, ptrField);
 		}
 		else if (n_id == IDA_STYLESHEET)
 		{
-			properbag_format_stylesheet(pnp->proper, sz_style, CSS_LEN);
+			properbag_format_stylesheet(ptrProper, sz_style, CSS_LEN);
 			set_field_style(ptrField, sz_style);
 		}
 		formctrl_redraw_field(pdt->hForm, ptrField, 1);
@@ -1685,11 +1687,11 @@ void FormPanel_Proper_OnEntityUpdate(widget_t widget, NOTICE_PROPER* pnp)
 	{
 		if (n_id == IDA_ATTRIBUTES)
 		{
-			properbag_read_form_attributes(pnp->proper, ptrForm);
+			properbag_read_form_attributes(ptrProper, ptrForm);
 		}
 		else if (n_id == IDA_STYLESHEET)
 		{
-			properbag_format_stylesheet(pnp->proper, sz_style, CSS_LEN);
+			properbag_format_stylesheet(ptrProper, sz_style, CSS_LEN);
 			set_form_style(ptrForm, sz_style);
 		}
 		formctrl_redraw(pdt->hForm, 1);
@@ -1716,7 +1718,7 @@ void FormPanel_Title_OnItemChanged(widget_t widget, NOTICE_TITLE* pnt)
 	widget_post_command(widget, 0, n_id, NULL);
 }
 
-void FormPanel_Form_OnRBClick(widget_t widget, NOTICE_DESIGN* pnf)
+void FormPanel_Form_OnRBClick(widget_t widget, NOTICE_DESIGNER* pnf)
 {
 	FormPanelDelta* pdt = GETFORMPANELDELTA(widget);
 	LINKPTR flk = (LINKPTR)pnf->object;
@@ -1792,7 +1794,7 @@ void FormPanel_Form_OnRBClick(widget_t widget, NOTICE_DESIGN* pnf)
 	destroy_menu_doc(ptrMenu);
 }
 
-void FormPanel_Form_OnLBClick(widget_t widget, NOTICE_DESIGN* pnf)
+void FormPanel_Form_OnLBClick(widget_t widget, NOTICE_DESIGNER* pnf)
 {
 	FormPanelDelta* pdt = GETFORMPANELDELTA(widget);
 
@@ -1804,7 +1806,7 @@ void FormPanel_Form_OnLBClick(widget_t widget, NOTICE_DESIGN* pnf)
 	widget_post_command(widget, 0, n_id, NULL);
 }
 
-void FormPanel_Form_OnSized(widget_t widget, NOTICE_DESIGN* pnf)
+void FormPanel_Form_OnSized(widget_t widget, NOTICE_DESIGNER* pnf)
 {
 	FormPanelDelta* pdt = GETFORMPANELDELTA(widget);
 
@@ -1816,7 +1818,7 @@ void FormPanel_Form_OnSized(widget_t widget, NOTICE_DESIGN* pnf)
 	widget_post_command(widget, 0, n_id, NULL);
 }
 
-void FormPanel_Form_OnMoved(widget_t widget, NOTICE_DESIGN* pnf)
+void FormPanel_Form_OnMoved(widget_t widget, NOTICE_DESIGNER* pnf)
 {
 	FormPanelDelta* pdt = GETFORMPANELDELTA(widget);
 
@@ -1882,6 +1884,8 @@ int FormPanel_OnCreate(widget_t widget, void* data)
 
 	LINKPTR ptrProper = create_proper_doc();
 	properctrl_attach(pdt->hProper, ptrProper);
+
+	hand_editor_create(pdt->hProper, &edit_properctrl);
 
 	set_split_item_delta(ilkProper, pdt->hProper);
 	widget_show(pdt->hProper, WS_SHOW_NORMAL);
@@ -1950,6 +1954,8 @@ void FormPanel_OnDestroy(widget_t widget)
 
 	if (widget_is_valid(pdt->hProper))
 	{
+		hand_editor_destroy(pdt->hProper);
+
 		LINKPTR ptrProper = properctrl_detach(pdt->hProper);
 		if (ptrProper)
 			destroy_proper_doc(ptrProper);
@@ -2496,14 +2502,12 @@ void FormPanel_OnMenuCommand(widget_t widget, int code, int cid, vword_t data)
 		break;
 
 	case IDC_FORMPANEL_MENU:
-		widget_destroy((widget_t)data);
 		if (code)
 		{
 			widget_post_command(widget, 0, code, NULL);
 		}
 		break;
 	case IDC_FORMPANEL_FONTNAME:
-		widget_destroy((widget_t)data);
 		if (code)
 		{
 			fontname_menu_item(code, token, RES_LEN);
@@ -2511,7 +2515,6 @@ void FormPanel_OnMenuCommand(widget_t widget, int code, int cid, vword_t data)
 		}
 		break;
 	case IDC_FORMPANEL_FONTSIZE:
-		widget_destroy((widget_t)data);
 		if (code)
 		{
 			fontsize_menu_item(code, token, RES_LEN);
@@ -2519,7 +2522,6 @@ void FormPanel_OnMenuCommand(widget_t widget, int code, int cid, vword_t data)
 		}
 		break;
 	case IDC_FORMPANEL_FONTCOLOR:
-		widget_destroy((widget_t)data);
 		if (code)
 		{
 			color_menu_item(code, token, RES_LEN);
@@ -2527,7 +2529,6 @@ void FormPanel_OnMenuCommand(widget_t widget, int code, int cid, vword_t data)
 		}
 		break;
 	case IDC_FORMPANEL_PAINTCOLOR:
-		widget_destroy((widget_t)data);
 		if (code)
 		{
 			color_menu_item(code, token, RES_LEN);
@@ -2535,7 +2536,6 @@ void FormPanel_OnMenuCommand(widget_t widget, int code, int cid, vword_t data)
 		}
 		break;
 	case IDC_FORMPANEL_DRAWCOLOR:
-		widget_destroy((widget_t)data);
 		if (code)
 		{
 			color_menu_item(code, token, RES_LEN);
@@ -2543,7 +2543,6 @@ void FormPanel_OnMenuCommand(widget_t widget, int code, int cid, vword_t data)
 		}
 		break;
 	case IDC_FORMPANEL_FIELDSHAPE:
-		widget_destroy((widget_t)data);
 		if (code)
 		{
 			shape_menu_item(code, token, RES_LEN);
@@ -2559,7 +2558,7 @@ void FormPanel_OnNotice(widget_t widget, LPNOTICE phdr)
 
 	if (phdr->user == IDC_FORMPANEL_FORM)
 	{
-		NOTICE_DESIGN* pnf = (NOTICE_DESIGN*)phdr;
+		NOTICE_DESIGNER* pnf = (NOTICE_DESIGNER*)phdr;
 		switch (pnf->code)
 		{
 		case NC_OBJECT_RBCLICK:
@@ -2581,8 +2580,6 @@ void FormPanel_OnNotice(widget_t widget, LPNOTICE phdr)
 		NOTICE_PROPER* pnp = (NOTICE_PROPER*)phdr;
 		switch (pnp->code)
 		{
-		case NC_PROPERCALCED:
-			break;
 		case NC_ENTITYCOMMIT:
 			FormPanel_SetDirty(widget, 1);
 			break;

@@ -37,10 +37,6 @@ typedef struct _list_delta_t{
 	link_t_ptr item;
 	link_t_ptr hover;
 
-	widget_t editor;
-	widget_t hsc;
-	widget_t vsc;
-
 	bool_t b_lock;
 
 	tchar_t help[MAX_HELP + 1];
@@ -272,10 +268,7 @@ void noti_list_item_enter(widget_t widget, link_t_ptr plk)
 
 	ptd->hover = plk;
 
-	if (widget_is_hotvoer(widget))
-	{
-		//widget_track_mouse(widget, MS_TRACK_HOVER | MS_TRACK_LEAVE);
-	}
+	widget_enable_hover(widget, bool_true);
 }
 
 void noti_list_item_leave(widget_t widget)
@@ -286,10 +279,7 @@ void noti_list_item_leave(widget_t widget)
 
 	ptd->hover = NULL;
 
-	if (widget_is_hotvoer(widget))
-	{
-		//widget_track_mouse(widget, MS_TRACK_HOVER | MS_TRACK_LEAVE);
-	}
+	widget_enable_hover(widget, bool_false);
 }
 
 void noti_list_item_hover(widget_t widget, int x, int y)
@@ -368,123 +358,14 @@ void noti_list_item_expand(widget_t widget, link_t_ptr plk)
 	noti_list_owner(widget, NC_LISTITEMEXPAND, ptd->list, plk, NULL);
 }
 
-void noti_list_begin_edit(widget_t widget)
-{
-	list_delta_t* ptd = GETLISTDELTA(widget);
-	const tchar_t* text;
-	xrect_t xr = { 0 };
-
-	color_mod_t ob = { 0 };
-
-	XDK_ASSERT(ptd->item);
-	
-	if (widget_is_valid(ptd->editor))
-		return;
-
-	if (ptd->b_lock)
-		return;
-
-	if (get_list_item_locked(ptd->item))
-		return;
-
-	widget_get_color_mode(widget, &ob);
-
-	_listctrl_item_text_rect(widget, ptd->item, &xr);
-
-	if (noti_list_owner(widget, NC_LISTITEMEDITING, ptd->list, ptd->item, NULL))
-		return;
-
-	ptd->editor = fireedit_create(widget, &xr);
-	XDK_ASSERT(ptd->editor);
-	widget_set_user_id(ptd->editor, IDC_FIREEDIT);
-	widget_set_owner(ptd->editor, widget);
-
-	widget_set_color_mode(ptd->editor, &ob);
-	widget_show(ptd->editor, WS_SHOW_NORMAL);
-	widget_set_focus(ptd->editor);
-
-	text = get_list_item_title_ptr(ptd->item);
-	editbox_set_text(ptd->editor, text);
-	editbox_selectall(ptd->editor);
-}
-
-void noti_list_commit_edit(widget_t widget)
-{
-	list_delta_t* ptd = GETLISTDELTA(widget);
-
-	const tchar_t* text;
-	widget_t editctrl;
-
-	if (!widget_is_valid(ptd->editor))
-		return;
-
-	XDK_ASSERT(ptd->item);
-
-	text = (tchar_t*)editbox_get_text_ptr(ptd->editor);
-
-	if (!noti_list_owner(widget, NC_LISTITEMCOMMIT, ptd->list, ptd->item, (void*)text))
-	{
-		listctrl_set_item_title(widget, ptd->item, text);
-	}
-
-	editctrl = ptd->editor;
-	ptd->editor = (widget_t)0;
-
-	widget_destroy(editctrl);
-	widget_set_focus(widget);
-}
-
-void noti_list_rollback_edit(widget_t widget)
-{
-	list_delta_t* ptd = GETLISTDELTA(widget);
-	widget_t editctrl;
-
-	if (!widget_is_valid(ptd->editor))
-		return;
-
-	XDK_ASSERT(ptd->item);
-
-	noti_list_owner(widget, NC_LISTITEMROLLBACK, ptd->list, ptd->item, NULL);
-
-	editctrl = ptd->editor;
-	ptd->editor = (widget_t)0;
-
-	widget_destroy(editctrl);
-	widget_set_focus(widget);
-}
-
 void noti_list_reset_editor(widget_t widget, bool_t bCommit)
 {
 	list_delta_t* ptd = GETLISTDELTA(widget);
 
-	if (widget_is_valid(ptd->editor))
-	{
-		if (bCommit)
-			noti_list_commit_edit(widget);
-		else
-			noti_list_rollback_edit(widget);
-	}
-}
-
-void noti_list_reset_scroll(widget_t widget, bool_t bUpdate)
-{
-	list_delta_t* ptd = GETLISTDELTA(widget);
-
-	if (widget_is_valid(ptd->vsc))
-	{
-		if (bUpdate)
-			widget_erase(ptd->vsc, NULL);
-		else
-			widget_close(ptd->vsc, 0);
-	}
-
-	if (widget_is_valid(ptd->hsc))
-	{
-		if (bUpdate)
-			widget_erase(ptd->hsc, NULL);
-		else
-			widget_close(ptd->hsc, 0);
-	}
+	if (bCommit)
+		widget_post_command(widget, COMMAND_COMMIT, IDC_CHILD, (vword_t)0);
+	else
+		widget_post_command(widget, COMMAND_ROLLBACK, IDC_CHILD, (vword_t)0);
 }
 
 /********************************************************************************************************/
@@ -512,12 +393,6 @@ void hand_list_destroy(widget_t widget)
 	XDK_ASSERT(ptd != NULL);
 
 	noti_list_reset_editor(widget, 0);
-
-	if (widget_is_valid(ptd->hsc))
-		widget_destroy(ptd->hsc);
-
-	if (widget_is_valid(ptd->vsc))
-		widget_destroy(ptd->vsc);
 
 	xmem_free(ptd);
 
@@ -566,60 +441,13 @@ void hand_list_scroll(widget_t widget, bool_t bHorz, int nLine)
 void hand_list_wheel(widget_t widget, bool_t bHorz, int nDelta)
 {
 	list_delta_t* ptd = GETLISTDELTA(widget);
-	scroll_t scr = { 0 };
-	int nLine;
-	widget_t win;
-	bool_t b_horz;
 
 	if (!ptd->list)
 		return;
 
 	noti_list_reset_editor(widget, 1);
 
-	widget_get_scroll_info(widget, bHorz, &scr);
-
-	if (bHorz)
-		nLine = (nDelta > 0) ? scr.min : -scr.min;
-	else
-		nLine = (nDelta < 0) ? scr.min : -scr.min;
-
-	if (widget_hand_scroll(widget, bHorz, nLine))
-	{
-		b_horz = (compare_text(get_list_layer_ptr(ptd->list), -1, ATTR_LAYER_HORZ, -1, 0) == 0) ? 1 : 0;
-
-		if (!b_horz && !bHorz && !(widget_get_style(widget) & WD_STYLE_VSCROLL))
-		{
-			if (!widget_is_valid(ptd->vsc))
-			{
-				ptd->vsc = show_vertbox(widget);
-			}
-			else
-			{
-				widget_erase(ptd->vsc, NULL);
-			}
-		}
-
-		if (b_horz && bHorz && !(widget_get_style(widget) & WD_STYLE_HSCROLL))
-		{
-			if (!widget_is_valid(ptd->hsc))
-			{
-				ptd->hsc = show_horzbox(widget);
-			}
-			else
-			{
-				widget_erase(ptd->hsc, NULL);
-			}
-		}
-
-		return;
-	}
-
-	win = widget_get_parent(widget);
-
-	if (widget_is_valid(win))
-	{
-		widget_scroll(win, bHorz, nLine);
-	}
+	widget_hand_wheel(widget, bHorz, nDelta);
 }
 
 void hand_list_mouse_move(widget_t widget, dword_t dw, const xpoint_t* pxp)
@@ -685,8 +513,7 @@ void hand_list_lbutton_dbclick(widget_t widget, const xpoint_t* pxp)
 	if (!ptd->list)
 		return;
 
-	if (widget_is_valid(ptd->editor))
-		return;
+	noti_list_reset_editor(widget, 1);
 
 	pt.x = pxp->x;
 	pt.y = pxp->y;
@@ -826,12 +653,6 @@ void hand_list_keydown(widget_t widget, dword_t ks, int nKey)
 
 	switch (nKey)
 	{
-	case KEY_ENTER:
-		if (ptd->item)
-		{
-			noti_list_begin_edit(widget);
-		}
-		break;
 	case KEY_SPACE:
 		if (ptd->item)
 		{
@@ -870,21 +691,6 @@ void hand_list_wchar(widget_t widget, wchar_t ch)
 			xsncat(ptd->help, (tchar_t*)&ch, 1);
 			_listctrl_find(widget, ptd->help);
 		}
-	}
-}
-
-void hand_list_child_command(widget_t widget, int code, vword_t data)
-{
-	list_delta_t* ptd = GETLISTDELTA(widget);
-
-	switch (code)
-	{
-	case COMMAND_COMMIT:
-		noti_list_commit_edit(widget);
-		break;
-	case COMMAND_ROLLBACK:
-		noti_list_rollback_edit(widget);
-		break;
 	}
 }
 
@@ -970,10 +776,6 @@ widget_t listctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* px
 		EVENT_ON_RBUTTON_DOWN(hand_list_rbutton_down)
 		EVENT_ON_RBUTTON_UP(hand_list_rbutton_up)
 
-		EVENT_ON_CHILD_COMMAND(hand_list_child_command)
-
-		
-
 	EVENT_END_DISPATH
 
 	return widget_create(wname, wstyle, pxr, wparent, &ev);
@@ -1042,7 +844,10 @@ void listctrl_accept(widget_t widget, bool_t bAccept)
 	if (!ptd->list)
 		return;
 
-	noti_list_reset_editor(widget, bAccept);
+	if(bAccept)
+		noti_list_reset_editor(widget, 1);
+	else
+		noti_list_reset_editor(widget, 0);
 }
 
 void listctrl_redraw(widget_t widget)
@@ -1142,7 +947,7 @@ void listctrl_redraw_item(widget_t widget, link_t_ptr plk)
 	if (!ptd->list)
 		return;
 
-	noti_list_reset_editor(widget, 1);
+	noti_list_reset_editor(widget, 0);
 
 #ifdef _DEBUG
 	XDK_ASSERT(is_list_item(ptd->list, plk));
@@ -1227,15 +1032,13 @@ bool_t listctrl_set_item_title(widget_t widget, link_t_ptr ilk, const tchar_t* s
 	{
 		set_list_item_title(ilk, szText);
 
-		noti_list_owner(widget, NC_LISTITEMUPDATE, ptd->list, ilk, NULL);
-
 		listctrl_redraw_item(widget, ilk);
 	}
 
 	return 1;
 }
 
-void listctrl_get_item_rect(widget_t widget, link_t_ptr ilk, xrect_t* pxr)
+void listctrl_get_item_rect(widget_t widget, link_t_ptr ilk, bool_t edit, xrect_t* pxr)
 {
 	list_delta_t* ptd = GETLISTDELTA(widget);
 	
@@ -1248,7 +1051,10 @@ void listctrl_get_item_rect(widget_t widget, link_t_ptr ilk, xrect_t* pxr)
 	XDK_ASSERT(is_list_item(ptd->parent, ilk));
 #endif
 
-	_listctrl_item_rect(widget, ilk, pxr);
+	if(edit)
+		_listctrl_item_text_rect(widget, ilk, pxr);
+	else
+		_listctrl_item_rect(widget, ilk, pxr);
 }
 
 bool_t listctrl_get_lock(widget_t widget)
@@ -1278,7 +1084,7 @@ void listctrl_find(widget_t widget, const tchar_t* token)
 	if (!ptd->list)
 		return;
 
-	noti_list_reset_editor(widget, 1);
+	noti_list_reset_editor(widget, 0);
 
 	_listctrl_find(widget, token);
 }

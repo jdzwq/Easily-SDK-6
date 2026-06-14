@@ -62,10 +62,10 @@ typedef struct _object_attr_t
 {
 	dword_t ret;
 
-	xfont_t** ppxf;
-	xface_t** ppxa;
-	xbrush_t** ppxb;
-	xpen_t** ppxp;
+	const xfont_t* pxf;
+	const xface_t* pxa;
+	const xbrush_t* pxb;
+	const xpen_t* pxp;
 }object_attr_t;
 
 typedef int(CALLBACK *PF_SCAN_TEXTOR_CALLBACK)(int scan, void* object, object_attr_t* attr, bool_t b_atom, bool_t b_ins, bool_t b_del, bool_t b_sel, const tchar_t* cur_word, int cur_count, tchar_t* ret_word, int page, int cur_row, int cur_col, const word_place_t* ptm, void* pp);

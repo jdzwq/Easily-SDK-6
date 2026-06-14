@@ -12,7 +12,7 @@ CFLAGS = -g -Wall -fPIC -D _DEBUG
 MODULE = xdb_mysql
 ARCH = aarch64
 CUR_VER = 26
-MAX_VER = 2
+MAX_VER = 1
 MIN_VER = 0
 
 INC_MYSQL = /opt/homebrew/opt/mysql-client/include/mysql

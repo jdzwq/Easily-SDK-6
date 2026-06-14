@@ -1,2 +1,2 @@
 SOURCES= \
-E:\Easily-temp\windows\xdb_oci\x64\Debug/xdb_oci.c \
+E:\Easily-temp\windows\xdb_oci\x86\Debug/xdb_oci.c \

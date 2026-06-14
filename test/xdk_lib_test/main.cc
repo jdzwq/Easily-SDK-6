@@ -223,8 +223,8 @@ void test_nums()
 	dword_t dh = 0;
 	lword_t ll = MAKELWORD(dl, dh) + 4096;
 
-	dword_t h = GETHDWORD(ll);
-	dword_t l = GETLDWORD(ll);
+	dword_t h = GETLWORDH(ll);
+	dword_t l = GETLWORDL(ll);
 
 	XDK_ASSERT(dl == l && dh == h);
 }

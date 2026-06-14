@@ -69,6 +69,7 @@ E:\Easily-temp\windows\xdc\x86\Release/firetime.c \
 E:\Easily-temp\windows\xdc\x86\Release/firewords.c \
 E:\Easily-temp\windows\xdc\x86\Release/designer.c \
 E:\Easily-temp\windows\xdc\x86\Release/docker.c \
+E:\Easily-temp\windows\xdc\x86\Release/editor.c \
 E:\Easily-temp\windows\xdc\x86\Release/splitor.c \
 E:\Easily-temp\windows\xdc\x86\Release/textor.c \
 E:\Easily-temp\windows\xdc\x86\Release/diagramdesg.c \
@@ -77,4 +78,12 @@ E:\Easily-temp\windows\xdc\x86\Release/formdesg.c \
 E:\Easily-temp\windows\xdc\x86\Release/griddesg.c \
 E:\Easily-temp\windows\xdc\x86\Release/statisdesg.c \
 E:\Easily-temp\windows\xdc\x86\Release/topogdesg.c \
+E:\Easily-temp\windows\xdc\x86\Release/formedit.c \
+E:\Easily-temp\windows\xdc\x86\Release/gridedit.c \
+E:\Easily-temp\windows\xdc\x86\Release/imagesedit.c \
+E:\Easily-temp\windows\xdc\x86\Release/listedit.c \
+E:\Easily-temp\windows\xdc\x86\Release/properedit.c \
+E:\Easily-temp\windows\xdc\x86\Release/statisedit.c \
+E:\Easily-temp\windows\xdc\x86\Release/tableedit.c \
+E:\Easily-temp\windows\xdc\x86\Release/treeedit.c \
 E:\Easily-temp\windows\xdc\x86\Release/menu.c \

@@ -12,7 +12,8 @@ LFLAGS = -shared -fPIC -pthread
 
 MODULE = xdb_mysql
 ARCH = aarch64
-VER = 6
+MAX_VER = 6
+MIN_VER = 0
 
 INC_MYSQL = /usr/include/mysql
 LIB_MYSQL = /usr/lib64/mysql
@@ -25,7 +26,7 @@ SRC_PATH = ../../xdb
 OBJ_PATH = ~/Easily-temp/linux/$(MODULE)/$(ARCH)
 OUT_PATH = ~/Easily-app-6/linux/lib
 
-TARGET = lib$(MODULE).so.$(VER)
+TARGET = lib$(MODULE).so.$(MAX_VER).$(MIN_VER).$(ARCH)
 LINKIT = lib$(MODULE).so
 
 LIBS = -L $(LIB_PATH) -lxdk -lxdl -L $(LIB_MYSQL) -lmysqlclient

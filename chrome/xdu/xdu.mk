@@ -7,15 +7,20 @@
 # 4. nmake /f xdu.mk install
 #-----------------------------------------------------------------------------
 CC = gcc
-CFLAGS = -g -Wall -fPIC -D _DEBUG
+CFLAGS = -g -Wall -fPIC -D _DEBUG -D _X11
 LFLAGS = -shared -fPIC -pthread
 
 MODULE = xdu
 ARCH = amd64
-VER = 6
+MAX_VER = 6
+MIN_VER = 0
 
 SYS_PATH = /usr/include
 XFT_PATH = /usr/include/freetype2
+
+GTK_HEAD = $(shell pkg-config --cflags gtk+-3.0)
+GTK_LIBS = $(shell pkg-config --libs gtk+-3.0)
+
 LIB_PATH = /usr/local/lib
 
 INC_PATH = ../../include
@@ -24,40 +29,44 @@ SRC_PATH = ../../xdu
 OBJ_PATH = ~/Easily-temp/chrome/$(MODULE)/$(ARCH)
 OUT_PATH = ~/Easily-app-6/chrome/lib
 
-TARGET = lib$(MODULE).so.$(VER)
+TARGET = lib$(MODULE).so.$(MAX_VER).$(MIN_VER).$(ARCH)
 LINKIT = lib$(MODULE).so
 
 LIBS = -lm -ldl -lutil -lrt -lX11 -lXft -lXrender -L $(LIB_PATH) -lxdk -lxdg
 DIRS = $(wildcard \
 	$(SRC_PATH)/*.c \
-	$(SRC_PATH)/X11/*.c \
+	$(SRC_PATH)/linux/*.c \
+	$(SRC_PATH)/linux/X11/*.c \
 	$(SRC_PATH)/imp/*.c \
 	$(SRC_PATH)/gdi/*.c )
 SRCS = $(notdir $(DIRS))
 COBS = $(patsubst %.c, %.o, $(SRCS))
 OBJS = $(addprefix $(OBJ_PATH)/,$(COBS))
 
-$(OBJ_PATH)/%.o : $(SRC_PATH)/X11/%.c
-	$(CC) $(CFLAGS) -c $< -o $@ -I $(SYS_PATH) -I $(XFT_PATH) -I $(INC_PATH) -I $(SRC_PATH)
+$(OBJ_PATH)/%.o : $(SRC_PATH)/linux/%.c
+	$(CC) $(CFLAGS) -c $< -o $@ $(GTK_HEAD) $(WL_HEAD) -I $(SYS_PATH) -I $(XFT_PATH) -I $(INC_PATH) -I $(SRC_PATH)
+
+$(OBJ_PATH)/%.o : $(SRC_PATH)/linux/X11/%.c
+	$(CC) $(CFLAGS) -c $< -o $@ $(GTK_HEAD) $(WL_HEAD) -I $(SYS_PATH) -I $(XFT_PATH) -I $(INC_PATH) -I $(SRC_PATH)
 
 $(OBJ_PATH)/%.o : $(SRC_PATH)/imp/%.c
-	$(CC) $(CFLAGS) -c $< -o $@ -I $(SYS_PATH) -I $(XFT_PATH) -I $(INC_PATH) -I $(SRC_PATH)
+	$(CC) $(CFLAGS) -c $< -o $@ $(GTK_HEAD) $(WL_HEAD) -I $(SYS_PATH) -I $(XFT_PATH) -I $(INC_PATH) -I $(SRC_PATH)
 
 $(OBJ_PATH)/%.o : $(SRC_PATH)/gdi/%.c
-	$(CC) $(CFLAGS) -c $< -o $@ -I $(SYS_PATH) -I $(XFT_PATH) -I $(INC_PATH) -I $(SRC_PATH)
+	$(CC) $(CFLAGS) -c $< -o $@ $(GTK_HEAD) $(WL_HEAD) -I $(SYS_PATH) -I $(XFT_PATH) -I $(INC_PATH) -I $(SRC_PATH)
 
 $(OBJ_PATH)/%.o : $(SRC_PATH)/%.c
-	$(CC) $(CFLAGS) -c $< -o $@ -I $(SYS_PATH) -I $(XFT_PATH) -I $(INC_PATH) -I $(SRC_PATH)
+	$(CC) $(CFLAGS) -c $< -o $@ $(GTK_HEAD) $(WL_HEAD) -I $(SYS_PATH) -I $(XFT_PATH) -I $(INC_PATH) -I $(SRC_PATH)
 
 all : $(OBJS)
-	$(CC) $(LFLAGS) -o $(OBJ_PATH)/$(TARGET) $(OBJS) $(LIBS)
+	rm -f $@
+	$(CC) $(LFLAGS) -o $(OBJ_PATH)/$(TARGET) $(OBJS) $(LIBS) $(GTK_LIBS) $(WL_LIBS)
 
 test:
 	if ! test -d $(OBJ_PATH); then \
 	mkdir -p $(OBJ_PATH); \
 	chmod 755 $(OBJ_PATH); \
 	fi
-
 	@echo $(DIRS)
 	@echo $(SRCS)
 	@echo $(OBJS)
@@ -65,9 +74,6 @@ test:
 install:
 	if ! test -d $(OUT_PATH); then \
 	sudo mkdir -p $(OUT_PATH); \
-	fi
-	if ! test -d $(LIB_PATH); then \
-	sudo mkdir $(LIB_PATH); \
 	fi
 
 	sudo cp -f $(OBJ_PATH)/$(TARGET) $(OUT_PATH);

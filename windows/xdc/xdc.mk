@@ -61,13 +61,16 @@ ASMS = $(patsubsti %.obj,%.asm,$(OBJS))
 {$(SRC_PATH)/dlg}.c{$(OBJ_PATH)}.obj::
 	$(CC) $(CFLAGS) /I $(INC_PATH) $<
 
-{$(SRC_PATH)/edit}.c{$(OBJ_PATH)}.obj::
+{$(SRC_PATH)/fire}.c{$(OBJ_PATH)}.obj::
 	$(CC) $(CFLAGS) /I $(INC_PATH) $<
 
 {$(SRC_PATH)/hand}.c{$(OBJ_PATH)}.obj::
 	$(CC) $(CFLAGS) /I $(INC_PATH) $<
 
 {$(SRC_PATH)/desg}.c{$(OBJ_PATH)}.obj::
+	$(CC) $(CFLAGS) /I $(INC_PATH) $<
+
+{$(SRC_PATH)/edit}.c{$(OBJ_PATH)}.obj::
 	$(CC) $(CFLAGS) /I $(INC_PATH) $<
 
 {$(SRC_PATH)/menu}.c{$(OBJ_PATH)}.obj::
@@ -94,9 +97,10 @@ test:
 	for %i in ($(SRC_PATH)/box/*.c) do @echo $(OBJ_PATH)/%i \>>$(MODULE).txt
 	for %i in ($(SRC_PATH)/ctrl/*.c) do @echo $(OBJ_PATH)/%i \>>$(MODULE).txt
 	for %i in ($(SRC_PATH)/dlg/*.c) do @echo $(OBJ_PATH)/%i \>>$(MODULE).txt
-	for %i in ($(SRC_PATH)/edit/*.c) do @echo $(OBJ_PATH)/%i \>>$(MODULE).txt
+	for %i in ($(SRC_PATH)/fire/*.c) do @echo $(OBJ_PATH)/%i \>>$(MODULE).txt
 	for %i in ($(SRC_PATH)/hand/*.c) do @echo $(OBJ_PATH)/%i \>>$(MODULE).txt
 	for %i in ($(SRC_PATH)/desg/*.c) do @echo $(OBJ_PATH)/%i \>>$(MODULE).txt
+	for %i in ($(SRC_PATH)/edit/*.c) do @echo $(OBJ_PATH)/%i \>>$(MODULE).txt
 	for %i in ($(SRC_PATH)/menu/*.c) do @echo $(OBJ_PATH)/%i \>>$(MODULE).txt
 	for %i in ($(SRC_PATH)/*.c) do @echo $(OBJ_PATH)/%i \>>$(MODULE).txt
 

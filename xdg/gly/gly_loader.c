@@ -489,8 +489,8 @@ static dword_t load_glyph_pixmap(byte_t* buf, dword_t len, glyph_info_t* gpm)
 			n++;
 		}
 		sw = a_hexntol((schar_t*)pre, n);
-		pch[0] = GETHBYTE(sw);
-		pch[1] = GETLBYTE(sw);
+		pch[0] = GETSWORDH(sw);
+		pch[1] = GETSWORDL(sw);
 
 		if (*buf == ',')
 		{
@@ -599,8 +599,8 @@ static dword_t save_glyph_pixmap(byte_t* buf, dword_t len, glyph_info_t* gpm)
 
 	a = (xsicmp(gpm->charset, CHARSET_ASCII) == 0)? 1 : 0;
 
-	pch[0] = GETHBYTE(gpm->firstchar);
-	pch[1] = GETLBYTE(gpm->firstchar);
+	pch[0] = GETSWORDH(gpm->firstchar);
+	pch[1] = GETSWORDL(gpm->firstchar);
 
 	do
 	{

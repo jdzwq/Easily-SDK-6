@@ -189,7 +189,7 @@ void SQLPanel_OnSave(widget_t widget)
 		if (!shell_get_filename(widget, szPath, _T("SQL Text File(*.sql)\0*.sql\0"), _T("sql"), 1, szPath, PATH_LEN, szFile, PATH_LEN))
 			return;
 
-		xscat(szPath, _T("\\"));
+		xscat(szPath, _T("/"));
 		xscat(szPath, szFile);
 		xscpy(szFile, szPath);
 	}
@@ -214,7 +214,7 @@ void SQLPanel_OnSaveAs(widget_t widget)
 	if (!shell_get_filename(widget, szPath, _T("SQL Text File(*.sql)\0*.sql\0"), _T("sql"), 1, szPath, PATH_LEN, szFile, PATH_LEN))
 		return;
 
-	xscat(szPath, _T("\\"));
+	xscat(szPath, _T("/"));
 	xscat(szPath, szFile);
 	xscpy(szFile, szPath);
 
@@ -240,7 +240,7 @@ void SQLPanel_OnSheet(widget_t widget)
 	if (!shell_get_filename(widget, szPath, _T("grid sheet file(*.sheet)\0*.sheet\0"), _T("sheet"), 1, szPath, PATH_LEN, szFile, PATH_LEN))
 		return;
 
-	xscat(szPath, _T("\\"));
+	xscat(szPath, _T("/"));
 	xscat(szPath, szFile);
 	xscpy(szFile, szPath);
 
@@ -276,7 +276,7 @@ void SQLPanel_OnExport(widget_t widget)
 	if (!shell_get_filename(widget, szPath, _T("grid csv file(*.csv)\0*.csv\0"), _T("csv"), 1, szPath, PATH_LEN, szFile, PATH_LEN))
 		return;
 
-	xscat(szPath, _T("\\"));
+	xscat(szPath, _T("/"));
 	xscat(szPath, szFile);
 	xscpy(szFile, szPath);
 

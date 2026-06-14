@@ -172,7 +172,7 @@ void noti_dialog_item_enter(widget_t widget, link_t_ptr ilk)
 
 	ptd->hover = ilk;
 
-	//widget_track_mouse(widget, MS_TRACK_HOVER | MS_TRACK_LEAVE);
+	widget_enable_hover(widget, bool_true);
 }
 
 void noti_dialog_item_leave(widget_t widget)
@@ -183,7 +183,7 @@ void noti_dialog_item_leave(widget_t widget)
 
 	ptd->hover = NULL;
 
-	//widget_track_mouse(widget, MS_TRACK_HOVER | MS_TRACK_LEAVE);
+	widget_enable_hover(widget, bool_false);
 }
 
 void noti_dialog_item_hover(widget_t widget, int x, int y)
@@ -282,24 +282,21 @@ void hand_dialog_mouse_move(widget_t widget, dword_t dw, const xpoint_t* pxp)
 	ilk = NULL;
 	calc_dialog_hint(&pt, ptd->dialog, &ilk);
 
-	if (widget_is_hotvoer(widget))
+	if (!ptd->hover && ilk)
 	{
-		if (!ptd->hover && ilk)
-		{
-			noti_dialog_item_enter(widget, ilk);
-			return;
-		}
+		noti_dialog_item_enter(widget, ilk);
+		return;
+	}
 
-		if (ptd->hover && ptd->hover != ilk)
-		{
-			noti_dialog_item_leave(widget);
-			return;
-		}
+	if (ptd->hover && ptd->hover != ilk)
+	{
+		noti_dialog_item_leave(widget);
+		return;
+	}
 
-		if (ptd->hover)
-		{
-			noti_dialog_item_leave(widget);
-		}
+	if (ptd->hover)
+	{
+		noti_dialog_item_leave(widget);
 	}
 }
 

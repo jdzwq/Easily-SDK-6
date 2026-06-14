@@ -64,9 +64,9 @@ LICENSE.GPL3 for more details.
 #define CLR_LEN			24
 #define FNT_LEN			32
 #define RES_LEN			64
-#define KEY_LEN			128
+#define KEY_LEN			127
 #define BLK_LEN			32
-#define META_LEN		256
+#define META_LEN		255
 #define UUID_LEN		36
 #define PATH_LEN		1024
 #define STYLE_LEN		2048

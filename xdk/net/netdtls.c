@@ -856,8 +856,8 @@ void xdtls_set_version(xhand_t dtls, int cli_ver)
 
 	XDK_ASSERT(pdtls->type == DTLS_TYPE_CLIENT);
 
-	pdtls->cli_minor_ver = GETLBYTE(cli_ver);
-	pdtls->cli_major_ver = GETHBYTE(cli_ver);
+	pdtls->cli_minor_ver = GETSWORDL(cli_ver);
+	pdtls->cli_major_ver = GETSWORDH(cli_ver);
 
 	pses->minor_ver = pdtls->cli_minor_ver;
 }

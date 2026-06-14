@@ -10,11 +10,11 @@
 !include xdb_sqlite.txt
 !endif
 
-ARCH = x64
+ARCH = x86
 MODULE = xdb_sqlite
 
-INC_sqlite = "D:/sqlite/include"
-LIB_sqlite = "D:/sqlite/lib"
+INC_sqlite = "E:/sqlite/include"
+LIB_sqlite = "E:/sqlite/lib"
 
 INC_PATH = ../../include
 SRC_PATH = ../../xdb
@@ -41,10 +41,10 @@ CFLAGS = /c /GL /W3 /Zc:wchar_t /Zi /Od /Fd"$(PDB_PATH)/vc140.pdb" /fp:precise \
 LK = link.exe
 LFLAGS = /OUT:"$(TARGET)" /MANIFEST /NXCOMPAT /PDB:"$(DATABASE)" \
 	/DEBUG /DYNAMICBASE "kernel32.lib" "user32.lib" "advapi32.lib" /DLL /MACHINE:$(ARCH) \
-	/LTCG:PGINSTRUMENT /PGD:"$(INSTRUMENT)" /SUBSYSTEM:WINDOWS \
+	/LTCG:PGINSTRUMENT /PGE:"$(INSTRUMENT)" /SUBSYSTEM:WINDOWS \
 	/DEF:"$(MODULE)_$(ARCH).def" /IMPLIB:"$(LIBRARY)" \
 	/LIBPATH:"$(LIB_PATH)" /LIBPATH:$(LIB_sqlite) \
-	/ERRORREPORT:PROMPT /NOLOGO /TLBID:1
+	/ERRORREPORT:PROMPT /NOLOGO /TLBIE:1
 
 DIRS = $(strip $(SOURCES))
 COBS = $(patsubsti %.cc,%.c,$(DIRS))

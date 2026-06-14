@@ -39,7 +39,7 @@ void nuid_from_timestamp(nuid_t* pu, lword_t tms)
 	dword_t r, nh, nl;
 
 	system_srand();
-	//Srand48((dword_t)(GETLDWORD(tms)));
+	//Srand48((dword_t)(GETLWORDL(tms)));
 	//r = Lrand48() >> 16;
 	//nh = r | 0x0100;
 	//nl = Lrand48();

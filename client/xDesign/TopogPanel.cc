@@ -229,7 +229,7 @@ void TopogPanel_OnAttach(widget_t widget)
 	if (!shell_get_filename(widget, szPath, szFilter, szExt, 0, szPath, PATH_LEN, szFile, PATH_LEN))
 		return;
 
-	xscat(szPath, _T("\\"));
+	xscat(szPath, _T("/"));
 	xscat(szPath, szFile);
 
 	visual_t rdc = widget_client_context(widget);
@@ -324,7 +324,7 @@ void TopogPanel_Title_OnItemChanged(widget_t widget, NOTICE_TITLE* pnt)
 	widget_post_command(widget, 0, n_id, NULL);
 }
 
-void TopogPanel_Topog_OnRBClick(widget_t widget, NOTICE_DESIGN* pnf)
+void TopogPanel_Topog_OnRBClick(widget_t widget, NOTICE_DESIGNER* pnf)
 {
 	TopogPanelDelta* pdt = GETTOPOGPANELDELTA(widget);
 
@@ -387,7 +387,7 @@ void TopogPanel_Topog_OnRBClick(widget_t widget, NOTICE_DESIGN* pnf)
 	destroy_menu_doc(ptrMenu);
 }
 
-void TopogPanel_Topog_OnLBClick(widget_t widget, NOTICE_DESIGN* pnf)
+void TopogPanel_Topog_OnLBClick(widget_t widget, NOTICE_DESIGNER* pnf)
 {
 	TopogPanelDelta* pdt = GETTOPOGPANELDELTA(widget);
 
@@ -399,7 +399,7 @@ void TopogPanel_Topog_OnLBClick(widget_t widget, NOTICE_DESIGN* pnf)
 	widget_post_command(widget, 0, n_id, NULL);
 }
 
-void TopogPanel_Topog_OnMoved(widget_t widget, NOTICE_DESIGN* pnf)
+void TopogPanel_Topog_OnMoved(widget_t widget, NOTICE_DESIGNER* pnf)
 {
 	TopogPanelDelta* pdt = GETTOPOGPANELDELTA(widget);
 
@@ -421,6 +421,8 @@ void TopogPanel_Proper_OnEntityUpdate(widget_t widget, NOTICE_PROPER* pnp)
 
 	int n_id = xstol(get_title_item_id_ptr(ptrItem));
 
+	LINKPTR ptrProper = properctrl_fetch(pnp->widget);
+	
 	LINKPTR ptrTopog = topogctrl_fetch(pdt->hTopog);
 	LINKPTR ptrSpot = (LINKPTR)designer_get_focused(pdt->hTopog);
 
@@ -430,11 +432,11 @@ void TopogPanel_Proper_OnEntityUpdate(widget_t widget, NOTICE_PROPER* pnp)
 	{
 		if (n_id == IDA_ATTRIBUTES)
 		{
-			properbag_read_topog_spot_attributes(pnp->proper, ptrSpot);
+			properbag_read_topog_spot_attributes(ptrProper, ptrSpot);
 		}
 		else if (n_id == IDA_STYLESHEET)
 		{
-			properbag_format_stylesheet(pnp->proper, sz_style, CSS_LEN);
+			properbag_format_stylesheet(ptrProper, sz_style, CSS_LEN);
 			set_topog_spot_style(ptrSpot, sz_style);
 		}
 		topogctrl_redraw(pdt->hTopog);
@@ -443,11 +445,11 @@ void TopogPanel_Proper_OnEntityUpdate(widget_t widget, NOTICE_PROPER* pnp)
 	{
 		if (n_id == IDA_ATTRIBUTES)
 		{
-			properbag_read_topog_attributes(pnp->proper, ptrTopog);
+			properbag_read_topog_attributes(ptrProper, ptrTopog);
 		}
 		else if (n_id == IDA_STYLESHEET)
 		{
-			properbag_format_stylesheet(pnp->proper, sz_style, CSS_LEN);
+			properbag_format_stylesheet(ptrProper, sz_style, CSS_LEN);
 			set_topog_style(ptrTopog, sz_style);
 		}
 		topogctrl_redraw(pdt->hTopog);
@@ -543,7 +545,7 @@ void TopogPanel_OnSave(widget_t widget)
 		if (!shell_get_filename(widget, szPath, _T("Topog Meta File(*.sheet)\0*.sheet\0"), _T("sheet"), 1, szPath, PATH_LEN, szFile, PATH_LEN))
 			return;
 
-		xscat(szPath, _T("\\"));
+		xscat(szPath, _T("/"));
 		xscat(szPath, szFile);
 		xscpy(szFile, szPath);
 	}
@@ -572,7 +574,7 @@ void TopogPanel_OnSaveAs(widget_t widget)
 	if (!shell_get_filename(widget, szPath, _T("Topog Meta File(*.sheet)\0*.sheet\0Svg Image File(*.svg)\0*.svg\0"), _T("sheet"), 1, szPath, PATH_LEN, szFile, PATH_LEN))
 		return;
 
-	xscat(szPath, _T("\\"));
+	xscat(szPath, _T("/"));
 	xscat(szPath, szFile);
 	xscpy(szFile, szPath);
 
@@ -700,6 +702,8 @@ int TopogPanel_OnCreate(widget_t widget, void* data)
 	LINKPTR ptrProper = create_proper_doc();
 	properctrl_attach(pdt->hProper, ptrProper);
 
+	hand_editor_create(pdt->hProper, &edit_properctrl);
+
 	widget_get_client_rect(widget, &xr);
 	pdt->hTitle = titlectrl_create(_T("TopogTitle"), WD_STYLE_CONTROL, &xr, widget);
 	widget_set_user_id(pdt->hTitle, IDC_TOPOGPANEL_TITLE);
@@ -766,6 +770,8 @@ void TopogPanel_OnDestroy(widget_t widget)
 
 	if (widget_is_valid(pdt->hProper))
 	{
+		hand_editor_destroy(pdt->hProper);
+
 		LINKPTR ptrProper = properctrl_detach(pdt->hProper);
 		if (ptrProper)
 			destroy_proper_doc(ptrProper);
@@ -979,7 +985,6 @@ void TopogPanel_OnMenuCommand(widget_t widget, int code, int cid, vword_t data)
 		break;
 
 	case IDC_TOPOGPANEL_MENU:
-		widget_destroy((widget_t)data);
 		if (code)
 		{
 			widget_post_command(widget, code, 0, NULL);
@@ -994,7 +999,7 @@ void TopogPanel_OnNotice(widget_t widget, LPNOTICE phdr)
 
 	if (phdr->user == IDC_TOPOGPANEL_TOPOG)
 	{
-		NOTICE_DESIGN* pnf = (NOTICE_DESIGN*)phdr;
+		NOTICE_DESIGNER* pnf = (NOTICE_DESIGNER*)phdr;
 		switch (pnf->code)
 		{
 		case NC_OBJECT_LBCLICK:

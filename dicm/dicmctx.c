@@ -491,8 +491,8 @@ bool_t dicm_format_command(dicm_conext_command* pdicm)
 				break;
 			}
 
-			vt[0] = GETHSWORD(tag);
-			vt[1] = GETLSWORD(tag);
+			vt[0] = GETDWORDH(tag);
+			vt[1] = GETDWORDL(tag);
 
 			if (pdicm->b_BigEndian)
 			{
@@ -1177,8 +1177,8 @@ bool_t dicm_format_dataset(dicm_context_dataset* pdicm)
 				break;
 			}
 
-			vt[0] = GETHSWORD(tag);
-			vt[1] = GETLSWORD(tag);
+			vt[0] = GETDWORDH(tag);
+			vt[1] = GETDWORDL(tag);
 
 			if (pdicm->b_BigEndian)
 			{

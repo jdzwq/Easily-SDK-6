@@ -96,7 +96,7 @@ static int CALLBACK _var_text_calc_draw(int scan, void* object, object_attr_t* a
 {
 	VARTEXT_DRAW* ptt = (VARTEXT_DRAW*)pp;
 	xpoint_t pt;
-	const xface_t* pxa = *(attr->ppxa);
+	const xface_t* pxa = attr->pxa;
 
 	switch (scan)
 	{
@@ -152,7 +152,7 @@ static int CALLBACK _tag_text_calc_draw(int scan, void* object, object_attr_t* a
 {
 	TAGTEXT_DRAW* ptt = (TAGTEXT_DRAW*)pp;
 	xpoint_t pt;
-	const xface_t* pxa = *(attr->ppxa);
+	const xface_t* pxa = attr->pxa;
 
 	if (page < ptt->page)
 		return _SCANNER_OPERA_PAGED;
@@ -263,8 +263,8 @@ static int CALLBACK _memo_text_calc_draw(int scan, void* object, object_attr_t* 
 {
 	MEMOTEXT_DRAW* ptt = (MEMOTEXT_DRAW*)pp;
 	xpoint_t pt;
-	const xfont_t* pxf = *(attr->ppxf);
-	const xface_t* pxa = *(attr->ppxa);
+	const xfont_t* pxf = attr->pxf;
+	const xface_t* pxa = attr->pxa;
 
 	if (page < ptt->page)
 		return _SCANNER_OPERA_PAGED;
@@ -375,7 +375,7 @@ static int CALLBACK _rich_text_calc_draw(int scan, void* object, object_attr_t* 
 {
 	RICHTEXT_DRAW* ptt = (RICHTEXT_DRAW*)pp;
 	xpoint_t pt;
-	const xface_t* pxa = *(attr->ppxa);
+	const xface_t* pxa = attr->pxa;
 
 	if (page < ptt->page)
 		return _SCANNER_OPERA_PAGED;

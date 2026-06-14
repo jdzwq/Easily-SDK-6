@@ -58,6 +58,13 @@ typedef struct _dev_cap_t{
 	int horz_size, vert_size;
 }dev_cap_t;
 
+typedef struct _pix_cap_t{
+	int pixel_depth;
+	int pixel_mode;
+	int pixel_size;
+	int pixel_base;
+}pix_cap_t;
+
 #define MAX_FORM_NAME		32
 #define MAX_GLYPH_NAME		64
 #define MAX_DEVICE_NAME		256

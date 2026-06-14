@@ -342,6 +342,8 @@ void ImagePanel_Proper_OnEntityUpdate(widget_t widget, NOTICE_PROPER* pnp)
 
 	int n_id = xstol(get_title_item_id_ptr(tlk));
 
+	LINKPTR ptrProper = properctrl_fetch(pnp->widget);
+	
 	LINKPTR ptrImages = imagesctrl_fetch(pdt->hImage);
 	LINKPTR ptrItem = imagesctrl_get_focus_item(pdt->hImage);
 
@@ -351,7 +353,7 @@ void ImagePanel_Proper_OnEntityUpdate(widget_t widget, NOTICE_PROPER* pnp)
 	{
 		if (n_id == IDA_ATTRIBUTES)
 		{
-			properbag_read_images_item_attributes(pnp->proper, ptrItem);
+			properbag_read_images_item_attributes(ptrProper, ptrItem);
 		}
 		imagesctrl_redraw_item(pdt->hImage, ptrItem);
 	}
@@ -359,7 +361,7 @@ void ImagePanel_Proper_OnEntityUpdate(widget_t widget, NOTICE_PROPER* pnp)
 	{
 		if (n_id == IDA_ATTRIBUTES)
 		{
-			properbag_read_images_attributes(pnp->proper, ptrImages);
+			properbag_read_images_attributes(ptrProper, ptrImages);
 		}
 		imagesctrl_redraw(pdt->hImage);
 	}
@@ -453,7 +455,7 @@ void ImagePanel_OnSave(widget_t widget)
 		if (!shell_get_filename(widget, szPath, _T("Images Meta File(*.sheet)\0*.sheet\0"), _T("sheet"), 1, szPath, PATH_LEN, szFile, PATH_LEN))
 			return;
 
-		xscat(szPath, _T("\\"));
+		xscat(szPath, _T("/"));
 		xscat(szPath, szFile);
 		xscpy(szFile, szPath);
 	}
@@ -477,7 +479,7 @@ void ImagePanel_OnSaveAs(widget_t widget)
 	if (!shell_get_filename(widget, szPath, _T("Images Meta File(*.sheet)\0*.sheet\0"), _T("sheet"), 1, szPath, PATH_LEN, szFile, PATH_LEN))
 		return;
 
-	xscat(szPath, _T("\\"));
+	xscat(szPath, _T("/"));
 	xscat(szPath, szFile);
 	xscpy(szFile, szPath);
 
@@ -565,6 +567,8 @@ int ImagePanel_OnCreate(widget_t widget, void* data)
 	LINKPTR ptrProper = create_proper_doc();
 	properctrl_attach(pdt->hProper, ptrProper);
 
+	hand_editor_create(pdt->hProper, &edit_properctrl);
+
 	widget_get_client_rect(widget, &xr);
 	pdt->hTitle = titlectrl_create(_T("ImageTitle"), WD_STYLE_CONTROL, &xr, widget);
 	widget_set_user_id(pdt->hTitle, IDC_IMAGEPANEL_TITLE);
@@ -629,6 +633,8 @@ void ImagePanel_OnDestroy(widget_t widget)
 
 	if (widget_is_valid(pdt->hProper))
 	{
+		hand_editor_destroy(pdt->hProper);
+
 		LINKPTR ptrProper = properctrl_detach(pdt->hProper);
 		if (ptrProper)
 			destroy_proper_doc(ptrProper);
@@ -784,9 +790,8 @@ void ImagePanel_OnMenuCommand(widget_t widget, int code, int cid, vword_t data)
 	case IDA_STYLESHEET:
 		ImagePanel_OnStyleSheet(widget);
 		break;
-
+		
 	case IDC_IMAGEPANEL_MENU:
-		widget_destroy((widget_t)data);
 		if (code)
 		{
 			widget_post_command(widget, code, 0, NULL);

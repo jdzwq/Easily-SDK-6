@@ -45,7 +45,7 @@ typedef struct _DESIGNERUNDO{
 typedef struct _designer_context{
 	widget_t widget;
 
-	void* cur_obj;
+	void* object;
 
 	bool_t b_drag;
 	bool_t b_size;
@@ -55,7 +55,7 @@ typedef struct _designer_context{
 	int org_x, cur_x;
 	int org_y, cur_y;
 
-	designer_interface desg;
+	designer_interface desgif;
 
 	int max_undo;
 	DESIGNERUNDO* ptu;
@@ -64,7 +64,7 @@ typedef struct _designer_context{
 //////////////////////////////////////////////////////////////////////////////////////////////////
 static void _designer_done(designer_context* ptd)
 {
-	designer_interface* pdi = &(ptd->desg);
+	designer_interface* pdi = &(ptd->desgif);
 	DESIGNERUNDO *pnew,*pnxt;
 	int count = 0;
 
@@ -104,7 +104,7 @@ static void _designer_done(designer_context* ptd)
 
 static void _designer_discard(designer_context* ptd)
 {
-	designer_interface* pdi = &(ptd->desg);
+	designer_interface* pdi = &(ptd->desgif);
 	DESIGNERUNDO *prev;
 
 	if (ptd->ptu)
@@ -119,7 +119,7 @@ static void _designer_discard(designer_context* ptd)
 
 static void _designer_clean(designer_context* ptd)
 {
-	designer_interface* pdi = &(ptd->desg);
+	designer_interface* pdi = &(ptd->desgif);
 	DESIGNERUNDO *next;
 
 	while (ptd->ptu)
@@ -136,7 +136,7 @@ static void _designer_clean(designer_context* ptd)
 
 static int _designer_calc_hint(designer_context* ptd, const xpoint_t* pxp, void** pobj)
 {
-	designer_interface* pdi = &(ptd->desg);
+	designer_interface* pdi = &(ptd->desgif);
 	xrect_t xr;
 	void *grp, *obj;
 
@@ -181,7 +181,7 @@ static int _designer_calc_hint(designer_context* ptd, const xpoint_t* pxp, void*
 
 static void _designer_ensure_visible(designer_context* ptd, void* obj)
 {
-	designer_interface* pdi = &(ptd->desg);
+	designer_interface* pdi = &(ptd->desgif);
 	xrect_t xr;
 
 	(*pdi->pf_get_obj_rect)(ptd->widget, obj, &xr);
@@ -193,8 +193,8 @@ static void _designer_ensure_visible(designer_context* ptd, void* obj)
 
 static int _designer_noti_owner(designer_context* ptd, unsigned int code, void* obj, vword_t data)
 {
-	designer_interface* pdi = &(ptd->desg);
-	NOTICE_DESIGN nf = { 0 };
+	designer_interface* pdi = &(ptd->desgif);
+	NOTICE_DESIGNER nf = { 0 };
 	widget_t owner;
 
 	nf.widget = ptd->widget;
@@ -216,7 +216,7 @@ static int _designer_noti_owner(designer_context* ptd, unsigned int code, void* 
 
 static void _designer_noti_reset_select(designer_context* ptd, bool_t b_sel)
 {
-	designer_interface* pdi = &(ptd->desg);
+	designer_interface* pdi = &(ptd->desgif);
 	void *grp, *obj;
 	int count = 0;
 
@@ -256,7 +256,7 @@ static void _designer_noti_reset_select(designer_context* ptd, bool_t b_sel)
 
 static void _designer_noti_object_unselect(designer_context* ptd, void* obj)
 {
-	designer_interface* pdi = &(ptd->desg);
+	designer_interface* pdi = &(ptd->desgif);
 	xrect_t xr;
 
 	XDK_ASSERT(obj != NULL);
@@ -274,7 +274,7 @@ static void _designer_noti_object_unselect(designer_context* ptd, void* obj)
 
 static void _designer_noti_object_selected(designer_context* ptd, void* obj)
 {
-	designer_interface* pdi = &(ptd->desg);
+	designer_interface* pdi = &(ptd->desgif);
 	xrect_t xr;
 
 	XDK_ASSERT(obj != NULL);
@@ -292,16 +292,16 @@ static void _designer_noti_object_selected(designer_context* ptd, void* obj)
 
 static bool_t _designer_noti_object_changing(designer_context* ptd)
 {
-	designer_interface* pdi = &(ptd->desg);
+	designer_interface* pdi = &(ptd->desgif);
 	xrect_t xr;
-	void *obf = ptd->cur_obj;
+	void *obf = ptd->object;
 
 	XDK_ASSERT(obf != NULL);
 
 	if(_designer_noti_owner(ptd, NC_OBJECT_CHANGING, obf, 0))
 		return bool_false;
 
-	ptd->cur_obj = NULL;
+	ptd->object = NULL;
 
 	(*pdi->pf_get_obj_rect)(ptd->widget, obf, &xr);
 
@@ -314,12 +314,12 @@ static bool_t _designer_noti_object_changing(designer_context* ptd)
 
 static void _designer_noti_object_changed(designer_context* ptd, void* obj)
 {
-	designer_interface* pdi = &(ptd->desg);
+	designer_interface* pdi = &(ptd->desgif);
 	xrect_t xr;
 
 	XDK_ASSERT(obj != NULL);
 
-	ptd->cur_obj = obj;
+	ptd->object = obj;
 
 	_designer_noti_owner(ptd, NC_OBJECT_CHANGED, obj, 0);
 
@@ -332,30 +332,30 @@ static void _designer_noti_object_changed(designer_context* ptd, void* obj)
 
 static void _designer_noti_object_lbclick(designer_context* ptd, void* obj, const xpoint_t* ppt)
 {
-	designer_interface* pdi = &(ptd->desg);
+	designer_interface* pdi = &(ptd->desgif);
 
 	_designer_noti_owner(ptd, NC_OBJECT_LBCLICK, obj, (vword_t)ppt);
 }
 
 static void _designer_noti_object_dbclick(designer_context* ptd, void* obj, const xpoint_t* ppt)
 {
-	designer_interface* pdi = &(ptd->desg);
+	designer_interface* pdi = &(ptd->desgif);
 
 	_designer_noti_owner(ptd, NC_OBJECT_DBCLICK, obj, (vword_t)ppt);
 }
 
 static void _designer_noti_object_rbclick(designer_context* ptd, void* obj, const xpoint_t* ppt)
 {
-	designer_interface* pdi = &(ptd->desg);
+	designer_interface* pdi = &(ptd->desgif);
 
 	_designer_noti_owner(ptd, NC_OBJECT_RBCLICK, obj, (vword_t)ppt);
 }
 
 static void _designer_noti_object_drag(designer_context* ptd, int x, int y)
 {
-	designer_interface* pdi = &(ptd->desg);
+	designer_interface* pdi = &(ptd->desgif);
 	xpoint_t pt;
-	void *obf = ptd->cur_obj;
+	void *obf = ptd->object;
 
 	XDK_ASSERT(obf != NULL);
 
@@ -379,10 +379,10 @@ static void _designer_noti_object_drag(designer_context* ptd, int x, int y)
 
 static void _designer_noti_object_drop(designer_context* ptd, int x, int y)
 {
-	designer_interface* pdi = &(ptd->desg);
+	designer_interface* pdi = &(ptd->desgif);
 	xpoint_t pt;
 	xrect_t xr;
-	void *grp, *obj, *obf = ptd->cur_obj;
+	void *grp, *obj, *obf = ptd->object;
 	int cx, cy;
 	int cn = 0;
 
@@ -457,8 +457,8 @@ static void _designer_noti_object_drop(designer_context* ptd, int x, int y)
 
 static void _designer_noti_object_sizing(designer_context* ptd, int hint, int x, int y)
 {
-	designer_interface* pdi = &(ptd->desg);
-	void *obf = ptd->cur_obj;
+	designer_interface* pdi = &(ptd->desgif);
+	void *obf = ptd->object;
 
 	XDK_ASSERT(obf != NULL);
 
@@ -478,11 +478,11 @@ static void _designer_noti_object_sizing(designer_context* ptd, int hint, int x,
 
 static void _designer_noti_object_sized(designer_context* ptd, int x, int y)
 {
-	designer_interface* pdi = &(ptd->desg);
+	designer_interface* pdi = &(ptd->desgif);
 	int hint;
 	xrect_t xr;
 	xsize_t xs;
-	void *obf = ptd->cur_obj;
+	void *obf = ptd->object;
 
 	XDK_ASSERT(obf != NULL);
 
@@ -544,7 +544,7 @@ static void _designer_noti_object_sized(designer_context* ptd, int x, int y)
 
 static void _designer_noti_object_grouping(designer_context* ptd, int x, int y)
 {
-	designer_interface* pdi = &(ptd->desg);
+	designer_interface* pdi = &(ptd->desgif);
 
 	if (widget_can_focus(ptd->widget))
 	{
@@ -559,7 +559,7 @@ static void _designer_noti_object_grouping(designer_context* ptd, int x, int y)
 
 static void _designer_noti_object_grouped(designer_context* ptd, int x, int y)
 {
-	designer_interface* pdi = &(ptd->desg);
+	designer_interface* pdi = &(ptd->desgif);
 	void *grp, *obj;
 	xrect_t xr_group, xr;
 	int n = 0;
@@ -608,12 +608,12 @@ static void _designer_noti_object_grouped(designer_context* ptd, int x, int y)
 
 static bool_t _designer_undo(designer_context* ptd)
 {
-	designer_interface* pdi = &(ptd->desg);
+	designer_interface* pdi = &(ptd->desgif);
 	DESIGNERUNDO *next;
 
 	if(!ptd->ptu) return bool_false;
 
-	if(ptd->cur_obj && !_designer_noti_object_changing(ptd))
+	if(ptd->object && !_designer_noti_object_changing(ptd))
 		return bool_false;
 
 	(*pdi->pf_restore_doc)(ptd->widget, ptd->ptu->buff, ptd->ptu->size);
@@ -628,10 +628,10 @@ static bool_t _designer_undo(designer_context* ptd)
 
 static bool_t _designer_copy(designer_context* ptd)
 {
-	designer_interface* pdi = &(ptd->desg);
+	designer_interface* pdi = &(ptd->desgif);
 	int len = 0;
 	tchar_t* buf;
-	void *obf = ptd->cur_obj;
+	void *obf = ptd->object;
 
 	if (!obf) return bool_false;
 
@@ -651,9 +651,9 @@ static bool_t _designer_copy(designer_context* ptd)
 
 static bool_t _designer_cut(designer_context* ptd)
 {
-	designer_interface* pdi = &(ptd->desg);
+	designer_interface* pdi = &(ptd->desgif);
 	xrect_t xr;
-	void* obf = ptd->cur_obj;
+	void* obf = ptd->object;
 
 	if (!_designer_copy(ptd))
 		return bool_false;
@@ -679,7 +679,7 @@ static bool_t _designer_cut(designer_context* ptd)
 
 static bool_t _designer_paste(designer_context* ptd)
 {
-	designer_interface* pdi = &(ptd->desg);
+	designer_interface* pdi = &(ptd->desgif);
 	tchar_t* buf;
 	int len;
 	xrect_t xr;
@@ -719,9 +719,9 @@ static bool_t _designer_paste(designer_context* ptd)
 int designer_sub_lbutton_down(widget_t widget, const xpoint_t* pxp, uid_t sid, vword_t delta)
 {
 	designer_context* ptd = (designer_context*)delta;
-	designer_interface* pdi = &(ptd->desg);
+	designer_interface* pdi = &(ptd->desgif);
 	int hint;
-	void *obj, *obf = ptd->cur_obj;
+	void *obj, *obf = ptd->object;
 	bool_t bSel, bCtl;
 
 	XDK_ASSERT(sid == IDS_DESIGNER && ptd);
@@ -766,10 +766,10 @@ int designer_sub_lbutton_down(widget_t widget, const xpoint_t* pxp, uid_t sid, v
 int designer_sub_lbutton_up(widget_t widget, const xpoint_t* pxp, uid_t sid, vword_t delta)
 {
 	designer_context* ptd = (designer_context*)delta;
-	designer_interface* pdi = &(ptd->desg);
+	designer_interface* pdi = &(ptd->desgif);
 	bool_t bRe, bCtl;
 	int hint;
-	void *obj, *obf = ptd->cur_obj;
+	void *obj, *obf = ptd->object;
 
 	XDK_ASSERT(sid == IDS_DESIGNER && ptd);
 
@@ -842,7 +842,7 @@ int designer_sub_rbutton_up(widget_t widget, const xpoint_t* pxp, uid_t sid, vwo
 int designer_sub_lbutton_dbclick(widget_t widget, const xpoint_t* pxp, uid_t sid, vword_t delta)
 {
 	designer_context* ptd = (designer_context*)delta;
-	designer_interface* pdi = &(ptd->desg);
+	designer_interface* pdi = &(ptd->desgif);
 	int hint;
 	void *obj;
 
@@ -859,10 +859,10 @@ int designer_sub_lbutton_dbclick(widget_t widget, const xpoint_t* pxp, uid_t sid
 int designer_sub_mousemove(widget_t widget, dword_t mk, const xpoint_t* pxp, uid_t sid, vword_t delta)
 {
 	designer_context* ptd = (designer_context*)delta;
-	designer_interface* pdi = &(ptd->desg);
+	designer_interface* pdi = &(ptd->desgif);
 	int hint;
 	xrect_t xr;
-	void *obj, *obf = ptd->cur_obj;
+	void *obj, *obf = ptd->object;
 
 	XDK_ASSERT(sid == IDS_DESIGNER && ptd);
 
@@ -933,8 +933,8 @@ int designer_sub_mousemove(widget_t widget, dword_t mk, const xpoint_t* pxp, uid
 int designer_sub_keydown(widget_t widget, dword_t ks, int nKey, uid_t sid, vword_t delta)
 {
 	designer_context* ptd = (designer_context*)delta;
-	designer_interface* pdi = &(ptd->desg);
-	void *grp, *obj, *org, *obf = ptd->cur_obj;
+	designer_interface* pdi = &(ptd->desgif);
+	void *grp, *obj, *org, *obf = ptd->object;
 	xrect_t xr;
 	int n = 0, mx, my;
 	bool_t b_ctl, b_sft;
@@ -1087,7 +1087,7 @@ int designer_sub_keydown(widget_t widget, dword_t ks, int nKey, uid_t sid, vword
 int designer_sub_paint(widget_t widget, visual_t dc, const xrect_t* pxr, uid_t sid, vword_t delta)
 {
 	designer_context* ptd = (designer_context*)delta;
-	designer_interface* pdi = &(ptd->desg);
+	designer_interface* pdi = &(ptd->desgif);
 	xrect_t xr;
 	visual_t rdc;
 	canvas_t canv;
@@ -1100,7 +1100,7 @@ int designer_sub_paint(widget_t widget, visual_t dc, const xrect_t* pxr, uid_t s
 	xcolor_t xc = { 0 };
 	xpen_t xp = {0};
 
-	void *grp, *obj, *obf = ptd->cur_obj;
+	void *grp, *obj, *obf = ptd->object;
 
 	XDK_ASSERT(sid == IDS_DESIGNER && ptd);
 
@@ -1241,7 +1241,7 @@ void hand_designer_create(widget_t widget, const designer_interface* pdi)
 		ptd = (designer_context*)xmem_alloc(sizeof(designer_context));
 		ptd->widget = widget;
 		ptd->max_undo = MAX_UNDO;
-		xmem_copy((void*)&(ptd->desg), (void*)pdi, sizeof(designer_interface));
+		xmem_copy((void*)&(ptd->desgif), (void*)pdi, sizeof(designer_interface));
 		widget_set_subproc_delta(widget, IDS_DESIGNER, (vword_t)ptd);
 	}
 }
@@ -1290,7 +1290,7 @@ void* designer_get_focused(widget_t widget)
 
 	XDK_ASSERT(ptd != NULL);
 
-	return ptd->cur_obj;
+	return ptd->object;
 }
 
 bool_t designer_set_focused(widget_t widget, void* obj)
@@ -1301,10 +1301,10 @@ bool_t designer_set_focused(widget_t widget, void* obj)
 
 	XDK_ASSERT(ptd != NULL);
 
-	if(obj == ptd->cur_obj)
+	if(obj == ptd->object)
 		return bool_true;
 
-	if(ptd->cur_obj)
+	if(ptd->object)
 	{
 		if(!_designer_noti_object_changing(ptd))
 			return bool_false;

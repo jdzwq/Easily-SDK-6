@@ -32,11 +32,11 @@ LICENSE.GPL3 for more details.
 #include <xdg.h>
 
 #if defined(_OS_WINDOWS)
-#include "win32/_xdu_win32.h"
+#include "windows/_xdu_windows.h"
 #elif defined(_OS_MACOS)
-#include "cocoa/_xdu_cocoa.h"
+#include "macos/_xdu_macos.h"
 #elif defined(_OS_LINUX)
-#include "X11/_xdu_X11.h"
+#include "linux/_xdu_linux.h"
 #endif
 
 #define _HANDLE_WIDGET		0x60
@@ -44,7 +44,7 @@ typedef struct _handle_head	 *widget_t;
 
 /*widget class*/
 #define XDUWIDGET		_T("XDUWIDGET")
-/*widget store property*/
+/*widget atom properties*/
 #define XDUSTRUCT		_T("XDUSTRUCT")
 #define XDUDISPATCH		_T("XDUDISPATCH")
 #define XDUSUBPROC		_T("XDUSUBPROC")
@@ -76,7 +76,7 @@ typedef struct _handle_head	 *widget_t;
 #define WD_STYLE_CHILD		0x00000001
 #define WD_STYLE_EDITOR		0x00000002
 #define WD_STYLE_DOCKER		0x00000004
-#define WD_STYLE_HOTOVER	0x00000008
+#define WD_STYLE_TIPPER		0x00000008
 
 #define WD_STYLE_SIZEBOX	0x00000010
 #define WD_STYLE_CLOSEBOX	0x00000020
@@ -119,10 +119,6 @@ typedef struct _handle_head	 *widget_t;
 #define KS_WITH_ALT			0x0020
 #define KS_WITH_CAPS		0x0040
 #define KS_WITH_CMD			0x0080
-
-/*mouse track mode*/
-#define MS_TRACK_HOVER		0x00000001
-#define	MS_TRACK_LEAVE		0x00000002
 
 /*widget size mode*/
 #define WS_SIZE_RESTORE		0
@@ -176,7 +172,6 @@ typedef int(CALLBACK *PF_ENUM_WINDOW_PROC)(widget_t widget, vword_t pv);
 
 #endif
 
-#ifdef XDU_SUPPORT_WIDGET_NC
 /*widget nc hit test*/
 #define HINT_NOWHERE	0
 #define HINT_TITLE		2
@@ -205,8 +200,6 @@ typedef int(CALLBACK *PF_ENUM_WINDOW_PROC)(widget_t widget, vword_t pv);
 #define HINT_LINELEFT	29
 #define HINT_LINERIGHT	30
 
-#endif
-
 /*widget frame*/
 #define FRAME_TITLE_DOTS	32
 #define FRAME_SCROLL_DOTS	10
@@ -234,14 +227,15 @@ typedef int(CALLBACK *PF_ENUM_WINDOW_PROC)(widget_t widget, vword_t pv);
 /*widget command code*/
 #define COMMAND_COLOR		1
 #define COMMAND_TABSKIP		9
-#define COMMAND_UPDATE		11
-#define COMMAND_CHANGE		12
-#define COMMAND_COMMIT		13
+#define COMMAND_EDITING		10
+#define COMMAND_COMMIT		11
+#define	COMMAND_ROLLBACK	12
+#define COMMAND_UPDATE		13
+#define COMMAND_CHANGE		14
 #define COMMAND_COPY		20
 #define COMMAND_CUT			21
 #define COMMAND_PASTE		22
 #define COMMAND_UNDO		23
-#define	COMMAND_ROLLBACK	27
 #define COMMAND_TABORDER	30
 #define COMMAND_QURYDRAG	40
 #define COMMAND_QUERYDROP	41
@@ -252,14 +246,15 @@ typedef int(CALLBACK *PF_ENUM_WINDOW_PROC)(widget_t widget, vword_t pv);
 #define COMMAND_REMOVE		46
 
 /*tab opera*/
-#define TABORDER_LEFT		0
-#define TABORDER_UP			1
-#define TABORDER_RIGHT		2
-#define TABORDER_DOWN		3
-#define TABORDER_END		4
-#define	TABORDER_HOME		5
-#define TABORDER_PAGEUP		6
-#define TABORDER_PAGEDOWN	7
+#define TABORDER_ANY		0
+#define TABORDER_LEFT		1
+#define TABORDER_UP			2
+#define TABORDER_RIGHT		3
+#define TABORDER_DOWN		4
+#define TABORDER_END		5
+#define	TABORDER_HOME		6
+#define TABORDER_PAGEUP		7
+#define TABORDER_PAGEDOWN	8
 
 //widget message button
 #define MSGBTN_OK		0x00000001
@@ -300,7 +295,7 @@ typedef int(CALLBACK *PF_ENUM_WINDOW_PROC)(widget_t widget, vword_t pv);
 #define CONTEXT_SCREEN		2
 #define CONTEXT_PRINTER		3
 
-/*keycode*/
+/*define keyboard code*/
 #define KEY_SHIFT		0x10
 #define KEY_CONTROL		0x11
 #define KEY_ALT			0x12
@@ -360,7 +355,7 @@ typedef struct _str_replace_t
 	bool_t b_none;
 }str_replace_t;
 
-#include "inf/ediinf.h"
+#include "inf/evtinf.h"
 #include "inf/xduinf.h"
 
 #endif	/* _XDUDEF_H */

@@ -36,9 +36,6 @@ typedef struct _tablectrl_delta_t{
 	float ratio;
 	bool_t onkey;
 
-	widget_t editor;
-	widget_t vsc;
-
 	int org_x, org_y;
 	bool_t b_size;
 	bool_t b_auto;
@@ -160,7 +157,7 @@ static void _tablectrl_ensure_visible(widget_t widget)
 }
 
 /*****************************************************************************************************************/
-int noti_tablectrl_owner(widget_t widget, unsigned int code, link_t_ptr table, link_t_ptr ilk, bool_t onkey, void* data)
+int noti_table_owner(widget_t widget, unsigned int code, link_t_ptr table, link_t_ptr ilk, bool_t onkey, void* data)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
 	NOTICE_TABLE nf = { 0 };
@@ -179,7 +176,7 @@ int noti_tablectrl_owner(widget_t widget, unsigned int code, link_t_ptr table, l
 	return nf.ret;
 }
 
-void noti_tablectrl_begin_size(widget_t widget, int x, int y)
+void noti_table_begin_size(widget_t widget, int x, int y)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
 
@@ -191,7 +188,7 @@ void noti_tablectrl_begin_size(widget_t widget, int x, int y)
 	widget_set_cursor(widget, CURSOR_SIZEWE);
 }
 
-void noti_tablectrl_end_size(widget_t widget, int x, int y)
+void noti_table_end_size(widget_t widget, int x, int y)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
 	canvbox_t cb;
@@ -217,38 +214,38 @@ void noti_tablectrl_end_size(widget_t widget, int x, int y)
 	widget_erase(widget, NULL);
 }
 
-bool_t noti_tablectrl_item_insert(widget_t widget, link_t_ptr ilk)
+bool_t noti_table_item_insert(widget_t widget, link_t_ptr ilk)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
 
 	XDK_ASSERT(ilk);
 
-	if (noti_tablectrl_owner(widget, NC_TABLEITEMINSERT, ptd->table, ilk, ptd->onkey, NULL))
+	if (noti_table_owner(widget, NC_TABLEITEMINSERT, ptd->table, ilk, ptd->onkey, NULL))
 		return 0;
 
 	return 1;
 }
 
-bool_t noti_tablectrl_item_delete(widget_t widget, link_t_ptr ilk)
+bool_t noti_table_item_delete(widget_t widget, link_t_ptr ilk)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
 
 	XDK_ASSERT(ilk);
 
-	if (noti_tablectrl_owner(widget, NC_TABLEITEMDELETE, ptd->table, ilk, ptd->onkey, NULL))
+	if (noti_table_owner(widget, NC_TABLEITEMDELETE, ptd->table, ilk, ptd->onkey, NULL))
 		return 0;
 
 	return 1;
 }
 
-bool_t noti_tablectrl_item_changing(widget_t widget)
+bool_t noti_table_item_changing(widget_t widget)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
 	xrect_t xr;
 
 	XDK_ASSERT(ptd->item);
 
-	if (noti_tablectrl_owner(widget, NC_TABLEITEMCHANGING, ptd->table, ptd->item, ptd->onkey, NULL))
+	if (noti_table_owner(widget, NC_TABLEITEMCHANGING, ptd->table, ptd->item, ptd->onkey, NULL))
 		return 0;
 
 	_tablectrl_item_rect(widget,ptd->item, &xr);
@@ -261,7 +258,7 @@ bool_t noti_tablectrl_item_changing(widget_t widget)
 	return 1;
 }
 
-void noti_tablectrl_item_changed(widget_t widget, link_t_ptr elk, bool_t onkey)
+void noti_table_item_changed(widget_t widget, link_t_ptr elk, bool_t onkey)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
 	xrect_t xr;
@@ -276,149 +273,16 @@ void noti_tablectrl_item_changed(widget_t widget, link_t_ptr elk, bool_t onkey)
 	widget_erase(widget, &xr);
 }
 
-void noti_tablectrl_begin_edit(widget_t widget)
+void noti_table_reset_editor(widget_t widget, bool_t bCommit)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
-	const tchar_t* text;
-	xrect_t xr = { 0 };
 
-	color_mod_t ob = { 0 };
-
-	XDK_ASSERT(ptd->item);
-
-	if (widget_is_valid(ptd->editor))
-		return;
-
-	if (ptd->b_lock)
-		return;
-
-	widget_get_color_mode(widget, &ob);
-
-	if (ptd->onkey)
-		_tablectrl_item_key_rect(widget, ptd->item, &xr);
+	if (bCommit)
+		widget_post_command(widget, COMMAND_COMMIT, IDC_CHILD, (vword_t)0);
 	else
-		_tablectrl_item_val_rect(widget, ptd->item, &xr);
-
-	pt_expand_rect(&xr, -1, -1);
-
-	if (noti_tablectrl_owner(widget, NC_TABLEITEMEDITING, ptd->table, ptd->item, ptd->onkey, NULL))
-		return;
-
-	ptd->editor = fireedit_create(widget, &xr);
-	XDK_ASSERT(ptd->editor);
-	widget_set_user_id(ptd->editor, IDC_FIREEDIT);
-	widget_set_owner(ptd->editor, widget);
-
-	widget_set_color_mode(ptd->editor, &ob);
-	widget_show(ptd->editor, WS_SHOW_NORMAL);
-	widget_set_focus(ptd->editor);
-
-	if (ptd->onkey)
-		text = get_string_entity_key_ptr(ptd->item);
-	else
-		text = get_string_entity_val_ptr(ptd->item);
-
-	editbox_set_text(ptd->editor, text);
-	editbox_selectall(ptd->editor);
+		widget_post_command(widget, COMMAND_ROLLBACK, IDC_CHILD, (vword_t)0);
 }
 
-void noti_tablectrl_commit_edit(widget_t widget)
-{
-	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
-	const tchar_t* text;
-	widget_t editctrl;
-	link_t_ptr ilk_new;
-
-	if (!widget_is_valid(ptd->editor))
-		return;
-
-	XDK_ASSERT(ptd->item);
-
-	text = (const tchar_t*)editbox_get_text_ptr(ptd->editor);
-
-	if (!noti_tablectrl_owner(widget, NC_TABLEITEMCOMMIT, ptd->table, ptd->item, ptd->onkey, (void*)text))
-	{
-		if (ptd->onkey)
-			tablectrl_set_item_key_text(widget, ptd->item, text);
-		else
-			tablectrl_set_item_val_text(widget, ptd->item, text);
-	}
-
-	editctrl = ptd->editor;
-	ptd->editor = (widget_t)0;
-
-	widget_destroy(editctrl);
-	widget_set_focus(widget);
-
-	if (ptd->b_auto && (ptd->item == get_string_prev_entity(ptd->table, LINK_LAST)) && !ptd->onkey)
-	{
-		ilk_new = insert_string_entity(ptd->table, LINK_LAST);
-		set_string_entity_dirty(ilk_new, 0);
-
-		if (!noti_tablectrl_item_insert(widget, ilk_new))
-		{
-			delete_string_entity(ptd->table, ilk_new);
-			return;
-		}
-
-		ptd->onkey = 1;
-		tablectrl_set_focus_item(widget, ilk_new);
-	}
-	else
-	{
-		if (ptd->onkey)
-		{
-			tablectrl_tabskip(widget,TABORDER_RIGHT);
-		}
-		else
-		{
-			tablectrl_tabskip(widget,TABORDER_DOWN);
-		}
-	}
-}
-
-void noti_tablectrl_rollback_edit(widget_t widget)
-{
-	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
-	widget_t editctrl;
-
-	if (!widget_is_valid(ptd->editor))
-		return;
-
-	XDK_ASSERT(ptd->item);
-
-	editctrl = ptd->editor;
-	ptd->editor = (widget_t)0;
-
-	widget_destroy(editctrl);
-	widget_set_focus(widget);
-}
-
-void noti_tablectrl_reset_editor(widget_t widget, bool_t bCommit)
-{
-	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
-
-	if (widget_is_valid(ptd->editor))
-	{
-		if (bCommit)
-			noti_tablectrl_commit_edit(widget);
-		else
-			noti_tablectrl_rollback_edit(widget);
-	}
-}
-
-void noti_tablectrl_reset_scroll(widget_t widget, bool_t bUpdate)
-{
-	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
-
-	if (widget_is_valid(ptd->vsc))
-	{
-		if (bUpdate)
-			widget_erase(ptd->vsc, NULL);
-		else
-			widget_close(ptd->vsc, 0);
-	}
-}
 /********************************************************************************************/
 
 int hand_tablectrl_create(widget_t widget, void* data)
@@ -443,9 +307,6 @@ void hand_tablectrl_destroy(widget_t widget)
 
 	XDK_ASSERT(ptd != NULL);
 
-	if (widget_is_valid(ptd->vsc))
-		widget_destroy(ptd->vsc);
-
 	xmem_free(ptd);
 
 	SETTABLECTRLDELTA(widget, 0);
@@ -462,12 +323,6 @@ void hand_tablectrl_keydown(widget_t widget, dword_t ks, int key)
 
 	switch (key)
 	{
-	case KEY_ENTER:
-		if (ptd->item && !widget_is_valid(ptd->editor))
-		{
-			noti_tablectrl_begin_edit(widget);
-		}
-		break;
 	case KEY_SPACE:
 		break;
 	case KEY_LEFT:
@@ -488,24 +343,6 @@ void hand_tablectrl_keydown(widget_t widget, dword_t ks, int key)
 	case KEY_END:
 		tablectrl_tabskip(widget,TABORDER_END);
 		break;
-	}
-}
-
-void hand_tablectrl_wchar(widget_t widget, wchar_t nChar)
-{
-	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
-
-	if (!ptd->table)
-		return;
-
-	if (IS_VISIBLE_CHAR(nChar) && !widget_is_valid(ptd->editor))
-	{
-		hand_tablectrl_keydown(widget, 0, KEY_ENTER);
-	}
-
-	if (IS_VISIBLE_CHAR(nChar) && widget_is_valid(ptd->editor))
-	{
-		widget_post_wchar(ptd->editor, nChar);
 	}
 }
 
@@ -547,7 +384,7 @@ void hand_tablectrl_lbutton_down(widget_t widget, const xpoint_t* pxp)
 	if (!ptd->table)
 		return;
 
-	noti_tablectrl_reset_editor(widget, 1);
+	noti_table_reset_editor(widget, 1);
 
 	if (widget_can_focus(widget))
 	{
@@ -569,7 +406,7 @@ void hand_tablectrl_lbutton_down(widget_t widget, const xpoint_t* pxp)
 
 	if (hint == TABLE_HINT_SPLIT)
 	{
-		noti_tablectrl_begin_size(widget, pxp->x, pxp->y);
+		noti_table_begin_size(widget, pxp->x, pxp->y);
 		return;
 	}
 }
@@ -591,7 +428,7 @@ void hand_tablectrl_lbutton_up(widget_t widget, const xpoint_t* pxp)
 
 	if (ptd->b_size)
 	{
-		noti_tablectrl_end_size(widget, pxp->x, pxp->y);
+		noti_table_end_size(widget, pxp->x, pxp->y);
 		return;
 	}
 
@@ -619,13 +456,13 @@ void hand_tablectrl_lbutton_up(widget_t widget, const xpoint_t* pxp)
 	if (ilk != ptd->item || onkey != ptd->onkey)
 	{
 		if (ptd->item)
-			noti_tablectrl_item_changing(widget);
+			noti_table_item_changing(widget);
 
 		if (ilk)
-			noti_tablectrl_item_changed(widget, ilk, onkey);
+			noti_table_item_changed(widget, ilk, onkey);
 	}
 
-	noti_tablectrl_owner(widget, NC_TABLELBCLK, ptd->table, ptd->item, ptd->onkey, (void*)pxp);
+	noti_table_owner(widget, NC_TABLELBCLK, ptd->table, ptd->item, ptd->onkey, (void*)pxp);
 }
 
 void hand_tablectrl_lbutton_dbclick(widget_t widget, const xpoint_t* pxp)
@@ -635,7 +472,7 @@ void hand_tablectrl_lbutton_dbclick(widget_t widget, const xpoint_t* pxp)
 	if (!ptd->table)
 		return;
 
-	noti_tablectrl_owner(widget, NC_TABLEDBCLK, ptd->table, ptd->item, 0, (void*)pxp);
+	noti_table_owner(widget, NC_TABLEDBCLK, ptd->table, ptd->item, 0, (void*)pxp);
 }
 
 void hand_tablectrl_rbutton_down(widget_t widget, const xpoint_t* pxp)
@@ -645,7 +482,7 @@ void hand_tablectrl_rbutton_down(widget_t widget, const xpoint_t* pxp)
 	if (!ptd->table)
 		return;
 
-	noti_tablectrl_reset_editor(widget, 1);
+	noti_table_reset_editor(widget, 1);
 }
 
 void hand_tablectrl_rbutton_up(widget_t widget, const xpoint_t* pxp)
@@ -655,7 +492,7 @@ void hand_tablectrl_rbutton_up(widget_t widget, const xpoint_t* pxp)
 	if (!ptd->table)
 		return;
 
-	noti_tablectrl_owner(widget, NC_TABLERBCLK, ptd->table, ptd->item, 0, (void*)pxp);
+	noti_table_owner(widget, NC_TABLERBCLK, ptd->table, ptd->item, 0, (void*)pxp);
 }
 
 void hand_tablectrl_size(widget_t widget, int code, const xsize_t* prs)
@@ -696,58 +533,11 @@ void hand_tablectrl_scroll(widget_t widget, bool_t bHorz, int nLine)
 void hand_tablectrl_wheel(widget_t widget, bool_t bHorz, int nDelta)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
-	scroll_t scr = { 0 };
-	int nLine;
-	widget_t win;
 
 	if (!ptd->table)
 		return;
 
-	widget_get_scroll_info(widget, bHorz, &scr);
-
-	if (bHorz)
-		nLine = (nDelta > 0) ? scr.min : -scr.min;
-	else
-		nLine = (nDelta < 0) ? scr.min : -scr.min;
-
-	if (widget_hand_scroll(widget, bHorz, nLine))
-	{
-		if (!bHorz && !(widget_get_style(widget) & WD_STYLE_VSCROLL))
-		{
-			if (!widget_is_valid(ptd->vsc))
-			{
-				ptd->vsc = show_vertbox(widget);
-			}
-			else
-			{
-				widget_erase(ptd->vsc, NULL);
-			}
-		}
-
-		return;
-	}
-
-	win = widget_get_parent(widget);
-
-	if (widget_is_valid(win))
-	{
-		widget_scroll(win, bHorz, nLine);
-	}
-}
-
-void hand_tablectrl_child_command(widget_t widget, int code, vword_t data)
-{
-	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
-
-	switch (code)
-	{
-	case COMMAND_COMMIT:
-		noti_tablectrl_commit_edit(widget);
-		break;
-	case COMMAND_ROLLBACK:
-		noti_tablectrl_rollback_edit(widget);
-		break;
-	}
+	widget_hand_wheel(widget, bHorz, nDelta);
 }
 
 void hand_tablectrl_paint(widget_t widget, visual_t dc, const xrect_t* pxr)
@@ -840,8 +630,6 @@ widget_t tablectrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* p
 		EVENT_ON_RBUTTON_DOWN(hand_tablectrl_rbutton_down)
 		EVENT_ON_RBUTTON_UP(hand_tablectrl_rbutton_up)
 
-		EVENT_ON_CHILD_COMMAND(hand_tablectrl_child_command)
-
 	EVENT_END_DISPATH
 
 	return widget_create(wname, wstyle, pxr, wparent, &ev);
@@ -899,7 +687,7 @@ void tablectrl_redraw(widget_t widget)
 	if (!ptd->table)
 		return;
 
-	noti_tablectrl_reset_editor(widget, 1);
+	noti_table_reset_editor(widget, 1);
 
 	b_valid = 0;
 	ilk = get_string_next_entity(ptd->table, LINK_FIRST);
@@ -908,12 +696,12 @@ void tablectrl_redraw(widget_t widget)
 		if (ilk == ptd->item)
 			b_valid = 1;
 
-		noti_tablectrl_owner(widget, NC_TABLEITEMCALCED, ptd->table, ilk, 0, NULL);
+		noti_table_owner(widget, NC_TABLEITEMCALCED, ptd->table, ilk, 0, NULL);
 
 		ilk = get_string_next_entity(ptd->table, ilk);
 	}
 
-	noti_tablectrl_owner(widget, NC_TABLECALCED, ptd->table, NULL, 0, NULL);
+	noti_table_owner(widget, NC_TABLECALCED, ptd->table, NULL, 0, NULL);
 
 	if (!b_valid)
 	{
@@ -934,13 +722,13 @@ void tablectrl_redraw_item(widget_t widget, link_t_ptr ent)
 	if (!ptd->table)
 		return;
 
-	noti_tablectrl_reset_editor(widget, 1);
+	noti_table_reset_editor(widget, 1);
 
 #ifdef _DEBUG
 	XDK_ASSERT(is_string_entity(ptd->table, ent));
 #endif
 
-	noti_tablectrl_owner(widget, NC_TABLEITEMCALCED, ptd->table, ent, 0, NULL);
+	noti_table_owner(widget, NC_TABLEITEMCALCED, ptd->table, ent, 0, NULL);
 
 	_tablectrl_item_rect(widget, ent, &xr);
 
@@ -949,7 +737,7 @@ void tablectrl_redraw_item(widget_t widget, link_t_ptr ent)
 	widget_erase(widget, &xr);
 }
 
-bool_t tablectrl_set_focus_item(widget_t widget, link_t_ptr ent)
+bool_t tablectrl_set_focus_item(widget_t widget, link_t_ptr ent, bool_t onkey)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
 	bool_t bRe;
@@ -968,16 +756,18 @@ bool_t tablectrl_set_focus_item(widget_t widget, link_t_ptr ent)
 
 	if (!bRe && ptd->item)
 	{
-		if (!noti_tablectrl_item_changing(widget))
+		if (!noti_table_item_changing(widget))
 			return 0;
 	}
 
 	if (!bRe && ent)
 	{
-		noti_tablectrl_item_changed(widget, ent, 0);
+		noti_table_item_changed(widget, ent, 0);
 
 		_tablectrl_ensure_visible(widget);
 	}
+
+	ptd->onkey = onkey;
 
 	return 1;
 }
@@ -994,20 +784,16 @@ link_t_ptr tablectrl_get_focus_item(widget_t widget)
 	return ptd->item;
 }
 
-void tablectrl_get_item_rect(widget_t widget, link_t_ptr elk, xrect_t* prt)
+bool_t tablectrl_get_focus_onkey(widget_t widget)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
 
 	XDK_ASSERT(ptd != NULL);
 
 	if (!ptd->table)
-		return;
+		return bool_false;
 
-#ifdef _DEBUG
-	XDK_ASSERT(is_string_entity(ptd->table, elk));
-#endif
-
-	_tablectrl_item_rect(widget, elk, prt);
+	return ptd->onkey;
 }
 
 void tablectrl_tabskip(widget_t widget, int nSkip)
@@ -1020,7 +806,7 @@ void tablectrl_tabskip(widget_t widget, int nSkip)
 	if (!ptd->table)
 		return;
 
-	noti_tablectrl_reset_editor(widget, 1);
+	noti_table_reset_editor(widget, 1);
 
 	switch (nSkip)
 	{
@@ -1045,8 +831,7 @@ void tablectrl_tabskip(widget_t widget, int nSkip)
 
 			if (plk)
 			{
-				ptd->onkey = 1;
-				tablectrl_set_focus_item(widget, plk);
+				tablectrl_set_focus_item(widget, plk, bool_true);
 			}
 		}
 		break;
@@ -1057,8 +842,7 @@ void tablectrl_tabskip(widget_t widget, int nSkip)
 
 			if (plk)
 			{
-				ptd->onkey = 1;
-				tablectrl_set_focus_item(widget, plk);
+				tablectrl_set_focus_item(widget, plk, bool_true);
 			}
 		}
 		break;
@@ -1067,8 +851,7 @@ void tablectrl_tabskip(widget_t widget, int nSkip)
 
 		if (plk)
 		{
-			ptd->onkey = 1;
-			tablectrl_set_focus_item(widget, plk);
+			tablectrl_set_focus_item(widget, plk, bool_true);
 		}
 		break;
 	case TABORDER_END:
@@ -1076,42 +859,43 @@ void tablectrl_tabskip(widget_t widget, int nSkip)
 
 		if (plk)
 		{
-			ptd->onkey = 1;
-			tablectrl_set_focus_item(widget, plk);
+			tablectrl_set_focus_item(widget, plk, bool_true);
 		}
 		break;
 	}
 }
 
-void tablectrl_set_item_key_text(widget_t widget, link_t_ptr elk, const tchar_t* token)
+bool_t tablectrl_set_item_key_text(widget_t widget, link_t_ptr elk, const tchar_t* token)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
 	xrect_t xr;
 	XDK_ASSERT(ptd != NULL);
 
 	if (!ptd->table)
-		return;
+		return bool_false;
 
 #ifdef _DEBUG
 	XDK_ASSERT(is_string_entity(ptd->table, elk));
 #endif
 
 	if (is_null(token))
-		return;
+		return bool_false;
 
 	if (compare_text(get_string_entity_key_ptr(elk), -1, token, -1, 0) == 0)
-		return;
+		return bool_true;
 
 	set_string_entity_key(elk, token, -1);
 
-	noti_tablectrl_owner(widget, NC_TABLEITEMUPDATE, ptd->table, elk, 1, NULL);
+	noti_table_owner(widget, NC_TABLEITEMUPDATE, ptd->table, elk, 1, NULL);
 
-	tablectrl_get_item_rect(widget, elk, &xr);
+	tablectrl_get_item_rect(widget, elk, bool_true, &xr);
 	pt_expand_rect(&xr, DEF_OUTER_FEED, DEF_OUTER_FEED);
 	widget_erase(widget, &xr);
+
+	return bool_true;
 }
 
-void tablectrl_set_item_val_text(widget_t widget, link_t_ptr elk, const tchar_t* token)
+bool_t tablectrl_set_item_val_text(widget_t widget, link_t_ptr elk, const tchar_t* token)
 {
 	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
 	xrect_t xr;
@@ -1119,23 +903,25 @@ void tablectrl_set_item_val_text(widget_t widget, link_t_ptr elk, const tchar_t*
 	XDK_ASSERT(ptd != NULL);
 
 	if (!ptd->table)
-		return;
+		return bool_false;
 
 #ifdef _DEBUG
 	XDK_ASSERT(is_string_entity(ptd->table, elk));
 #endif
 
 	if (compare_text(get_string_entity_val_ptr(elk), -1, token, -1, 0) == 0)
-		return;
+		return bool_true;
 
 	set_string_entity_val(elk, token, -1);
 	set_string_entity_dirty(elk, 1);
 
-	noti_tablectrl_owner(widget, NC_TABLEITEMUPDATE, ptd->table, elk, 0, NULL);
+	noti_table_owner(widget, NC_TABLEITEMUPDATE, ptd->table, elk, 0, NULL);
 
-	tablectrl_get_item_rect(widget, elk, &xr);
+	tablectrl_get_item_rect(widget, elk, bool_false, &xr);
 	pt_expand_rect(&xr, DEF_OUTER_FEED, DEF_OUTER_FEED);
 	widget_erase(widget, &xr);
+
+	return bool_true;
 }
 
 void tablectrl_accept(widget_t widget, bool_t bAccept)
@@ -1148,7 +934,7 @@ void tablectrl_accept(widget_t widget, bool_t bAccept)
 	if (!ptd->table)
 		return;
 
-	noti_tablectrl_reset_editor(widget, bAccept);
+	noti_table_reset_editor(widget, bAccept);
 
 	ilk = get_string_next_entity(ptd->table, LINK_FIRST);
 	while (ilk)
@@ -1184,18 +970,18 @@ bool_t tablectrl_delete_item(widget_t widget, link_t_ptr ilk)
 		return 0;
 
 
-	noti_tablectrl_reset_editor(widget, 0);
+	noti_table_reset_editor(widget, 0);
 
 #ifdef _DEBUG
 	XDK_ASSERT(is_string_entity(ptd->table, ilk));
 #endif
 
-	if (!noti_tablectrl_item_delete(widget, ilk))
+	if (!noti_table_item_delete(widget, ilk))
 		return 0;
 
 	if (ilk == ptd->item)
 	{
-		noti_tablectrl_item_changing(widget);
+		noti_table_item_changing(widget);
 	}
 
 	nlk = get_string_next_entity(ptd->table, ilk);
@@ -1207,7 +993,7 @@ bool_t tablectrl_delete_item(widget_t widget, link_t_ptr ilk)
 	tablectrl_redraw(widget);
 
 	if (nlk)
-		tablectrl_set_focus_item(widget, nlk);
+		tablectrl_set_focus_item(widget, nlk, bool_true);
 
 	return 1;
 }
@@ -1222,7 +1008,7 @@ link_t_ptr tablectrl_insert_item(widget_t widget, link_t_ptr pre)
 	if (!ptd->table)
 		return NULL;
 
-	noti_tablectrl_reset_editor(widget, 0);
+	noti_table_reset_editor(widget, 0);
 
 	if (pre == LINK_FIRST)
 		pre = get_string_next_entity(ptd->table, LINK_FIRST);
@@ -1240,7 +1026,7 @@ link_t_ptr tablectrl_insert_item(widget_t widget, link_t_ptr pre)
 	ilk = insert_string_entity(ptd->table, pre);
 	set_string_entity_dirty(ilk, 0);
 
-	if (!noti_tablectrl_item_insert(widget, ilk))
+	if (!noti_table_item_insert(widget, ilk))
 	{
 		delete_string_entity(ptd->table, ilk);
 		return NULL;
@@ -1248,8 +1034,7 @@ link_t_ptr tablectrl_insert_item(widget_t widget, link_t_ptr pre)
 
 	tablectrl_redraw(widget);
 
-	ptd->onkey = 1;
-	tablectrl_set_focus_item(widget, ilk);
+	tablectrl_set_focus_item(widget, ilk, bool_true);
 
 	return ilk;
 }
@@ -1300,4 +1085,16 @@ bool_t tablectrl_get_lock(widget_t widget)
 	XDK_ASSERT(ptd != NULL);
 
 	return ptd->b_lock;
+}
+
+void tablectrl_get_item_rect(widget_t widget, link_t_ptr ilk, bool_t key, xrect_t* pxr)
+{
+	tablectrl_delta_t* ptd = GETTABLECTRLDELTA(widget);
+
+	XDK_ASSERT(ptd != NULL);
+
+	if(key)
+		_tablectrl_item_key_rect(widget, ilk, pxr);
+	else
+		_tablectrl_item_val_rect(widget, ilk, pxr);
 }

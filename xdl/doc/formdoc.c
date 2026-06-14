@@ -294,7 +294,7 @@ typedef struct _field_compare_param_t{
 	int nocase;
 }field_compare_param_t;
 
-int _field_compare_func(link_t_ptr flk1, link_t_ptr flk2, void* parm)
+int CALLBACK _field_compare_func(link_t_ptr flk1, link_t_ptr flk2, void* parm)
 {
 	field_compare_param_t* pcp = (field_compare_param_t*)parm;
 
@@ -1009,6 +1009,33 @@ void get_field_datetime(link_t_ptr flk,xdate_t* pdt)
 	parse_datetime(pdt,get_field_text_ptr(flk));
 }
 
+link_t_ptr get_field_embed_data(link_t_ptr flk)
+{
+	const tchar_t *cls;
+
+	cls = get_field_class_ptr(flk);
+
+	XDK_ASSERT(IS_EMBED_FIELD(cls));
+
+	return get_dom_first_child_node(flk);
+}
+
+void set_field_embed_data(link_t_ptr flk, link_t_ptr doc)
+{
+	const tchar_t *cls;
+	link_t_ptr plk;
+
+	cls = get_field_class_ptr(flk);
+
+	XDK_ASSERT(IS_EMBED_FIELD(cls));
+
+	plk = detach_dom_node(flk, LINK_FIRST);
+	if (plk)
+		destroy_dom_doc(plk);
+
+	attach_dom_node(flk, LINK_LAST, doc);
+}
+
 link_t_ptr get_field_embed_rich(link_t_ptr flk)
 {
 	const tchar_t *cls;
@@ -1274,8 +1301,7 @@ int calc_form_field(link_t_ptr ptr,link_t_ptr flk)
 					set_field_text(flk,tmp, -1);
 					ds = 1;
 				}
-				if(tmp)
-					xmem_free(tmp);
+				if(tmp) xmem_free(tmp);
 			}
 
 			destroy_multi_tree(macro);

@@ -349,8 +349,8 @@ void parse_bytes_range(tchar_t* sz_range, dword_t* phoff, dword_t* ploff, dword_
 			token++;
 	}
 
-	*phoff = GETHDWORD(ll_from);
-	*ploff = GETLDWORD(ll_from);
+	*phoff = GETLWORDH(ll_from);
+	*ploff = GETLWORDL(ll_from);
 	*psize = (dword_t)(ll_to - ll_from + 1);
 	*ptotal = ll_total;
 }

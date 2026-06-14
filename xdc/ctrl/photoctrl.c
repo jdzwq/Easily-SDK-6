@@ -41,8 +41,6 @@ typedef struct _photo_delta_t{
 	bitmap_t bmp;
 
 	widget_t editor;
-	widget_t hsc;
-	widget_t vsc;
 
 	bool_t b_drag;
 	bool_t b_size;
@@ -329,7 +327,7 @@ static bitmap_t _photoctrl_merge_anno(widget_t widget)
 	{
 		_photoctrl_arti_rect(widget, ilk, &xr);
 
-		//noti_photo_owner(widget, NC_PHOTOANNODRAW, ilk, (void*)&xr, memdc);
+		//noti_photo_owner(widget, NC_PHOTOARTIDRAW, ilk, (void*)&xr, memdc);
 	}
 
 	membm = create_context_bitmap(memdc);
@@ -369,6 +367,7 @@ static void _photoctrl_reset_page(widget_t widget)
 	widget_reset_scroll(widget, 0);
 }
 /*******************************************************************************************************/
+
 int noti_photo_owner(widget_t widget, unsigned int code, link_t_ptr arti, void* data, visual_t rdc)
 {
 	photo_delta_t* ptd = GETPHOTODELTA(widget);
@@ -399,7 +398,7 @@ void noti_photo_arti_drag(widget_t widget, int x, int y)
 
 	pt.x = x;
 	pt.y = y;
-	noti_photo_owner(widget, NC_PHOTOANNODRAG, ptd->arti, (void*)&pt, NULL);
+	noti_photo_owner(widget, NC_PHOTOARTIDRAG, ptd->arti, (void*)&pt, NULL);
 }
 
 void noti_photo_arti_drop(widget_t widget, int x, int y)
@@ -450,7 +449,7 @@ void noti_photo_arti_drop(widget_t widget, int x, int y)
 
 	pt.x = x;
 	pt.y = y;
-	noti_photo_owner(widget, NC_PHOTOANNODROP, ptd->arti, (void*)&pt, NULL);
+	noti_photo_owner(widget, NC_PHOTOARTIDROP, ptd->arti, (void*)&pt, NULL);
 }
 
 void noti_photo_arti_sizing(widget_t widget, int x, int y)
@@ -464,7 +463,7 @@ void noti_photo_arti_sizing(widget_t widget, int x, int y)
 
 	_photoctrl_arti_rect(widget, ptd->arti, &xr);
 
-	noti_photo_owner(widget, NC_PHOTOANNOSIZING, ptd->arti, (void*)&xr, NULL);
+	noti_photo_owner(widget, NC_PHOTOARTISIZING, ptd->arti, (void*)&xr, NULL);
 }
 
 void noti_photo_arti_sized(widget_t widget, int x, int y)
@@ -514,7 +513,7 @@ void noti_photo_arti_sized(widget_t widget, int x, int y)
 	pt_expand_rect(&xr_org, 100, 100);
 	widget_erase(widget, &xr_org);
 
-	noti_photo_owner(widget, NC_PHOTOANNOSIZED, ptd->arti, (void*)&xr, NULL);
+	noti_photo_owner(widget, NC_PHOTOARTISIZED, ptd->arti, (void*)&xr, NULL);
 }
 
 bool_t noti_photo_arti_changing(widget_t widget)
@@ -524,7 +523,7 @@ bool_t noti_photo_arti_changing(widget_t widget)
 
 	XDK_ASSERT(ptd->arti);
 
-	if (noti_photo_owner(widget, NC_PHOTOANNOCHANGING, ptd->arti, NULL, NULL))
+	if (noti_photo_owner(widget, NC_PHOTOARTICHANGING, ptd->arti, NULL, NULL))
 		return 0;
 
 	_photoctrl_arti_rect(widget, ptd->arti, &xr);
@@ -553,7 +552,7 @@ void noti_photo_arti_changed(widget_t widget, link_t_ptr ilk)
 
 	widget_erase(widget, &xr);
 
-	noti_photo_owner(widget, NC_PHOTOANNOCHANGED, ptd->arti, NULL, NULL);
+	noti_photo_owner(widget, NC_PHOTOARTICHANGED, ptd->arti, NULL, NULL);
 }
 
 void noti_photo_begin_edit(widget_t widget)
@@ -573,7 +572,7 @@ void noti_photo_begin_edit(widget_t widget)
 
 	_photoctrl_arti_rect(widget, ptd->arti, &xr);
 
-	if (noti_photo_owner(widget, NC_PHOTOANNOEDITING, ptd->arti, NULL, NULL))
+	if (noti_photo_owner(widget, NC_PHOTOARTIEDITING, ptd->arti, NULL, NULL))
 		return;
 
 	ptd->editor = fireedit_create(widget, &xr);
@@ -605,7 +604,7 @@ void noti_photo_commit_edit(widget_t widget)
 
 	text = (tchar_t*)editbox_get_text_ptr(ptd->editor);
 
-	if (!noti_photo_owner(widget, NC_PHOTOANNOCOMMIT, ptd->arti, NULL, NULL))
+	if (!noti_photo_owner(widget, NC_PHOTOARTICOMMIT, ptd->arti, NULL, NULL))
 	{
 		_photoctrl_done(widget);
 
@@ -636,7 +635,7 @@ void noti_photo_rollback_edit(widget_t widget)
 
 	XDK_ASSERT(ptd->arti);
 
-	noti_photo_owner(widget, NC_PHOTOANNOROLLBACK, ptd->arti, NULL, NULL);
+	noti_photo_owner(widget, NC_PHOTOARTIROLLBACK, ptd->arti, NULL, NULL);
 
 	editctrl = ptd->editor;
 	ptd->editor = (widget_t)0;
@@ -655,27 +654,6 @@ void noti_photo_reset_editor(widget_t widget, bool_t bCommit)
 			noti_photo_commit_edit(widget);
 		else
 			noti_photo_rollback_edit(widget);
-	}
-}
-
-void noti_photo_reset_scroll(widget_t widget, bool_t bUpdate)
-{
-	photo_delta_t* ptd = GETPHOTODELTA(widget);
-
-	if (widget_is_valid(ptd->vsc))
-	{
-		if (bUpdate)
-			widget_erase(ptd->vsc, NULL);
-		else
-			widget_close(ptd->vsc, 0);
-	}
-
-	if (widget_is_valid(ptd->hsc))
-	{
-		if (bUpdate)
-			widget_erase(ptd->hsc, NULL);
-		else
-			widget_close(ptd->hsc, 0);
 	}
 }
 /*****************************************************************************/
@@ -704,12 +682,6 @@ void hand_photo_destroy(widget_t widget)
 	XDK_ASSERT(ptd != NULL);
 
 	noti_photo_reset_editor(widget, 0);
-
-	if (widget_is_valid(ptd->hsc))
-		widget_destroy(ptd->hsc);
-
-	if (widget_is_valid(ptd->vsc))
-		widget_destroy(ptd->vsc);
 
 	if (ptd->bmp)
 		destroy_bitmap(ptd->bmp);
@@ -913,48 +885,7 @@ void hand_photo_wheel(widget_t widget, bool_t bHorz, int nDelta)
 
 	noti_photo_reset_editor(widget, 1);
 
-	widget_get_scroll_info(widget, bHorz, &scr);
-
-	if (bHorz)
-		nLine = (nDelta > 0) ? scr.min : -scr.min;
-	else
-		nLine = (nDelta < 0) ? scr.min : -scr.min;
-
-	if (widget_hand_scroll(widget, bHorz, nLine))
-	{
-		if (!bHorz && !(widget_get_style(widget) & WD_STYLE_VSCROLL))
-		{
-			if (!widget_is_valid(ptd->vsc))
-			{
-				ptd->vsc = show_vertbox(widget);
-			}
-			else
-			{
-				widget_erase(ptd->vsc, NULL);
-			}
-		}
-
-		if (bHorz && !(widget_get_style(widget) & WD_STYLE_HSCROLL))
-		{
-			if (!widget_is_valid(ptd->hsc))
-			{
-				ptd->hsc = show_horzbox(widget);
-			}
-			else
-			{
-				widget_erase(ptd->hsc, NULL);
-			}
-		}
-
-		return;
-	}
-
-	win = widget_get_parent(widget);
-
-	if (widget_is_valid(win))
-	{
-		widget_scroll(win, bHorz, nLine);
-	}
+	widget_hand_wheel(widget, bHorz, nDelta);
 }
 
 void hand_photo_keydown(widget_t widget, dword_t ks, int key)
@@ -1302,6 +1233,36 @@ link_t_ptr photoctrl_get_focus_arti(widget_t widget)
 	XDK_ASSERT(ptd != NULL);
 
 	return ptd->arti;
+}
+
+void photoctrl_get_arti_rect(widget_t widget, link_t_ptr ilk, xrect_t* pxr)
+{
+	photo_delta_t* ptd = GETPHOTODELTA(widget);
+
+	XDK_ASSERT(ptd != NULL);
+
+	_photoctrl_arti_rect(widget, ilk, pxr);
+}
+
+bool_t photoctrl_set_arti_text(widget_t widget, link_t_ptr ilk, const tchar_t* text)
+{
+	photo_delta_t* ptd = GETPHOTODELTA(widget);
+	xrect_t xr;
+
+	XDK_ASSERT(ptd != NULL);
+
+	if (xscmp(text, get_anno_arti_text_ptr(ilk)) != 0)
+	{
+		_photoctrl_done(widget);
+
+		set_anno_arti_text(ptd->arti, text);
+
+		_photoctrl_arti_rect(widget, ptd->arti, &xr);
+		pt_expand_rect(&xr, 100, 100);
+		widget_erase(widget, &xr);
+	}
+
+	return 1;
 }
 
 void photoctrl_commit(widget_t widget)

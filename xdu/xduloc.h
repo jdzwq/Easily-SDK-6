@@ -54,37 +54,6 @@ LOC_API void	_render_context(visual_t src, int srcx, int srcy, visual_t dst, int
 LOC_API float	_pixel_metric(visual_t rdc);
 LOC_API float	_font_metric(visual_t rdc, const tchar_t* xf_size);
 
-#ifdef XDU_SUPPORT_CONTEXT_BITMAP
-LOC_API bitmap_t _create_context_bitmap(visual_t rdc);
-LOC_API bitmap_t _create_color_bitmap(visual_t rdc, const xcolor_t* pxc, int w, int h);
-LOC_API bitmap_t _create_pattern_bitmap(visual_t rdc, const xcolor_t* pxc_front, const xcolor_t* pxc_back, int w, int h);
-LOC_API bitmap_t _create_gradient_bitmap(visual_t rdc, const xcolor_t* pxc_near, const xcolor_t* pxc_center,int w, int h, const tchar_t* lay);
-LOC_API bitmap_t _create_code128_bitmap(visual_t rdc, const xcolor_t* pxc_front, const xcolor_t* pxc_back, const byte_t* bar_buf, int bar_cols);
-LOC_API bitmap_t _create_pdf417_bitmap(visual_t rdc, const xcolor_t* pxc_front, const xcolor_t* pxc_back, const byte_t* bar_buf, int bar_rows, int bar_cols);
-LOC_API bitmap_t _create_qrcode_bitmap(visual_t rdc, const xcolor_t* pxc_front, const xcolor_t* pxc_back, const byte_t* bar_buf, int bar_rows, int bar_cols);
-LOC_API bitmap_t _create_storage_bitmap(visual_t rdc, const tchar_t* filename);
-LOC_API bitmap_t _load_bitmap_from_bytes(visual_t rdc, const unsigned char* pb, dword_t len);
-LOC_API dword_t	_save_bitmap_to_bytes(visual_t rdc, bitmap_t rb, unsigned char* pb, dword_t max);
-LOC_API dword_t	_get_bitmap_bytes(bitmap_t rdc);
-LOC_API void	_get_bitmap_size(bitmap_t rb, int* pw, int* ph);
-LOC_API void	_destroy_bitmap(bitmap_t bmp);
-#ifdef XDU_SUPPORT_SHELL
-LOC_API bitmap_t _load_bitmap_from_icon(visual_t rdc, const tchar_t* iname);
-LOC_API bitmap_t _load_bitmap_from_thumb(visual_t rdc, const tchar_t* fname);
-#endif
-#endif
-#ifdef XDU_SUPPORT_CONTEXT_PRINTER
-LOC_API bool_t _default_printer_mode(dev_prn_t* pmod);
-LOC_API bool_t _setup_printer_mode(widget_t wnd, dev_prn_t* pmod);
-LOC_API visual_t _create_printer_context(const dev_prn_t* pmod);
-LOC_API void	_destroy_printer_context(visual_t rdc);
-LOC_API void	_begin_page(visual_t rdc);
-LOC_API void	_end_page(visual_t rdc);
-LOC_API void	_begin_doc(visual_t rdc, const tchar_t* docname);
-LOC_API void	_end_doc(visual_t rdc);
-#endif
-
-#ifdef XDU_SUPPORT_CONTEXT_GDI
 LOC_API void _gdi_init(int osv);
 LOC_API void _gdi_uninit(void);
 LOC_API void _gdi_get_point(visual_t rdc, xcolor_t* pxc, const xpoint_t* ppt);
@@ -122,7 +91,36 @@ LOC_API fontset_t _gdi_get_fontset(visual_t rdc);
 LOC_API fontset_t _gdi_create_fontset(const xfont_t* pxf);
 LOC_API void 	_gdi_destroy_fontset(fontset_t ft);
 LOC_API void 	_gdi_word_size(fontset_t ft, const tchar_t* pch, int chs, xsize_t* pxs);
-#endif //XDU_SUPPORT_CONTEXT_GDI
+
+#ifdef XDU_SUPPORT_CONTEXT_BITMAP
+LOC_API bitmap_t _create_context_bitmap(visual_t rdc);
+LOC_API bitmap_t _create_color_bitmap(visual_t rdc, const xcolor_t* pxc, int w, int h);
+LOC_API bitmap_t _create_pattern_bitmap(visual_t rdc, const xcolor_t* pxc_front, const xcolor_t* pxc_back, int w, int h);
+LOC_API bitmap_t _create_gradient_bitmap(visual_t rdc, const xcolor_t* pxc_near, const xcolor_t* pxc_center,int w, int h, const tchar_t* lay);
+LOC_API bitmap_t _create_code128_bitmap(visual_t rdc, const xcolor_t* pxc_front, const xcolor_t* pxc_back, const byte_t* bar_buf, int bar_cols);
+LOC_API bitmap_t _create_pdf417_bitmap(visual_t rdc, const xcolor_t* pxc_front, const xcolor_t* pxc_back, const byte_t* bar_buf, int bar_rows, int bar_cols);
+LOC_API bitmap_t _create_qrcode_bitmap(visual_t rdc, const xcolor_t* pxc_front, const xcolor_t* pxc_back, const byte_t* bar_buf, int bar_rows, int bar_cols);
+LOC_API bitmap_t _create_storage_bitmap(visual_t rdc, const tchar_t* filename);
+LOC_API bitmap_t _load_bitmap_from_bytes(visual_t rdc, const unsigned char* pb, dword_t len);
+LOC_API dword_t	_save_bitmap_to_bytes(visual_t rdc, bitmap_t rb, unsigned char* pb, dword_t max);
+LOC_API dword_t	_get_bitmap_bytes(bitmap_t rdc);
+LOC_API void	_get_bitmap_size(bitmap_t rb, int* pw, int* ph);
+LOC_API void	_destroy_bitmap(bitmap_t bmp);
+#ifdef XDU_SUPPORT_SHELL
+LOC_API bitmap_t _load_bitmap_from_icon(visual_t rdc, const tchar_t* iname);
+LOC_API bitmap_t _load_bitmap_from_thumb(visual_t rdc, const tchar_t* fname);
+#endif
+#endif
+#ifdef XDU_SUPPORT_CONTEXT_PRINTER
+LOC_API bool_t _default_printer_mode(dev_prn_t* pmod);
+LOC_API bool_t _setup_printer_mode(widget_t wnd, dev_prn_t* pmod);
+LOC_API visual_t _create_printer_context(const dev_prn_t* pmod);
+LOC_API void	_destroy_printer_context(visual_t rdc);
+LOC_API void	_begin_page(visual_t rdc);
+LOC_API void	_end_page(visual_t rdc);
+LOC_API void	_begin_doc(visual_t rdc, const tchar_t* docname);
+LOC_API void	_end_doc(visual_t rdc);
+#endif
 
 #ifdef XDU_SUPPORT_CONTEXT_OPENGL
 LOC_API res_glc_t	_widget_get_glctx(widget_t wt);
@@ -192,6 +190,7 @@ LOC_API void	_widget_layout(widget_t wt);
 LOC_API void	_widget_erase(widget_t wt, const xrect_t* prt);
 LOC_API void	_widget_enable(widget_t wt, bool_t b);
 LOC_API void	_widget_active(widget_t wt);
+LOC_API void	_widget_enable_hover(widget_t wt, bool_t b);
 
 LOC_API void	_widget_set_title(widget_t wt, const tchar_t* token);
 LOC_API int		_widget_get_title(widget_t wt, tchar_t* buf, int max);
@@ -236,7 +235,7 @@ LOC_API void	_message_quit(int code);
 LOC_API void	_adjust_widget_size(dword_t wstyle, xsize_t* pxs);
 LOC_API void	_calc_widget_border(dword_t wstyle, border_t* pbd);
 LOC_API void	_get_screen_size(xsize_t* pxs);
-LOC_API void	_get_desktop_size(xsize_t* pxs);
+LOC_API void	_get_desktop_rect(xrect_t* pxr);
 LOC_API void	_screen_size_to_pt(xsize_t* pls);
 LOC_API void	_screen_size_to_mm(xsize_t* pxs);
 

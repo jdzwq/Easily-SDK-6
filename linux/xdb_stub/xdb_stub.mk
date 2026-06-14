@@ -12,7 +12,8 @@ LFLAGS = -shared -fPIC -pthread
 
 MODULE = xdb_stub
 ARCH = aarch64
-VER = 6
+MAX_VER = 6
+MIN_VER = 0
 
 INC_PATH = ../../include
 SRC_PATH = ../../xdb
@@ -22,7 +23,7 @@ LIB_PATH = /usr/local/lib
 OBJ_PATH = ~/Easily-temp/linux/$(MODULE)/$(ARCH)
 OUT_PATH = ~/Easily-app-6/linux/lib
 
-TARGET = lib$(MODULE).so.$(VER)
+TARGET = lib$(MODULE).so.$(MAX_VER).$(MIN_VER).$(ARCH)
 LINKIT = lib$(MODULE).so
 
 LIBS = -L $(LIB_PATH) -lxdk -lxdl

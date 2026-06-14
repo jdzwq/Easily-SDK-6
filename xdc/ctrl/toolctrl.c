@@ -100,20 +100,6 @@ int noti_tool_owner(widget_t widget, unsigned int code, link_t_ptr tool, link_t_
 	return nf.ret;
 }
 
-void noti_tool_item_leave(widget_t widget)
-{
-	tool_delta_t* ptd = GETTOOLDELTA(widget);
-
-	XDK_ASSERT(ptd->hover);
-
-	ptd->hover = NULL;
-
-	if (widget_is_hotvoer(widget))
-	{
-		//widget_track_mouse(widget, MS_TRACK_HOVER | MS_TRACK_LEAVE);
-	}
-}
-
 void noti_tool_item_enter(widget_t widget, link_t_ptr plk)
 {
 	tool_delta_t* ptd = GETTOOLDELTA(widget);
@@ -123,10 +109,18 @@ void noti_tool_item_enter(widget_t widget, link_t_ptr plk)
 
 	ptd->hover = plk;
 
-	if (widget_is_hotvoer(widget))
-	{
-		//widget_track_mouse(widget, MS_TRACK_HOVER | MS_TRACK_LEAVE);
-	}
+	widget_enable_hover(widget, bool_true);
+}
+
+void noti_tool_item_leave(widget_t widget)
+{
+	tool_delta_t* ptd = GETTOOLDELTA(widget);
+
+	XDK_ASSERT(ptd->hover);
+
+	ptd->hover = NULL;
+
+	widget_enable_hover(widget, bool_false);
 }
 
 void noti_tool_item_hover(widget_t widget, int x, int y)

@@ -43,10 +43,6 @@ typedef struct _form_delta_t{
 
 	short cur_page;
 	short max_page;
-
-	widget_t editor;
-	widget_t hsc;
-	widget_t vsc;
 }form_delta_t;
 
 #define GETFORMDELTA(ph) 	(form_delta_t*)widget_get_user_delta(ph)
@@ -240,10 +236,7 @@ void noti_form_field_enter(widget_t widget, link_t_ptr flk)
 
 	ptd->hover = flk;
 
-	if (widget_is_hotvoer(widget))
-	{
-		//widget_track_mouse(widget, MS_TRACK_HOVER | MS_TRACK_LEAVE);
-	}
+	widget_enable_hover(widget, bool_true);
 }
 
 void noti_form_field_leave(widget_t widget)
@@ -254,10 +247,7 @@ void noti_form_field_leave(widget_t widget)
 
 	ptd->hover = NULL;
 
-	if (widget_is_hotvoer(widget))
-	{
-		//widget_track_mouse(widget, MS_TRACK_HOVER | MS_TRACK_LEAVE);
-	}
+	widget_enable_hover(widget, bool_false);
 }
 
 void noti_form_field_hover(widget_t widget, int x, int y)
@@ -272,932 +262,18 @@ void noti_form_field_hover(widget_t widget, int x, int y)
 	noti_form_owner(widget, NC_FIELDHOVER, ptd->form, ptd->hover, (void*)&xp);
 }
 
-void noti_form_begin_edit(widget_t widget)
-{
-	form_delta_t* ptd = GETFORMDELTA(widget);
-	const tchar_t* fclass;
-	const tchar_t* editor;
-	const tchar_t* text;
-	bool_t checked;
-	link_t_ptr data;
-
-	xrect_t xr;
-
-	EDITDELTA fd = { 0 };
-
-	color_mod_t ob = { 0 };
-	xfont_t xf = { 0 };
-	xface_t xa = { 0 };
-
-	XDK_ASSERT(ptd->field);
-
-	if (widget_is_valid(ptd->editor))
-		return;
-
-	if (!get_field_focusable(ptd->field))
-	{
-		return;
-	}
-
-	fclass = get_field_class_ptr(ptd->field);
-
-	if (compare_text(fclass, -1, DOC_FORM_TEXT, -1, 0) == 0)
-	{
-		editor = get_field_editor_ptr(ptd->field);
-	}
-	else if (compare_text(fclass, -1, DOC_FORM_CHECK, -1, 0) == 0)
-	{
-		editor = ATTR_EDITOR_FIRECHECK;
-	}
-	else if (compare_text(fclass, -1, DOC_FORM_RICH, -1, 0) == 0)
-	{
-		editor = ATTR_EDITOR_RICHBOX;
-	}
-	else if (compare_text(fclass, -1, DOC_FORM_TAG, -1, 0) == 0)
-	{
-		editor = ATTR_EDITOR_TAGBOX;
-	}
-	else if (compare_text(fclass, -1, DOC_FORM_TABLE, -1, 0) == 0)
-	{
-		editor = ATTR_EDITOR_TABLEBOX;
-	}
-	else if (compare_text(fclass, -1, DOC_FORM_MEMO, -1, 0) == 0)
-	{
-		editor = ATTR_EDITOR_MEMOBOX;
-	}
-	else if (compare_text(fclass, -1, DOC_FORM_GRID, -1, 0) == 0)
-	{
-		editor = ATTR_EDITOR_GRIDBOX;
-	}
-	else if (compare_text(fclass, -1, DOC_FORM_STATIS, -1, 0) == 0)
-	{
-		editor = ATTR_EDITOR_STATISBOX;
-	}
-	else if (compare_text(fclass, -1, DOC_FORM_FORM, -1, 0) == 0)
-	{
-		editor = ATTR_EDITOR_FORMBOX;
-	}
-	else
-	{
-		return;
-	}
-
-	default_xfont(&xf);
-	parse_xfont_from_style(&xf, get_field_style_ptr(ptd->field));
-	default_xface(&xa);
-	parse_xface_from_style(&xa, get_field_style_ptr(ptd->field));
-	widget_get_color_mode(widget, &ob);
-
-	_formctrl_field_rect(widget, ptd->field, &xr);
-	pt_expand_rect(&xr, DEF_INNER_FEED, DEF_INNER_FEED);
-
-	if (compare_text(editor, -1, ATTR_EDITOR_FIREEDIT, -1, 0) == 0)
-	{
-		if (noti_form_owner(widget, NC_FIELDEDITING, ptd->form, ptd->field, NULL))
-			return;
-
-		ptd->editor = fireedit_create(widget, &xr);
-		XDK_ASSERT(ptd->editor);
-		widget_set_user_id(ptd->editor, IDC_FIREEDIT);
-		widget_set_owner(ptd->editor, widget);
-
-		widget_set_color_mode(ptd->editor, &ob);
-		editbox_set_xfont(ptd->editor, &xf);
-		editbox_set_xface(ptd->editor, &xa);
-
-		widget_show(ptd->editor, WS_SHOW_NORMAL);
-		widget_set_focus(ptd->editor);
-
-		text = get_field_text_ptr(ptd->field);
-		editbox_set_text(ptd->editor, text);
-		editbox_selectall(ptd->editor);
-	}
-	else if (compare_text(editor, -1, ATTR_EDITOR_FIRECHECK, -1, 0) == 0)
-	{
-		if (is_null(get_field_value_ptr(ptd->field)))
-			return;
-
-		checked = (compare_text(get_field_text_ptr(ptd->field), -1, get_field_value_ptr(ptd->field), -1, 0) == 0) ? 1 : 0;
-		if (checked)
-			formctrl_set_field_text(widget, ptd->field, NULL);
-		else
-			formctrl_set_field_text(widget, ptd->field, get_field_value_ptr(ptd->field));
-
-		_formctrl_reset_group(widget);
-		return;
-	}
-	else if (compare_text(editor, -1, ATTR_EDITOR_FIRENUM, -1, 0) == 0)
-	{
-		if (noti_form_owner(widget, NC_FIELDEDITING, ptd->form, ptd->field, NULL))
-			return;
-
-		ptd->editor = firenum_create(widget, &xr);
-		XDK_ASSERT(ptd->editor);
-		widget_set_user_id(ptd->editor, IDC_FIRENUM);
-		widget_set_owner(ptd->editor, widget);
-
-		widget_set_color_mode(ptd->editor, &ob);
-		editbox_set_xfont(ptd->editor, &xf);
-
-		widget_show(ptd->editor, WS_SHOW_NORMAL);
-		widget_set_focus(ptd->editor);
-		
-		text = get_field_text_ptr(ptd->field);
-		editbox_set_text(ptd->editor, text);
-		editbox_selectall(ptd->editor);
-	}
-	else if (compare_text(editor, -1, ATTR_EDITOR_FIREDATE, -1, 0) == 0)
-	{
-		if (noti_form_owner(widget, NC_FIELDEDITING, ptd->form, ptd->field, NULL))
-			return;
-
-		ptd->editor = firedate_create(widget, &xr);
-		XDK_ASSERT(ptd->editor);
-		widget_set_user_id(ptd->editor, IDC_FIREDATE);
-		widget_set_owner(ptd->editor, widget);
-
-		widget_set_color_mode(ptd->editor, &ob);
-		editbox_set_xfont(ptd->editor, &xf);
-
-		widget_show(ptd->editor, WS_SHOW_NORMAL);
-		widget_set_focus(ptd->editor);
-
-		text = get_field_text_ptr(ptd->field);
-		editbox_set_text(ptd->editor, text);
-		editbox_selectall(ptd->editor);
-	}
-	else if (compare_text(editor, -1, ATTR_EDITOR_FIRETIME, -1, 0) == 0)
-	{
-		if (noti_form_owner(widget, NC_FIELDEDITING, ptd->form, ptd->field, NULL))
-			return;
-
-		ptd->editor = firetime_create(widget, &xr);
-		XDK_ASSERT(ptd->editor);
-		widget_set_user_id(ptd->editor, IDC_FIRETIME);
-		widget_set_owner(ptd->editor, widget);
-
-		widget_set_color_mode(ptd->editor, &ob);
-		editbox_set_xfont(ptd->editor, &xf);
-
-		widget_show(ptd->editor, WS_SHOW_NORMAL);
-		widget_set_focus(ptd->editor);
-
-		text = get_field_text_ptr(ptd->field);
-		editbox_set_text(ptd->editor, text);
-		editbox_selectall(ptd->editor);
-	}
-	else if (compare_text(editor, -1, ATTR_EDITOR_FIRELIST, -1, 0) == 0)
-	{
-		if (noti_form_owner(widget, NC_FIELDEDITING, ptd->form, ptd->field, NULL))
-			return;
-		
-		data = get_field_options_table(ptd->field);
-		if (!data)
-			return;
-
-		ptd->editor = firelist_create(widget, &xr, data);
-		XDK_ASSERT(ptd->editor);
-		widget_set_user_id(ptd->editor, IDC_FIRELIST);
-		widget_set_owner(ptd->editor, widget);
-
-		widget_set_color_mode(ptd->editor, &ob);
-		editbox_set_xfont(ptd->editor, &xf);
-
-		widget_show(ptd->editor, WS_SHOW_NORMAL);
-		widget_set_focus(ptd->editor);
-
-		text = get_field_text_ptr(ptd->field);
-		editbox_set_text(ptd->editor, text);
-		editbox_selectall(ptd->editor);
-	}
-	else if (compare_text(editor, -1, ATTR_EDITOR_FIREWORDS, -1, 0) == 0)
-	{
-		if (noti_form_owner(widget, NC_FIELDEDITING, ptd->form, ptd->field, (void*)&fd))
-			return;
-
-		data = (link_t_ptr)fd.data;
-		ptd->editor = firewords_create(widget, &xr, data);
-		XDK_ASSERT(ptd->editor);
-		widget_set_user_id(ptd->editor, IDC_FIREWORDS);
-		widget_set_owner(ptd->editor, widget);
-
-		widget_set_color_mode(ptd->editor, &ob);
-		editbox_set_xfont(ptd->editor, &xf);
-
-		widget_show(ptd->editor, WS_SHOW_NORMAL);
-		widget_set_focus(ptd->editor);
-
-		text = get_field_text_ptr(ptd->field);
-		editbox_set_text(ptd->editor, text);
-		editbox_selectall(ptd->editor);
-	}
-	else if (compare_text(editor, -1, ATTR_EDITOR_FIREGRID, -1, 0) == 0)
-	{
-		if (noti_form_owner(widget, NC_FIELDEDITING, ptd->form, ptd->field, (void*)&fd))
-			return;
-
-		data = (link_t_ptr)fd.data;
-		if (!data)
-			return;
-
-		ptd->editor = firegrid_create(widget, &xr, data);
-		XDK_ASSERT(ptd->editor);
-		widget_set_user_id(ptd->editor, IDC_FIREGRID);
-		widget_set_owner(ptd->editor, widget);
-
-		widget_set_color_mode(ptd->editor, &ob);
-		editbox_set_xfont(ptd->editor, &xf);
-
-		widget_show(ptd->editor, WS_SHOW_NORMAL);
-		widget_set_focus(ptd->editor);
-	}
-	else if (compare_text(editor, -1, ATTR_EDITOR_TABLEBOX, -1, 0) == 0)
-	{
-		if (noti_form_owner(widget, NC_FIELDEDITING, ptd->form, ptd->field, &fd))
-			return;
-
-		pt_expand_rect(&xr, -DEF_INNER_FEED, -DEF_INNER_FEED);
-
-		if (fd.menu)
-		{
-			ptd->editor = tablectrl_create(NULL, WD_STYLE_CONTROL | WD_STYLE_VSCROLL | WD_STYLE_MENUBAR, &xr, widget);
-		}
-		else
-		{
-			ptd->editor = tablectrl_create(NULL, WD_STYLE_CONTROL | WD_STYLE_VSCROLL, &xr, widget);
-		}
-
-		XDK_ASSERT(ptd->editor);
-		widget_set_user_id(ptd->editor, IDC_TABLEBOX);
-		widget_set_owner(ptd->editor, widget);
-
-		widget_set_color_mode(ptd->editor, &ob);
-		editbox_set_xfont(ptd->editor, &xf);
-		editbox_set_xface(ptd->editor, &xa);
-
-		if (fd.menu)
-		{
-			widget_attach_menu(ptd->editor, fd.menu);
-		}
-
-		tablectrl_set_lock(ptd->editor, 0);
-		tablectrl_auto_insert(ptd->editor, 1);
-
-		text = get_field_text_ptr(ptd->field);
-		data = create_string_table(0);
-		string_table_parse_options(data, text, -1, OPT_ITEMFEED, OPT_LINEFEED);
-
-		tablectrl_attach(ptd->editor, data);
-
-		widget_show(ptd->editor, WS_SHOW_NORMAL);
-		widget_set_focus(ptd->editor);
-	}
-	else if (compare_text(editor, -1, ATTR_EDITOR_GRIDBOX, -1, 0) == 0)
-	{
-		data = get_field_embed_grid(ptd->field);
-		if (!data)
-			return;
-
-		if (noti_form_owner(widget, NC_FIELDEDITING, ptd->form, ptd->field, &fd))
-			return;
-
-		pt_expand_rect(&xr, -DEF_INNER_FEED, -DEF_INNER_FEED);
-
-		if (fd.menu)
-		{
-			ptd->editor = gridctrl_create(NULL, WD_STYLE_CONTROL | WD_STYLE_HSCROLL | WD_STYLE_VSCROLL | WD_STYLE_MENUBAR, &xr, widget);
-		}
-		else
-		{
-			ptd->editor = gridctrl_create(NULL, WD_STYLE_CONTROL | WD_STYLE_HSCROLL | WD_STYLE_VSCROLL, &xr, widget);
-		}
-
-		XDK_ASSERT(ptd->editor);
-		widget_set_user_id(ptd->editor, IDC_GRIDBOX);
-		widget_set_owner(ptd->editor, widget);
-
-		widget_set_color_mode(ptd->editor, &ob);
-
-		if (fd.menu)
-		{
-			widget_attach_menu(ptd->editor, fd.menu);
-		}
-
-		set_grid_width(data, get_field_width(ptd->field));
-		set_grid_height(data, get_field_height(ptd->field));
-
-		gridctrl_set_lock(ptd->editor, 0);
-		gridctrl_auto_insert(ptd->editor, 1);
-
-		gridctrl_attach(ptd->editor, data);
-
-		widget_show(ptd->editor, WS_SHOW_NORMAL);
-		widget_set_focus(ptd->editor);
-	}
-	else if (compare_text(editor, -1, ATTR_EDITOR_STATISBOX, -1, 0) == 0)
-	{
-		data = get_field_embed_statis(ptd->field);
-		if (!data)
-			return;
-
-		if (noti_form_owner(widget, NC_FIELDEDITING, ptd->form, ptd->field, &fd))
-			return;
-
-		pt_expand_rect(&xr, -DEF_INNER_FEED, -DEF_INNER_FEED);
-
-		if (fd.menu)
-			ptd->editor = statisctrl_create(NULL, WD_STYLE_CONTROL | WD_STYLE_HSCROLL | WD_STYLE_VSCROLL | WD_STYLE_MENUBAR, &xr, widget);
-		else
-			ptd->editor = statisctrl_create(NULL, WD_STYLE_CONTROL | WD_STYLE_HSCROLL | WD_STYLE_VSCROLL, &xr, widget);
-
-		XDK_ASSERT(ptd->editor);
-		widget_set_user_id(ptd->editor, IDC_STATISBOX);
-		widget_set_owner(ptd->editor, widget);
-
-		widget_set_color_mode(ptd->editor, &ob);
-
-		if (fd.menu)
-		{
-			widget_attach_menu(ptd->editor, fd.menu);
-		}
-
-		statisctrl_set_lock(ptd->editor, 0);
-		statisctrl_auto_insert(ptd->editor, 1);
-
-		set_statis_width(data, get_field_width(ptd->field));
-		set_statis_height(data, get_field_height(ptd->field));
-
-		statisctrl_attach(ptd->editor, data);
-
-		widget_show(ptd->editor, WS_SHOW_NORMAL);
-		widget_set_focus(ptd->editor);
-	}
-	else if (compare_text(editor, -1, ATTR_EDITOR_FORMBOX, -1, 0) == 0)
-	{
-		data = get_field_embed_form(ptd->field);
-		if (!data)
-			return;
-
-		if (noti_form_owner(widget, NC_FIELDEDITING, ptd->form, ptd->field, &fd))
-			return;
-
-		pt_expand_rect(&xr, -DEF_INNER_FEED, -DEF_INNER_FEED);
-
-		if (fd.menu)
-			ptd->editor = formctrl_create(NULL, WD_STYLE_CONTROL | WD_STYLE_HSCROLL | WD_STYLE_VSCROLL | WD_STYLE_MENUBAR, &xr, widget);
-		else
-			ptd->editor = formctrl_create(NULL, WD_STYLE_CONTROL | WD_STYLE_HSCROLL | WD_STYLE_VSCROLL, &xr, widget);
-
-		XDK_ASSERT(ptd->editor);
-		widget_set_user_id(ptd->editor, IDC_FORMBOX);
-		widget_set_owner(ptd->editor, widget);
-
-		widget_set_color_mode(ptd->editor, &ob);
-
-		if (fd.menu)
-		{
-			widget_attach_menu(ptd->editor, fd.menu);
-		}
-
-		formctrl_set_lock(ptd->editor, 0);
-
-		set_form_width(data, get_field_width(ptd->field));
-		set_form_height(data, get_field_height(ptd->field));
-
-		formctrl_attach(ptd->editor, data);
-
-		widget_show(ptd->editor, WS_SHOW_NORMAL);
-		widget_set_focus(ptd->editor);
-	}
-	else if (compare_text(editor, -1, ATTR_EDITOR_TAGBOX, -1, 0) == 0)
-	{
-		if (noti_form_owner(widget, NC_FIELDEDITING, ptd->form, ptd->field, &fd))
-			return;
-
-		pt_expand_rect(&xr, -DEF_INNER_FEED, -DEF_INNER_FEED);
-
-		if (fd.menu)
-			ptd->editor = tagctrl_create(NULL, WD_STYLE_CONTROL | WD_STYLE_HSCROLL | WD_STYLE_VSCROLL | WD_STYLE_MENUBAR, &xr, widget);
-		else
-			ptd->editor = tagctrl_create(NULL, WD_STYLE_CONTROL | WD_STYLE_HSCROLL | WD_STYLE_VSCROLL, &xr, widget);
-
-		XDK_ASSERT(ptd->editor);
-		widget_set_user_id(ptd->editor, IDC_TAGBOX);
-		widget_set_owner(ptd->editor, widget);
-
-		widget_set_color_mode(ptd->editor, &ob);
-		editbox_set_xfont(ptd->editor, &xf);
-		editbox_set_xface(ptd->editor, &xa);
-
-		if (fd.menu)
-		{
-			widget_attach_menu(ptd->editor, fd.menu);
-		}
-
-		tagctrl_set_lock(ptd->editor, 0);
-
-		text = get_field_text_ptr(ptd->field);
-		data = create_tag_doc();
-		parse_tag_doc(data, text, -1);
-
-		tagctrl_attach(ptd->editor, data);
-
-		widget_show(ptd->editor, WS_SHOW_NORMAL);
-		widget_set_focus(ptd->editor);
-	}
-	else if (compare_text(editor, -1, ATTR_EDITOR_MEMOBOX, -1, 0) == 0)
-	{
-		if (noti_form_owner(widget, NC_FIELDEDITING, ptd->form, ptd->field, &fd))
-			return;
-
-		pt_expand_rect(&xr, -DEF_INNER_FEED, -DEF_INNER_FEED);
-
-		if (fd.menu)
-			ptd->editor = memoctrl_create(NULL, WD_STYLE_CONTROL | WD_STYLE_HSCROLL | WD_STYLE_VSCROLL | WD_STYLE_MENUBAR, &xr, widget);
-		else
-			ptd->editor = memoctrl_create(NULL, WD_STYLE_CONTROL | WD_STYLE_HSCROLL | WD_STYLE_VSCROLL, &xr, widget);
-
-		XDK_ASSERT(ptd->editor);
-		widget_set_user_id(ptd->editor, IDC_MEMOBOX);
-		widget_set_owner(ptd->editor, widget);
-
-		widget_set_color_mode(ptd->editor, &ob);
-		editbox_set_xfont(ptd->editor, &xf);
-		editbox_set_xface(ptd->editor, &xa);
-
-		if (fd.menu)
-		{
-			widget_attach_menu(ptd->editor, fd.menu);
-		}
-
-		memoctrl_set_lock(ptd->editor, 0);
-
-		text = get_field_text_ptr(ptd->field);
-		data = create_memo_doc();
-		parse_memo_doc(data, text, -1);
-
-		set_memo_width(data, get_field_width(ptd->field));
-		set_memo_height(data, get_field_height(ptd->field));
-		memoctrl_attach(ptd->editor, data);
-
-		widget_show(ptd->editor, WS_SHOW_NORMAL);
-		widget_set_focus(ptd->editor);
-	}
-	else if (compare_text(editor, -1, ATTR_EDITOR_RICHBOX, -1, 0) == 0)
-	{
-		data = get_field_embed_rich(ptd->field);
-		if (!data)
-			return;
-
-		if (noti_form_owner(widget, NC_FIELDEDITING, ptd->form, ptd->field, &fd))
-			return;
-
-		pt_expand_rect(&xr, -DEF_INNER_FEED, -DEF_INNER_FEED);
-
-		if (fd.menu)
-			ptd->editor = richctrl_create(NULL, WD_STYLE_CONTROL | WD_STYLE_HSCROLL | WD_STYLE_VSCROLL | WD_STYLE_MENUBAR, &xr, widget);
-		else
-			ptd->editor = richctrl_create(NULL, WD_STYLE_CONTROL | WD_STYLE_HSCROLL | WD_STYLE_VSCROLL, &xr, widget);
-
-		XDK_ASSERT(ptd->editor);
-		widget_set_user_id(ptd->editor, IDC_RICHBOX);
-		widget_set_owner(ptd->editor, widget);
-
-		widget_set_color_mode(ptd->editor, &ob);
-		editbox_set_xfont(ptd->editor, &xf);
-		editbox_set_xface(ptd->editor, &xa);
-
-		if (fd.menu)
-		{
-			widget_attach_menu(ptd->editor, fd.menu);
-		}
-
-		richctrl_set_lock(ptd->editor, 0);
-
-		set_rich_width(data, get_field_width(ptd->field));
-		set_rich_height(data, get_field_height(ptd->field));
-		richctrl_attach(ptd->editor, data);
-
-		widget_show(ptd->editor, WS_SHOW_NORMAL);
-		widget_set_focus(ptd->editor);
-	}
-
-	if (!widget_is_valid(ptd->editor))
-		return;
-
-	set_field_visible(ptd->field, 0);
-}
-
-void noti_form_commit_edit(widget_t widget)
-{
-	form_delta_t* ptd = GETFORMDELTA(widget);
-
-	widget_t editctrl;
-	dword_t uid;
-	tchar_t* text;
-	int len;
-	link_t_ptr item, data;
-	bool_t dirty;
-	bool_t b_accept = 0;
-
-	EDITDELTA fd = { 0 };
-
-	if (!widget_is_valid(ptd->editor))
-		return;
-
-	XDK_ASSERT(ptd->field);
-
-	set_field_visible(ptd->field, 1);
-
-	uid = widget_get_user_id(ptd->editor);
-
-	if (uid == IDC_FIREEDIT)
-	{
-		text = (tchar_t*)editbox_get_text_ptr(ptd->editor);
-		b_accept = (noti_form_owner(widget, NC_FIELDCOMMIT, ptd->form, ptd->field, (void*)text) == 0) ? 1 : 0;
-		if (b_accept)
-		{
-			formctrl_set_field_text(widget, ptd->field, text);
-		}
-	}
-	else if (uid == IDC_FIRELIST)
-	{
-		text = (tchar_t*)editbox_get_text_ptr(ptd->editor);
-		b_accept = (noti_form_owner(widget, NC_FIELDCOMMIT, ptd->form, ptd->field, (void*)text) == 0) ? 1 : 0;
-		if (b_accept)
-		{
-			formctrl_set_field_text(widget, ptd->field, text);
-		}
-	}
-	else if (uid == IDC_FIRENUM)
-	{
-		text = (tchar_t*)editbox_get_text_ptr(ptd->editor);
-		b_accept = (noti_form_owner(widget, NC_FIELDCOMMIT, ptd->form, ptd->field, (void*)text) == 0) ? 1 : 0;
-		if (b_accept)
-		{
-			formctrl_set_field_text(widget, ptd->field, text);
-		}
-	}
-	else if (uid == IDC_FIREDATE)
-	{
-		text = (tchar_t*)editbox_get_text_ptr(ptd->editor);
-		b_accept = (noti_form_owner(widget, NC_FIELDCOMMIT, ptd->form, ptd->field, (void*)text) == 0) ? 1 : 0;
-		if (b_accept)
-		{
-			formctrl_set_field_text(widget, ptd->field, text);
-		}
-	}
-	else if (uid == IDC_FIRETIME)
-	{
-		text = (tchar_t*)editbox_get_text_ptr(ptd->editor);
-		b_accept = (noti_form_owner(widget, NC_FIELDCOMMIT, ptd->form, ptd->field, (void*)text) == 0) ? 1 : 0;
-		if (b_accept)
-		{
-			formctrl_set_field_text(widget, ptd->field, text);
-		}
-	}
-	else if (uid == IDC_FIREWORDS)
-	{
-		fd.data = firewords_get_data(ptd->editor);
-		item = firewords_get_item(ptd->editor);
-		if (item)
-		{
-			editbox_set_text(ptd->editor, get_words_item_text_ptr(item));
-		}
-
-		fd.text = editbox_get_text_ptr(ptd->editor);
-		b_accept = (noti_form_owner(widget, NC_FIELDCOMMIT, ptd->form, ptd->field, (void*)&fd) == 0) ? 1 : 0;
-		if (b_accept)
-		{
-			formctrl_set_field_text(widget, ptd->field, fd.text);
-		}
-	}
-	else if (uid == IDC_FIREGRID)
-	{
-		fd.data = firegrid_get_data(ptd->editor);
-		fd.item = firegrid_get_item(ptd->editor);
-
-		b_accept = (noti_form_owner(widget, NC_FIELDCOMMIT, ptd->form, ptd->field, (void*)&fd) == 0) ? 1 : 0;
-	}
-	else if (uid == IDC_TABLEBOX)
-	{
-		fd.menu = widget_detach_menu(ptd->editor);
-
-		tablectrl_accept(ptd->editor, 1);
-		dirty = (get_field_editable(ptd->field)) ? tablectrl_is_update(ptd->editor) : 0;
-
-		data = tablectrl_detach(ptd->editor);
-		b_accept = (noti_form_owner(widget, NC_FIELDCOMMIT, ptd->form, ptd->field, (void*)&fd) == 0) ? 1 : 0;
-		if (b_accept)
-		{
-			if (dirty)
-			{
-				len = string_table_format_options(data, NULL, MAX_LONG, OPT_ITEMFEED, OPT_LINEFEED);
-				text = xsalloc(len + 1);
-				string_table_format_options(data, text, len, OPT_ITEMFEED, OPT_LINEFEED);
-
-				set_field_text(ptd->field, text, len);
-				xsfree(text);
-
-				set_field_dirty(ptd->field, 1);
-
-				noti_form_owner(widget, NC_FIELDUPDATE, ptd->form, ptd->field, NULL);
-			}
-		}
-
-		destroy_string_table(data);
-	}
-	else if (uid == IDC_GRIDBOX)
-	{
-		fd.menu = widget_detach_menu(ptd->editor);
-
-		gridctrl_accept(ptd->editor, 1);
-		dirty = (get_field_editable(ptd->field)) ? gridctrl_is_update(ptd->editor) : 0;
-
-		ptd->cur_page = gridctrl_get_cur_page(ptd->editor);
-
-		data = gridctrl_detach(ptd->editor);
-		b_accept = (noti_form_owner(widget, NC_FIELDCOMMIT, ptd->form, ptd->field, (void*)&fd) == 0) ? 1 : 0;
-		if (b_accept)
-		{
-			if (dirty)
-			{
-				set_field_dirty(ptd->field, 1);
-				noti_form_owner(widget, NC_FIELDUPDATE, ptd->form, ptd->field, NULL);
-			}
-		}
-	}
-	else if (uid == IDC_STATISBOX)
-	{
-		fd.menu = widget_detach_menu(ptd->editor);
-
-		statisctrl_accept(ptd->editor, 1);
-		dirty = (get_field_editable(ptd->field)) ? statisctrl_is_update(ptd->editor) : 0;
-
-		ptd->cur_page = statisctrl_get_cur_page(ptd->editor);
-
-		data = statisctrl_detach(ptd->editor);
-		b_accept = (noti_form_owner(widget, NC_FIELDCOMMIT, ptd->form, ptd->field, (void*)&fd) == 0) ? 1 : 0;
-		if (b_accept)
-		{
-			if (dirty)
-			{
-				set_field_dirty(ptd->field, 1);
-				noti_form_owner(widget, NC_FIELDUPDATE, ptd->form, ptd->field, NULL);
-			}
-		}
-	}
-	else if (uid == IDC_FORMBOX)
-	{
-		fd.menu = widget_detach_menu(ptd->editor);
-
-		formctrl_accept(ptd->editor, 1);
-		dirty = (get_field_editable(ptd->field)) ? formctrl_is_update(ptd->editor) : 0;
-
-		data = formctrl_detach(ptd->editor);
-		b_accept = (noti_form_owner(widget, NC_FIELDCOMMIT, ptd->form, ptd->field, (void*)&fd) == 0) ? 1 : 0;
-		if (b_accept)
-		{
-			if (dirty)
-			{
-				set_field_dirty(ptd->field, 1);
-				noti_form_owner(widget, NC_FIELDUPDATE, ptd->form, ptd->field, NULL);
-			}
-		}
-	}
-	else if (uid == IDC_TAGBOX)
-	{
-		fd.menu = widget_detach_menu(ptd->editor);
-
-		dirty = (get_field_editable(ptd->field)) ? tagctrl_get_dirty(ptd->editor) : 0;
-
-		data = tagctrl_detach(ptd->editor);
-		b_accept = (noti_form_owner(widget, NC_FIELDCOMMIT, ptd->form, ptd->field, (void*)&fd) == 0) ? 1 : 0;
-		if (b_accept)
-		{
-			if (dirty)
-			{
-				len = format_tag_doc(data, NULL, MAX_LONG);
-				text = xsalloc(len + 1);
-				format_tag_doc(data, text, len);
-
-				set_field_text(ptd->field, text, len);
-				xsfree(text);
-
-				set_field_dirty(ptd->field, 1);
-
-				noti_form_owner(widget, NC_FIELDUPDATE, ptd->form, ptd->field, NULL);
-			}
-		}
-
-		destroy_tag_doc(data);
-	}
-	else if (uid == IDC_MEMOBOX)
-	{
-		fd.menu = widget_detach_menu(ptd->editor);
-
-		dirty = (get_field_editable(ptd->field)) ? memoctrl_get_dirty(ptd->editor) : 0;
-
-		ptd->cur_page = memoctrl_get_cur_page(ptd->editor);
-
-		data = memoctrl_detach(ptd->editor);
-		b_accept = (noti_form_owner(widget, NC_FIELDCOMMIT, ptd->form, ptd->field, (void*)&fd) == 0) ? 1 : 0;
-		if (b_accept)
-		{
-			if (dirty)
-			{
-				len = format_memo_doc(data, NULL, MAX_LONG);
-				text = xsalloc(len + 1);
-				format_memo_doc(data, text, len);
-
-				set_field_text(ptd->field, text, len);
-				xsfree(text);
-
-				set_field_dirty(ptd->field, 1);
-
-				noti_form_owner(widget, NC_FIELDUPDATE, ptd->form, ptd->field, NULL);
-			}
-		}
-
-		destroy_memo_doc(data);
-	}
-	else if (uid == IDC_RICHBOX)
-	{
-		fd.menu = widget_detach_menu(ptd->editor);
-
-		dirty = (get_field_editable(ptd->field)) ? richctrl_get_dirty(ptd->editor) : 0;
-
-		ptd->cur_page = richctrl_get_cur_page(ptd->editor);
-
-		data = richctrl_detach(ptd->editor);
-		b_accept = (noti_form_owner(widget, NC_FIELDCOMMIT, ptd->form, ptd->field, (void*)&fd) == 0) ? 1 : 0;
-		if (b_accept)
-		{
-			if (dirty)
-			{
-				set_field_dirty(ptd->field, 1);
-
-				noti_form_owner(widget, NC_FIELDUPDATE, ptd->form, ptd->field, NULL);
-			}
-		}
-	}
-
-	editctrl = ptd->editor;
-	ptd->editor = (widget_t)0;
-
-	widget_destroy(editctrl);
-	widget_set_focus(widget);
-
-	if (!b_accept)
-		return;
-
-	if (IS_DATA_FIELD(get_field_class_ptr(ptd->field)))
-	{
-		widget_post_key(widget, KEY_TAB);
-	}
-}
-
-void noti_form_rollback_edit(widget_t widget)
-{
-	form_delta_t* ptd = GETFORMDELTA(widget);
-	dword_t uid;
-	link_t_ptr data;
-	widget_t editctrl;
-
-	EDITDELTA fd = { 0 };
-
-	if (!widget_is_valid(ptd->editor))
-		return;
-
-	XDK_ASSERT(ptd->field);
-
-	set_field_visible(ptd->field, 1);
-
-	uid = widget_get_user_id(ptd->editor);
-
-	if (uid == IDC_FIREWORDS)
-	{
-		fd.data = firewords_get_data(ptd->editor);
-		fd.text = NULL;
-		noti_form_owner(widget, NC_FIELDROLLBACK, ptd->form, ptd->field, (void*)&fd);
-	}
-	else if (uid == IDC_FIREGRID)
-	{
-		fd.data = firegrid_get_data(ptd->editor);
-		fd.item = NULL;
-		noti_form_owner(widget, NC_FIELDROLLBACK, ptd->form, ptd->field, (void*)&fd);
-	}
-	else if (uid == IDC_TABLEBOX)
-	{
-		fd.menu = widget_detach_menu(ptd->editor);
-
-		tablectrl_accept(ptd->editor, 0);
-
-		data = tablectrl_detach(ptd->editor);
-
-		noti_form_owner(widget, NC_FIELDROLLBACK, ptd->form, ptd->field, (void*)&fd);
-
-		destroy_string_table(data);
-	}
-	else if (uid == IDC_GRIDBOX)
-	{
-		fd.menu = widget_detach_menu(ptd->editor);
-
-		gridctrl_accept(ptd->editor, 0);
-		ptd->cur_page = gridctrl_get_cur_page(ptd->editor);
-		noti_form_owner(widget, NC_FIELDROLLBACK, ptd->form, ptd->field, (void*)&fd);
-	}
-	else if (uid == IDC_STATISBOX)
-	{
-		fd.menu = widget_detach_menu(ptd->editor);
-
-		statisctrl_accept(ptd->editor, 0);
-		ptd->cur_page = statisctrl_get_cur_page(ptd->editor);
-		noti_form_owner(widget, NC_FIELDROLLBACK, ptd->form, ptd->field, (void*)&fd);
-	}
-	else if (uid == IDC_FORMBOX)
-	{
-		fd.menu = widget_detach_menu(ptd->editor);
-
-		formctrl_accept(ptd->editor, 0);
-		noti_form_owner(widget, NC_FIELDROLLBACK, ptd->form, ptd->field, (void*)&fd);
-	}
-	else if (uid == IDC_MEMOBOX)
-	{
-		fd.menu = widget_detach_menu(ptd->editor);
-
-		ptd->cur_page = memoctrl_get_cur_page(ptd->editor);
-
-		data = memoctrl_detach(ptd->editor);
-
-		noti_form_owner(widget, NC_FIELDROLLBACK, ptd->form, ptd->field, (void*)&fd);
-
-		destroy_memo_doc(data);
-	}
-	else if (uid == IDC_TAGBOX)
-	{
-		fd.menu = widget_detach_menu(ptd->editor);
-
-		data = tagctrl_detach(ptd->editor);
-
-		noti_form_owner(widget, NC_FIELDROLLBACK, ptd->form, ptd->field, (void*)&fd);
-
-		destroy_tag_doc(data);
-	}
-	else if (uid == IDC_RICHBOX)
-	{
-		fd.menu = widget_detach_menu(ptd->editor);
-
-		ptd->cur_page = richctrl_get_cur_page(ptd->editor);
-		noti_form_owner(widget, NC_FIELDROLLBACK, ptd->form, ptd->field, (void*)&fd);
-	}
-	else
-	{
-		noti_form_owner(widget, NC_FIELDROLLBACK, ptd->form, ptd->field, NULL);
-	}
-
-	editctrl = ptd->editor;
-	ptd->editor = (widget_t)0;
-
-	widget_destroy(editctrl);
-	widget_set_focus(widget);
-}
-
 void noti_form_reset_editor(widget_t widget, bool_t bCommit)
 {
 	form_delta_t* ptd = GETFORMDELTA(widget);
 
-	if (!widget_is_valid(ptd->editor))
-		return;
-
 	if (bCommit)
-		noti_form_commit_edit(widget);
+		widget_post_command(widget, COMMAND_COMMIT, IDC_CHILD, (vword_t)0);
 	else
-		noti_form_rollback_edit(widget);
-}
-
-void noti_form_reset_scroll(widget_t widget, bool_t bUpdate)
-{
-	form_delta_t* ptd = GETFORMDELTA(widget);
-
-	if (widget_is_valid(ptd->vsc))
-	{
-		if (bUpdate)
-			widget_erase(ptd->vsc, NULL);
-		else
-			widget_destroy(ptd->vsc);
-	}
-
-	if (widget_is_valid(ptd->hsc))
-	{
-		if (bUpdate)
-			widget_erase(ptd->hsc, NULL);
-		else
-			widget_destroy(ptd->hsc);
-	}
+		widget_post_command(widget, COMMAND_ROLLBACK, IDC_CHILD, (vword_t)0);
 }
 
 /*******************************************************************************/
+
 int hand_form_create(widget_t widget, void* data)
 {
 	form_delta_t* ptd;
@@ -1219,12 +295,6 @@ void hand_form_destroy(widget_t widget)
 	form_delta_t* ptd = GETFORMDELTA(widget);
 
 	XDK_ASSERT(ptd != NULL);
-
-	if (widget_is_valid(ptd->hsc))
-		widget_destroy(ptd->hsc);
-
-	if (widget_is_valid(ptd->vsc))
-		widget_destroy(ptd->vsc);
 
 	xmem_free(ptd);
 
@@ -1263,82 +333,23 @@ void hand_form_scroll(widget_t widget, bool_t bHorz, int nLine)
 	form_delta_t* ptd = GETFORMDELTA(widget);
 	xrect_t xr;
 
-	if (!ptd->form)
-		return;
+	XDK_ASSERT(ptd != NULL);
 
-	if (widget_is_valid(ptd->editor))
-	{
-		if (!IS_AUTO_FIELD(get_field_class_ptr(ptd->field)))
-		{
-			noti_form_reset_editor(widget, 1);
-		}
-	}
+	if (!ptd->form) return;
 
-	if (!widget_hand_scroll(widget, bHorz, nLine))
-		return;
-
-	if (widget_is_valid(ptd->editor))
-	{
-		_formctrl_field_rect(widget, ptd->field, &xr);
-		widget_move(ptd->editor, RECTPOINT(&xr));
-	}
+	widget_hand_scroll(widget, bHorz, nLine);
 }
 
 void hand_form_wheel(widget_t widget, bool_t bHorz, int nDelta)
 {
 	form_delta_t* ptd = GETFORMDELTA(widget);
-
-	scroll_t scr = { 0 };
-	int nLine;
-	widget_t win;
-
+	xrect_t xr;
+	
 	XDK_ASSERT(ptd != NULL);
 
-	if (!ptd->form)
-		return;
+	if (!ptd->form) return;
 
-	widget_get_scroll_info(widget, bHorz, &scr);
-
-	if (bHorz)
-		nLine = (nDelta > 0) ? scr.min : -scr.min;
-	else
-		nLine = (nDelta < 0) ? scr.min : -scr.min;
-
-	if (widget_hand_scroll(widget, bHorz, nLine))
-	{
-		if (!bHorz && !(widget_get_style(widget) & WD_STYLE_VSCROLL))
-		{
-			if (!widget_is_valid(ptd->vsc))
-			{
-				ptd->vsc = show_vertbox(widget);
-			}
-			else
-			{
-				widget_erase(ptd->vsc, NULL);
-			}
-		}
-
-		if (bHorz && !(widget_get_style(widget) & WD_STYLE_HSCROLL))
-		{
-			if (!widget_is_valid(ptd->hsc))
-			{
-				ptd->hsc = show_horzbox(widget);
-			}
-			else
-			{
-				widget_erase(ptd->hsc, NULL);
-			}
-		}
-
-		return;
-	}
-
-	win = widget_get_parent(widget);
-
-	if (widget_is_valid(win))
-	{
-		widget_scroll(win, bHorz, nLine);
-	}
+	widget_hand_wheel(widget, bHorz, nDelta);
 }
 
 void hand_form_mouse_hover(widget_t widget, dword_t dw, const xpoint_t* pxp)
@@ -1469,14 +480,10 @@ void hand_form_keydown(widget_t widget, dword_t ks, int nKey)
 	if (!ptd->form)
 		return;
 
-	if (nKey == KEY_ENTER && ptd->field)
-	{
-		if (widget_can_focus(widget) && !ptd->b_lock)
-		{
-			noti_form_begin_edit(widget);
-		}
-	}
-	else if (nKey == KEY_TAB)
+	if(!widget_can_focus(widget))
+		return;
+
+	if (nKey == KEY_TAB)
 	{
 		formctrl_tabskip(widget, TABORDER_RIGHT);
 	}
@@ -1506,61 +513,18 @@ void hand_form_keydown(widget_t widget, dword_t ks, int nKey)
 	}
 }
 
-void hand_form_wchar(widget_t widget, wchar_t nChar)
+void hand_form_menu_command(widget_t widget, int code, int cid, vword_t data)
 {
 	form_delta_t* ptd = GETFORMDELTA(widget);
 
 	if (!ptd->form)
 		return;
 
-	if (IS_VISIBLE_CHAR(nChar) && !widget_is_valid(ptd->editor))
+	if (cid == IDC_EDITMENU)
 	{
-		hand_form_keydown(widget, 0, KEY_ENTER);
-	}
-
-	if (IS_VISIBLE_CHAR(nChar) && widget_is_valid(ptd->editor))
-	{
-		widget_post_wchar(ptd->editor, nChar);
-	}
-}
-
-void hand_form_child_command(widget_t widget, int code, vword_t data)
-{
-	form_delta_t* ptd = GETFORMDELTA(widget);
-
-	switch (code)
-	{
-	case COMMAND_COMMIT:
-		noti_form_commit_edit(widget);
-		break;
-	case COMMAND_ROLLBACK:
-		noti_form_rollback_edit(widget);
-		break;
-	}
-}
-
-void hand_form_menu_command(widget_t widget, int code, int cid, vword_t data)
-{
-	form_delta_t* ptd = GETFORMDELTA(widget);
-
-	if (ptd->form)
-	{
-		if (cid == IDC_EDITMENU)
+		if (widget_is_valid((widget_t)data))
 		{
-			if (widget_is_valid((widget_t)data))
-			{
-				widget_close((widget_t)data, 1);
-			}
-		}
-	}
-	else
-	{
-		if (!widget_is_valid(ptd->editor))
-			return;
-
-		if (widget_get_user_id(ptd->editor) == cid && code)
-		{
-			widget_post_command(widget_get_owner(widget), code, IDC_CHILD, (vword_t)ptd->editor);
+			widget_close((widget_t)data, 1);
 		}
 	}
 }
@@ -1711,7 +675,6 @@ widget_t formctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* px
 		EVENT_ON_WHEEL(hand_form_wheel)
 
 		EVENT_ON_KEYDOWN(hand_form_keydown)
-		EVENT_ON_WCHAR(hand_form_wchar)
 
 		EVENT_ON_MOUSE_HOVER(hand_form_mouse_hover)
 		EVENT_ON_MOUSE_LEAVE(hand_form_mouse_leave)
@@ -1723,7 +686,6 @@ widget_t formctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* px
 		EVENT_ON_RBUTTON_UP(hand_form_rbutton_up)
 
 		EVENT_ON_NOTICE(hand_form_notice)
-		EVENT_ON_CHILD_COMMAND(hand_form_child_command)
 		EVENT_ON_MENU_COMMAND(hand_form_menu_command)
 
 	EVENT_END_DISPATH
@@ -1776,13 +738,6 @@ link_t_ptr formctrl_fetch(widget_t widget)
 	return ptd->form;
 }
 
-widget_t formctrl_get_editor(widget_t widget)
-{
-	form_delta_t* ptd = GETFORMDELTA(widget);
-
-	return ptd->editor;
-}
-
 bool_t formctrl_verify(widget_t widget, bool_t bAlarm)
 {
 	form_delta_t* ptd = GETFORMDELTA(widget);
@@ -1794,7 +749,7 @@ bool_t formctrl_verify(widget_t widget, bool_t bAlarm)
 	if (!ptd->form)
 		return 1;
 
-	noti_form_reset_editor(widget, (bool_t)0);
+	noti_form_reset_editor(widget, 0);
 
 	code = verify_form_doc(ptd->form, &flk);
 	if (veValid != code)
@@ -1915,7 +870,7 @@ void formctrl_tabskip(widget_t widget, int nSkip)
 	if (!ptd->form)
 		return;
 
-	noti_form_reset_editor(widget, (bool_t)1);
+	noti_form_reset_editor(widget, 1);
 
 	switch (nSkip)
 	{
@@ -2000,10 +955,10 @@ void formctrl_move_first_page(widget_t widget)
 	if (!ptd->form)
 		return;
 
+	noti_form_reset_editor(widget, 1);
+
 	if (ptd->cur_page != 1)
 	{
-		noti_form_reset_editor(widget, (bool_t)1);
-
 		ptd->cur_page = 1;
 
 		widget_erase(widget, NULL);
@@ -2019,10 +974,10 @@ void formctrl_move_last_page(widget_t widget)
 	if (!ptd->form)
 		return;
 
+	noti_form_reset_editor(widget, 1);
+
 	if (ptd->cur_page != ptd->max_page)
 	{
-		noti_form_reset_editor(widget, (bool_t)1);
-
 		ptd->cur_page = ptd->max_page;
 		widget_erase(widget, NULL);
 	}
@@ -2037,10 +992,10 @@ void formctrl_move_next_page(widget_t widget)
 	if (!ptd->form)
 		return;
 
+	noti_form_reset_editor(widget, 1);
+
 	if (ptd->cur_page < ptd->max_page)
 	{
-		noti_form_reset_editor(widget, (bool_t)1);
-
 		ptd->cur_page++;
 
 		widget_erase(widget, NULL);
@@ -2056,10 +1011,10 @@ void formctrl_move_prev_page(widget_t widget)
 	if (!ptd->form)
 		return;
 
+	noti_form_reset_editor(widget, 1);
+
 	if (ptd->cur_page > 1)
 	{
-		noti_form_reset_editor(widget, (bool_t)1);
-
 		ptd->cur_page--;
 
 		widget_erase(widget, NULL);
@@ -2102,10 +1057,10 @@ void formctrl_move_to_page(widget_t widget, int page)
 	if (!ptd->form)
 		return;
 
+	noti_form_reset_editor(widget, 1);
+
 	if (page > ptd->max_page || page < 1)
 		return;
-
-	noti_form_reset_editor(widget, (bool_t)1);
 
 	ptd->cur_page = page;
 
@@ -2139,8 +1094,6 @@ bool_t formctrl_set_field_text(widget_t widget, link_t_ptr flk, const tchar_t* s
 
 	set_field_text(flk, szText, -1);
 	set_field_dirty(flk, 1);
-
-	noti_form_owner(widget, NC_FIELDUPDATE, ptd->form, flk, NULL);
 
 	formctrl_get_field_rect(widget, flk, &xr);
 	pt_expand_rect(&xr, DEF_OUTER_FEED, DEF_OUTER_FEED);

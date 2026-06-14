@@ -27,8 +27,8 @@ void cjk_ucs_3000()
 	{
 		sys_ucs_byte_to_gbk((wchar_t)u, m);
 
-		pch[0] = GETHBYTE(u);
-		pch[1] = GETLBYTE(u);
+		pch[0] = GETSWORDH(u);
+		pch[1] = GETSWORDL(u);
 
 		xsprintf(str, _T("0x%02X%02X,0x%02X%02X,%S\n"), pch[0], pch[1], m[0], m[1], m);
 
@@ -64,8 +64,8 @@ void cjk_ucs_ff00()
 	{
 		sys_ucs_byte_to_gbk((wchar_t)u, m);
 
-		pch[0] = GETHBYTE(u);
-		pch[1] = GETLBYTE(u);
+		pch[0] = GETSWORDH(u);
+		pch[1] = GETSWORDL(u);
 
 		xsprintf(str, _T("0x%02X%02X,0x%02X%02X,%S\n"), pch[0], pch[1], m[0], m[1], m);
 

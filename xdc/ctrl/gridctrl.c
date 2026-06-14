@@ -40,10 +40,6 @@ typedef struct _grid_delta_t{
 	int cur_x, cur_y;
 	short cur_page;
 
-	widget_t editor;
-	widget_t hsc;
-	widget_t vsc;
-
 	bool_t b_size_row, b_size_col;
 	bool_t b_alarm;
 	bool_t b_auto;
@@ -213,6 +209,7 @@ void _gridctrl_ensure_visible(widget_t widget)
 }
 
 /*************************************************************************************************/
+
 int noti_grid_owner(widget_t widget, unsigned int code, link_t_ptr grid, link_t_ptr rlk, link_t_ptr clk, void* data)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
@@ -286,10 +283,7 @@ void noti_grid_col_sizing(widget_t widget, int x, int y)
 	ptd->org_x = x;
 	ptd->org_y = y;
 
-	if (widget_is_hotvoer(widget))
-	{
-		widget_set_capture(widget, 1);
-	}
+	widget_set_capture(widget, 1);
 	widget_set_cursor(widget, CURSOR_SIZEWE);
 }
 
@@ -300,10 +294,7 @@ void noti_grid_col_sized(widget_t widget, int x, int y)
 	xrect_t xrCol, xrCli;
 	xsize_t xs = { 0 };
 
-	if (widget_is_hotvoer(widget))
-	{
-		widget_set_capture(widget, 0);
-	}
+	widget_set_capture(widget, 0);
 	widget_set_cursor(widget, CURSOR_ARROW);
 
 	xs.w = x - ptd->org_x;
@@ -352,10 +343,7 @@ void noti_grid_row_sizing(widget_t widget, int x, int y)
 	ptd->org_x = x;
 	ptd->org_y = y;
 
-	if (widget_is_hotvoer(widget))
-	{
-		widget_set_capture(widget, 1);
-	}
+	widget_set_capture(widget, 1);
 	widget_set_cursor(widget,CURSOR_SIZENS);
 }
 
@@ -365,10 +353,7 @@ void noti_grid_row_sized(widget_t widget, int x, int y)
 	float mh;
 	xsize_t xs = { 0 };
 
-	if (widget_is_hotvoer(widget))
-	{
-		widget_set_capture(widget, 0);
-	}
+	widget_set_capture(widget, 0);
 	widget_set_cursor(widget, CURSOR_ARROW);
 
 	xs.h = y - ptd->org_y;
@@ -535,10 +520,7 @@ void noti_grid_col_enter(widget_t widget, link_t_ptr clk)
 
 	ptd->hover = clk;
 
-	if (widget_is_hotvoer(widget))
-	{
-		//widget_track_mouse(widget, MS_TRACK_HOVER | MS_TRACK_LEAVE);
-	}
+	widget_enable_hover(widget, bool_true);
 }
 
 void noti_grid_col_leave(widget_t widget)
@@ -549,10 +531,7 @@ void noti_grid_col_leave(widget_t widget)
 
 	ptd->hover = NULL;
 
-	if (widget_is_hotvoer(widget))
-	{
-		//widget_track_mouse(widget, MS_TRACK_HOVER | MS_TRACK_LEAVE);
-	}
+	widget_enable_hover(widget, bool_false);
 }
 
 void noti_grid_col_hover(widget_t widget)
@@ -564,393 +543,16 @@ void noti_grid_col_hover(widget_t widget)
 	noti_grid_owner(widget, NC_COLHOVER, ptd->grid, NULL, ptd->hover, NULL);
 }
 
-void noti_grid_begin_edit(widget_t widget)
-{
-	grid_delta_t* ptd = GETGRIDDELTA(widget);
-	const tchar_t* editor;
-	const tchar_t* text;
-	xrect_t xr = { 0 };
-	link_t_ptr data;
-
-	EDITDELTA fd = { 0 };
-
-	color_mod_t ob = { 0 };
-	xfont_t xf = { 0 };
-
-	XDK_ASSERT(ptd->row && ptd->col);
-	
-	if (widget_is_valid(ptd->editor))
-		return;
-
-	if (ptd->b_lock)
-		return;
-
-	if (grid_is_design(ptd->grid) || !get_col_focusable(ptd->col) || get_row_locked(ptd->row))
-	{
-		return;
-	}
-
-	default_xfont(&xf);
-	parse_xfont_from_style(&xf, get_col_style_ptr(ptd->col));
-	widget_get_color_mode(widget, &ob);
-
-	_gridctrl_cell_rect(widget, ptd->row, ptd->col, &xr);
-	pt_expand_rect(&xr, -1, -1);
-
-	editor = get_col_editor_ptr(ptd->col);
-
-	if (compare_text(editor, -1, ATTR_EDITOR_FIREEDIT, -1, 0) == 0)
-	{
-		if (noti_grid_owner(widget, NC_CELLEDITING, ptd->grid, ptd->row, ptd->col, NULL))
-			return;
-
-		ptd->editor = fireedit_create(widget, &xr);
-		XDK_ASSERT(ptd->editor);
-		widget_set_user_id(ptd->editor, IDC_FIREEDIT);
-		widget_set_owner(ptd->editor, widget);
-
-		editbox_set_xfont(ptd->editor, &xf);
-		widget_set_color_mode(ptd->editor, &ob);
-		widget_show(ptd->editor, WS_SHOW_NORMAL);
-		widget_set_focus(ptd->editor);
-
-		text = get_cell_text_ptr(ptd->row, ptd->col);
-		editbox_set_text(ptd->editor, text);
-		editbox_selectall(ptd->editor);
-	}
-	else if (compare_text(editor, -1, ATTR_EDITOR_FIRENUM, -1, 0) == 0)
-	{
-		if (noti_grid_owner(widget, NC_CELLEDITING, ptd->grid, ptd->row, ptd->col, NULL))
-			return;
-
-		ptd->editor = firenum_create(widget, &xr);
-		XDK_ASSERT(ptd->editor);
-		widget_set_user_id(ptd->editor, IDC_FIRENUM);
-		widget_set_owner(ptd->editor, widget);
-
-		editbox_set_xfont(ptd->editor, &xf);
-		widget_set_color_mode(ptd->editor, &ob);
-		widget_show(ptd->editor, WS_SHOW_NORMAL);
-		widget_set_focus(ptd->editor);
-
-		text = get_cell_text_ptr(ptd->row, ptd->col);
-		editbox_set_text(ptd->editor, text);
-		editbox_selectall(ptd->editor);
-	}
-	else if (compare_text(editor, -1, ATTR_EDITOR_FIREDATE, -1, 0) == 0)
-	{
-		if (noti_grid_owner(widget, NC_CELLEDITING, ptd->grid, ptd->row, ptd->col, NULL))
-			return;
-
-		ptd->editor = firedate_create(widget, &xr);
-		XDK_ASSERT(ptd->editor);
-		widget_set_user_id(ptd->editor, IDC_FIREDATE);
-		widget_set_owner(ptd->editor, widget);
-
-		editbox_set_xfont(ptd->editor, &xf);
-		widget_set_color_mode(ptd->editor, &ob);
-		widget_show(ptd->editor, WS_SHOW_NORMAL);
-		widget_set_focus(ptd->editor);
-
-		text = get_cell_text_ptr(ptd->row, ptd->col);
-		editbox_set_text(ptd->editor, text);
-		editbox_selectall(ptd->editor);
-	}
-	else if (compare_text(editor, -1, ATTR_EDITOR_FIRETIME, -1, 0) == 0)
-	{
-		if (noti_grid_owner(widget, NC_CELLEDITING, ptd->grid, ptd->row, ptd->col, NULL))
-			return;
-
-		ptd->editor = firetime_create(widget, &xr);
-		XDK_ASSERT(ptd->editor);
-		widget_set_user_id(ptd->editor, IDC_FIRETIME);
-		widget_set_owner(ptd->editor, widget);
-
-		editbox_set_xfont(ptd->editor, &xf);
-		widget_set_color_mode(ptd->editor, &ob);
-		widget_show(ptd->editor, WS_SHOW_NORMAL);
-		widget_set_focus(ptd->editor);
-
-		text = get_cell_text_ptr(ptd->row, ptd->col);
-		editbox_set_text(ptd->editor, text);
-		editbox_selectall(ptd->editor);
-	}
-	else if (compare_text(editor, -1, ATTR_EDITOR_FIRELIST, -1, 0) == 0)
-	{
-		if (noti_grid_owner(widget, NC_CELLEDITING, ptd->grid, ptd->row, ptd->col, NULL))
-			return;
-
-		data = get_col_options_table(ptd->col);
-		if (!data)
-			return;
-
-		ptd->editor = firelist_create(widget, &xr, data);
-		XDK_ASSERT(ptd->editor);
-		widget_set_user_id(ptd->editor, IDC_FIRELIST);
-		widget_set_owner(ptd->editor, widget);
-
-		editbox_set_xfont(ptd->editor, &xf);
-		widget_set_color_mode(ptd->editor, &ob);
-		widget_show(ptd->editor, WS_SHOW_NORMAL);
-		widget_set_focus(ptd->editor);
-
-		text = get_cell_text_ptr(ptd->row, ptd->col);
-		editbox_set_text(ptd->editor, text);
-		editbox_selectall(ptd->editor);
-	}
-	else if (compare_text(editor, -1, ATTR_EDITOR_FIREWORDS, -1, 0) == 0)
-	{
-		if (noti_grid_owner(widget, NC_CELLEDITING, ptd->grid, ptd->row, ptd->col, (void*)&fd))
-			return;
-
-		data = (link_t_ptr)fd.data;
-		ptd->editor = firewords_create(widget, &xr, data);
-		XDK_ASSERT(ptd->editor);
-		widget_set_user_id(ptd->editor, IDC_FIREWORDS);
-		widget_set_owner(ptd->editor, widget);
-
-		editbox_set_xfont(ptd->editor, &xf);
-		widget_set_color_mode(ptd->editor, &ob);
-		widget_show(ptd->editor, WS_SHOW_NORMAL);
-		widget_set_focus(ptd->editor);
-
-		text = get_cell_text_ptr(ptd->row, ptd->col);
-		editbox_set_text(ptd->editor, text);
-		editbox_selectall(ptd->editor);
-	}
-	else if (compare_text(editor, -1, ATTR_EDITOR_FIREGRID, -1, 0) == 0)
-	{
-		if (noti_grid_owner(widget, NC_CELLEDITING, ptd->grid, ptd->row, ptd->col, (void*)&fd))
-			return;
-
-		data = (link_t_ptr)fd.data;
-		if (!data)
-			return;
-
-		ptd->editor = firegrid_create(widget, &xr, data);
-		XDK_ASSERT(ptd->editor);
-		widget_set_user_id(ptd->editor, IDC_FIREGRID);
-		widget_set_owner(ptd->editor, widget);
-
-		editbox_set_xfont(ptd->editor, &xf);
-		widget_set_color_mode(ptd->editor, &ob);
-		widget_show(ptd->editor, WS_SHOW_NORMAL);
-		widget_set_focus(ptd->editor);
-	}
-}
-
-void noti_grid_commit_edit(widget_t widget)
-{
-	grid_delta_t* ptd = GETGRIDDELTA(widget);
-	const tchar_t* editor;
-	tchar_t* text;
-	widget_t editctrl;
-	link_t_ptr ilk,rlk_new;
-	int n_ret = 0;
-
-	EDITDELTA fd = { 0 };
-
-	if (!widget_is_valid(ptd->editor))
-		return;
-
-	XDK_ASSERT(ptd->row && ptd->col);
-
-	editor = get_col_editor_ptr(ptd->col);
-
-	if (compare_text(editor, -1, ATTR_EDITOR_FIREEDIT, -1, 0) == 0)
-	{
-		text = (tchar_t*)editbox_get_text_ptr(ptd->editor);
-		n_ret = noti_grid_owner(widget, NC_CELLCOMMIT, ptd->grid, ptd->row, ptd->col, (void*)text);
-		if (n_ret == GRID_NOTICE_ACCEPT)
-		{
-			gridctrl_set_cell_text(widget, ptd->row, ptd->col, text);
-		}
-	}
-	else if (compare_text(editor, -1, ATTR_EDITOR_FIRENUM, -1, 0) == 0)
-	{
-		text = (tchar_t*)editbox_get_text_ptr(ptd->editor);
-		n_ret = noti_grid_owner(widget, NC_CELLCOMMIT, ptd->grid, ptd->row, ptd->col, (void*)text);
-		if (n_ret == GRID_NOTICE_ACCEPT)
-		{
-			gridctrl_set_cell_text(widget, ptd->row, ptd->col, text);
-		}
-	}
-	else if (compare_text(editor, -1, ATTR_EDITOR_FIREDATE, -1, 0) == 0)
-	{
-		text = (tchar_t*)editbox_get_text_ptr(ptd->editor);
-		n_ret = noti_grid_owner(widget, NC_CELLCOMMIT, ptd->grid, ptd->row, ptd->col, (void*)text);
-		if (n_ret == GRID_NOTICE_ACCEPT)
-		{
-			gridctrl_set_cell_text(widget, ptd->row, ptd->col, text);
-		}
-	}
-	else if (compare_text(editor, -1, ATTR_EDITOR_FIRETIME, -1, 0) == 0)
-	{
-		text = (tchar_t*)editbox_get_text_ptr(ptd->editor);
-		n_ret = noti_grid_owner(widget, NC_CELLCOMMIT, ptd->grid, ptd->row, ptd->col, (void*)text);
-		if (n_ret == GRID_NOTICE_ACCEPT)
-		{
-			gridctrl_set_cell_text(widget, ptd->row, ptd->col, text);
-		}
-	}
-	else if (compare_text(editor, -1, ATTR_EDITOR_FIRELIST, -1, 0) == 0)
-	{
-		text = (tchar_t*)editbox_get_text_ptr(ptd->editor);
-		n_ret = noti_grid_owner(widget, NC_CELLCOMMIT, ptd->grid, ptd->row, ptd->col, (void*)text);
-		if (n_ret == GRID_NOTICE_ACCEPT)
-		{
-			gridctrl_set_cell_text(widget, ptd->row, ptd->col, text);
-		}
-	}
-	else if (compare_text(editor, -1, ATTR_EDITOR_FIREWORDS, -1, 0) == 0)
-	{
-		fd.data = firewords_get_data(ptd->editor);
-		ilk = firewords_get_item(ptd->editor);
-		if (ilk)
-		{
-			editbox_set_text(ptd->editor, get_words_item_text_ptr(ilk));
-		}
-
-		fd.text = editbox_get_text_ptr(ptd->editor);
-		n_ret = noti_grid_owner(widget, NC_CELLCOMMIT, ptd->grid, ptd->row, ptd->col, (void*)&fd);
-		if (n_ret == GRID_NOTICE_ACCEPT)
-		{
-			gridctrl_set_cell_text(widget, ptd->row, ptd->col, fd.text);
-		}
-	}
-	else if (compare_text(editor, -1, ATTR_EDITOR_FIREGRID, -1, 0) == 0)
-	{
-		fd.data = firegrid_get_data(ptd->editor);
-		fd.item = firegrid_get_item(ptd->editor);
-		n_ret = noti_grid_owner(widget, NC_CELLCOMMIT, ptd->grid, ptd->row, ptd->col, (void*)&fd);
-		if (n_ret == GRID_NOTICE_ACCEPT)
-		{
-			gridctrl_redraw_row(widget, ptd->row, 1);
-		}
-	}
-
-	editctrl = ptd->editor;
-	ptd->editor = (widget_t)0;
-
-	widget_destroy(editctrl);
-	widget_set_focus(widget);
-
-	if (n_ret == GRID_NOTICE_REJECT)
-	{
-		return;
-	}
-	else if (n_ret == GRID_NOTICE_DELETE)
-	{
-		gridctrl_delete_row(widget, ptd->row);
-		return;
-	}
-
-	if (ptd->b_auto && (ptd->row == get_prev_visible_row(ptd->grid, LINK_LAST)) && (ptd->col == ptd->fix || ptd->col == get_prev_focusable_col(ptd->grid, LINK_LAST)))
-	{
-		rlk_new = insert_row(ptd->grid, LINK_LAST);
-		set_row_state(rlk_new, dsNewClean);
-
-		if (!noti_grid_row_insert(widget, rlk_new))
-		{
-			delete_row(rlk_new);
-			return;
-		}
-
-		gridctrl_redraw_row(widget, rlk_new, 1);
-		gridctrl_set_focus_cell(widget, rlk_new, get_next_focusable_col(ptd->grid, LINK_FIRST));
-	}
-	else
-	{
-		if (ptd->col == ptd->fix)
-		{
-			gridctrl_tabskip(widget, TABORDER_DOWN);
-		}
-		else if (ptd->col == get_prev_focusable_col(ptd->grid, LINK_LAST))
-		{
-			rlk_new = get_next_visible_row(ptd->grid, ptd->row);
-			if (rlk_new)
-			{
-				gridctrl_set_focus_cell(widget, rlk_new, get_next_focusable_col(ptd->grid, LINK_FIRST));
-			}
-		}
-		else
-		{
-			gridctrl_tabskip(widget, TABORDER_RIGHT);
-		}
-	}
-}
-
-void noti_grid_rollback_edit(widget_t widget)
-{
-	grid_delta_t* ptd = GETGRIDDELTA(widget);
-	widget_t editctrl;
-	const tchar_t* editor;
-	EDITDELTA fd = { 0 };
-
-	if (!widget_is_valid(ptd->editor))
-		return;
-
-	XDK_ASSERT(ptd->row && ptd->col);
-
-	editor = get_col_editor_ptr(ptd->col);
-
-	if (compare_text(editor, -1, ATTR_EDITOR_FIREWORDS, -1, 0) == 0)
-	{
-		fd.data = firewords_get_data(ptd->editor);
-		fd.text = NULL;
-		noti_grid_owner(widget, NC_CELLROLLBACK, ptd->grid, ptd->row, ptd->col, (void*)&fd);
-	}
-	else if (compare_text(editor, -1, ATTR_EDITOR_FIREGRID, -1, 0) == 0)
-	{
-		fd.data = firegrid_get_data(ptd->editor);
-		fd.item = NULL;
-		noti_grid_owner(widget, NC_CELLROLLBACK, ptd->grid, ptd->row, ptd->col, (void*)&fd);
-	}
-	else
-	{
-		noti_grid_owner(widget, NC_CELLROLLBACK, ptd->grid, ptd->row, ptd->col, NULL);
-	}
-
-	editctrl = ptd->editor;
-	ptd->editor = (widget_t)0;
-
-	widget_destroy(editctrl);
-	widget_set_focus(widget);
-}
-
 void noti_grid_reset_editor(widget_t widget, bool_t bCommit)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
 
-	if (widget_is_valid(ptd->editor))
-	{
-		if (bCommit)
-			noti_grid_commit_edit(widget);
-		else
-			noti_grid_rollback_edit(widget);
-	}
+	if (bCommit)
+		widget_post_command(widget, COMMAND_COMMIT, IDC_CHILD, (vword_t)0);
+	else
+		widget_post_command(widget, COMMAND_ROLLBACK, IDC_CHILD, (vword_t)0);
 }
 
-void noti_grid_reset_scroll(widget_t widget, bool_t bUpdate)
-{
-	grid_delta_t* ptd = GETGRIDDELTA(widget);
-
-	if (widget_is_valid(ptd->vsc))
-	{
-		if (bUpdate)
-			widget_erase(ptd->vsc, NULL);
-		else
-			widget_destroy(ptd->vsc);
-	}
-
-	if (widget_is_valid(ptd->hsc))
-	{
-		if (bUpdate)
-			widget_erase(ptd->hsc, NULL);
-		else
-			widget_destroy(ptd->hsc);
-	}
-}
 /*******************************************************************************************/
 
 int hand_grid_create(widget_t widget, void* data)
@@ -973,12 +575,6 @@ void hand_grid_destroy(widget_t widget)
 	XDK_ASSERT(ptd != NULL);
 
 	noti_grid_reset_editor(widget, 0);
-
-	if (widget_is_valid(ptd->hsc))
-		widget_destroy(ptd->hsc);
-
-	if (widget_is_valid(ptd->vsc))
-		widget_destroy(ptd->vsc);
 
 	xmem_free(ptd);
 
@@ -1027,57 +623,13 @@ void hand_grid_scroll(widget_t widget, bool_t bHorz, int nLine)
 void hand_grid_wheel(widget_t widget, bool_t bHorz, int nDelta)
 {
 	grid_delta_t* ptd = GETGRIDDELTA(widget);
-	scroll_t scr = { 0 };
-	int nLine;
-	widget_t win;
 
 	if (!ptd->grid)
 		return;
 
 	noti_grid_reset_editor(widget, 1);
 
-	widget_get_scroll_info(widget, bHorz, &scr);
-
-	if (bHorz)
-		nLine = (nDelta > 0) ? scr.min : -scr.min;
-	else
-		nLine = (nDelta < 0) ? scr.min : -scr.min;
-
-	if (widget_hand_scroll(widget, bHorz, nLine))
-	{
-		if (!bHorz && !(widget_get_style(widget) & WD_STYLE_VSCROLL))
-		{
-			if (!widget_is_valid(ptd->vsc))
-			{
-				ptd->vsc = show_vertbox(widget);
-			}
-			else
-			{
-				widget_erase(ptd->vsc, NULL);
-			}
-		}
-
-		if (bHorz && !(widget_get_style(widget) & WD_STYLE_HSCROLL))
-		{
-			if (!widget_is_valid(ptd->hsc))
-			{
-				ptd->hsc = show_horzbox(widget);
-			}
-			else
-			{
-				widget_erase(ptd->hsc, NULL);
-			}
-		}
-
-		return;
-	}
-
-	win = widget_get_parent(widget);
-
-	if (widget_is_valid(win))
-	{
-		widget_scroll(win, bHorz, nLine);
-	}
+	widget_hand_wheel(widget, bHorz, nDelta);
 }
 
 void hand_grid_mouse_move(widget_t widget, dword_t dw, const xpoint_t* pxp)
@@ -1353,20 +905,20 @@ void hand_grid_keydown(widget_t widget, dword_t ks, int nKey)
 
 	switch (nKey)
 	{
-	case KEY_ENTER:
-		if (ptd->row && ptd->col)
-		{
-			noti_grid_begin_edit(widget);
-		}
-		break;
 	case KEY_SPACE:
 		if (ptd->row)
 		{
 			noti_grid_row_checked(widget, ptd->row);
 		}
 		break;
+	case KEY_DELETE:
+		if (ptd->row)
+		{
+			gridctrl_delete_row(widget, ptd->row);
+		}
+		break;
 	case KEY_TAB:
-		gridctrl_tabskip(widget, TABORDER_RIGHT);
+		gridctrl_tabskip(widget, TABORDER_ANY);
 		break;
 	case KEY_LEFT:
 		gridctrl_tabskip(widget, TABORDER_LEFT);
@@ -1391,39 +943,6 @@ void hand_grid_keydown(widget_t widget, dword_t ks, int nKey)
 		break;
 	case KEY_PAGEDOWN:
 		gridctrl_tabskip(widget, TABORDER_PAGEDOWN);
-		break;
-	}
-}
-
-void hand_grid_wchar(widget_t widget, wchar_t nChar)
-{
-	grid_delta_t* ptd = GETGRIDDELTA(widget);
-
-	if (!ptd->grid)
-		return;
-
-	if (IS_VISIBLE_CHAR(nChar) && !widget_is_valid(ptd->editor))
-	{
-		hand_grid_keydown(widget, 0, KEY_ENTER);
-	}
-
-	if (IS_VISIBLE_CHAR(nChar) && widget_is_valid(ptd->editor))
-	{
-		widget_post_wchar(ptd->editor, nChar);
-	}
-}
-
-void hand_grid_child_command(widget_t widget, int code, vword_t data)
-{
-	grid_delta_t* ptd = GETGRIDDELTA(widget);
-
-	switch (code)
-	{
-	case COMMAND_COMMIT:
-		noti_grid_commit_edit(widget);
-		break;
-	case COMMAND_ROLLBACK:
-		noti_grid_rollback_edit(widget);
 		break;
 	}
 }
@@ -1535,7 +1054,6 @@ widget_t gridctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* px
 		EVENT_ON_WHEEL(hand_grid_wheel)
 
 		EVENT_ON_KEYDOWN(hand_grid_keydown)
-		EVENT_ON_WCHAR(hand_grid_wchar)
 
 		EVENT_ON_MOUSE_MOVE(hand_grid_mouse_move)
 		EVENT_ON_MOUSE_HOVER(hand_grid_mouse_hover)
@@ -1548,7 +1066,6 @@ widget_t gridctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* px
 		EVENT_ON_RBUTTON_UP(hand_grid_rbutton_up)
 
 		EVENT_ON_NOTICE(hand_grid_notice)
-		EVENT_ON_CHILD_COMMAND(hand_grid_child_command)
 		EVENT_ON_MENU_COMMAND(hand_grid_menu_command)
 
 	EVENT_END_DISPATH
@@ -1698,6 +1215,39 @@ void gridctrl_tabskip(widget_t widget, int dir)
 
 	switch (dir)
 	{
+	case TABORDER_ANY:
+		if ((ptd->row == get_prev_visible_row(ptd->grid, LINK_LAST)) && (ptd->col == ptd->fix || ptd->col == get_prev_focusable_col(ptd->grid, LINK_LAST)))
+		{
+			gridctrl_insert_row(widget, LINK_LAST);
+		}
+		else
+		{
+			if (ptd->col == ptd->fix)
+			{
+				rlk = get_next_visible_row(ptd->grid, rlk);
+				if (rlk)
+				{
+					gridctrl_set_focus_cell(widget, rlk, clk);
+				}
+			}
+			else if (ptd->col == get_prev_focusable_col(ptd->grid, LINK_LAST))
+			{
+				rlk = get_next_visible_row(ptd->grid, ptd->row);
+				if (rlk)
+				{
+					gridctrl_set_focus_cell(widget, rlk, get_next_focusable_col(ptd->grid, LINK_FIRST));
+				}
+			}
+			else
+			{
+				clk = get_next_focusable_col(ptd->grid, clk);
+				if (clk)
+				{
+					gridctrl_set_focus_cell(widget, rlk, clk);
+				}
+			}
+		}
+		break;
 	case TABORDER_LEFT:
 		if (clk == NULL)
 			clk = get_prev_focusable_col(ptd->grid, LINK_LAST);
@@ -1783,8 +1333,6 @@ bool_t gridctrl_set_cell_text(widget_t widget, link_t_ptr rlk, link_t_ptr clk, c
 	set_cell_text(rlk, clk, szText, -1);
 	set_cell_dirty(rlk, clk, 1);
 	set_row_dirty(rlk);
-
-	noti_grid_owner(widget, NC_CELLUPDATE, ptd->grid, rlk, clk, NULL);
 
 	if (get_col_fireable(clk))
 	{
@@ -2140,7 +1688,10 @@ void gridctrl_accept(widget_t widget, bool_t bAccept)
 	if (!ptd->grid)
 		return;
 
-	noti_grid_reset_editor(widget, bAccept);
+	if(bAccept)
+		noti_grid_reset_editor(widget, 1);
+	else
+		noti_grid_reset_editor(widget, 0);
 
 	rlk = get_next_row(ptd->grid, LINK_FIRST);
 	while (rlk)
@@ -2323,7 +1874,7 @@ void gridctrl_find(widget_t widget, const tchar_t* token)
 	if (!ptd->grid)
 		return;
 
-	noti_grid_reset_editor(widget, 1);
+	noti_grid_reset_editor(widget, 0);
 
 	clk = get_next_visible_col(ptd->grid, LINK_FIRST);
 	if (!clk)

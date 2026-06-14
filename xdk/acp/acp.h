@@ -63,7 +63,7 @@ LICENSE.GPL3 for more details.
 #define MIN_CHS_GB2312		0xA1A1
 #define MAX_CHS_GB2312		0xFEFF
 #define CHS_GB2312_COUNT	8836
-#define GB2312_CODE_INDEX(sw)		 ((GETHBYTE(sw) - 161) * 94 + GETLBYTE(sw) - 161)
+#define GB2312_CODE_INDEX(sw)		 ((GETSWORDH(sw) - 161) * 94 + GETSWORDL(sw) - 161)
 
 /*define unicode range*/
 #define MIN_CHS_UNICODE		0x4E00

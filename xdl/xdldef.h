@@ -102,6 +102,7 @@ typedef enum{
 
 #define DEF_PAGE_FEED		10.0f
 #define DEF_CORNER_FEED		3.0f
+#define DEF_EDGE_FEED		0.5f
 #define DEF_SPLIT_FEED		1.0f
 #define DEF_SHADOW_FEED		2.0f
 

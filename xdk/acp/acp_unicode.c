@@ -63,8 +63,8 @@ int acp_unicode_byte_to_gb2312(wchar_t wch, byte_t* buf)
 	
 	if(buf)
 	{
-		buf[0] = GETLBYTE(uch);
-		buf[1] = GETHBYTE(uch);
+		buf[0] = GETSWORDL(uch);
+		buf[1] = GETSWORDH(uch);
 	}
 
 	return 2;

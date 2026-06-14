@@ -553,10 +553,15 @@ void call_rich_cur_object(void* ctx, void** pobj)
 void call_rich_object_attr(void* ctx, void* pobj, object_attr_t* pret)
 {
 	rich_scan_context* pscan = (rich_scan_context*)ctx;
+	link_t_ptr plk = (link_t_ptr)pobj;
 	
-	if(pret->ret & OBJECT_ATTR_XFACE)
+	if(!plk)
 	{
-		*(pret->ppxa) = pscan->pxa;
+		pret->ret |= OBJECT_ATTR_XFONT;
+		pret->pxf = pscan->pxf;
+
+		pret->ret |= OBJECT_ATTR_XFACE;
+		pret->pxa = pscan->pxa;
 	}
 }
 

@@ -25,7 +25,7 @@ SRCS = $(notdir $(DIRS))
 COBS = $(patsubst %.cc, %.o, $(SRCS))
 OBJS = $(addprefix $(OBJ_PATH)/,$(COBS))
 
-$(OBJ_PATH)%.o : $(SRC_PATH)/xDesign/%.cc
+$(OBJ_PATH)/%.o : $(SRC_PATH)/xDesign/%.cc
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
 
 all : $(OBJS)

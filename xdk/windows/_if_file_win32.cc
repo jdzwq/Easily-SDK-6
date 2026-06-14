@@ -246,16 +246,16 @@ bool_t _file_read_range(res_file_t fh, vword_t voff, void* buf, dword_t size)
 	GetSystemInfo(&si);
 	gran = si.dwAllocationGranularity;
 
-	hoff = GETHDWORD(voff);
-	loff = GETLDWORD(voff);
+	hoff = GETLWORDH(voff);
+	loff = GETLWORDL(voff);
 
 	poff = (loff % gran);
 	loff = (loff / gran) * gran;
 	dlen = (vword_t)poff + (vword_t)size;
 
 	flen = MAKELWORD(loff, hoff) + (lword_t)dlen;
-	dwh = GETHDWORD(flen);
-	dwl = GETLDWORD(flen);
+	dwh = GETLWORDH(flen);
+	dwl = GETLWORDL(flen);
 
 	mh = CreateFileMapping(fh, NULL, PAGE_READONLY, dwh, dwl, NULL);
 	if (!mh)
@@ -290,16 +290,16 @@ bool_t _file_write_range(res_file_t fh, vword_t voff, void* buf, dword_t size)
 	GetSystemInfo(&si);
 	gran = si.dwAllocationGranularity;
 
-	hoff = GETHDWORD(voff);
-	loff = GETLDWORD(voff);
+	hoff = GETLWORDH(voff);
+	loff = GETLWORDL(voff);
 
 	poff = (loff % gran);
 	loff = (loff / gran) * gran;
 	dlen = (vword_t)poff + (vword_t)size;
 
 	flen = MAKELWORD(loff, hoff) + (lword_t)dlen;
-	dwh = GETHDWORD(flen);
-	dwl = GETLDWORD(flen);
+	dwh = GETLWORDH(flen);
+	dwl = GETLWORDL(flen);
 
 	mh = CreateFileMapping(fh, NULL, PAGE_READWRITE, dwh, dwl, NULL);
 	if (!mh)
@@ -335,8 +335,8 @@ void* _file_lock_range(res_file_t fh, vword_t voff, dword_t size, bool_t write, 
 
 	*ph = NULL;
 
-	hoff = GETHDWORD(voff);
-	loff = GETLDWORD(voff);
+	hoff = GETLWORDH(voff);
+	loff = GETLWORDL(voff);
 
 	GetSystemInfo(&si);
 	gran = si.dwAllocationGranularity;
@@ -346,8 +346,8 @@ void* _file_lock_range(res_file_t fh, vword_t voff, dword_t size, bool_t write, 
 	dlen = (vword_t)poff + (vword_t)size;
 
 	flen = MAKELWORD(loff, hoff) + (lword_t)dlen;
-	dwh = GETHDWORD(flen);
-	dwl = GETLDWORD(flen);
+	dwh = GETLWORDH(flen);
+	dwl = GETLWORDL(flen);
 
 	mask = (write)? PAGE_READWRITE : PAGE_READONLY;
 
@@ -381,16 +381,16 @@ void _file_unlock_range(res_file_t mh, vword_t voff, dword_t size, void* p)
 	GetSystemInfo(&si);
 	gran = si.dwAllocationGranularity;
 
-	hoff = GETHDWORD(voff);
-	loff = GETLDWORD(voff);
+	hoff = GETLWORDH(voff);
+	loff = GETLWORDL(voff);
 
 	poff = (loff % gran);
 	loff = (loff / gran) * gran;
 	dlen = (vword_t)poff + (vword_t)size;
 
 	flen = MAKELWORD(loff, hoff) + (lword_t)dlen;
-	dwh = GETHDWORD(flen);
-	dwl = GETLDWORD(flen);
+	dwh = GETLWORDH(flen);
+	dwl = GETLWORDL(flen);
 
 	pBase = (void*)((BYTE*)p - poff);
 
@@ -405,8 +405,8 @@ bool_t _file_truncate(res_file_t fh, vword_t voff)
 	HANDLE hMap = NULL;
 	dword_t hoff, loff;
 
-	hoff = GETHDWORD(voff);
-	loff = GETLDWORD(voff);
+	hoff = GETLWORDH(voff);
+	loff = GETLWORDL(voff);
 	
 	hMap = CreateFileMapping(fh, NULL, PAGE_READWRITE, hoff, loff, NULL);
 	if (!hMap)

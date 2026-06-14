@@ -372,8 +372,8 @@ bool_t get_file_table_block_alloced(link_t_ptr ptr, lword_t bid)
 	XDK_ASSERT(ptr && ptr->tag == lkFileTable);
 	XDK_ASSERT(bid != INVALID_INDEX);
 
-	ind = GETHDWORD(bid);
-	pos = GETLDWORD(bid);
+	ind = GETLWORDH(bid);
+	pos = GETLWORDL(bid);
 
 	map_blocks = BLOCKS_PERMAP(ppt->page_size, ppt->mask_bits);
 	XDK_ASSERT(ind < ppt->file_maps && pos < map_blocks);
@@ -504,8 +504,8 @@ void free_file_table_block(link_t_ptr ptr, lword_t bid, dword_t size)
 
 	XDK_ASSERT(ptr && ptr->tag == lkFileTable);
 
-	ind = GETHDWORD(bid);
-	pos = GETLDWORD(bid);
+	ind = GETLWORDH(bid);
+	pos = GETLWORDL(bid);
 
 	map_blocks = BLOCKS_PERMAP(ppt->page_size, ppt->mask_bits);
 	XDK_ASSERT(pos < map_blocks && ind < ppt->file_maps);
@@ -538,8 +538,8 @@ void* lock_file_table_block(link_t_ptr ptr, lword_t bid, dword_t size, bool_t wr
 
 	XDK_ASSERT(ptr && ptr->tag == lkFileTable);
 
-	ind = GETHDWORD(bid);
-	pos = GETLDWORD(bid);
+	ind = GETLWORDH(bid);
+	pos = GETLWORDL(bid);
 
 	return _lock_file_table_block(ppt, ind, pos, size, write, pmh);
 }
@@ -551,8 +551,8 @@ void unlock_file_table_block(link_t_ptr ptr, lword_t bid, dword_t size, bool_t w
 
 	XDK_ASSERT(ptr && ptr->tag == lkFileTable);
 
-	ind = GETHDWORD(bid);
-	pos = GETLDWORD(bid);
+	ind = GETLWORDH(bid);
+	pos = GETLWORDL(bid);
 
 	_unlock_file_table_block(ppt, ind, pos, size, write, mh, buf);
 }
@@ -667,14 +667,14 @@ void file_table_self_test()
 			XDK_ASSERT(bid[i] != INVALID_INDEX);
 
 			b = (int)get_file_table_block_alloced(ptr, bid[i]);
-			ind = GETHDWORD(bid[i]);
-			pos = GETLDWORD(bid[i]);
+			ind = GETLWORDH(bid[i]);
+			pos = GETLWORDL(bid[i]);
 
 			_tprintf(_T("%d-%d-%d-%d\t"), ind, pos, ext[i], b);
 
-			if(pos && ind == GETHDWORD(bid[i-1]))
+			if(pos && ind == GETLWORDH(bid[i-1]))
 			{
-				XDK_ASSERT(pos == GETLDWORD(bid[i-1] + ext[i-1]));
+				XDK_ASSERT(pos == GETLWORDL(bid[i-1] + ext[i-1]));
 			}
 
 			buff = lock_file_table_block(ptr, bid[i], bytes, 1, &mh);
@@ -697,8 +697,8 @@ void file_table_self_test()
 			free_file_table_block(ptr, bid[i], bytes);
 
 			b = (int)get_file_table_block_alloced(ptr, bid[i]);
-			ind = GETHDWORD(bid[i]);
-			pos = GETLDWORD(bid[i]);
+			ind = GETLWORDH(bid[i]);
+			pos = GETLWORDL(bid[i]);
 
 			_tprintf(_T("%d-%d-%d-%d\t"), ind, pos, ext[i], b);
 

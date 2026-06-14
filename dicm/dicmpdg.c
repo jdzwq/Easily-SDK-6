@@ -358,13 +358,13 @@ dword_t dicm_fill_pdg(byte_t* buf, int max, pdg_file_t* pdf, pdg_info_t* pdi, pd
 
 				if (pdi->psign)
 				{
-					pbm[dw] = GETLBYTE(ss);
-					pbm[dw + 1] = GETHBYTE(ss);
+					pbm[dw] = GETSWORDL(ss);
+					pbm[dw + 1] = GETSWORDH(ss);
 				}
 				else
 				{
-					pbm[dw] = GETLBYTE(us);
-					pbm[dw + 1] = GETHBYTE(us);
+					pbm[dw] = GETSWORDL(us);
+					pbm[dw + 1] = GETSWORDH(us);
 				}
 			}
 			else if (pdi->psize == 3)

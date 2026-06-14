@@ -79,6 +79,7 @@ EXP_API void	xmem_zero(void* p, dword_t size);
 @RETURN void: none
 */
 EXP_API void	xmem_set(void* p, byte_t c, dword_t size);
+EXP_API void	xmem_int(void* p, int i, int count);
 
 /*
 @FUNCTION xmem_clone: clone the memory segment.

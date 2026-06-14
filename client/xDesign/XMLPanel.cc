@@ -279,7 +279,7 @@ void XMLPanel_OnSave(widget_t widget)
 		if (!shell_get_filename(widget, szPath, _T("Xml File(*.xml)\0*.xml\0"), _T("xml"), 1, szPath, PATH_LEN, szFile, PATH_LEN))
 			return;
 
-		xscat(szPath, _T("\\"));
+		xscat(szPath, _T("/"));
 		xscat(szPath, szFile);
 		xscpy(szFile, szPath);
 	}
@@ -304,7 +304,7 @@ void XMLPanel_OnSaveAs(widget_t widget)
 	if (!shell_get_filename(widget, szPath, _T("Xml File(*.xml)\0*.xml\0"), _T("xml"), 1, szPath, PATH_LEN, szFile, PATH_LEN))
 		return;
 
-	xscat(szPath, _T("\\"));
+	xscat(szPath, _T("/"));
 	xscat(szPath, szFile);
 	xscpy(szFile, szPath);
 
@@ -487,6 +487,8 @@ int XMLPanel_OnCreate(widget_t widget, void* data)
 	properctrl_attach(pdt->hProper, ptrProper);
 	properctrl_set_lock(pdt->hProper, 0);
 
+	hand_editor_create(pdt->hProper, &edit_properctrl);
+
 	set_split_item_delta(ilkProper, pdt->hProper);
 	widget_show(pdt->hProper, WS_SHOW_NORMAL);
 
@@ -538,6 +540,8 @@ void XMLPanel_OnDestroy(widget_t widget)
 
 	if (widget_is_valid(pdt->hProper))
 	{
+		hand_editor_destroy(pdt->hProper);
+		
 		LINKPTR ptrProper = properctrl_detach(pdt->hProper);
 		if (ptrProper)
 			destroy_proper_doc(ptrProper);

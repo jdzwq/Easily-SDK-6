@@ -350,10 +350,15 @@ void call_tag_cur_object(void* ctx, void** pobj)
 void call_tag_object_attr(void* ctx, void* pobj, object_attr_t* pret)
 {
 	tag_scan_contet* pscan = (tag_scan_contet*)ctx;
-
-	if(pret->ret & OBJECT_ATTR_XFACE)
+	link_t_ptr plk = (link_t_ptr)pobj;
+	
+	if(!plk)
 	{
-		*(pret->ppxa) = pscan->pxa;
+		pret->ret |= OBJECT_ATTR_XFONT;
+		pret->pxf = pscan->pxf;
+
+		pret->ret |= OBJECT_ATTR_XFACE;
+		pret->pxa = pscan->pxa;
 	}
 }
 

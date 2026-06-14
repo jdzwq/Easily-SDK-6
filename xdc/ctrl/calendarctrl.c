@@ -228,7 +228,7 @@ void noti_calendar_daily_enter(widget_t widget, link_t_ptr ilk)
 
 	ptd->hover = ilk;
 
-	//widget_track_mouse(widget, MS_TRACK_HOVER | MS_TRACK_LEAVE);
+	widget_enable_hover(widget, bool_true);
 }
 
 void noti_calendar_daily_leave(widget_t widget)
@@ -239,7 +239,7 @@ void noti_calendar_daily_leave(widget_t widget)
 
 	ptd->hover = NULL;
 
-	//widget_track_mouse(widget, MS_TRACK_HOVER | MS_TRACK_LEAVE);
+	widget_enable_hover(widget, bool_false);
 }
 
 void noti_calendar_daily_hover(widget_t widget, int x, int y)
@@ -363,24 +363,21 @@ void hand_calendar_mouse_move(widget_t widget, dword_t dw, const xpoint_t* pxp)
 	ilk = NULL;
 	nHint = calc_calendar_hint(ptd->calendar, &pt, &ilk);
 
-	if (widget_is_hotvoer(widget))
+	if (nHint == CALENDAR_HINT_DAILY && !ptd->hover && ilk)
 	{
-		if (nHint == CALENDAR_HINT_DAILY && !ptd->hover && ilk)
-		{
-			noti_calendar_daily_enter(widget, ilk);
-			return;
-		}
+		noti_calendar_daily_enter(widget, ilk);
+		return;
+	}
 
-		if (nHint == CALENDAR_HINT_DAILY && ptd->hover && ptd->hover != ilk)
-		{
-			noti_calendar_daily_leave(widget);
-			return;
-		}
+	if (nHint == CALENDAR_HINT_DAILY && ptd->hover && ptd->hover != ilk)
+	{
+		noti_calendar_daily_leave(widget);
+		return;
+	}
 
-		if (nHint != CALENDAR_HINT_DAILY && ptd->hover)
-		{
-			noti_calendar_daily_leave(widget);
-		}
+	if (nHint != CALENDAR_HINT_DAILY && ptd->hover)
+	{
+		noti_calendar_daily_leave(widget);
 	}
 }
 

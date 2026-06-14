@@ -2,8 +2,8 @@
 #include <xdg.h>
 #include <xdu.h>
 
-if_context_t if_context = {0};
-if_widget_t if_widget = {0};
+if_context_t* pif_context = NULL;
+if_widget_t* pif_widget = NULL;
 widget_t g_main = 0;
 vword_t g_timer = 0;
 
@@ -12,7 +12,7 @@ int pop_on_create(widget_t wt, void* param)
 {
     printf("pop on_create\n");
 
-    (*if_widget.pf_widget_post_command)(wt, 4, IDC_SELF, 100);
+    (pif_widget->pf_widget_post_command)(wt, 4, IDC_SELF, 100);
     
     return 0;
 }
@@ -26,20 +26,20 @@ void pop_on_lbutton_down(widget_t wt, const xpoint_t* ppt)
 {
     printf("pop on_lbutton_down x:%d y:%d\n", ppt->x, ppt->y);
 
-    widget_t par =  (*if_widget.pf_widget_get_owner)(wt);
+    widget_t par =  (pif_widget->pf_widget_get_owner)(wt);
 
-    (*if_widget.pf_widget_send_command)(par, 1, 1000, 100);
+    (pif_widget->pf_widget_send_command)(par, 1, 1000, 100);
 }
 
 void pop_on_lbutton_up(widget_t wt, const xpoint_t* ppt)
 {
     printf("pop on_lbutton_up x:%d y:%d\n", ppt->x, ppt->y);
 
-    widget_t par =  (*if_widget.pf_widget_get_parent)(wt);
+    widget_t par =  (pif_widget->pf_widget_get_parent)(wt);
 
-   // (*if_widget.pf_widget_post_command)(par, 2, IDC_CHILD, 100);
+   // (pif_widget->pf_widget_post_command)(par, 2, IDC_CHILD, 100);
 
-    (*if_widget.pf_widget_close)(wt, 0);
+    (pif_widget->pf_widget_close)(wt, 0);
 }
 
 void pop_on_self_command(widget_t wt, int code, vword_t data)
@@ -52,8 +52,8 @@ void pop_on_paint(widget_t wt, visual_t rdc, const xrect_t* prt)
     printf("pop on_paint the rect is x:%d y:%d w:%d h:%d \n", prt->x, prt->y, prt->w, prt->h);
 
     xrect_t rt;
-    (*if_widget.pf_widget_get_client_rect)(wt, &rt);
-    visual_t ctx = (*if_context.pf_create_compatible_context)(rdc, rt.w, rt.h);
+    (pif_widget->pf_widget_get_client_rect)(wt, &rt);
+    visual_t ctx = (pif_context->pf_create_compatible_context)(rdc, rt.w, rt.h);
 
 	xpen_t xp = { 0 };
 	default_xpen(&xp);
@@ -63,21 +63,21 @@ void pop_on_paint(widget_t wt, visual_t rdc, const xrect_t* prt)
 	default_xbrush(&xb);
 	xscpy(xb.color, GDI_ATTR_RGB_SLATE);
 
-    (*if_context.pf_gdi_draw_rect)(ctx, &xp, &xb, &rt);
+    (pif_context->pf_gdi_draw_rect)(ctx, &xp, &xb, &rt);
 
-    (*if_context.pf_render_context)(ctx, 0,0, rdc, 0, 0, rt.w, rt.h);
+    (pif_context->pf_render_context)(ctx, 0,0, rdc, 0, 0, rt.w, rt.h);
 
-    (*if_context.pf_destroy_context)(ctx);
+    (pif_context->pf_destroy_context)(ctx);
 }
 /****************************************************************************/
 int sub_on_create(widget_t wt, void* param)
 {
     xrect_t xr;
-    (*if_widget.pf_widget_get_window_rect)(wt, &xr);
+    (pif_widget->pf_widget_get_window_rect)(wt, &xr);
 
     printf("sub on_create at x:%d y:%d w:%d h:%d \n", xr.x, xr.y, xr.w, xr.h);
 
-    (*if_widget.pf_widget_post_command)(wt, 4, IDC_SELF, 100);
+    (pif_widget->pf_widget_post_command)(wt, 4, IDC_SELF, 100);
     
     return 0;
 }
@@ -92,8 +92,8 @@ void sub_on_paint(widget_t wt, visual_t rdc, const xrect_t* prt)
     printf("sub on_paint the rect is x:%d y:%d w:%d h:%d \n", prt->x, prt->y, prt->w, prt->h);
 
     xrect_t rt;
-    (*if_widget.pf_widget_get_client_rect)(wt, &rt);
-    visual_t ctx = (*if_context.pf_create_compatible_context)(rdc, rt.w, rt.h);
+    (pif_widget->pf_widget_get_client_rect)(wt, &rt);
+    visual_t ctx = (pif_context->pf_create_compatible_context)(rdc, rt.w, rt.h);
 
 	xpen_t xp = { 0 };
 	default_xpen(&xp);
@@ -103,11 +103,11 @@ void sub_on_paint(widget_t wt, visual_t rdc, const xrect_t* prt)
 	default_xbrush(&xb);
 	xscpy(xb.color, GDI_ATTR_RGB_GREEN);
 
-    (*if_context.pf_gdi_draw_rect)(ctx, &xp, &xb, &rt);
+    (pif_context->pf_gdi_draw_rect)(ctx, &xp, &xb, &rt);
 
-    (*if_context.pf_render_context)(ctx, 0,0, rdc, 0, 0, rt.w, rt.h);
+    (pif_context->pf_render_context)(ctx, 0,0, rdc, 0, 0, rt.w, rt.h);
 
-    (*if_context.pf_destroy_context)(ctx);
+    (pif_context->pf_destroy_context)(ctx);
 }
 
 void sub_on_mouse_move(widget_t wt, dword_t ms, const xpoint_t* ppt)
@@ -124,7 +124,7 @@ void sub_on_mouse_move(widget_t wt, dword_t ms, const xpoint_t* ppt)
 int child_on_create(widget_t wt, void* param)
 {
     xrect_t xr;
-    (*if_widget.pf_widget_get_window_rect)(wt, &xr);
+    (pif_widget->pf_widget_get_window_rect)(wt, &xr);
 
     printf("child on_create at x:%d y:%d w:%d h:%d \n", xr.x, xr.y, xr.w, xr.h);
     
@@ -140,10 +140,10 @@ int child_on_create(widget_t wt, void* param)
     xr.w = 100;
     xr.h = 100;
 
-    widget_t sub = (*if_widget.pf_widget_create)(_T("sub"),WD_STYLE_CONTROL,&xr,wt,&ev);
-    (*if_widget.pf_widget_set_owner)(sub, wt);
-    (*if_widget.pf_widget_set_user_id)(sub, 2000);
-    (*if_widget.pf_widget_show)(sub, 0);
+    /*widget_t sub = (pif_widget->pf_widget_create)(_T("sub"),WD_STYLE_CONTROL,&xr,wt,&ev);
+    (pif_widget->pf_widget_set_owner)(sub, wt);
+    (pif_widget->pf_widget_set_user_id)(sub, 2000);
+    (pif_widget->pf_widget_show)(sub, 0);*/
 
     return 0;
 }
@@ -152,8 +152,8 @@ void child_on_destroy(widget_t wt)
 {
     printf("child on_destroy\n");
 
-    widget_t sub = (*if_widget.pf_widget_get_child)(wt, 2000);
-    if(sub) (*if_widget.pf_widget_destroy)(sub);
+    widget_t sub = (pif_widget->pf_widget_get_child)(wt, 2000);
+    if(sub) (pif_widget->pf_widget_destroy)(sub);
 }
 
 void child_on_mouse_move(widget_t wt, dword_t ms, const xpoint_t* ppt)
@@ -202,15 +202,15 @@ void child_on_lbutton_down(widget_t wt, const xpoint_t* ppt)
 {
     printf("child on_lbutton_down x:%d y:%d\n", ppt->x, ppt->y);
 
-    (*if_widget.pf_widget_set_focus)(wt);
+    (pif_widget->pf_widget_set_focus)(wt);
 
-    widget_t par =  (*if_widget.pf_widget_get_parent)(wt);
+    widget_t par =  (pif_widget->pf_widget_get_parent)(wt);
 
     nt2.user = 1001;
     nt2.code = 6;
     nt2.widget = wt;
 
-    (*if_widget.pf_widget_post_notice)(par, &nt2);
+    (pif_widget->pf_widget_post_notice)(par, &nt2);
     printf("child post notice\n");    
 
     NOTICE nt = {0};
@@ -218,25 +218,25 @@ void child_on_lbutton_down(widget_t wt, const xpoint_t* ppt)
     nt.code = 5;
     nt.widget = wt;
 
-   int n = (*if_widget.pf_widget_send_notice)(par, &nt);
+   int n = (pif_widget->pf_widget_send_notice)(par, &nt);
     printf("child send notice return %d \n", n);
 
-   (*if_widget.pf_widget_set_capture)(wt, 1);
+   (pif_widget->pf_widget_set_capture)(wt, 1);
 
-   (*if_widget.pf_widget_set_cursor)(wt, CURSOR_HAND);
+   (pif_widget->pf_widget_set_cursor)(wt, CURSOR_HAND);
 
-   (*if_widget.pf_widget_show_caret)(wt, ppt->x, ppt->y);
+   (pif_widget->pf_widget_show_caret)(wt, ppt->x, ppt->y);
 }
 
 void child_on_lbutton_up(widget_t wt, const xpoint_t* ppt)
 {
     printf("child on_lbutton_up x:%d y:%d\n", ppt->x, ppt->y);
 
-    (*if_widget.pf_widget_set_cursor)(wt, 0);
+    (pif_widget->pf_widget_set_cursor)(wt, 0);
 
-    (*if_widget.pf_widget_set_capture)(wt, 0);
+    (pif_widget->pf_widget_set_capture)(wt, 0);
 
-    (*if_widget.pf_widget_erase)(wt, NULL);
+    (pif_widget->pf_widget_erase)(wt, NULL);
 }
 
 void child_on_lbutton_dbclick(widget_t wt, const xpoint_t* ppt)
@@ -247,7 +247,7 @@ void child_on_lbutton_dbclick(widget_t wt, const xpoint_t* ppt)
     nt2.code = 7;
     nt2.widget = wt;
 
-    (*if_widget.pf_widget_post_notice)(wt, &nt2);
+    (pif_widget->pf_widget_post_notice)(wt, &nt2);
     
     printf("child post notice\n");    
 }
@@ -276,15 +276,15 @@ void child_on_rbutton_up(widget_t wt, const xpoint_t* ppt)
     xr.w = 100;
     xr.h = 200;
 
-    (*if_widget.pf_widget_client_to_screen)(wt, RECTPOINT(&xr));
+    (pif_widget->pf_widget_client_to_screen)(wt, RECTPOINT(&xr));
 
-    widget_t pop = (*if_widget.pf_widget_create)(_T("popup"),WD_STYLE_MENU,&xr,g_main,&ev);
+    widget_t pop = (pif_widget->pf_widget_create)(_T("popup"),WD_STYLE_MENU,&xr,g_main,&ev);
 
-    (*if_widget.pf_widget_set_owner)(pop, wt);
+    (pif_widget->pf_widget_set_owner)(pop, wt);
 
-    (*if_widget.pf_widget_show)(pop, 0);
+    (pif_widget->pf_widget_show)(pop, 0);
 
-    (*if_widget.pf_widget_do_track)(pop);
+    (pif_widget->pf_widget_do_track)(pop);
 }
 
 void child_on_keydown(widget_t wt, dword_t ks, int key)
@@ -349,16 +349,16 @@ void child_on_set_focus(widget_t wt, widget_t from)
 {
     printf("child on_set_focus \n");
 
-    (*if_widget.pf_widget_create_caret)(wt, 2, 20);
+    (pif_widget->pf_widget_create_caret)(wt, 2, 20);
 
-    (*if_widget.pf_widget_show_caret)(wt, 10, 10);
+    (pif_widget->pf_widget_show_caret)(wt, 10, 10);
 }
 
 void child_on_kill_focus(widget_t wt, widget_t to)
 {
     printf("child on_kill_focus \n");
 
-    (*if_widget.pf_widget_destroy_caret)(wt);
+    (pif_widget->pf_widget_destroy_caret)(wt);
 }
 
 void child_on_menu_command(widget_t wt, int code, int cid, vword_t data)
@@ -376,8 +376,8 @@ void child_on_paint(widget_t wt, visual_t rdc, const xrect_t* prt)
     //printf("child on_paint the rect is x:%d y:%d w:%d h:%d \n", prt->x, prt->y, prt->w, prt->h);
 
     xrect_t rt;
-    (*if_widget.pf_widget_get_client_rect)(wt, &rt);
-    visual_t ctx = (*if_context.pf_create_compatible_context)(rdc, rt.w, rt.h);
+    (pif_widget->pf_widget_get_client_rect)(wt, &rt);
+    visual_t ctx = (pif_context->pf_create_compatible_context)(rdc, rt.w, rt.h);
 
 	xpen_t xp = { 0 };
 	default_xpen(&xp);
@@ -387,7 +387,7 @@ void child_on_paint(widget_t wt, visual_t rdc, const xrect_t* prt)
 	default_xbrush(&xb);
 	xscpy(xb.color, GDI_ATTR_RGB_HARDBLACK);
 
-    (*if_context.pf_gdi_draw_rect)(ctx, &xp, &xb, &rt);
+    (pif_context->pf_gdi_draw_rect)(ctx, &xp, &xb, &rt);
 
 	xrect_t xr;
 	xr.x = 10;
@@ -397,7 +397,7 @@ void child_on_paint(widget_t wt, visual_t rdc, const xrect_t* prt)
 
     xscpy(xp.color, GDI_ATTR_RGB_SOFTWHITE);
     xscpy(xb.color, GDI_ATTR_RGB_SOFTBLACK);
-    //(*if_context.pf_gdi_draw_rect)(ctx, &xp, &xb, &xr);
+    //(pif_context->pf_gdi_draw_rect)(ctx, &xp, &xb, &xr);
 
     xpoint_t xp1,xp2,xp3,xp4;
     xp1.x = 10;
@@ -407,9 +407,9 @@ void child_on_paint(widget_t wt, visual_t rdc, const xrect_t* prt)
     xp3.x = 30;
     xp3.y = 60;
     xscpy(xp.color, GDI_ATTR_RGB_SLATE);
-   //(*if_context.pf_gdi_draw_line)(ctx, &xp, &xp1, &xp2);
-   //(*if_context.pf_gdi_draw_line)(ctx, &xp, &xp2, &xp3);
-   //(*if_context.pf_gdi_draw_line)(ctx, &xp, &xp3, &xp1);
+   //(pif_context->pf_gdi_draw_line)(ctx, &xp, &xp1, &xp2);
+   //(pif_context->pf_gdi_draw_line)(ctx, &xp, &xp2, &xp3);
+   //(pif_context->pf_gdi_draw_line)(ctx, &xp, &xp3, &xp1);
 
    xpoint_t pt[5];
    pt[0].x = 40;
@@ -423,27 +423,19 @@ void child_on_paint(widget_t wt, visual_t rdc, const xrect_t* prt)
    pt[4].x = 40;
    pt[4].y = 40;
    xscpy(xp.color, GDI_ATTR_RGB_SLATE);
-   //(*if_context.pf_gdi_draw_polyline)(ctx, &xp, pt, 4);
+   //(pif_context->pf_gdi_draw_polyline)(ctx, &xp, pt, 4);
 
    xscpy(xb.color, GDI_ATTR_RGB_YELLOW);
-   //(*if_context.pf_gdi_draw_polygon)(ctx, &xp, &xb, pt, 4);
-
-   xr.x = 50;
-   xr.y = 50;
-   xr.w = 90;
-   xr.h = 90;
-   xsize_t xs1;
-   xs1.w = 10;
-   xs1.h = 10;
-   xscpy(xb.color, GDI_ATTR_RGB_SOFTRED);
-   //(*if_context.pf_gdi_draw_round)(ctx, &xp, &xb, &xr, &xs1);
+   //(pif_context->pf_gdi_draw_polygon)(ctx, &xp, &xb, pt, 4);
 
    xr.x = 50;
    xr.y = 50;
    xr.w = 80;
    xr.h = 100;
    xscpy(xb.color, GDI_ATTR_RGB_SOFTRED);
-   //(*if_context.pf_gdi_draw_ellipse)(ctx, &xp, &xb, &xr);
+   //(pif_context->pf_gdi_draw_ellipse)(ctx, &xp, &xb, &xr);
+
+    xsize_t xs1;
 
     xp1.x = 100;
     xp1.y = 100;
@@ -454,8 +446,8 @@ void child_on_paint(widget_t wt, visual_t rdc, const xrect_t* prt)
     xs1.h = 50;
     xscpy(xp.size,_T("1"));
     xscpy(xp.color, GDI_ATTR_RGB_YELLOW);
-   //(*if_context.pf_gdi_draw_arc)(ctx, &xp, &xp1, &xp2, &xs1, 1, 0);
-   //(*if_context.pf_gdi_draw_line)(ctx, &xp, &xp1, &xp2);
+   //(pif_context->pf_gdi_draw_arc)(ctx, &xp, &xp1, &xp2, &xs1, 0, 0);
+   //(pif_context->pf_gdi_draw_line)(ctx, &xp, &xp1, &xp2);
 
    xr.x = 100;
    xr.y = 50;
@@ -463,7 +455,8 @@ void child_on_paint(widget_t wt, visual_t rdc, const xrect_t* prt)
    xr.h = 120;
    xscpy(xp.color, GDI_ATTR_RGB_GREEN);
    xscpy(xb.color, GDI_ATTR_RGB_BLUE);
-   //(*if_context.pf_gdi_draw_pie)(ctx, &xp, &xb, &xr, XPI, XPI * 7 / 4);
+   //(pif_context->pf_gdi_draw_pie)(ctx, &xp, &xb, &xr, XPI, XPI * 7 / 4);
+   //(pif_context->pf_gdi_draw_pie)(ctx, &xp, &xb, &xr, -XPI/2, -XPI * 5 / 4);
 
     pt[0].x = 20;
     pt[0].y = 100;
@@ -472,8 +465,8 @@ void child_on_paint(widget_t wt, visual_t rdc, const xrect_t* prt)
     pt[2].x = 100;
     pt[2].y = 80;
 	xscpy(xp.color, GDI_ATTR_RGB_SLATE);
-	//(*if_context.pf_gdi_draw_polyline)(ctx, &xp, pt, 3);
-    //(*if_context.pf_gdi_draw_curve)(ctx, &xp, pt, 3);
+	//(pif_context->pf_gdi_draw_polyline)(ctx, &xp, pt, 3);
+    //(pif_context->pf_gdi_draw_curve)(ctx, &xp, pt, 3);
 
     pt[0].x = 20;
     pt[0].y = 100;
@@ -484,8 +477,18 @@ void child_on_paint(widget_t wt, visual_t rdc, const xrect_t* prt)
     pt[3].x = 120;
     pt[3].y = 90;
 	xscpy(xp.color, GDI_ATTR_RGB_SLATE);
-	//(*if_context.pf_gdi_draw_polyline)(ctx, &xp, pt, 4);
-	//(*if_context.pf_gdi_draw_bezier)(ctx, &xp, &pt[0], &pt[1], &pt[2], &pt[3]);
+	//(pif_context->pf_gdi_draw_polyline)(ctx, &xp, pt, 4);
+	//(pif_context->pf_gdi_draw_bezier)(ctx, &xp, &pt[0], &pt[1], &pt[2], &pt[3]);
+
+   xr.x = 50;
+   xr.y = 50;
+   xr.w = 90;
+   xr.h = 90;
+
+   xs1.w = 10;
+   xs1.h = 10;
+   xscpy(xb.color, GDI_ATTR_RGB_SOFTRED);
+   //(pif_context->pf_gdi_draw_round)(ctx, &xp, &xb, &xr, &xs1);
 
 	tchar_t aa[20] = { 0 };
 	xpoint_t pa[50] = { 0 };
@@ -585,7 +588,7 @@ void child_on_paint(widget_t wt, visual_t rdc, const xrect_t* prt)
 	i++;
 
 	xscpy(xp.color, GDI_ATTR_RGB_SLATE);
-	//(*if_context.pf_gdi_draw_path)(ctx, &xp, NULL, aa, pa, n);
+	//(pif_context->pf_gdi_draw_path)(ctx, &xp, NULL, aa, pa, n);
 
 	xcolor_t brim_color, core_color;
 	parse_xcolor(&brim_color, GDI_ATTR_RGB_GRAY);
@@ -596,49 +599,49 @@ void child_on_paint(widget_t wt, visual_t rdc, const xrect_t* prt)
 	xr.y = 2;
 	xr.w = 96;
 	xr.h = 96;
-	//(*if_context.pf_gdi_gradient_rect)(ctx, &brim_color, &core_color, GDI_ATTR_GRADIENT_HORZ, &xr);
+	//(pif_context->pf_gdi_gradient_rect)(ctx, &brim_color, &core_color, GDI_ATTR_GRADIENT_HORZ, &xr);
 
     xr.x = 10;
 	xr.y = 10;
 	xr.w = 50;
 	xr.h = 50;
-    //(*if_context.pf_gdi_exclude_rect)(ctx, &xr);
+    //(pif_context->pf_gdi_exclude_rect)(ctx, &xr);
     xr.x -= 1;
     xr.y -= 1;
     xr.w += 2;
     xr.h += 2;
     xscpy(xp.color, GDI_ATTR_RGB_SOFTWHITE);
-    //(*if_context.pf_gdi_draw_rect)(ctx, &xp, NULL, &xr);
+    //(pif_context->pf_gdi_draw_rect)(ctx, &xp, NULL, &xr);
     xr.x = 30;
 	xr.y = 30;
 	xr.w = 50;
 	xr.h = 50;
     xscpy(xb.color, GDI_ATTR_RGB_SOFTBLACK);
-    //(*if_context.pf_gdi_draw_rect)(ctx, &xp, &xb, &xr);
+    //(pif_context->pf_gdi_draw_rect)(ctx, &xp, &xb, &xr);
 
     xr.x = 40;
 	xr.y = 40;
 	xr.w = 50;
 	xr.h = 50;
-    //(*if_context.pf_gdi_inclip_rect)(ctx, &xr);
+    //(pif_context->pf_gdi_inclip_rect)(ctx, &xr);
     xr.x += 1;
     xr.y += 1;
     xr.w -= 2;
     xr.h -= 2;
     xscpy(xp.color, GDI_ATTR_RGB_SOFTWHITE);
     xscpy(xb.color, GDI_ATTR_RGB_SOFTBLACK);
-    //(*if_context.pf_gdi_draw_rect)(ctx, &xp, NULL, &xr);
+    //(pif_context->pf_gdi_draw_rect)(ctx, &xp, NULL, &xr);
     xr.x = 30;
 	xr.y = 30;
 	xr.w = 50;
 	xr.h = 50;
-    //(*if_context.pf_gdi_draw_rect)(ctx, &xp, &xb, &xr);
+    //(pif_context->pf_gdi_draw_rect)(ctx, &xp, &xb, &xr);
 
     xr.x = 10;
 	xr.y = 10;
 	xr.w = 90;
 	xr.h = 90;
-    //(*if_context.pf_gdi_invert_rect)(ctx, &xr);
+    //(pif_context->pf_gdi_invert_rect)(ctx, &xr);
 
     xr.x = 20;
 	xr.y = 20;
@@ -646,7 +649,7 @@ void child_on_paint(widget_t wt, visual_t rdc, const xrect_t* prt)
 	xr.h = 120;
 	xcolor_t xc = { 0 };
 	parse_xcolor(&xc, GDI_ATTR_RGB_RED);
-	//(*if_context.pf_gdi_alphablend_rect)(ctx, &xc, &xr, 128);
+	//(pif_context->pf_gdi_alphablend_rect)(ctx, &xc, &xr, 128);
 
     xfont_t xf = {0};
     default_textor_xfont(&xf);
@@ -659,67 +662,83 @@ void child_on_paint(widget_t wt, visual_t rdc, const xrect_t* prt)
     const tchar_t* token = _T("您好，世界！");
     
     xsize_t xs = {0};
-    (*if_context.pf_gdi_font_size)(ctx, &xs);
-	(*if_context.pf_gdi_text_size)(ctx, token, -1, &xs);
+    (pif_context->pf_gdi_font_size)(ctx, &xf, &xs);
+	(pif_context->pf_gdi_text_size)(ctx, &xf, token, -1, &xs);
 	xp1.x = 10;
 	xp1.y = 10;
 	xp2.x = xp1.x + xs.w;
 	xp2.y = 10;
 
-	(*if_context.pf_gdi_draw_line)(ctx, &xp, &xp1, &xp2);
-	(*if_context.pf_gdi_text_out)(ctx, &xa, &xp1, token, -1);
+	(pif_context->pf_gdi_draw_line)(ctx, &xp, &xp1, &xp2);
+	(pif_context->pf_gdi_text_out)(ctx, &xa, &xp1, token, -1);
 
     xr.x = 10;
     xr.y = 20;
-    //(*if_context.pf_gdi_text_size)(ctx, &xf, _T("Hello World!"), -1, RECTSIZE(&xr));
-    //(*if_context.pf_gdi_draw_rect)(ctx, &xp, &xb, &xr);
-    //(*if_context.pf_gdi_draw_text)(ctx, &xf, &xa, &xr, _T("Hello World!"), -1);
+    //(pif_context->pf_gdi_text_size)(ctx, &xf, _T("Hello World!"), -1, RECTSIZE(&xr));
+    //(pif_context->pf_gdi_draw_rect)(ctx, &xp, &xb, &xr);
+    //(pif_context->pf_gdi_draw_text)(ctx, &xf, &xa, &xr, _T("Hello World!"), -1);
 
     xr.x = 10;
     xr.y = 10;
     xr.w = 150;
     xr.h = 100;
-    //(*if_context.pf_gdi_draw_rect)(ctx, &xp, &xb, &xr);
+    //(pif_context->pf_gdi_draw_rect)(ctx, &xp, &xb, &xr);
     xscpy(xa.text_align, GDI_ATTR_TEXT_ALIGN_CENTER);
     xscpy(xa.line_align, GDI_ATTR_TEXT_ALIGN_CENTER);
-    //(*if_context.pf_gdi_draw_text)(ctx, &xf, &xa, &xr, _T("Hello World!"), -1);
+    //(pif_context->pf_gdi_draw_text)(ctx, &xf, &xa, &xr, _T("Hello World!"), -1);
 
     parse_xcolor(&xc, GDI_ATTR_RGB_RED);
 	xcolor_t xc_back;
 	parse_xcolor(&xc_back, GDI_ATTR_RGB_YELLOW);
     bitmap_t bmp = NULL;
-	bmp = (*if_context.pf_create_color_bitmap)(ctx, &xc, 32, 32);
-	//bmp = (*if_context.pf_create_pattern_bitmap)(ctx, &xc, &xc_back, 5, 5);
-	//bmp = (*if_context.pf_create_gradient_bitmap)(ctx, &xc, &xc_back, 50, 50, GDI_ATTR_GRADIENT_VERT);
-
-	byte_t code[10] = { '1', '2', '3', '4', '5', '6', '7', '8', '9', '0' };
-	byte_t bar[1000] = { 0 };
-	dword_t bar_len = code128_encode(code, 10, bar, 1000);
-	//bmp = (*if_context.pf_create_code128_bitmap)(ctx, &xc, &xc_back, bar, bar_len);
-	int bar_rows, bar_cols;
-	//bar_len = pdf417_encode(code, 10, bar, 1000, &bar_rows, &bar_cols);
-	//bmp = (*if_context.pf_create_pdf417_bitmap)(ctx, &xc, &xc_back, bar, bar_rows, bar_cols);
-	//bar_len = qr_encode(code, 10, bar, 1000, &bar_rows, &bar_cols);
-	//bmp = (*if_context.pf_create_qrcode_bitmap)(ctx, &xc, &xc_back, bar, bar_rows, bar_cols);
+	//bmp = (pif_context->pf_create_color_bitmap)(ctx, &xc, 32, 32);
+	//bmp = (pif_context->pf_create_pattern_bitmap)(ctx, &xc, &xc_back, 5, 5);
+	//bmp = (pif_context->pf_create_gradient_bitmap)(ctx, &xc, &xc_back, 50, 50, GDI_ATTR_GRADIENT_VERT);
     if(bmp)
     {
 		int w, h;
-		(*if_context.pf_get_bitmap_size)(bmp, &w, &h);
+		(pif_context->pf_get_bitmap_size)(bmp, &w, &h);
         xr.x = 10;
         xr.y = 50;
         xr.w = w;
         xr.h = h;
 
-       (*if_context.pf_gdi_draw_rect)(ctx, &xp, NULL, &xr);
+       (pif_context->pf_gdi_draw_rect)(ctx, &xp, NULL, &xr);
 
-       (*if_context.pf_gdi_draw_bitmap)(ctx, bmp, RECTPOINT(&xr));
+       (pif_context->pf_gdi_draw_bitmap)(ctx, bmp, RECTPOINT(&xr));
     
-        (*if_context.pf_destroy_bitmap)(bmp);
+        (pif_context->pf_destroy_bitmap)(bmp);
+        bmp = NULL;
+    }
+    
+	byte_t code[10] = { '1', '2', '3', '4', '5', '6', '7', '8', '9', '0' };
+	byte_t bar[1000] = { 0 };
+	dword_t bar_len = code128_encode(code, 10, bar, 1000);
+	//bmp = (pif_context->pf_create_code128_bitmap)(ctx, &xc, &xc_back, bar, bar_len);
+	int bar_rows, bar_cols;
+	//bar_len = pdf417_encode(code, 10, bar, 1000, &bar_rows, &bar_cols);
+	//bmp = (pif_context->pf_create_pdf417_bitmap)(ctx, &xc, &xc_back, bar, bar_rows, bar_cols);
+	//bar_len = qr_encode(code, 10, bar, 1000, &bar_rows, &bar_cols);
+	//bmp = (pif_context->pf_create_qrcode_bitmap)(ctx, &xc, &xc_back, bar, bar_rows, bar_cols);
+    if(bmp)
+    {
+		int w, h;
+		(pif_context->pf_get_bitmap_size)(bmp, &w, &h);
+        xr.x = 10;
+        xr.y = 50;
+        xr.w = w;
+        xr.h = h;
+
+       (pif_context->pf_gdi_draw_rect)(ctx, &xp, NULL, &xr);
+
+       (pif_context->pf_gdi_draw_bitmap)(ctx, bmp, RECTPOINT(&xr));
+    
+        (pif_context->pf_destroy_bitmap)(bmp);
         bmp = NULL;
     }
 
-    //bmp = (*if_context.pf_create_storage_bitmap)(ctx, _T("./title.jpg"));
-	//bmp = (*if_context.pf_create_storage_bitmap)(ctx, _T("./draw.bmp"));
+    //bmp = (pif_context->pf_create_storage_bitmap)(ctx, _T("./title.jpg"));
+	//bmp = (pif_context->pf_create_storage_bitmap)(ctx, _T("./draw.bmp"));
     if(bmp)
     {
         xr.x = 10;
@@ -727,18 +746,18 @@ void child_on_paint(widget_t wt, visual_t rdc, const xrect_t* prt)
         xr.w = 200;
         xr.h = 200;
 
-       //(*if_context.pf_gdi_draw_bitmap)(ctx, bmp, RECTPOINT(&xr));
+       //(pif_context->pf_gdi_draw_bitmap)(ctx, bmp, RECTPOINT(&xr));
 
        parse_xcolor(&xc, GDI_ATTR_RGB_BLACK);
-       (*if_context.pf_gdi_draw_image)(ctx, bmp, &xc, &xr);
+       (pif_context->pf_gdi_draw_image)(ctx, bmp, &xc, &xr);
 
-        (*if_context.pf_destroy_bitmap)(bmp);
+        (pif_context->pf_destroy_bitmap)(bmp);
         bmp = NULL;
     }
 
-    (*if_context.pf_render_context)(ctx, 0,0, rdc, 0, 0, rt.w, rt.h);
+    (pif_context->pf_render_context)(ctx, 0,0, rdc, 0, 0, rt.w, rt.h);
 
-    (*if_context.pf_destroy_context)(ctx);
+    (pif_context->pf_destroy_context)(ctx);
 }
 /**********************************************************************************/
 
@@ -765,14 +784,14 @@ void dlg_on_lbutton_dbclick(widget_t wt, const xpoint_t* ppt)
 {
     printf("dlg on_lbutton_dbclick x:%d y:%d\n", ppt->x, ppt->y);
 
-    (*if_widget.pf_widget_close)(wt, 0);   
+    (pif_widget->pf_widget_close)(wt, 0);   
 }
 /**********************************************************************************/
 
 int main_on_create(widget_t wt, void* param)
 {
     xrect_t xr;
-    (*if_widget.pf_widget_get_window_rect)(wt, &xr);
+    (pif_widget->pf_widget_get_window_rect)(wt, &xr);
 
     printf("main on_create at x:%d y:%d w:%d h:%d \n", xr.x, xr.y, xr.w, xr.h);
 
@@ -809,23 +828,23 @@ int main_on_create(widget_t wt, void* param)
 	xr.w = 300;
 	xr.h = 200;
 
-    widget_t child = (*if_widget.pf_widget_create)(_T("child"),WD_STYLE_CHILD,&xr,wt,&ev);
+    widget_t child = (pif_widget->pf_widget_create)(_T("child"),WD_STYLE_CHILD,&xr,wt,&ev);
 
-    (*if_widget.pf_widget_set_user_id)(child, 1000);
+    (pif_widget->pf_widget_set_user_id)(child, 1000);
 
-    (*if_widget.pf_widget_set_color_mode)(child, &clrs);
+    (pif_widget->pf_widget_set_color_mode)(child, &clrs);
 
-    (*if_widget.pf_widget_show)(child, WS_SHOW_NORMAL);
+    (pif_widget->pf_widget_show)(child, WS_SHOW_NORMAL);
 
-   //(*if_widget.pf_widget_enable)(child, 0);
+   //(pif_widget->pf_widget_enable)(child, 0);
 
-   (*if_widget.pf_widget_get_window_rect)(child, &xr);
+   (pif_widget->pf_widget_get_window_rect)(child, &xr);
     printf("child screen position at: x:%d y:%d w:%d h:%d\n", xr.x, xr.y, xr.w, xr.h);
 
-    (*if_widget.pf_widget_screen_to_client)(child, RECTPOINT(&xr));
+    (pif_widget->pf_widget_screen_to_client)(child, RECTPOINT(&xr));
     printf("child client position at: x:%d y:%d w:%d h:%d\n", xr.x, xr.y, xr.w, xr.h);
 
-    //g_timer = (*if_widget.pf_widget_set_timer)(wt, 3000);
+    //g_timer = (pif_widget->pf_widget_set_timer)(wt, 3000);
 
     return 0;
 }
@@ -843,11 +862,11 @@ void main_on_destroy(widget_t wt)
 
     if(g_timer)
     {
-        (*if_widget.pf_widget_kill_timer)(wt, g_timer);
+        (pif_widget->pf_widget_kill_timer)(wt, g_timer);
     }
 
-    widget_t child = (*if_widget.pf_widget_get_child)(wt, 1000);
-    if(child) (*if_widget.pf_widget_destroy)(child);
+    widget_t child = (pif_widget->pf_widget_get_child)(wt, 1000);
+    if(child) (pif_widget->pf_widget_destroy)(child);
 }
 
 void main_on_lbutton_down(widget_t wt, const xpoint_t* ppt)
@@ -859,10 +878,10 @@ void main_on_lbutton_up(widget_t wt, const xpoint_t* ppt)
 {
     printf("main on_lbutton_up x:%d y:%d\n", ppt->x, ppt->y);
 
-    /*widget_t cld = (*if_widget.pf_widget_get_child)(wt, 1000);
+    /*widget_t cld = (pif_widget->pf_widget_get_child)(wt, 1000);
     if(cld)
     {
-        (*if_widget.pf_widget_post_command)(cld, 3, IDC_PARENT, 100);
+        (pif_widget->pf_widget_post_command)(cld, 3, IDC_PARENT, 100);
     }*/
 }
 
@@ -870,13 +889,13 @@ void main_on_lbutton_dbclick(widget_t wt, const xpoint_t* ppt)
 {
     printf("main on_lbutton_dbclick x:%d y:%d\n", ppt->x, ppt->y);
 
-   //(*if_widget.pf_widget_post_key)(wt, KEY_ENTER);
+   //(pif_widget->pf_widget_post_key)(wt, KEY_ENTER);
 }
 
 void main_on_rbutton_down(widget_t wt, const xpoint_t* ppt)
 {
     printf("main on_rbutton_down x:%d y:%d\n", ppt->x, ppt->y);
-    //(*if_widget.pf_widget_post_wchar)(wt, L'��');
+    //(pif_widget->pf_widget_post_wchar)(wt, L'��');
 }
 
 void main_on_rbutton_up(widget_t wt, const xpoint_t* ppt)
@@ -896,15 +915,15 @@ void main_on_rbutton_up(widget_t wt, const xpoint_t* ppt)
     xr.w = 200;
     xr.h = 100;
 
-    (*if_widget.pf_widget_client_to_screen)(wt, RECTPOINT(&xr));
+    (pif_widget->pf_widget_client_to_screen)(wt, RECTPOINT(&xr));
 
-    widget_t dlg = (*if_widget.pf_widget_create)(_T("dialog"),(WD_STYLE_DIALOG & (~WD_STYLE_OWNERNC)),&xr,g_main,&ev);
+    widget_t dlg = (pif_widget->pf_widget_create)(_T("dialog"),(WD_STYLE_DIALOG & (~WD_STYLE_OWNERNC)),&xr,g_main,&ev);
 
-    (*if_widget.pf_widget_show)(dlg, 0);
+    (pif_widget->pf_widget_show)(dlg, 0);
 
-    (*if_widget.pf_widget_set_owner)(dlg, wt);
+    (pif_widget->pf_widget_set_owner)(dlg, wt);
 
-    (*if_widget.pf_widget_do_modal)(dlg);
+    (pif_widget->pf_widget_do_modal)(dlg);
 }
 
 void main_on_mouse_move(widget_t wt, dword_t ms, const xpoint_t* ppt)
@@ -954,7 +973,7 @@ void main_on_whell(widget_t wt, bool_t horz, int delta)
     else
        printf("main on_whell_vert delta:%d\n", delta);
 
-    (*if_widget.pf_widget_scroll)(g_main, horz, (delta < 0)? -10 : 10);
+    (pif_widget->pf_widget_scroll)(g_main, horz, (delta < 0)? -10 : 10);
 }
 
 void main_on_scroll(widget_t wt, bool_t horz, int pos)
@@ -965,27 +984,27 @@ void main_on_scroll(widget_t wt, bool_t horz, int pos)
        printf("main on_scroll_vert position:%d\n", pos);
 
     xrect_t xr;
-	widget_t child = (*if_widget.pf_widget_get_child)(wt, 1000);
+	widget_t child = (pif_widget->pf_widget_get_child)(wt, 1000);
 	if (child)
 	{
-		(*if_widget.pf_widget_get_window_rect)(child, &xr);
-		(*if_widget.pf_widget_screen_to_client)(child, RECTPOINT(&xr));
+		(pif_widget->pf_widget_get_window_rect)(child, &xr);
+		(pif_widget->pf_widget_screen_to_client)(child, RECTPOINT(&xr));
 
         printf("child org position: x:%d y:%d w:%d h:%d\n", xr.x, xr.y, xr.w, xr.h);
 	}
 
     scroll_t sc;
-    (*if_widget.pf_widget_get_scroll_info)(wt, horz, &sc);
+    (pif_widget->pf_widget_get_scroll_info)(wt, horz, &sc);
     if(sc.pos + pos >= sc.min && sc.pos + pos <= sc.max)
     {
         sc.pos += pos;
-        (*if_widget.pf_widget_set_scroll_info)(wt, horz, &sc);
+        (pif_widget->pf_widget_set_scroll_info)(wt, horz, &sc);
     }
 
     if (child)
 	{
-        (*if_widget.pf_widget_get_window_rect)(child, &xr);
-        (*if_widget.pf_widget_screen_to_client)(child, RECTPOINT(&xr));
+        (pif_widget->pf_widget_get_window_rect)(child, &xr);
+        (pif_widget->pf_widget_screen_to_client)(child, RECTPOINT(&xr));
 
         printf("child new position: x:%d y:%d w:%d h:%d\n", xr.x, xr.y, xr.w, xr.h);
 	}
@@ -1043,7 +1062,7 @@ void main_on_move(widget_t wt, const xpoint_t* ppt)
     printf("main on_move position x:%d y:%d\n", ppt->x, ppt->y);
     xrect_t xr;
 
-    (*if_widget.pf_widget_get_window_rect)(wt, &xr);
+    (pif_widget->pf_widget_get_window_rect)(wt, &xr);
     printf("main window at: x:%d y:%d w:%d h:%d\n", xr.x, xr.y, xr.w, xr.h);
 }
 
@@ -1068,8 +1087,8 @@ void main_on_paint(widget_t wt, visual_t rdc, const xrect_t* prt)
     printf("main main on_paint the rect is x:%d y:%d w:%d h:%d \n", prt->x, prt->y, prt->w, prt->h);
 
 	xrect_t rt;
-	(*if_widget.pf_widget_get_client_rect)(wt, &rt);
-	visual_t ctx = (*if_context.pf_create_compatible_context)(rdc, rt.w, rt.h);
+	(pif_widget->pf_widget_get_client_rect)(wt, &rt);
+	visual_t ctx = (pif_context->pf_create_compatible_context)(rdc, rt.w, rt.h);
 
 	xpen_t xp = { 0 };
 	default_xpen(&xp);
@@ -1085,11 +1104,11 @@ void main_on_paint(widget_t wt, visual_t rdc, const xrect_t* prt)
 	xr.h = rt.h;
 
 	xscpy(xb.color, GDI_ATTR_RGB_SOFTAZURE);
-	(*if_context.pf_gdi_draw_rect)(ctx, &xp, &xb, &xr);
+	(pif_context->pf_gdi_draw_rect)(ctx, &xp, &xb, &xr);
 
-	(*if_context.pf_render_context)(ctx, 0, 0, rdc, 0, 0, rt.w, rt.h);
+	(pif_context->pf_render_context)(ctx, 0, 0, rdc, 0, 0, rt.w, rt.h);
 
-	(*if_context.pf_destroy_context)(ctx);
+	(pif_context->pf_destroy_context)(ctx);
 }
 
 void main_on_set_focus(widget_t wt, widget_t from)
@@ -1153,17 +1172,11 @@ void main_on_idle(widget_t wt)
 
 void init_instance()
 {
-    xdu_impl_context(&if_context);
+    pif_context = PROCESS_CONTEXT_INTERFACE;
+    (pif_context->pf_context_startup)();
 
-    xdu_impl_context_graphic(&if_context);
-
-    xdu_impl_context_bitmap(&if_context);
-
-    (*if_context.pf_context_startup)();
-
-    xdu_impl_widget(&if_widget);
-
-    (*if_widget.pf_widget_startup)(0);
+    pif_widget = PROCESS_WIDGET_INTERFACE;
+    (pif_widget->pf_widget_startup)(0);
 
     accel_table_t acs[3] = {
         {KS_WITH_CONTROL, 'a', 10},
@@ -1218,36 +1231,36 @@ void init_instance()
 	xr.w = 600;
 	xr.h = 400;
 
-	g_main = (*if_widget.pf_widget_create)(_T("frame1"), (WD_STYLE_FRAME /*& (~WD_STYLE_OWNERNC)*/), &xr, NULL, &ev);
-	(*if_widget.pf_widget_set_accel)(g_main, acs, sizeof(acs) / sizeof(accel_table_t));
+	g_main = (pif_widget->pf_widget_create)(_T("frame1"), (WD_STYLE_FRAME /*& (~WD_STYLE_OWNERNC)*/), &xr, NULL, &ev);
+	(pif_widget->pf_widget_set_accel)(g_main, acs, sizeof(acs) / sizeof(accel_table_t));
 
-    (*if_widget.pf_widget_set_color_mode)(g_main, &clrs);
-    (*if_widget.pf_widget_show)(g_main, WS_SHOW_NORMAL);
+    (pif_widget->pf_widget_set_color_mode)(g_main, &clrs);
+    (pif_widget->pf_widget_show)(g_main, WS_SHOW_NORMAL);
 
     scroll_t scr = {0};
     scr.max = 600;
     scr.min = 0;
 
-    (*if_widget.pf_widget_set_scroll_info)(g_main, 0, &scr);
+    (pif_widget->pf_widget_set_scroll_info)(g_main, 0, &scr);
 
-    (*if_widget.pf_widget_active)(g_main);
+    (pif_widget->pf_widget_active)(g_main);
 
-    (*if_widget.pf_widget_get_window_rect)(g_main, &xr);
+    (pif_widget->pf_widget_get_window_rect)(g_main, &xr);
     printf("main window at: x:%d y:%d w:%d h:%d\n", xr.x, xr.y, xr.w, xr.h);
 }
 
 void uninit_instance()
 {
-    (*if_widget.pf_widget_cleanup)();
+    (pif_widget->pf_widget_cleanup)();
 
-    (*if_context.pf_context_cleanup)();
+    (pif_context->pf_context_cleanup)();
 }
 
 void test_win()
 {
 	init_instance();
 
-	(*if_widget.pf_widget_do_main)(g_main);
+	(pif_widget->pf_widget_do_main)(g_main);
 
 	uninit_instance();
 }
@@ -1260,8 +1273,12 @@ int main(int argc, const char * argv[]) {
 
     xdk_process_init(XDK_APARTMENT_PROCESS);
 
+    xdu_process_init();
+
 	test_win();
 
+    xdu_process_uninit();
+    
     xdk_process_uninit();
 
     return 0;

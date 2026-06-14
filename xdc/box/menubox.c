@@ -268,7 +268,9 @@ void hand_menu_lbutton_down(widget_t widget, const xpoint_t* pxp)
 void hand_menu_lbutton_up(widget_t widget, const xpoint_t* pxp)
 {
 	menu_delta_t* ptd = GETMENUDELTA(widget);
-	
+	widget_t owner;
+	dword_t uid;
+
 	int code = 0;
 
 	if (!ptd->menu)
@@ -281,8 +283,14 @@ void hand_menu_lbutton_up(widget_t widget, const xpoint_t* pxp)
 	else
 		code = 0;
 
-	widget_post_command(widget_get_owner(widget), code, widget_get_user_id(widget), (vword_t)widget);
+	owner = widget_get_owner(widget);
+	uid = widget_get_user_id(widget);
 	widget_close(widget, 0);
+
+	if(widget_is_valid(owner))
+	{
+		widget_post_command(owner, code, uid, (vword_t)0);
+	}
 }
 
 void hand_menu_rbutton_down(widget_t widget, const xpoint_t* pxp)

@@ -408,9 +408,9 @@ bool_t widget_key_state(widget_t wt, byte_t key)
 	return (*pif->pf_widget_key_state)(wt, key);
 }
 
-bool_t widget_is_hotvoer(widget_t wt)
+bool_t widget_is_topper(widget_t wt)
 {
-	return (widget_get_style(wt) & WD_STYLE_HOTOVER) ? 1 : 0;
+	return (widget_get_style(wt) & WD_STYLE_TIPPER) ? 1 : 0;
 }
 
 bool_t widget_is_editor(widget_t wt)
@@ -658,6 +658,15 @@ void widget_active(widget_t wt)
 	(*pif->pf_widget_active)(wt);
 }
 
+void widget_enable_hover(widget_t wt, bool_t b)
+{
+	if_widget_t* pif;
+
+	pif = PROCESS_WIDGET_INTERFACE;
+
+	(*pif->pf_widget_enable_hover)(wt, b);
+}
+
 void widget_close(widget_t wt, int ret)
 {
 	if_widget_t* pif;
@@ -874,13 +883,13 @@ void get_screen_size(xsize_t* pxs)
 	(*pif->pf_get_screen_size)(pxs);
 }
 
-void get_desktop_size(xsize_t* pxs)
+void get_desktop_rect(xrect_t* pxr)
 {
 	if_widget_t* pif;
 
 	pif = PROCESS_WIDGET_INTERFACE;
 
-	(*pif->pf_get_desktop_size)(pxs);
+	(*pif->pf_get_desktop_rect)(pxr);
 }
 
 void screen_size_to_pt(xsize_t* pxs)

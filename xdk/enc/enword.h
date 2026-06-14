@@ -33,53 +33,53 @@ LICENSE.GPL3 for more details.
 #define SWAPDWORD(n)			(((dword_t)(n) & 0x0000FFFF) << 16) | ((dword_t)(n) & 0xFFFF0000) >> 16))
 
 #define LIT_MAKESWORD(lc,hc)	((((sword_t)(hc) << 8) & 0xFF00) | ((sword_t)(lc) & 0x00FF))
-#define LIT_GETHBYTE(sw)		(byte_t)(((sword_t)(sw) >> 8) & 0x00FF)
-#define LIT_GETLBYTE(sw)		(byte_t)((sword_t)(sw) & 0x00FF)
+#define LIT_GETSWORDH(sw)		(byte_t)(((sword_t)(sw) >> 8) & 0x00FF)
+#define LIT_GETSWORDL(sw)		(byte_t)((sword_t)(sw) & 0x00FF)
 
 #define BIG_MAKESWORD(lc,hc)	((((sword_t)(lc) << 8) & 0xFF00) | ((sword_t)(hc) & 0x00FF))
-#define BIG_GETHBYTE(sw)		(byte_t)((sword_t)(sw) & 0x00FF)
-#define BIG_GETLBYTE(sw)		(byte_t)(((sword_t)(sw) >> 8) & 0x00FF) 
+#define BIG_GETSWORDH(sw)		(byte_t)((sword_t)(sw) & 0x00FF)
+#define BIG_GETSWORDL(sw)		(byte_t)(((sword_t)(sw) >> 8) & 0x00FF) 
 
 #define LIT_MAKEDWORD(ls,hs)	((((dword_t)(hs) << 16) & 0xFFFF0000) | ((dword_t)(ls) & 0x0000FFFF))
-#define LIT_GETHSWORD(dw)		(sword_t)(((dword_t)(dw) >> 16) & 0x0000FFFF)
-#define LIT_GETLSWORD(dw)		(sword_t)((dword_t)(dw) & 0x0000FFFF)
+#define LIT_GETDWORDH(dw)		(sword_t)(((dword_t)(dw) >> 16) & 0x0000FFFF)
+#define LIT_GETDWORDL(dw)		(sword_t)((dword_t)(dw) & 0x0000FFFF)
 
 #define BIG_MAKEDWORD(ls,hs)	((((dword_t)(ls) << 16) & 0xFFFF0000) | ((dword_t)(hs) & 0x0000FFFF))
-#define BIG_GETHSWORD(dw)		(sword_t)((dword_t)(dw) & 0x0000FFFF)
-#define BIG_GETLSWORD(dw)		(sword_t)(((dword_t)(dw) >> 16) & 0x0000FFFF)
+#define BIG_GETDWORDH(dw)		(sword_t)((dword_t)(dw) & 0x0000FFFF)
+#define BIG_GETDWORDL(dw)		(sword_t)(((dword_t)(dw) >> 16) & 0x0000FFFF)
 
 #define LIT_MAKELWORD(lw,hw)	((((lword_t)(hw) << 32) & 0xFFFFFFFF00000000) | ((lword_t)(lw) & 0x00000000FFFFFFFF))
-#define LIT_GETHDWORD(ll)		(dword_t)(((lword_t)(ll) >> 32) & 0x00000000FFFFFFFF)
-#define LIT_GETLDWORD(ll)		(dword_t)((lword_t)(ll) & 0x00000000FFFFFFFF)
+#define LIT_GETLWORDH(ll)		(dword_t)(((lword_t)(ll) >> 32) & 0x00000000FFFFFFFF)
+#define LIT_GETLWORDL(ll)		(dword_t)((lword_t)(ll) & 0x00000000FFFFFFFF)
 
 #define BIG_MAKELWORD(lw,hw)	((((lword_t)(lw) << 32) & 0xFFFFFFFF00000000) | (lword_t)(hw) & 0x00000000FFFFFFFF))
-#define BIG_GETHDWORD(ll)		(dword_t)((lword_t)(ll) & 0x00000000FFFFFFFF)
-#define BIG_GETLDWORD(ll)		(dword_t)(((lword_t)(ll) >> 32) & 0x00000000FFFFFFFF)
+#define BIG_GETLWORDH(ll)		(dword_t)((lword_t)(ll) & 0x00000000FFFFFFFF)
+#define BIG_GETLWORDL(ll)		(dword_t)(((lword_t)(ll) >> 32) & 0x00000000FFFFFFFF)
 
 #if ACP_BYTE_ORDER == BIG_ENDIAN
 #define MAKELWORD			BIG_MAKELWORD
-#define GETLDWORD			BIG_GETLDWORD
-#define GETHDWORD			BIG_GETHDWORD
+#define GETLWORDL			BIG_GETLWORDL
+#define GETLWORDH			BIG_GETLWORDH
 
 #define MAKEDWORD			BIG_MAKEDWORD
-#define GETLSWORD			BIG_GETLSWORD
-#define GETHSWORD			BIG_GETHSWORD
+#define GETDWORDL			BIG_GETDWORDL
+#define GETDWORDH			BIG_GETDWORDH
 
 #define MAKESWORD			BIG_MAKESWORD
-#define GETLBYTE			BIG_GETLBYTE
-#define GETHBYTE			BIG_GETHBYTE
+#define GETSWORDL			BIG_GETSWORDL
+#define GETSWORDH			BIG_GETSWORDH
 #else
 #define MAKELWORD			LIT_MAKELWORD
-#define GETLDWORD			LIT_GETLDWORD
-#define GETHDWORD			LIT_GETHDWORD
+#define GETLWORDL			LIT_GETLWORDL
+#define GETLWORDH			LIT_GETLWORDH
 
 #define MAKEDWORD			LIT_MAKEDWORD
-#define GETLSWORD			LIT_GETLSWORD
-#define GETHSWORD			LIT_GETHSWORD
+#define GETDWORDL			LIT_GETDWORDL
+#define GETDWORDH			LIT_GETDWORDH
 
 #define MAKESWORD			LIT_MAKESWORD
-#define GETLBYTE			LIT_GETLBYTE
-#define GETHBYTE			LIT_GETHBYTE
+#define GETSWORDL			LIT_GETSWORDL
+#define GETSWORDH			LIT_GETSWORDH
 #endif
 
 #define GET_THREEBYTE_BIG(buf,off)		(((unsigned int)((buf)[off]) << 16) | ((unsigned int)((buf)[off+1]) << 8) | (unsigned int)((buf)[off+2]))
@@ -91,10 +91,10 @@ LICENSE.GPL3 for more details.
 #define PUT_BYTE(buf,off,n)			((buf)[off] = (unsigned char)((n) & 0xFF))
 #define PUT_SWORD_LIT(buf,off,n)	((buf)[off] = (unsigned char) ((n) & 0xFF), (buf)[off+1] = (unsigned char) (((n) >> 8) & 0xFF))
 #define PUT_DWORD_LIT(buf,off,n)	((buf)[off] = (unsigned char) ((n) & 0xFF), (buf)[off+1] = (unsigned char) (((n) >> 8) & 0xFF), (buf)[off+2] = (unsigned char) (((n) >> 16) & 0xFF), (buf)[off+3] = (unsigned char) (((n) >> 24) & 0xFF))
-#define PUT_LWORD_LIT(buf,off,n)    (PUT_DWORD_LIT(buf,off,LIT_GETLDWORD(n)),PUT_DWORD_LIT(buf,(off+4),LIT_GETHDWORD(n)))
+#define PUT_LWORD_LIT(buf,off,n)    (PUT_DWORD_LIT(buf,off,LIT_GETLWORDL(n)),PUT_DWORD_LIT(buf,(off+4),LIT_GETLWORDH(n)))
 #define PUT_SWORD_BIG(buf,off,n)	((buf)[off] = (unsigned char) (((n) >> 8) & 0xFF), (buf)[off+1] = (unsigned char) ((n) & 0xFF))
 #define PUT_DWORD_BIG(buf,off,n)	((buf)[off] = (unsigned char) (((n) >> 24) & 0xFF), (buf)[off+1] = (unsigned char) (((n) >> 16) & 0xFF), (buf)[off+2] = (unsigned char) (((n) >> 8) & 0xFF), (buf)[off+3] = (unsigned char) ((n) & 0xFF))
-#define PUT_LWORD_BIG(buf,off,n)    (PUT_DWORD_BIG(buf,off,BIG_GETLDWORD(n)),PUT_DWORD_BIG(buf,(off+4),BIG_GETHDWORD(n)))
+#define PUT_LWORD_BIG(buf,off,n)    (PUT_DWORD_BIG(buf,off,BIG_GETLWORDL(n)),PUT_DWORD_BIG(buf,(off+4),BIG_GETLWORDH(n)))
 
 #define GET_BYTE(buf,off)			((unsigned char)(((buf)[off]) & 0xFF))
 #define GET_SWORD_LIT(buf,off)		((((unsigned short)((buf)[off + 1]) << 8) & 0xFF00) | ((unsigned short)((buf)[off]) & 0x00FF))
@@ -173,6 +173,16 @@ LICENSE.GPL3 for more details.
 #define PUT_VOID_LOC	PUT_DWORD_LOC
 #endif
 
+
+#ifdef _OS_64
+#define MAKEVWORD 		MAKELWORD
+#define GETVWORDH		GETLWORDH
+#define GETVWORDL		GETLWORDL
+#else
+#define MAKEVWORD 		MAKEDWORD
+#define GETVWORDH		GETDWORDH
+#define GETVWORDL		GETDWORDL
+#endif
 
 #endif	/* _ENWORD_H */
 

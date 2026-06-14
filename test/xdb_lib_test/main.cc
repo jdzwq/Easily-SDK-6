@@ -23,17 +23,17 @@ PF_DB_EXPORT pf_db_export;
 PF_DB_CALL_FUNC pf_db_call_func;
 
 //#define dsnfile _T("/demo_stub.dsn")
-//#define dsnfile _T("/demo_odbc.dsn")
+#define dsnfile _T("/demo_odbc.dsn")
 //#define dsnfile _T("/demo_oci.dsn")
 //#define dsnfile _T("/demo_mysql.dsn")
 //#define dsnfile _T("/demo_pgsql.dsn")
-#define dsnfile _T("/demo_sqlite.dsn")
+//#define dsnfile _T("/demo_sqlite.dsn")
 
 #if defined(_OS_WINDOWS)
 //#define xdblib	_T("xdb_stub.dll")
-//#define xdblib	_T("xdb_odbc.dll")
+#define xdblib	_T("xdb_odbc.dll")
 //#define xdblib	_T("xdb_oci.dll")
-#define xdblib	_T("xdb_mysql.dll")
+//#define xdblib	_T("xdb_mysql.dll")
 //#define xdblib	_T("xdb_pgsql.dll")
 //#define xdblib	_T("xdb_sqlite.dll")
 #endif

@@ -1,2 +1,2 @@
 SOURCES= \
-E:\Easily-temp\windows\xdb_pgsql\x64\Debug/xdb_pgsql.c \
+E:\Easily-temp\windows\xdb_pgsql\x86\Debug/xdb_pgsql.c \

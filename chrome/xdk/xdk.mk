@@ -12,7 +12,8 @@ LFLAGS = -shared -fPIC -pthread
 
 MODULE = xdk
 ARCH = amd64
-VER = 6
+MAX_VER = 6
+MIN_VER = 0
 
 LIB_PATH = /usr/local/lib
 
@@ -22,7 +23,7 @@ SRC_PATH = ../../xdk
 OBJ_PATH = ~/Easily-temp/chrome/$(MODULE)/$(ARCH)
 OUT_PATH = ~/Easily-app-6/chrome/lib
 
-TARGET = lib$(MODULE).so.$(VER)
+TARGET = lib$(MODULE).so.$(MAX_VER).$(MIN_VER).$(ARCH)
 LINKIT = lib$(MODULE).so
 
 LIBS = -lm -ldl -lutil -lrt -L $(LIB_PATH) -limg -lbar -lcrypt -lzlib
@@ -38,6 +39,8 @@ DIRS = $(wildcard \
 		$(SRC_PATH)/zip/*.c \
 		$(SRC_PATH)/mob/*.c \
 		$(SRC_PATH)/dob/*.c \
+		$(SRC_PATH)/aob/*.c \
+		$(SRC_PATH)/vob/*.c \
 		$(SRC_PATH)/net/*.c \
 		$(SRC_PATH)/iop/*.c \
 		$(SRC_PATH)/stm/*.c \
@@ -76,6 +79,12 @@ $(OBJ_PATH)/%.o : $(SRC_PATH)/zip/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
 
 $(OBJ_PATH)/%.o : $(SRC_PATH)/mob/%.c
+	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
+
+$(OBJ_PATH)/%.o : $(SRC_PATH)/aob/%.c
+	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
+
+$(OBJ_PATH)/%.o : $(SRC_PATH)/vob/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
 
 $(OBJ_PATH)/%.o : $(SRC_PATH)/dob/%.c

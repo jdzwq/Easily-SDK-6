@@ -40,10 +40,6 @@ typedef struct _statis_delta_t{
 	int cur_x, cur_y;
 	int cur_page;
 
-	widget_t editor;
-	widget_t hsc;
-	widget_t vsc;
-
 	bool_t b_size_xax, b_size_yax;
 
 	bool_t b_auto;
@@ -530,7 +526,7 @@ void noti_statis_yax_enter(widget_t widget, link_t_ptr yax)
 
 	ptd->hover = yax;
 
-	//widget_track_mouse(widget, MS_TRACK_HOVER | MS_TRACK_LEAVE);
+	widget_enable_hover(widget, bool_true);
 }
 
 void noti_statis_yax_leave(widget_t widget)
@@ -541,7 +537,7 @@ void noti_statis_yax_leave(widget_t widget)
 
 	ptd->hover = NULL;
 
-	//widget_track_mouse(widget, MS_TRACK_HOVER | MS_TRACK_LEAVE);
+	widget_enable_hover(widget, bool_false);
 }
 
 void noti_statis_yax_hover(widget_t widget, int x, int y)
@@ -556,87 +552,11 @@ void noti_statis_yax_hover(widget_t widget, int x, int y)
 	noti_statis_owner(widget, NC_YAXHOVER, ptd->statis, NULL, ptd->hover, NULL, (void*)&xp);
 }
 
-void noti_statis_begin_edit(widget_t widget)
+void noti_statis_navi_edit(widget_t widget)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
-	const tchar_t* text;
-	xrect_t xr = { 0 };
 
-	color_mod_t ob = { 0 };
-
-	XDK_ASSERT(ptd->xax);
-	
-	if (widget_is_valid(ptd->editor))
-		return;
-
-	if (ptd->b_lock)
-		return;
-
-	if (get_xax_locked(ptd->xax))
-		return;
-
-	widget_get_color_mode(widget, &ob);
-
-	_statisctrl_coor_rect(widget, ptd->xax, ptd->yax, &xr);
-	pt_expand_rect(&xr, -1, -1);
-
-	if (noti_statis_owner(widget, NC_COOREDITING, ptd->statis, ptd->xax, ptd->yax, NULL, NULL))
-		return;
-
-	if (ptd->yax)
-	{
-		ptd->editor = firenum_create(widget, &xr);
-		widget_set_user_id(ptd->editor, IDC_FIRENUM);
-	}
-	else
-	{
-		ptd->editor = fireedit_create(widget, &xr);
-		widget_set_user_id(ptd->editor, IDC_FIREEDIT);
-	}
-	XDK_ASSERT(ptd->editor);
-	
-	widget_set_owner(ptd->editor, widget);
-
-	widget_set_color_mode(ptd->editor, &ob);
-	widget_show(ptd->editor, WS_SHOW_NORMAL);
-	widget_set_focus(ptd->editor);
-
-	if (ptd->yax)
-		text = get_coor_text_ptr(ptd->xax, ptd->yax);
-	else
-		text = get_xax_text_ptr(ptd->xax);
-
-	editbox_set_text(ptd->editor, text);
-	editbox_selectall(ptd->editor);
-}
-
-void noti_statis_commit_edit(widget_t widget)
-{
-	statis_delta_t* ptd = GETSTATISDELTA(widget);
-	const tchar_t* text;
-	widget_t editctrl;
-	link_t_ptr xlk_new;
-	bool_t b_accept = 0;
-
-	if (!widget_is_valid(ptd->editor))
-		return;
-
-	XDK_ASSERT(ptd->xax);
-
-	text = (tchar_t*)editbox_get_text_ptr(ptd->editor);
-	b_accept = (noti_statis_owner(widget, NC_COORCOMMIT, ptd->statis, ptd->xax, ptd->yax, NULL, (void*)text) == 0) ? 1 : 0;
-	if (b_accept)
-	{
-		statisctrl_set_coor_text(widget, ptd->xax, ptd->yax, text);
-	}
-
-	editctrl = ptd->editor;
-	ptd->editor = (widget_t)0;
-
-	widget_destroy(editctrl);
-	widget_set_focus(widget);
-
-	if (!b_accept)
+	/*if (!b_accept)
 		return;
 
 	if (ptd->b_auto && (ptd->xax == get_prev_xax(ptd->statis, LINK_LAST)) && (ptd->yax == get_prev_yax(ptd->statis, LINK_LAST)))
@@ -666,58 +586,17 @@ void noti_statis_commit_edit(widget_t widget)
 		{
 			statisctrl_tabskip(widget,TABORDER_DOWN);
 		}
-	}
-}
-
-void noti_statis_rollback_edit(widget_t widget)
-{
-	statis_delta_t* ptd = GETSTATISDELTA(widget);
-	widget_t editctrl;
-
-	if (!widget_is_valid(ptd->editor))
-		return;
-
-	XDK_ASSERT(ptd->xax);
-
-	editctrl = ptd->editor;
-	ptd->editor = (widget_t)0;
-
-	widget_destroy(editctrl);
-	widget_set_focus(widget);
+	}*/
 }
 
 void noti_statis_reset_editor(widget_t widget, bool_t bCommit)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
 
-	if (widget_is_valid(ptd->editor))
-	{
-		if (bCommit)
-			noti_statis_commit_edit(widget);
-		else
-			noti_statis_rollback_edit(widget);
-	}
-}
-
-void noti_statis_reset_scroll(widget_t widget, bool_t bUpdate)
-{
-	statis_delta_t* ptd = GETSTATISDELTA(widget);
-
-	if (widget_is_valid(ptd->vsc))
-	{
-		if (bUpdate)
-			widget_erase(ptd->vsc, NULL);
-		else
-			widget_close(ptd->vsc, 0);
-	}
-
-	if (widget_is_valid(ptd->hsc))
-	{
-		if (bUpdate)
-			widget_erase(ptd->hsc, NULL);
-		else
-			widget_close(ptd->hsc, 0);
-	}
+	if (bCommit)
+		noti_statis_reset_editor(widget, 1);
+	else
+		noti_statis_reset_editor(widget, 0);
 }
 
 /***********************************************************************/
@@ -744,12 +623,6 @@ void hand_statis_destroy(widget_t widget)
 	XDK_ASSERT(ptd != NULL);
 
 	noti_statis_reset_editor(widget, 0);
-
-	if (widget_is_valid(ptd->hsc))
-		widget_destroy(ptd->hsc);
-
-	if (widget_is_valid(ptd->vsc))
-		widget_destroy(ptd->vsc);
 
 	xmem_free(ptd);
 
@@ -798,57 +671,13 @@ void hand_statis_scroll(widget_t widget, bool_t bHorz, int nLine)
 void hand_statis_wheel(widget_t widget, bool_t bHorz, int nDelta)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
-	scroll_t scr = { 0 };
-	int nLine;
-	widget_t win;
 
 	if (!ptd->statis)
 		return;
 
 	noti_statis_reset_editor(widget, 1);
 
-	widget_get_scroll_info(widget, bHorz, &scr);
-
-	if (bHorz)
-		nLine = (nDelta > 0) ? scr.min : -scr.min;
-	else
-		nLine = (nDelta < 0) ? scr.min : -scr.min;
-
-	if (widget_hand_scroll(widget, bHorz, nLine))
-	{
-		if (!bHorz && !(widget_get_style(widget) & WD_STYLE_VSCROLL))
-		{
-			if (!widget_is_valid(ptd->vsc))
-			{
-				ptd->vsc = show_vertbox(widget);
-			}
-			else
-			{
-				widget_erase(ptd->vsc, NULL);
-			}
-		}
-
-		if (bHorz && !(widget_get_style(widget) & WD_STYLE_HSCROLL))
-		{
-			if (!widget_is_valid(ptd->hsc))
-			{
-				ptd->hsc = show_horzbox(widget);
-			}
-			else
-			{
-				widget_erase(ptd->hsc, NULL);
-			}
-		}
-
-		return;
-	}
-
-	win = widget_get_parent(widget);
-
-	if (widget_is_valid(win))
-	{
-		widget_scroll(win, bHorz, nLine);
-	}
+	widget_hand_wheel(widget, bHorz, nDelta);
 }
 
 void hand_statis_mouse_move(widget_t widget, dword_t dw, const xpoint_t* pxp)
@@ -1102,12 +931,6 @@ void hand_statis_keydown(widget_t widget, dword_t ks, int nKey)
 
 	switch (nKey)
 	{
-	case KEY_ENTER:
-		if (ptd->xax)
-		{
-			noti_statis_begin_edit(widget);
-		}
-		break;
 	case KEY_LEFT:
 		statisctrl_tabskip(widget, TABORDER_LEFT);
 		break;
@@ -1135,39 +958,6 @@ void hand_statis_keydown(widget_t widget, dword_t ks, int nKey)
 	}
 }
 
-void hand_statis_wchar(widget_t widget, wchar_t nChar)
-{
-	statis_delta_t* ptd = GETSTATISDELTA(widget);
-
-	if (!ptd->statis)
-		return;
-
-	if (IS_VISIBLE_CHAR(nChar) && !widget_is_valid(ptd->editor))
-	{
-		hand_statis_keydown(widget, 0, KEY_ENTER);
-	}
-
-	if (IS_VISIBLE_CHAR(nChar) && widget_is_valid(ptd->editor))
-	{
-		widget_post_wchar(ptd->editor, nChar);
-	}
-}
-
-void hand_statis_child_command(widget_t widget, int code, vword_t data)
-{
-	statis_delta_t* ptd = GETSTATISDELTA(widget);
-
-	switch (code)
-	{
-	case COMMAND_COMMIT:
-		noti_statis_commit_edit(widget);
-		break;
-	case COMMAND_ROLLBACK:
-		noti_statis_rollback_edit(widget);
-		break;
-	}
-}
-
 void hand_statis_menu_command(widget_t widget, int code, int cid, vword_t data)
 {
 	statis_delta_t* ptd = GETSTATISDELTA(widget);
@@ -1176,7 +966,6 @@ void hand_statis_menu_command(widget_t widget, int code, int cid, vword_t data)
 	{
 		if (cid == IDC_EDITMENU)
 		{
-
 			if (widget_is_valid((widget_t)data))
 			{
 				widget_close((widget_t)data, 1);
@@ -1274,7 +1063,6 @@ widget_t statisctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* 
 		EVENT_ON_WHEEL(hand_statis_wheel)
 
 		EVENT_ON_KEYDOWN(hand_statis_keydown)
-		EVENT_ON_WCHAR(hand_statis_wchar)
 
 		EVENT_ON_MOUSE_MOVE(hand_statis_mouse_move)
 		EVENT_ON_MOUSE_HOVER(hand_statis_mouse_hover)
@@ -1286,10 +1074,7 @@ widget_t statisctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* 
 		EVENT_ON_RBUTTON_DOWN(hand_statis_rbutton_down)
 		EVENT_ON_RBUTTON_UP(hand_statis_rbutton_up)
 
-		EVENT_ON_CHILD_COMMAND(hand_statis_child_command)
 		EVENT_ON_MENU_COMMAND(hand_statis_menu_command)
-
-		
 
 	EVENT_END_DISPATH
 

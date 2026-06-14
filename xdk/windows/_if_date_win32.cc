@@ -253,8 +253,8 @@ void _utc_date_from_times(xdate_t* pxd, dword_t s)
 	ss = (lword_t)s * 10000000;
 	ss += MAKELWORD(ft.dwLowDateTime, ft.dwHighDateTime);
 
-	ft.dwLowDateTime = GETLDWORD(ss);
-	ft.dwHighDateTime = GETHDWORD(ss);
+	ft.dwLowDateTime = GETLWORDL(ss);
+	ft.dwHighDateTime = GETLWORDH(ss);
 
 	ZeroMemory((void*)&st, sizeof(SYSTEMTIME));
 	FileTimeToSystemTime(&ft, &st);
@@ -290,8 +290,8 @@ void _utc_date_from_ticks(xdate_t* pxd, clock_t ts)
 	fs = ((double)ts / (double)CLOCKS_PER_SEC) * 10000000.0;
 	ss = (lword_t)fs + MAKELWORD(ft.dwLowDateTime, ft.dwHighDateTime);
 
-	ft.dwLowDateTime = GETLDWORD(ss);
-	ft.dwHighDateTime = GETHDWORD(ss);
+	ft.dwLowDateTime = GETLWORDL(ss);
+	ft.dwHighDateTime = GETLWORDH(ss);
 
 	FileTimeToSystemTime(&ft, &st);
 
@@ -313,8 +313,8 @@ void _utc_date_from_timestamp(xdate_t* pxd, stamp_t ts)
 	lword_t ss;
 
 	ss = (lword_t)ts * 10000;
-	ft.dwLowDateTime = GETLDWORD(ss);
-	ft.dwHighDateTime = GETHDWORD(ss);
+	ft.dwLowDateTime = GETLWORDL(ss);
+	ft.dwHighDateTime = GETLWORDH(ss);
 
 	FileTimeToSystemTime(&ft, &st);
 

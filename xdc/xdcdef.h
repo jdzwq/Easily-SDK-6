@@ -50,8 +50,9 @@ LICENSE.GPL3 for more details.
 #define IDS_SLIDEBOX		(IDS_SUBCLASS_MIN + 13)
 #define IDS_SPINBOX			(IDS_SUBCLASS_MIN + 14)
 
-#define IDS_SPLITOR			(IDS_SUBCLASS_MIN + 18)
-#define IDS_DESIGNER		(IDS_SUBCLASS_MIN + 19)
+#define IDS_SPLITOR			(IDS_SUBCLASS_MIN + 17)
+#define IDS_DESIGNER		(IDS_SUBCLASS_MIN + 18)
+#define IDS_EDITOR			(IDS_SUBCLASS_MIN + 19)
 
 /*reserved control id*/
 #define IDC_FIREEDIT		(IDC_USERCTRL_MIN + 1)
@@ -97,6 +98,11 @@ LICENSE.GPL3 for more details.
 #define IDC_TEXTDLG			(IDC_USERCTRL_MIN + 47)
 #define IDC_PREVIEWDLG		(IDC_USERCTRL_MIN + 48)
 #define IDC_GRIDDLG			(IDC_USERCTRL_MIN + 49)
+
+/*notice return code*/
+#define RET_NOTICE_ACCEPT		0
+#define RET_NOTICE_REJECT		1
+#define RET_NOTICE_DELETE		2
 
 #define IS_VISIBLE_CHAR(ch) (((nChar >= _T('0') && nChar <= _T('9')) || (nChar >= _T('A') && nChar <= _T('Z')) || (nChar >= _T('a') && nChar <= _T('z')) || (nChar == _T('-')) || (nChar == _T('.')))? 1 : 0)
 #define IS_ASCII_CHAR(ch) ((ch >= 32 && ch < 127)? 1 : 0)
@@ -199,8 +205,11 @@ typedef struct _splitor_t{
 
 
 #ifdef _OS_WINDOWS
-#include "lang\_xdc_ansi.h"
+#include "lang/_xdc_ansi.h"
 #endif
+
+#include "inf/desginf.h"
+#include "inf/editinf.h"
 
 #endif	/* _XDCDEF_H */
 

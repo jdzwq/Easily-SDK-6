@@ -208,7 +208,7 @@ void DialogPanel_OnSave(widget_t widget)
 		if (!shell_get_filename(widget, szPath, _T("Dialog Meta File(*.sheet)\0*.sheet\0"), _T("sheet"), 1, szPath, PATH_LEN, szFile, PATH_LEN))
 			return;
 
-		xscat(szPath, _T("\\"));
+		xscat(szPath, _T("/"));
 		xscat(szPath, szFile);
 		xscpy(szFile, szPath);
 	}
@@ -237,7 +237,7 @@ void DialogPanel_OnSaveAs(widget_t widget)
 	if (!shell_get_filename(widget, szPath, _T("Dialog Meta File(*.sheet)\0*.sheet\0Svg Image File(*.svg)\0*.svg\0"), _T("sheet"), 1, szPath, PATH_LEN, szFile, PATH_LEN))
 		return;
 
-	xscat(szPath, _T("\\"));
+	xscat(szPath, _T("/"));
 	xscat(szPath, szFile);
 	xscpy(szFile, szPath);
 
@@ -1205,6 +1205,8 @@ void DialogPanel_Proper_OnEntityUpdate(widget_t widget, NOTICE_PROPER* pnp)
 
 	int n_id = xstol(get_title_item_id_ptr(ilk));
 
+	LINKPTR ptrProper = properctrl_fetch(pnp->widget);
+	
 	LINKPTR ptrDialog = dialogctrl_fetch(pdt->hDialog);
 	LINKPTR ptrItem = (LINKPTR)designer_get_focused(pdt->hDialog);
 
@@ -1214,11 +1216,11 @@ void DialogPanel_Proper_OnEntityUpdate(widget_t widget, NOTICE_PROPER* pnp)
 	{
 		if (n_id == IDA_ATTRIBUTES)
 		{
-			properbag_read_dialog_item_attributes(pnp->proper, ptrItem);
+			properbag_read_dialog_item_attributes(ptrProper, ptrItem);
 		}
 		else if (n_id == IDA_STYLESHEET)
 		{
-			properbag_format_stylesheet(pnp->proper, sz_style, CSS_LEN);
+			properbag_format_stylesheet(ptrProper, sz_style, CSS_LEN);
 			set_dialog_item_style(ptrItem, sz_style);
 		}
 		dialogctrl_redraw_item(pdt->hDialog, ptrItem);
@@ -1227,11 +1229,11 @@ void DialogPanel_Proper_OnEntityUpdate(widget_t widget, NOTICE_PROPER* pnp)
 	{
 		if (n_id == IDA_ATTRIBUTES)
 		{
-			properbag_read_dialog_attributes(pnp->proper, ptrDialog);
+			properbag_read_dialog_attributes(ptrProper, ptrDialog);
 		}
 		else if (n_id == IDA_STYLESHEET)
 		{
-			properbag_format_stylesheet(pnp->proper, sz_style, CSS_LEN);
+			properbag_format_stylesheet(ptrProper, sz_style, CSS_LEN);
 			set_dialog_style(ptrDialog, sz_style);
 		}
 		dialogctrl_redraw(pdt->hDialog);
@@ -1258,7 +1260,7 @@ void DialogPanel_Title_OnItemChanged(widget_t widget, NOTICE_TITLE* pnt)
 	widget_post_command(widget, 0, n_id, NULL);
 }
 
-void DialogPanel_Dialog_OnRBClick(widget_t widget, NOTICE_DESIGN* pnf)
+void DialogPanel_Dialog_OnRBClick(widget_t widget, NOTICE_DESIGNER* pnf)
 {
 	DialogPanelDelta* pdt = GETDIALOGPANELDELTA(widget);
 
@@ -1311,7 +1313,7 @@ void DialogPanel_Dialog_OnRBClick(widget_t widget, NOTICE_DESIGN* pnf)
 	destroy_menu_doc(ptrMenu);
 }
 
-void DialogPanel_Dialog_OnLBClick(widget_t widget, NOTICE_DESIGN* pnf)
+void DialogPanel_Dialog_OnLBClick(widget_t widget, NOTICE_DESIGNER* pnf)
 {
 	DialogPanelDelta* pdt = GETDIALOGPANELDELTA(widget);
 
@@ -1323,7 +1325,7 @@ void DialogPanel_Dialog_OnLBClick(widget_t widget, NOTICE_DESIGN* pnf)
 	widget_post_command(widget, 0, n_id, NULL);
 }
 
-void DialogPanel_Dialog_OnSized(widget_t widget, NOTICE_DESIGN* pnf)
+void DialogPanel_Dialog_OnSized(widget_t widget, NOTICE_DESIGNER* pnf)
 {
 	DialogPanelDelta* pdt = GETDIALOGPANELDELTA(widget);
 
@@ -1335,7 +1337,7 @@ void DialogPanel_Dialog_OnSized(widget_t widget, NOTICE_DESIGN* pnf)
 	widget_post_command(widget, 0, n_id, NULL);
 }
 
-void DialogPanel_Dialog_OnMoved(widget_t widget, NOTICE_DESIGN* pnf)
+void DialogPanel_Dialog_OnMoved(widget_t widget, NOTICE_DESIGNER* pnf)
 {
 	DialogPanelDelta* pdt = GETDIALOGPANELDELTA(widget);
 
@@ -1401,6 +1403,8 @@ int DialogPanel_OnCreate(widget_t widget, void* data)
 
 	LINKPTR ptrProper = create_proper_doc();
 	properctrl_attach(pdt->hProper, ptrProper);
+
+	hand_editor_create(pdt->hProper, &edit_properctrl);
 
 	set_split_item_delta(ilkProper, pdt->hProper);
 	widget_show(pdt->hProper, WS_SHOW_NORMAL);
@@ -1470,6 +1474,8 @@ void DialogPanel_OnDestroy(widget_t widget)
 
 	if (widget_is_valid(pdt->hProper))
 	{
+		hand_editor_destroy(pdt->hProper);
+		
 		LINKPTR ptrProper = properctrl_detach(pdt->hProper);
 		if (ptrProper)
 			destroy_proper_doc(ptrProper);
@@ -1952,7 +1958,6 @@ void DialogPanel_OnMenuCommand(widget_t widget, int code, int cid, vword_t data)
 		break;
 
 	case IDC_DIALOGPANEL_FONTNAME:
-		widget_destroy((widget_t)data);
 		if (code)
 		{
 			fontname_menu_item(code, token, RES_LEN);
@@ -1960,7 +1965,6 @@ void DialogPanel_OnMenuCommand(widget_t widget, int code, int cid, vword_t data)
 		}
 		break;
 	case IDC_DIALOGPANEL_FONTSIZE:
-		widget_destroy((widget_t)data);
 		if (code)
 		{
 			fontsize_menu_item(code, token, RES_LEN);
@@ -1968,7 +1972,6 @@ void DialogPanel_OnMenuCommand(widget_t widget, int code, int cid, vword_t data)
 		}
 		break;
 	case IDC_DIALOGPANEL_FONTCOLOR:
-		widget_destroy((widget_t)data);
 		if (code)
 		{
 			color_menu_item(code, token, RES_LEN);
@@ -1976,7 +1979,6 @@ void DialogPanel_OnMenuCommand(widget_t widget, int code, int cid, vword_t data)
 		}
 		break;
 	case IDC_DIALOGPANEL_PAINTCOLOR:
-		widget_destroy((widget_t)data);
 		if (code)
 		{
 			color_menu_item(code, token, RES_LEN);
@@ -1984,7 +1986,6 @@ void DialogPanel_OnMenuCommand(widget_t widget, int code, int cid, vword_t data)
 		}
 		break;
 	case IDC_DIALOGPANEL_DRAWCOLOR:
-		widget_destroy((widget_t)data);
 		if (code)
 		{
 			color_menu_item(code, token, RES_LEN);
@@ -2000,7 +2001,7 @@ void DialogPanel_OnNotice(widget_t widget, LPNOTICE phdr)
 
 	if (phdr->user == IDC_DIALOGPANEL_DIALOG)
 	{
-		NOTICE_DESIGN* pnf = (NOTICE_DESIGN*)phdr;
+		NOTICE_DESIGNER* pnf = (NOTICE_DESIGNER*)phdr;
 		switch (pnf->code)
 		{
 		case NC_OBJECT_RBCLICK:
@@ -2030,7 +2031,6 @@ void DialogPanel_OnNotice(widget_t widget, LPNOTICE phdr)
 		case NC_ENTITYUPDATE:
 			DialogPanel_Proper_OnEntityUpdate(widget, pnp);
 			break;
-
 		}
 	}
 	else if (phdr->user == IDC_DIALOGPANEL_TITLE)

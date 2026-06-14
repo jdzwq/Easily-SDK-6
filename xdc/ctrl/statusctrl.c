@@ -110,10 +110,7 @@ void noti_status_item_enter(widget_t widget, link_t_ptr plk)
 
 	ptd->hover = plk;
 
-	if (widget_is_hotvoer(widget))
-	{
-		//widget_track_mouse(widget, MS_TRACK_HOVER | MS_TRACK_LEAVE);
-	}
+	widget_enable_hover(widget, bool_true);
 }
 
 void noti_status_item_leave(widget_t widget)
@@ -124,10 +121,7 @@ void noti_status_item_leave(widget_t widget)
 
 	ptd->hover = NULL;
 
-	if (widget_is_hotvoer(widget))
-	{
-		//widget_track_mouse(widget, MS_TRACK_HOVER | MS_TRACK_LEAVE);
-	}
+	widget_enable_hover(widget, bool_false);
 }
 
 void noti_status_item_hover(widget_t widget, int x, int y)

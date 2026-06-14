@@ -32,8 +32,6 @@ LICENSE.GPL3 for more details.
 typedef struct _owner_delta_t{
 	vword_t var;
 
-	widget_t hsc;
-	widget_t vsc;
 }owner_delta_t;
 
 #define GETOWNERDELTA(ph) 	(owner_delta_t*)widget_get_user_delta(ph)
@@ -61,27 +59,6 @@ static int noti_owner_owner(widget_t widget, unsigned int code, void* data)
 	}
 
 	return 0;
-}
-
-void noti_owner_reset_scroll(widget_t widget, bool_t bUpdate)
-{
-	owner_delta_t* ptd = GETOWNERDELTA(widget);
-
-	if (widget_is_valid(ptd->vsc))
-	{
-		if (bUpdate)
-			widget_erase(ptd->vsc, NULL);
-		else
-			widget_close(ptd->vsc, 0);
-	}
-
-	if (widget_is_valid(ptd->hsc))
-	{
-		if (bUpdate)
-			widget_erase(ptd->hsc, NULL);
-		else
-			widget_close(ptd->hsc, 0);
-	}
 }
 
 static void _ownerctrl_reset_page(widget_t widget)
@@ -118,12 +95,6 @@ void hand_owner_destroy(widget_t widget)
 
 	XDK_ASSERT(ptd != NULL);
 
-	if (widget_is_valid(ptd->hsc))
-		widget_destroy(ptd->hsc);
-
-	if (widget_is_valid(ptd->vsc))
-		widget_destroy(ptd->vsc);
-
 	xmem_free(ptd);
 
 	SETOWNERDELTA(widget, 0);
@@ -158,16 +129,6 @@ void hand_owner_lbutton_down(widget_t widget, const xpoint_t* pxp)
 
 	XDK_ASSERT(ptd != NULL);
 
-	if (widget_is_valid(ptd->hsc))
-	{
-		widget_destroy(ptd->hsc);
-	}
-
-	if (widget_is_valid(ptd->vsc))
-	{
-		widget_destroy(ptd->vsc);
-	}
-
 	if (widget_can_focus(widget))
 	{
 		widget_set_focus(widget);
@@ -198,15 +159,6 @@ void hand_owner_rbutton_down(widget_t widget, const xpoint_t* pxp)
 
 	XDK_ASSERT(ptd != NULL);
 
-	if (widget_is_valid(ptd->hsc))
-	{
-		widget_destroy(ptd->hsc);
-	}
-
-	if (widget_is_valid(ptd->vsc))
-	{
-		widget_destroy(ptd->vsc);
-	}
 }
 
 void hand_owner_rbutton_up(widget_t widget, const xpoint_t* pxp)
@@ -256,54 +208,9 @@ void hand_owner_wheel(widget_t widget, bool_t bHorz, int nDelta)
 {
 	owner_delta_t* ptd = GETOWNERDELTA(widget);
 
-	scroll_t scr = { 0 };
-	int nLine;
-	widget_t win;
-
 	XDK_ASSERT(ptd != NULL);
 
-	widget_get_scroll_info(widget, bHorz, &scr);
-
-	if (bHorz)
-		nLine = (nDelta > 0) ? scr.min : -scr.min;
-	else
-		nLine = (nDelta < 0) ? scr.min : -scr.min;
-
-	if (widget_hand_scroll(widget, bHorz, nLine))
-	{
-		if (!bHorz && !(widget_get_style(widget) & WD_STYLE_VSCROLL))
-		{
-			if (!widget_is_valid(ptd->vsc))
-			{
-				ptd->vsc = show_vertbox(widget);
-			}
-			else
-			{
-				widget_erase(ptd->vsc, NULL);
-			}
-		}
-
-		if (bHorz && !(widget_get_style(widget) & WD_STYLE_HSCROLL))
-		{
-			if (!widget_is_valid(ptd->hsc))
-			{
-				ptd->hsc = show_horzbox(widget);
-			}
-			else
-			{
-				widget_erase(ptd->hsc, NULL);
-			}
-		}
-
-		return;
-	}
-
-	win = widget_get_parent(widget);
-
-	if (widget_is_valid(win))
-	{
-		widget_scroll(win, bHorz, nLine);
-	}
+	widget_hand_wheel(widget, bHorz, nDelta);
 }
 
 void hand_owner_paint(widget_t widget, visual_t dc, const xrect_t* pxr)

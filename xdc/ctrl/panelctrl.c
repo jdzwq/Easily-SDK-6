@@ -37,7 +37,6 @@ typedef struct _panel_delta_t{
 	int title_height;
 	int item_width;
 
-	widget_t vsc;
 	bool_t b_delete;
 
 	xfont_t xf;
@@ -304,10 +303,7 @@ void noti_panel_item_enter(widget_t widget, link_t_ptr plk)
 
 	ptd->hover = plk;
 
-	if (widget_is_hotvoer(widget))
-	{
-		//widget_track_mouse(widget, MS_TRACK_HOVER | MS_TRACK_LEAVE);
-	}
+	widget_enable_hover(widget, bool_true);
 }
 
 void noti_panel_item_leave(widget_t widget)
@@ -318,10 +314,7 @@ void noti_panel_item_leave(widget_t widget)
 
 	ptd->hover = NULL;
 
-	if (widget_is_hotvoer(widget))
-	{
-		//widget_track_mouse(widget, MS_TRACK_HOVER | MS_TRACK_LEAVE);
-	}
+	widget_enable_hover(widget, bool_false);
 }
 
 void noti_panel_item_hover(widget_t widget, int x, int y)
@@ -334,19 +327,6 @@ void noti_panel_item_hover(widget_t widget, int x, int y)
 	xp.x = x;
 	xp.y = y;
 	noti_panel_owner(widget, NC_PANELITEMHOVER, ptd->arch, ptd->hover, (void*)&xp);
-}
-
-void noti_panel_reset_scroll(widget_t widget, bool_t bUpdate)
-{
-	panel_delta_t* ptd = GETPANELDELTA(widget);
-
-	if (widget_is_valid(ptd->vsc))
-	{
-		if (bUpdate)
-			widget_erase(ptd->vsc, NULL);
-		else
-			widget_close(ptd->vsc, 0);
-	}
 }
 
 /********************************************************************************************/
@@ -386,9 +366,6 @@ void hand_panel_destroy(widget_t widget)
 	panel_delta_t* ptd = GETPANELDELTA(widget);
 
 	XDK_ASSERT(ptd != NULL);
-
-	if (widget_is_valid(ptd->vsc))
-		widget_destroy(ptd->vsc);
 
 	xmem_free(ptd);
 
@@ -586,43 +563,11 @@ void hand_panel_scroll(widget_t widget, bool_t bHorz, int nLine)
 void hand_panel_wheel(widget_t widget, bool_t bHorz, int nDelta)
 {
 	panel_delta_t* ptd = GETPANELDELTA(widget);
-	scroll_t scr = { 0 };
-	int nLine;
-	widget_t win;
 
 	if (!ptd->arch)
 		return;
 
-	widget_get_scroll_info(widget, bHorz, &scr);
-
-	if (bHorz)
-		nLine = (nDelta > 0) ? scr.min : -scr.min;
-	else
-		nLine = (nDelta < 0) ? scr.min : -scr.min;
-
-	if (widget_hand_scroll(widget, bHorz, nLine))
-	{
-		if (!bHorz && !(widget_get_style(widget) & WD_STYLE_VSCROLL))
-		{
-			if (!widget_is_valid(ptd->vsc))
-			{
-				ptd->vsc = show_vertbox(widget);
-			}
-			else
-			{
-				widget_erase(ptd->vsc, NULL);
-			}
-		}
-
-		return;
-	}
-
-	win = widget_get_parent(widget);
-
-	if (widget_is_valid(win))
-	{
-		widget_scroll(win, bHorz, nLine);
-	}
+	widget_hand_wheel(widget, bHorz, nDelta);
 }
 
 void hand_panel_xfont(widget_t widget, const xfont_t* pxf)

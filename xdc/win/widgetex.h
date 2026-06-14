@@ -269,6 +269,8 @@ EXP_API void	widget_hand_paint(widget_t wt, visual_t rdc, const tchar_t* gradien
 
 EXP_API bool_t	widget_hand_scroll(widget_t wt, bool_t b_horz, int pos);
 
+EXP_API void 	widget_hand_wheel(widget_t wt, bool_t bHorz, int nDelta);
+
 /******************************widget splitor implement*****************************************************/
 
 EXP_API void widget_splitor_on_mousemove(widget_t widget, dword_t dw, const xpoint_t* pxp);

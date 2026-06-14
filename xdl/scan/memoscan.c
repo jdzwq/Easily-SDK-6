@@ -616,13 +616,13 @@ void call_memo_object_attr(void* ctx, void* pobj, object_attr_t* pret)
 	memo_scan_context* pscan = (memo_scan_context*)ctx;
 	link_t_ptr plk = (link_t_ptr)pobj;
 
-	if(is_memo_doc(plk))
+	if(!plk)
 	{
 		pret->ret |= OBJECT_ATTR_XFONT;
-		*(pret->ppxf) = pscan->pxf;
+		pret->pxf = pscan->pxf;
 
 		pret->ret |= OBJECT_ATTR_XFACE;
-		*(pret->ppxa) = pscan->pxa;
+		pret->pxa = pscan->pxa;
 	}
 }
 

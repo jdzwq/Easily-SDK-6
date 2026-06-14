@@ -12,10 +12,11 @@ LFLAGS = -shared -fPIC -pthread
 
 MODULE = xdb_pgsql
 ARCH = aarch64
-VER = 6
+MAX_VER = 6
+MIN_VER = 0
 
-INC_POSTGRE = /usr/include
-LIB_POSTGRE = /usr/lib64
+INC_PGSQL = /usr/include
+LIB_PGSQL = /usr/lib64
 
 LIB_PATH = /usr/local/lib
 
@@ -25,17 +26,17 @@ SRC_PATH = ../../xdb
 OBJ_PATH = ~/Easily-temp/linux/$(MODULE)/$(ARCH)
 OUT_PATH = ~/Easily-app-6/linux/lib
 
-TARGET = lib$(MODULE).so.$(VER)
+TARGET = lib$(MODULE).so.$(MAX_VER).$(MIN_VER).$(ARCH)
 LINKIT = lib$(MODULE).so
 
-LIBS = -L $(LIB_PATH) -lxdk -lxdl -L $(LIB_POSTGRE) -lpq
+LIBS = -L $(LIB_PATH) -lxdk -lxdl -L $(LIB_PGSQL) -lpq
 DIRS = $(wildcard $(SRC_PATH)/pgsql/*.c)
 SRCS = $(notdir $(DIRS))
 COBS = $(patsubst %.c, %.o, $(SRCS))
 OBJS = $(addprefix $(OBJ_PATH)/,$(COBS))
 
 $(OBJ_PATH)/%.o : $(SRC_PATH)/pgsql/%.c
-	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH) -I $(INC_POSTGRE)
+	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH) -I $(INC_PGSQL)
 
 all : $(OBJS)
 	rm -f $@

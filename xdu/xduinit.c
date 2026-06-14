@@ -45,36 +45,6 @@ xdu_mou_t g_xdu_mou = {
 	.if_context.pf_render_context = _render_context,
 	.if_context.pf_pixel_metric = _pixel_metric,
 	.if_context.pf_font_metric = _font_metric,
-#ifdef XDU_SUPPORT_CONTEXT_BITMAP
-	.if_context.pf_destroy_bitmap = _destroy_bitmap,
-	.if_context.pf_get_bitmap_size = _get_bitmap_size,
-	.if_context.pf_create_context_bitmap = _create_context_bitmap,
-	.if_context.pf_create_color_bitmap = _create_color_bitmap,
-	.if_context.pf_create_gradient_bitmap = _create_gradient_bitmap,
-	.if_context.pf_create_pattern_bitmap = _create_pattern_bitmap,
-	.if_context.pf_create_code128_bitmap = _create_code128_bitmap,
-	.if_context.pf_create_pdf417_bitmap = _create_pdf417_bitmap,
-	.if_context.pf_create_qrcode_bitmap = _create_qrcode_bitmap,
-	.if_context.pf_create_storage_bitmap = _create_storage_bitmap,
-	.if_context.pf_save_bitmap_to_bytes = _save_bitmap_to_bytes,
-	.if_context.pf_load_bitmap_from_bytes = _load_bitmap_from_bytes,
-	.if_context.pf_get_bitmap_bytes = _get_bitmap_bytes,
-#ifdef XDU_SUPPORT_SHELL
-	.if_context.pf_load_bitmap_from_thumb = _load_bitmap_from_thumb,
-	.if_context.pf_load_bitmap_from_icon = _load_bitmap_from_icon,
-#endif
-#endif //XDU_SUPPORT_CONTEXT_BITMAP
-#ifdef XDU_SUPPORT_CONTEXT_PRINTER
-	.if_context.pf_create_printer_context = _create_printer_context,
-	.if_context.pf_destroy_printer_context = _destroy_printer_context,
-	.if_context.pf_setup_printer_mode = _setup_printer_mode,
-	.if_context.pf_default_printer_mode = _default_printer_mode,
-	.if_context.pf_begin_doc = _begin_doc,
-	.if_context.pf_begin_page = _begin_page,
-	.if_context.pf_end_page = _end_page,
-	.if_context.pf_end_doc = _end_doc,
-#endif
-#ifdef XDU_SUPPORT_CONTEXT_GDI
 	.if_context.pf_gdi_set_point = _gdi_set_point,
 	.if_context.pf_gdi_get_point = _gdi_get_point,
 	.if_context.pf_gdi_draw_points = _gdi_draw_points,
@@ -105,7 +75,35 @@ xdu_mou_t g_xdu_mou = {
 	.if_context.pf_gdi_draw_bitmap = _gdi_draw_bitmap,
 	.if_context.pf_gdi_draw_image = _gdi_draw_image,
 #endif
-#endif //XDU_SUPPORT_CONTEXT_GDI
+#ifdef XDU_SUPPORT_CONTEXT_BITMAP
+	.if_context.pf_destroy_bitmap = _destroy_bitmap,
+	.if_context.pf_get_bitmap_size = _get_bitmap_size,
+	.if_context.pf_create_context_bitmap = _create_context_bitmap,
+	.if_context.pf_create_color_bitmap = _create_color_bitmap,
+	.if_context.pf_create_gradient_bitmap = _create_gradient_bitmap,
+	.if_context.pf_create_pattern_bitmap = _create_pattern_bitmap,
+	.if_context.pf_create_code128_bitmap = _create_code128_bitmap,
+	.if_context.pf_create_pdf417_bitmap = _create_pdf417_bitmap,
+	.if_context.pf_create_qrcode_bitmap = _create_qrcode_bitmap,
+	.if_context.pf_create_storage_bitmap = _create_storage_bitmap,
+	.if_context.pf_save_bitmap_to_bytes = _save_bitmap_to_bytes,
+	.if_context.pf_load_bitmap_from_bytes = _load_bitmap_from_bytes,
+	.if_context.pf_get_bitmap_bytes = _get_bitmap_bytes,
+#ifdef XDU_SUPPORT_SHELL
+	.if_context.pf_load_bitmap_from_thumb = _load_bitmap_from_thumb,
+	.if_context.pf_load_bitmap_from_icon = _load_bitmap_from_icon,
+#endif
+#endif //XDU_SUPPORT_CONTEXT_BITMAP
+#ifdef XDU_SUPPORT_CONTEXT_PRINTER
+	.if_context.pf_create_printer_context = _create_printer_context,
+	.if_context.pf_destroy_printer_context = _destroy_printer_context,
+	.if_context.pf_setup_printer_mode = _setup_printer_mode,
+	.if_context.pf_default_printer_mode = _default_printer_mode,
+	.if_context.pf_begin_doc = _begin_doc,
+	.if_context.pf_begin_page = _begin_page,
+	.if_context.pf_end_page = _end_page,
+	.if_context.pf_end_doc = _end_doc,
+#endif
 #endif //XDU_SUPPORT_CONTEXT
 
 #ifdef XDU_SUPPORT_WIDGET
@@ -163,6 +161,7 @@ xdu_mou_t g_xdu_mou = {
 	.if_widget.pf_widget_show_caret = _widget_show_caret,
 	.if_widget.pf_widget_enable = _widget_enable,
 	.if_widget.pf_widget_active = _widget_active,
+	.if_widget.pf_widget_enable_hover = _widget_enable_hover,
 	.if_widget.pf_widget_post_wchar = _widget_post_wchar,
 	.if_widget.pf_widget_post_key = _widget_post_key,
 	.if_widget.pf_widget_post_notice = _widget_post_notice,
@@ -196,7 +195,7 @@ xdu_mou_t g_xdu_mou = {
 	.if_widget.pf_calc_widget_border = _calc_widget_border,
 	.if_widget.pf_adjust_widget_size = _adjust_widget_size,
 	.if_widget.pf_get_screen_size = _get_screen_size,
-	.if_widget.pf_get_desktop_size = _get_desktop_size,
+	.if_widget.pf_get_desktop_rect = _get_desktop_rect,
 	.if_widget.pf_screen_size_to_pt = _screen_size_to_pt,
 	.if_widget.pf_screen_size_to_mm = _screen_size_to_mm,
 #ifdef XDU_SUPPORT_CONTEXT_OPENGL

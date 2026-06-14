@@ -10,7 +10,7 @@
 !include xdb_odbc.txt
 !endif
 
-ARCH = x64
+ARCH = x86
 MODULE = xdb_odbc
 
 INC_PATH = ../../include

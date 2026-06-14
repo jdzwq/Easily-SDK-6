@@ -68,15 +68,15 @@ static void big_bytes(const tchar_t* str, byte_t* pch)
 		return;
 	}
 #if defined(_UNICODE) || defined(UNICODE)
-	pch[0] = GETHBYTE((sword_t)(*str));
-	pch[1] = GETLBYTE((sword_t)(*str));
+	pch[0] = GETSWORDH((sword_t)(*str));
+	pch[1] = GETSWORDL((sword_t)(*str));
 #else
 #ifdef XGC_USE_GB2312_GLYPH
 	mbs_byte_to_gb2312(str, pch);
 #else
 	mbs_byte_to_ucs(str, &wc);
-	pch[0] = GETHBYTE((sword_t)wc);
-	pch[1] = GETLBYTE((sword_t)wc);
+	pch[0] = GETSWORDH((sword_t)wc);
+	pch[1] = GETSWORDL((sword_t)wc);
 #endif
 #endif
 }

@@ -222,7 +222,7 @@ xhand_t xuncf_open_file(const secu_desc_t* psd, const tchar_t* fname, dword_t fm
 	pos = _split_path_len(fname);
 	xsncpy(fpath, fname, pos);
 
-	if(!is_null(fpath) && xsncmp(fpath,_T("."),1) != 0)
+	/*if(!is_null(fpath) && xsncmp(fpath,_T("."),1) != 0)
 	{
 		b_add = ((fmode & FILE_OPEN_CREATE) || (fmode & FILE_OPEN_APPEND)) ? 1 : 0;
 
@@ -230,7 +230,7 @@ xhand_t xuncf_open_file(const secu_desc_t* psd, const tchar_t* fname, dword_t fm
 		{
 			return NULL;
 		}
-	}
+	}*/
 
 	if(is_null(fpath))
 	{

@@ -24,7 +24,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
 LICENSE.GPL3 for more details.
 ***********************************************************************/
 
-#include "desg.h"
+#include "../inf/desginf.h"
 
 #include "../xdcobj.h"
 

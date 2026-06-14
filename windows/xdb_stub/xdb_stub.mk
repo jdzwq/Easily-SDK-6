@@ -10,7 +10,7 @@
 !include xdb_stub.txt
 !endif
 
-ARCH = x64
+ARCH = x86
 MODULE = xdb_stub
 
 INC_PATH = ../../include

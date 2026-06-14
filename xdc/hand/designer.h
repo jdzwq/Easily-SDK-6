@@ -28,7 +28,6 @@ LICENSE.GPL3 for more details.
 #define _DESIGNER_H
 
 #include "../xdcdef.h"
-#include "../desg/desg.h"
 
 typedef enum{
 	HINT_NONE,
@@ -37,7 +36,7 @@ typedef enum{
 	HINT_VERT_SPLIT,
 	HINT_HORZ_SPLIT,
 	HINT_CROSS_SPLIT,
-}DESIGN_HINT_CODE;
+}DESIGNER_HINT_CODE;
 
 typedef enum{
 	NC_OBJECT_DRAG = 101,
@@ -51,9 +50,9 @@ typedef enum{
 	NC_OBJECT_LBCLICK = 109,
 	NC_OBJECT_DBCLICK = 110,
 	NC_OBJECT_RBCLICK = 111
-}DESIGN_NOTI_CODE;
+}DESIGNER_NOTI_CODE;
 
-typedef struct _NOTICE_DESIGN{
+typedef struct _NOTICE_DESIGNER{
 	widget_t widget;
 	unsigned int id;
 	unsigned int code;
@@ -62,7 +61,7 @@ typedef struct _NOTICE_DESIGN{
 	vword_t data;
 
 	int ret;
-}NOTICE_DESIGN;
+}NOTICE_DESIGNER;
 
 LOC_API int designer_sub_lbutton_down(widget_t widget, const xpoint_t* pxp, uid_t sid, vword_t delta);
 

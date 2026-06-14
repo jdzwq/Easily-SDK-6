@@ -343,6 +343,8 @@ EXP_API void	widget_enable(widget_t wt, bool_t b);
 */
 EXP_API void	widget_active(widget_t wt);
 
+EXP_API void	widget_enable_hover(widget_t wt, bool_t b);
+
 /*
 @FUNCTION widget_set_cursor: set widget cursor type.
 @INPUT widget_t wt: the widget resource handle.
@@ -405,7 +407,7 @@ EXP_API bool_t	widget_key_state(widget_t wt,byte_t key);
 @INPUT widget_t wt: the widget resource handle.
 @RETURN bool_t: if return nonzero indicate is tracked, zero indicate not.
 */
-EXP_API bool_t	widget_is_hotvoer(widget_t wt);
+EXP_API bool_t	widget_is_tipper(widget_t wt);
 
 /*
 @FUNCTION widget_is_editor: test widget is editor control.
@@ -702,7 +704,7 @@ EXP_API void	get_screen_size(xsize_t* pxs);
 @OUTPUT xsize_t* pxs: the size struct.
 @RETURN void: none.
 */
-EXP_API void	get_desktop_size(xsize_t* pxs);
+EXP_API void	get_desktop_rect(xrect_t* pxr);
 
 /*
 @FUNCTION screen_size_to_pt: mapping points size to millimeter size.

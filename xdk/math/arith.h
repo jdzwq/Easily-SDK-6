@@ -29,19 +29,18 @@ LICENSE.GPL3 for more details.
 
 #include "../xdkdef.h"
 
-extern double DBL_NAN;		/* IEEE NaN */
-extern double DBL_POSINF;	/* IEEE Inf */
-extern double DBL_NEGINF;	/* IEEE -Inf */
-extern double NA_REAL;		/* IEEE NA_REAL */
-extern int	 NA_INTEGER;	/* IEEE NA_INTEGER */
-
 #ifdef	__cplusplus
 extern "C" {
 #endif
 
-EXP_API void dbl_init(void);
+//EXP_API double DBL_NAN;		/* IEEE NaN */
+//EXP_API double DBL_POSINF;	/* IEEE Inf */
+//EXP_API double DBL_NEGINF;	/* IEEE -Inf */
+//EXP_API double NA_REAL;		/* IEEE NA_REAL */
+//EXP_API int	 NA_INTEGER;	/* IEEE NA_INTEGER */
 
-EXP_API bool_t dbl_isnar(double x);
+
+EXP_API bool_t dbl_isna(double x);
 
 EXP_API double dbl_pow(double x, double y);
 

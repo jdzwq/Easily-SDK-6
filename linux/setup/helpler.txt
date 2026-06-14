@@ -42,9 +42,8 @@ unset NLS_LANG
 $(INC_OCI) = /usr/local/oracle/instantclient_19c/sdk/include
 $(LIB_OCI) = /usr/local/oracle/instantclient_19c/lib
 
-
 [Postgres Client and Library]
-sudo dnf install postgresql
+sudo dnf install postgresql-client-utils
 sudo dnf install postgresql-devel
 
 --Declare in Makefile:
@@ -53,8 +52,8 @@ $(LIB_POSTGRE) = /usr/lib64
 
 
 [Mysql Client and Library]
-sudo dnf install mysql
-sudo dnf install mysql-devel
+sudo dnf install mariadb-client-utils
+sudo dnf install mariadb-devel
 
 --Declare in Makefile:
 $(INC_MYSQL) = /usr/include/mysql

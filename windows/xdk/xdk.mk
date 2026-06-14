@@ -142,7 +142,7 @@ install:
 	copy /y $(subst /,\, $(TARGET)) $(OUT_PATH)
 
 uninstall:
-	del $(OUT_PATH)/$(MODULE).dll
+	del $(subst /,\, $(OUT_PATH)/$(MODULE).dll)
 
 .PHONY : clean
 clean:

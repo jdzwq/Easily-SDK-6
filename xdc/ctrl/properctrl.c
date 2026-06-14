@@ -34,9 +34,6 @@ typedef struct _proper_delta_t{
 	link_t_ptr entity;
 	link_t_ptr hover;
 
-	widget_t editor;
-	widget_t vsc;
-
 	int org_x, org_y;
 
 	bool_t b_size;
@@ -257,10 +254,7 @@ void noti_proper_entity_enter(widget_t widget, link_t_ptr plk)
 
 	ptd->hover = plk;
 
-	if (widget_is_hotvoer(widget))
-	{
-		//widget_track_mouse(widget, MS_TRACK_HOVER | MS_TRACK_LEAVE);
-	}
+	widget_enable_hover(widget, bool_true);
 }
 
 void noti_proper_entity_leave(widget_t widget)
@@ -271,10 +265,7 @@ void noti_proper_entity_leave(widget_t widget)
 
 	ptd->hover = NULL;
 
-	if (widget_is_hotvoer(widget))
-	{
-		//widget_track_mouse(widget, MS_TRACK_HOVER | MS_TRACK_LEAVE);
-	}
+	widget_enable_hover(widget, bool_false);
 }
 
 void noti_proper_entity_hover(widget_t widget, int x, int y)
@@ -310,324 +301,14 @@ void noti_proper_section_expand(widget_t widget, link_t_ptr slk)
 	widget_erase(widget, &xr);
 }
 
-void noti_proper_begin_edit(widget_t widget)
-{
-	proper_delta_t* ptd = GETPROPERDELTA(widget);
-	const tchar_t* editor;
-	const tchar_t* text;
-	xrect_t xr = { 0 };
-
-	link_t_ptr data;
-	EDITDELTA fd = { 0 };
-
-	color_mod_t ob = { 0 };
-
-	XDK_ASSERT(ptd->entity);
-
-	if (widget_is_valid(ptd->editor))
-		return;
-
-	if (ptd->b_lock)
-		return;
-
-	if (!get_entity_editable(ptd->entity))
-		return;
-
-	widget_get_color_mode(widget, &ob);
-
-	_properctrl_entity_text_rect(widget, ptd->entity, &xr);
-	pt_expand_rect(&xr, -1, -1);
-
-	editor = get_entity_editor_ptr(ptd->entity);
-
-	if (compare_text(editor, -1, ATTR_EDITOR_FIREEDIT, -1, 0) == 0)
-	{
-		if (noti_proper_owner(widget, NC_ENTITYEDITING, ptd->proper, section_from_entity(ptd->entity), ptd->entity, NULL))
-			return;
-
-		ptd->editor = fireedit_create(widget, &xr);
-		XDK_ASSERT(ptd->editor);
-		widget_set_user_id(ptd->editor, IDC_FIREEDIT);
-		widget_set_owner(ptd->editor, widget);
-
-		widget_set_color_mode(ptd->editor, &ob);
-		widget_show(ptd->editor, WS_SHOW_NORMAL);
-		widget_set_focus(ptd->editor);
-
-		text = get_entity_value_ptr(ptd->entity);
-		editbox_set_text(ptd->editor, text);
-		editbox_selectall(ptd->editor);
-	}
-	else if (compare_text(editor, -1, ATTR_EDITOR_FIRENUM, -1, 0) == 0)
-	{
-		if (noti_proper_owner(widget, NC_ENTITYEDITING, ptd->proper, section_from_entity(ptd->entity), ptd->entity, NULL))
-			return;
-
-		ptd->editor = firenum_create(widget, &xr);
-		XDK_ASSERT(ptd->editor);
-		widget_set_user_id(ptd->editor, IDC_FIRENUM);
-		widget_set_owner(ptd->editor, widget);
-
-		widget_set_color_mode(ptd->editor, &ob);
-		widget_show(ptd->editor, WS_SHOW_NORMAL);
-		widget_set_focus(ptd->editor);
-
-		text = get_entity_value_ptr(ptd->entity);
-		editbox_set_text(ptd->editor, text);
-		editbox_selectall(ptd->editor);
-	}
-	else if (compare_text(editor, -1, ATTR_EDITOR_FIREDATE, -1, 0) == 0)
-	{
-		if (noti_proper_owner(widget, NC_ENTITYEDITING, ptd->proper, section_from_entity(ptd->entity), ptd->entity, NULL))
-			return;
-
-		ptd->editor = firedate_create(widget, &xr);
-		XDK_ASSERT(ptd->editor);
-		widget_set_user_id(ptd->editor, IDC_FIREDATE);
-		widget_set_owner(ptd->editor, widget);
-
-		widget_set_color_mode(ptd->editor, &ob);
-		widget_show(ptd->editor, WS_SHOW_NORMAL);
-		widget_set_focus(ptd->editor);
-
-		text = get_entity_value_ptr(ptd->entity);
-		editbox_set_text(ptd->editor, text);
-		editbox_selectall(ptd->editor);
-	}
-	else if (compare_text(editor, -1, ATTR_EDITOR_FIRETIME, -1, 0) == 0)
-	{
-		if (noti_proper_owner(widget, NC_ENTITYEDITING, ptd->proper, section_from_entity(ptd->entity), ptd->entity, NULL))
-			return;
-
-		ptd->editor = firetime_create(widget, &xr);
-		XDK_ASSERT(ptd->editor);
-		widget_set_user_id(ptd->editor, IDC_FIRETIME);
-		widget_set_owner(ptd->editor, widget);
-
-		widget_set_color_mode(ptd->editor, &ob);
-		widget_show(ptd->editor, WS_SHOW_NORMAL);
-		widget_set_focus(ptd->editor);
-
-		text = get_entity_value_ptr(ptd->entity);
-		editbox_set_text(ptd->editor, text);
-		editbox_selectall(ptd->editor);
-	}
-	else if (compare_text(editor, -1, ATTR_EDITOR_FIRELIST, -1, 0) == 0)
-	{
-		if (noti_proper_owner(widget, NC_ENTITYEDITING, ptd->proper, section_from_entity(ptd->entity), ptd->entity, NULL))
-			return;
-
-		data = get_entity_options_table(ptd->entity);
-		if (!data)
-			return;
-
-		ptd->editor = firelist_create(widget, &xr, data);
-		XDK_ASSERT(ptd->editor);
-		widget_set_user_id(ptd->editor, IDC_FIRELIST);
-		widget_set_owner(ptd->editor, widget);
-
-		widget_set_color_mode(ptd->editor, &ob);
-		widget_show(ptd->editor, WS_SHOW_NORMAL);
-		widget_set_focus(ptd->editor);
-
-		text = get_entity_value_ptr(ptd->entity);
-		editbox_set_text(ptd->editor, text);
-		editbox_selectall(ptd->editor);
-	}
-	else if (compare_text(editor, -1, ATTR_EDITOR_FIREWORDS, -1, 0) == 0)
-	{
-		if (noti_proper_owner(widget, NC_ENTITYEDITING, ptd->proper, section_from_entity(ptd->entity), ptd->entity, (void*)&fd))
-			return;
-
-		data = (link_t_ptr)fd.data;
-		ptd->editor = firewords_create(widget, &xr, data);
-		XDK_ASSERT(ptd->editor);
-		widget_set_user_id(ptd->editor, IDC_FIREWORDS);
-		widget_set_owner(ptd->editor, widget);
-
-		widget_set_color_mode(ptd->editor, &ob);
-		widget_show(ptd->editor, WS_SHOW_NORMAL);
-		widget_set_focus(ptd->editor);
-
-		text = get_entity_value_ptr(ptd->entity);
-		editbox_set_text(ptd->editor, text);
-		editbox_selectall(ptd->editor);
-	}
-	else if (compare_text(editor, -1, ATTR_EDITOR_FIREGRID, -1, 0) == 0)
-	{
-		if (noti_proper_owner(widget, NC_ENTITYEDITING, ptd->proper, section_from_entity(ptd->entity), ptd->entity, (void*)&fd))
-			return;
-
-		data = (link_t_ptr)fd.data;
-		if (!data)
-			return;
-
-		ptd->editor = firegrid_create(widget, &xr, data);
-		XDK_ASSERT(ptd->editor);
-		widget_set_user_id(ptd->editor, IDC_FIREGRID);
-		widget_set_owner(ptd->editor, widget);
-		
-		widget_set_color_mode(ptd->editor, &ob);
-		widget_show(ptd->editor, WS_SHOW_NORMAL);
-		widget_set_focus(ptd->editor);
-	}
-}
-
-void noti_proper_commit_edit(widget_t widget)
-{
-	proper_delta_t* ptd = GETPROPERDELTA(widget);
-	const tchar_t* editor;
-	const tchar_t* text;
-	widget_t editctrl;
-	link_t_ptr item;
-
-	EDITDELTA fd = { 0 };
-
-	if (!widget_is_valid(ptd->editor))
-		return;
-
-	XDK_ASSERT(ptd->entity);
-
-	editor = get_entity_editor_ptr(ptd->entity);
-
-	if (compare_text(editor, -1, ATTR_EDITOR_FIREEDIT, -1, 0) == 0)
-	{
-		text = (const tchar_t*)editbox_get_text_ptr(ptd->editor);
-
-		if (!noti_proper_owner(widget, NC_ENTITYCOMMIT, ptd->proper, section_from_entity(ptd->entity), ptd->entity, (void*)text))
-		{
-			properctrl_set_entity_value(widget, ptd->entity, text);
-		}
-	}
-	else if (compare_text(editor, -1, ATTR_EDITOR_FIRENUM, -1, 0) == 0)
-	{
-		text = (const tchar_t*)editbox_get_text_ptr(ptd->editor);
-		
-		if (!noti_proper_owner(widget, NC_ENTITYCOMMIT, ptd->proper, section_from_entity(ptd->entity), ptd->entity, (void*)text))
-		{
-			properctrl_set_entity_value(widget, ptd->entity, text);
-		}
-	}
-	else if (compare_text(editor, -1, ATTR_EDITOR_FIREDATE, -1, 0) == 0)
-	{
-		text = (const tchar_t*)editbox_get_text_ptr(ptd->editor);
-
-		if (!noti_proper_owner(widget, NC_ENTITYCOMMIT, ptd->proper, section_from_entity(ptd->entity), ptd->entity, (void*)text))
-		{
-			properctrl_set_entity_value(widget, ptd->entity, text);
-		}
-	}
-	else if (compare_text(editor, -1, ATTR_EDITOR_FIRETIME, -1, 0) == 0)
-	{
-		text = (const tchar_t*)editbox_get_text_ptr(ptd->editor);
-
-		if (!noti_proper_owner(widget, NC_ENTITYCOMMIT, ptd->proper, section_from_entity(ptd->entity), ptd->entity, (void*)text))
-		{
-			properctrl_set_entity_value(widget, ptd->entity, text);
-		}
-	}
-	else if (compare_text(editor, -1, ATTR_EDITOR_FIRELIST, -1, 0) == 0)
-	{
-		text = editbox_get_text_ptr(ptd->editor);
-
-		if (!noti_proper_owner(widget, NC_ENTITYCOMMIT, ptd->proper, section_from_entity(ptd->entity), ptd->entity, (void*)text))
-		{
-			properctrl_set_entity_value(widget, ptd->entity, text);
-		}
-	}
-	else if (compare_text(editor, -1, ATTR_EDITOR_FIREWORDS, -1, 0) == 0)
-	{
-		fd.data = firewords_get_data(ptd->editor);
-		item = firewords_get_item(ptd->editor);
-		if (item)
-		{
-			editbox_set_text(ptd->editor, get_words_item_text_ptr(item));
-		}
-
-		fd.text = editbox_get_text_ptr(ptd->editor);
-
-		if (!noti_proper_owner(widget, NC_ENTITYCOMMIT, ptd->proper, section_from_entity(ptd->entity), ptd->entity, (void*)&fd))
-		{
-			properctrl_set_entity_value(widget, ptd->entity, fd.text);
-		}
-	}
-	else if (compare_text(editor, -1, ATTR_EDITOR_FIREGRID, -1, 0) == 0)
-	{
-		fd.data = firegrid_get_data(ptd->editor);
-		fd.item = (link_t_ptr)firegrid_get_item(ptd->editor);
-		noti_proper_owner(widget, NC_ENTITYCOMMIT, ptd->proper, section_from_entity(ptd->entity), ptd->entity, (void*)&fd);
-	}
-
-	editctrl = ptd->editor;
-	ptd->editor = (widget_t)0;
-
-	widget_destroy(editctrl);
-	widget_set_focus(widget);
-}
-
-void noti_proper_rollback_edit(widget_t widget)
-{
-	proper_delta_t* ptd = GETPROPERDELTA(widget);
-	widget_t editctrl;
-	const tchar_t* editor;
-
-	EDITDELTA fd = { 0 };
-
-	if (!widget_is_valid(ptd->editor))
-		return;
-
-	XDK_ASSERT(ptd->entity);
-
-	editor = get_entity_editor_ptr(ptd->entity);
-
-	if (compare_text(editor, -1, ATTR_EDITOR_FIREWORDS, -1, 0) == 0)
-	{
-		fd.data = firewords_get_data(ptd->editor);
-		fd.text = NULL;
-		noti_proper_owner(widget, NC_ENTITYROLLBACK, ptd->proper, section_from_entity(ptd->entity), ptd->entity, (void*)&fd);
-	}
-	else if (compare_text(editor, -1, ATTR_EDITOR_FIREGRID, -1, 0) == 0)
-	{
-		fd.data = firegrid_get_data(ptd->editor);
-		fd.item = NULL;
-		noti_proper_owner(widget, NC_ENTITYROLLBACK, ptd->proper, section_from_entity(ptd->entity), ptd->entity, (void*)&fd);
-	}
-	else
-	{
-		noti_proper_owner(widget, NC_ENTITYROLLBACK, ptd->proper, section_from_entity(ptd->entity), ptd->entity, NULL);
-	}
-
-	editctrl = ptd->editor;
-	ptd->editor = (widget_t)0;
-
-	widget_destroy(editctrl);
-	widget_set_focus(widget);
-}
-
 void noti_proper_reset_editor(widget_t widget, bool_t bCommit)
 {
 	proper_delta_t* ptd = GETPROPERDELTA(widget);
 
-	if (widget_is_valid(ptd->editor))
-	{
-		if (bCommit)
-			noti_proper_commit_edit(widget);
-		else
-			noti_proper_rollback_edit(widget);
-	}
-}
-
-void noti_proper_reset_scroll(widget_t widget, bool_t bUpdate)
-{
-	proper_delta_t* ptd = GETPROPERDELTA(widget);
-
-	if (widget_is_valid(ptd->vsc))
-	{
-		if (bUpdate)
-			widget_erase(ptd->vsc, NULL);
-		else
-			widget_close(ptd->vsc, 0);
-	}
+	if (bCommit)
+		widget_post_command(widget, COMMAND_COMMIT, IDC_CHILD, (vword_t)0);
+	else
+		widget_post_command(widget, COMMAND_ROLLBACK, IDC_CHILD, (vword_t)0);
 }
 
 /***********************************************************************/
@@ -650,9 +331,6 @@ void hand_proper_destroy(widget_t widget)
 	proper_delta_t* ptd = GETPROPERDELTA(widget);
 
 	XDK_ASSERT(ptd != NULL);
-
-	if (widget_is_valid(ptd->vsc))
-		widget_destroy(ptd->vsc);
 
 	xmem_free(ptd);
 
@@ -708,43 +386,11 @@ void hand_proper_scroll(widget_t widget, bool_t bHorz, int nLine)
 void hand_proper_wheel(widget_t widget, bool_t bHorz, int nDelta)
 {
 	proper_delta_t* ptd = GETPROPERDELTA(widget);
-	scroll_t scr = { 0 };
-	int nLine;
-	widget_t win;
 
 	if (!ptd->proper)
 		return;
 
-	widget_get_scroll_info(widget, bHorz, &scr);
-
-	if (bHorz)
-		nLine = (nDelta > 0) ? scr.min : -scr.min;
-	else
-		nLine = (nDelta < 0) ? scr.min : -scr.min;
-
-	if (widget_hand_scroll(widget, bHorz, nLine))
-	{
-		if (!bHorz && !(widget_get_style(widget) & WD_STYLE_VSCROLL))
-		{
-			if (!widget_is_valid(ptd->vsc))
-			{
-				ptd->vsc = show_vertbox(widget);
-			}
-			else
-			{
-				widget_erase(ptd->vsc, NULL);
-			}
-		}
-
-		return;
-	}
-
-	win = widget_get_parent(widget);
-
-	if (widget_is_valid(win))
-	{
-		widget_scroll(win, bHorz, nLine);
-	}
+	widget_hand_wheel(widget, bHorz, nDelta);
 }
 
 void hand_proper_mouse_move(widget_t widget, dword_t dw, const xpoint_t* pxp)
@@ -921,7 +567,7 @@ void hand_proper_rbutton_up(widget_t widget, const xpoint_t* pxp)
 	if (!ptd->proper)
 		return;
 
-	noti_proper_owner(widget, NC_PROPERRBCLK, ptd->proper, ((ptd->editor)? section_from_entity(ptd->entity) : NULL), ptd->entity, (void*)pxp);
+	noti_proper_owner(widget, NC_PROPERRBCLK, ptd->proper, ((ptd->entity)? section_from_entity(ptd->entity) : NULL), ptd->entity, (void*)pxp);
 }
 
 void hand_proper_keydown(widget_t widget, dword_t ks, int nKey)
@@ -933,12 +579,6 @@ void hand_proper_keydown(widget_t widget, dword_t ks, int nKey)
 
 	switch (nKey)
 	{
-	case KEY_ENTER:
-		if (ptd->entity && !widget_is_valid(ptd->editor))
-		{
-			noti_proper_begin_edit(widget);
-		}
-		break;
 	case KEY_LEFT:
 		properctrl_tabskip(widget,TABORDER_LEFT);
 		break;
@@ -962,40 +602,6 @@ void hand_proper_keydown(widget_t widget, dword_t ks, int nKey)
 		break;
 	case KEY_PAGEDOWN:
 		properctrl_tabskip(widget,TABORDER_PAGEDOWN);
-		break;
-	}
-}
-
-void hand_proper_wchar(widget_t widget, wchar_t nChar)
-{
-	proper_delta_t* ptd = GETPROPERDELTA(widget);
-
-	if (!ptd->proper)
-		return;
-
-	if (IS_VISIBLE_CHAR(nChar) && !widget_is_valid(ptd->editor))
-	{
-		hand_proper_keydown(widget, 0, KEY_ENTER);
-	}
-
-	if (IS_VISIBLE_CHAR(nChar) && widget_is_valid(ptd->editor))
-	{
-		widget_post_wchar(ptd->editor, nChar);
-	}
-
-}
-
-void hand_proper_child_command(widget_t widget, int code, vword_t data)
-{
-	proper_delta_t* ptd = GETPROPERDELTA(widget);
-
-	switch (code)
-	{
-	case COMMAND_COMMIT:
-		noti_proper_commit_edit(widget);
-		break;
-	case COMMAND_ROLLBACK:
-		noti_proper_rollback_edit(widget);
 		break;
 	}
 }
@@ -1070,7 +676,6 @@ widget_t properctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* 
 		EVENT_ON_WHEEL(hand_proper_wheel)
 
 		EVENT_ON_KEYDOWN(hand_proper_keydown)
-		EVENT_ON_WCHAR(hand_proper_wchar)
 
 		EVENT_ON_MOUSE_MOVE(hand_proper_mouse_move)
 		EVENT_ON_MOUSE_HOVER(hand_proper_mouse_hover)
@@ -1082,10 +687,7 @@ widget_t properctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* 
 		EVENT_ON_RBUTTON_DOWN(hand_proper_rbutton_down)
 		EVENT_ON_RBUTTON_UP(hand_proper_rbutton_up)
 
-		EVENT_ON_NOTICE(hand_proper_notice)
-		EVENT_ON_CHILD_COMMAND(hand_proper_child_command)
-
-		
+		EVENT_ON_NOTICE(hand_proper_notice)	
 
 	EVENT_END_DISPATH
 
@@ -1150,7 +752,10 @@ void properctrl_accept(widget_t widget, bool_t bAccept)
 	if (!ptd->proper)
 		return;
 
-	noti_proper_reset_editor(widget, bAccept);
+	if(bAccept)
+		noti_proper_reset_editor(widget, 1);
+	else
+		noti_proper_reset_editor(widget, 0);
 }
 
 void properctrl_redraw(widget_t widget)
@@ -1409,18 +1014,16 @@ bool_t	properctrl_set_entity_value(widget_t widget, link_t_ptr elk, const tchar_
 #endif
 
 	if (compare_text(get_entity_value_ptr(elk), -1, token, -1, 0) == 0)
-		return 1;
+		return 0;
 
 	set_entity_value(elk, token, -1);
-
-	noti_proper_owner(widget, NC_ENTITYUPDATE, ptd->proper, section_from_entity(elk), elk, NULL);
 
 	properctrl_redraw_entity(widget, elk);
 
 	return 1;
 }
 
-void properctrl_get_entity_rect(widget_t widget, link_t_ptr ent, xrect_t* pxr)
+void properctrl_get_entity_rect(widget_t widget, link_t_ptr ent, bool_t edit, xrect_t* pxr)
 {
 	proper_delta_t* ptd = GETPROPERDELTA(widget);
 	
@@ -1433,7 +1036,10 @@ void properctrl_get_entity_rect(widget_t widget, link_t_ptr ent, xrect_t* pxr)
 	XDK_ASSERT(is_proper_entity(ptd->proper, ent));
 #endif
 
-	_properctrl_entity_rect(widget, ent, pxr);
+	if(edit)
+		_properctrl_entity_text_rect(widget, ent, pxr);
+	else
+		_properctrl_entity_rect(widget, ent, pxr);
 }
 
 void properctrl_set_lock(widget_t widget, bool_t bLock)

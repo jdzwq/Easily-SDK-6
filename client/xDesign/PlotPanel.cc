@@ -230,17 +230,19 @@ void PlotPanel_Proper_OnEntityUpdate(widget_t widget, NOTICE_PROPER* pnp)
 
 	int n_id = xstol(get_title_item_id_ptr(tlk));
 
+	LINKPTR ptrProper = properctrl_fetch(pnp->widget);
+	
 	LINKPTR ptrPlot = plotctrl_fetch(pdt->hPlot);
 
 	tchar_t sz_style[CSS_LEN + 1] = { 0 };
 
 	if (n_id == IDA_ATTRIBUTES)
 	{
-		properbag_read_plot_attributes(pnp->proper, ptrPlot);
+		properbag_read_plot_attributes(ptrProper, ptrPlot);
 	}
 	else if (n_id == IDA_STYLESHEET)
 	{
-		properbag_format_stylesheet(pnp->proper, sz_style, CSS_LEN);
+		properbag_format_stylesheet(ptrProper, sz_style, CSS_LEN);
 		set_plot_style(ptrPlot, sz_style, -1);
 	}
 
@@ -335,7 +337,7 @@ void PlotPanel_OnSave(widget_t widget)
 		if (!shell_get_filename(widget, szPath, _T("Plot Meta File(*.sheet)\0*.sheet\0"), _T("sheet"), 1, szPath, PATH_LEN, szFile, PATH_LEN))
 			return;
 
-		xscat(szPath, _T("\\"));
+		xscat(szPath, _T("/"));
 		xscat(szPath, szFile);
 		xscpy(szFile, szPath);
 	}
@@ -361,7 +363,7 @@ void PlotPanel_OnSaveAs(widget_t widget)
 	if (!shell_get_filename(widget, szPath, _T("Plot Meta File(*.sheet)\0*.sheet\0Svg Image File(*.svg)\0*.svg\0"), _T("sheet"), 1, szPath, PATH_LEN, szFile, PATH_LEN))
 		return;
 
-	xscat(szPath, _T("\\"));
+	xscat(szPath, _T("/"));
 	xscat(szPath, szFile);
 	xscpy(szFile, szPath);
 
@@ -467,6 +469,8 @@ int PlotPanel_OnCreate(widget_t widget, void* data)
 	LINKPTR ptrProper = create_proper_doc();
 	properctrl_attach(pdt->hProper, ptrProper);
 
+	hand_editor_create(pdt->hProper, &edit_properctrl);
+
 	widget_get_client_rect(widget, &xr);
 	pdt->hTitle = titlectrl_create(_T("PlotTitle"), WD_STYLE_CONTROL, &xr, widget);
 	widget_set_user_id(pdt->hTitle, IDC_PLOTPANEL_TITLE);
@@ -531,6 +535,8 @@ void PlotPanel_OnDestroy(widget_t widget)
 
 	if (widget_is_valid(pdt->hProper))
 	{
+		hand_editor_destroy(pdt->hProper);
+
 		LINKPTR ptrProper = properctrl_detach(pdt->hProper);
 		if (ptrProper)
 			destroy_proper_doc(ptrProper);
@@ -670,7 +676,6 @@ void PlotPanel_OnMenuCommand(widget_t widget, int code, int cid, vword_t data)
 		break;
 
 	case IDC_PLOTPANEL_MENU:
-		widget_destroy((widget_t)data);
 		if (code)
 		{
 			widget_post_command(widget, code, 0, NULL);

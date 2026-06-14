@@ -34,10 +34,6 @@ typedef struct _images_delta_t{
 	link_t_ptr item;
 	link_t_ptr hover;
 
-	widget_t editor;
-	widget_t hsc;
-	widget_t vsc;
-
 	int opera;
 	bool_t b_drag;
 	bool_t b_lock;
@@ -176,7 +172,7 @@ static void _imagesctrl_reset_page(widget_t widget)
 	int pw, ph, vw, vh, lw, lh;
 	xrect_t xr;
 	xsize_t xs;
-	bool_t b_horz;
+	bool_t b_horz = bool_true;
 
 	widget_get_client_rect(widget, &xr);
 	pw = xr.w;
@@ -336,10 +332,7 @@ void noti_images_item_enter(widget_t widget, link_t_ptr plk)
 
 	ptd->hover = plk;
 
-	if (widget_is_hotvoer(widget))
-	{
-		//widget_track_mouse(widget, MS_TRACK_HOVER | MS_TRACK_LEAVE);
-	}
+	widget_enable_hover(widget, bool_true);
 }
 
 void noti_images_item_leave(widget_t widget)
@@ -350,10 +343,7 @@ void noti_images_item_leave(widget_t widget)
 
 	ptd->hover = NULL;
 
-	if (widget_is_hotvoer(widget))
-	{
-		//widget_track_mouse(widget, MS_TRACK_HOVER | MS_TRACK_LEAVE);
-	}
+	widget_enable_hover(widget, bool_false);
 }
 
 void noti_images_item_hover(widget_t widget, int x, int y)
@@ -428,123 +418,14 @@ void noti_images_item_drop(widget_t widget, int x, int y)
 	noti_images_owner(widget, NC_IMAGEITEMDROP,ptd->images, ptd->item, (void*)&pt);
 }
 
-void noti_images_begin_edit(widget_t widget)
-{
-	images_delta_t* ptd = GETIMAGESDELTA(widget);
-	const tchar_t* text;
-	xrect_t xr = { 0 };
-
-	color_mod_t ob = { 0 };
-	xfont_t xf = { 0 };
-
-	XDK_ASSERT(ptd->item);
-	
-	if (widget_is_valid(ptd->editor))
-		return;
-
-	if (ptd->b_lock)
-		return;
-
-	default_xfont(&xf);
-	widget_get_color_mode(widget, &ob);
-
-	_imagesctrl_text_rect(widget, ptd->item, &xr);
-
-	if (noti_images_owner(widget, NC_IMAGEITEMEDITING, ptd->images, ptd->item, NULL))
-		return;
-
-	ptd->editor = fireedit_create(widget, &xr);
-	XDK_ASSERT(ptd->editor);
-	widget_set_user_id(ptd->editor, IDC_FIREEDIT);
-	widget_set_owner(ptd->editor, widget);
-
-	editbox_set_xfont(ptd->editor, &xf);
-	widget_set_color_mode(ptd->editor, &ob);
-
-	widget_show(ptd->editor, WS_SHOW_NORMAL);
-	widget_set_focus(ptd->editor);
-
-	text = get_images_item_alt_ptr(ptd->item);
-	editbox_set_text(ptd->editor, text);
-	editbox_selectall(ptd->editor);
-}
-
-void noti_images_commit_edit(widget_t widget)
-{
-	images_delta_t* ptd = GETIMAGESDELTA(widget);
-	const tchar_t* text;
-	widget_t editctrl;
-
-	if (!widget_is_valid(ptd->editor))
-		return;
-
-	XDK_ASSERT(ptd->item);
-
-	text = (tchar_t*)editbox_get_text_ptr(ptd->editor);
-
-	if (!noti_images_owner(widget, NC_IMAGEITEMCOMMIT, ptd->images, ptd->item, (void*)text))
-	{
-		imagesctrl_set_item_title(widget, ptd->item, text);
-	}
-
-	editctrl = ptd->editor;
-	ptd->editor = (widget_t)0;
-
-	widget_destroy(editctrl);
-	widget_set_focus(widget);
-}
-
-void noti_images_rollback_edit(widget_t widget)
-{
-	images_delta_t* ptd = GETIMAGESDELTA(widget);
-	widget_t editctrl;
-
-	if (!widget_is_valid(ptd->editor))
-		return;
-
-	XDK_ASSERT(ptd->item);
-
-	noti_images_owner(widget, NC_IMAGEITEMROLLBACK, ptd->images, ptd->item, NULL);
-
-	editctrl = ptd->editor;
-	ptd->editor = (widget_t)0;
-
-	widget_destroy(editctrl);
-	widget_set_focus(widget);
-}
-
 void noti_images_reset_editor(widget_t widget, bool_t bCommit)
 {
 	images_delta_t* ptd = GETIMAGESDELTA(widget);
 
-	if (widget_is_valid(ptd->editor))
-	{
-		if (bCommit)
-			noti_images_commit_edit(widget);
-		else
-			noti_images_rollback_edit(widget);
-	}
-}
-
-void noti_images_reset_scroll(widget_t widget, bool_t bUpdate)
-{
-	images_delta_t* ptd = GETIMAGESDELTA(widget);
-
-	if (widget_is_valid(ptd->vsc))
-	{
-		if (bUpdate)
-			widget_erase(ptd->vsc, NULL);
-		else
-			widget_close(ptd->vsc, 0);
-	}
-
-	if (widget_is_valid(ptd->hsc))
-	{
-		if (bUpdate)
-			widget_erase(ptd->hsc, NULL);
-		else
-			widget_close(ptd->hsc, 0);
-	}
+	if (bCommit)
+		widget_post_command(widget, COMMAND_COMMIT, IDC_CHILD, (vword_t)0);
+	else
+		widget_post_command(widget, COMMAND_ROLLBACK, IDC_CHILD, (vword_t)0);
 }
 
 /********************************************************************************************************/
@@ -572,12 +453,6 @@ void hand_images_destroy(widget_t widget)
 	XDK_ASSERT(ptd != NULL);
 
 	noti_images_reset_editor(widget, 0);
-
-	if (widget_is_valid(ptd->hsc))
-		widget_destroy(ptd->hsc);
-
-	if (widget_is_valid(ptd->vsc))
-		widget_destroy(ptd->vsc);
 
 	xmem_free(ptd);
 
@@ -636,50 +511,7 @@ void hand_images_wheel(widget_t widget, bool_t bHorz, int nDelta)
 
 	noti_images_reset_editor(widget, 1);
 
-	widget_get_scroll_info(widget, bHorz, &scr);
-
-	if (bHorz)
-		nLine = (nDelta > 0) ? scr.min : -scr.min;
-	else
-		nLine = (nDelta < 0) ? scr.min : -scr.min;
-
-	if (widget_hand_scroll(widget, bHorz, nLine))
-	{
-		b_horz = (compare_text(get_images_layer_ptr(ptd->images), -1, ATTR_LAYER_HORZ, -1, 0) == 0) ? 1 : 0;
-
-		if (!b_horz && !bHorz && !(widget_get_style(widget) & WD_STYLE_VSCROLL))
-		{
-			if (!widget_is_valid(ptd->vsc))
-			{
-				ptd->vsc = show_vertbox(widget);
-			}
-			else
-			{
-				widget_erase(ptd->vsc, NULL);
-			}
-		}
-
-		if (b_horz && bHorz && !(widget_get_style(widget) & WD_STYLE_HSCROLL))
-		{
-			if (!widget_is_valid(ptd->hsc))
-			{
-				ptd->hsc = show_horzbox(widget);
-			}
-			else
-			{
-				widget_erase(ptd->hsc, NULL);
-			}
-		}
-
-		return;
-	}
-
-	win = widget_get_parent(widget);
-
-	if (widget_is_valid(win))
-	{
-		widget_scroll(win, bHorz, nLine);
-	}
+	widget_hand_wheel(widget, bHorz, nDelta);
 }
 
 void hand_images_mouse_move(widget_t widget, dword_t dw, const xpoint_t* pxp)
@@ -754,8 +586,7 @@ void hand_images_lbutton_dbclick(widget_t widget, const xpoint_t* pxp)
 	if (!ptd->images)
 		return;
 
-	if (widget_is_valid(ptd->editor))
-		return;
+	noti_images_reset_editor(widget, 1);
 
 	noti_images_owner(widget, NC_IMAGESDBCLK, ptd->images, ptd->item, (void*)pxp);
 }
@@ -884,10 +715,6 @@ void hand_images_keydown(widget_t widget, dword_t ks, int nKey)
 	
 	switch (nKey)
 	{
-	case KEY_ENTER:
-		if (ptd->item)
-			noti_images_begin_edit(widget);
-		break;
 	case KEY_SPACE:
 		if (ptd->item)
 			noti_images_item_check(widget, ptd->item);
@@ -949,30 +776,6 @@ void hand_images_kill_focus(widget_t widget, widget_t wt)
 	if (widget_is_editor(widget))
 	{
 		widget_send_command(widget_get_owner(widget), COMMAND_COMMIT, IDC_CHILD, (vword_t)NULL);
-	}
-}
-
-void hand_images_notice(widget_t widget, NOTICE* pnt)
-{
-	images_delta_t* ptd = GETIMAGESDELTA(widget);
-
-	if (!ptd->images)
-		return;
-
-}
-
-void hand_images_child_command(widget_t widget, int code, vword_t data)
-{
-	images_delta_t* ptd = GETIMAGESDELTA(widget);
-
-	switch (code)
-	{
-	case COMMAND_COMMIT:
-		noti_images_commit_edit(widget);
-		break;
-	case COMMAND_ROLLBACK:
-		noti_images_rollback_edit(widget);
-		break;
 	}
 }
 
@@ -1057,13 +860,8 @@ widget_t imagesctrl_create(const tchar_t* wname, dword_t wstyle, const xrect_t* 
 		EVENT_ON_RBUTTON_DOWN(hand_images_rbutton_down)
 		EVENT_ON_RBUTTON_UP(hand_images_rbutton_up)
 
-		EVENT_ON_NOTICE(hand_images_notice)
-		EVENT_ON_CHILD_COMMAND(hand_images_child_command)
-
 		EVENT_ON_SET_FOCUS(hand_images_set_focus)
 		EVENT_ON_KILL_FOCUS(hand_images_kill_focus)
-
-		
 
 	EVENT_END_DISPATH
 
@@ -1161,7 +959,7 @@ void imagesctrl_tabskip(widget_t widget, int nSkip)
 	if (!ptd->images)
 		return;
 
-	noti_images_reset_editor(widget, 0);
+	noti_images_reset_editor(widget, 1);
 
 	switch (nSkip)
 	{
@@ -1293,7 +1091,7 @@ bool_t imagesctrl_set_item_title(widget_t widget, link_t_ptr ilk, const tchar_t*
 	return 0;
 }
 
-void imagesctrl_get_item_rect(widget_t widget, link_t_ptr ilk, xrect_t* pxr)
+void imagesctrl_get_item_rect(widget_t widget, link_t_ptr ilk, bool_t edit, xrect_t* pxr)
 {
 	images_delta_t* ptd = GETIMAGESDELTA(widget);
 	
@@ -1306,7 +1104,10 @@ void imagesctrl_get_item_rect(widget_t widget, link_t_ptr ilk, xrect_t* pxr)
 	XDK_ASSERT(is_images_item(ptd->images, ilk));
 #endif
 
-	_imagesctrl_item_rect(widget, ilk, pxr);
+	if(edit)
+		_imagesctrl_text_rect(widget, ilk, pxr);
+	else
+		_imagesctrl_item_rect(widget, ilk, pxr);
 }
 
 void imagesctrl_set_opera(widget_t widget, int opera)

@@ -32,9 +32,6 @@ LICENSE.GPL3 for more details.
 typedef struct _tagctrl_delta_t{
 	textor_context textor;
 	link_t_ptr phrase;
-	
-	widget_t hsc;
-	widget_t vsc;
 
 	bool_t b_lock;
 
@@ -111,27 +108,6 @@ int noti_tagctrl_owner(widget_t widget, unsigned int code, link_t_ptr tag, link_
 	return nf.ret;
 }
 
-void noti_tagctrl_reset_scroll(widget_t widget, bool_t bUpdate)
-{
-	tagctrl_delta_t* ptd = GETTAGCTRLDELTA(widget);
-
-	if (widget_is_valid(ptd->vsc))
-	{
-		if (bUpdate)
-			widget_erase(ptd->vsc, NULL);
-		else
-			widget_close(ptd->vsc, 0);
-	}
-
-	if (widget_is_valid(ptd->hsc))
-	{
-		if (bUpdate)
-			widget_erase(ptd->hsc, NULL);
-		else
-			widget_close(ptd->hsc, 0);
-	}
-}
-
 /***********************************************************************/
 
 int hand_tagctrl_create(widget_t widget, void* data)
@@ -172,12 +148,6 @@ void hand_tagctrl_destroy(widget_t widget)
 	tagctrl_delta_t* ptd = GETTAGCTRLDELTA(widget);
 
 	XDK_ASSERT(ptd != NULL);
-
-	if (widget_is_valid(ptd->hsc))
-		widget_destroy(ptd->hsc);
-
-	if (widget_is_valid(ptd->vsc))
-		widget_destroy(ptd->vsc);
 
 	hand_textor_clean(&ptd->textor);
 
@@ -602,9 +572,6 @@ void hand_tagctrl_scroll(widget_t widget, bool_t bHorz, int nLine)
 void hand_tagctrl_wheel(widget_t widget, bool_t bHorz, int nDelta)
 {
 	tagctrl_delta_t* ptd = GETTAGCTRLDELTA(widget);
-	scroll_t scr = { 0 };
-	int nLine;
-	widget_t win;
 
 	if (!ptd)
 		return;
@@ -612,48 +579,7 @@ void hand_tagctrl_wheel(widget_t widget, bool_t bHorz, int nDelta)
 	if (!ptd->textor.data)
 		return;
 
-	widget_get_scroll_info(widget, bHorz, &scr);
-
-	if (bHorz)
-		nLine = (nDelta > 0) ? scr.min : -scr.min;
-	else
-		nLine = (nDelta < 0) ? scr.min : -scr.min;
-
-	if (hand_textor_scroll(&ptd->textor, bHorz, nLine))
-	{
-		if (!bHorz && !(widget_get_style(widget) & WD_STYLE_VSCROLL))
-		{
-			if (!widget_is_valid(ptd->vsc))
-			{
-				ptd->vsc = show_vertbox(widget);
-			}
-			else
-			{
-				widget_erase(ptd->vsc, NULL);
-			}
-		}
-
-		if (bHorz && !(widget_get_style(widget) & WD_STYLE_HSCROLL))
-		{
-			if (!widget_is_valid(ptd->hsc))
-			{
-				ptd->hsc = show_horzbox(widget);
-			}
-			else
-			{
-				widget_erase(ptd->hsc, NULL);
-			}
-		}
-
-		return;
-	}
-
-	win = widget_get_parent(widget);
-
-	if (widget_is_valid(win))
-	{
-		widget_scroll(win, bHorz, nLine);
-	}
+	widget_hand_wheel(widget, bHorz, nDelta);
 }
 
 void hand_tagctrl_self_command(widget_t widget, int code, vword_t data)

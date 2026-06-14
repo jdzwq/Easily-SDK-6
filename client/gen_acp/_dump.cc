@@ -91,8 +91,8 @@ void dump_acp_unicode()
 		for (i = 0; i < CHS_UNICODE_COUNT; i++)
 		{
 			pt = (acp_table_t *)(pb + i * sizeof(acp_table_t));
-			bc[0] = GETLBYTE(GET_SWORD_LOC((byte_t *)pt, 0));
-			bc[1] = GETHBYTE(GET_SWORD_LOC((byte_t *)pt, 0));
+			bc[0] = GETSWORDL(GET_SWORD_LOC((byte_t *)pt, 0));
+			bc[1] = GETSWORDH(GET_SWORD_LOC((byte_t *)pt, 0));
 			py[0] = (unsigned char)GET_SWORD_LOC((byte_t *)pt, 2);
 			if (!bc[0] || !bc[1]) continue;
 

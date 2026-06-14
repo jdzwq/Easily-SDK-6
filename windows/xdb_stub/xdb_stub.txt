@@ -1,2 +1,2 @@
 SOURCES= \
-E:\Easily-temp\windows\xdb_stub\x64\Debug/xdb_stub.c \
+E:\Easily-temp\windows\xdb_stub\x86\Debug/xdb_stub.c \

@@ -893,8 +893,8 @@ dword_t ucs_byte_to_utf16lit(wchar_t ch, byte_t* dest)
 	{
 		if (dest)
 		{
-			dest[0] = LIT_GETLBYTE(ch);
-			dest[1] = LIT_GETHBYTE(ch);
+			dest[0] = LIT_GETSWORDL(ch);
+			dest[1] = LIT_GETSWORDH(ch);
 		}
 		return 2;
 	}
@@ -902,8 +902,8 @@ dword_t ucs_byte_to_utf16lit(wchar_t ch, byte_t* dest)
 	{
 		if (dest)
 		{
-			dest[0] = LIT_GETLBYTE(ch);
-			dest[1] = LIT_GETHBYTE(ch);
+			dest[0] = LIT_GETSWORDL(ch);
+			dest[1] = LIT_GETSWORDH(ch);
 		}
 		return 2;
 	}
@@ -913,10 +913,10 @@ dword_t ucs_byte_to_utf16lit(wchar_t ch, byte_t* dest)
 
 		if (dest)
 		{
-			dest[0] = LIT_GETLBYTE(((ch & 0xFFC00) >> 10) | 0xD800);
-			dest[1] = LIT_GETHBYTE(((ch & 0xFFC00) >> 10) | 0xD800);
-			dest[2] = LIT_GETLBYTE((ch & 0x3FF) | 0xDC00);
-			dest[3] = LIT_GETHBYTE((ch & 0x3FF) | 0xDC00);;
+			dest[0] = LIT_GETSWORDL(((ch & 0xFFC00) >> 10) | 0xD800);
+			dest[1] = LIT_GETSWORDH(((ch & 0xFFC00) >> 10) | 0xD800);
+			dest[2] = LIT_GETSWORDL((ch & 0x3FF) | 0xDC00);
+			dest[3] = LIT_GETSWORDH((ch & 0x3FF) | 0xDC00);;
 		}
 		return 4;
 	}
@@ -958,8 +958,8 @@ dword_t ucs_byte_to_utf16big(wchar_t ch, byte_t* dest)
 	{
 		if (dest)
 		{
-			dest[0] = BIG_GETLBYTE(ch);
-			dest[1] = BIG_GETHBYTE(ch);
+			dest[0] = BIG_GETSWORDL(ch);
+			dest[1] = BIG_GETSWORDH(ch);
 		}
 		return 2;
 	}
@@ -967,8 +967,8 @@ dword_t ucs_byte_to_utf16big(wchar_t ch, byte_t* dest)
 	{
 		if (dest)
 		{
-			dest[0] = BIG_GETLBYTE(ch);
-			dest[1] = BIG_GETHBYTE(ch);
+			dest[0] = BIG_GETSWORDL(ch);
+			dest[1] = BIG_GETSWORDH(ch);
 		}
 		return 2;
 	}
@@ -978,10 +978,10 @@ dword_t ucs_byte_to_utf16big(wchar_t ch, byte_t* dest)
 
 		if (dest)
 		{
-			dest[0] = BIG_GETLBYTE(((ch & 0xFFC00) >> 10) | 0xD800);
-			dest[1] = BIG_GETHBYTE(((ch & 0xFFC00) >> 10) | 0xD800);
-			dest[2] = BIG_GETLBYTE((ch & 0x3FF) | 0xDC00);
-			dest[3] = BIG_GETHBYTE((ch & 0x3FF) | 0xDC00);;
+			dest[0] = BIG_GETSWORDL(((ch & 0xFFC00) >> 10) | 0xD800);
+			dest[1] = BIG_GETSWORDH(((ch & 0xFFC00) >> 10) | 0xD800);
+			dest[2] = BIG_GETSWORDL((ch & 0x3FF) | 0xDC00);
+			dest[3] = BIG_GETSWORDH((ch & 0x3FF) | 0xDC00);;
 		}
 		return 4;
 	}
@@ -1021,8 +1021,8 @@ dword_t ucs_byte_to_unn(wchar_t ch, byte_t* dest)
 	{
 		xmem_zero((void*)dest, 4);
 
-		dest[0] = GETLBYTE(ch);
-		dest[1] = GETHBYTE(ch);
+		dest[0] = GETSWORDL(ch);
+		dest[1] = GETSWORDH(ch);
 	}
 
 	return 4;

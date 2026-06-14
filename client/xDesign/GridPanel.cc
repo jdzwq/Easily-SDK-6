@@ -203,7 +203,7 @@ void GridPanel_OnSave(widget_t widget)
 		if (!shell_get_filename(widget, szPath, _T("Grid Meta File(*.sheet)\0*.sheet\0"), _T("sheet"), 1, szPath, PATH_LEN, szFile, PATH_LEN))
 			return;
 
-		xscat(szPath, _T("\\"));
+		xscat(szPath, _T("/"));
 		xscat(szPath, szFile);
 		xscpy(szFile, szPath);
 	}
@@ -232,7 +232,7 @@ void GridPanel_OnSaveAs(widget_t widget)
 	if (!shell_get_filename(widget, szPath, _T("Grid Meta File(*.sheet)\0*.sheet\0Svg Image File(*.svg)\0*.svg\0"), _T("sheet"), 1, szPath, PATH_LEN, szFile, PATH_LEN))
 		return;
 
-	xscat(szPath, _T("\\"));
+	xscat(szPath, _T("/"));
 	xscat(szPath, szFile);
 	xscpy(szFile, szPath);
 
@@ -325,7 +325,7 @@ void GridPanel_OnSchema(widget_t widget)
 	if (!shell_get_filename(widget, szPath, _T("xml schema file(*.schema)\0*.schema\0"), _T("schema"), 1, szPath, PATH_LEN, szFile, PATH_LEN))
 		return;
 
-	xscat(szPath, _T("\\"));
+	xscat(szPath, _T("/"));
 	xscat(szPath, szFile);
 	xscpy(szFile, szPath);
 
@@ -354,7 +354,7 @@ void GridPanel_OnExport(widget_t widget)
 	if (!shell_get_filename(widget, szPath, _T("csv data file(*.csv)\0*.csv\0"), _T("csv"), 1, szPath, PATH_LEN, szFile, PATH_LEN))
 		return;
 
-	xscat(szPath, _T("\\"));
+	xscat(szPath, _T("/"));
 	xscat(szPath, szFile);
 	xscpy(szFile, szPath);
 
@@ -380,7 +380,7 @@ void GridPanel_OnImport(widget_t widget)
 	if (!shell_get_filename(widget, szPath, _T("csv data file(*.csv)\0*.csv\0"), _T("csv"), 0, szPath, PATH_LEN, szFile, PATH_LEN))
 		return;
 
-	xscat(szPath, _T("\\"));
+	xscat(szPath, _T("/"));
 	xscat(szPath, szFile);
 	xscpy(szFile, szPath);
 
@@ -769,7 +769,7 @@ void GridPanel_OnImportCols(widget_t widget)
 	if (!shell_get_filename(widget, szPath, _T("xml schema file(*.schema)\0*.schema\0"), _T("schema"), 0, szPath, PATH_LEN, szFile, PATH_LEN))
 		return;
 
-	xscat(szPath, _T("\\"));
+	xscat(szPath, _T("/"));
 	xscat(szPath, szFile);
 	xscpy(szFile, szPath);
 
@@ -1197,7 +1197,7 @@ void GridPanel_Title_OnItemChanged(widget_t widget, NOTICE_TITLE* pnt)
 	widget_post_command(widget, 0, n_id, NULL);
 }
 
-void GridPanel_Grid_OnLBClick(widget_t widget, NOTICE_DESIGN* pnf)
+void GridPanel_Grid_OnLBClick(widget_t widget, NOTICE_DESIGNER* pnf)
 {
 	GridPanelDelta* pdt = GETGRIDPANELDELTA(widget);
 
@@ -1209,7 +1209,7 @@ void GridPanel_Grid_OnLBClick(widget_t widget, NOTICE_DESIGN* pnf)
 	widget_post_command(widget, 0, n_id, NULL);
 }
 
-void GridPanel_Grid_OnSized(widget_t widget, NOTICE_DESIGN* pnf)
+void GridPanel_Grid_OnSized(widget_t widget, NOTICE_DESIGNER* pnf)
 {
 	GridPanelDelta* pdt = GETGRIDPANELDELTA(widget);
 
@@ -1221,7 +1221,7 @@ void GridPanel_Grid_OnSized(widget_t widget, NOTICE_DESIGN* pnf)
 	widget_post_command(widget, 0, n_id, NULL);
 }
 
-void GridPanel_Grid_OnMoved(widget_t widget, NOTICE_DESIGN* pnf)
+void GridPanel_Grid_OnMoved(widget_t widget, NOTICE_DESIGNER* pnf)
 {
 	GridPanelDelta* pdt = GETGRIDPANELDELTA(widget);
 
@@ -1237,6 +1237,8 @@ void GridPanel_Proper_OnEntityUpdate(widget_t widget, NOTICE_PROPER* pnp)
 
 	int n_id = xstol(get_title_item_id_ptr(ptrItem));
 
+	LINKPTR ptrProper = properctrl_fetch(pnp->widget);
+
 	LINKPTR ptrGrid = gridctrl_fetch(pdt->hGrid);
 	LINKPTR ptrCol = (LINKPTR)designer_get_focused(pdt->hGrid);
 
@@ -1246,11 +1248,11 @@ void GridPanel_Proper_OnEntityUpdate(widget_t widget, NOTICE_PROPER* pnp)
 	{
 		if (n_id == IDA_ATTRIBUTES)
 		{
-			properbag_read_col_attributes(pnp->proper, ptrCol);
+			properbag_read_col_attributes(ptrProper, ptrCol);
 		}
 		else if (n_id == IDA_STYLESHEET)
 		{
-			properbag_format_stylesheet(pnp->proper, sz_style, CSS_LEN);
+			properbag_format_stylesheet(ptrProper, sz_style, CSS_LEN);
 			set_col_style(ptrCol, sz_style);
 		}
 		gridctrl_redraw(pdt->hGrid, 1);
@@ -1259,11 +1261,11 @@ void GridPanel_Proper_OnEntityUpdate(widget_t widget, NOTICE_PROPER* pnp)
 	{
 		if (n_id == IDA_ATTRIBUTES)
 		{
-			properbag_read_grid_attributes(pnp->proper, ptrGrid);
+			properbag_read_grid_attributes(ptrProper, ptrGrid);
 		}
 		else if (n_id == IDA_STYLESHEET)
 		{
-			properbag_format_stylesheet(pnp->proper, sz_style, CSS_LEN);
+			properbag_format_stylesheet(ptrProper, sz_style, CSS_LEN);
 			set_grid_style(ptrGrid, sz_style);
 		}
 		gridctrl_redraw(pdt->hGrid, 1);
@@ -1319,7 +1321,6 @@ int GridPanel_OnCreate(widget_t widget, void* data)
 	gridctrl_set_lock(pdt->hGrid, 0);
 	widget_show(pdt->hGrid, WS_SHOW_NORMAL);
 
-
 	widget_get_client_rect(widget, &xr);
 	pdt->hProper = properctrl_create(_T("GridProper"), WD_STYLE_CONTROL, &xr, widget);
 	XDK_ASSERT(pdt->hProper);
@@ -1331,6 +1332,8 @@ int GridPanel_OnCreate(widget_t widget, void* data)
 
 	LINKPTR ptrProper = create_proper_doc();
 	properctrl_attach(pdt->hProper, ptrProper);
+
+	hand_editor_create(pdt->hProper, &edit_properctrl);
 
 	widget_get_client_rect(widget, &xr);
 	pdt->hTitle = titlectrl_create(_T("GridTitle"), WD_STYLE_CONTROL, &xr, widget);
@@ -1393,6 +1396,8 @@ void GridPanel_OnDestroy(widget_t widget)
 
 	if (widget_is_valid(pdt->hProper))
 	{
+		hand_editor_destroy(pdt->hProper);
+
 		LINKPTR ptrProper = properctrl_detach(pdt->hProper);
 		if (ptrProper)
 			destroy_proper_doc(ptrProper);
@@ -1799,7 +1804,6 @@ void GridPanel_OnMenuCommand(widget_t widget, int code, int cid, vword_t data)
 		break;
 
 	case IDC_GRIDPANEL_FONTNAME:
-		widget_destroy((widget_t)data);
 		if (code)
 		{
 			fontname_menu_item(code, token, RES_LEN);
@@ -1807,7 +1811,6 @@ void GridPanel_OnMenuCommand(widget_t widget, int code, int cid, vword_t data)
 		}
 		break;
 	case IDC_GRIDPANEL_FONTSIZE:
-		widget_destroy((widget_t)data);
 		if (code)
 		{
 			fontsize_menu_item(code, token, RES_LEN);
@@ -1815,7 +1818,6 @@ void GridPanel_OnMenuCommand(widget_t widget, int code, int cid, vword_t data)
 		}
 		break;
 	case IDC_GRIDPANEL_FONTCOLOR:
-		widget_destroy((widget_t)data);
 		if (code)
 		{
 			color_menu_item(code, token, RES_LEN);
@@ -1823,7 +1825,6 @@ void GridPanel_OnMenuCommand(widget_t widget, int code, int cid, vword_t data)
 		}
 		break;
 	case IDC_GRIDPANEL_PAINTCOLOR:
-		widget_destroy((widget_t)data);
 		if (code)
 		{
 			color_menu_item(code, token, RES_LEN);
@@ -1831,7 +1832,6 @@ void GridPanel_OnMenuCommand(widget_t widget, int code, int cid, vword_t data)
 		}
 		break;
 	case IDC_GRIDPANEL_DRAWCOLOR:
-		widget_destroy((widget_t)data);
 		if (code)
 		{
 			color_menu_item(code, token, RES_LEN);
@@ -1848,7 +1848,7 @@ void GridPanel_OnNotice(widget_t widget, LPNOTICE phdr)
 
 	if (phdr->user == IDC_GRIDPANEL_GRID)
 	{
-		NOTICE_DESIGN* png = (NOTICE_DESIGN*)phdr;
+		NOTICE_DESIGNER* png = (NOTICE_DESIGNER*)phdr;
 		switch (png->code)
 		{
 		case NC_OBJECT_LBCLICK:

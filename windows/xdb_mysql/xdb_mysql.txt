@@ -1,2 +1,2 @@
 SOURCES= \
-E:\Easily-temp\windows\xdb_mysql\x64\Debug/xdb_mysql.c \
+E:\Easily-temp\windows\xdb_mysql\x86\Debug/xdb_mysql.c \

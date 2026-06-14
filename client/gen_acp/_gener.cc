@@ -28,8 +28,8 @@ void acp_gb2312_unicode()
 		if(!ch) ch = _T(' ');
 
 		xsprintf(str, _T("0x%02X%02X,0x%02X%02X,%c\n"),
-			GETHBYTE(fw), GETLBYTE(fw), 
-			GETHBYTE(tw), GETLBYTE(tw), 
+			GETSWORDH(fw), GETSWORDL(fw), 
+			GETSWORDH(tw), GETSWORDL(tw), 
 			ch);
 
 #if defined(_UNICODE) || defined(UNICODE)
@@ -72,8 +72,8 @@ void acp_unicode_gb2312()
 		if(!ch) ch = _T(' ');
 
 		xsprintf(str, _T("0x%02X%02X,0x%02X%02X,%c\n"),
-			GETHBYTE(fw), GETLBYTE(fw), 
-			GETHBYTE(tw), GETLBYTE(tw), 
+			GETSWORDH(fw), GETSWORDL(fw), 
+			GETSWORDH(tw), GETSWORDL(tw), 
 			ch);
 
 #if defined(_UNICODE) || defined(UNICODE)

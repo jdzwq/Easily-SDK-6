@@ -33,9 +33,6 @@ typedef struct _diagram_delta_t{
 	link_t_ptr diagram;
 	link_t_ptr entity;
 	link_t_ptr hover;
-
-	widget_t hsc;
-	widget_t vsc;
 }diagram_delta_t;
 
 #define GETDIAGRAMDELTA(ph) 	(diagram_delta_t*)widget_get_user_delta(ph)
@@ -180,7 +177,7 @@ void noti_diagram_entity_enter(widget_t widget, link_t_ptr ilk)
 
 	ptd->hover = ilk;
 
-	//widget_track_mouse(widget, MS_TRACK_HOVER | MS_TRACK_LEAVE);
+	widget_enable_hover(widget, bool_true);
 }
 
 void noti_diagram_entity_leave(widget_t widget)
@@ -191,7 +188,7 @@ void noti_diagram_entity_leave(widget_t widget)
 
 	ptd->hover = NULL;
 
-	//widget_track_mouse(widget, MS_TRACK_HOVER | MS_TRACK_LEAVE);
+	widget_enable_hover(widget, bool_false);
 }
 
 void noti_diagram_entity_hover(widget_t widget, int x, int y)
@@ -209,27 +206,6 @@ void noti_diagram_entity_hover(widget_t widget, int x, int y)
 void noti_diagram_calc(widget_t widget)
 {
 	diagram_delta_t* ptd = GETDIAGRAMDELTA(widget);
-}
-
-void noti_diagram_reset_scroll(widget_t widget, bool_t bUpdate)
-{
-	diagram_delta_t* ptd = GETDIAGRAMDELTA(widget);
-
-	if (widget_is_valid(ptd->vsc))
-	{
-		if (bUpdate)
-			widget_erase(ptd->vsc, NULL);
-		else
-			widget_destroy(ptd->vsc);
-	}
-
-	if (widget_is_valid(ptd->hsc))
-	{
-		if (bUpdate)
-			widget_erase(ptd->hsc, NULL);
-		else
-			widget_destroy(ptd->hsc);
-	}
 }
 
 /*******************************************************************************/
@@ -252,12 +228,6 @@ void hand_diagram_destroy(widget_t widget)
 	diagram_delta_t* ptd = GETDIAGRAMDELTA(widget);
 
 	XDK_ASSERT(ptd != NULL);
-
-	if (widget_is_valid(ptd->hsc))
-		widget_destroy(ptd->hsc);
-
-	if (widget_is_valid(ptd->vsc))
-		widget_destroy(ptd->vsc);
 
 	xmem_free(ptd);
 
@@ -304,55 +274,11 @@ void hand_diagram_scroll(widget_t widget, bool_t bHorz, int nLine)
 void hand_diagram_wheel(widget_t widget, bool_t bHorz, int nDelta)
 {
 	diagram_delta_t* ptd = GETDIAGRAMDELTA(widget);
-	scroll_t scr = { 0 };
-	int nLine;
-	widget_t win;
 
 	if (!ptd->diagram)
 		return;
 
-	widget_get_scroll_info(widget, bHorz, &scr);
-
-	if (bHorz)
-		nLine = (nDelta > 0) ? scr.min : -scr.min;
-	else
-		nLine = (nDelta < 0) ? scr.min : -scr.min;
-
-	if (widget_hand_scroll(widget, bHorz, nLine))
-	{
-		if (!bHorz && !(widget_get_style(widget) & WD_STYLE_VSCROLL))
-		{
-			if (!widget_is_valid(ptd->vsc))
-			{
-				ptd->vsc = show_vertbox(widget);
-			}
-			else
-			{
-				widget_erase(ptd->vsc, NULL);
-			}
-		}
-
-		if (bHorz && !(widget_get_style(widget) & WD_STYLE_HSCROLL))
-		{
-			if (!widget_is_valid(ptd->hsc))
-			{
-				ptd->hsc = show_horzbox(widget);
-			}
-			else
-			{
-				widget_erase(ptd->hsc, NULL);
-			}
-		}
-
-		return;
-	}
-
-	win = widget_get_parent(widget);
-
-	if (widget_is_valid(win))
-	{
-		widget_scroll(win, bHorz, nLine);
-	}
+	widget_hand_wheel(widget, bHorz, nDelta);
 }
 
 void hand_diagram_mouse_move(widget_t widget, dword_t dw, const xpoint_t* pxp)
@@ -371,24 +297,21 @@ void hand_diagram_mouse_move(widget_t widget, dword_t dw, const xpoint_t* pxp)
 	ilk = NULL;
 	calc_diagram_hint(&pt, ptd->diagram, &ilk);
 
-	if (widget_is_hotvoer(widget))
+	if (!ptd->hover && ilk)
 	{
-		if (!ptd->hover && ilk)
-		{
-			noti_diagram_entity_enter(widget, ilk);
-			return;
-		}
+		noti_diagram_entity_enter(widget, ilk);
+		return;
+	}
 
-		if (ptd->hover && ptd->hover != ilk)
-		{
-			noti_diagram_entity_leave(widget);
-			return;
-		}
+	if (ptd->hover && ptd->hover != ilk)
+	{
+		noti_diagram_entity_leave(widget);
+		return;
+	}
 
-		if (ptd->hover)
-		{
-			noti_diagram_entity_leave(widget);
-		}
+	if (ptd->hover)
+	{
+		noti_diagram_entity_leave(widget);
 	}
 }
 

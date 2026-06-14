@@ -106,6 +106,7 @@ typedef struct tagMainFrameDelta{
 	bool_t bMode;
 
 	LINKPTR ptrProject;
+	tchar_t szPath[PATH_LEN + 1];
 	tchar_t szFile[PATH_LEN + 1];
 }MainFrameDelta;
 
@@ -294,7 +295,10 @@ void MainFrame_OpenProject(widget_t widget)
 	tchar_t szPath[PATH_LEN + 1] = { 0 };
 	tchar_t szFile[PATH_LEN + 1] = { 0 };
 
-	shell_get_curpath(szPath, PATH_LEN);
+	if(is_null(pdt->szPath))
+		shell_get_curpath(szPath, PATH_LEN);
+	else
+		xscpy(szPath, pdt->szPath);
 
 	if (!shell_get_filename(widget, szPath, _T("Project File(*.project)\0*.project\0"), _T("project"), 0, szPath, PATH_LEN, szFile, PATH_LEN))
 		return;
@@ -314,7 +318,7 @@ void MainFrame_OpenProject(widget_t widget)
 	}
 
 	xscpy(pdt->szFile, szPath);
-
+	
 	LINKPTR ptrResTree = treectrl_fetch(pdt->hResBar);
 	Project_GetResource(pdt->ptrProject, ptrResTree);
 	treectrl_redraw(pdt->hResBar);
@@ -323,7 +327,7 @@ void MainFrame_OpenProject(widget_t widget)
 	xscpy(token, _T("xDesign ["));
 	int len = xslen(token);
 
-	split_path(pdt->szFile, NULL, token + len, NULL);
+	split_path(pdt->szFile, pdt->szPath, token + len, NULL);
 	xscat(token, _T("]"));
 
 	widget_set_title(widget, token);
@@ -501,12 +505,15 @@ void MainFrame_OpenFile(widget_t widget)
 	tchar_t szFile[PATH_LEN + 1] = { 0 };
 	tchar_t szFilter[] = _T("Sheet File(*.sheet)\0*.sheet\0Schema File(*.schema)\0*.schema\0Text File(*.txt)\0*.txt\0SQL File(*.sql)\0*.sql\0Xml File(*.xml)\0*.xml\0Json File(*.json)\0*.json\0");
 
-	shell_get_curpath(szPath, PATH_LEN);
+	if(is_null(pdt->szPath))
+		shell_get_curpath(szPath, PATH_LEN);
+	else
+		xscpy(szPath, pdt->szPath);
 
 	if (!shell_get_filename(widget, szPath, szFilter, _T("sheet"), 0, szPath, PATH_LEN, szFile, PATH_LEN))
 		return;
 
-	xscat(szPath, _T("\\"));
+	xscat(szPath, _T("/"));
 	xscat(szPath, szFile);
 
 	tchar_t szClass[RES_LEN + 1] = { 0 };
@@ -628,7 +635,7 @@ bool_t MainFrame_RenameFile(widget_t widget, const tchar_t* nname)
 	tchar_t szClass[RES_LEN + 1] = { 0 };
 
 	split_path(pdt->szFile, szOrg, NULL, NULL);
-	xscat(szOrg, _T("\\"));
+	xscat(szOrg, _T("/"));
 	xscat(szOrg, get_tree_item_name_ptr(tlk));
 
 	_MainFrame_FileClass(szOrg, szClass);
@@ -636,7 +643,7 @@ bool_t MainFrame_RenameFile(widget_t widget, const tchar_t* nname)
 	split_path(get_tree_item_name_ptr(tlk), NULL, NULL, szExt);
 
 	split_path(pdt->szFile, szNew, NULL, NULL);
-	xscat(szNew, _T("\\"));
+	xscat(szNew, _T("/"));
 	xscat(szNew, nname);
 	xscat(szNew, _T("."));
 	xscat(szNew, szExt);
@@ -695,7 +702,7 @@ void MainFrame_ShowFile(widget_t widget)
 	xscpy(szFile, get_tree_item_name_ptr(tlk));
 
 	split_path(pdt->szFile, szPath, NULL, NULL);
-	xscat(szPath, _T("\\"));
+	xscat(szPath, _T("/"));
 	xscat(szPath, szFile);
 
 	_MainFrame_FileClass(szPath, szClass);
@@ -778,7 +785,7 @@ void MainFrame_SyncFile(widget_t widget)
 		{
 			split_path(pdt->szFile, szLoc, NULL, NULL);
 
-			xscat(szLoc, _T("\\"));
+			xscat(szLoc, _T("/"));
 			xscat(szLoc, get_tree_item_name_ptr(tlk_file));
 
 			xscpy(szSrv, szSYN);
@@ -1469,7 +1476,7 @@ void _MainFrame_CreateToolBar(widget_t widget)
 
 	_MainFrame_CalcToolBar(widget, &xr);
 
-	pdt->hToolBar = toolctrl_create(_T("ToolBar"), WD_STYLE_CONTROL | WD_STYLE_HOTOVER, &xr, widget);
+	pdt->hToolBar = toolctrl_create(_T("ToolBar"), WD_STYLE_CONTROL, &xr, widget);
 	widget_set_user_id(pdt->hToolBar, IDC_MAINFRAME_TOOLBAR);
 	widget_set_owner(pdt->hToolBar, widget);
 
@@ -1595,7 +1602,7 @@ void _MainFrame_CreateTitleBar(widget_t widget)
 
 	_MainFrame_CalcTitleBar(widget, &xr);
 	
-	pdt->hTitleBar = titlectrl_create(_T("TitleBar"), WD_STYLE_CONTROL | WD_STYLE_HOTOVER, &xr, widget);
+	pdt->hTitleBar = titlectrl_create(_T("TitleBar"), WD_STYLE_CONTROL, &xr, widget);
 	widget_set_user_id(pdt->hTitleBar, IDC_MAINFRAME_TITLEBAR);
 	widget_set_owner(pdt->hTitleBar, widget);
 
@@ -1627,7 +1634,9 @@ void _MainFrame_CreateResBar(widget_t widget)
 	treectrl_attach(pdt->hResBar, ptrTree);
 	treectrl_set_lock(pdt->hResBar, 0);
 
-	//widget_show(pdt->hResBar, WS_SHOW_NORMAL);
+	hand_editor_create(pdt->hResBar, &edit_treectrl);
+
+	widget_show(pdt->hResBar, WS_SHOW_NORMAL);
 }
 
 void _MainFrame_CreateObjBar(widget_t widget)
@@ -1647,7 +1656,7 @@ void _MainFrame_CreateObjBar(widget_t widget)
 	treectrl_attach(pdt->hObjBar, ptrTree);
 	treectrl_set_lock(pdt->hObjBar, 1);
 
-	//widget_show(pdt->hObjBar, WS_SHOW_NORMAL);
+	widget_show(pdt->hObjBar, WS_SHOW_HIDE);
 }
 
 void _MainFrame_CreateCateBar(widget_t widget)
@@ -1942,6 +1951,8 @@ void _MainFrame_DestroyResBar(widget_t widget)
 {
 	MainFrameDelta* pdt = GETMAINFRAMEDELTA(widget);
 
+	hand_editor_destroy(pdt->hResBar);
+
 	LINKPTR ptrTree = treectrl_detach(pdt->hResBar);
 	if (ptrTree)
 		destroy_tree_doc(ptrTree);
@@ -2136,17 +2147,13 @@ void MainFrame_OnMenuCommand(widget_t widget, int code, int cid, vword_t data)
 		break;
 
 	case IDC_MAINFRAME_MENUBOX:
-		widget_destroy((widget_t)data);
-
 		if (code)
 		{
-			widget_post_command(widget, code, 0, NULL);
+			widget_post_command(widget, 0, code, NULL);
 		}
 		break;
 
 	case IDC_MAINFRAME_FACEMENU:
-		widget_destroy((widget_t)data);
-
 		if (code)
 		{
 			MainFrame_ChangeFace(widget, code - 1);
@@ -2435,7 +2442,6 @@ widget_t MainFrame_Create(const tchar_t* mname)
 
 		EVENT_ON_MENU_COMMAND(MainFrame_OnMenuCommand)
 
-		
 		EVENT_ON_DOCKER_IMPLEMENT
 
 	SUBPROC_END_DISPATH

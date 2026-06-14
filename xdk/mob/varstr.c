@@ -595,8 +595,8 @@ dword_t string_encode(string_t vs, int encode, byte_t* buf, dword_t max)
 			str = string_ptr(vs);
 			for (i = 0; i < max / 2; i++)
 			{
-				buf[i * 2] = GETLBYTE(str[i]);
-				buf[i * 2 + 1] = GETHBYTE(str[i]);
+				buf[i * 2] = GETSWORDL(str[i]);
+				buf[i * 2 + 1] = GETSWORDH(str[i]);
 			}
 		}
 		return max;

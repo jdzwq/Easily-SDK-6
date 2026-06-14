@@ -1,2 +1,2 @@
 SOURCES= \
-E:\Easily-temp\windows\xdb_odbc\x64\Debug/xdb_odbc.c \
+E:\Easily-temp\windows\xdb_odbc\x86\Debug/xdb_odbc.c \

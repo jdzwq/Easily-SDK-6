@@ -313,6 +313,19 @@ void xmem_set(void* p, byte_t c, dword_t size)
 #endif
 }
 
+void xmem_int(void* p, int i, int count)
+{
+	int* pi = (int*)p;
+
+	if (!pi || count <= 0)
+		return;
+
+	while (count--)
+	{
+		*(pi++) = i;
+	}
+}
+
 void* xmem_clone(const void* src,dword_t bytes)
 {
 	void* p;

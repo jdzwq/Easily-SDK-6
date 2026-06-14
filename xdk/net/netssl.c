@@ -943,8 +943,8 @@ void xssl_set_version(xhand_t ssl, int cli_ver)
 
 	XDK_ASSERT(pssl->type == SSL_TYPE_CLIENT);
 
-	pssl->cli_minor_ver = GETLBYTE(cli_ver);
-	pssl->cli_major_ver = GETHBYTE(cli_ver);
+	pssl->cli_minor_ver = GETSWORDL(cli_ver);
+	pssl->cli_major_ver = GETSWORDH(cli_ver);
 
 	pses->major_ver = pssl->cli_major_ver;
 	pses->minor_ver = (pssl->cli_minor_ver == SSL_MINOR_VERSION_4) ? SSL_MINOR_VERSION_3 : pssl->cli_minor_ver;

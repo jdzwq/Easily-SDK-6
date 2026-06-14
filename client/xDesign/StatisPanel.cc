@@ -198,7 +198,7 @@ void StatisPanel_OnSave(widget_t widget)
 		if (!shell_get_filename(widget, szPath, _T("Statis Meta File(*.sheet)\0*.sheet\0"), _T("sheet"), 1, szPath, PATH_LEN, szFile, PATH_LEN))
 			return;
 
-		xscat(szPath, _T("\\"));
+		xscat(szPath, _T("/"));
 		xscat(szPath, szFile);
 		xscpy(szFile, szPath);
 	}
@@ -227,7 +227,7 @@ void StatisPanel_OnSaveAs(widget_t widget)
 	if (!shell_get_filename(widget, szPath, _T("Statis Meta File(*.sheet)\0*.sheet\0Svg Image File(*.svg)\0*.svg\0"), _T("sheet"), 1, szPath, PATH_LEN, szFile, PATH_LEN))
 		return;
 
-	xscat(szPath, _T("\\"));
+	xscat(szPath, _T("/"));
 	xscat(szPath, szFile);
 	xscpy(szFile, szPath);
 
@@ -313,7 +313,7 @@ void StatisPanel_OnSchema(widget_t widget)
 	if (!shell_get_filename(widget, szPath, _T("xml schema file(*.schema)\0*.schema\0"), _T("schema"), 1, szPath, PATH_LEN, szFile, PATH_LEN))
 		return;
 
-	xscat(szPath, _T("\\"));
+	xscat(szPath, _T("/"));
 	xscat(szPath, szFile);
 	xscpy(szFile, szPath);
 
@@ -342,7 +342,7 @@ void StatisPanel_OnExport(widget_t widget)
 	if (!shell_get_filename(widget, szPath, _T("xml data file(*.xml)\0*.xml\0"), _T("xml"), 1, szPath, PATH_LEN, szFile, PATH_LEN))
 		return;
 
-	xscat(szPath, _T("\\"));
+	xscat(szPath, _T("/"));
 	xscat(szPath, szFile);
 	xscpy(szFile, szPath);
 
@@ -375,7 +375,7 @@ void StatisPanel_OnImport(widget_t widget)
 	if (!shell_get_filename(widget, szPath, _T("xml data file(*.xml)\0*.xml\0"), _T("xml"), 0, szPath, PATH_LEN, szFile, PATH_LEN))
 		return;
 
-	xscat(szPath, _T("\\"));
+	xscat(szPath, _T("/"));
 	xscat(szPath, szFile);
 	xscpy(szFile, szPath);
 
@@ -793,7 +793,7 @@ void StatisPanel_Title_OnItemChanged(widget_t widget, NOTICE_TITLE* pnt)
 	widget_post_command(widget, 0, n_id, NULL);
 }
 
-void StatisPanel_Statis_OnLBClick(widget_t widget, NOTICE_DESIGN* pnf)
+void StatisPanel_Statis_OnLBClick(widget_t widget, NOTICE_DESIGNER* pnf)
 {
 	StatisPanelDelta* pdt = GETSTATISPANELDELTA(widget);
 
@@ -805,7 +805,7 @@ void StatisPanel_Statis_OnLBClick(widget_t widget, NOTICE_DESIGN* pnf)
 	widget_post_command(widget, 0, n_id, NULL);
 }
 
-void StatisPanel_Statis_OnSized(widget_t widget, NOTICE_DESIGN* pnf)
+void StatisPanel_Statis_OnSized(widget_t widget, NOTICE_DESIGNER* pnf)
 {
 	StatisPanelDelta* pdt = GETSTATISPANELDELTA(widget);
 
@@ -817,7 +817,7 @@ void StatisPanel_Statis_OnSized(widget_t widget, NOTICE_DESIGN* pnf)
 	widget_post_command(widget, 0, n_id, NULL);
 }
 
-void StatisPanel_Statis_OnMoved(widget_t widget, NOTICE_DESIGN* pnf)
+void StatisPanel_Statis_OnMoved(widget_t widget, NOTICE_DESIGNER* pnf)
 {
 	StatisPanelDelta* pdt = GETSTATISPANELDELTA(widget);
 
@@ -833,6 +833,8 @@ void StatisPanel_Proper_OnEntityUpdate(widget_t widget, NOTICE_PROPER* pnp)
 
 	int n_id = xstol(get_title_item_id_ptr(ptrItem));
 
+	LINKPTR ptrProper = properctrl_fetch(pnp->widget);
+	
 	LINKPTR ptrStatis = statisctrl_fetch(pdt->hStatis);
 	LINKPTR ptrObj = (LINKPTR)designer_get_focused(pdt->hStatis);
 
@@ -842,7 +844,7 @@ void StatisPanel_Proper_OnEntityUpdate(widget_t widget, NOTICE_PROPER* pnp)
 	{
 		if (n_id == IDA_ATTRIBUTES)
 		{
-			properbag_read_gax_attributes(pnp->proper, ptrObj);
+			properbag_read_gax_attributes(ptrProper, ptrObj);
 		}
 
 		statisctrl_redraw(pdt->hStatis, 1);
@@ -851,7 +853,7 @@ void StatisPanel_Proper_OnEntityUpdate(widget_t widget, NOTICE_PROPER* pnp)
 	{
 		if (n_id == IDA_ATTRIBUTES)
 		{
-			properbag_read_yax_attributes(pnp->proper, ptrObj);
+			properbag_read_yax_attributes(ptrProper, ptrObj);
 		}
 		
 		statisctrl_redraw(pdt->hStatis, 1);
@@ -860,11 +862,11 @@ void StatisPanel_Proper_OnEntityUpdate(widget_t widget, NOTICE_PROPER* pnp)
 	{
 		if (n_id == IDA_ATTRIBUTES)
 		{
-			properbag_read_statis_attributes(pnp->proper, ptrStatis);
+			properbag_read_statis_attributes(ptrProper, ptrStatis);
 		}
 		else if (n_id == IDA_STYLESHEET)
 		{
-			properbag_format_stylesheet(pnp->proper, sz_style, CSS_LEN);
+			properbag_format_stylesheet(ptrProper, sz_style, CSS_LEN);
 			set_statis_style(ptrStatis, sz_style);
 		}
 		statisctrl_redraw(pdt->hStatis, 1);
@@ -927,6 +929,8 @@ int StatisPanel_OnCreate(widget_t widget, void* data)
 
 	LINKPTR ptrProper = create_proper_doc();
 	properctrl_attach(pdt->hProper, ptrProper);
+
+	hand_editor_create(pdt->hProper, &edit_properctrl);
 
 	widget_get_client_rect(widget, &xr);
 	pdt->hTitle = titlectrl_create(_T("StatisTitle"), WD_STYLE_CONTROL, &xr, widget);
@@ -991,6 +995,8 @@ void StatisPanel_OnDestroy(widget_t widget)
 
 	if (widget_is_valid(pdt->hProper))
 	{
+		hand_editor_destroy(pdt->hProper);
+
 		LINKPTR ptrProper = properctrl_detach(pdt->hProper);
 		if (ptrProper)
 			destroy_proper_doc(ptrProper);
@@ -1384,7 +1390,6 @@ void StatisPanel_OnMenuCommand(widget_t widget, int code, int cid, vword_t data)
 		break;
 
 	case IDC_STATISPANEL_FONTNAME:
-		widget_destroy((widget_t)data);
 		if (code)
 		{
 			fontname_menu_item(code, token, RES_LEN);
@@ -1392,7 +1397,6 @@ void StatisPanel_OnMenuCommand(widget_t widget, int code, int cid, vword_t data)
 		}
 		break;
 	case IDC_STATISPANEL_FONTSIZE:
-		widget_destroy((widget_t)data);
 		if (code)
 		{
 			fontsize_menu_item(code, token, RES_LEN);
@@ -1400,7 +1404,6 @@ void StatisPanel_OnMenuCommand(widget_t widget, int code, int cid, vword_t data)
 		}
 		break;
 	case IDC_STATISPANEL_FONTCOLOR:
-		widget_destroy((widget_t)data);
 		if (code)
 		{
 			color_menu_item(code, token, RES_LEN);
@@ -1408,7 +1411,6 @@ void StatisPanel_OnMenuCommand(widget_t widget, int code, int cid, vword_t data)
 		}
 		break;
 	case IDC_STATISPANEL_PAINTCOLOR:
-		widget_destroy((widget_t)data);
 		if (code)
 		{
 			color_menu_item(code, token, RES_LEN);
@@ -1416,7 +1418,6 @@ void StatisPanel_OnMenuCommand(widget_t widget, int code, int cid, vword_t data)
 		}
 		break;
 	case IDC_STATISPANEL_DRAWCOLOR:
-		widget_destroy((widget_t)data);
 		if (code)
 		{
 			color_menu_item(code, token, RES_LEN);
@@ -1432,7 +1433,7 @@ void StatisPanel_OnNotice(widget_t widget, LPNOTICE phdr)
 
 	if (phdr->user == IDC_STATISPANEL_STATIS)
 	{
-		NOTICE_DESIGN* pnf = (NOTICE_DESIGN*)phdr;
+		NOTICE_DESIGNER* pnf = (NOTICE_DESIGNER*)phdr;
 		switch (pnf->code)
 		{
 		case NC_OBJECT_LBCLICK:

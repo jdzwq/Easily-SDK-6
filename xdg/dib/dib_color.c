@@ -124,8 +124,8 @@ dword_t fill_color_dibbits(const xcolor_t* pxc, const bitmap_info_head_t* pbi, c
 					rgb16 = ((unsigned short)(pxc->r & RGB_MASK_5B) << 11) | ((unsigned short)(pxc->g & RGB_MASK_6B) << 5) | (unsigned short)(pxc->b & RGB_MASK_5B);
 
 				//PUT_SWORD_LIT((buf + total + ind), 0, rgb16);
-				buf[total + ind] = LIT_GETLBYTE(rgb16);
-				buf[total + ind + 1] = LIT_GETHBYTE(rgb16);
+				buf[total + ind] = LIT_GETSWORDL(rgb16);
+				buf[total + ind + 1] = LIT_GETSWORDH(rgb16);
 				break;
 			case 24:
 				ind = col * 3;
@@ -257,8 +257,8 @@ dword_t fill_pattern_dibbits(const xcolor_t* pxc_front, const xcolor_t* pxc_back
 				}
 
 				//PUT_SWORD_LIT((buf + total + ind), 0, rgb16);
-				buf[total + ind] = LIT_GETLBYTE(rgb16);
-				buf[total + ind + 1] = LIT_GETHBYTE(rgb16);
+				buf[total + ind] = LIT_GETSWORDL(rgb16);
+				buf[total + ind + 1] = LIT_GETSWORDH(rgb16);
 				break;
 			case 24:
 				ind = col * 3;

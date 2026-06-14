@@ -33,10 +33,6 @@ void scan_object_text(const measure_interface* pmv, const viewbox_t* pvb, words_
 	int break_mode = 0;
 
 	object_attr_t attr = {0};
-	xpen_t* pxp = NULL;
-	xbrush_t* pxb = NULL;
-	xfont_t* pxf = NULL;
-	xface_t* pxa = NULL;
 
 	tchar_t sch[4] = { 0 };
 	tchar_t* pch = NULL;
@@ -53,41 +49,40 @@ void scan_object_text(const measure_interface* pmv, const viewbox_t* pvb, words_
 	bool_t b_del = 0;
 	bool_t b_sel = 0;
 
-	void* obj = NULL;
+	void *org_obj, *cur_obj = NULL;
 	int row_at = 0;
 	int col_at = 0;
 	int page = 0;
 
 	word_place_t tm = { 0 };
-	xsize_t xs;
+	xsize_t xs, se = {0};
 
-	(*pit->pf_cur_object)(pit->ctx, &obj);
+	(*pit->pf_cur_object)(pit->ctx, &cur_obj);
 
-	attr.ppxp = &pxp; attr.ppxb = &pxb; attr.ppxf = &pxf; attr.ppxa = &pxa;
 	attr.ret = 0;
-	(*pit->pf_object_attr)(pit->ctx, obj, &attr);
+	(*pit->pf_object_attr)(pit->ctx, cur_obj, &attr);
 
-	if((attr.ret & OBJECT_ATTR_XFACE) && pxa)
+	if((attr.ret & OBJECT_ATTR_XFACE) && attr.pxa)
 	{
-		break_mode = parse_wrap(pxa);
+		break_mode = parse_wrap(attr.pxa);
 
-		if (is_null(pxa->line_height))
+		if (is_null(attr.pxa->line_height))
 			line_rati = xstof(DEF_GDI_TEXT_LINE_HEIGHT);
 		else
-			line_rati = xstof(pxa->line_height);
+			line_rati = xstof(attr.pxa->line_height);
 
 		if (line_rati < 1)
 			line_rati = 1.0;
 	}
 
-	if((attr.ret & OBJECT_ATTR_XFONT) && pxf)
+	if((attr.ret & OBJECT_ATTR_XFONT) && attr.pxf)
 	{
-		(*pmv->mea->pf_measure_font)(pmv->ctx, pxf, &xs);
+		(*pmv->mea->pf_measure_font)(pmv->ctx, attr.pxf, &se);
 	}
 
-	tm.char_w = xs.w;
-	tm.char_h = xs.h;
-	tm.line_h = (int)((float)xs.h * (line_rati - 1.0));
+	tm.char_w = se.w;
+	tm.char_h = se.h;
+	tm.line_h = (int)((float)se.h * (line_rati - 1.0));
 	tm.min_x = pvb->px;
 	tm.min_y = pvb->py;
 	tm.max_x = pvb->px + pvb->pw;
@@ -138,7 +133,6 @@ void scan_object_text(const measure_interface* pmv, const viewbox_t* pvb, words_
 				break;
 			}
 
-			obj = NULL;
 			pch = NULL;
 			xs.w = tm.char_w;
 			xs.h = tm.char_h;
@@ -154,7 +148,36 @@ void scan_object_text(const measure_interface* pmv, const viewbox_t* pvb, words_
 				chs = xslen(pch);
 			}
 
-			(*pit->pf_cur_object)(pit->ctx, &obj);
+			org_obj = cur_obj;
+			cur_obj = NULL;
+			(*pit->pf_cur_object)(pit->ctx, &cur_obj);
+
+			if (org_obj != cur_obj)
+			{
+				attr.ret = 0;
+				(*pit->pf_object_attr)(pit->ctx, cur_obj, &attr);
+
+				if ((attr.ret & OBJECT_ATTR_XFACE) && attr.pxa)
+				{
+					break_mode = parse_wrap(attr.pxa);
+
+					if (is_null(attr.pxa->line_height))
+						line_rati = xstof(DEF_GDI_TEXT_LINE_HEIGHT);
+					else
+						line_rati = xstof(attr.pxa->line_height);
+
+					if (line_rati < 1)
+						line_rati = 1.0;
+				}
+
+				if ((attr.ret & OBJECT_ATTR_XFONT) && attr.pxf)
+				{
+					(*pmv->mea->pf_measure_font)(pmv->ctx, attr.pxf, &se);
+					tm.char_w = se.w;
+					tm.char_h = se.h;
+					tm.line_h = (int)((float)se.h * (line_rati - 1.0));
+				}
+			}
 
 			break;
 		case _SCANNER_OPERA_INS:
@@ -249,20 +272,20 @@ void scan_object_text(const measure_interface* pmv, const viewbox_t* pvb, words_
 		case _SCANNER_STATE_LINEBREAK:
 		case _SCANNER_STATE_PAGEBREAK:
 			if (b_atom == 1)
-				to = (*pf)(ts, obj, &attr, b_atom, b_ins, b_del, b_sel, pch, chs, sch, page, row_at, col_at, &tm, pp);
+				to = (*pf)(ts, cur_obj, &attr, b_atom, b_ins, b_del, b_sel, pch, chs, sch, page, row_at, col_at, &tm, pp);
 			else if (b_atom == 2)
-				to = (*pf)(ts, obj, &attr, b_atom, b_ins, b_del, b_sel, pch, chs, sch, page, row_at, col_at, &tm, pp);
+				to = (*pf)(ts, cur_obj, &attr, b_atom, b_ins, b_del, b_sel, pch, chs, sch, page, row_at, col_at, &tm, pp);
 			else
-				to = (*pf)(ts, obj, &attr, b_atom, b_ins, b_del, b_sel, pch, chs, sch, page, row_at, col_at, &tm, pp);
+				to = (*pf)(ts, cur_obj, &attr, b_atom, b_ins, b_del, b_sel, pch, chs, sch, page, row_at, col_at, &tm, pp);
 			break;
 		case _SCANNER_STATE_NEWLINE:
-			to = (*pf)(ts, obj, &attr, 0, 0, 0, 0, NULL, chs, NULL, page, row_at, col_at, &tm, pp);
+			to = (*pf)(ts, cur_obj, &attr, 0, 0, 0, 0, NULL, chs, NULL, page, row_at, col_at, &tm, pp);
 			break;
 		case _SCANNER_STATE_NEWPAGE:
-			to = (*pf)(ts, obj, &attr, 0, 0, 0, 0, NULL, chs, NULL, page, row_at, col_at, &tm, pp);
+			to = (*pf)(ts, cur_obj, &attr, 0, 0, 0, 0, NULL, chs, NULL, page, row_at, col_at, &tm, pp);
 			break;
 		case _SCANNER_STATE_END:
-			to = (*pf)(ts, obj, &attr, b_atom, b_ins, b_del, b_sel, NULL, chs, sch, page, row_at, col_at, &tm, pp);
+			to = (*pf)(ts, cur_obj, &attr, b_atom, b_ins, b_del, b_sel, NULL, chs, sch, page, row_at, col_at, &tm, pp);
 			if (to != _SCANNER_OPERA_INS)
 				to = _SCANNER_OPERA_STOP;
 			break;

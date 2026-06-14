@@ -12,7 +12,7 @@ CFLAGS = -g -Wall -fPIC -D _DEBUG
 MODULE = xdg
 ARCH = aarch64
 CUR_VER = 26
-MAX_VER = 2
+MAX_VER = 1
 MIN_VER = 0
 
 OUT_PATH = ~/工程/Easily-app-6/macos/lib

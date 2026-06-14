@@ -907,6 +907,9 @@ EXP_API link_t_ptr get_field_embed_plot(link_t_ptr flk);
 */
 EXP_API void set_field_embed_plot(link_t_ptr flk, link_t_ptr doc);
 
+EXP_API link_t_ptr get_field_embed_data(link_t_ptr flk);
+EXP_API void set_field_embed_data(link_t_ptr flk, link_t_ptr doc);
+
 /*
 @FUNCTION clear_field_embed: clear the field embed document.
 @INPUT link_t_ptr flk: the field link component.

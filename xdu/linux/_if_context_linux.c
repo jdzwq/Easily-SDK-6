@@ -27,7 +27,7 @@ LICENSE.GPL3 for more details.
 #include "../xduloc.h"
 
 #if defined(_X11)
-#include "X11/_if_x11.h"
+#include "X11/_if_X11.h"
 #elif defined(_WAYLAND)
 #include "wayland/_if_wayland.h"
 #endif

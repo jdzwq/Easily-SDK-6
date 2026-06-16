@@ -1,9 +1,9 @@
 
-#include <xdk.h>
+#include "_appdef.h"
 
 /********************************************************************************/
 
-void gen_ddl(const tchar_t* pathname, const tchar_t* item_feed)
+void make_ddl(const tchar_t* pathname, const tchar_t* fencode, const tchar_t* item_feed)
 {
 	int enc;
 	dword_t dw;
@@ -12,21 +12,21 @@ void gen_ddl(const tchar_t* pathname, const tchar_t* item_feed)
 	bio_interface bio = { 0 };
 	string_t vs_sql = NULL;
 	string_t vs_txt = NULL;
-	tchar_t path[MAX_PATH] = { 0 };
-	tchar_t table[MAX_PATH] = { 0 };
+	tchar_t path[PATH_LEN] = { 0 };
+	tchar_t table[PATH_LEN] = { 0 };
 	const tchar_t* token;
 	tchar_t* text = NULL;
-	int pos, len, len_feed;
+	int len, len_feed;
 
 	TRY_CATCH;
-	
-	enc = xuncf_file_encode(NULL, pathname);
 
 	fh = xuncf_open_file(NULL, pathname, FILE_OPEN_READ);
 	if (!fh)
 	{
-		raise_user_error(_T("gen_ddl"), _T("open file failed"));
+		raise_user_error(_T("make_ddl"), _T("open file failed"));
 	}
+
+	enc = parse_encode(fencode);
 
 	get_bio_interface(fh, &bio);
 
@@ -51,43 +51,17 @@ void gen_ddl(const tchar_t* pathname, const tchar_t* item_feed)
 	{
 		string_cat(vs_sql, _T("\t"), 1);
 
-		if (is_null(item_feed))
+		len = 0;
+		while(*token != CSV_ITEMFEED && *token != CSV_LINEFEED && *token != _T('\0'))
 		{
-			pos = csv_token_decode(token, NULL, &len);
-
-			if (pos != len)
-			{
-				text = xsalloc(len + 1);
-				csv_token_decode(token, text, &len);
-				string_cat(vs_sql, text, len);
-				xsfree(text);
-			}
-			else
-			{
-				if (len)
-				{
-					string_cat(vs_sql, token, len);
-				}
-			}
-
-			token += pos;
-		}
-		else
-		{
-			pos = split_token(token, item_feed, &len);
-			if (len)
-			{
-				string_cat(vs_sql, token, len);
-			}
-			token += pos;
-
-			if (*token == _T('\r'))
-				token++;
+			token ++;
+			len ++;
 		}
 
+		string_cat(vs_sql, (token - len), len);
 		string_cat(vs_sql, _T(" VARCHAR2(100) NULL,\n"), -1);
 
-		if (*token == CSV_ITEMFEED)
+		if (*token == CSV_ITEMFEED || *token == _T('\r'))
 			token++;
 	}
 
@@ -115,7 +89,7 @@ void gen_ddl(const tchar_t* pathname, const tchar_t* item_feed)
 	get_bio_interface(fh, &bio);
 
 	stm = stream_alloc(&bio);
-	stream_set_encode(stm, _UTF8);
+	stream_set_encode(stm, _UTF8_BOM);
 	stream_write_utfbom(stm, &dw);
 	stream_set_mode(stm, LINE_OPERA);
 
@@ -136,6 +110,7 @@ void gen_ddl(const tchar_t* pathname, const tchar_t* item_feed)
 	return;
 
 ONERROR:
+	_tprintf(_T("make DDL falied\n"));
 
 	if (stm)
 		stream_free(stm);
@@ -152,7 +127,7 @@ ONERROR:
 	return;
 }
 
-void gen_sql(const tchar_t* pathname)
+void make_sql(const tchar_t* pathname, const tchar_t* fencode)
 {
 	int enc;
 	dword_t dw;
@@ -163,24 +138,24 @@ void gen_sql(const tchar_t* pathname)
 
 	string_t vs_tbl = NULL, vs_sql = NULL;
 	string_t vs_txt = NULL;
-	tchar_t path[MAX_PATH] = { 0 };
-	tchar_t table[MAX_PATH] = { 0 };
+	tchar_t path[PATH_LEN] = { 0 };
+	tchar_t table[PATH_LEN] = { 0 };
 	tchar_t sn[INT_LEN] = { 0 };
 	const tchar_t* token;
 	tchar_t* text = NULL;
-	int len_tbl, len_sql, pos, len, n, k = 0;
+	int len_tbl, len_sql, len, n, k = 0;
 
 	TRY_CATCH;
 
 	split_path(pathname, path, table, NULL);
-
-	enc = xuncf_file_encode(NULL, pathname);
 
 	fhd_src = xuncf_open_file(NULL, pathname, FILE_OPEN_READ);
 	if (!fhd_src)
 	{
 		raise_user_error(_T("gen_sql"), _T("open file failed"));
 	}
+
+	enc = parse_encode(fencode);
 
 	get_bio_interface(fhd_src, &bio_src);
 	stm_src = stream_alloc(&bio_src);
@@ -199,7 +174,7 @@ void gen_sql(const tchar_t* pathname)
 
 	get_bio_interface(fhd_dst, &bio_dst);
 	stm_dst = stream_alloc(&bio_dst);
-	stream_set_encode(stm_dst, _UTF8);
+	stream_set_encode(stm_dst, _UTF8_BOM);
 	stream_write_utfbom(stm_dst, &dw);
 	stream_set_mode(stm_dst, LINE_OPERA);
 
@@ -207,30 +182,24 @@ void gen_sql(const tchar_t* pathname)
 	string_printf(vs_tbl, _T("INSERT INTO %s ("), table);
 
 	vs_txt = string_alloc();
-	stream_read_line(stm_src, vs_txt, &dw);
+	stream_read_csv_line(stm_src, vs_txt, &dw);
 
 	vs_sql = string_alloc();
 
 	token = string_ptr(vs_txt);
 	while (*token != CSV_LINEFEED && *token != _T('\0'))
 	{
-		pos = csv_token_decode(token, NULL, &len);
-		if (pos != len)
+		len = 0;
+		while(*token != CSV_ITEMFEED && *token != CSV_LINEFEED && *token != _T('\0'))
 		{
-			text = xsalloc(len + 1);
-			csv_token_decode(token, text, &len);
-			string_cat(vs_tbl, text, len);
-			xsfree(text);
+			token ++;
+			len ++;
 		}
-		else
-		{
-			string_cat(vs_tbl, token, len);
-		}
-		token += pos;
 
+		string_cat(vs_tbl, (token - len), len);
 		string_cat(vs_tbl, _T(","), 1);
 
-		if (*token == CSV_ITEMFEED)
+		if (*token == CSV_ITEMFEED || *token == _T('\r'))
 			token++;
 	}
 
@@ -243,7 +212,7 @@ void gen_sql(const tchar_t* pathname)
 	{
 		string_empty(vs_txt);
 		dw = 0;
-		stream_read_line(stm_src, vs_txt, &dw);
+		stream_read_csv_line(stm_src, vs_txt, &dw);
 		if (!dw)
 			break;
 
@@ -255,23 +224,17 @@ void gen_sql(const tchar_t* pathname)
 		{
 			len_sql = string_cat(vs_sql, _T("'"), 1);
 
-			pos = csv_token_decode(token, NULL, &len);
-			if (pos != len)
+			len = 0;
+			while (*token != CSV_ITEMFEED && *token != CSV_LINEFEED && *token != _T('\0'))
 			{
-				text = xsalloc(len + 1);
-				csv_token_decode(token, text, &len);
-				string_cat(vs_sql, text, len);
-				xsfree(text);
+				token++;
+				len++;
 			}
-			else
-			{
-				string_cat(vs_sql, token, len);
-			}
-			token += pos;
 
+			string_cat(vs_sql, (token - len), len);
 			len_sql = string_cat(vs_sql, _T("',"), 2);
 
-			if (*token == CSV_ITEMFEED)
+			if (*token == CSV_ITEMFEED || *token == _T('\r'))
 				token++;
 		}
 
@@ -318,7 +281,7 @@ void gen_sql(const tchar_t* pathname)
 
 			get_bio_interface(fhd_dst, &bio_dst);
 			stm_dst = stream_alloc(&bio_dst);
-			stream_set_encode(stm_dst, _UTF8);
+			stream_set_encode(stm_dst, _UTF8_BOM);
 			stream_write_utfbom(stm_dst, &dw);
 			stream_set_mode(stm_dst, LINE_OPERA);
 		}
@@ -357,6 +320,8 @@ void gen_sql(const tchar_t* pathname)
 	return;
 
 ONERROR:
+	_tprintf(_T("make SQL falied\n"));
+
 	if (stm_src)
 		stream_free(stm_src);
 
@@ -379,36 +344,4 @@ ONERROR:
 		string_free(vs_txt);
 
 	return;
-}
-
-int _tmain(int argc, _TCHAR* argv[]){
-
-	tchar_t pname[MAX_PATH] = { 0 };
-	tchar_t param[MAX_PATH] = { 0 };
-	tchar_t pval[50] = { 0 };
-
-    xdk_process_init(XDK_APARTMENT_PROCESS);
-
-	if (argc > 2)
-	{
-		xscpy(param, argv[1]);
-		xscpy(pname, argv[2]);
-	}
-	if (argc > 3)
-	{
-		xscpy(pval, argv[3]);
-	}
-
-	if (compare_text(param, -1, _T("-DDL"), -1, 1) == 0)
-	{
-		gen_ddl(pname, pval);
-	}
-	else if (compare_text(param, -1, _T("-SQL"), -1, 1) == 0)
-	{
-		gen_sql(pname);
-	}
-
-    xdk_process_uninit();
-
-    return 0;
 }

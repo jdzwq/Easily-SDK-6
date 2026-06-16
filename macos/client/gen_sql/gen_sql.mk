@@ -1,15 +1,15 @@
 #-----------------------------------------------------------------------------
 # begin GNU MAKE file
 # making order for debug version:
-# 1. make -f xConvert.mk tools --if need to creating some directory or file-list
-# 2. make -f xConvert.mk clean
-# 3. make -f xConvert.mk
-# 4. make -f xConvert.mk install
+# 1. make -f gen_sql.mk tools --if need to creating some directory or file-list
+# 2. make -f gen_sql.mk clean
+# 3. make -f gen_sql.mk
+# 4. make -f gen_sql.mk install
 #-----------------------------------------------------------------------------
 CC = clang
 CFLAGS = -g -Wall -D _DEBUG
 
-MODULE = xConvert
+MODULE = gen_sql
 ARCH = aarch64
 
 LIB_PATH = /usr/local/lib
@@ -20,12 +20,12 @@ SRC_PATH = ../../../client
 OBJ_PATH = ~/工程/Easily-temp/macos/$(MODULE)/$(ARCH)
 OUT_PATH = ~/工程/Easily-app-6/macos/bin
 
-DIRS = $(wildcard $(SRC_PATH)/xConvert/*.cc)
+DIRS = $(wildcard $(SRC_PATH)/gen_sql/*.cc)
 SRCS = $(notdir $(DIRS))
 COBS = $(patsubst %.cc, %.o, $(SRCS))
 OBJS = $(addprefix $(OBJ_PATH)/,$(COBS))
 
-$(OBJ_PATH)/%.o : $(SRC_PATH)/xConvert/%.cc
+$(OBJ_PATH)/%.o : $(SRC_PATH)/gen_sql/%.cc
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
 
 all : $(OBJS)

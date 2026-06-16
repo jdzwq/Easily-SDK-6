@@ -68,3 +68,18 @@ sudo dnf install sqlite-devel
 $(INC_SQLITE) = /usr/include
 $(LIB_SQLITE) = /usr/lib64
 
+---------------------------------------------------------------------------------
+        INSTALL GRAPHIC DEVELOPER FOR ORACLELINUX ARM64
+---------------------------------------------------------------------------------
+
+[X11]
+sudo dnf install libX11-devel libXext-devel libXrandr-devel libXrender-devel libXfixes-devel libXcursor-devel libXi-devel libXinerama-devel libXtst-devel
+sudo dnf install libXft libXft-devel
+
+[WAYLAND]
+sudo dnf install wayland-devel wayland-protocols-devel wayland-utils
+
+[GTK]
+sudo dnf install gtk3-devel pkg-config
+pkg-config --cflags gtk+-3.0
+pkg-config --libs gtk+-3.0

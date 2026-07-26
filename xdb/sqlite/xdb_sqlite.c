@@ -287,7 +287,7 @@ xdb_t STDCALL db_open(const tchar_t* srv, const tchar_t* dbn, const tchar_t* uid
 
 	TRY_CATCH;
 
-	if(!is_null(srv))
+	if(!xsisnil(srv))
 	{
 		xscpy(tconn, srv);
 		xsncat(tconn, _T("/"), 1);
@@ -727,7 +727,7 @@ int STDCALL _db_fetch_row(xdb_sqlite_context* pdb, sqlite3_stmt* stm, LINKPTR gr
 			if (compare_text(data_type, -1, ATTR_DATA_TYPE_DATE, -1, 0) == 0 || compare_text(data_type, -1, ATTR_DATA_TYPE_DATETIME, -1, 0) == 0)
 			{
 				data_cast = get_col_field_cast_ptr(clk);
-				if (!is_null(data_cast))
+				if (!xsisnil(data_cast))
 				{
 					parse_datetime_ex(&dt, data_cast, d_str);
 					format_datetime(&dt, d_str);
@@ -864,7 +864,7 @@ bool_t STDCALL db_select(xdb_t db, LINKPTR grid, const tchar_t* sqlstr)
 	clear_grid_rowset(grid);
 	clear_grid_colset(grid);
 
-	if (is_null(sqlstr))
+	if (xsisnil(sqlstr))
 	{
 		raise_user_error(_T("-1"), _T("Empty sql statement"));
 	}
@@ -977,7 +977,7 @@ bool_t STDCALL db_schema(xdb_t db, LINKPTR grid, const tchar_t* sqlstr)
 	clear_grid_rowset(grid);
 	clear_grid_colset(grid);
 
-	if (is_null(sqlstr))
+	if (xsisnil(sqlstr))
 	{
 		raise_user_error(_T("-1"), _T("Empty sql statement"));
 	}
@@ -1500,7 +1500,7 @@ bool_t STDCALL _db_prepare(xdb_sqlite_context* pdb, const tchar_t* sqlstr)
 
 	_db_reset(pdb);
 
-	if (is_null(sqlstr))
+	if (xsisnil(sqlstr))
 	{
 		raise_user_error(_T("-1"), _T("Empty sql statement"));
 	}

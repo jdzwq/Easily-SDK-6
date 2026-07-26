@@ -142,7 +142,7 @@ int parse_dicm_point(const tchar_t* token, int len, xpoint_t* ppt, int max)
 	if (len < 0)
 		len = xslen(token);
 
-	if (is_null(token) || !len)
+	if (xsisnil(token) || !len)
 		return 0;
 
 	i = 0;

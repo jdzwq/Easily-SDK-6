@@ -76,6 +76,7 @@ typedef struct _dev_prn_t{
 	short paper_height;
 	short landscape;
 	short duplex;
+	short dpi;
 }dev_prn_t;
 
 //color darkeness
@@ -160,6 +161,10 @@ typedef struct _xspan_t{
 		float fs;
 	};
 }xspan_t;
+
+typedef struct _offset_t{
+	int cx, cy;
+}offset_t;
 
 typedef struct _viewbox_t{
 	int px, py, pw, ph;

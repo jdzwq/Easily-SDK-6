@@ -571,7 +571,7 @@ void listbox_find(widget_t widget, const tchar_t* token)
 	link_t_ptr ent;
 	int tlen;
 
-	if (is_null(token))
+	if (xsisnil(token))
 	{
 		listbox_set_focus_item(widget, NULL);
 		return;

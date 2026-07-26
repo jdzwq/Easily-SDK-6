@@ -217,6 +217,15 @@ typedef struct _handle_head *stream_t;
 #define PF_TIMERFUNC	GNU_TIMER_PROC
 #endif
 
+/*slash character*/
+#if defined(_OS_WINDOWS)
+#define SLASH_CHAR	_T("\\")
+#elif defined(_OS_MACOS)
+#define SLASH_CHAR	_T("/")
+#elif defined(_OS_LINUX)
+#define SLASH_CHAR	_T("/")
+#endif
+
 #define NOP		((void*)0)
 
 #if defined(_UNICODE) || defined(UNICODE)

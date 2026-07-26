@@ -43,8 +43,10 @@ typedef struct _memo_context_t
 	mem_device_ptr device;
 	device_t handle;
 
-	bitmap_file_head_t bitmap_head;
 	int rop; /*raster operation mode*/
+	bitmap_file_head_t bitmap_head;
+	void* bitmap_buffer;
+	dword_t bitmap_stride;
 
 	mem_font_ptr font_inf;
 	fontset_t ft;
@@ -76,7 +78,7 @@ visual_t create_mgc_visual(const tchar_t *devName, const tchar_t *formName, int 
 {
 	memo_context_t *pmgc;
 	dev_prn_t prn = {0};
-	dword_t total, pixels;
+	dword_t dwHead, dwQuad, dwData;
 	xfont_t xf;
 
 	TRY_CATCH;
@@ -94,24 +96,95 @@ visual_t create_mgc_visual(const tchar_t *devName, const tchar_t *formName, int 
 	{
 		prn.paper_width = (int)((float)width * 10.0f);
 		prn.paper_height = (int)((float)height * 10.0f);
+	}else
+	{
+		width = (int)((float)prn.paper_width / 10.0f);
+		height = (int)((float)prn.paper_height / 10.0f);
 	}
 
 	xscpy(prn.devname, devName);
+	prn.dpi = dpi;
 
-	pmgc->handle = (*(pmgc->device->openDevice))(&prn, dpi);
+	pmgc->handle = (*(pmgc->device->openDevice))(&prn);
 	if (!pmgc->handle)
 	{
 		raise_user_error(_T("create_mgc_visual"), _T("openDevice"));
 	}
 
-	(*(pmgc->device->getBitmapSize))(pmgc->handle, &total, &pixels);
+	(*(pmgc->device->getBitmapInfo))(pmgc->handle, &dwHead, &dwQuad, &dwData);
 
 	pmgc->bitmap_head.flag = BMP_FLAG;
-	pmgc->bitmap_head.fsize = BMP_FILEHEADER_SIZE + total;
-	pmgc->bitmap_head.offset = BMP_FILEHEADER_SIZE + (total - pixels);
+	pmgc->bitmap_head.fsize = BMP_FILEHEADER_SIZE + dwHead + dwQuad + dwData;
+	pmgc->bitmap_head.offset = BMP_FILEHEADER_SIZE + dwHead + dwQuad;
+
+	pmgc->bitmap_buffer = (byte_t*)xmem_alloc(dwData);
+	pmgc->bitmap_stride = dwData / height;
+	
+	(*(pmgc->device->setDeviceBuffer))(pmgc->handle, pmgc->bitmap_buffer, pmgc->bitmap_stride);
+
+	pmgc->font_inf = &font_Internal;	
+	default_xfont(&xf);
+	mgc_set_xfont(&(pmgc->head), &xf);
+
+	END_CATCH;
+
+	return &(pmgc->head);
+
+ONERROR:
+	XDK_TRACE_LAST;
+
+	if (pmgc)
+	{
+		if(pmgc->bitmap_buffer)
+			xmem_free(pmgc->bitmap_buffer);
+
+		xmem_free(pmgc);
+	}
+
+	return NULL;
+}
+
+visual_t create_shm_visual(const tchar_t *devName, int width, int height, int dpi, void* shmBuffer, dword_t shmStride)
+{
+	memo_context_t *pmgc;
+	dev_prn_t prn = {0};
+	dword_t dwHead, dwQuad, dwData;
+	xfont_t xf;
+
+	TRY_CATCH;
+
+	pmgc = (memo_context_t *)xmem_alloc(sizeof(memo_context_t));
+	pmgc->head.tag = _VISUAL_MEMORY;
+
+	pmgc->device = select_device(devName);
+	if (!pmgc->device)
+	{
+		raise_user_error(_T("create_shm_visual"), _T("select_device"));
+	}
+
+	xscpy(prn.devname, devName);
+	prn.paper_width = (int)((float)width * 10.0f);
+	prn.paper_height = (int)((float)height * 10.0f);
+	prn.dpi = dpi;
+
+	pmgc->handle = (*(pmgc->device->openDevice))(&prn);
+	if (!pmgc->handle)
+	{
+		raise_user_error(_T("create_shm_visual"), _T("openDevice"));
+	}
+
+	(*(pmgc->device->getBitmapInfo))(pmgc->handle, &dwHead, &dwQuad, &dwData);
+
+	pmgc->bitmap_head.flag = BMP_FLAG;
+	pmgc->bitmap_head.fsize = BMP_FILEHEADER_SIZE + dwHead + dwQuad + dwData;
+	pmgc->bitmap_head.offset = BMP_FILEHEADER_SIZE + dwHead + dwQuad;
+
+	pmgc->bitmap_buffer = NULL;
+	pmgc->bitmap_stride = 0;
+
+	(*(pmgc->device->setDeviceBuffer))(pmgc->handle, shmBuffer, shmStride);
 
 	pmgc->font_inf = &font_Internal;
-
 	default_xfont(&xf);
 	mgc_set_xfont(&(pmgc->head), &xf);
 
@@ -144,6 +217,11 @@ void destroy_mgc_visual(visual_t mgc)
 	if (pmgc->device)
 	{
 		(*(pmgc->device->closeDevice))(pmgc->handle);
+	}
+
+	if(pmgc->bitmap_buffer)
+	{
+		xmem_free(pmgc->bitmap_buffer);
 	}
 
 	xmem_free(pmgc);

@@ -1702,14 +1702,14 @@ int hand_textor_word(textor_context* ptd, tchar_t* pch)
 
 	if (*pch == KEY_ENTER)
 	{
-		if (is_null(pxa->text_wrap))
+		if (xsisnil(pxa->text_wrap))
 			return _TEXTOR_PRESS_IGNORE;
 
 		xsncpy(token, _T("\n"), 1);
 	}
 	else if (*pch == KEY_TAB)
 	{
-		if (is_null(pxa->text_wrap))
+		if (xsisnil(pxa->text_wrap))
 			return _TEXTOR_PRESS_IGNORE;
 
 		xsncpy(token, _T("\t"), 1);

@@ -37,7 +37,7 @@ int parse_options(const tchar_t* str, int len, tchar_t itemfeed, tchar_t linefee
 	const tchar_t *key, *val;
 	int klen, vlen;
 
-	if (is_null(str) || !len)
+	if (xsisnil(str) || !len)
 		return 0;
 
 	if (len < 0)

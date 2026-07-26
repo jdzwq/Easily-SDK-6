@@ -36,7 +36,7 @@ tchar_t* next_draw_path(const tchar_t* script, int len, tchar_t* pname, xpoint_t
 	int total = 0;
 	tchar_t ch;
 
-	if (is_null(script))
+	if (xsisnil(script))
 		return NULL;
 
 	if (len < 0)

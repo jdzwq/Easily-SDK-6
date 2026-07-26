@@ -67,12 +67,12 @@ static Pen* create_pen(const xpen_t* pxp)
 	xcolor_t pen_color = {0};
 	short sp;
 
-	if (pxp && !is_null(pxp->color))
+	if (pxp && !xsisnil(pxp->color))
 		parse_xcolor(&pen_color,pxp->color);
 	else
 		parse_xcolor(&pen_color, GDI_ATTR_RGB_GRAY);
 		
-	if (pxp && !is_null(pxp->size))
+	if (pxp && !xsisnil(pxp->size))
 		sp = xstol(pxp->size);
 	else
 		sp = 1;	
@@ -93,19 +93,19 @@ static Brush* create_brush(const xbrush_t* pxb, const xrect_t* pxr, GraphicsPath
 	xcolor_t linear_color = { 0 };
 	short opacity;
 
-	if (pxb && !is_null(pxb->color))
+	if (pxb && !xsisnil(pxb->color))
 		parse_xcolor(&brush_color,pxb->color);
 	else
 		parse_xcolor(&brush_color, GDI_ATTR_RGB_SOFTWHITE);
 
-	if (pxb && !is_null(pxb->opacity))
+	if (pxb && !xsisnil(pxb->opacity))
 		opacity = xstol(pxb->opacity);
 	else
 		opacity = 255;
 
 	if (pxb && xscmp(pxb->style, GDI_ATTR_FILL_STYLE_GRADIENT) == 0)
 	{
-		if (is_null(pxb->linear))
+		if (xsisnil(pxb->linear))
 		{
 			parse_xcolor(&linear_color, pxb->color);
 			lighten_xcolor(&linear_color, 20);
@@ -188,7 +188,7 @@ static HFONT create_font(HDC hDC, const xfont_t* pxf)
 		lf.lfItalic = lf.lfUnderline = lf.lfStrikeOut = 0;
 	}
 
-	if (!is_null(pxf->family))
+	if (!xsisnil(pxf->family))
 	{
 		xscpy(lf.lfFaceName, pxf->family);
 	}else
@@ -231,7 +231,7 @@ static StringFormat* create_face(const xface_t* pxa)
 
 	if(!pxa)
 		psf->SetFormatFlags(StringFormatFlagsNoWrap);
-	else if (pxa && is_null(pxa->text_wrap))
+	else if (pxa && xsisnil(pxa->text_wrap))
 		psf->SetFormatFlags(StringFormatFlagsNoWrap);
 
 	return psf;
@@ -583,7 +583,7 @@ void winGdiSetXFont(visual_t rdc, const xfont_t* pxf)
 		lf_new.lfItalic = lf_new.lfUnderline = lf_new.lfStrikeOut = 0;
 	}
 
-	if (!is_null(pxf->family))
+	if (!xsisnil(pxf->family))
 	{
 		xscpy(lf_new.lfFaceName, pxf->family);
 	}
@@ -1132,7 +1132,7 @@ void winGdiDrawText(visual_t rdc,const xface_t* pxa,const xrect_t* prt,const tch
 		else
 			dw |= DT_LEFT;
 
-		if (!is_null(pxa->text_wrap))
+		if (!xsisnil(pxa->text_wrap))
 			dw |= DT_WORDBREAK;
 		else
 			dw |= DT_SINGLELINE;
@@ -1236,7 +1236,7 @@ void winGdiTextRect(visual_t rdc, const xfont_t* pxf, const xface_t* pxa, const 
 
 		if (!h)
 		{
-			if (is_null(pxa->line_height))
+			if (xsisnil(pxa->line_height))
 				h = se.h;
 			else
 				h = (int)((float)se.h * xstof(pxa->line_height));
@@ -1246,7 +1246,7 @@ void winGdiTextRect(visual_t rdc, const xfont_t* pxf, const xface_t* pxa, const 
 		{
 			if (prt->w && (w + se.w > prt->w))
 			{
-				if (is_null(pxa->line_height))
+				if (xsisnil(pxa->line_height))
 					h += se.h;
 				else
 					h += (int)((float)se.h * xstof(pxa->line_height));
@@ -1264,7 +1264,7 @@ void winGdiTextRect(visual_t rdc, const xfont_t* pxf, const xface_t* pxa, const 
 		{
 			if (pch[0] == _T('\n'))
 			{
-				if (is_null(pxa->line_height))
+				if (xsisnil(pxa->line_height))
 					h += se.h;
 				else
 					h += (int)((float)se.h * xstof(pxa->line_height));
@@ -1273,7 +1273,7 @@ void winGdiTextRect(visual_t rdc, const xfont_t* pxf, const xface_t* pxa, const 
 			}
 			else if (prt->w && (w + se.w > prt->w))
 			{
-				if (is_null(pxa->line_height))
+				if (xsisnil(pxa->line_height))
 					h += se.h;
 				else
 					h += (int)((float)se.h * xstof(pxa->line_height));

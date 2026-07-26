@@ -25,7 +25,7 @@ LICENSE.GPL3 for more details.
 ***********************************************************************/
 #include "tableview.h"
 
-#include "../xdlgdi.h"
+#include "../xdlsdi.h"
 #include "../xdldoc.h"
 
 
@@ -35,7 +35,7 @@ float calc_table_height(const measure_interface* pmc, const xfont_t* pxf, const 
 	xsize_t xs;
 	link_t_ptr ilk;
 
-	if (is_null(pxa->line_height))
+	if (xsisnil(pxa->line_height))
 		lr = xstof(DEF_GDI_TEXT_LINE_HEIGHT);
 	else
 		lr = xstof(pxa->line_height);
@@ -91,7 +91,7 @@ void calc_table_item_rect(const measure_interface* pmc, const xfont_t* pxf, cons
 	xsize_t xs;
 	link_t_ptr ilk;
 
-	if (is_null(pxa->line_height))
+	if (xsisnil(pxa->line_height))
 		lr = (float)xstof(DEF_GDI_TEXT_LINE_HEIGHT);
 	else
 		lr = (float)xstof(pxa->line_height);
@@ -156,7 +156,7 @@ int	calc_table_hint(const measure_interface* pmc, const xfont_t* pxf, const xfac
 	link_t_ptr ilk;
 	int hint;
 
-	if (is_null(pxa->line_height))
+	if (xsisnil(pxa->line_height))
 		lr = (float)xstof(DEF_GDI_TEXT_LINE_HEIGHT);
 	else
 		lr = (float)xstof(pxa->line_height);
@@ -234,7 +234,7 @@ void draw_table(const drawing_interface* pci, const xfont_t* pxf, const xface_t*
 
 	const canvbox_t* pbox = (canvbox_t*)(&pci->rect);
 
-	if (is_null(pxa->line_height))
+	if (xsisnil(pxa->line_height))
 		lr = (float)xstof(DEF_GDI_TEXT_LINE_HEIGHT);
 	else
 		lr = (float)xstof(pxa->line_height);

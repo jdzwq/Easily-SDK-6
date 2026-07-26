@@ -53,7 +53,7 @@ typedef enum{
 #define CONTENTTYPE_IS_XML(token)	((compare_text(token, xslen(HTTP_HEADER_CONTENTTYPE_APPXML), HTTP_HEADER_CONTENTTYPE_APPXML, -1, 1) == 0)? 1 : 0)
 #define CONTENTTYPE_IS_SVG(token)	((compare_text(token, xslen(HTTP_HEADER_CONTENTTYPE_IMAGESVG), HTTP_HEADER_CONTENTTYPE_IMAGESVG, -1, 1) == 0)? 1 : 0)
 #define CONTENTTYPE_IS_TEXT(token)	((compare_text(token, 5, _T("text/"), 5 ,1) == 0)? 1 : 0)
-#define CONTENTTYPE_IS_ANY(token)	((is_null(token) || compare_text(token, 3, _T("*/*"), -1, 1) == 0)? 1 : 0)
+#define CONTENTTYPE_IS_ANY(token)	((xsisnil(token) || compare_text(token, 3, _T("*/*"), -1, 1) == 0)? 1 : 0)
 #define CHARSET_NEED_UTFBOM(token)	((compare_text(charset,6,_T("utf-16"),6,1) == 0)? 1 : 0)
 
 #ifdef	__cplusplus

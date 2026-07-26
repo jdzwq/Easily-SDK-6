@@ -26,7 +26,7 @@ LICENSE.GPL3 for more details.
 
 #include "shaping.h"
 
-#include "../xdlgdi.h"
+#include "../xdlsdi.h"
 
 
 
@@ -240,7 +240,7 @@ PF_SHAPE_MAKE find_shape_maker(const tchar_t* iname)
 {
 	int k;
 
-	if (is_null(iname))
+	if (xsisnil(iname))
 		return NULL;
 
 	k = sizeof(g_shape_table) / sizeof(SHAPE_DRAW_TABLE);

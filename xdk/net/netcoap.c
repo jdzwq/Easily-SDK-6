@@ -1181,7 +1181,7 @@ void xcoap_set_object(xhand_t coap, const tchar_t* obj, int len)
 			xmem_free(pdu->opt_table[i].opt);
 		pdu->opt_table[i].len = 0;
 
-		if (!is_null(obj) || !len)
+		if (!xsisnil(obj) || !len)
 		{
 #if defined(_UNICODE) || defined(UNICODE)
 			pdu->opt_table[i].len = ucs_to_utf8(obj, len, NULL, MAX_LONG);
@@ -1254,7 +1254,7 @@ void xcoap_set_query(xhand_t coap, const tchar_t* qry, int len)
 			xmem_free(pdu->opt_table[i].opt);
 		pdu->opt_table[i].len = 0;
 
-		if (!is_null(qry) || !len)
+		if (!xsisnil(qry) || !len)
 		{
 #if defined(_UNICODE) || defined(UNICODE)
 			pdu->opt_table[i].len = ucs_to_utf8(qry, len, NULL, MAX_LONG);
@@ -1451,7 +1451,7 @@ void xcoap_set_option(xhand_t coap, int opd, const tchar_t* opt, int len)
 			xmem_free(pdu->opt_table[i].opt);
 		pdu->opt_table[i].len = 0;
 
-		if (!is_null(opt) || !len)
+		if (!xsisnil(opt) || !len)
 		{
 #if defined(_UNICODE) || defined(UNICODE)
 			pdu->opt_table[i].len = ucs_to_utf8(opt, len, NULL, MAX_LONG);

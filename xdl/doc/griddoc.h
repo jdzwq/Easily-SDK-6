@@ -506,7 +506,7 @@ LICENSE.GPL3 for more details.
 @PROPER sumable: boolean.
 @GET get_col_sumable: get the col data can be sumared.
 */
-#define get_col_sumable(clk)								(is_null(get_dom_node_attr_ptr(clk,ATTR_SUM_MODE))? 0 : 1)
+#define get_col_sumable(clk)								(xsisnil(get_dom_node_attr_ptr(clk,ATTR_SUM_MODE))? 0 : 1)
 /*
 @PROPER sumMode: string.
 @SET set_col_sum_mode: set the col sumary mode.

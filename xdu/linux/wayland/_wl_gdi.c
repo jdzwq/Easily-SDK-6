@@ -94,7 +94,7 @@ static void _calc_point(const xpoint_t* pt, int r, double a, xpoint_t* pp)
 
 static void calc_penmode(const xpen_t* pxp, int* fs, int* ds)
 {
-	*fs = is_null(pxp->size) ? 1 : xstol(pxp->size);
+	*fs = xsisnil(pxp->size) ? 1 : xstol(pxp->size);
 
 	if (compare_text(pxp->style, -1, GDI_ATTR_STROKE_STYLE_DASH, -1, 1) == 0)
 		*ds = DOT_DASH;

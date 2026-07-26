@@ -49,7 +49,7 @@ static void format_font_pattern(const xfont_t* pxf, tchar_t* buf)
     float pt, px = 0;
 	int i;
     
-    if(is_null((pxf->family)))
+    if(xsisnil((pxf->family)))
         fs_name = x11_font_name[0];
     else
         fs_name = pxf->family;
@@ -82,7 +82,7 @@ static void format_font_pattern(const xfont_t* pxf, tchar_t* buf)
 		xscat(buf, fs_weight);
 	}
 
-	if(!is_null(pxf->size))
+	if(!xsisnil(pxf->size))
 	{
 		pt = xstof(pxf->size);
 		font_metric_by_pt(pt, NULL, &px);
@@ -172,7 +172,7 @@ static void _calc_point(const xpoint_t* pt, int r, double a, xpoint_t* pp)
 
 static void calc_penmode(const xpen_t* pxp, int* fs, int* ds)
 {
-	*fs = is_null(pxp->size) ? 1 : xstol(pxp->size);
+	*fs = xsisnil(pxp->size) ? 1 : xstol(pxp->size);
 
 	if (compare_text(pxp->style, -1, GDI_ATTR_STROKE_STYLE_DASH, -1, 1) == 0)
 		*ds = DOT_DASH;
@@ -229,7 +229,7 @@ void xlGdiSetXFont(visual_t rdc, const xfont_t* pxf)
 			xscpy(style, GDI_ATTR_FONT_STYLE_REGULAR);
 	}
 
-	if(size == xstof(pxf->size) && weight == xstol(pxf->weight) && xsicmp(style, pxf->style) == 0 && (is_null(pxf->family) || xsicmp(family, pxf->family) == 0))
+	if(size == xstof(pxf->size) && weight == xstol(pxf->weight) && xsicmp(style, pxf->style) == 0 && (xsisnil(pxf->family) || xsicmp(family, pxf->family) == 0))
 	{
 		return;
 	}
@@ -1345,7 +1345,7 @@ void xlGdiTextRect(visual_t rdc, const xfont_t* pxf, const xface_t* pxa, const t
 
 		if (!h)
 		{
-			if (is_null(pxa->line_height))
+			if (xsisnil(pxa->line_height))
 				h = se.h;
 			else
 				h = (int)((float)se.h * xstof(pxa->line_height));
@@ -1355,7 +1355,7 @@ void xlGdiTextRect(visual_t rdc, const xfont_t* pxf, const xface_t* pxa, const t
 		{
 			if (prt->w && (w + se.w > prt->w))
 			{
-				if (is_null(pxa->line_height))
+				if (xsisnil(pxa->line_height))
 					h += se.h;
 				else
 					h += (int)((float)se.h * xstof(pxa->line_height));
@@ -1373,7 +1373,7 @@ void xlGdiTextRect(visual_t rdc, const xfont_t* pxf, const xface_t* pxa, const t
 		{
 			if (pch[0] == _T('\n'))
 			{
-				if (is_null(pxa->line_height))
+				if (xsisnil(pxa->line_height))
 					h += se.h;
 				else
 					h += (int)((float)se.h * xstof(pxa->line_height));
@@ -1382,7 +1382,7 @@ void xlGdiTextRect(visual_t rdc, const xfont_t* pxf, const xface_t* pxa, const t
 			}
 			else if (prt->w && (w + se.w > prt->w))
 			{
-				if (is_null(pxa->line_height))
+				if (xsisnil(pxa->line_height))
 					h += se.h;
 				else
 					h += (int)((float)se.h * xstof(pxa->line_height));

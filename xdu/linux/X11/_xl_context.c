@@ -88,11 +88,6 @@ visual_t xlCreateDisplayContext(widget_t wt)
     ctx->visual = attr.visual;
     ctx->depth = attr.depth;
 
-#ifdef XLIB_SUPPORT_CAIRO
-    ctx->fac = cairo_xlib_surface_create(g_display, ctx->device, ctx->visual, ctx->width, ctx->height);
-    ctx->cai = cairo_create(ctx->fac);
-#endif
-
     return &(ctx->head);
 }
 
@@ -123,11 +118,6 @@ visual_t xlCreateCompatibleContext(visual_t rdc, int cx, int cy)
     ctx->color = DefaultColormap(g_display, DefaultScreen(g_display));
     ctx->visual = org->visual;
     ctx->depth = org->depth;
-    
-#ifdef XLIB_SUPPORT_CAIRO
-    ctx->fac = cairo_xlib_surface_create(g_display, ctx->device, ctx->visual, ctx->width, ctx->height);
-    ctx->cai = cairo_create(ctx->fac);
-#endif
 
     return &(ctx->head);
 }
@@ -135,11 +125,6 @@ visual_t xlCreateCompatibleContext(visual_t rdc, int cx, int cy)
 void xlDestroyContext(visual_t rdc)
 {
     X11_context_t* ctx = TypePtrFromHead(X11_context_t, rdc);
-
-#ifdef XLIB_SUPPORT_CAIRO
-    if(ctx->cai) cairo_destroy(ctx->cai);
-    if(ctx->fac) cairo_surface_destroy(ctx->fac);
-#endif
 
     if(ctx->type == CONTEXT_MEMORY && ctx->device)
         XFreePixmap(g_display, ctx->device);

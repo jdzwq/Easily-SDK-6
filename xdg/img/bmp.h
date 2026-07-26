@@ -75,7 +75,8 @@ typedef struct _bitmap_quad_t{
 
 #define RGB_GRAY(r,g,b) (unsigned char)(0.299 * (double)r + 0.587 * (double)g + 0.114 * (double)b)
 
-#define BMP_LINE_BYTES(width, depth)	(((width * depth + 31) & ~31) >> 3)
+#define BMP_POINTS_BYTES(points, depth)	(((points * depth + 31) & ~31) >> 3)
+#define BMP_BYTES_POINTS(bytes, depth)	((((bytes << 3) | 31) - 31) / depth)
 
 #define RGB_MASK_5B		0x1F
 #define RGB_MASK_6B		0x3F

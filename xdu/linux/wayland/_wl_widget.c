@@ -29,41 +29,43 @@ LICENSE.GPL3 for more details.
 
 #include <linux/input.h>
 
+#define WIDGET_EVENTS   (WAYLAND_EVENT_MASK_CONFIG \
+						| WAYLAND_EVENT_MASK_MAPING \
+						| WAYLAND_EVENT_MASK_EXPOSE \
+						| WAYLAND_EVENT_MASK_POINTER \
+						| WAYLAND_EVENT_MASK_KEYBOARD \
+						| WAYLAND_EVENT_MASK_TOUCHPAD \
+						| WAYLAND_EVENT_MASK_NOTIFY \
+						| WAYLAND_EVENT_MASK_NOTCLI)
+#define WIDGET_CHILD_EVENTS   (WAYLAND_EVENT_MASK_CONFIG \
+						| WAYLAND_EVENT_MASK_MAPING \
+						| WAYLAND_EVENT_MASK_EXPOSE \
+						| WAYLAND_EVENT_MASK_POINTER \
+						| WAYLAND_EVENT_MASK_KEYBOARD \
+						| WAYLAND_EVENT_MASK_TOUCHPAD \
+						| WAYLAND_EVENT_MASK_NOTIFY)
+#define WIDGET_POPUP_EVENTS   (WAYLAND_EVENT_MASK_CONFIG \
+						| WAYLAND_EVENT_MASK_MAPING \
+						| WAYLAND_EVENT_MASK_EXPOSE \
+						| WAYLAND_EVENT_MASK_POINTER \
+						| WAYLAND_EVENT_MASK_KEYBOARD \
+						| WAYLAND_EVENT_MASK_TOUCHPAD \
+						| WAYLAND_EVENT_MASK_NOTIFY)
+#define WIDGET_MAIN_EVENTS   (WAYLAND_EVENT_MASK_CONFIG \
+						| WAYLAND_EVENT_MASK_MAPING \
+						| WAYLAND_EVENT_MASK_EXPOSE \
+						| WAYLAND_EVENT_MASK_POINTER \
+						| WAYLAND_EVENT_MASK_KEYBOARD \
+						| WAYLAND_EVENT_MASK_TOUCHPAD \
+						| WAYLAND_EVENT_MASK_NOTIFY)
+#define WIDGET_FOCUS_EVENTS   (WAYLAND_EVENT_MASK_CONFIG \
+						| WAYLAND_EVENT_MASK_MAPING \
+						| WAYLAND_EVENT_MASK_EXPOSE \
+						| WAYLAND_EVENT_MASK_POINTER \
+						| WAYLAND_EVENT_MASK_KEYBOARD \
+						| WAYLAND_EVENT_MASK_TOUCHPAD \
+						| WAYLAND_EVENT_MASK_NOTIFY)
 
-#define WIDGET_EVENTS   (WAYLAND_EVENT_KEY_DOWN | WAYLAND_EVENT_KEY_UP \
-                        | WAYLAND_EVENT_LBUTTON_DOWN | WAYLAND_EVENT_LBUTTON_UP | WAYLAND_EVENT_RBUTTON_DOWN | WAYLAND_EVENT_RBUTTON_UP | WAYLAND_EVENT_MOUSE_WHEEL \
-						| WAYLAND_EVENT_MOUSE_ENTER | WAYLAND_EVENT_MOUSE_LEAVE \
-						| WAYLAND_EVENT_EXPOSE \
-						| WAYLAND_EVENT_SET_FOCUS | WAYLAND_EVENT_KILL_FOCUS \
-						| WAYLAND_EVENT_ACTIVATE | WAYLAND_EVENT_SHOW \
-						| WAYLAND_EVENT_SIZE \
-						| WAYLAND_EVENT_CREATE | WAYLAND_EVENT_DESTROY | WAYLAND_EVENT_CLOSE)
-#define WIDGET_CHILD_EVENTS (WAYLAND_EVENT_KEY_DOWN | WAYLAND_EVENT_KEY_UP \
-                        | WAYLAND_EVENT_LBUTTON_DOWN | WAYLAND_EVENT_LBUTTON_UP | WAYLAND_EVENT_RBUTTON_DOWN | WAYLAND_EVENT_RBUTTON_UP | WAYLAND_EVENT_MOUSE_WHEEL \
-						| WAYLAND_EVENT_MOUSE_ENTER | WAYLAND_EVENT_MOUSE_LEAVE \
-						| WAYLAND_EVENT_EXPOSE \
-						| WAYLAND_EVENT_SET_FOCUS | WAYLAND_EVENT_KILL_FOCUS \
-						| WAYLAND_EVENT_ACTIVATE \
-						| WAYLAND_EVENT_SIZE \
-						| WAYLAND_EVENT_CREATE | WAYLAND_EVENT_DESTROY)
-#define WIDGET_POPUP_EVENTS (WAYLAND_EVENT_KEY_DOWN | WAYLAND_EVENT_KEY_UP \
-                        | WAYLAND_EVENT_LBUTTON_DOWN | WAYLAND_EVENT_LBUTTON_UP | WAYLAND_EVENT_RBUTTON_DOWN | WAYLAND_EVENT_RBUTTON_UP | WAYLAND_EVENT_MOUSE_WHEEL \
-						| WAYLAND_EVENT_MOUSE_ENTER | WAYLAND_EVENT_MOUSE_LEAVE \
-						| WAYLAND_EVENT_EXPOSE \
-						| WAYLAND_EVENT_SET_FOCUS | WAYLAND_EVENT_KILL_FOCUS \
-						| WAYLAND_EVENT_ACTIVATE | WAYLAND_EVENT_SHOW \
-						| WAYLAND_EVENT_SIZE \
-						| WAYLAND_EVENT_CREATE | WAYLAND_EVENT_DESTROY | WAYLAND_EVENT_CLOSE)				
-#define WIDGET_MAIN_EVENTS (WAYLAND_EVENT_KEY_DOWN | WAYLAND_EVENT_KEY_UP \
-                        | WAYLAND_EVENT_LBUTTON_DOWN | WAYLAND_EVENT_LBUTTON_UP | WAYLAND_EVENT_RBUTTON_DOWN | WAYLAND_EVENT_RBUTTON_UP | WAYLAND_EVENT_MOUSE_WHEEL \
-						| WAYLAND_EVENT_MOUSE_ENTER | WAYLAND_EVENT_MOUSE_LEAVE \
-						| WAYLAND_EVENT_EXPOSE \
-						| WAYLAND_EVENT_SET_FOCUS | WAYLAND_EVENT_KILL_FOCUS \
-						| WAYLAND_EVENT_ACTIVATE | WAYLAND_EVENT_SHOW \
-						| WAYLAND_EVENT_SIZE \
-						| WAYLAND_EVENT_CREATE | WAYLAND_EVENT_DESTROY | WAYLAND_EVENT_CLOSE)
-#define WIDGET_FOCUS_EVENTS (WAYLAND_EVENT_KEY_DOWN | WAYLAND_EVENT_KEY_UP \
-						| WAYLAND_EVENT_SET_FOCUS | WAYLAND_EVENT_KILL_FOCUS)
 
 
 #define WIDGET_BORDER_WIDTH		2 //pt
@@ -74,80 +76,80 @@ LICENSE.GPL3 for more details.
 #define HIWORD(dw)		(unsigned short)(((unsigned int)(dw) >> 16) & 0x0000FFFF)
 #define LOWORD(dw)		(unsigned short)((unsigned int)(dw) & 0x0000FFFF)
 
-#define IS_META_KEY(key)	(key == XK_Shift_L || key == XK_Shift_R || key == XK_Control_L || key == XK_Control_R ||key == XK_Caps_Lock || key == XK_Shift_Lock || key == XK_Meta_L || key == XK_Meta_R || key == XK_Alt_L || key == XK_Alt_R || key == XK_Super_L || key == XK_Super_R ||key == XK_Hyper_L || key == XK_Hyper_R)
+#define IS_META_KEY(key)	(key == XKB_KEY_Shift_L || key == XKB_KEY_Shift_R || key == XKB_KEY_Control_L || key == XKB_KEY_Control_R ||key == XKB_KEY_Caps_Lock || key == XKB_KEY_Shift_Lock || key == XKB_KEY_Meta_L || key == XKB_KEY_Meta_R || key == XKB_KEY_Alt_L || key == XKB_KEY_Alt_R || key == XKB_KEY_Super_L || key == XKB_KEY_Super_R ||key == XKB_KEY_Hyper_L || key == XKB_KEY_Hyper_R)
 
 res_queue_t g_queue = 0;
 
 static int wayland_to_keycode(int xk)
 {
-    /*switch (xk)
+    switch (xk)
     {
-        case XK_BackSpace: return KEY_BACK; 
-        case XK_Tab: return KEY_TAB; 
-        case XK_Return: return KEY_ENTER;
-        case XK_Escape: return KEY_ESC;
+        case XKB_KEY_BackSpace: return KEY_BACK; 
+        case XKB_KEY_Tab: return KEY_TAB; 
+        case XKB_KEY_Return: return KEY_ENTER;
+        case XKB_KEY_Escape: return KEY_ESC;
         case 32: return KEY_SPACE;
-        case XK_Page_Up: return KEY_PAGEUP; 
-        case XK_Page_Down: return KEY_PAGEDOWN;
-        case XK_End: return KEY_END;
-        case XK_Home: return KEY_HOME;
-        case XK_Left: return KEY_LEFT; 
-        case XK_Up: return KEY_UP; 
-        case XK_Right: return KEY_RIGHT; 
-        case XK_Down: return KEY_DOWN;
-        case XK_Insert: return KEY_INSERT; 
-        case XK_Delete: return KEY_DELETE;
-        case XK_F1: return KEY_F1;
-        case XK_F2: return KEY_F2;
-        case XK_F3: return KEY_F3;
-        case XK_F4: return KEY_F4;
-        case XK_F5: return KEY_F5;
-        case XK_F6: return KEY_F6;
-        case XK_F7: return KEY_F7;
-        case XK_F8: return KEY_F8;
-        case XK_F9: return KEY_F9;
-        case XK_F10: return KEY_F10;
-        case XK_F11: return KEY_F11;
-        case XK_F12: return KEY_F12;
+        case XKB_KEY_Page_Up: return KEY_PAGEUP; 
+        case XKB_KEY_Page_Down: return KEY_PAGEDOWN;
+        case XKB_KEY_End: return KEY_END;
+        case XKB_KEY_Home: return KEY_HOME;
+        case XKB_KEY_Left: return KEY_LEFT; 
+        case XKB_KEY_Up: return KEY_UP; 
+        case XKB_KEY_Right: return KEY_RIGHT; 
+        case XKB_KEY_Down: return KEY_DOWN;
+        case XKB_KEY_Insert: return KEY_INSERT; 
+        case XKB_KEY_Delete: return KEY_DELETE;
+        case XKB_KEY_F1: return KEY_F1;
+        case XKB_KEY_F2: return KEY_F2;
+        case XKB_KEY_F3: return KEY_F3;
+        case XKB_KEY_F4: return KEY_F4;
+        case XKB_KEY_F5: return KEY_F5;
+        case XKB_KEY_F6: return KEY_F6;
+        case XKB_KEY_F7: return KEY_F7;
+        case XKB_KEY_F8: return KEY_F8;
+        case XKB_KEY_F9: return KEY_F9;
+        case XKB_KEY_F10: return KEY_F10;
+        case XKB_KEY_F11: return KEY_F11;
+        case XKB_KEY_F12: return KEY_F12;
         default: return (int)0; 
-    }*/
+    }
 
 	return (int)0; 
 }
 
 static int keycode_to_wayland(int key)
 {
-    /*switch (key)
+    switch (key)
     {
-        case KEY_BACK: return XK_BackSpace; 
-        case KEY_TAB: return XK_Tab; 
-        case KEY_ENTER: return XK_Return;
-        case KEY_ESC: return XK_Escape;
+        case KEY_BACK: return XKB_KEY_BackSpace; 
+        case KEY_TAB: return XKB_KEY_Tab; 
+        case KEY_ENTER: return XKB_KEY_Return;
+        case KEY_ESC: return XKB_KEY_Escape;
         case KEY_SPACE: return 32;
-        case KEY_PAGEUP: return XK_Page_Up; 
-        case KEY_PAGEDOWN: return XK_Page_Down;
-        case KEY_END: return XK_End;
-        case KEY_HOME: return XK_Home;
-        case KEY_LEFT: return XK_Left; 
-        case KEY_UP: return XK_Up; 
-        case KEY_RIGHT: return XK_Right; 
-        case KEY_DOWN: return XK_Down;
-        case KEY_INSERT: return XK_Insert; 
-        case KEY_DELETE: return XK_Delete;
-        case KEY_F1: return XK_F1;
-        case KEY_F2: return XK_F2;
-        case KEY_F3: return XK_F3;
-        case KEY_F4: return XK_F4;
-        case KEY_F5: return XK_F5;
-        case KEY_F6: return XK_F6;
-        case KEY_F7: return XK_F7;
-        case KEY_F8: return XK_F8;
-        case KEY_F9: return XK_F9;
-        case KEY_F10: return XK_F10;
-        case KEY_F11: return XK_F11;
-        case KEY_F12: return XK_F12;
+        case KEY_PAGEUP: return XKB_KEY_Page_Up; 
+        case KEY_PAGEDOWN: return XKB_KEY_Page_Down;
+        case KEY_END: return XKB_KEY_End;
+        case KEY_HOME: return XKB_KEY_Home;
+        case KEY_LEFT: return XKB_KEY_Left; 
+        case KEY_UP: return XKB_KEY_Up; 
+        case KEY_RIGHT: return XKB_KEY_Right; 
+        case KEY_DOWN: return XKB_KEY_Down;
+        case KEY_INSERT: return XKB_KEY_Insert; 
+        case KEY_DELETE: return XKB_KEY_Delete;
+        case KEY_F1: return XKB_KEY_F1;
+        case KEY_F2: return XKB_KEY_F2;
+        case KEY_F3: return XKB_KEY_F3;
+        case KEY_F4: return XKB_KEY_F4;
+        case KEY_F5: return XKB_KEY_F5;
+        case KEY_F6: return XKB_KEY_F6;
+        case KEY_F7: return XKB_KEY_F7;
+        case KEY_F8: return XKB_KEY_F8;
+        case KEY_F9: return XKB_KEY_F9;
+        case KEY_F10: return XKB_KEY_F10;
+        case KEY_F11: return XKB_KEY_F11;
+        case KEY_F12: return XKB_KEY_F12;
         default: return (int)0; 
-    }*/
+    }
 
 	return (int)0; 
 }
@@ -162,6 +164,8 @@ static dword_t _key_state(unsigned int unFlags)
         mask |= KS_WITH_CONTROL;
     if (unFlags & WAYLAND_STATE_ALT)
         mask |= KS_WITH_ALT;
+	if (unFlags & WAYLAND_STATE_META)
+        mask |= KS_WITH_META;
 
     return mask;
 }
@@ -169,6 +173,13 @@ static dword_t _key_state(unsigned int unFlags)
 static dword_t _mouse_state(unsigned int nsState)
 {
     dword_t mask = 0;
+
+	if (nsState & WAYLAND_WITH_LBUTTON)
+        mask |= MS_WITH_LBUTTON;
+    if (nsState & WAYLAND_WITH_RBUTTON)
+        mask |= MS_WITH_RBUTTON;
+    if (nsState & WAYLAND_WITH_MBUTTON)
+        mask |= MS_WITH_MBUTTON;
 
     return mask;
 }
@@ -240,44 +251,36 @@ void wlWidgetCleanup(void)
 
 static bool_t _EventTranslate(wayland_window* window, dword_t event_id, dword_t event_code, vword_t event_data)
 {
+	wayland_widget_t* pxw = GETXDUSTRUCT(window);
 	accel_table_t* pac;
-	char keystr[5] = {0};
-	unsigned int state = 0;
-	int i, keys = 0;
-	char ch = 0;
-	char* pch = NULL;
-	char kch = 0;
-	wchar_t wc = 0;
+	unsigned char kch = 0;
+	dword_t state = 0;
+	int i;
 
-	if(WAYLAND_EVENTMAP(event_id) == WAYLAND_EVENT_KEY_DOWN)
+	if(event_id == WAYLAND_EVENT_KEY_DOWN && pxw->accel)
 	{
-		if(WAYLAND_STATEMAP(event_id) == WAYLAND_STATE_SHIFT) state |= KS_WITH_SHIFT;
-		if(WAYLAND_STATEMAP(event_id) == WAYLAND_STATE_CONTROL) state |= KS_WITH_CONTROL;
-		if(WAYLAND_STATEMAP(event_id) == WAYLAND_STATE_ALT) state |= KS_WITH_ALT;
+		state = _key_state(event_code);
 
-		switch(keys)
+		kch = event_code & 0x0000FFFF;
+
+		pac = (accel_table_t *)pxw->accel;
+		i = 0;
+		while (pac[i].vir != 0 && pac[i].key != 0)
 		{
-		case 1:
-			ch = keystr[0];
-			break;
-		case 2:
-			ch = keystr[1];
-			break;
-		case 3:
-			ch = keystr[2];
-			break;
-		default:
-			ch = keystr[3];
-			break;
-		}
+			if (pac[i].vir == state && pac[i].key == kch)
+			{
+				wlWidgetPostCommand(&(pxw->head), pac[i].cmd, pxw->uid, 0);
+				return 1;
+			}
 
-		return 1;
+			i++;
+		}
 	}
 
     return 0;
 }
 
-static int _MessageDispatch(wayland_window* window, dword_t event_id, dword_t event_code, vword_t event_data)
+static int CALLBACK _MessageDispatch(wayland_window* window, dword_t event_id, dword_t event_code, vword_t event_data)
 {
 	widget_t wt;
 	wayland_widget_t* pxw;
@@ -289,7 +292,7 @@ static int _MessageDispatch(wayland_window* window, dword_t event_id, dword_t ev
 	dword_t ks;
 	int rev, key;
 
-	switch (WAYLAND_EVENTMAP(event_id))
+	switch (event_id)
 	{
 	case WAYLAND_EVENT_KEY_DOWN:
 		pxw = GETXDUSTRUCT(window);
@@ -301,7 +304,7 @@ static int _MessageDispatch(wayland_window* window, dword_t event_id, dword_t ev
 
 		key = wayland_to_keycode((int)event_code);
 
-		ks = _key_state(WAYLAND_EVENTMAP(event_id));
+		ks = _key_state(event_id);
 		psub = GETXDUSUBPROC(window);
 		if (psub && psub->sub_on_keydown)
 		{
@@ -324,7 +327,7 @@ static int _MessageDispatch(wayland_window* window, dword_t event_id, dword_t ev
 			break;
 		wt = &(pxw->head);
 
-		ks = _key_state(WAYLAND_EVENTMAP(event_id));
+		ks = _key_state(event_id);
 		key = wayland_to_keycode((int)event_code);
 
 		psub = GETXDUSUBPROC(window);
@@ -921,8 +924,10 @@ widget_t wlWidgetCreate(const tchar_t* wname, dword_t wstyle, const xrect_t* pxr
 	window_width = (pxr->w > WIDGET_BORDER_WIDTH)? pxr->w : (WIDGET_BORDER_WIDTH + 1);
 	window_height = (pxr->h > WIDGET_BORDER_WIDTH)? pxr->h : (WIDGET_BORDER_WIDTH + 1);
 
-	win = WaylandCreateWindow(par, window_type, event_mask, wname, window_x, window_y, window_width, window_height);
+	win = WaylandCreateWindow(par, window_type, wname, window_x, window_y, window_width, window_height);
 	if(!win) return NULL;
+
+	WaylandSetWindowProc(win, event_mask, _MessageDispatch);
 
 	pxw_new = (wayland_widget_t*)xmem_alloc_handle(sizeof(wayland_widget_t));
 	pxw_new->head.tag = _HANDLE_WIDGET;
@@ -981,9 +986,6 @@ void wlWidgetClose(widget_t wt, int ret)
 		wlWidgetDestroy(wt);
 		return;
 	}
-
-	WaylandEventsAdd(pxw->self, WAYLAND_EVENT_CLOSE, 0, 0);
-	WaylandEventsFlash();
 
 	if(pxw->result) return;
 
@@ -1518,10 +1520,13 @@ void wlWidgetShow(widget_t wt, dword_t sw)
 	switch(sw)
 	{
 	case WS_SHOW_MINIMIZE:
+		//WaylandMinimizeWindow(pxw->self);
 		break;
 	case WS_SHOW_MAXIMIZE:
+		//WaylandMaximizeWindow(pxw->self);
 		break;
 	case WS_SHOW_HIDE:
+		//WaylandShowWindow(pxw->self, bool_false);
 		break;
 	default:
 		break;

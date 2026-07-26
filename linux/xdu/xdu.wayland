@@ -6,6 +6,12 @@
 # 3. make -f xdu.mk
 # 4. make -f xdu.mk install
 #-----------------------------------------------------------------------------
+
+#-----------------------------------------------------------------------------
+# cd ~/Easily-sdk-6/xdu/linux/wayland
+# wayland-scanner client-header /usr/share/wayland-protocols/staging/xdg-activation/xdg-activation-v1.xml xdg-activation-client-protocol.h
+# wayland-scanner private-code /usr/share/wayland-protocols/staging/xdg-activation/xdg-activation-v1.xml xdg-activation-client-protocol.c
+#-----------------------------------------------------------------------------
 CC = gcc
 CFLAGS = -g -Wall -fPIC -D _DEBUG -D _WAYLAND
 LFLAGS = -shared -fPIC -pthread
@@ -15,8 +21,8 @@ ARCH = aarch64
 MAX_VER = 6
 MIN_VER = 1
 
-WL_HEAD = $(shell pkg-config --cflags wayland-client wayland-cursor wayland-egl egl xkbcommon)
-WL_LIBS = $(shell pkg-config --libs wayland-client wayland-cursor wayland-egl egl xkbcommon)
+WL_HEAD = $(shell pkg-config --cflags wayland-client wayland-cursor wayland-egl)
+WL_LIBS = $(shell pkg-config --libs wayland-client wayland-cursor wayland-egl)
 
 SYS_PATH = /usr/include
 
@@ -31,7 +37,7 @@ OUT_PATH = ~/Easily-app-6/linux/lib/$(ARCH)
 TARGET = lib$(MODULE).so.$(MAX_VER).$(MIN_VER).$(ARCH)
 LINKIT = lib$(MODULE).so
 
-LIBS = -lm -ldl -lutil -L $(LIB_PATH) -lxdk -lxdg
+LIBS = -lm -ldl -lutil -lxkbcommon -L $(LIB_PATH) -lxdk -lxdg
 DIRS = $(wildcard \
 	$(SRC_PATH)/*.c \
 	$(SRC_PATH)/linux/*.c \
@@ -43,19 +49,19 @@ COBS = $(patsubst %.c, %.o, $(SRCS))
 OBJS = $(addprefix $(OBJ_PATH)/,$(COBS))
 
 $(OBJ_PATH)/%.o : $(SRC_PATH)/linux/%.c
-	$(CC) $(CFLAGS) -c $< -o $@ $(GTK_HEAD) $(WL_HEAD) -I $(SYS_PATH) -I $(INC_PATH) -I $(SRC_PATH)
+	$(CC) $(CFLAGS) -c $< -o $@ $(WL_HEAD) -I $(SYS_PATH) -I $(INC_PATH) -I $(SRC_PATH)
 
 $(OBJ_PATH)/%.o : $(SRC_PATH)/linux/wayland/%.c
-	$(CC) $(CFLAGS) -c $< -o $@ $(GTK_HEAD) $(WL_HEAD) -I $(SYS_PATH) -I $(INC_PATH) -I $(SRC_PATH)
+	$(CC) $(CFLAGS) -c $< -o $@ $(WL_HEAD) -I $(SYS_PATH) -I $(INC_PATH) -I $(SRC_PATH)
 
 $(OBJ_PATH)/%.o : $(SRC_PATH)/imp/%.c
-	$(CC) $(CFLAGS) -c $< -o $@ $(GTK_HEAD) $(WL_HEAD) -I $(SYS_PATH)  -I $(INC_PATH) -I $(SRC_PATH)
+	$(CC) $(CFLAGS) -c $< -o $@ $(WL_HEAD) -I $(SYS_PATH)  -I $(INC_PATH) -I $(SRC_PATH)
 
 $(OBJ_PATH)/%.o : $(SRC_PATH)/gdi/%.c
-	$(CC) $(CFLAGS) -c $< -o $@ $(GTK_HEAD) $(WL_HEAD) -I $(SYS_PATH) -I $(INC_PATH) -I $(SRC_PATH)
+	$(CC) $(CFLAGS) -c $< -o $@ $(WL_HEAD) -I $(SYS_PATH) -I $(INC_PATH) -I $(SRC_PATH)
 
 $(OBJ_PATH)/%.o : $(SRC_PATH)/%.c
-	$(CC) $(CFLAGS) -c $< -o $@ $(GTK_HEAD) $(WL_HEAD) -I $(SYS_PATH) -I $(INC_PATH) -I $(SRC_PATH)
+	$(CC) $(CFLAGS) -c $< -o $@ $(WL_HEAD) -I $(SYS_PATH) -I $(INC_PATH) -I $(SRC_PATH)
 
 all : $(OBJS)
 	rm -f $@

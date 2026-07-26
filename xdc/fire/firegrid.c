@@ -133,7 +133,7 @@ static int sub_editbox_self_command(widget_t widget, int code, vword_t data, uid
 			text = editbox_get_text_ptr(widget);
 			gridctrl_filter(ctrl, text);
 
-			if (!is_null(text))
+			if (!xsisnil(text))
 			{
 				gridctrl_set_focus_cell(ctrl, LINK_FIRST, LINK_FIRST);
 			}

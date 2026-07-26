@@ -229,7 +229,7 @@ void TopogPanel_OnAttach(widget_t widget)
 	if (!shell_get_filename(widget, szPath, szFilter, szExt, 0, szPath, PATH_LEN, szFile, PATH_LEN))
 		return;
 
-	xscat(szPath, _T("/"));
+	xsncat(szPath, SLASH_CHAR, 1);
 	xscat(szPath, szFile);
 
 	visual_t rdc = widget_client_context(widget);
@@ -536,7 +536,7 @@ void TopogPanel_OnSave(widget_t widget)
 
 	tchar_t szFile[PATH_LEN + 1] = { 0 };
 
-	if (is_null(pdt->szFile))
+	if (xsisnil(pdt->szFile))
 	{
 		tchar_t szPath[PATH_LEN + 1] = { 0 };
 
@@ -545,7 +545,7 @@ void TopogPanel_OnSave(widget_t widget)
 		if (!shell_get_filename(widget, szPath, _T("Topog Meta File(*.sheet)\0*.sheet\0"), _T("sheet"), 1, szPath, PATH_LEN, szFile, PATH_LEN))
 			return;
 
-		xscat(szPath, _T("/"));
+		xsncat(szPath, SLASH_CHAR, 1);
 		xscat(szPath, szFile);
 		xscpy(szFile, szPath);
 	}
@@ -574,7 +574,7 @@ void TopogPanel_OnSaveAs(widget_t widget)
 	if (!shell_get_filename(widget, szPath, _T("Topog Meta File(*.sheet)\0*.sheet\0Svg Image File(*.svg)\0*.svg\0"), _T("sheet"), 1, szPath, PATH_LEN, szFile, PATH_LEN))
 		return;
 
-	xscat(szPath, _T("/"));
+	xsncat(szPath, SLASH_CHAR, 1);
 	xscat(szPath, szFile);
 	xscpy(szFile, szPath);
 
@@ -738,7 +738,7 @@ int TopogPanel_OnCreate(widget_t widget, void* data)
 
 	const tchar_t* szParam = (tchar_t*)data;
 
-	if (!is_null(szParam))
+	if (!xsisnil(szParam))
 	{
 		if (!TopogPanel_OpenFile(widget, szParam))
 			return -1;
@@ -917,7 +917,7 @@ void TopogPanel_OnParentCommand(widget_t widget, int code, vword_t data)
 		tchar_t szPath[PATH_LEN + 1], szExt[INT_LEN + 1];
 		const tchar_t* nname = (const tchar_t*)data;
 
-		if (!is_null(pdt->szFile) && !is_null(nname))
+		if (!xsisnil(pdt->szFile) && !xsisnil(nname))
 		{
 			split_path(pdt->szFile, szPath, NULL, szExt);
 			xsprintf(pdt->szFile, _T("%s\\%s.%s"), szPath, nname, szExt);

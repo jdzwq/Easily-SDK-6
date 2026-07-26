@@ -46,7 +46,7 @@ void export_grid_schema(link_t_ptr ptr,link_t_ptr sch)
 	while(clk)
 	{
 		cname = get_col_name_ptr(clk);
-		if(is_null(cname))
+		if(xsisnil(cname))
 		{
 			clk = get_next_col(ptr,clk);
 			continue;
@@ -57,7 +57,7 @@ void export_grid_schema(link_t_ptr ptr,link_t_ptr sch)
 		dig = get_col_data_dig(clk);
 
 		nlk = insert_schema_element(nlk_row, LINK_LAST);
-		if (!is_null(cid))
+		if (!xsisnil(cid))
 			set_schema_element_name(nlk, cid);
 		else
 			set_schema_element_name(nlk,cname);
@@ -131,7 +131,7 @@ void import_grid_schema(link_t_ptr ptr, link_t_ptr sch)
 	slk_row = get_schema_next_element(slk_rowset, LINK_FIRST);
 	while (slk_row)
 	{
-		if (is_null(get_schema_element_name_ptr(slk_row)))
+		if (xsisnil(get_schema_element_name_ptr(slk_row)))
 		{
 			slk_ref = get_schema_element(sch, get_schema_element_ref_ptr(slk_row));
 			if (slk_ref && compare_text(get_schema_element_id_ptr(slk_ref), -1, DOC_GRID_ROW, -1, 0) == 0)
@@ -244,7 +244,7 @@ void export_grid_data(link_t_ptr grid, link_t_ptr sch, link_t_ptr dom)
 		slk_row = get_schema_next_element(slk_rowset, LINK_FIRST);
 		while (slk_row)
 		{
-			if (is_null(get_schema_element_name_ptr(slk_row)))
+			if (xsisnil(get_schema_element_name_ptr(slk_row)))
 			{
 				slk_ref = get_schema_element(sch, get_schema_element_ref_ptr(slk_row));
 				if (slk_ref && is_schema_declare(slk_ref))
@@ -312,7 +312,7 @@ void export_grid_data(link_t_ptr grid, link_t_ptr sch, link_t_ptr dom)
 			clk = get_next_col(grid, LINK_FIRST);
 			while (clk)
 			{
-				if (!is_null(get_col_id_ptr(clk)))
+				if (!xsisnil(get_col_id_ptr(clk)))
 				{
 					nlk = insert_dom_node(nlk_row, LINK_LAST);
 					set_dom_node_name(nlk, get_col_id_ptr(clk), -1);
@@ -360,7 +360,7 @@ void import_grid_data(link_t_ptr grid, link_t_ptr sch, link_t_ptr dom)
 		slk_row = get_schema_next_element(slk_rowset, LINK_FIRST);
 		while (slk_row)
 		{
-			if (is_null(get_schema_element_name_ptr(slk_row)))
+			if (xsisnil(get_schema_element_name_ptr(slk_row)))
 			{
 				slk_ref = get_schema_element(sch, get_schema_element_ref_ptr(slk_row));
 				if (slk_ref && is_schema_declare(slk_ref))
@@ -473,7 +473,7 @@ void export_statis_schema(link_t_ptr ptr, link_t_ptr sch)
 	set_schema_element_type(nlk_row, SCHEMA_ATTR_TYPE_COMPLEXTYPE);
 
 	cname = get_statis_xaxis_ptr(ptr);
-	if (!is_null(cname))
+	if (!xsisnil(cname))
 	{
 		nlk = insert_schema_element(nlk_row, LINK_LAST);
 		set_schema_element_name(nlk, cname);
@@ -485,7 +485,7 @@ void export_statis_schema(link_t_ptr ptr, link_t_ptr sch)
 	while (ylk)
 	{
 		cname = get_yax_name_ptr(ylk);
-		if (is_null(cname))
+		if (xsisnil(cname))
 		{
 			ylk = get_next_yax(ptr, ylk);
 			continue;
@@ -496,7 +496,7 @@ void export_statis_schema(link_t_ptr ptr, link_t_ptr sch)
 		dig = get_yax_data_dig(ylk);
 
 		nlk = insert_schema_element(nlk_row, LINK_LAST);
-		if (!is_null(cid))
+		if (!xsisnil(cid))
 			set_schema_element_name(nlk, cid);
 		else
 			set_schema_element_name(nlk, cname);
@@ -559,7 +559,7 @@ void export_statis_data(link_t_ptr statis, link_t_ptr sch, link_t_ptr dom)
 		slk_row = get_schema_next_element(slk_rowset, LINK_FIRST);
 		while (slk_row)
 		{
-			if (is_null(get_schema_element_name_ptr(slk_row)))
+			if (xsisnil(get_schema_element_name_ptr(slk_row)))
 			{
 				slk_ref = get_schema_element(sch, get_schema_element_ref_ptr(slk_row));
 				if (slk_ref && is_schema_declare(slk_ref))
@@ -627,7 +627,7 @@ void export_statis_data(link_t_ptr statis, link_t_ptr sch, link_t_ptr dom)
 			ylk = get_next_yax(statis, LINK_FIRST);
 			while (ylk)
 			{
-				if (!is_null(get_yax_id_ptr(ylk)))
+				if (!xsisnil(get_yax_id_ptr(ylk)))
 				{
 					nlk = insert_dom_node(nlk_row, LINK_LAST);
 					set_dom_node_name(nlk, get_yax_id_ptr(ylk), -1);
@@ -675,7 +675,7 @@ void import_statis_data(link_t_ptr statis, link_t_ptr sch, link_t_ptr dom)
 		slk_row = get_schema_next_element(slk_rowset, LINK_FIRST);
 		while (slk_row)
 		{
-			if (is_null(get_schema_element_name_ptr(slk_row)))
+			if (xsisnil(get_schema_element_name_ptr(slk_row)))
 			{
 				slk_ref = get_schema_element(sch, get_schema_element_ref_ptr(slk_row));
 				if (slk_ref && is_schema_declare(slk_ref))
@@ -797,7 +797,7 @@ void export_form_schema(link_t_ptr ptr, link_t_ptr sch)
 		}
 
 		cname = get_field_name_ptr(flk);
-		if (is_null(cname))
+		if (xsisnil(cname))
 		{
 			flk = get_next_field(ptr, flk);
 			continue;
@@ -808,7 +808,7 @@ void export_form_schema(link_t_ptr ptr, link_t_ptr sch)
 		dig = get_field_data_dig(flk);
 
 		nlk = insert_schema_element(nlk_row, LINK_LAST);
-		if (!is_null(cid))
+		if (!xsisnil(cid))
 			set_schema_element_name(nlk, cid);
 		else
 			set_schema_element_name(nlk, cname);
@@ -904,7 +904,7 @@ void export_form_data(link_t_ptr form, link_t_ptr sch, link_t_ptr dom)
 		slk_row = get_schema_next_element(slk_rowset, LINK_FIRST);
 		while (slk_row)
 		{
-			if (is_null(get_schema_element_name_ptr(slk_row)))
+			if (xsisnil(get_schema_element_name_ptr(slk_row)))
 			{
 				slk_ref = get_schema_element(sch, get_schema_element_ref_ptr(slk_row));
 				if (slk_ref && is_schema_declare(slk_ref))
@@ -974,7 +974,7 @@ void export_form_data(link_t_ptr form, link_t_ptr sch, link_t_ptr dom)
 		flk = get_next_field(form, LINK_FIRST);
 		while (flk)
 		{
-			if (is_null(get_field_id_ptr(flk)))
+			if (xsisnil(get_field_id_ptr(flk)))
 			{
 				flk = get_next_field(form, flk);
 				continue;
@@ -1026,7 +1026,7 @@ void import_form_data(link_t_ptr form, link_t_ptr sch, link_t_ptr dom)
 		slk_row = get_schema_next_element(slk_rowset, LINK_FIRST);
 		while (slk_row)
 		{
-			if (is_null(get_schema_element_name_ptr(slk_row)))
+			if (xsisnil(get_schema_element_name_ptr(slk_row)))
 			{
 				slk_ref = get_schema_element(sch, get_schema_element_ref_ptr(slk_row));
 				if (slk_ref && is_schema_declare(slk_ref))
@@ -1140,7 +1140,7 @@ void export_rich_schema(link_t_ptr ptr, link_t_ptr sch)
 	while (plk)
 	{
 		cname = get_rich_anch_name_ptr(plk);
-		if (is_null(cname))
+		if (xsisnil(cname))
 		{
 			plk = get_rich_next_anch(ptr, plk);
 			continue;
@@ -1203,7 +1203,7 @@ void export_rich_data(link_t_ptr rich, link_t_ptr sch, link_t_ptr dom)
 		slk_row = get_schema_next_element(slk_rowset, LINK_FIRST);
 		while (slk_row)
 		{
-			if (is_null(get_schema_element_name_ptr(slk_row)))
+			if (xsisnil(get_schema_element_name_ptr(slk_row)))
 			{
 				slk_ref = get_schema_element(sch, get_schema_element_ref_ptr(slk_row));
 				if (slk_ref && is_schema_declare(slk_ref))
@@ -1275,7 +1275,7 @@ void export_rich_data(link_t_ptr rich, link_t_ptr sch, link_t_ptr dom)
 		plk = get_rich_next_anch(rich, LINK_FIRST);
 		while (plk)
 		{
-			if (is_null(get_rich_anch_name_ptr(plk)))
+			if (xsisnil(get_rich_anch_name_ptr(plk)))
 			{
 				plk = get_rich_next_anch(rich, plk);
 				continue;
@@ -1330,7 +1330,7 @@ void import_rich_data(link_t_ptr rich, link_t_ptr sch, link_t_ptr dom)
 		slk_row = get_schema_next_element(slk_rowset, LINK_FIRST);
 		while (slk_row)
 		{
-			if (is_null(get_schema_element_name_ptr(slk_row)))
+			if (xsisnil(get_schema_element_name_ptr(slk_row)))
 			{
 				slk_ref = get_schema_element(sch, get_schema_element_ref_ptr(slk_row));
 				if (slk_ref && is_schema_declare(slk_ref))
@@ -1467,7 +1467,7 @@ void import_rich_data(link_t_ptr rich, link_t_ptr sch, link_t_ptr dom)
 	slk_row = get_schema_next_element(slk_rowset, LINK_FIRST);
 	while (slk_row)
 	{
-		if (is_null(get_schema_element_name_ptr(slk_row)))
+		if (xsisnil(get_schema_element_name_ptr(slk_row)))
 		{
 			slk_ref = get_schema_element(sch, get_schema_element_ref_ptr(slk_row));
 			if (slk_ref && is_schema_declare(slk_ref))
@@ -1549,7 +1549,7 @@ void import_dom_node(link_t_ptr node, link_t_ptr sch, link_t_ptr dom)
 	slk_row = get_schema_next_element(slk_rowset, LINK_FIRST);
 	while (slk_row)
 	{
-		if (is_null(get_schema_element_name_ptr(slk_row)))
+		if (xsisnil(get_schema_element_name_ptr(slk_row)))
 		{
 			slk_ref = get_schema_element(sch, get_schema_element_ref_ptr(slk_row));
 			if (slk_ref && is_schema_declare(slk_ref))

@@ -155,7 +155,7 @@ static bool_t _on_parse_data(void* pp, dword_t tag, const byte_t* vr, const byte
 		pa->di.width = xstol(tval);
 		break;
 	case 0x00280030: //pixel spaceing
-		if (!is_null(tval))
+		if (!xsisnil(tval))
 		{
 			tmp = tval;
 			pa->di.xmm_pixel = xstof(tmp);

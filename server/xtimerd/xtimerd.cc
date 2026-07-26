@@ -109,7 +109,7 @@ void xtimerd_start()
 		return ;
 
 	get_envvar(XSERVICE_ROOT, sz_path, PATH_LEN);
-	if (is_null(sz_path))
+	if (xsisnil(sz_path))
 	{
 		//xscpy(sz_path,_T("."));
 		get_runpath((res_modu_t)0, sz_path, PATH_LEN);
@@ -168,7 +168,7 @@ void xtimerd_start()
 						if (compare_text(get_dom_node_name_ptr(nlk_hint), -1, XTIMERD_ATTR_FIRSTTIME, -1, 1) == 0)
 						{
 							get_dom_node_text(nlk_hint, sz_time, DATE_LEN);
-							if (is_null(sz_time))
+							if (xsisnil(sz_time))
 								get_loc_date(&(ptimer->hint.fdate));
 							else
 								parse_datetime(&(ptimer->hint.fdate), sz_time);
@@ -176,7 +176,7 @@ void xtimerd_start()
 						else if (compare_text(get_dom_node_name_ptr(nlk_hint), -1, XTIMERD_ATTR_LASTTIME, -1, 1) == 0)
 						{
 							get_dom_node_text(nlk_hint, sz_time, DATE_LEN);
-							if (is_null(sz_time))
+							if (xsisnil(sz_time))
 							{
 								get_loc_date(&(ptimer->hint.ldate));
 								plus_years(&(ptimer->hint.ldate), 1);

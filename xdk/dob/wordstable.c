@@ -395,7 +395,7 @@ void words_table_parse_tokens(link_t_ptr ptr, const tchar_t* tokens, int len, tc
 	if (len < 0)
 		len = xslen(tokens);
 
-	if (is_null(tokens) || !len)
+	if (xsisnil(tokens) || !len)
 		return;
 
 	while (n = parse_string_token((tokens + total), (len - total), feed, &key, &keylen))

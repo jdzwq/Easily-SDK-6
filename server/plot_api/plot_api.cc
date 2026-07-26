@@ -75,91 +75,91 @@ bool_t _invoke_ploting(const https_block_t* pb, plot_block_t* pd)
 		ptr_plot = create_plot_doc();
 
 		xhttp_get_url_query_entity(pb->http, DOC_PLOT_TYPE, -1, sz_token, RES_LEN);
-		if (!is_null(sz_token))
+		if (!xsisnil(sz_token))
 		{
 			set_plot_type(ptr_plot, sz_token, -1);
 		}
 
 		xhttp_get_url_query_entity(pb->http, DOC_PLOT_WIDTH, -1, sz_token, NUM_LEN);
-		if (!is_null(sz_token))
+		if (!xsisnil(sz_token))
 		{
 			set_plot_width(ptr_plot, xstof(sz_token));
 		}
 
 		xhttp_get_url_query_entity(pb->http, DOC_PLOT_HEIGHT, -1, sz_token, NUM_LEN);
-		if (!is_null(sz_token))
+		if (!xsisnil(sz_token))
 		{
 			set_plot_height(ptr_plot, xstof(sz_token));
 		}
 
 		xhttp_get_url_query_entity(pb->http, DOC_PLOT_STYLE, -1, sz_token, STYLE_LEN);
-		if (!is_null(sz_token))
+		if (!xsisnil(sz_token))
 		{
 			set_plot_style(ptr_plot, sz_token, -1);
 		}
 
 		xhttp_get_url_query_entity(pb->http, DOC_PLOT_RULER, -1, sz_token, INT_LEN);
-		if (!is_null(sz_token))
+		if (!xsisnil(sz_token))
 		{
 			set_plot_ruler(ptr_plot, xstol(sz_token));
 		}
 
 		xhttp_get_url_query_entity(pb->http, DOC_PLOT_Y_STAGES, -1, sz_token, STYLE_LEN);
-		if (!is_null(sz_token))
+		if (!xsisnil(sz_token))
 		{
 			set_plot_y_stages_token(ptr_plot, sz_token, -1);
 		}
 
 		xhttp_get_url_query_entity(pb->http, DOC_PLOT_Y_BASES, -1, sz_token, STYLE_LEN);
-		if (!is_null(sz_token))
+		if (!xsisnil(sz_token))
 		{
 			set_plot_y_bases_token(ptr_plot, sz_token, -1);
 		}
 
 		xhttp_get_url_query_entity(pb->http, DOC_PLOT_Y_STEPS, -1, sz_token, STYLE_LEN);
-		if (!is_null(sz_token))
+		if (!xsisnil(sz_token))
 		{
 			set_plot_y_steps_token(ptr_plot, sz_token, -1);
 		}
 
 		xhttp_get_url_query_entity(pb->http, DOC_PLOT_Y_LABELS, -1, sz_token, STYLE_LEN);
-		if (!is_null(sz_token))
+		if (!xsisnil(sz_token))
 		{
 			set_plot_y_labels_token(ptr_plot, sz_token, -1);
 		}
 
 		xhttp_get_url_query_entity(pb->http, DOC_PLOT_Y_COLORS, -1, sz_token, STYLE_LEN);
-		if (!is_null(sz_token))
+		if (!xsisnil(sz_token))
 		{
 			set_plot_y_colors_token(ptr_plot, sz_token, -1);
 		}
 
 		xhttp_get_url_query_entity(pb->http, DOC_PLOT_X_LABELS, -1, sz_token, STYLE_LEN);
-		if (!is_null(sz_token))
+		if (!xsisnil(sz_token))
 		{
 			set_plot_x_labels_token(ptr_plot, sz_token, -1);
 		}
 
 		xhttp_get_url_query_entity(pb->http, DOC_PLOT_Y_COLORS, -1, sz_token, STYLE_LEN);
-		if (!is_null(sz_token))
+		if (!xsisnil(sz_token))
 		{
 			set_plot_y_colors_token(ptr_plot, sz_token, -1);
 		}
 
 		xhttp_get_url_query_entity(pb->http, DOC_MATRIX_ROWS, -1, sz_token, INT_LEN);
-		if (!is_null(sz_token))
+		if (!xsisnil(sz_token))
 		{
 			set_plot_matrix_rows(ptr_plot, xstol(sz_token));
 		}
 
 		xhttp_get_url_query_entity(pb->http, DOC_MATRIX_COLS, -1, sz_token, INT_LEN);
-		if (!is_null(sz_token))
+		if (!xsisnil(sz_token))
 		{
 			set_plot_matrix_cols(ptr_plot, xstol(sz_token));
 		}
 
 		xhttp_get_url_query_entity(pb->http, DOC_MATRIX_DATA, -1, sz_token, STYLE_LEN);
-		if (!is_null(sz_token))
+		if (!xsisnil(sz_token))
 		{
 			set_plot_matrix_data(ptr_plot, sz_token, -1);
 		}
@@ -231,7 +231,7 @@ bool_t _invoke_ploting(const https_block_t* pb, plot_block_t* pd)
 	xsprintf(sz_file, _T("%s/%s"), pd->path, pb->object);
 	split_file(sz_file, NULL, sz_name);
 
-	if (!is_null(sz_name))
+	if (!xsisnil(sz_name))
 	{
 		ptr_org = create_plot_from_meta_file(&pd->sd, sz_file);
 
@@ -246,7 +246,7 @@ bool_t _invoke_ploting(const https_block_t* pb, plot_block_t* pd)
 	}
 
 	get_plot_type(ptr_plot, sz_name, RES_LEN);
-	if (is_null(sz_name))
+	if (xsisnil(sz_name))
 	{
 		raise_user_error(_T("-1"), _T("unknown plot type"));
 	}
@@ -256,7 +256,7 @@ bool_t _invoke_ploting(const https_block_t* pb, plot_block_t* pd)
 	if (IS_ZERO_FLOAT(get_plot_height(ptr_plot)))
 		set_plot_height(ptr_plot, DEF_PLOT_HEIGHT);
 
-	if (is_null(get_plot_style_ptr(ptr_plot)))
+	if (xsisnil(get_plot_style_ptr(ptr_plot)))
 	{
 		if (compare_text(sz_name, -1, ATTR_PLOT_TYPE_INDICATOR, -1, 1) == 0)
 			set_plot_style(ptr_plot, DEF_INDICATOR_STYLE, -1);

@@ -56,7 +56,7 @@ static void _xhttps_get_config(const tchar_t* site, tchar_t* sz_path, tchar_t* s
 	tchar_t sz_file[PATH_LEN + 1] = { 0 };
 
 	get_envvar(XSERVICE_ROOT, sz_root, PATH_LEN);
-	if(is_null(sz_root))
+	if(xsisnil(sz_root))
 	{
 		//xscpy(sz_root,_T("."));
 		get_runpath((res_modu_t)0, sz_root, PATH_LEN);
@@ -123,7 +123,7 @@ static bool_t _xhttps_get_licence(xhand_t http, const tchar_t* site, tchar_t* hm
 	xhttp_get_authorization(http, sz_auth, sz_sid, RES_LEN, sz_sign, KEY_LEN);
 
 	get_envvar(XSERVICE_ROOT, sz_root, PATH_LEN);
-	if (is_null(sz_root))
+	if (xsisnil(sz_root))
 	{
 		//xscpy(sz_root,_T("."));
 		get_runpath((res_modu_t)0, sz_root, PATH_LEN);
@@ -286,7 +286,7 @@ void _xhttps_dispatch(xhand_t http, void* p)
 
 	get_envvar(XSERVICE_ROOT, sz_path, PATH_LEN);
 
-	if (is_null(sz_path))
+	if (xsisnil(sz_path))
 	{
 		get_runpath((res_modu_t)0, sz_path, PATH_LEN);
 	}
@@ -328,7 +328,7 @@ void _xhttps_dispatch(xhand_t http, void* p)
         xmem_free(buf_key);
         buf_key = NULL;
 
-		if (!is_null(sz_verify))
+		if (!xsisnil(sz_verify))
 		{
 			dw_crt = X509_CERT_SIZE;
 			buf_crt = (byte_t*)xmem_alloc(dw_crt);
@@ -394,7 +394,7 @@ void _xhttps_dispatch(xhand_t http, void* p)
 	xhttp_get_url_method(http, sz_method, RES_LEN);
 	xhttp_get_url_object(http, sz_object, PATH_LEN);
 
-	if (is_null(sz_object))
+	if (xsisnil(sz_object))
 	{
 		xhttp_set_response_code(http, HTTP_CODE_404);
 		xhttp_set_response_message(http, HTTP_CODE_404_TEXT, -1);
@@ -402,7 +402,7 @@ void _xhttps_dispatch(xhand_t http, void* p)
 		raise_user_error(_T("_https_invoke"), _T("request header object is empty"));
 	}
 
-	if (is_null(sz_site))
+	if (xsisnil(sz_site))
 	{
 		xhttp_split_object(sz_object, sz_site, sz_res);
 		if (IS_NULL_SITE(sz_site))
@@ -417,7 +417,7 @@ void _xhttps_dispatch(xhand_t http, void* p)
 		_xhttps_get_config(sz_site, sz_path, sz_track, sz_trace, sz_proc);
 	}
 
-	if (is_null(sz_path))
+	if (xsisnil(sz_path))
 	{
 		xhttp_set_response_code(http, HTTP_CODE_404);
 		xhttp_set_response_message(http, HTTP_CODE_404_TEXT, -1);
@@ -425,7 +425,7 @@ void _xhttps_dispatch(xhand_t http, void* p)
 		raise_user_error(sz_site, _T("website not define service entry\n"));
 	}
 
-	if (is_null(sz_proc))
+	if (xsisnil(sz_proc))
 	{
 		xhttp_set_response_code(http, HTTP_CODE_404);
 		xhttp_set_response_message(http, HTTP_CODE_404_TEXT, -1);
@@ -476,7 +476,7 @@ void _xhttps_dispatch(xhand_t http, void* p)
 
     xszero(sz_path, PATH_LEN);
     
-	if (!is_null(sz_track))
+	if (!xsisnil(sz_track))
 	{
 		get_loc_date(&xdt);
 		xsprintf(sz_trace, _T("%02d%02d%02d%02d%02d%08d"), xdt.year - 200, xdt.mon, xdt.day, xdt.hour, xdt.min, thread_get_id());

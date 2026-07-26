@@ -782,7 +782,7 @@ dword_t get_dicm_pdg(link_t_ptr ptr, byte_t* buf, dword_t max)
 		else if (compare_text(get_dom_node_name_ptr(nlk), -1, _T("PixelSpacing"), -1, 1) == 0) //pixel space
 		{
 			tmp = get_dom_node_text_ptr(nlk);
-			if (!is_null(tmp))
+			if (!xsisnil(tmp))
 			{
 				di.xmm_pixel = (int)(xstof(tmp) * 10000);
 				while (*tmp != _T('/') && *tmp != _T('\\') && *tmp != _T('\0'))

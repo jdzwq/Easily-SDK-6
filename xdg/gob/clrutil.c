@@ -212,7 +212,7 @@ bool_t find_color(const tchar_t* en_clr, tchar_t* cn_clr, tchar_t* rgb_clr, tcha
 {
 	int k;
 
-	if (is_null(en_clr))
+	if (xsisnil(en_clr))
 		return 0;
 
 	k = sizeof(color_map) / sizeof(color_map_t);
@@ -236,7 +236,7 @@ bool_t next_color(const tchar_t* en, tchar_t* en_clr, tchar_t* cn_clr, tchar_t* 
 {
 	int i, k;
 
-	if (is_null(en))
+	if (xsisnil(en))
 	{
 		i = 0;
 	}

@@ -80,7 +80,7 @@ void parse_xcolor(xcolor_t* pxc, const tchar_t* color)
 	tchar_t clr[CLR_LEN + 1] = { 0 };
 
 	pxc->r = pxc->g = pxc->b = 0;
-	if (is_null(color))
+	if (xsisnil(color))
 		return;
 
 	if (xsncmp(color, _T("RGB("), 4) == 0)
@@ -168,7 +168,7 @@ bool_t is_null_xpen(const xpen_t* pxp)
 	if (!pxp)
 		return 1;
 
-	return (is_null(pxp->size)) ? 1 : 0;
+	return (xsisnil(pxp->size)) ? 1 : 0;
 }
 
 bool_t is_null_xbrush(const xbrush_t* pxb)
@@ -176,7 +176,7 @@ bool_t is_null_xbrush(const xbrush_t* pxb)
 	if (!pxb)
 		return 1;
 
-	return (is_null(pxb->color)) ? 1 : 0;
+	return (xsisnil(pxb->color)) ? 1 : 0;
 }
 
 bool_t is_null_xfont(const xfont_t* pxf)
@@ -184,7 +184,7 @@ bool_t is_null_xfont(const xfont_t* pxf)
 	if (!pxf)
 		return 1;
 
-	return (is_null(pxf->size)) ? 1 : 0;
+	return (xsisnil(pxf->size)) ? 1 : 0;
 }
 
 bool_t is_null_xface(const xface_t* pxa)
@@ -192,7 +192,7 @@ bool_t is_null_xface(const xface_t* pxa)
 	if (!pxa)
 		return 1;
 
-	return (is_null(pxa->line_align) && is_null(pxa->text_align) && is_null(pxa->text_wrap)) ? 1 : 0;
+	return (xsisnil(pxa->line_align) && xsisnil(pxa->text_align) && xsisnil(pxa->text_wrap)) ? 1 : 0;
 }
 
 void default_xpen(xpen_t* pxp)
@@ -263,53 +263,53 @@ void format_wrap(int wrap, xface_t* pxa)
 
 void merge_xpen(xpen_t* pxp_dst, const xpen_t* pxp_src)
 {
-	if (is_null(pxp_dst->style))
+	if (xsisnil(pxp_dst->style))
 		xscpy(pxp_dst->style, pxp_src->style);
-	if (is_null(pxp_dst->color))
+	if (xsisnil(pxp_dst->color))
 		xscpy(pxp_dst->color, pxp_src->color);
-	if (is_null(pxp_dst->size))
+	if (xsisnil(pxp_dst->size))
 		xscpy(pxp_dst->size, pxp_src->size);
-	if (is_null(pxp_dst->opacity))
+	if (xsisnil(pxp_dst->opacity))
 		xscpy(pxp_dst->opacity, pxp_src->opacity);
 }
 
 void merge_xbrush(xbrush_t* pxb_dst, const xbrush_t* pxb_src)
 {
-	if (is_null(pxb_dst->style))
+	if (xsisnil(pxb_dst->style))
 		xscpy(pxb_dst->style, pxb_src->style);
-	if (is_null(pxb_dst->color))
+	if (xsisnil(pxb_dst->color))
 		xscpy(pxb_dst->color, pxb_src->color);
-	if (is_null(pxb_dst->opacity))
+	if (xsisnil(pxb_dst->opacity))
 		xscpy(pxb_dst->opacity, pxb_src->opacity);
-	if (is_null(pxb_dst->linear))
+	if (xsisnil(pxb_dst->linear))
 		xscpy(pxb_dst->linear, pxb_src->linear);
-	if (is_null(pxb_dst->gradient))
+	if (xsisnil(pxb_dst->gradient))
 		xscpy(pxb_dst->gradient, pxb_src->gradient);
 }
 
 void merge_xfont(xfont_t* pxf_dst, const xfont_t* pxf_src)
 {
-	if (is_null(pxf_dst->style))
+	if (xsisnil(pxf_dst->style))
 		xscpy(pxf_dst->style, pxf_src->style);
-	if (is_null(pxf_dst->size))
+	if (xsisnil(pxf_dst->size))
 		xscpy(pxf_dst->size, pxf_src->size);
-	if (is_null(pxf_dst->weight))
+	if (xsisnil(pxf_dst->weight))
 		xscpy(pxf_dst->weight, pxf_src->weight);
-	if (is_null(pxf_dst->family))
+	if (xsisnil(pxf_dst->family))
 		xscpy(pxf_dst->family, pxf_src->family);
 }
 
 void merge_xface(xface_t* pxa_dst, const xface_t* pxa_src)
 {
-	if (is_null(pxa_dst->text_color))
+	if (xsisnil(pxa_dst->text_color))
 		xscpy(pxa_dst->text_color, pxa_src->text_color);
-	if (is_null(pxa_dst->text_align))
+	if (xsisnil(pxa_dst->text_align))
 		xscpy(pxa_dst->text_align, pxa_src->text_align);
-	if (is_null(pxa_dst->line_align))
+	if (xsisnil(pxa_dst->line_align))
 		xscpy(pxa_dst->line_align, pxa_src->line_align);
-	if (is_null(pxa_dst->line_height))
+	if (xsisnil(pxa_dst->line_height))
 		xscpy(pxa_dst->line_height, pxa_src->line_height);
-	if (is_null(pxa_dst->text_wrap))
+	if (xsisnil(pxa_dst->text_wrap))
 		xscpy(pxa_dst->text_wrap, pxa_src->text_wrap);
 }
 
@@ -341,7 +341,7 @@ void lighten_xpen(xpen_t* pxp, int n)
 {
 	xcolor_t xc = { 0 };
 
-	if (is_null(pxp->color))
+	if (xsisnil(pxp->color))
 		return;
 
 	parse_xcolor(&xc, pxp->color);
@@ -355,7 +355,7 @@ void lighten_xbrush(xbrush_t* pxb, int n)
 {
 	xcolor_t xc = { 0 };
 
-	if (is_null(pxb->color))
+	if (xsisnil(pxb->color))
 		return;
 
 	parse_xcolor(&xc, pxb->color);
@@ -369,7 +369,7 @@ void lighten_xface(xface_t* pxa, int n)
 {
 	xcolor_t xc = { 0 };
 
-	if (is_null(pxa->text_color))
+	if (xsisnil(pxa->text_color))
 		return;
 
 	parse_xcolor(&xc, pxa->text_color);
@@ -409,7 +409,7 @@ int format_xpen_to_style(const xpen_t* pxp, tchar_t* buf, int max)
 {
 	int len, total = 0;
 
-	if (!is_null(pxp->style))
+	if (!xsisnil(pxp->style))
 	{
 		len = xslen(GDI_ATTR_STROKE_STYLE) + xslen(pxp->style) + 2;
 		if (total + len > max)
@@ -421,7 +421,7 @@ int format_xpen_to_style(const xpen_t* pxp, tchar_t* buf, int max)
 		total += len;
 	}
 
-	if (!is_null(pxp->size))
+	if (!xsisnil(pxp->size))
 	{
 		len = xslen(GDI_ATTR_STROKE_WIDTH) + xslen(pxp->size) + 2;
 		if (total + len > max)
@@ -433,7 +433,7 @@ int format_xpen_to_style(const xpen_t* pxp, tchar_t* buf, int max)
 		total += len;
 	}
 
-	if (!is_null(pxp->color))
+	if (!xsisnil(pxp->color))
 	{
 		len = xslen(GDI_ATTR_STROKE_COLOR) + xslen(pxp->color) + 2;
 		if (total + len > max)
@@ -445,7 +445,7 @@ int format_xpen_to_style(const xpen_t* pxp, tchar_t* buf, int max)
 		total += len;
 	}
 
-	if (!is_null(pxp->opacity))
+	if (!xsisnil(pxp->opacity))
 	{
 		len = xslen(GDI_ATTR_STROKE_OPACITY) + xslen(pxp->opacity) + 2;
 		if (total + len > max)
@@ -491,7 +491,7 @@ int format_xbrush_to_style(const xbrush_t* pxb, tchar_t* buf, int max)
 {
 	int len, total = 0;
 
-	if (!is_null(pxb->style))
+	if (!xsisnil(pxb->style))
 	{
 		len = xslen(GDI_ATTR_FILL_STYLE) + xslen(pxb->style) + 2;
 		if (total + len > max)
@@ -503,7 +503,7 @@ int format_xbrush_to_style(const xbrush_t* pxb, tchar_t* buf, int max)
 		total += len;
 	}
 
-	if (!is_null(pxb->color))
+	if (!xsisnil(pxb->color))
 	{
 		len = xslen(GDI_ATTR_FILL_COLOR) + xslen(pxb->color) + 2;
 		if (total + len > max)
@@ -515,7 +515,7 @@ int format_xbrush_to_style(const xbrush_t* pxb, tchar_t* buf, int max)
 		total += len;
 	}
 
-	if (!is_null(pxb->linear))
+	if (!xsisnil(pxb->linear))
 	{
 		len = xslen(GDI_ATTR_STOP_COLOR) + xslen(pxb->linear) + 2;
 		if (total + len > max)
@@ -527,7 +527,7 @@ int format_xbrush_to_style(const xbrush_t* pxb, tchar_t* buf, int max)
 		total += len;
 	}
 
-	if (!is_null(pxb->gradient))
+	if (!xsisnil(pxb->gradient))
 	{
 		len = xslen(GDI_ATTR_GRADIENT) + xslen(pxb->color) + 2;
 		if (total + len > max)
@@ -539,7 +539,7 @@ int format_xbrush_to_style(const xbrush_t* pxb, tchar_t* buf, int max)
 		total += len;
 	}
 
-	if (!is_null(pxb->opacity))
+	if (!xsisnil(pxb->opacity))
 	{
 		len = xslen(GDI_ATTR_FILL_OPACITY) + xslen(pxb->opacity) + 2;
 		if (total + len > max)
@@ -582,7 +582,7 @@ int format_xfont_to_style(const xfont_t* pfont, tchar_t* buf, int max)
 {
 	int len, total = 0;
 
-	if (!is_null(pfont->family))
+	if (!xsisnil(pfont->family))
 	{
 		len = xslen(GDI_ATTR_FONT_FAMILY) + xslen(pfont->family) + 2;
 		if (total + len > max)
@@ -594,7 +594,7 @@ int format_xfont_to_style(const xfont_t* pfont, tchar_t* buf, int max)
 		total += len;
 	}
 
-	if (!is_null(pfont->style))
+	if (!xsisnil(pfont->style))
 	{
 		len = xslen(GDI_ATTR_FONT_STYLE) + xslen(pfont->style) + 2;
 		if (total + len > max)
@@ -606,7 +606,7 @@ int format_xfont_to_style(const xfont_t* pfont, tchar_t* buf, int max)
 		total += len;
 	}
 
-	if (!is_null(pfont->size))
+	if (!xsisnil(pfont->size))
 	{
 		len = xslen(GDI_ATTR_FONT_SIZE) + xslen(pfont->size) + 2;
 		if (total + len > max)
@@ -618,7 +618,7 @@ int format_xfont_to_style(const xfont_t* pfont, tchar_t* buf, int max)
 		total += len;
 	}
 
-	if (!is_null(pfont->weight))
+	if (!xsisnil(pfont->weight))
 	{
 		len = xslen(GDI_ATTR_FONT_WEIGHT) + xslen(pfont->weight) + 2;
 		if (total + len > max)
@@ -664,7 +664,7 @@ int format_xface_to_style(const xface_t* ptt, tchar_t* buf, int max)
 {
 	int len, total = 0;
 
-	if (!is_null(ptt->text_color))
+	if (!xsisnil(ptt->text_color))
 	{
 		len = xslen(GDI_ATTR_TEXT_COLOR) + xslen(ptt->text_color) + 2;
 		if (total + len > max)
@@ -676,7 +676,7 @@ int format_xface_to_style(const xface_t* ptt, tchar_t* buf, int max)
 		total += len;
 	}
 
-	if (!is_null(ptt->text_align))
+	if (!xsisnil(ptt->text_align))
 	{
 		len = xslen(GDI_ATTR_TEXT_ALIGN) + xslen(ptt->text_align) + 2;
 		if (total + len > max)
@@ -688,7 +688,7 @@ int format_xface_to_style(const xface_t* ptt, tchar_t* buf, int max)
 		total += len;
 	}
 
-	if (!is_null(ptt->line_align))
+	if (!xsisnil(ptt->line_align))
 	{
 		len = xslen(GDI_ATTR_LINE_ALIGN) + xslen(ptt->line_align) + 2;
 		if (total + len > max)
@@ -700,7 +700,7 @@ int format_xface_to_style(const xface_t* ptt, tchar_t* buf, int max)
 		total += len;
 	}
 
-	if (!is_null(ptt->text_wrap))
+	if (!xsisnil(ptt->text_wrap))
 	{
 		len = xslen(GDI_ATTR_TEXT_WRAP) + xslen(ptt->text_wrap) + 2;
 		if (total + len > max)
@@ -712,7 +712,7 @@ int format_xface_to_style(const xface_t* ptt, tchar_t* buf, int max)
 		total += len;
 	}
 
-	if (!is_null(ptt->line_height))
+	if (!xsisnil(ptt->line_height))
 	{
 		len = xslen(GDI_ATTR_LINE_HEIGHT) + xslen(ptt->line_height) + 2;
 		if (total + len > max)

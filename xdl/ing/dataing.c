@@ -26,7 +26,7 @@ LICENSE.GPL3 for more details.
 
 #include "dataing.h"
 
-#include "../xdlgdi.h"
+#include "../xdlsdi.h"
 #include "../xdlutil.h"
 
 
@@ -62,7 +62,7 @@ void draw_data(const drawing_interface* pci, const xface_t* pxa, const xrect_t* 
 		{
 			xscpy(sz_format, _T(""));
 		}
-		else if (!is_null(fmt))
+		else if (!xsisnil(fmt))
 		{
 			format_integer_ex(lt, fmt, sz_format, RES_LEN);
 		}
@@ -71,7 +71,7 @@ void draw_data(const drawing_interface* pci, const xface_t* pxa, const xrect_t* 
 			xsncpy(sz_format, data, len);
 		}
 
-		if (autowrap && pxa && is_null(xa.text_wrap))
+		if (autowrap && pxa && xsisnil(xa.text_wrap))
 		{
 			(*pci->drw->pf_text_size)(pci->ctx, sz_format, -1, &xs);
 			if (xs.fw > pxr->fw)
@@ -90,7 +90,7 @@ void draw_data(const drawing_interface* pci, const xface_t* pxa, const xrect_t* 
 		{
 			xscpy(sz_format, _T(""));
 		}
-		else if (!is_null(fmt))
+		else if (!xsisnil(fmt))
 		{
 			format_numeric(db, fmt, sz_format, RES_LEN);
 		}
@@ -99,7 +99,7 @@ void draw_data(const drawing_interface* pci, const xface_t* pxa, const xrect_t* 
 			xsncpy(sz_format, data, len);
 		}
 
-		if (autowrap && is_null(xa.text_wrap))
+		if (autowrap && xsisnil(xa.text_wrap))
 		{
 			(*pci->drw->pf_text_size)(pci->ctx, sz_format, -1, &xs);
 			if (xs.fw > pxr->fw)
@@ -112,7 +112,7 @@ void draw_data(const drawing_interface* pci, const xface_t* pxa, const xrect_t* 
 	}
 	else if (compare_text(type, -1, ATTR_DATA_TYPE_DATETIME, -1, 0) == 0)
 	{
-		if (!is_null(fmt) && !is_null(data))
+		if (!xsisnil(fmt) && !xsisnil(data))
 		{
 			parse_datetime(&dt, data);
 			format_datetime_ex(&dt, fmt, sz_format, RES_LEN);
@@ -122,7 +122,7 @@ void draw_data(const drawing_interface* pci, const xface_t* pxa, const xrect_t* 
 			xsncpy(sz_format, data, len);
 		}
 
-		if (autowrap && is_null(xa.text_wrap))
+		if (autowrap && xsisnil(xa.text_wrap))
 		{
 			(*pci->drw->pf_text_size)(pci->ctx, sz_format, -1, &xs);
 			if (xs.fw > pxr->fw)
@@ -135,7 +135,7 @@ void draw_data(const drawing_interface* pci, const xface_t* pxa, const xrect_t* 
 	}
 	else if (compare_text(type, -1, ATTR_DATA_TYPE_DATE, -1, 0) == 0)
 	{
-		if (!is_null(fmt) && !is_null(data))
+		if (!xsisnil(fmt) && !xsisnil(data))
 		{
 			parse_date(&dt, data);
 			format_datetime_ex(&dt, fmt, sz_format, RES_LEN);
@@ -145,7 +145,7 @@ void draw_data(const drawing_interface* pci, const xface_t* pxa, const xrect_t* 
 			xsncpy(sz_format, data, len);
 		}
 
-		if (autowrap && is_null(xa.text_wrap))
+		if (autowrap && xsisnil(xa.text_wrap))
 		{
 			(*pci->drw->pf_text_size)(pci->ctx, sz_format, -1, &xs);
 			if (xs.fw > pxr->fw)
@@ -158,7 +158,7 @@ void draw_data(const drawing_interface* pci, const xface_t* pxa, const xrect_t* 
 	}
 	else
 	{
-		if (autowrap && is_null(xa.text_wrap))
+		if (autowrap && xsisnil(xa.text_wrap))
 		{
 			(*pci->drw->pf_text_size)(pci->ctx, data, len, &xs);
 			if (xs.fw > pxr->fw)

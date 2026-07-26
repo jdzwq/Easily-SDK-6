@@ -711,7 +711,7 @@ void hand_images_keydown(widget_t widget, dword_t ks, int nKey)
 	if (!ptd->images)
 		return;
 
-	b_ctl = ((ks & KS_WITH_CONTROL) || (ks & KS_WITH_CMD))? 1 : 0;
+	b_ctl = ((ks & KS_WITH_CONTROL) || (ks & KS_WITH_META))? 1 : 0;
 	
 	switch (nKey)
 	{

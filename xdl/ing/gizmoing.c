@@ -26,7 +26,7 @@ LICENSE.GPL3 for more details.
 
 #include "gizmoing.h"
 
-#include "../xdlgdi.h"
+#include "../xdlsdi.h"
 
 #define SMALL_GIZMO		12 //(float)(12.0f / PDPERMM)
 #define MIDD_GIZMO		24 //(float)(24.0f / PDPERMM)
@@ -9178,7 +9178,7 @@ PF_GIZMO_MAKE find_gizmo_maker(const tchar_t* iname)
 {
 	int k;
 
-	if (is_null(iname))
+	if (xsisnil(iname))
 		return NULL;
 
 	k = sizeof(g_gizmo_table) / sizeof(GIZMO_DRAW_TABLE);

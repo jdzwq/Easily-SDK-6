@@ -1147,7 +1147,7 @@ static tls12_handshake_states _ssl_write_client_hello(ssl_context *pssl)
 	PUT_SWORD_NET(prec->snd_msg, msglen, (unsigned short)(0));
 	msglen += 2;
 
-	if (!a_is_null(psec->host_cn))
+	if (!a_xsisnil(psec->host_cn))
 	{
 		len = a_xslen(psec->host_cn);
 

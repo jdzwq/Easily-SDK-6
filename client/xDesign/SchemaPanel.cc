@@ -244,7 +244,7 @@ void SchemaPanel_OnSave(widget_t widget)
 	
 	tchar_t szFile[PATH_LEN + 1] = { 0 };
 
-	if (is_null(pdt->szFile))
+	if (xsisnil(pdt->szFile))
 	{
 		tchar_t szPath[PATH_LEN + 1] = { 0 };
 
@@ -253,7 +253,7 @@ void SchemaPanel_OnSave(widget_t widget)
 		if (!shell_get_filename(widget, szPath, _T("Schema Xml File(*.schema)\0*.schema\0"), _T("schema"), 1, szPath, PATH_LEN, szFile, PATH_LEN))
 			return;
 
-		xscat(szPath, _T("/"));
+		xsncat(szPath, SLASH_CHAR, 1);
 		xscat(szPath, szFile);
 		xscpy(szFile, szPath);
 	}
@@ -282,7 +282,7 @@ void SchemaPanel_OnSaveAs(widget_t widget)
 	if (!shell_get_filename(widget, szPath, _T("Schema Xml File(*.schema)\0*.schema\0"), _T("schema"), 1, szPath, PATH_LEN, szFile, PATH_LEN))
 		return;
 
-	xscat(szPath, _T("/"));
+	xsncat(szPath, SLASH_CHAR, 1);
 	xscat(szPath, szFile);
 	xscpy(szFile, szPath);
 
@@ -382,7 +382,7 @@ int SchemaPanel_OnCreate(widget_t widget, void* data)
 
 	widget_show(pdt->hMemo, WS_SHOW_NORMAL);
 
-	if (!is_null(szParam))
+	if (!xsisnil(szParam))
 	{
 		SchemaPanel_OpenFile(widget, szParam);
 	}
@@ -549,7 +549,7 @@ void SchemaPanel_OnParentCommand(widget_t widget, int code, vword_t data)
 		tchar_t szPath[PATH_LEN + 1], szExt[INT_LEN + 1];
 		const tchar_t* nname = (const tchar_t*)data;
 
-		if (!is_null(pdt->szFile) && !is_null(nname))
+		if (!xsisnil(pdt->szFile) && !xsisnil(nname))
 		{
 			split_path(pdt->szFile, szPath, NULL, szExt);
 			xsprintf(pdt->szFile, _T("%s\\%s.%s"), szPath, nname, szExt);

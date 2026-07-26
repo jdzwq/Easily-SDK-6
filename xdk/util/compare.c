@@ -125,7 +125,7 @@ int compare_text(const tchar_t* src, int srclen, const tchar_t* dest, int destle
 	int cmplen;
 	int rt;
 
-	if (is_null(src) && is_null(dest))
+	if (xsisnil(src) && xsisnil(dest))
 		return 0;
 
 	if (srclen == -1)

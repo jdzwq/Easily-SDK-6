@@ -59,9 +59,9 @@ static int _editor_noti_begin_edit(editor_context* ptd)
 	(*pdi->pf_get_obj_rect)(ptd->widget, &xr);
 
 	default_textor_xfont(&xf);
-	if(!is_null(styles)){parse_xfont_from_style(&xf, styles);}
+	if(!xsisnil(styles)){parse_xfont_from_style(&xf, styles);}
 	default_textor_xface(&xa);
-	if(!is_null(styles)){parse_xface_from_style(&xa, styles);}
+	if(!xsisnil(styles)){parse_xface_from_style(&xa, styles);}
 
 	widget_get_color_mode(ptd->widget, &clrs);
 	format_xcolor(&(clrs.clr_txt), xa.text_color);
@@ -91,7 +91,7 @@ static int _editor_noti_begin_edit(editor_context* ptd)
 	}
 	else if (compare_text(editor, -1, ATTR_EDITOR_FIRECHECK, -1, 0) == 0)
 	{
-		/*if (is_null(get_field_value_ptr(ptd->field)))
+		/*if (xsisnil(get_field_value_ptr(ptd->field)))
 			return 0;
 
 		checked = (compare_text(get_field_text_ptr(ptd->field), -1, get_field_value_ptr(ptd->field), -1, 0) == 0) ? 1 : 0;

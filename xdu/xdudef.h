@@ -116,9 +116,8 @@ typedef struct _handle_head	 *widget_t;
 /*key button state*/
 #define KS_WITH_CONTROL		0x0008
 #define KS_WITH_SHIFT		0x0004
-#define KS_WITH_ALT			0x0020
-#define KS_WITH_CAPS		0x0040
-#define KS_WITH_CMD			0x0080
+#define KS_WITH_ALT			0x0040
+#define KS_WITH_META		0x0080
 
 /*widget size mode*/
 #define WS_SIZE_RESTORE		0

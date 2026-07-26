@@ -25,7 +25,7 @@ LICENSE.GPL3 for more details.
 ***********************************************************************/
 #include "treeview.h"
 
-#include "../xdlgdi.h"
+#include "../xdlsdi.h"
 #include "../xdldoc.h"
 
 
@@ -466,7 +466,7 @@ void draw_tree(const drawing_interface* pci, link_t_ptr ptr)
 		xr_image.fh = ih;
 
 		icon = get_tree_item_icon_ptr(ilk);
-		if ( !is_null(icon))
+		if ( !xsisnil(icon))
 		{
 			ft_center_rect(&xr_image, DEF_SMALL_ICON, DEF_SMALL_ICON);
 			draw_gizmo(pci, &xc, &xr_image, get_tree_item_icon_ptr(ilk));

@@ -688,10 +688,10 @@ bool_t load_glyph_info(const tchar_t* fpath, glyph_info_t* gpm)
 
 	TRY_CATCH;
 
-	if(!is_null(fpath)) 
+	if(!xsisnil(fpath)) 
 	{
 		xscpy(fname, fpath);
-		xscat(fname, _T("/"));
+		xscat(fname, SLASH_CHAR);
 	}
 
 	xsappend(fname, _T("%s-%s-%s-%s-%s.gly"),
@@ -756,10 +756,10 @@ bool_t save_glyph_info(const tchar_t* fpath, glyph_info_t* gpm)
 	dw = save_glyph_header(buf, MAX_LONG, gpm);
 	dw += save_glyph_pixmap((buf + dw), MAX_LONG, gpm);
 
-	if(!is_null(fpath)) 
+	if(!xsisnil(fpath)) 
 	{
 		xscpy(fname, fpath);
-		xscat(fname, _T("/"));
+		xscat(fname, SLASH_CHAR);
 	}
 
 	xsappend(fname, _T("%s-%s-%s-%s-%s.gly"),

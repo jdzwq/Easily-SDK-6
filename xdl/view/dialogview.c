@@ -26,7 +26,7 @@ LICENSE.GPL3 for more details.
 #include "dialogview.h"
 #include "boxview.h"
 
-#include "../xdlgdi.h"
+#include "../xdlsdi.h"
 #include "../xdldoc.h"
 
 

@@ -986,7 +986,7 @@ void format_xml(xml_read_interface* pxp, opera_interface* pbo)
 
 		b_parent = (get_dom_first_child_node(nlk) == NULL) ? 0 : 1;
 
-		b_close = (b_parent || !is_null(node_text)) ? 1 : 0;
+		b_close = (b_parent || !xsisnil(node_text)) ? 1 : 0;
 
 		if (pxp->pf_node_read_begin)
 		{

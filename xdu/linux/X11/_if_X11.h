@@ -41,6 +41,7 @@ LICENSE.GPL3 for more details.
 #include <X11/Xlocale.h>
 #include <X11/extensions/Xrender.h>
 #include <X11/Xft/Xft.h>
+//#include <xkbcommon/xkbcommon.h>
 
 #include <gtk/gtk.h>
 

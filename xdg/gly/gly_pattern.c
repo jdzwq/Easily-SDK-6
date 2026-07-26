@@ -193,7 +193,7 @@ int format_glyph_pattern(const xfont_t* pxf, tchar_t* buf, int max)
 	else
 		xscpy(fstyle, _T("regular"));
 
-	if (is_null(pxf->size))
+	if (xsisnil(pxf->size))
 		xscpy(fsize, _T("12"));
 	else
 		xsncpy(fsize, pxf->size, INT_LEN);

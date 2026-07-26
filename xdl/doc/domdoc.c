@@ -728,7 +728,7 @@ void set_dom_node_nsurl(link_t_ptr ilk, const tchar_t* sz_url, int len)
 	if (!pti->xmlns)
 		pti->xmlns = create_string_table(0);
 
-	if (is_null(pti->ns))
+	if (xsisnil(pti->ns))
 		xsprintf(nkey, _T("%s"), XMLNS);
 	else
 		xsprintf(nkey, _T("%s:%s"), XMLNS, pti->ns);
@@ -748,7 +748,7 @@ const tchar_t* get_dom_node_nsurl_ptr(link_t_ptr ilk)
 	if (!pti->xmlns)
 		return NULL;
 
-	if (is_null(pti->ns))
+	if (xsisnil(pti->ns))
 		xsprintf(nkey, _T("%s"), XMLNS);
 	else
 		xsprintf(nkey, _T("%s:%s"), XMLNS, pti->ns);
@@ -776,10 +776,10 @@ void set_dom_node_xmlns(link_t_ptr ilk, const tchar_t* nsname, int klen, const t
 
 	pti = DomItemFromLink(ilk);
 
-	if (is_null(nsname) || !klen)
+	if (xsisnil(nsname) || !klen)
 		return;
 
-	if (is_null(nsurl))
+	if (xsisnil(nsurl))
 		vlen = 0;
 
 	if (vlen < 0)
@@ -954,7 +954,7 @@ void set_dom_node_options(link_t_ptr ilk,const tchar_t* token,int len)
 		ptt->opti = NULL;
 	}
 
-	if(is_null(token) || !len)
+	if(xsisnil(token) || !len)
 		return;
 
 	ptt->opti = create_string_table(ORDER_ASCEND);
@@ -1008,7 +1008,7 @@ const tchar_t* get_dom_node_options_text_ptr(link_t_ptr ilk,const tchar_t* szKey
 
 	ptt = DomItemFromLink(ilk);
 
-	if(is_null(szKey))
+	if(xsisnil(szKey))
 		return NULL;
 
 	if (!ptt->opti)
@@ -1027,7 +1027,7 @@ void set_dom_node_options_text(link_t_ptr ilk,const tchar_t* szKey,int klen,cons
 
 	ptt = DomItemFromLink(ilk);
 
-	if(is_null(szKey))
+	if(xsisnil(szKey))
 		return ;
 
 	if(!ptt->opti)

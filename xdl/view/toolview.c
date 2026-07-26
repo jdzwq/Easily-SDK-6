@@ -25,7 +25,7 @@ LICENSE.GPL3 for more details.
 ***********************************************************************/
 #include "toolview.h"
 
-#include "../xdlgdi.h"
+#include "../xdlsdi.h"
 #include "../xdldoc.h"
 
 
@@ -47,7 +47,7 @@ int _calc_tool_group_cols(link_t_ptr ptr, link_t_ptr glk)
 
 	count = get_tool_group_item_count(glk);
 
-	if (is_null(show))
+	if (xsisnil(show))
 	{
 		return count;
 	}
@@ -81,7 +81,7 @@ int _calc_tool_group_rows(link_t_ptr ptr, link_t_ptr glk)
 
 	show = get_tool_group_show_ptr(glk);
 
-	if (is_null(show))
+	if (xsisnil(show))
 	{
 		return 1;
 	}

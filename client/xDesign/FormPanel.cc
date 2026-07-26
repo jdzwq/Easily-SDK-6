@@ -272,7 +272,7 @@ void FormPanel_OnSave(widget_t widget)
 
 	tchar_t szFile[PATH_LEN + 1] = { 0 };
 
-	if (is_null(pdt->szFile))
+	if (xsisnil(pdt->szFile))
 	{
 		tchar_t szPath[PATH_LEN + 1] = { 0 };
 
@@ -281,7 +281,7 @@ void FormPanel_OnSave(widget_t widget)
 		if (!shell_get_filename(widget, szPath, _T("Form Meta File(*.sheet)\0*.sheet\0"), _T("sheet"), 1, szPath, PATH_LEN, szFile, PATH_LEN))
 			return;
 
-		xscat(szPath, _T("/"));
+		xsncat(szPath, SLASH_CHAR, 1);
 		xscat(szPath, szFile);
 		xscpy(szFile, szPath);
 	}
@@ -310,7 +310,7 @@ void FormPanel_OnSaveAs(widget_t widget)
 	if (!shell_get_filename(widget, szPath, _T("Form Meta File(*.sheet)\0*.sheet\0svg image file(*.svg)\0*.svg\0"), _T("sheet"), 1, szPath, PATH_LEN, szFile, PATH_LEN))
 		return;
 
-	xscat(szPath, _T("/"));
+	xsncat(szPath, SLASH_CHAR, 1);
 	xscat(szPath, szFile);
 	xscpy(szFile, szPath);
 
@@ -400,7 +400,7 @@ void FormPanel_OnSchema(widget_t widget)
 	if (!shell_get_filename(widget, szPath, _T("xml schema file(*.schema)\0*.schema\0"), _T("schema"), 1, szPath, PATH_LEN, szFile, PATH_LEN))
 		return;
 
-	xscat(szPath, _T("/"));
+	xsncat(szPath, SLASH_CHAR, 1);
 	xscat(szPath, szFile);
 	xscpy(szFile, szPath);
 
@@ -429,7 +429,7 @@ void FormPanel_OnExport(widget_t widget)
 	if (!shell_get_filename(widget, szPath, _T("xml data file(*.xml)\0*.xml\0"), _T("xml"), 1, szPath, PATH_LEN, szFile, PATH_LEN))
 		return;
 
-	xscat(szPath, _T("/"));
+	xsncat(szPath, SLASH_CHAR, 1);
 	xscat(szPath, szFile);
 	xscpy(szFile, szPath);
 
@@ -462,7 +462,7 @@ void FormPanel_OnImport(widget_t widget)
 	if (!shell_get_filename(widget, szPath, _T("xml data file(*.xml)\0*.xml\0"), _T("xml"), 0, szPath, PATH_LEN, szFile, PATH_LEN))
 		return;
 
-	xscat(szPath, _T("/"));
+	xsncat(szPath, SLASH_CHAR, 1);
 	xscat(szPath, szFile);
 	xscpy(szFile, szPath);
 
@@ -678,7 +678,7 @@ void FormPanel_OnAttach(widget_t widget)
 	if (!shell_get_filename(widget, szPath, szFilter, szExt, 0, szPath, PATH_LEN, szFile, PATH_LEN))
 		return;
 
-	xscat(szPath, _T("/"));
+	xsncat(szPath, SLASH_CHAR, 1);
 	xscat(szPath, szFile);
 
 	if (compare_text(fclass, -1, DOC_FORM_HREF, -1, 0) == 0)
@@ -1922,7 +1922,7 @@ int FormPanel_OnCreate(widget_t widget, void* data)
 	widget_attach_splitor(widget, ptrSplit);
 	widget_layout_splitor(widget);
 
-	if (!is_null(szParam))
+	if (!xsisnil(szParam))
 	{
 		if (!FormPanel_OpenFile(widget, szParam))
 			return -1;
@@ -2312,7 +2312,7 @@ void FormPanel_OnParentCommand(widget_t widget, int code, vword_t data)
 		tchar_t szPath[PATH_LEN + 1], szExt[INT_LEN + 1];
 		const tchar_t* nname = (const tchar_t*)data;
 
-		if (!is_null(pdt->szFile) && !is_null(nname))
+		if (!xsisnil(pdt->szFile) && !xsisnil(nname))
 		{
 			split_path(pdt->szFile, szPath, NULL, szExt);
 			xsprintf(pdt->szFile, _T("%s\\%s.%s"), szPath, nname, szExt);

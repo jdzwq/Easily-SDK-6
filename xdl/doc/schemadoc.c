@@ -70,7 +70,7 @@ bool_t is_empty_schema(link_t_ptr ptr)
 	slk_row = get_schema_next_element(slk_rowset, LINK_FIRST);
 	while (slk_row)
 	{
-		if (is_null(get_schema_element_name_ptr(slk_row)))
+		if (xsisnil(get_schema_element_name_ptr(slk_row)))
 		{
 			slk_ref = get_schema_element(ptr, get_schema_element_ref_ptr(slk_row));
 			if (slk_ref && is_schema_declare(slk_ref))

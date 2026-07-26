@@ -25,7 +25,7 @@ LICENSE.GPL3 for more details.
 ***********************************************************************/
 #include "gridview.h"
 
-#include "../xdlgdi.h"
+#include "../xdlsdi.h"
 #include "../xdldoc.h"
 
 
@@ -807,7 +807,7 @@ void draw_grid_page(const drawing_interface* pci, link_t_ptr ptr, int page)
 			}
 
 			rstyle = get_row_style_ptr(rlk);
-			if (!is_null(rstyle))
+			if (!xsisnil(rstyle))
 			{
 				parse_xfont_from_style(&xf, rstyle);
 				(*pci->drw->pf_set_xfont)(pci->ctx, &xf);

@@ -261,7 +261,7 @@ link_t_ptr get_gax(link_t_ptr ptr, const tchar_t *gname)
 {
 	link_t_ptr glk;
 
-	if (is_null(gname))
+	if (xsisnil(gname))
 		return NULL;
 
 	glk = get_next_gax(ptr, LINK_FIRST);
@@ -370,7 +370,7 @@ link_t_ptr get_yax(link_t_ptr ptr,const tchar_t *yname)
 {
 	link_t_ptr ylk;
 
-	if(is_null(yname))
+	if(xsisnil(yname))
 		return NULL;
 
 	ylk = get_next_yax(ptr,LINK_FIRST);
@@ -387,7 +387,7 @@ link_t_ptr get_yax_by_id(link_t_ptr ptr, const tchar_t* cid)
 {
 	link_t_ptr ylk;
 
-	if (is_null(cid))
+	if (xsisnil(cid))
 		return NULL;
 
 	ylk = get_next_yax(ptr, LINK_FIRST);
@@ -581,7 +581,7 @@ void set_coor_text(link_t_ptr xlk, link_t_ptr ylk, const tchar_t *sz, int len)
 	const tchar_t* sz_name;
 
 	sz_name = get_yax_name_ptr(ylk);
-	if(is_null(sz_name))
+	if(xsisnil(sz_name))
 		return;
 
 	if (len < 0)
@@ -599,7 +599,7 @@ void set_coor_numeric(link_t_ptr xlk,link_t_ptr ylk,double dbl)
 	const tchar_t* sz_name;
 
 	sz_name = get_yax_name_ptr(ylk);
-	if(is_null(sz_name))
+	if(xsisnil(sz_name))
 		return;
 
 	numtoxs_dig(dbl, get_yax_data_dig(ylk), token, NUM_LEN);
@@ -696,7 +696,7 @@ void set_coor_dirty(link_t_ptr xlk, link_t_ptr ylk, bool_t b)
 	dword_t msk;
 
 	sz_yax = get_yax_name_ptr(ylk);
-	if (is_null(sz_yax))
+	if (xsisnil(sz_yax))
 		return;
 
 	ent = get_hash_entity(get_dom_node_attr_table(xlk), sz_yax, -1);
@@ -719,7 +719,7 @@ bool_t get_coor_dirty(link_t_ptr xlk, link_t_ptr ylk)
 	dword_t msk;
 
 	sz_yax = get_yax_name_ptr(ylk);
-	if (is_null(sz_yax))
+	if (xsisnil(sz_yax))
 		return 0;
 
 	ent = get_hash_entity(get_dom_node_attr_table(xlk), sz_yax, -1);

@@ -135,7 +135,7 @@ link_t_ptr set_soap_request_node(link_t_ptr ptr, const tchar_t* sz_req, const tc
 	nlk_req = insert_dom_node(nlk_body, LINK_LAST);
 	set_dom_node_name(nlk_req, sz_req, -1);
 
-	if (is_null(sz_ns))
+	if (xsisnil(sz_ns))
 	{
 		xscpy(sz_token, XMLNS);
 	}
@@ -145,7 +145,7 @@ link_t_ptr set_soap_request_node(link_t_ptr ptr, const tchar_t* sz_req, const tc
 		xsprintf(sz_token, _T("%s:%s"), XMLNS, sz_ns);
 	}
 
-	if (!is_null(sz_url))
+	if (!xsisnil(sz_url))
 	{
 		set_dom_node_xmlns(nlk_req, sz_token, -1, sz_url, -1);
 	}
@@ -340,7 +340,7 @@ link_t_ptr set_soap_response_node(link_t_ptr ptr, const tchar_t* sz_res, const t
 	nlk_res = insert_dom_node(nlk_body, LINK_LAST);
 	set_dom_node_name(nlk_res, sz_res, -1);
 
-	if (is_null(sz_ns))
+	if (xsisnil(sz_ns))
 	{
 		xscpy(sz_token, XMLNS);
 	}
@@ -350,7 +350,7 @@ link_t_ptr set_soap_response_node(link_t_ptr ptr, const tchar_t* sz_res, const t
 		xsprintf(sz_token, _T("%s:%s"), XMLNS, sz_ns);
 	}
 
-	if (!is_null(sz_url))
+	if (!xsisnil(sz_url))
 	{
 		set_dom_node_xmlns(nlk_res, sz_token, -1, sz_url, -1);
 	}

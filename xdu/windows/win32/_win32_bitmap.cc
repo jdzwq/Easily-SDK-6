@@ -155,7 +155,7 @@ bitmap_t winCreateColorBitmap(visual_t rdc, const xcolor_t* pxc, int w, int h)
 	bih.planes = 1;
 	bih.clrbits = deep;
 	bih.compress = 0;
-	bih.bytes = BMP_LINE_BYTES(w, bih.clrbits) * h;
+	bih.bytes = BMP_POINTS_BYTES(w, bih.clrbits) * h;
 	bih.xpelsperm = 0;
 	bih.ypelsperm = 0;
 	bih.clrused = 0;
@@ -261,7 +261,7 @@ bitmap_t winCreatePatternBitmap(visual_t rdc, const xcolor_t* pxc_front, const x
 	bih.planes = 1;
 	bih.clrbits = deep;
 	bih.compress = 0;
-	bih.bytes = BMP_LINE_BYTES(w, bih.clrbits) * h;
+	bih.bytes = BMP_POINTS_BYTES(w, bih.clrbits) * h;
 	bih.xpelsperm = 0;
 	bih.ypelsperm = 0;
 	bih.clrused = 0;
@@ -345,7 +345,7 @@ bitmap_t winCreateGradientBitmap(visual_t rdc, const xcolor_t* pxc_brim, const x
 	bih.planes = 1;
 	bih.clrbits = deep;
 	bih.compress = 0;
-	bih.bytes = BMP_LINE_BYTES(w, bih.clrbits) * h;
+	bih.bytes = BMP_POINTS_BYTES(w, bih.clrbits) * h;
 	bih.xpelsperm = 0;
 	bih.ypelsperm = 0;
 	bih.clrused = 0;
@@ -438,7 +438,7 @@ bitmap_t winCreateCode128Bitmap(visual_t rdc, const xcolor_t* pxc_front, const x
 	bih.planes = 1;
 	bih.clrbits = deep;
 	bih.compress = 0;
-	bih.bytes = BMP_LINE_BYTES(w, bih.clrbits) * h;
+	bih.bytes = BMP_POINTS_BYTES(w, bih.clrbits) * h;
 	bih.xpelsperm = 0;
 	bih.ypelsperm = 0;
 	bih.clrused = 0;
@@ -555,7 +555,7 @@ bitmap_t winCreatePDF417Bitmap(visual_t rdc, const xcolor_t* pxc_front, const xc
 	bih.planes = 1;
 	bih.clrbits = deep;
 	bih.compress = 0;
-	bih.bytes = BMP_LINE_BYTES(w, bih.clrbits) * h;
+	bih.bytes = BMP_POINTS_BYTES(w, bih.clrbits) * h;
 	bih.xpelsperm = 0;
 	bih.ypelsperm = 0;
 	bih.clrused = 0;
@@ -672,7 +672,7 @@ bitmap_t winCreateQRCodeBitmap(visual_t rdc, const xcolor_t* pxc_front, const xc
 	bih.planes = 1;
 	bih.clrbits = deep;
 	bih.compress = 0;
-	bih.bytes = BMP_LINE_BYTES(w, bih.clrbits) * h;
+	bih.bytes = BMP_POINTS_BYTES(w, bih.clrbits) * h;
 	bih.xpelsperm = 0;
 	bih.ypelsperm = 0;
 	bih.clrused = 0;
@@ -729,7 +729,7 @@ bitmap_t winCreateStorageBitmap(visual_t rdc, const tchar_t* filename)
 	HANDLE hFile;
 	DWORD dw = 0;
 	
-	if (is_null(filename))
+	if (xsisnil(filename))
 		return 0;
 
 	if (!GetFileAttributesEx(filename, GetFileExInfoStandard, &ad))

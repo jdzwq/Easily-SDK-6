@@ -96,7 +96,7 @@ void _invoke_publish(const tcps_block_t* pb, mqtt_block_t* pd)
 
 	split_topic(pd->topic_name, cid, did, pid);
 
-	if (is_null(cid) || is_null(did))
+	if (xsisnil(cid) || xsisnil(did))
 	{
 		raise_user_error(_T("_invoke_publish"), _T("unknown kv database"));
 	}
@@ -108,7 +108,7 @@ void _invoke_publish(const tcps_block_t* pb, mqtt_block_t* pd)
 		raise_user_error(_T("_invoke_publish"), _T("open kv database failed"));
 	}
 
-	if (is_null(pid))
+	if (xsisnil(pid))
 	{
 		xscpy(pid, ZERO_NUID);
 	}
@@ -208,7 +208,7 @@ void _invoke_subcribe(const tcps_block_t* pb, mqtt_block_t* pd)
 
 	split_topic(pd->topic_name, cid, did, pid);
 
-	if (is_null(cid) || is_null(did))
+	if (xsisnil(cid) || xsisnil(did))
 	{
 		raise_user_error(_T("_invoke_publish"), _T("unknown kv database"));
 	}
@@ -220,7 +220,7 @@ void _invoke_subcribe(const tcps_block_t* pb, mqtt_block_t* pd)
 		raise_user_error(_T("_invoke_subcribe"), _T("open kv database failed"));
 	}
 
-	if (is_null(pid))
+	if (xsisnil(pid))
 	{
 		xscpy(pid, ZERO_NUID);
 	}
@@ -327,12 +327,12 @@ void _invoke_unsubcribe(const tcps_block_t* pb, mqtt_block_t* pd)
 
 	split_topic(pd->topic_name, cid, did, pid);
 
-	if (is_null(cid) || is_null(did))
+	if (xsisnil(cid) || xsisnil(did))
 	{
 		raise_user_error(_T("_invoke_unsubcribe"), _T("unknown kv database"));
 	}
 
-	if (is_null(pid))
+	if (xsisnil(pid))
 	{
 		raise_user_error(_T("_invoke_unsubcribe"), _T("unknown topic"));
 	}

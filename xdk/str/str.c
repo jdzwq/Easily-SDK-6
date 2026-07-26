@@ -65,7 +65,7 @@ schar_t* a_xsnclone(const schar_t* str, int len)
 
 	if(len < 0) len = a_xslen(str);
 
-	if (a_is_null(str) || !len) return NULL;
+	if (a_xsisnil(str) || !len) return NULL;
 
 	token = a_xsalloc(len + 1);
 
@@ -79,7 +79,7 @@ wchar_t* w_xsnclone(const wchar_t* str, int len)
 
 	if(len < 0) len = w_xslen(str);
 
-	if (w_is_null(str) || !len) return NULL;
+	if (w_xsisnil(str) || !len) return NULL;
 
 	token = w_xsalloc(len + 1);
 
@@ -117,17 +117,17 @@ void w_xszero(wchar_t* str,int len)
 	}
 }
 
-bool_t a_is_null(const schar_t* sz)
+bool_t a_xsisnil(const schar_t* sz)
 {
 	return ((!sz || (sz && *sz == '\0')) ? 1 : 0);
 }
 
-bool_t w_is_null(const wchar_t* sz)
+bool_t w_xsisnil(const wchar_t* sz)
 {
 	return ((!sz || (sz && *sz == L'\0')) ? 1 : 0);
 }
 
-bool_t a_is_numeric(const schar_t* sz)
+bool_t a_xsisnum(const schar_t* sz)
 {
 	schar_t* token;
 	int dot_count = 0;
@@ -173,7 +173,7 @@ bool_t a_is_numeric(const schar_t* sz)
 	return 1;
 }
 
-bool_t w_is_numeric(const wchar_t* sz)
+bool_t w_xsisnum(const wchar_t* sz)
 {
 	wchar_t* token;
 	int dot_count = 0;
@@ -2576,11 +2576,11 @@ int a_xscmp(const schar_t* dest,const schar_t* src)
 {
 	int rt = 0 ;
 
-	if (a_is_null(dest) && a_is_null(src))
+	if (a_xsisnil(dest) && a_xsisnil(src))
 		return 0;
-	else if (a_is_null(dest))
+	else if (a_xsisnil(dest))
 		return -1;
-	else if (a_is_null(src))
+	else if (a_xsisnil(src))
 		return 1;
 
 	while(*dest || *src)
@@ -2601,11 +2601,11 @@ int w_xscmp(const wchar_t* dest,const wchar_t* src)
 {
 	int rt = 0 ;
 
-	if (w_is_null(dest) && w_is_null(src))
+	if (w_xsisnil(dest) && w_xsisnil(src))
 		return 0;
-	else if (w_is_null(dest))
+	else if (w_xsisnil(dest))
 		return -1;
-	else if (w_is_null(src))
+	else if (w_xsisnil(src))
 		return 1;
 
 	while(*dest || *src)
@@ -2626,11 +2626,11 @@ int a_xsncmp(const schar_t* dest,const schar_t* src,int n)
 {
 	int rt = 0 ;
 
-	if (a_is_null(dest) && a_is_null(src))
+	if (a_xsisnil(dest) && a_xsisnil(src))
 		return 0;
-	else if (a_is_null(dest))
+	else if (a_xsisnil(dest))
 		return (n)? -1 : 0;
-	else if (a_is_null(src))
+	else if (a_xsisnil(src))
 		return (n)? 1 : 0;
 
 	while(n && *src)
@@ -2652,11 +2652,11 @@ int w_xsncmp(const wchar_t* dest,const wchar_t* src,int n)
 {
 	int rt = 0 ;
 
-	if (w_is_null(dest) && w_is_null(src))
+	if (w_xsisnil(dest) && w_xsisnil(src))
 		return 0;
-	else if (w_is_null(dest))
+	else if (w_xsisnil(dest))
 		return (n) ? -1 : 0;
-	else if (w_is_null(src))
+	else if (w_xsisnil(src))
 		return (n) ? 1 : 0;
 
 	while(n && *src)
@@ -2710,11 +2710,11 @@ int a_xsicmp(const schar_t* dest, const schar_t* src)
 {
 	int rt = 0;
 
-	if (a_is_null(dest) && a_is_null(src))
+	if (a_xsisnil(dest) && a_xsisnil(src))
 		return 0;
-	else if (a_is_null(dest))
+	else if (a_xsisnil(dest))
 		return -1;
-	else if (a_is_null(src))
+	else if (a_xsisnil(src))
 		return 1;
 
 	while (*src || *dest)
@@ -2737,11 +2737,11 @@ int w_xsicmp(const wchar_t* dest, const wchar_t* src)
 {
 	int rt = 0;
 
-	if (w_is_null(dest) && w_is_null(src))
+	if (w_xsisnil(dest) && w_xsisnil(src))
 		return 0;
-	else if (w_is_null(dest))
+	else if (w_xsisnil(dest))
 		return -1;
-	else if (w_is_null(src))
+	else if (w_xsisnil(src))
 		return 1;
 
 	while (*src || *dest)
@@ -2764,11 +2764,11 @@ int a_xsnicmp(const schar_t* dest, const schar_t* src, int n)
 {
 	int rt = 0;
 
-	if (a_is_null(dest) && a_is_null(src))
+	if (a_xsisnil(dest) && a_xsisnil(src))
 		return 0;
-	else if (a_is_null(dest))
+	else if (a_xsisnil(dest))
 		return (n)? -1 : 0;
-	else if (a_is_null(src))
+	else if (a_xsisnil(src))
 		return (n)? 1 : 0;
 
 	while (n && *src)
@@ -2792,11 +2792,11 @@ int w_xsnicmp(const wchar_t* dest, const wchar_t* src, int n)
 {
 	int rt = 0;
 
-	if (w_is_null(dest) && w_is_null(src))
+	if (w_xsisnil(dest) && w_xsisnil(src))
 		return 0;
-	else if (w_is_null(dest))
+	else if (w_xsisnil(dest))
 		return (n) ? -1 : 0;
-	else if (w_is_null(src))
+	else if (w_xsisnil(src))
 		return (n) ? 1 : 0;
 
 	while (n && *src)
@@ -2938,7 +2938,7 @@ const schar_t* a_kmpnstr(const schar_t* str, int len, const schar_t* sub)
 	int i, j, n_sub;
 	int* kmp;
 
-	if (a_is_null(str) || !len || a_is_null(sub))
+	if (a_xsisnil(str) || !len || a_xsisnil(sub))
 		return NULL;
 
 	n_sub = a_xslen(sub);
@@ -3010,7 +3010,7 @@ const wchar_t* w_kmpnstr(const wchar_t* str, int len, const wchar_t* sub)
 	int i, j, n_sub;
 	int* kmp;
 
-	if (w_is_null(str) || !len || w_is_null(sub))
+	if (w_xsisnil(str) || !len || w_xsisnil(sub))
 		return NULL;
 
 	n_sub = w_xslen(sub);
@@ -3092,7 +3092,7 @@ const schar_t* a_kmpnistr(const schar_t* str, int len, const schar_t* sub)
 	int i, j, n_sub;
 	int* kmp;
 
-	if (a_is_null(str) || !len || a_is_null(sub))
+	if (a_xsisnil(str) || !len || a_xsisnil(sub))
 		return NULL;
 
 	n_sub = a_xslen(sub);
@@ -3164,7 +3164,7 @@ const wchar_t* w_kmpnistr(const wchar_t* str, int len, const wchar_t* sub)
 	int i, j, n_sub;
 	int* kmp;
 
-	if (w_is_null(str) || !len || w_is_null(sub))
+	if (w_xsisnil(str) || !len || w_xsisnil(sub))
 		return NULL;
 
 	n_sub = w_xslen(sub);
@@ -3246,7 +3246,7 @@ const schar_t* a_xsnstr(const schar_t* str,int len,const schar_t* sub)
 	schar_t *tk = (schar_t *)str;
 	schar_t *s1, *s2;
 
-	if (a_is_null(sub))
+	if (a_xsisnil(sub))
 		return((schar_t *)str);
 
 	while(*tk && len)
@@ -3272,7 +3272,7 @@ const wchar_t* w_xsnstr(const wchar_t* str,int len,const wchar_t* sub)
 	wchar_t *tk = (wchar_t *)str;
 	wchar_t *s1, *s2;
 
-	if (w_is_null(sub))
+	if (w_xsisnil(sub))
 		return((wchar_t *)str);
 
 	while(*tk && len)
@@ -3308,7 +3308,7 @@ const schar_t* a_xsnistr(const schar_t* str, int len, const schar_t* sub)
 	schar_t *tk = (schar_t *)str;
 	schar_t *s1, *s2;
 
-	if (a_is_null(sub))
+	if (a_xsisnil(sub))
 		return((schar_t *)str);
 
 	while (*tk && len)
@@ -3335,7 +3335,7 @@ const wchar_t* w_xsnistr(const wchar_t* str, int len, const wchar_t* sub)
 	wchar_t *tk = (wchar_t *)str;
 	wchar_t *s1, *s2;
 
-	if (w_is_null(sub))
+	if (w_xsisnil(sub))
 		return((wchar_t *)str);
 
 	while (*tk && len)
@@ -3368,10 +3368,10 @@ const wchar_t* w_xsistr(const wchar_t* str, const wchar_t* sub)
 
 bool_t a_is_prefix(const schar_t* str, const schar_t* sub)
 {
-	if (a_is_null(sub))
+	if (a_xsisnil(sub))
 		return 1;
 
-	if (a_is_null(str))
+	if (a_xsisnil(str))
 		return 0;
 
 	while (*str && *sub && *str == *sub)
@@ -3385,10 +3385,10 @@ bool_t a_is_prefix(const schar_t* str, const schar_t* sub)
 
 bool_t w_is_prefix(const wchar_t* str, const wchar_t* sub)
 {
-	if (w_is_null(sub))
+	if (w_xsisnil(sub))
 		return 1;
 
-	if (w_is_null(str))
+	if (w_xsisnil(str))
 		return 0;
 
 	while (*str && *sub && *str == *sub)
@@ -3404,10 +3404,10 @@ bool_t a_is_suffix(const schar_t* str, const schar_t* sub)
 {
 	int len_str,len_sub;
 
-	if (a_is_null(sub))
+	if (a_xsisnil(sub))
 		return 1;
 
-	if (a_is_null(str))
+	if (a_xsisnil(str))
 		return 0;
 
 	len_str = a_xslen(str);
@@ -3430,10 +3430,10 @@ bool_t w_is_suffix(const wchar_t* str, const wchar_t* sub)
 {
 	int len_str, len_sub;
 
-	if (w_is_null(sub))
+	if (w_xsisnil(sub))
 		return 1;
 
-	if (w_is_null(str))
+	if (w_xsisnil(str))
 		return 0;
 
 	len_str = w_xslen(str);

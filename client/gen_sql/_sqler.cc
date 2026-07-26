@@ -3,7 +3,7 @@
 
 /********************************************************************************/
 
-void make_ddl(const tchar_t* pathname, const tchar_t* fencode, const tchar_t* item_feed)
+void _make_ctl(const tchar_t* pathname, const tchar_t* fencode)
 {
 	int enc;
 	dword_t dw;
@@ -16,7 +16,138 @@ void make_ddl(const tchar_t* pathname, const tchar_t* fencode, const tchar_t* it
 	tchar_t table[PATH_LEN] = { 0 };
 	const tchar_t* token;
 	tchar_t* text = NULL;
-	int len, len_feed;
+	int len;
+
+	TRY_CATCH;
+
+	fh = xuncf_open_file(NULL, pathname, FILE_OPEN_READ);
+	if (!fh)
+	{
+		raise_user_error(_T("make_ctl"), _T("open file failed"));
+	}
+
+	enc = parse_encode(fencode);
+
+	get_bio_interface(fh, &bio);
+
+	stm = stream_alloc(&bio);
+	stream_set_encode(stm, enc);
+	stream_read_utfbom(stm, &dw);
+	stream_set_mode(stm, LINE_OPERA);
+
+	split_path(pathname, path, table, NULL);
+
+	vs_sql = string_alloc();
+
+	string_cat(vs_sql, _T("options(skip=1,direct=true,parallel=true)\n"), -1);
+	string_cat(vs_sql, _T("load data\n"), -1);
+	string_cat(vs_sql, _T("characterset UTF8\n"), -1);
+	string_append(vs_sql, _T("infile '%s' \"str '\\r\\n'\"\n"), pathname);
+	string_append(vs_sql, _T("append into table \"%s\"\n"), table);
+	string_cat(vs_sql, _T("fields terminated by ','\n"), -1);
+	string_cat(vs_sql, _T("OPTIONALLY ENCLOSED BY '\\'' AND '\\''\n"), -1);
+	string_cat(vs_sql, _T("trailing nullcols\n"), -1);
+	string_cat(vs_sql, _T("("), -1);
+
+	vs_txt = string_alloc();
+	stream_read_csv_line(stm, vs_txt, &dw);
+
+	token = string_ptr(vs_txt);
+	while (*token != CSV_LINEFEED && *token != _T('\0'))
+	{
+		len = 0;
+		while(*token != CSV_ITEMFEED && *token != CSV_LINEFEED && *token != _T('\r') && *token != _T('\0'))
+		{
+			token ++;
+			len ++;
+		}
+
+		string_cat(vs_sql, (token - len), len);
+		string_cat(vs_sql, _T(",\n"), -1);
+
+		if (*token == CSV_ITEMFEED || *token == _T('\r'))
+			token++;
+	}
+
+	len = string_len(vs_sql);
+	string_set_char(vs_sql, len - 2, _T(')'));
+	string_set_char(vs_sql, len - 1, _T('\n'));
+
+	string_free(vs_txt);
+	vs_txt = NULL;
+
+	stream_free(stm);
+	stm = NULL;
+
+	xuncf_close_file(fh);
+	fh = NULL;
+
+	if(!xsisnil(path))
+	{
+		xsncat(path, SLASH_CHAR, 1);
+	}
+	xscat(path, table);
+	xscat(path, _T(".ctl"));
+
+	fh = xuncf_open_file(NULL, path, FILE_OPEN_CREATE | FILE_OPEN_WRITE);
+	if (!fh)
+	{
+		raise_user_error(_T("gen_ctl"), _T("create file failed"));
+	}
+
+	get_bio_interface(fh, &bio);
+
+	stm = stream_alloc(&bio);
+	stream_set_mode(stm, LINE_OPERA);
+
+	stream_write_line(stm, vs_sql, &dw);
+	stream_flush(stm);
+
+	string_free(vs_sql);
+	vs_sql = NULL;
+
+	stream_free(stm);
+	stm = NULL;
+
+	xuncf_close_file(fh);
+	fh = NULL;
+
+	END_CATCH;
+
+	return;
+
+ONERROR:
+	_tprintf(_T("make DDL falied\n"));
+
+	if (stm)
+		stream_free(stm);
+
+	if (fh)
+		xuncf_close_file(fh);
+
+	if (vs_sql)
+		string_free(vs_sql);
+
+	if (vs_txt)
+		string_free(vs_txt);
+
+	return;
+}
+
+void _make_ddl(const tchar_t* pathname, const tchar_t* fencode)
+{
+	int enc;
+	dword_t dw;
+	xhand_t fh = NULL;
+	stream_t stm = NULL;
+	bio_interface bio = { 0 };
+	string_t vs_sql = NULL;
+	string_t vs_txt = NULL;
+	tchar_t path[PATH_LEN] = { 0 };
+	tchar_t table[PATH_LEN] = { 0 };
+	const tchar_t* token;
+	tchar_t* text = NULL;
+	int len;
 
 	TRY_CATCH;
 
@@ -39,12 +170,10 @@ void make_ddl(const tchar_t* pathname, const tchar_t* fencode, const tchar_t* it
 
 	vs_sql = string_alloc();
 
-	string_printf(vs_sql, _T("CREATE TABLE %s (\n"), table);
+	string_printf(vs_sql, _T("CREATE TABLE %s ( \n"), table);
 
 	vs_txt = string_alloc();
-	stream_read_line(stm, vs_txt, &dw);
-
-	len_feed = (item_feed) ? xslen(item_feed) : 0;
+	stream_read_csv_line(stm, vs_txt, &dw);
 
 	token = string_ptr(vs_txt);
 	while (*token != CSV_LINEFEED && *token != _T('\0'))
@@ -52,14 +181,14 @@ void make_ddl(const tchar_t* pathname, const tchar_t* fencode, const tchar_t* it
 		string_cat(vs_sql, _T("\t"), 1);
 
 		len = 0;
-		while(*token != CSV_ITEMFEED && *token != CSV_LINEFEED && *token != _T('\0'))
+		while(*token != CSV_ITEMFEED && *token != CSV_LINEFEED && *token != _T('\r') && *token != _T('\0'))
 		{
 			token ++;
 			len ++;
 		}
 
 		string_cat(vs_sql, (token - len), len);
-		string_cat(vs_sql, _T(" VARCHAR2(100) NULL,\n"), -1);
+		string_cat(vs_sql, _T(" VARCHAR2(500) NULL,\n"), -1);
 
 		if (*token == CSV_ITEMFEED || *token == _T('\r'))
 			token++;
@@ -67,6 +196,7 @@ void make_ddl(const tchar_t* pathname, const tchar_t* fencode, const tchar_t* it
 
 	len = string_len(vs_sql);
 	string_set_char(vs_sql, len - 2, _T(')'));
+	string_set_char(vs_sql, len - 1, _T(';'));
 
 	string_free(vs_txt);
 	vs_txt = NULL;
@@ -77,6 +207,10 @@ void make_ddl(const tchar_t* pathname, const tchar_t* fencode, const tchar_t* it
 	xuncf_close_file(fh);
 	fh = NULL;
 
+	if(!xsisnil(path))
+	{
+		xsncat(path, SLASH_CHAR, 1);
+	}
 	xscat(path, table);
 	xscat(path, _T(".ddl"));
 
@@ -127,7 +261,7 @@ ONERROR:
 	return;
 }
 
-void make_sql(const tchar_t* pathname, const tchar_t* fencode)
+void _make_sql(const tchar_t* pathname, const tchar_t* fencode)
 {
 	int enc;
 	dword_t dw;
@@ -163,6 +297,10 @@ void make_sql(const tchar_t* pathname, const tchar_t* fencode)
 	stream_read_utfbom(stm_src, &dw);
 	stream_set_mode(stm_src, LINE_OPERA);
 
+	if(!xsisnil(path))
+	{
+		xsncat(path, SLASH_CHAR, 1);
+	}
 	xscat(path, table);
 	xscat(path, _T(".sql"));
 
@@ -190,7 +328,7 @@ void make_sql(const tchar_t* pathname, const tchar_t* fencode)
 	while (*token != CSV_LINEFEED && *token != _T('\0'))
 	{
 		len = 0;
-		while(*token != CSV_ITEMFEED && *token != CSV_LINEFEED && *token != _T('\0'))
+		while(*token != CSV_ITEMFEED && *token != CSV_LINEFEED && *token != _T('\r') && *token != _T('\0'))
 		{
 			token ++;
 			len ++;
@@ -225,7 +363,7 @@ void make_sql(const tchar_t* pathname, const tchar_t* fencode)
 			len_sql = string_cat(vs_sql, _T("'"), 1);
 
 			len = 0;
-			while (*token != CSV_ITEMFEED && *token != CSV_LINEFEED && *token != _T('\0'))
+			while (*token != CSV_ITEMFEED && *token != CSV_LINEFEED && *token != _T('\r') && *token != _T('\0'))
 			{
 				token++;
 				len++;
@@ -286,6 +424,9 @@ void make_sql(const tchar_t* pathname, const tchar_t* fencode)
 			stream_set_mode(stm_dst, LINE_OPERA);
 		}
 	}
+
+	string_cpy(vs_sql, _T("COMMIT;\n"), -1);
+	stream_write_line(stm_dst, vs_sql, &dw);
 
 	if (stm_dst)
 	{

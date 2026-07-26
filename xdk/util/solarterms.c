@@ -150,7 +150,7 @@ void find_solar_terms(const tchar_t* idate, tchar_t* iname, tchar_t* cdate)
 	int k, i;
 	xdate_t dt1, dt2;
 
-	if (is_null(idate))
+	if (xsisnil(idate))
 		return;
 
 	k = sizeof(solar_terms) / sizeof(SOLARTERMS);

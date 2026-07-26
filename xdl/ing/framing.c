@@ -26,7 +26,7 @@ LICENSE.GPL3 for more details.
 
 #include "framing.h"
 
-#include "../xdlgdi.h"
+#include "../xdlsdi.h"
 
 
 void draw_progress(const drawing_interface* pci, const xcolor_t* pxc, const xrect_t* prt, int steps)

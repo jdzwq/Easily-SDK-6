@@ -55,7 +55,10 @@ ASMS = $(patsubsti %.obj,%.asm,$(OBJS))
 {$(SRC_PATH)/doc}.c{$(OBJ_PATH)}.obj::
 	$(CC) $(CFLAGS) /I $(INC_PATH) $<
 
-{$(SRC_PATH)/sdi}.c{$(OBJ_PATH)}.obj::
+{$(SRC_PATH)/gdi}.c{$(OBJ_PATH)}.obj::
+	$(CC) $(CFLAGS) /I $(INC_PATH) $<
+
+{$(SRC_PATH)/sgc}.c{$(OBJ_PATH)}.obj::
 	$(CC) $(CFLAGS) /I $(INC_PATH) $<
 
 {$(SRC_PATH)/ing}.c{$(OBJ_PATH)}.obj::
@@ -98,7 +101,8 @@ test:
  	for %i in ($(SRC_PATH)/bag/*.c) do @echo $(OBJ_PATH)/%i \>>$(MODULE).txt
 	for %i in ($(SRC_PATH)/bio/*.c) do @echo $(OBJ_PATH)/%i \>>$(MODULE).txt
 	for %i in ($(SRC_PATH)/doc/*.c) do @echo $(OBJ_PATH)/%i \>>$(MODULE).txt
-	for %i in ($(SRC_PATH)/sdi/*.c) do @echo $(OBJ_PATH)/%i \>>$(MODULE).txt
+	for %i in ($(SRC_PATH)/gdi/*.c) do @echo $(OBJ_PATH)/%i \>>$(MODULE).txt
+	for %i in ($(SRC_PATH)/sgc/*.c) do @echo $(OBJ_PATH)/%i \>>$(MODULE).txt
 	for %i in ($(SRC_PATH)/ing/*.c) do @echo $(OBJ_PATH)/%i \>>$(MODULE).txt
 	for %i in ($(SRC_PATH)/mis/*.c) do @echo $(OBJ_PATH)/%i \>>$(MODULE).txt
 	for %i in ($(SRC_PATH)/par/*.c) do @echo $(OBJ_PATH)/%i \>>$(MODULE).txt

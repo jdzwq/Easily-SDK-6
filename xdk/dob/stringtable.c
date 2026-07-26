@@ -129,7 +129,7 @@ link_t_ptr write_string_entity(link_t_ptr ptr, const tchar_t* key, int keylen, c
 
 	XDK_ASSERT(ptr && ptr->tag == lkStringTable);
 
-	if (is_null(key) || !keylen)
+	if (xsisnil(key) || !keylen)
 		return NULL;
 
 	pht = StringTableFromLink(ptr);
@@ -233,7 +233,7 @@ link_t_ptr	get_string_entity(link_t_ptr ptr, const tchar_t* key, int keylen)
 
 	XDK_ASSERT(ptr && ptr->tag == lkStringTable);
 
-	if (is_null(key) || !keylen)
+	if (xsisnil(key) || !keylen)
 		return NULL;
 
 	pht = StringTableFromLink(ptr);
@@ -280,7 +280,7 @@ link_t_ptr	find_string_entity(link_t_ptr ptr, const tchar_t* key, int keylen)
 
 	XDK_ASSERT(ptr && ptr->tag == lkStringTable);
 
-	if (is_null(key) || !keylen)
+	if (xsisnil(key) || !keylen)
 		return NULL;
 
 	pht = StringTableFromLink(ptr);
@@ -429,7 +429,7 @@ void set_string_entity_val(link_t_ptr elk, const tchar_t* val, int len)
 
 	phe = StringEntityFromLink(elk);
 
-	if (!is_null(val) && len)
+	if (!xsisnil(val) && len)
 	{
 		if (len < 0)
 			len = xslen(val);
@@ -571,7 +571,7 @@ void string_table_parse_attrset(link_t_ptr ptr, const tchar_t* attrset, int len)
 
 	clear_string_table(ptr);
 
-	if (is_null(attrset) || !len)
+	if (xsisnil(attrset) || !len)
 		return;
 
 	if (len < 0)

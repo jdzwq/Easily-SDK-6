@@ -71,7 +71,7 @@ link_t_ptr get_tool_group(link_t_ptr ptr, const tchar_t* sz_name)
 {
 	link_t_ptr glk;
 
-	if (is_null(sz_name))
+	if (xsisnil(sz_name))
 		return NULL;
 
 	glk = get_tool_next_group(ptr, LINK_FIRST);
@@ -166,7 +166,7 @@ link_t_ptr get_tool_group_item(link_t_ptr glk, const tchar_t* sz_name)
 {
 	link_t_ptr ilk;
 
-	if (is_null(sz_name))
+	if (xsisnil(sz_name))
 		return NULL;
 
 	ilk = get_tool_group_next_item(glk, LINK_FIRST);

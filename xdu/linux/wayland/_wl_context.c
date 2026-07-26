@@ -31,8 +31,6 @@ int wlContextStartup(void)
 {
 	if(!WaylandConnect()) return -1;
 
-    WaylandEventsInit();
-
 	//WaylandGdiInit();
 
 	return 0;
@@ -42,14 +40,15 @@ void wlContextCleanup(void)
 {
 	//WaylsndGdiUninit();
 
-	WaylandEventsUninit();
-
 	WaylandDisconnect();
 }
 
 visual_t wlCreateDisplayContext(widget_t wt)
 {
-    return NULL;
+    wayland_widget_t* pxw = TypePtrFromHead(wayland_widget_t, wt);
+    wayland_context_t* ctx = NULL;
+
+	return NULL;
 }
 
 visual_t wlCreateCompatibleContext(visual_t rdc, int cx, int cy)

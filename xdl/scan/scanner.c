@@ -66,7 +66,7 @@ void scan_object_text(const measure_interface* pmv, const viewbox_t* pvb, words_
 	{
 		break_mode = parse_wrap(attr.pxa);
 
-		if (is_null(attr.pxa->line_height))
+		if (xsisnil(attr.pxa->line_height))
 			line_rati = xstof(DEF_GDI_TEXT_LINE_HEIGHT);
 		else
 			line_rati = xstof(attr.pxa->line_height);
@@ -161,7 +161,7 @@ void scan_object_text(const measure_interface* pmv, const viewbox_t* pvb, words_
 				{
 					break_mode = parse_wrap(attr.pxa);
 
-					if (is_null(attr.pxa->line_height))
+					if (xsisnil(attr.pxa->line_height))
 						line_rati = xstof(DEF_GDI_TEXT_LINE_HEIGHT);
 					else
 						line_rati = xstof(attr.pxa->line_height);

@@ -173,7 +173,7 @@ static HFONT create_font(HDC hDC, const xfont_t* pxf)
 		lf.lfStrikeOut = 1;
 	}
 
-	if (!is_null(pxf->family))
+	if (!xsisnil(pxf->family))
 	{
 		xscpy(lf.lfFaceName, pxf->family);
 	}
@@ -653,7 +653,7 @@ void wceGdiDrawText(visual_t rdc,const xfont_t* pxf,const xface_t* pxa,const xre
 {
 	HDC hDC = (HDC)(rdc->context);
 	
-	if (is_null(txt))
+	if (xsisnil(txt))
 		return;
 
 	if (len < 0)
@@ -688,7 +688,7 @@ void wceGdiDrawText(visual_t rdc,const xfont_t* pxf,const xface_t* pxa,const xre
 		else
 			dw |= DT_LEFT;
 
-		if (!is_null(pxa->text_wrap))
+		if (!xsisnil(pxa->text_wrap))
 			dw |= DT_WORDBREAK;
 		else
 			dw |= DT_SINGLELINE;
@@ -855,7 +855,7 @@ void wceGdiTextRect(visual_t rdc, const xfont_t* pxf, const xface_t* pxa, const 
 		hDC = (HDC)rdc->context;
 	}
 
-	if (is_null(txt))
+	if (xsisnil(txt))
 		return;
 
 	if (len < 0)
@@ -960,7 +960,7 @@ void wceGdiTextSize(visual_t rdc, const xfont_t* pxf, const tchar_t* txt, int le
 		lf.lfStrikeOut = 1;
 	}
 
-	if (!is_null(pxf->family))
+	if (!xsisnil(pxf->family))
 	{
 		xscpy(lf.lfFaceName, pxf->family);
 	}
@@ -1020,7 +1020,7 @@ void wceGdiTextMetric(visual_t rdc, const xfont_t* pxf, xsize_t* pxs)
 		lf.lfStrikeOut = 1;
 	}
 
-	if (!is_null(pxf->family))
+	if (!xsisnil(pxf->family))
 	{
 		xscpy(lf.lfFaceName, pxf->family);
 	}

@@ -25,7 +25,7 @@ LICENSE.GPL3 for more details.
 ***********************************************************************/
 #include "notesview.h"
 
-#include "../xdlgdi.h"
+#include "../xdlsdi.h"
 #include "../xdldoc.h"
 
 #define NOTESVIEW_SPAN_PLUS		10
@@ -309,7 +309,7 @@ void draw_notes(const drawing_interface* pci, const xfont_t* pxf, const xpen_t* 
 			draw_gizmo(pci, &xc, &xr_btn, GDI_ATTR_GIZMO_NEXT);
 		}
 
-		if (!is_null(get_notes_time_ptr(doc)))
+		if (!xsisnil(get_notes_time_ptr(doc)))
 		{
 			parse_datetime(&dt, get_notes_time_ptr(doc));
 			if (compare_date(&dt, &dt) == 0)

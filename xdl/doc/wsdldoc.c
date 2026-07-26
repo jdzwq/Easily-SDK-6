@@ -291,7 +291,7 @@ link_t_ptr add_wsdl_types_schema(link_t_ptr ilk, const tchar_t* sz_tns)
 	plk = insert_dom_node(ilk, LINK_LAST);
 	set_dom_node_name(plk, DOC_SCHEMA, -1);
 	set_dom_node_ns(plk, NSXSD, -1);
-	if (!is_null(sz_tns))
+	if (!xsisnil(sz_tns))
 	{
 		set_dom_node_attr(plk, WSDL_ATTR_TARGETNAMESPACE, -1, sz_tns, -1);
 		set_dom_node_attr(plk, _T("elementFormDefault"), -1, _T("unqualified"), -1);

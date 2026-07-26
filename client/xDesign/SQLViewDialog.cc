@@ -83,7 +83,7 @@ void SQLViewDlg_OnExec(widget_t widget)
 	SQLVIEWDLGDELTA* pdt = GETSQLVIEWDLGDELTA(widget);
 
 	const tchar_t* sz_sql = editbox_get_text_ptr(pdt->hEdit);
-	if (is_null(sz_sql))
+	if (xsisnil(sz_sql))
 	{
 		return;
 	}

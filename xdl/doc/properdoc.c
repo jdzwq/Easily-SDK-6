@@ -117,7 +117,7 @@ link_t_ptr get_section(link_t_ptr ptr,const tchar_t* szsec,int seclen)
 {
 	link_t_ptr slk;
 	
-	if(is_null(szsec) || !seclen)
+	if(xsisnil(szsec) || !seclen)
 		return NULL;
 	
 	if(seclen < 0)
@@ -177,7 +177,7 @@ link_t_ptr get_entity(link_t_ptr slk,const tchar_t* szent,int entlen)
 {
 	link_t_ptr elk;
 
-	if(is_null(szent) || !entlen)
+	if(xsisnil(szent) || !entlen)
 		return NULL;
 	
 	if(entlen < 0)
@@ -219,7 +219,7 @@ link_t_ptr	write_proper(link_t_ptr ptr,const tchar_t* szSec, int seclen, const t
 	link_t_ptr slk;
 	link_t_ptr elk;
 	
-	if(is_null(szSec) || seclen == 0 || is_null(szEnt) || entlen == 0)
+	if(xsisnil(szSec) || seclen == 0 || xsisnil(szEnt) || entlen == 0)
 		return NULL;
 
 	slk = get_section(ptr,szSec,seclen);
@@ -271,7 +271,7 @@ const tchar_t* get_entity_options_text_ptr(link_t_ptr ent)
 	sz_text = get_entity_value_ptr(ent);
 
 	sz_opt = get_dom_node_options_text_ptr(ent, sz_text, -1);
-	return (is_null(sz_opt)) ? sz_text : sz_opt;
+	return (xsisnil(sz_opt)) ? sz_text : sz_opt;
 }
 
 const tchar_t* get_proper_ptr(link_t_ptr ptr,const tchar_t* szSec,const tchar_t* szEnt)

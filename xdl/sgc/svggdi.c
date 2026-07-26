@@ -518,7 +518,7 @@ void svg_draw_path(canvas_t canv, const xpen_t* pxp, const xbrush_t* pxb, const 
 
 	view = svg_get_canvas_visual(canv);
 
-	if (is_null(aa))
+	if (xsisnil(aa))
 		return;
 
 	ppt = (xpoint_t*)xmem_alloc(n * sizeof(xpoint_t));
@@ -594,7 +594,7 @@ void svg_multi_line_raw(visual_t view, const xface_t* pxa, const xpen_t* pxp, co
 
 	g = svg_get_visual_doc(view);
 
-	if (is_null(pxa->line_height))
+	if (xsisnil(pxa->line_height))
 		line_rati = xstof(DEF_GDI_TEXT_LINE_HEIGHT);
 	else
 		line_rati = xstof(pxa->line_height);
@@ -700,7 +700,7 @@ static void _draw_multi_text_raw(visual_t view, const xface_t* pxa, const xrect_
 	if (len < 0)
 		len = xslen(txt);
 
-	if (is_null(txt) || !len)
+	if (xsisnil(txt) || !len)
 		return;
 
 	font_metric_by_pt(xstof(pview->xf.size), &pm, &px);
@@ -730,7 +730,7 @@ static void _draw_multi_text_raw(visual_t view, const xface_t* pxa, const xrect_
 
 void svg_draw_text_raw(visual_t view, const xface_t* pxa, const xrect_t* pxr, const tchar_t* txt, int len)
 {
-	if (is_null(pxa->text_wrap))
+	if (xsisnil(pxa->text_wrap))
 		_draw_single_text_raw(view, pxa, pxr, txt, len);
 	else
 		_draw_multi_text_raw(view, pxa, pxr, txt, len);
@@ -763,7 +763,7 @@ void svg_measure_rect_raw(visual_t view, const xfont_t* pxf, const xface_t* pxa,
 	if (len < 0)
 		len = xslen(txt);
 
-	if (is_null(txt) || !len)
+	if (xsisnil(txt) || !len)
 		return;
 
 	if(pxf)
@@ -830,7 +830,7 @@ void svg_measure_size_raw(visual_t view, const xfont_t* pxf, const tchar_t* txt,
 
 	if (len < 0)
 		len = xslen(txt);
-	if (is_null(txt) || !len)
+	if (xsisnil(txt) || !len)
 	{
 		pxs->w = 0;
 		pxs->h = 0;
@@ -1002,7 +1002,7 @@ void svg_draw_image(canvas_t canv, const ximage_t* pxi, const xrect_t* pxr)
 	visual_t view;
 	xrect_t xr;
 
-	if (is_null(pxi->source))
+	if (xsisnil(pxi->source))
 		return;
 
 	view = svg_get_canvas_visual(canv);

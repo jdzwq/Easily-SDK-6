@@ -382,7 +382,7 @@ int format_ubb_doc(link_t_ptr dom, tchar_t* buf, int max)
 
 		if (buf)
 		{
-			if (!is_null(sz_name))
+			if (!xsisnil(sz_name))
 			{
 				if (get_hash_entity_count(ht))
 					xsprintf(buf + total, _T("[%s "), sz_name);
@@ -414,7 +414,7 @@ int format_ubb_doc(link_t_ptr dom, tchar_t* buf, int max)
 			ent = get_hash_next_entity(&he);
 		}
 
-		if (!is_null(sz_name))
+		if (!xsisnil(sz_name))
 			len = 1; //]
 		else
 			len = 0;
@@ -424,7 +424,7 @@ int format_ubb_doc(link_t_ptr dom, tchar_t* buf, int max)
 
 		if (buf)
 		{
-			if (!is_null(sz_name))
+			if (!xsisnil(sz_name))
 			{
 				xsncpy(buf + total, _T("]"), 1);
 			}
@@ -443,7 +443,7 @@ int format_ubb_doc(link_t_ptr dom, tchar_t* buf, int max)
 		}
 		total += len;
 
-		if (!is_null(sz_name))
+		if (!xsisnil(sz_name))
 		{
 			len = xslen(sz_name);
 			len += 3; //[/name]
@@ -458,7 +458,7 @@ int format_ubb_doc(link_t_ptr dom, tchar_t* buf, int max)
 
 		if (buf)
 		{
-			if (!is_null(sz_name))
+			if (!xsisnil(sz_name))
 			{
 				xsprintf(buf + total, _T("[/%s]"), sz_name);
 			}

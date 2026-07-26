@@ -158,7 +158,7 @@ int words_count(const tchar_t* str, int len)
 
 	if (len < 0)
 		len = xslen(str);
-	if (is_null(str) || !len)
+	if (xsisnil(str) || !len)
 		return 0;
 
 	while (total < len)
@@ -175,7 +175,7 @@ void split_path(const tchar_t* pathfile, tchar_t* path, tchar_t* file, tchar_t* 
 	const tchar_t* token;
 	int n, extlen = 0;
 
-	if (is_null(pathfile))
+	if (xsisnil(pathfile))
 		return;
 
 	token = pathfile + xslen(pathfile);
@@ -232,7 +232,7 @@ void split_file(const tchar_t* pathfile, tchar_t* path, tchar_t* file)
 	const tchar_t* token;
 	int n;
 
-	if (is_null(pathfile))
+	if (xsisnil(pathfile))
 		return;
 
 	token = pathfile + xslen(pathfile);

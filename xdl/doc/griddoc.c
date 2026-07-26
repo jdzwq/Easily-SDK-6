@@ -84,7 +84,7 @@ tchar_t* col_calc_func(const tchar_t* token,void* parm)
 		return NULL;
 
 	tmp = (tchar_t*)get_cell_text_ptr(pcp->rlk,clk);
-	if(is_null(tmp))
+	if(xsisnil(tmp))
 		return NULL;
 
 	len = xslen(tmp);
@@ -105,7 +105,7 @@ bool_t row_find_proc(const tchar_t* key,const tchar_t* sin,const tchar_t* val,vo
 
 	pfp = (find_param_t*)parm;
 	
-	if(is_null(key))
+	if(xsisnil(key))
 		return 0;
 
 	clk = get_col(pfp->ptr,key);
@@ -462,7 +462,7 @@ link_t_ptr get_col(link_t_ptr ptr,const tchar_t* cname)
 {
 	link_t_ptr clk;
 
-	if(is_null(cname))
+	if(xsisnil(cname))
 		return NULL;
 
 	clk = get_next_col(ptr,LINK_FIRST);
@@ -479,7 +479,7 @@ link_t_ptr get_col_by_id(link_t_ptr ptr, const tchar_t* cid)
 {
 	link_t_ptr clk;
 
-	if (is_null(cid))
+	if (xsisnil(cid))
 		return NULL;
 
 	clk = get_next_col(ptr, LINK_FIRST);
@@ -515,7 +515,7 @@ bool_t get_col_integrity(link_t_ptr clk)
 	fieldtype = get_col_field_type_ptr(clk);
 	fieldname = get_col_field_name_ptr(clk);
 
-	if(updateable == 0  || is_null(fieldname) || is_null(fieldtype) || compare_text(fieldtype,-1,ATTR_FIELD_TYPE_CALC,-1,0) == 0)
+	if(updateable == 0  || xsisnil(fieldname) || xsisnil(fieldtype) || compare_text(fieldtype,-1,ATTR_FIELD_TYPE_CALC,-1,0) == 0)
 		return 0;
 	else
 		return 1;
@@ -656,7 +656,7 @@ void set_cell_dirty(link_t_ptr rlk,link_t_ptr clk,bool_t b)
 	const tchar_t* sz_col;
 
 	sz_col = get_col_name_ptr(clk);
-	if(is_null(sz_col))
+	if(xsisnil(sz_col))
 		return;
 
 	ent = get_hash_entity(get_dom_node_attr_table(rlk),sz_col,-1);
@@ -679,7 +679,7 @@ bool_t get_cell_dirty(link_t_ptr rlk,link_t_ptr clk)
 	vword_t msk;
 
 	sz_col = get_col_name_ptr(clk);
-	if(is_null(sz_col))
+	if(xsisnil(sz_col))
 		return dsClean;
 
 	ent = get_hash_entity(get_dom_node_attr_table(rlk),sz_col,-1);
@@ -732,7 +732,7 @@ const tchar_t* get_cell_prim_ptr(link_t_ptr rlk,link_t_ptr clk)
 	const tchar_t* cname;
 
 	cname = get_col_name_ptr(clk);
-	if(is_null(cname))
+	if(xsisnil(cname))
 		return NULL;
 	
 	return get_dom_node_options_text_ptr(rlk,cname,-1);
@@ -743,7 +743,7 @@ void set_cell_prim(link_t_ptr rlk, link_t_ptr clk, const tchar_t *sz, int len)
 	const tchar_t* cname;
 
 	cname = get_col_name_ptr(clk);
-	if(is_null(cname))
+	if(xsisnil(cname))
 		return;
 
 	set_dom_node_options_text(rlk,cname,-1,sz,len);
@@ -783,7 +783,7 @@ void set_cell_text(link_t_ptr rlk, link_t_ptr clk, const tchar_t *sz, int len)
 		len = xslen(sz);
 
 	cname = get_col_name_ptr(clk);
-	if (is_null(cname))
+	if (xsisnil(cname))
 	{
 		return;
 	}
@@ -865,7 +865,7 @@ int get_cell_integer(link_t_ptr rlk,link_t_ptr clk)
 	const tchar_t* token;
 	
 	token = get_cell_text_ptr(rlk,clk);
-	return (is_null(token))? 0 : xstol(token);
+	return (xsisnil(token))? 0 : xstol(token);
 }
 
 void set_cell_numeric(link_t_ptr rlk,link_t_ptr clk,double n)
@@ -882,7 +882,7 @@ double get_cell_numeric(link_t_ptr rlk,link_t_ptr clk)
 	
 	token = get_cell_text_ptr(rlk,clk);
 
-	return (is_null(token))? 0 : xstonum(token);
+	return (xsisnil(token))? 0 : xstonum(token);
 }
 
 void set_cell_datetime(link_t_ptr rlk,link_t_ptr clk,const xdate_t* pdt)
@@ -920,7 +920,7 @@ const tchar_t* get_cell_options_text_ptr(link_t_ptr rlk,link_t_ptr clk)
 	sz_text = get_cell_text_ptr(rlk, clk);
 	
 	sz_opt = get_dom_node_options_text_ptr(clk,sz_text,-1);
-	return (is_null(sz_opt)) ? sz_text : sz_opt;
+	return (xsisnil(sz_opt)) ? sz_text : sz_opt;
 }
 
 int get_visible_row_count(link_t_ptr ptr)
@@ -1010,7 +1010,7 @@ int calc_grid_row(link_t_ptr ptr,link_t_ptr rlk)
 	while(clk)
 	{
 		tmp = (tchar_t*)get_col_macro_ptr(clk);
-		if(!is_null(tmp))
+		if(!xsisnil(tmp))
 		{
 			macro = create_multi_tree();
 
@@ -1068,7 +1068,7 @@ int sum_grid_col(link_t_ptr ptr,link_t_ptr clk)
 	tchar_t buf[NUM_LEN + 1] = { 0 };
 
 	mode = get_col_sum_mode_ptr(clk);
-	if(is_null(mode))
+	if(xsisnil(mode))
 		return  0;
 
 	set_col_sum_text(clk, NULL);
@@ -1089,7 +1089,7 @@ int sum_grid_col(link_t_ptr ptr,link_t_ptr clk)
 		count++;
 
 		str = get_cell_text_ptr(rlk,clk);
-		if(is_null(str))
+		if(xsisnil(str))
 		{
 			rlk = get_next_visible_row(ptr,rlk);
 			continue;
@@ -1274,7 +1274,7 @@ void filter_grid_rowset(link_t_ptr ptr,const tchar_t* szFilter)
 	bool_t matched;
 	find_param_t fp = {0};
 
-	if(is_null(szFilter))	
+	if(xsisnil(szFilter))	
 	{
 		_reset_grid_filter(ptr);
 		return ;
@@ -1400,7 +1400,7 @@ int make_grid_options(link_t_ptr ptr,const tchar_t* keycol,const tchar_t*  valco
 	rlk = get_next_visible_row(ptr,LINK_FIRST);
 	while(rlk)
 	{
-		if(is_null(get_cell_text_ptr(rlk,keyclk)))
+		if(xsisnil(get_cell_text_ptr(rlk,keyclk)))
 		{
 			rlk = get_next_visible_row(ptr,rlk);
 			continue;

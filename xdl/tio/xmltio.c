@@ -111,7 +111,7 @@ bool_t call_write_xml_node_name(void* pv, const tchar_t* ns, int nslen, const tc
 	if (!pop->nlk)
 		return 0;
 
-	if (is_null(ns) || !nslen)
+	if (xsisnil(ns) || !nslen)
 	{
 		set_dom_node_name(pop->nlk, na, nalen);
 	}
@@ -451,7 +451,7 @@ bool_t call_read_xml_node_begin(void* pv, int indent, bool_t b_parent, const tch
 	}
 	pb->pos += pos;
 
-	if (!is_null(ns))
+	if (!xsisnil(ns))
 		b_ns = 1;
 
 	if (b_ns)
@@ -650,7 +650,7 @@ bool_t call_read_xml_node_end(void* pv, int indent, bool_t b_parent, bool_t b_cl
 		}
 		pb->pos += pos;
 
-		if (!is_null(ns))
+		if (!xsisnil(ns))
 			b_ns = 1;
 
 		if (b_ns)

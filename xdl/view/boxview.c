@@ -25,7 +25,7 @@ LICENSE.GPL3 for more details.
 ***********************************************************************/
 #include "boxview.h"
 
-#include "../xdlgdi.h"
+#include "../xdlsdi.h"
 
 
 void calc_datebox_size(const measure_interface* pmc, const xfont_t* pxf, xsize_t* pxs)

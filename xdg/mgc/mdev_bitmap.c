@@ -66,7 +66,7 @@ static const mem_driver_ptr select_driver(const tchar_t* devName)
 	}
 }
 
-static device_t open_device(const dev_prn_t* devPrint, int dpi)
+static device_t open_device(const dev_prn_t* devPrint)
 {
 	bitmap_device_t* pdev;
 
@@ -92,17 +92,11 @@ static device_t open_device(const dev_prn_t* devPrint, int dpi)
 	pdev->logic_sx = PTPERINCH;
 	pdev->logic_sy = PTPERINCH;
 
-	pdev->physi_sx = dpi;
-	pdev->physi_sy = dpi;
+	pdev->physi_sx = devPrint->dpi;
+	pdev->physi_sy = devPrint->dpi;
 
 	pdev->physi_width = (int)((float)(pdev->logic_width) * (float)pdev->physi_sx / (float)pdev->logic_sx);
 	pdev->physi_height = (int)((float)(pdev->logic_height) * (float)pdev->physi_sx / (float)pdev->logic_sx);
-
-	pdev->handle = (*(pdev->driver->openDriver))(pdev->physi_width, pdev->physi_height);
-	if (!pdev->handle)
-	{
-		raise_user_error(_T("open_device"), _T("openDriver"));
-	}
 
 	pdev->bitmap_info.isize = BMP_INFOHEADER_SIZE;
 	pdev->bitmap_info.width = pdev->physi_width;
@@ -110,11 +104,17 @@ static device_t open_device(const dev_prn_t* devPrint, int dpi)
 	pdev->bitmap_info.planes = 1;
 	pdev->bitmap_info.clrbits = pdev->driver->bits_per_pixel;
 	pdev->bitmap_info.compress = 0;
-	pdev->bitmap_info.bytes = BMP_LINE_BYTES(pdev->bitmap_info.width, pdev->bitmap_info.clrbits) * pdev->bitmap_info.height;
+	pdev->bitmap_info.bytes = BMP_POINTS_BYTES(pdev->bitmap_info.width, pdev->bitmap_info.clrbits) * pdev->bitmap_info.height;
 	pdev->bitmap_info.xpelsperm = 0;
 	pdev->bitmap_info.ypelsperm = 0;
 	pdev->bitmap_info.clrused = (pdev->bitmap_info.clrbits <= 8)? (1 << pdev->bitmap_info.clrbits) : 0;
 	pdev->bitmap_info.clrimport = 0;
+
+	pdev->handle = (*(pdev->driver->openDriver))(pdev->physi_width, pdev->physi_height);
+	if (!pdev->handle)
+	{
+		raise_user_error(_T("open_device"), _T("openDriver"));
+	}
 
 	END_CATCH;
 
@@ -124,6 +124,9 @@ ONERROR:
 
 	if (pdev)
 	{
+		if(pdev->handle)
+			(*(pdev->driver->closeDriver))(pdev->handle);
+
 		xmem_free(pdev);
 	}
 
@@ -142,6 +145,15 @@ static void close_device(device_t dev)
 	}
 
 	xmem_free(pdev);
+}
+
+static void set_device_buffer(device_t dev, void* buffer, dword_t stride)
+{
+	bitmap_device_t* pdev = (bitmap_device_t*)dev;
+
+	XDK_ASSERT(dev && dev->tag == _DEVICE_BITMAP);
+
+	(*(pdev->driver->attachBuffer))(pdev->handle, (byte_t*)buffer, stride);
 }
 
 static int get_device_width(device_t dev)
@@ -205,6 +217,33 @@ static void dp_to_lp(device_t dev, xpoint_t* ppt, int n)
 		ppt[i].x = (int)((float)ppt[i].x * (float)pdev->logic_sx / (float)pdev->physi_sx);
 		ppt[i].y = (int)((float)ppt[i].y * (float)pdev->logic_sy / (float)pdev->physi_sy);
 	}
+}
+
+static void get_bitmap_info(device_t dev, dword_t* pHead, dword_t* pQuad, dword_t* pData)
+{
+	bitmap_device_t* pdev = (bitmap_device_t*)dev;
+
+	XDK_ASSERT(dev && dev->tag == _DEVICE_BITMAP);
+	XDK_ASSERT(pdev->handle != NULL);
+
+	if(pHead) *pHead = BMP_INFOHEADER_SIZE;
+	if(pQuad) *pQuad = pdev->bitmap_info.clrused * BMP_RGBQUAD_SIZE;
+	if(pData) *pData = pdev->bitmap_info.bytes;
+}
+
+static dword_t get_bitmap(device_t dev, byte_t* buf, dword_t max)
+{
+	bitmap_device_t* pdev = (bitmap_device_t*)dev;
+	dword_t total = 0;
+
+	XDK_ASSERT(dev && dev->tag == _DEVICE_BITMAP);
+	XDK_ASSERT(pdev->handle != NULL);
+
+	total += xbmp_set_info(&pdev->bitmap_info, ((buf) ? (buf + total) : NULL), (max - total));
+	total += xbmp_fill_quad(pdev->bitmap_info.clrbits, pdev->bitmap_info.clrused, ((buf) ? (buf + total) : NULL), (max - total));
+	total += (*(pdev->driver->copyBytes))(pdev->handle, ((buf) ? (buf + total) : NULL), (max - total));
+
+	return total;
 }
 
 static void get_point(device_t dev, const xpoint_t* ppt, xcolor_t* pxc)
@@ -273,32 +312,6 @@ static void fill_points(device_t dev, int x, int y, int w, int h, const xcolor_t
 	c = PUT_PIXVAL(pxc->a, pxc->r, pxc->g, pxc->b);
 
 	(*(pdev->driver->setPixels))(pdev->handle, x, y, w, h, &c, 1, rop);
-}
-
-static void get_bitmap_size(device_t dev, dword_t* pTotal, dword_t* pPixel)
-{
-	bitmap_device_t* pdev = (bitmap_device_t*)dev;
-
-	XDK_ASSERT(dev && dev->tag == _DEVICE_BITMAP);
-	XDK_ASSERT(pdev->handle != NULL);
-
-	*pPixel = (*(pdev->driver->getWidth))(pdev->handle) *  (*(pdev->driver->getHeight))(pdev->handle);
-	*pTotal = BMP_INFOHEADER_SIZE + pdev->bitmap_info.clrused * BMP_RGBQUAD_SIZE + *pPixel;
-}
-
-static dword_t get_bitmap(device_t dev, byte_t* buf, dword_t max)
-{
-	bitmap_device_t* pdev = (bitmap_device_t*)dev;
-	dword_t total = 0;
-
-	XDK_ASSERT(dev && dev->tag == _DEVICE_BITMAP);
-	XDK_ASSERT(pdev->handle != NULL);
-
-	total += xbmp_set_info(&pdev->bitmap_info, ((buf) ? (buf + total) : NULL), (max - total));
-	total += xbmp_fill_quad(pdev->bitmap_info.clrbits, pdev->bitmap_info.clrused, ((buf) ? (buf + total) : NULL), (max - total));
-	total += (*(pdev->driver->copyBytes))(pdev->handle, ((buf) ? (buf + total) : NULL), (max - total));
-
-	return total;
 }
 
 static void horz_line(device_t dev, const xpoint_t* ppt, int w, const xcolor_t* pxc, int rop)
@@ -1096,11 +1109,15 @@ mem_device_interface monochrome_bitmap_device = {
 
 	open_device,
 	close_device,
+	set_device_buffer,
 	get_device_width,
 	get_device_height,
 	get_device_caps,
 	lp_to_dp,
 	dp_to_lp,
+
+	get_bitmap_info,
+	get_bitmap,
 
 	get_point,
 	set_point,
@@ -1108,8 +1125,6 @@ mem_device_interface monochrome_bitmap_device = {
 	fill_points,
 	draw_pixmap,
 	stretch_pixmap,
-	get_bitmap_size,
-	get_bitmap,
 	horz_line,
 	vert_line,
 	mask_rect,
@@ -1129,11 +1144,15 @@ mem_device_interface grayscale_bitmap_device = {
 
 	open_device,
 	close_device,
+	set_device_buffer,
 	get_device_width,
 	get_device_height,
 	get_device_caps,
 	lp_to_dp,
 	dp_to_lp,
+
+	get_bitmap_info,
+	get_bitmap,
 
 	get_point,
 	set_point,
@@ -1141,8 +1160,6 @@ mem_device_interface grayscale_bitmap_device = {
 	fill_points,
 	draw_pixmap,
 	stretch_pixmap,
-	get_bitmap_size,
-	get_bitmap,
 	horz_line,
 	vert_line,
 	mask_rect,
@@ -1162,11 +1179,15 @@ mem_device_interface truecolor16_bitmap_device = {
 
 	open_device,
 	close_device,
+	set_device_buffer,
 	get_device_width,
 	get_device_height,
 	get_device_caps,
 	lp_to_dp,
 	dp_to_lp,
+
+	get_bitmap_info,
+	get_bitmap,
 
 	get_point,
 	set_point,
@@ -1174,8 +1195,6 @@ mem_device_interface truecolor16_bitmap_device = {
 	fill_points,
 	draw_pixmap,
 	stretch_pixmap,
-	get_bitmap_size,
-	get_bitmap,
 	horz_line,
 	vert_line,
 	mask_rect,
@@ -1195,11 +1214,15 @@ mem_device_interface truecolor24_bitmap_device = {
 
 	open_device,
 	close_device,
+	set_device_buffer,
 	get_device_width,
 	get_device_height,
 	get_device_caps,
 	lp_to_dp,
 	dp_to_lp,
+
+	get_bitmap_info,
+	get_bitmap,
 
 	get_point,
 	set_point,
@@ -1207,8 +1230,6 @@ mem_device_interface truecolor24_bitmap_device = {
 	fill_points,
 	draw_pixmap,
 	stretch_pixmap,
-	get_bitmap_size,
-	get_bitmap,
 	horz_line,
 	vert_line,
 	mask_rect,
@@ -1228,11 +1249,15 @@ mem_device_interface truecolor32_bitmap_device = {
 
 	open_device,
 	close_device,
+	set_device_buffer,
 	get_device_width,
 	get_device_height,
 	get_device_caps,
 	lp_to_dp,
 	dp_to_lp,
+
+	get_bitmap_info,
+	get_bitmap,
 
 	get_point,
 	set_point,
@@ -1240,8 +1265,6 @@ mem_device_interface truecolor32_bitmap_device = {
 	fill_points,
 	draw_pixmap,
 	stretch_pixmap,
-	get_bitmap_size,
-	get_bitmap,
 	horz_line,
 	vert_line,
 	mask_rect,

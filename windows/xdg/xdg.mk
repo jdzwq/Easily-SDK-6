@@ -76,7 +76,7 @@ ASMS = $(patsubsti %.obj,%.asm,$(OBJS))
 {$(SRC_PATH)/bio}.c{$(OBJ_PATH)}.obj::
 	$(CC) $(CFLAGS) /I $(INC_PATH) $<
 
-{$(SRC_PATH)/mdi}.c{$(OBJ_PATH)}.obj::
+{$(SRC_PATH)/gdi}.c{$(OBJ_PATH)}.obj::
 	$(CC) $(CFLAGS) /I $(INC_PATH) $<
 
 {$(SRC_PATH)}.c{$(OBJ_PATH)}.obj::
@@ -102,7 +102,7 @@ test:
 	for %i in ($(SRC_PATH)/img/*.c) do @echo $(OBJ_PATH)/%i \>>$(MODULE).txt
 	for %i in ($(SRC_PATH)/imp/*.c) do @echo $(OBJ_PATH)/%i \>>$(MODULE).txt
 	for %i in ($(SRC_PATH)/bio/*.c) do @echo $(OBJ_PATH)/%i \>>$(MODULE).txt
-	for %i in ($(SRC_PATH)/mdi/*.c) do @echo $(OBJ_PATH)/%i \>>$(MODULE).txt
+	for %i in ($(SRC_PATH)/gdi/*.c) do @echo $(OBJ_PATH)/%i \>>$(MODULE).txt
 	for %i in ($(SRC_PATH)/*.c) do @echo $(OBJ_PATH)/%i \>>$(MODULE).txt
 
 	@echo $(SOURCES)

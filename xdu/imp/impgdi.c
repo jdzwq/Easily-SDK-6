@@ -264,7 +264,7 @@ void draw_path(canvas_t canv, const xpen_t* pxp, const xbrush_t* pxb, const tcha
 
 	pif = PROCESS_CONTEXT_INTERFACE;
 
-	if (is_null(aa))
+	if (xsisnil(aa))
 		return;
 
 	ppt = (xpoint_t*)xmem_alloc(n * sizeof(xpoint_t));
@@ -956,7 +956,7 @@ void multi_line_raw(visual_t rdc, const xface_t* pxa, const xpen_t* pxp, const x
 	xpoint_t pt1, pt2;
 	xsize_t xs;
 
-	if (is_null(pxa->line_height))
+	if (xsisnil(pxa->line_height))
 		line_rati = xstof(DEF_GDI_TEXT_LINE_HEIGHT);
 	else
 		line_rati = xstof(pxa->line_height);

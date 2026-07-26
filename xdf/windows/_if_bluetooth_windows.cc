@@ -239,7 +239,7 @@ static void _blt_device_class(const tchar_t* dev_class, tchar_t* major_class, tc
 			xscat(minor_class, _T("Reserved"));
 			break;
 		}
-		if(is_null(minor_class))
+		if(xsisnil(minor_class))
 		{
             xscat(minor_class, _T("Unknown"));
         }

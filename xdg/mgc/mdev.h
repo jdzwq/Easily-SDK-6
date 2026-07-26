@@ -45,13 +45,17 @@ typedef struct _mem_device_interface{
 
 	int depth;	/*color depth*/
 
-	device_t(*openDevice)(const dev_prn_t* devPrint, int dpi);
+	device_t(*openDevice)(const dev_prn_t* devPrint);
 	void(*closeDevice)(device_t dev);
+	void(*setDeviceBuffer)(device_t dev, void* buff, dword_t stride);
 	int(*getDeviceWidth)(device_t dev);
 	int(*getDeviceHeight)(device_t dev);
 	void(*getDeviceCaps)(device_t dev, dev_cap_t* pcap);
 	void(*LpToDp)(device_t dev, xpoint_t* ppt, int n);
 	void(*DpToLp)(device_t dev, xpoint_t* ppt, int n);
+
+	void(*getBitmapInfo)(device_t dev, dword_t* pHead, dword_t* pQuad, dword_t* pData);
+	dword_t(*getBitmap)(device_t dev, byte_t* buf, dword_t max);
 
 	void(*getPoint)(device_t dev, const xpoint_t* ppt, xcolor_t* pxc);
 	void(*setPoint)(device_t dev, const xpoint_t* ppt, const xcolor_t* pxc, int rop);
@@ -59,8 +63,6 @@ typedef struct _mem_device_interface{
 	void(*fillPoints)(device_t dev, int x, int y, int w, int h, const xcolor_t* pxc, int rop);
 	void(*drawPixmap)(device_t dev, int dstx, int dsty, int w, int h, mem_pixmap_ptr pxm, int srcx, int srcy, int rop);
 	void(*stretchPixmap)(device_t dev, int dstx, int dsty, int dstw, int dsth, mem_pixmap_ptr pxm, int srcx, int srcy, int srcw, int srch, int rop);
-	void(*getBitmapSize)(device_t dev, dword_t* pTotal, dword_t* pPixel);
-	dword_t(*getBitmap)(device_t dev, byte_t* buf, dword_t max);
 	void(*horzLine)(device_t dev, const xpoint_t* ppt, int h, const xcolor_t* pxc, int rop);
 	void(*vertLine)(device_t dev, const xpoint_t* ppt, int w, const xcolor_t* pxc, int rop);
 	void(*maskRect)(device_t dev, const xrect_t* pxr, const xcolor_t* pxc, int opacity);

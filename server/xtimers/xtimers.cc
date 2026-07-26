@@ -240,7 +240,7 @@ bool_t xtimers_config(const tchar_t* task, tchar_t* tname, tchar_t* tpath, tchar
 	tchar_t sz_file[PATH_LEN + 1] = { 0 };
 
 	get_envvar(XSERVICE_ROOT, token, PATH_LEN);
-	if (is_null(token))
+	if (xsisnil(token))
 	{
 		get_runpath((res_modu_t)0, token, PATH_LEN);
 	}
@@ -313,12 +313,12 @@ void xtimers_dispatch(xtimers_param_t* pts)
 		raise_user_error(_T("xtimers_dispatch"), _T("timer load configure failed"));
 	}
 
-	if (is_null(ptb->name))
+	if (xsisnil(ptb->name))
 	{
 		raise_user_error(_T("xtimers_dispatch"), _T("timer unknown task"));
 	}
 
-	if (!is_null(sz_track))
+	if (!xsisnil(sz_track))
 	{
 		get_loc_date(&dt);
 		xsprintf(sz_trace, _T("%02d%02d%02d"), dt.year, dt.mon, dt.day);

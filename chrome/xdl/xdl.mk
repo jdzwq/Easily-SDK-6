@@ -33,7 +33,8 @@ DIRS = $(wildcard \
 	$(SRC_PATH)/bag/*.c \
 	$(SRC_PATH)/bio/*.c \
 	$(SRC_PATH)/doc/*.c \
-	$(SRC_PATH)/sdi/*.c \
+	$(SRC_PATH)/gdi/*.c \
+	$(SRC_PATH)/sgc/*.c \
 	$(SRC_PATH)/ing/*.c \
 	$(SRC_PATH)/mis/*.c \
 	$(SRC_PATH)/par/*.c \
@@ -60,7 +61,10 @@ $(OBJ_PATH)/%.o : $(SRC_PATH)/bio/%.c
 $(OBJ_PATH)/%.o : $(SRC_PATH)/doc/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
 
-$(OBJ_PATH)/%.o : $(SRC_PATH)/sdi/%.c
+$(OBJ_PATH)/%.o : $(SRC_PATH)/gdi/%.c
+	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
+
+$(OBJ_PATH)/%.o : $(SRC_PATH)/sgc/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
 
 $(OBJ_PATH)/%.o : $(SRC_PATH)/ing/%.c

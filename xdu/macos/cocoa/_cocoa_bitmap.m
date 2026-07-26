@@ -82,7 +82,7 @@ bitmap_t coCreateColorBitmap(visual_t rdc, const xcolor_t* pxc, int w, int h)
 	bitmap_info_head_t bih = { 0 };
 	byte_t* pbb = NULL;
 
-	bytes_per_line = BMP_LINE_BYTES(w, 32);
+	bytes_per_line = BMP_POINTS_BYTES(w, 32);
 
 	bih.isize = BITMAPINFOHEAD_FIXED_SIZE;
 	bih.width = w;
@@ -132,7 +132,7 @@ bitmap_t coCreatePatternBitmap(visual_t rdc, const xcolor_t* pxc_front, const xc
 	bitmap_info_head_t bih = { 0 };
 	byte_t* pbb = NULL;
 
-	bytes_per_line = BMP_LINE_BYTES(w, 32);
+	bytes_per_line = BMP_POINTS_BYTES(w, 32);
 
 	bih.isize = BITMAPINFOHEAD_FIXED_SIZE;
 	bih.width = w;
@@ -182,7 +182,7 @@ bitmap_t coCreateGradientBitmap(visual_t rdc, const xcolor_t* pxc_brim, const xc
 	bitmap_info_head_t bih = { 0 };
 	byte_t* pbb = NULL;
 
-	bytes_per_line = BMP_LINE_BYTES(w, 32);
+	bytes_per_line = BMP_POINTS_BYTES(w, 32);
 
 	bih.isize = BITMAPINFOHEAD_FIXED_SIZE;
 	bih.width = w;
@@ -236,7 +236,7 @@ bitmap_t coCreateCode128Bitmap(visual_t rdc, const xcolor_t* pxc_front, const xc
 	w = code128_units(bar_buf, bar_cols) * unit;
 	h = 10 * unit;
 
-	bytes_per_line = BMP_LINE_BYTES(w, 32);
+	bytes_per_line = BMP_POINTS_BYTES(w, 32);
 
 	bih.isize = BITMAPINFOHEAD_FIXED_SIZE;
 	bih.width = w;
@@ -290,7 +290,7 @@ bitmap_t coCreatePDF417Bitmap(visual_t rdc, const xcolor_t* pxc_front, const xco
 	w = (pdf417_units(bar_buf, bar_rows, bar_cols) / bar_rows) * unit;
 	h = bar_rows * unit;
 
-	bytes_per_line = BMP_LINE_BYTES(w, 32);
+	bytes_per_line = BMP_POINTS_BYTES(w, 32);
 
 	bih.isize = BITMAPINFOHEAD_FIXED_SIZE;
 	bih.width = w;
@@ -344,7 +344,7 @@ bitmap_t coCreateQRCodeBitmap(visual_t rdc, const xcolor_t* pxc_front, const xco
 	w = (qr_units(bar_buf, bar_rows, bar_cols) / bar_rows) * unit;
 	h = bar_rows * unit;
 
-	bytes_per_line = BMP_LINE_BYTES(w, 32);
+	bytes_per_line = BMP_POINTS_BYTES(w, 32);
 
 	bih.isize = BITMAPINFOHEAD_FIXED_SIZE;
 	bih.width = w;
@@ -391,7 +391,7 @@ bitmap_t coCreateStorageBitmap(visual_t rdc, const tchar_t* fname)
     cocoa_bitmap_t* bmp;
 	tchar_t fpath[PATH_LEN * 2] = { 0 };
 
-	if(is_null(fname)) return NULL;
+	if(xsisnil(fname)) return NULL;
 
 	if(*fname == _T('.') && *(fname + 1) == _T('/'))
 	{
@@ -400,7 +400,7 @@ bitmap_t coCreateStorageBitmap(visual_t rdc, const tchar_t* fname)
 	}else if(*fname != _T('/'))
 	{
 		get_runpath(NULL, fpath, PATH_LEN);
-		xsncat(fpath, _T("/"), 1);
+		xsncat(fpath, SLASH_CHAR, 1);
 		xscat(fpath, fname);
 	}else
 	{

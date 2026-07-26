@@ -270,7 +270,7 @@ void XMLPanel_OnSave(widget_t widget)
 
 	tchar_t szFile[PATH_LEN + 1] = { 0 };
 
-	if (is_null(pdt->szFile))
+	if (xsisnil(pdt->szFile))
 	{
 		tchar_t szPath[PATH_LEN + 1] = { 0 };
 
@@ -279,7 +279,7 @@ void XMLPanel_OnSave(widget_t widget)
 		if (!shell_get_filename(widget, szPath, _T("Xml File(*.xml)\0*.xml\0"), _T("xml"), 1, szPath, PATH_LEN, szFile, PATH_LEN))
 			return;
 
-		xscat(szPath, _T("/"));
+		xsncat(szPath, SLASH_CHAR, 1);
 		xscat(szPath, szFile);
 		xscpy(szFile, szPath);
 	}
@@ -304,7 +304,7 @@ void XMLPanel_OnSaveAs(widget_t widget)
 	if (!shell_get_filename(widget, szPath, _T("Xml File(*.xml)\0*.xml\0"), _T("xml"), 1, szPath, PATH_LEN, szFile, PATH_LEN))
 		return;
 
-	xscat(szPath, _T("/"));
+	xsncat(szPath, SLASH_CHAR, 1);
 	xscat(szPath, szFile);
 	xscpy(szFile, szPath);
 
@@ -355,7 +355,7 @@ void XMLPanel_OnExecute(widget_t widget)
 	read_proper(ptrProper, XMLPANEL_SECTION, -1, _T("SECRET-ID"), -1, sz_id, RES_LEN);
 	read_proper(ptrProper, XMLPANEL_SECTION, -1, _T("SECRET-KEY"), -1, sz_key, RES_LEN);
 
-	if (is_null(sz_url))
+	if (xsisnil(sz_url))
 	{
 		ShowMsg(0, _T("XML服务地址未设置！"));
 		return;
@@ -497,7 +497,7 @@ int XMLPanel_OnCreate(widget_t widget, void* data)
 
 	const tchar_t* szParam = (tchar_t*)data;
 
-	if (!is_null(szParam))
+	if (!xsisnil(szParam))
 	{
 		if (!XMLPanel_OpenFile(widget, szParam))
 			return -1;
@@ -574,17 +574,17 @@ int XMLPanel_OnClose(widget_t widget)
 		read_proper(ptrProper, XMLPANEL_SECTION, -1, _T("SECRET-ID"), -1, sz_id, RES_LEN);
 		read_proper(ptrProper, XMLPANEL_SECTION, -1, _T("SECRET-KEY"), -1, sz_key, RES_LEN);
 
-		if (!is_null(sz_url))
+		if (!xsisnil(sz_url))
 		{
 			SavePreference(_T("XML"), _T("URL"), sz_url);
 		}
 
-		if (!is_null(sz_id))
+		if (!xsisnil(sz_id))
 		{
 			SavePreference(_T("XML"), _T("SECRET-ID"), sz_id);
 		}
 
-		if (!is_null(sz_key))
+		if (!xsisnil(sz_key))
 		{
 			SavePreference(_T("XML"), _T("SECRET-KEY"), sz_key);
 		}

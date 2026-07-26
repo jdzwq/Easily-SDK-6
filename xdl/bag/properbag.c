@@ -36,7 +36,7 @@ int write_style_attr(const tchar_t* org_style, int slen, const tchar_t* sz_key, 
 
 	link_t_ptr st = NULL;
 
-	if (is_null(sz_key) || !klen)
+	if (xsisnil(sz_key) || !klen)
 		return 0;
 
 	st = create_string_table(0);
@@ -70,7 +70,7 @@ int read_style_attr(const tchar_t* style, int len, const tchar_t* sz_key, int kl
 
 	link_t_ptr st = NULL;
 
-	if (is_null(sz_key) || !klen)
+	if (xsisnil(sz_key) || !klen)
 		return 0;
 
 	st = create_string_table(0);

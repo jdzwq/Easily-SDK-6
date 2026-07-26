@@ -145,7 +145,7 @@ void parse_rowset_from_line(link_t_ptr ptr, string_t vs)
 			if (compare_text(data_type, -1, ATTR_DATA_TYPE_DATE, -1, 0) == 0 || compare_text(data_type, -1, ATTR_DATA_TYPE_DATETIME, -1, 0) == 0)
 			{
 				data_cast = get_col_field_cast_ptr(clk);
-				if (!is_null(data_cast))
+				if (!xsisnil(data_cast))
 				{
 					xsncpy(sz_date, token - pos, pos);
 					parse_datetime_ex(&dt, data_cast, sz_date);
@@ -792,7 +792,7 @@ bool_t STDCALL db_exec(xdb_t db, const tchar_t* sqlstr, int sqllen)
 	if (sqllen < 0)
 		sqllen = xslen(sqlstr);
 
-	if (!sqllen || is_null(sqlstr))
+	if (!sqllen || xsisnil(sqlstr))
 	{
 		return 1;
 	}
@@ -1112,7 +1112,7 @@ bool_t STDCALL db_batch(xdb_t db, stream_t stream)
 
 	xhttp_set_request_content_type(xhttp, HTTP_HEADER_CONTENTTYPE_TEXTPLAIN, -1);
 	format_charset(stream_get_encode(stream), sz_enc);
-	if (is_null(sz_enc))
+	if (xsisnil(sz_enc))
 	{
 		format_charset(DEF_MBS, sz_enc);
 	}
@@ -1230,7 +1230,7 @@ bool_t STDCALL db_import(xdb_t db, stream_t stream, const tchar_t* table)
 
 	xhttp_set_request_content_type(xhttp, HTTP_HEADER_CONTENTTYPE_TEXTPLAIN, -1);
 	format_charset(stream_get_encode(stream), sz_enc);
-	if (is_null(sz_enc))
+	if (xsisnil(sz_enc))
 	{
 		format_charset(DEF_MBS, sz_enc);
 	}

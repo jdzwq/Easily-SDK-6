@@ -297,7 +297,7 @@ void hand_editbox_keydown(widget_t widget, dword_t ks, int key)
 	case KEY_ENTER:
 		if (widget_is_editor(widget))
 		{
-			if (is_null(ptd->xa.text_wrap))
+			if (xsisnil(ptd->xa.text_wrap))
 			{
 				noti_editbox_command(widget, COMMAND_COMMIT, (vword_t)NULL);
 			}
@@ -319,7 +319,7 @@ void hand_editbox_keydown(widget_t widget, dword_t ks, int key)
 
 		if (widget_is_editor(widget))
 		{
-			if (is_null(ptd->xa.text_wrap))
+			if (xsisnil(ptd->xa.text_wrap))
 			{
 				noti_editbox_command(widget, COMMAND_TABORDER, (vword_t)TABORDER_UP);
 			}
@@ -330,7 +330,7 @@ void hand_editbox_keydown(widget_t widget, dword_t ks, int key)
 
 		if (widget_is_editor(widget))
 		{
-			if (is_null(ptd->xa.text_wrap))
+			if (xsisnil(ptd->xa.text_wrap))
 			{
 				noti_editbox_command(widget, COMMAND_TABORDER, (vword_t)TABORDER_DOWN);
 			}
@@ -620,7 +620,7 @@ bool_t editbox_is_multiline(widget_t widget)
 
 	XDK_ASSERT(ptd != NULL);
 
-	return is_null(ptd->xa.text_wrap) ? 0 : 1;
+	return xsisnil(ptd->xa.text_wrap) ? 0 : 1;
 }
 
 void editbox_auto_size(widget_t widget, bool_t bSize)

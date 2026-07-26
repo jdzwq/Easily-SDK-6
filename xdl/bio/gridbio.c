@@ -44,7 +44,7 @@ int format_grid_colset_to_csv(link_t_ptr ptr, tchar_t* buf, int max)
 	while (clk)
 	{
 		str = get_col_title_ptr(clk);
-		if (is_null(str))
+		if (xsisnil(str))
 		{
 			str = get_col_name_ptr(clk);
 		}

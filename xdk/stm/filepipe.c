@@ -170,7 +170,7 @@ bool_t xfile_info(const secu_desc_t* psd, const tchar_t* fname, tchar_t* ftime, 
 {
 	byte_t proto;
 
-	if(is_null(fname))
+	if(xsisnil(fname))
 		return 0;
 
 	proto = parse_proto(fname);
@@ -199,7 +199,7 @@ bool_t xfile_delete(const secu_desc_t* psd, const tchar_t* fname)
 {
 	byte_t proto;
 
-	if (is_null(fname))
+	if (xsisnil(fname))
 		return 0;
 
 	proto = parse_proto(fname);
@@ -228,7 +228,7 @@ bool_t	xfile_rename(const secu_desc_t* psd, const tchar_t* fname, const tchar_t*
 {
 	byte_t proto;
 
-	if (is_null(fname))
+	if (xsisnil(fname))
 		return 0;
 
 	proto = parse_proto(fname);
@@ -253,7 +253,7 @@ EXP_API bool_t xfile_mkdir(const secu_desc_t* psd, const tchar_t* path)
 {
 	byte_t proto;
 
-	if (is_null(path))
+	if (xsisnil(path))
 		return 0;
 
 	proto = parse_proto(path);
@@ -275,7 +275,7 @@ EXP_API bool_t xfile_rmdir(const secu_desc_t* psd, const tchar_t* path)
 {
 	byte_t proto;
 
-	if (is_null(path))
+	if (xsisnil(path))
 		return 0;
 
 	proto = parse_proto(path);
@@ -429,7 +429,7 @@ bool_t xfile_list(const secu_desc_t* psd, const tchar_t* path, link_t_ptr ptr)
 {
 	byte_t proto;
 
-	if (is_null(path))
+	if (xsisnil(path))
 		return 0;
 
 	proto = parse_proto(path);
@@ -551,7 +551,7 @@ bool_t xfile_dump(const secu_desc_t* psd, const tchar_t* path, stream_t stm)
 
 	stream_write_utfbom(stm, NULL);
 
-	if (!is_null(path))
+	if (!xsisnil(path))
 	{
 		proto = parse_proto(path);
 

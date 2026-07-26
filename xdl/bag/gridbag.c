@@ -47,7 +47,7 @@ void save_form_to_grid_row(link_t_ptr ptrForm, link_t_ptr ptrGrid, link_t_ptr pt
 		}
 
 		src = get_field_id_ptr(flk);
-		if (is_null(src))
+		if (xsisnil(src))
 		{
 			flk = get_next_field(ptrForm, flk);
 			continue;
@@ -89,7 +89,7 @@ void load_form_from_grid_row(link_t_ptr ptrForm, link_t_ptr ptrGrid, link_t_ptr 
 		}
 
 		src = get_field_id_ptr(flk);
-		if (is_null(src))
+		if (xsisnil(src))
 		{
 			flk = get_next_field(ptrForm, flk);
 			continue;

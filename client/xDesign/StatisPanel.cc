@@ -189,7 +189,7 @@ void StatisPanel_OnSave(widget_t widget)
 
 	tchar_t szFile[PATH_LEN + 1] = { 0 };
 
-	if (is_null(pdt->szFile))
+	if (xsisnil(pdt->szFile))
 	{
 		tchar_t szPath[PATH_LEN + 1] = { 0 };
 
@@ -198,7 +198,7 @@ void StatisPanel_OnSave(widget_t widget)
 		if (!shell_get_filename(widget, szPath, _T("Statis Meta File(*.sheet)\0*.sheet\0"), _T("sheet"), 1, szPath, PATH_LEN, szFile, PATH_LEN))
 			return;
 
-		xscat(szPath, _T("/"));
+		xsncat(szPath, SLASH_CHAR, 1);
 		xscat(szPath, szFile);
 		xscpy(szFile, szPath);
 	}
@@ -227,7 +227,7 @@ void StatisPanel_OnSaveAs(widget_t widget)
 	if (!shell_get_filename(widget, szPath, _T("Statis Meta File(*.sheet)\0*.sheet\0Svg Image File(*.svg)\0*.svg\0"), _T("sheet"), 1, szPath, PATH_LEN, szFile, PATH_LEN))
 		return;
 
-	xscat(szPath, _T("/"));
+	xsncat(szPath, SLASH_CHAR, 1);
 	xscat(szPath, szFile);
 	xscpy(szFile, szPath);
 
@@ -313,7 +313,7 @@ void StatisPanel_OnSchema(widget_t widget)
 	if (!shell_get_filename(widget, szPath, _T("xml schema file(*.schema)\0*.schema\0"), _T("schema"), 1, szPath, PATH_LEN, szFile, PATH_LEN))
 		return;
 
-	xscat(szPath, _T("/"));
+	xsncat(szPath, SLASH_CHAR, 1);
 	xscat(szPath, szFile);
 	xscpy(szFile, szPath);
 
@@ -342,7 +342,7 @@ void StatisPanel_OnExport(widget_t widget)
 	if (!shell_get_filename(widget, szPath, _T("xml data file(*.xml)\0*.xml\0"), _T("xml"), 1, szPath, PATH_LEN, szFile, PATH_LEN))
 		return;
 
-	xscat(szPath, _T("/"));
+	xsncat(szPath, SLASH_CHAR, 1);
 	xscat(szPath, szFile);
 	xscpy(szFile, szPath);
 
@@ -375,7 +375,7 @@ void StatisPanel_OnImport(widget_t widget)
 	if (!shell_get_filename(widget, szPath, _T("xml data file(*.xml)\0*.xml\0"), _T("xml"), 0, szPath, PATH_LEN, szFile, PATH_LEN))
 		return;
 
-	xscat(szPath, _T("/"));
+	xsncat(szPath, SLASH_CHAR, 1);
 	xscat(szPath, szFile);
 	xscpy(szFile, szPath);
 
@@ -966,7 +966,7 @@ int StatisPanel_OnCreate(widget_t widget, void* data)
 
 	const tchar_t* szParam = (const tchar_t*)data;
 
-	if (!is_null(szParam))
+	if (!xsisnil(szParam))
 	{
 		StatisPanel_OpenFile(widget, szParam);
 	}
@@ -1270,7 +1270,7 @@ void StatisPanel_OnParentCommand(widget_t widget, int code, vword_t data)
 		tchar_t szPath[PATH_LEN + 1], szExt[INT_LEN + 1];
 		const tchar_t* nname = (const tchar_t*)data;
 
-		if (!is_null(pdt->szFile) && !is_null(nname))
+		if (!xsisnil(pdt->szFile) && !xsisnil(nname))
 		{
 			split_path(pdt->szFile, szPath, NULL, szExt);
 			xsprintf(pdt->szFile, _T("%s\\%s.%s"), szPath, nname, szExt);

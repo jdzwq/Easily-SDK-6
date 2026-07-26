@@ -68,7 +68,7 @@ bool_t _invoke_head(const https_block_t* pb, loc_block_t* pos)
 	xhttp_set_response_header(pb->http, HTTP_HEADER_CONTENTLENGTH, -1, fsize, -1);
 	xhttp_set_response_header(pb->http, HTTP_HEADER_LASTMODIFIED, -1, ftime, -1);
 	xhttp_set_response_header(pb->http, HTTP_HEADER_ETAG, -1, fetag, -1);
-	if (!is_null(fencode))
+	if (!xsisnil(fencode))
 	{
 		xhttp_set_response_content_type(pb->http, HTTP_HEADER_CONTENTTYPE_TEXTPLAIN, -1);
 		xhttp_set_response_content_type_charset(pb->http, fencode, -1);
@@ -225,7 +225,7 @@ bool_t _invoke_get(const https_block_t* pb, loc_block_t* pos)
 		raise_user_error(NULL, NULL);
 	}
 
-	if (is_huge_size(fsize) && is_null(frange))
+	if (is_huge_size(fsize) && xsisnil(frange))
 	{
 		xhttp_set_response_code(pb->http, HTTP_CODE_403);
 		xhttp_set_response_message(pb->http, HTTP_CODE_403_TEXT, -1);
@@ -233,7 +233,7 @@ bool_t _invoke_get(const https_block_t* pb, loc_block_t* pos)
 		raise_user_error(_T("loc_api._invoke_gut"), _T("not support large file\n"));
 	}
 
-	if (!is_null(frange))
+	if (!xsisnil(frange))
 	{
 		n_hoff = n_loff = n_size = 0;
 		n_total = 0;
@@ -257,7 +257,7 @@ bool_t _invoke_get(const https_block_t* pb, loc_block_t* pos)
 	xscpy(frange, _T("bytes "));
 	format_bytes_range(frange + xslen(frange), n_hoff, n_loff, n_size, n_total);
 
-	if (!is_null(yes_etag))
+	if (!xsisnil(yes_etag))
 	{
 		if (compare_text(yes_etag, -1, fetag, -1, 0) != 0)
 		{
@@ -268,7 +268,7 @@ bool_t _invoke_get(const https_block_t* pb, loc_block_t* pos)
 		}
 	}
 
-	if (!is_null(not_etag))
+	if (!xsisnil(not_etag))
 	{
 		if (compare_text(not_etag, -1, fetag, -1, 0) == 0)
 		{
@@ -279,7 +279,7 @@ bool_t _invoke_get(const https_block_t* pb, loc_block_t* pos)
 		}
 	}
 
-	if (!is_null(fsince))
+	if (!xsisnil(fsince))
 	{
 		parse_gmttime(&dt_since, fsince);
 		parse_gmttime(&dt_time, ftime);
@@ -485,10 +485,10 @@ bool_t _invoke_put(const https_block_t* pb, loc_block_t* pos)
 	xhttp_get_request_header(pb->http, HTTP_HEADER_IFMATCH, -1, yes_etag, ETAG_LEN);
 	xhttp_get_request_header(pb->http, HTTP_HEADER_IFNONEMATCH, -1, not_etag, ETAG_LEN);
 
-	if (!is_null(fsince))
+	if (!xsisnil(fsince))
 	{
 		xfile_info(&pos->sd, sz_object, ftime, NULL, NULL, NULL);
-		if (!is_null(ftime))
+		if (!xsisnil(ftime))
 		{
 			parse_gmttime(&dt_since, fsince);
 			parse_gmttime(&dt_time, ftime);
@@ -503,10 +503,10 @@ bool_t _invoke_put(const https_block_t* pb, loc_block_t* pos)
 		}
 	}
 
-	if (!is_null(yes_etag))
+	if (!xsisnil(yes_etag))
 	{
 		xfile_info(&pos->sd, sz_object, NULL, NULL, fetag, NULL);
-		if (!is_null(fetag))
+		if (!xsisnil(fetag))
 		{
 			if (compare_text(yes_etag, -1, fetag, -1, 1) != 0)
 			{
@@ -518,10 +518,10 @@ bool_t _invoke_put(const https_block_t* pb, loc_block_t* pos)
 		}
 	}
 
-	if (!is_null(not_etag))
+	if (!xsisnil(not_etag))
 	{
 		xfile_info(&pos->sd, sz_object, NULL, NULL, fetag, NULL);
-		if (!is_null(fetag))
+		if (!xsisnil(fetag))
 		{
 			if (compare_text(not_etag, -1, fetag, -1, 1) == 0)
 			{
@@ -537,7 +537,7 @@ bool_t _invoke_put(const https_block_t* pb, loc_block_t* pos)
 	xhttp_get_request_header(pb->http, HTTP_HEADER_CONTENTRANGE, -1, frange, RES_LEN);
 	xhttp_get_request_header(pb->http, HTTP_HEADER_CONTENTENCODING, -1, fencode, INT_LEN);
 
-	if (is_null(frange))
+	if (xsisnil(frange))
 	{
 		n_hoff = 0;
 		n_loff = 0;
@@ -588,7 +588,7 @@ bool_t _invoke_put(const https_block_t* pb, loc_block_t* pos)
 		raise_user_error(NULL, NULL);
 	}
 
-	if (!is_null(ftime))
+	if (!xsisnil(ftime))
 	{
 		xfile_settime(xf, ftime);
 	}

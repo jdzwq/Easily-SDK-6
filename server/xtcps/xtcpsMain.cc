@@ -30,7 +30,7 @@ int main(int argc, char* argv[])
 
 	for (i = 1; i < argc; i++)
 	{
-		if (a_is_null(argv[i]))
+		if (a_xsisnil(argv[i]))
 			continue;
 
 		len = xslen(xp.sz_param);

@@ -43,7 +43,7 @@ bool_t get_grid_next_param(link_t_ptr ptr, tchar_t* pname, int max)
 	if (!len)
 		return 0;
 
-	if (is_null(pname))
+	if (xsisnil(pname))
 		rt = 1;
 
 	while (n = parse_param_name((token + total), (len - total), _T(':'), &key, &klen))
@@ -70,7 +70,7 @@ bool_t get_grid_next_param(link_t_ptr ptr, tchar_t* pname, int max)
 
 void set_grid_sql_param(link_t_ptr ptr, const tchar_t* paramname, const tchar_t* paramval)
 {
-	if (is_null(paramname))
+	if (xsisnil(paramname))
 		return;
 
 	set_dom_node_options_text(ptr, paramname, -1, paramval, -1);
@@ -112,7 +112,7 @@ int format_row_update_sql(link_t_ptr ptr,link_t_ptr rlk,tchar_t* buf,int max)
 	tchar_t bk[3] = { _T('\r'), _T('\n'), _T('\0') };
 
 	update_table = get_grid_update_table_ptr(ptr);
-	if(is_null(update_table))
+	if(xsisnil(update_table))
 		return 0;
 
 	len = xslen(_T("UPDATE ")) + xslen(update_table) + xslen(_T(" SET ")); /*UPDATE szTable */
@@ -136,7 +136,7 @@ int format_row_update_sql(link_t_ptr ptr,link_t_ptr rlk,tchar_t* buf,int max)
 		
 		field_name = get_col_field_name_ptr(clk);
 		token = get_cell_text_ptr(rlk,clk);
-		if(is_null(token))
+		if(xsisnil(token))
 		{
 			len = xslen(field_name) + xslen(_T("=NULL,"));
 			if(total + len > max)
@@ -164,7 +164,7 @@ int format_row_update_sql(link_t_ptr ptr,link_t_ptr rlk,tchar_t* buf,int max)
 			}else if (compare_text(data_type, -1, ATTR_DATA_TYPE_DATE, -1, 1) == 0 || compare_text(data_type, -1, ATTR_DATA_TYPE_DATETIME, -1, 1) == 0)
 			{
 				field_cast = get_col_field_cast_ptr(clk);
-				if (is_null(field_cast))
+				if (xsisnil(field_cast))
 				{
 					xscpy(sz_date, token);
 				}
@@ -223,7 +223,7 @@ skipone:
 		table_name = get_col_table_name_ptr(clk);
 		data_type = get_col_data_type_ptr(clk);
 
-		if(is_null(field_name) || compare_text(field_type,-1,ATTR_FIELD_TYPE_PRIM,-1,1) != 0 || compare_text(table_name,-1,update_table,-1,1) != 0)
+		if(xsisnil(field_name) || compare_text(field_type,-1,ATTR_FIELD_TYPE_PRIM,-1,1) != 0 || compare_text(table_name,-1,update_table,-1,1) != 0)
 		{
 			goto skiptwo;
 		}
@@ -234,7 +234,7 @@ skipone:
 			prim = get_cell_text_ptr(rlk,clk);
 			
 
-		if(is_null(prim))
+		if(xsisnil(prim))
 		{
 			len = xslen(field_name) + xslen(_T(" IS NULL AND "));
 			if(total + len > max)
@@ -262,7 +262,7 @@ skipone:
 			else if (compare_text(data_type, -1, ATTR_DATA_TYPE_DATE, -1, 1) == 0 || compare_text(data_type, -1, ATTR_DATA_TYPE_DATETIME, -1, 1) == 0)
 			{
 				field_cast = get_col_field_cast_ptr(clk);
-				if (is_null(field_cast))
+				if (xsisnil(field_cast))
 				{
 					xscpy(sz_date, prim);
 				}
@@ -304,7 +304,7 @@ skiptwo:
 	/*format exists clause*/
 	sz_exists = get_grid_exists_clause_ptr(ptr);
 
-	if (!is_null(sz_exists))
+	if (!xsisnil(sz_exists))
 	{
 		len = xslen(_T(" AND EXISTS ("));
 		if (total + len > max)
@@ -366,7 +366,7 @@ int format_row_insert_sql(link_t_ptr ptr,link_t_ptr rlk,tchar_t* buf,int max)
 	tchar_t bk[3] = { _T('\r'), _T('\n'), _T('\0') };
 
 	update_table = get_grid_update_table_ptr(ptr);
-	if(is_null(update_table))
+	if(xsisnil(update_table))
 		return 0;
 
 	len = xslen(_T("INSERT INTO ")) + xslen(update_table) + xslen(_T(" (")); 
@@ -408,7 +408,7 @@ skipone:
 
 	sz_exists = get_grid_exists_clause_ptr(ptr);
 
-	if (!is_null(sz_exists))
+	if (!xsisnil(sz_exists))
 	{
 		/*format select clause*/
 		len = xslen(_T(" SELECT "));
@@ -425,7 +425,7 @@ skipone:
 
 	if (buf)
 	{
-		if (!is_null(sz_exists))
+		if (!xsisnil(sz_exists))
 			xsprintf(buf + total, _T("%s"), _T(" SELECT "));
 		else
 			xsprintf(buf + total, _T("%s"), _T(" VALUES ("));
@@ -442,7 +442,7 @@ skipone:
 		}
 
 		token = get_cell_text_ptr(rlk,clk);
-		if(is_null(token))
+		if(xsisnil(token))
 		{
 			len = xslen(_T("NULL,"));
 			if(total + len > max)
@@ -471,7 +471,7 @@ skipone:
 			else if (compare_text(data_type, -1, ATTR_DATA_TYPE_DATE, -1, 1) == 0 || compare_text(data_type, -1, ATTR_DATA_TYPE_DATETIME, -1, 1) == 0)
 			{
 				field_cast = get_col_field_cast_ptr(clk);
-				if (is_null(field_cast))
+				if (xsisnil(field_cast))
 				{
 					xscpy(sz_date, token);
 				}
@@ -509,7 +509,7 @@ skiptwo:
 
 		if (clk == NULL && buf)
 		{
-			if (!is_null(sz_exists))
+			if (!xsisnil(sz_exists))
 				buf[total - 1] = _T(' '); /*replace last ','*/
 			else
 				buf[total - 1] = _T(')'); /*replace last ','*/
@@ -517,7 +517,7 @@ skiptwo:
 	}
 
 	/*format exists clause*/
-	if (!is_null(sz_exists))
+	if (!xsisnil(sz_exists))
 	{
 		len = xslen(_T("WHERE EXISTS ("));
 		if (total + len > max)
@@ -601,7 +601,7 @@ int format_row_delete_sql(link_t_ptr ptr,link_t_ptr rlk,tchar_t* buf,int max)
 		field_name = get_col_field_name_ptr(clk);
 		table_name = get_col_table_name_ptr(clk);
 
-		if(is_null(field_name) || compare_text(field_type,-1,ATTR_FIELD_TYPE_PRIM,-1,1) != 0  || compare_text(table_name,-1,update_table,-1,1) != 0)
+		if(xsisnil(field_name) || compare_text(field_type,-1,ATTR_FIELD_TYPE_PRIM,-1,1) != 0  || compare_text(table_name,-1,update_table,-1,1) != 0)
 		{
 			goto skip;
 		}
@@ -613,7 +613,7 @@ int format_row_delete_sql(link_t_ptr ptr,link_t_ptr rlk,tchar_t* buf,int max)
 			prim = get_cell_text_ptr(rlk,clk);
 
 
-		if(is_null(prim))
+		if(xsisnil(prim))
 		{
 			len = xslen(field_name) + xslen(_T(" IS NULL AND "));
 			if(total + len > max)
@@ -642,7 +642,7 @@ int format_row_delete_sql(link_t_ptr ptr,link_t_ptr rlk,tchar_t* buf,int max)
 			else if (compare_text(data_type, -1, ATTR_DATA_TYPE_DATE, -1, 1) == 0 || compare_text(data_type, -1, ATTR_DATA_TYPE_DATETIME, -1, 1) == 0)
 			{
 				field_cast = get_col_field_cast_ptr(clk);
-				if (is_null(field_cast))
+				if (xsisnil(field_cast))
 				{
 					xscpy(sz_date, prim);
 				}
@@ -685,7 +685,7 @@ skip:
 	/*format exists clause*/
 	sz_exists = get_grid_exists_clause_ptr(ptr);
 
-	if (!is_null(sz_exists))
+	if (!xsisnil(sz_exists))
 	{
 		len = xslen(_T(" AND EXISTS ("));
 		if (total + len > max)
@@ -738,7 +738,7 @@ int format_grid_param_clause(link_t_ptr ptr,const tchar_t* clause, tchar_t* buf,
 	int len, total;
 	int n, m = 0;
 
-	if (is_null(clause))
+	if (xsisnil(clause))
 		return 0;
 
 	total = 0;
@@ -863,12 +863,12 @@ int format_grid_select_sql(link_t_ptr ptr,tchar_t* buf,int max)
 		table_name = get_col_table_name_ptr(clk);
 		field_type = get_col_field_type_ptr(clk);
 
-		if(is_null(col_name) || is_null(field_name))
+		if(xsisnil(col_name) || xsisnil(field_name))
 		{
 			goto skipone;
 		}
 
-		if (compare_text(field_type, -1, ATTR_FIELD_TYPE_CALC, -1, 1) != 0 && is_null(table_name))
+		if (compare_text(field_type, -1, ATTR_FIELD_TYPE_CALC, -1, 1) != 0 && xsisnil(table_name))
 		{
 			goto skipone;
 		}

@@ -458,7 +458,7 @@ link_t_ptr	write_hash_attr(link_t_ptr ptr,const tchar_t* key,int keylen,const tc
 
 	XDK_ASSERT(ptr && ptr->tag == lkHashTable);
 
-	if(is_null(key) || !keylen)
+	if(xsisnil(key) || !keylen)
 		return NULL;
 
 	pht = HashTableFromLink(ptr);
@@ -468,7 +468,7 @@ link_t_ptr	write_hash_attr(link_t_ptr ptr,const tchar_t* key,int keylen,const tc
 	{
 		phe = HashEntityFromLink(plk);
 		
-		if(!is_null(val) && vallen)
+		if(!xsisnil(val) && vallen)
 		{
 			if(vallen < 0)
 				vallen = xslen(val);
@@ -496,7 +496,7 @@ link_t_ptr	write_hash_attr(link_t_ptr ptr,const tchar_t* key,int keylen,const tc
 		xsncpy(phe->wkey,key,keylen);
 		phe->index = KEYINDEX(code);
 		
-		if(!is_null(val) && vallen)
+		if(!xsisnil(val) && vallen)
 		{
 			if(vallen < 0)
 				vallen = xslen(val);
@@ -583,7 +583,7 @@ link_t_ptr get_hash_entity(link_t_ptr ptr,const tchar_t* key,int keylen)
 
 	XDK_ASSERT(ptr && ptr->tag == lkHashTable);
 
-	if(is_null(key) || keylen == 0)
+	if(xsisnil(key) || keylen == 0)
 		return NULL;
 
 	if (keylen < 0)
@@ -716,7 +716,7 @@ void attach_hash_entity_val(link_t_ptr elk, tchar_t* val)
 	if (phe->wval)
 		xmem_free(phe->wval);
 
-	if (is_null(val))
+	if (xsisnil(val))
 	{
 		phe->wval = NULL;
 		phe->vlen = 0;
@@ -990,7 +990,7 @@ const tchar_t* hash_attr_set_chars(link_t_ptr ptr, const tchar_t* key, int pos, 
 	link_t_ptr plk;
 	int len;
 
-	if (is_null(key))
+	if (xsisnil(key))
 		return NULL;
 
 	plk = get_hash_entity(ptr, key, -1);
@@ -1024,7 +1024,7 @@ const tchar_t* hash_attr_ins_chars(link_t_ptr ptr, const tchar_t* key, int pos, 
 	link_t_ptr plk;
 	int len;
 
-	if (is_null(key))
+	if (xsisnil(key))
 		return NULL;
 
 	plk = get_hash_entity(ptr, key, -1);
@@ -1059,7 +1059,7 @@ const tchar_t* hash_attr_del_chars(link_t_ptr ptr, const tchar_t* key, int pos, 
 	link_t_ptr plk;
 	int len;
 
-	if (is_null(key))
+	if (xsisnil(key))
 		return NULL;
 
 	plk = get_hash_entity(ptr, key, -1);
@@ -1091,7 +1091,7 @@ void hash_table_parse_attrset(link_t_ptr ptr, const tchar_t* attrs, int len)
 	if (len < 0)
 		len = xslen(attrs);
 
-	if (is_null(attrs) || !len)
+	if (xsisnil(attrs) || !len)
 		return;
 
 	while (n = parse_attrset_token((attrs + total), (len - total), &key, &keylen, &val, &vallen))
@@ -1145,7 +1145,7 @@ static int hash_table_compare_attr(const tchar_t* key,const tchar_t* sin,const t
 
 	ptr = (link_t_ptr)parm;
 	
-	if(is_null(key))
+	if(xsisnil(key))
 		return 0;
 
 	ent = get_hash_entity(ptr,key,-1);

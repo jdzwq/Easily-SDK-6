@@ -319,7 +319,7 @@ xdb_t STDCALL db_open_dsn(const tchar_t* dsnfile)
 		raise_user_error(_T("-1"), _T("Alloc connectoin handle failed"));
 	}
 
-	if (is_null(tru))
+	if (xsisnil(tru))
 		xsprintf(sql, _T("DRIVER=%s;SERVER=%s;DATABASE=%s;UID=%s;PWD=%s;"),drv, srv, dbn, uid, pwd);
 	else
 		xsprintf(sql, _T("DRIVER=%s;SERVER=%s;DATABASE=%s;UID=%s;PWD=%s;Encrypt=no;TrustServerCertificate=yes;"), drv, srv, dbn, uid, pwd);
@@ -557,7 +557,7 @@ bool_t STDCALL db_exec(xdb_t db, const tchar_t* sqlstr, int sqllen)
 	if (sqllen < 0)
 		sqllen = xslen(sqlstr);
 
-	if (!sqllen || is_null(sqlstr))
+	if (!sqllen || xsisnil(sqlstr))
 	{
 		return 1;
 	}
@@ -1010,7 +1010,7 @@ bool_t STDCALL db_select(xdb_t db, LINKPTR grid, const tchar_t* sqlstr)
 	clear_grid_rowset(grid);
 	clear_grid_colset(grid);
 
-	if(is_null(sqlstr))
+	if(xsisnil(sqlstr))
 	{
 		raise_user_error(_T("-1"), _T("Empty sql statement"));
 	}
@@ -1125,7 +1125,7 @@ bool_t STDCALL db_schema(xdb_t db, LINKPTR grid, const tchar_t* sqlstr)
 	clear_grid_rowset(grid);
 	clear_grid_colset(grid);
 
-	if (is_null(sqlstr))
+	if (xsisnil(sqlstr))
 	{
 		raise_user_error(_T("-1"), _T("Empty sql statement"));
 	}
@@ -1161,7 +1161,7 @@ bool_t STDCALL db_schema(xdb_t db, LINKPTR grid, const tchar_t* sqlstr)
 
 		SQLColAttribute(pdb->stm, i, SQL_DESC_BASE_TABLE_NAME, strattr, ERR_LEN, &si, NULL);
 		set_col_table_name(clk, strattr);
-		if (is_null(strattr))
+		if (xsisnil(strattr))
 			set_col_field_type(clk, ATTR_FIELD_TYPE_CALC);
 		else
 			set_col_field_type(clk, ATTR_FIELD_TYPE_DATA);
@@ -1921,7 +1921,7 @@ bool_t STDCALL _db_prepare(xdb_odbc_context* pdb, const tchar_t* sqlstr)
 
 	_db_reset(pdb);
 
-	if (is_null(sqlstr))
+	if (xsisnil(sqlstr))
 	{
 		raise_user_error(_T("-1"), _T("Empty sql statement"));
 	}

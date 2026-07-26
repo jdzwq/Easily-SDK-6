@@ -98,7 +98,7 @@ void parse_date(xdate_t* pmd, const tchar_t* text)
 	pmd->millsec = 0;
 	pmd->wday = 0;
 
-	if (is_null(text))
+	if (xsisnil(text))
 		return;
 
 	tmp = (tchar_t*)text;
@@ -160,7 +160,7 @@ void parse_datetime(xdate_t* pmd, const tchar_t* text)
 	pmd->millsec = 0;
 	pmd->wday = 0;
 
-	if (is_null(text))
+	if (xsisnil(text))
 		return;
 
 	tmp = (tchar_t*)text;
@@ -297,7 +297,7 @@ void parse_gmttime(xdate_t* pdt, const tchar_t* str)
 	pdt->millsec = 0;
 	pdt->wday = 0;
 
-	if (is_null(str))
+	if (xsisnil(str))
 		return;
 
 	key = token;
@@ -409,7 +409,7 @@ int format_datetime_ex(const xdate_t* pxd, const tchar_t* fmt, tchar_t* buf, int
 	const tchar_t* tk_at;
 	int tk_len, total = 0;
 
-	if (is_null(fmt))
+	if (xsisnil(fmt))
 		return format_datetime(pxd, buf);
 
 	while (*fmt != _T('\0'))
@@ -537,7 +537,7 @@ void parse_datetime_ex(xdate_t* pxd, const tchar_t* fmt, const tchar_t* str)
 	int tklen;
 	tchar_t ch;
 
-	if (is_null(fmt) || is_null(str))
+	if (xsisnil(fmt) || xsisnil(str))
 	{
 		parse_datetime(pxd, str);
 		return;

@@ -1931,7 +1931,7 @@ void gridctrl_filter(widget_t widget, const tchar_t* token)
 	{
 		b_hidden = 1;
 
-		if (is_null(token))
+		if (xsisnil(token))
 		{
 			b_hidden = 0;
 		}

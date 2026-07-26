@@ -34,7 +34,7 @@ link_t_ptr insert_images_item_from_url(link_t_ptr ptr, const tchar_t* iname, con
 {
 	link_t_ptr nlk;
 
-	if (is_null(iname))
+	if (xsisnil(iname))
 		return NULL;
 
 	nlk = get_images_item(ptr, iname, -1);
@@ -58,7 +58,7 @@ link_t_ptr insert_images_item_from_file(link_t_ptr ptr, const tchar_t* iname, co
 	tchar_t* xbas_buf = NULL;
 	tchar_t type[RES_LEN + 1] = { 0 };
 
-	if (is_null(iname))
+	if (xsisnil(iname))
 		return NULL;
 
 	size = load_image_bytes_from_file(psd, fname, NULL, NULL, MAX_LONG);

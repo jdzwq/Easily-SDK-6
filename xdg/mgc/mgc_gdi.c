@@ -37,7 +37,7 @@ LICENSE.GPL3 for more details.
 
 static void calc_penmode(const xpen_t* pxp, int* fs, int* ds)
 {
-	*fs = is_null(pxp->size) ? 1 : xstol(pxp->size);
+	*fs = xsisnil(pxp->size) ? 1 : xstol(pxp->size);
 
 	if (compare_text(pxp->style, -1, GDI_ATTR_STROKE_STYLE_DASH, -1, 1) == 0)
 		*ds = DOT_DASH;
@@ -1585,7 +1585,7 @@ void mgc_draw_path(canvas_t canv, const xpen_t *pxp, const xbrush_t *pxb, const 
 
 	view = mgc_get_canvas_visual(canv);
 
-	if (is_null(aa))
+	if (xsisnil(aa))
 		return;
 
 	ppt = (xpoint_t *)xmem_alloc(n * sizeof(xpoint_t));
@@ -1667,7 +1667,7 @@ void mgc_multi_line_raw(visual_t mgc, const xface_t *pxa, const xpen_t *pxp, con
 	pdev = mgc_get_device_interface(mgc, &hand);
 	rop = mgc_get_rop(mgc);
 
-	if (is_null(pxa->line_height))
+	if (xsisnil(pxa->line_height))
 		line_rati = xstof(DEF_GDI_TEXT_LINE_HEIGHT);
 	else
 		line_rati = xstof(pxa->line_height);
@@ -1970,7 +1970,7 @@ void mgc_measure_rect_raw(visual_t mgc, const xfont_t* pxf, const xface_t *pxa, 
 
 		if (!h)
 		{
-			if (is_null(pxa->line_height))
+			if (xsisnil(pxa->line_height))
 				h = se.h;
 			else
 				h = (int)((float)se.h * xstof(pxa->line_height));
@@ -1980,7 +1980,7 @@ void mgc_measure_rect_raw(visual_t mgc, const xfont_t* pxf, const xface_t *pxa, 
 		{
 			if (pxr->w && (w + se.w > pxr->w))
 			{
-				if (is_null(pxa->line_height))
+				if (xsisnil(pxa->line_height))
 					h += se.h;
 				else
 					h += (int)((float)se.h * xstof(pxa->line_height));
@@ -1998,7 +1998,7 @@ void mgc_measure_rect_raw(visual_t mgc, const xfont_t* pxf, const xface_t *pxa, 
 		{
 			if (pch[0] == _T('\n'))
 			{
-				if (is_null(pxa->line_height))
+				if (xsisnil(pxa->line_height))
 					h += se.h;
 				else
 					h += (int)((float)se.h * xstof(pxa->line_height));
@@ -2007,7 +2007,7 @@ void mgc_measure_rect_raw(visual_t mgc, const xfont_t* pxf, const xface_t *pxa, 
 			}
 			else if (pxr->w && (w + se.w > pxr->w))
 			{
-				if (is_null(pxa->line_height))
+				if (xsisnil(pxa->line_height))
 					h += se.h;
 				else
 					h += (int)((float)se.h * xstof(pxa->line_height));
@@ -2320,7 +2320,7 @@ void mgc_text_indicate_raw(visual_t mgc, const xface_t *pxa, const tchar_t *txt,
 
 		if (!h)
 		{
-			if (is_null(pxa->line_height))
+			if (xsisnil(pxa->line_height))
 				h = se.h;
 			else
 				h = (int)((float)se.h * xstof(pxa->line_height));
@@ -2330,7 +2330,7 @@ void mgc_text_indicate_raw(visual_t mgc, const xface_t *pxa, const tchar_t *txt,
 		{
 			if (pxr->w && (w + se.w > pxr->w))
 			{
-				if (is_null(pxa->line_height))
+				if (xsisnil(pxa->line_height))
 					h += se.h;
 				else
 					h += (int)((float)se.h * xstof(pxa->line_height));
@@ -2366,7 +2366,7 @@ void mgc_text_indicate_raw(visual_t mgc, const xface_t *pxa, const tchar_t *txt,
 				}
 				n++;
 
-				if (is_null(pxa->line_height))
+				if (xsisnil(pxa->line_height))
 					h += se.h;
 				else
 					h += (int)((float)se.h * xstof(pxa->line_height));
@@ -2375,7 +2375,7 @@ void mgc_text_indicate_raw(visual_t mgc, const xface_t *pxa, const tchar_t *txt,
 			}
 			else if (pxr->w && (w + se.w > pxr->w))
 			{
-				if (is_null(pxa->line_height))
+				if (xsisnil(pxa->line_height))
 					h += se.h;
 				else
 					h += (int)((float)se.h * xstof(pxa->line_height));
@@ -2680,7 +2680,7 @@ void mgc_draw_image(canvas_t canv, const ximage_t *pxi, const xrect_t *pxr)
 	visual_t view;
 	xrect_t xr;
 
-	if (is_null(pxi->source))
+	if (xsisnil(pxi->source))
 		return;
 
 	view = mgc_get_canvas_visual(canv);

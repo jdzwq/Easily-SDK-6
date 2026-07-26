@@ -87,7 +87,7 @@ void parse_long(unsigned int* phl, unsigned int* pll, const tchar_t* str)
 	if (pll)
 		*pll = 0;
 
-	if (is_null(str))
+	if (xsisnil(str))
 		return;
 
 	while (str[len] != _T('\0'))
@@ -111,7 +111,7 @@ unsigned int parse_hexnum(const tchar_t* token, int len)
 	if (len < 0)
 		len = xslen(token);
 
-	if (is_null(token) || !len)
+	if (xsisnil(token) || !len)
 		return 0;
 
 	if (token[0] == _T('0') && (token[1] == _T('x') || token[1] == _T('X')))
@@ -286,7 +286,7 @@ int format_integer_ex(int ln, const tchar_t* fmt, tchar_t* buf, int max)
 	tchar_t sz_num[INT_LEN + 1] = { 0 };
 	tchar_t* token;
 
-	if (is_null(fmt))
+	if (xsisnil(fmt))
 		return ltoxs(ln, buf, max);
 
 	n_split = 0;
@@ -428,7 +428,7 @@ double parse_numeric(const tchar_t* token, int len)
 	if (len < 0)
 		len = xslen(token);
 
-	if (is_null(token) || !len)
+	if (xsisnil(token) || !len)
 		return 0;
 
 	while (*token != _T('\0') && len && sz_len < NUM_LEN)
@@ -473,7 +473,7 @@ int format_numeric(double dbl, const tchar_t* fmt, tchar_t* buf, int max)
 	tchar_t sz_num[NUM_LEN + 1] = { 0 };
 	tchar_t* token;
 
-	if (is_null(fmt))
+	if (xsisnil(fmt))
 		return numtoxs(dbl, buf, max);
 
 	n_split = n_prec = b_percent = 0;

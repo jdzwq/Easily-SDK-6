@@ -24,13 +24,11 @@ SRCS = $(notdir $(DIRS))
 COBS = $(patsubst %.cc, %.o, $(SRCS))
 OBJS = $(addprefix $(OBJ_PATH)/,$(COBS))
 
-$(OBJ_PATH)%.o : $(SRC_PATH)/%.cc
+$(OBJ_PATH)%.o : $(SRC_PATH)%.cc
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_PATH)
 
 all : $(OBJS)
-	rm -f $@
 	$(CC) -o $(OUT_PATH)/$(MODULE) $(OBJS) -L $(LIB_PATH) -lxdk -lxdg -lxdu
-#	rm -f $(OBJS)
 
 test:
 	if ! test -d $(OBJ_PATH); then \

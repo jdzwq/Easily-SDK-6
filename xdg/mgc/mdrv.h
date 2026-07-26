@@ -45,10 +45,12 @@ typedef struct _mem_driver_interface{
 	int	num_colors;		/* summary colors equal 2^bits_per_pixel */
 	int pixel_format;	/* format of pixel pack into bytes */
 
+	dword_t(*needSize)(int width, int height);
+	
 	driver_t(*openDriver)(int width, int height);
 	void(*closeDriver)(driver_t drv);
+	void(*attachBuffer)(driver_t drv, byte_t* addr, dword_t stride);
 
-	int(*getPointsPerline)(driver_t drv);
 	int(*getHeight)(driver_t drv);
 	int(*getWidth)(driver_t drv);
 	dword_t(*getBytes)(driver_t drv);

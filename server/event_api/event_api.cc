@@ -70,73 +70,73 @@ bool_t _invoke_event_pubs(const https_block_t* pb, event_block_t* pd)
 		ptr_event = create_event_doc();
 
 		xhttp_get_url_query_entity(pb->http, DOC_EVENT_ID, -1, sz_token, RES_LEN);
-		if (!is_null(sz_token))
+		if (!xsisnil(sz_token))
 		{
 			set_event_id(ptr_event, sz_token, -1);
 		}
 
 		xhttp_get_url_query_entity(pb->http, DOC_EVENT_FROM, -1, sz_token, PATH_LEN);
-		if (!is_null(sz_token))
+		if (!xsisnil(sz_token))
 		{
 			set_event_from(ptr_event, sz_token, -1);
 		}
 
 		xhttp_get_url_query_entity(pb->http, DOC_EVENT_SENDER, -1, sz_token, RES_LEN);
-		if (!is_null(sz_token))
+		if (!xsisnil(sz_token))
 		{
 			set_event_sender(ptr_event, sz_token, -1);
 		}
 
 		xhttp_get_url_query_entity(pb->http, DOC_EVENT_SENDTIME, -1, sz_token, DATE_LEN);
-		if (!is_null(sz_token))
+		if (!xsisnil(sz_token))
 		{
 			set_event_send_time(ptr_event, sz_token, -1);
 		}
 
 		xhttp_get_url_query_entity(pb->http, DOC_EVENT_CODE, -1, sz_token, RES_LEN);
-		if (!is_null(sz_token))
+		if (!xsisnil(sz_token))
 		{
 			set_event_code(ptr_event, sz_token, -1);
 		}
 
 		xhttp_get_url_query_entity(pb->http, DOC_EVENT_DESCRIBE, -1, sz_token, STYLE_LEN);
-		if (!is_null(sz_token))
+		if (!xsisnil(sz_token))
 		{
 			set_event_describe(ptr_event, sz_token, -1);
 		}
 
 		xhttp_get_url_query_entity(pb->http, DOC_EVENT_MEDIUM, -1, sz_token, RES_LEN);
-		if (!is_null(sz_token))
+		if (!xsisnil(sz_token))
 		{
 			set_event_medium(ptr_event, sz_token, -1);
 		}
 
 		xhttp_get_url_query_entity(pb->http, DOC_EVENT_CONTENT, -1, sz_token, STYLE_LEN);
-		if (!is_null(sz_token))
+		if (!xsisnil(sz_token))
 		{
 			set_event_content(ptr_event, sz_token, -1);
 		}
 
 		xhttp_get_url_query_entity(pb->http, DOC_EVENT_TO, -1, sz_token, PATH_LEN);
-		if (!is_null(sz_token))
+		if (!xsisnil(sz_token))
 		{
 			set_event_to(ptr_event, sz_token, -1);
 		}
 
 		xhttp_get_url_query_entity(pb->http, DOC_EVENT_RECEIPTOR, -1, sz_token, RES_LEN);
-		if (!is_null(sz_token))
+		if (!xsisnil(sz_token))
 		{
 			set_event_receiptor(ptr_event, sz_token, -1);
 		}
 
 		xhttp_get_url_query_entity(pb->http, DOC_EVENT_RECEIPTTIME, -1, sz_token, DATE_LEN);
-		if (!is_null(sz_token))
+		if (!xsisnil(sz_token))
 		{
 			set_event_receipt_time(ptr_event, sz_token, -1);
 		}
 
 		xhttp_get_url_query_entity(pb->http, DOC_EVENT_RECEIPTSTATE, -1, sz_token, RES_LEN);
-		if (!is_null(sz_token))
+		if (!xsisnil(sz_token))
 		{
 			set_event_receipt_state(ptr_event, sz_token, -1);
 		}
@@ -206,7 +206,7 @@ bool_t _invoke_event_pubs(const https_block_t* pb, event_block_t* pd)
 	}
 
 	get_event_id(ptr_event, sz_name, RES_LEN);
-	if (is_null(sz_name))
+	if (xsisnil(sz_name))
 	{
 		raise_user_error(_T("_invoke_event_pubs"), _T("empty event id"));
 	}
@@ -368,7 +368,7 @@ bool_t _invoke_event_subs(const https_block_t* pb, event_block_t* pd)
 	TRY_CATCH;
 
 	xhttp_get_url_query_entity(pb->http, DOC_EVENT_ID, -1, sz_name, RES_LEN);
-	if (is_null(sz_name))
+	if (xsisnil(sz_name))
 	{
 		raise_user_error(_T("_invoke_event_subs"), _T("unknown event id"));
 	}
@@ -592,7 +592,7 @@ int STDCALL https_invoke(const tchar_t* method, const https_block_t* pb)
 	if (compare_text((pb->object + 1), 4, _T("pubs"), 4, 1) == 0)
 	{
 		xsncpy(pd->topic, (pb->object + 1 + 4 + 1), RES_LEN);
-		if (is_null(pd->topic))
+		if (xsisnil(pd->topic))
 		{
 			raise_user_error(_T("-1"), _T("unknown event topic\n"));
 		}
@@ -601,7 +601,7 @@ int STDCALL https_invoke(const tchar_t* method, const https_block_t* pb)
 	else if (compare_text((pb->object + 1), 5, _T("subs"), 5, 1) == 0)
 	{
 		xsncpy(pd->topic, (pb->object + 1 + 5 + 1), RES_LEN);
-		if (is_null(pd->topic))
+		if (xsisnil(pd->topic))
 		{
 			raise_user_error(_T("-1"), _T("unknown event topic\n"));
 		}

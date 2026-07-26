@@ -47,7 +47,7 @@ dword_t xhttp_format_error(bool_t b_json, const tchar_t* encoding, const tchar_t
 	{
 		ptr_xml = create_xml_doc();
 
-		if (!is_null(encoding))
+		if (!xsisnil(encoding))
 			set_xml_encoding(ptr_xml, encoding, -1);
 
 		ptr_dom = get_xml_dom_node(ptr_xml);
@@ -159,7 +159,7 @@ bool_t xhttp_send_error(xhand_t xhttp, const tchar_t* http_code, const tchar_t* 
 	b_json = (compare_text(encoding, xslen(HTTP_HEADER_CONTENTTYPE_APPJSON), HTTP_HEADER_CONTENTTYPE_APPJSON, -1, 1) == 0) ? 1 : 0;
 
 	xhttp_get_request_accept_charset(xhttp, encoding, RES_LEN);
-	if (is_null(encoding))
+	if (xsisnil(encoding))
 	{
 		xhttp_get_request_content_type_charset(xhttp, encoding, RES_LEN);
 	}
@@ -186,9 +186,9 @@ bool_t xhttp_send_error(xhand_t xhttp, const tchar_t* http_code, const tchar_t* 
 		xhttp_set_response_content_type(xhttp, HTTP_HEADER_CONTENTTYPE_APPXML, -1);
 	xhttp_set_response_content_type_charset(xhttp, encoding, -1);
 
-	if (!is_null(http_code))
+	if (!xsisnil(http_code))
 		xhttp_set_response_code(xhttp, http_code);
-	if (!is_null(http_info))
+	if (!xsisnil(http_info))
 		xhttp_set_response_message(xhttp, http_info, -1);
 
 	b_rt = xhttp_send_full(xhttp, sz_buf, nlen);
@@ -217,7 +217,7 @@ bool_t xhttp_recv_error(xhand_t xhttp, tchar_t* http_code, tchar_t* http_info, t
 	b_json = (compare_text(encoding, xslen(HTTP_HEADER_CONTENTTYPE_APPJSON), HTTP_HEADER_CONTENTTYPE_APPJSON, -1, 1) == 0) ? 1 : 0;
 
 	xhttp_get_response_content_type_charset(xhttp, encoding, RES_LEN);
-	if (is_null(encoding))
+	if (xsisnil(encoding))
 	{
 		xscpy(encoding, CHARSET_UTF8);
 	}
@@ -427,7 +427,7 @@ bool_t xhttp_invoke_soap(xhand_t xhttp, link_t_ptr send_soap, link_t_ptr recv_so
 
 	xhttp_get_request_header(xhttp, HTTP_HEADER_SOAPACTION, -1, sz_action, PATH_LEN);
 
-	if (is_null(sz_action))
+	if (xsisnil(sz_action))
 	{
 		nlk_req = get_soap_request_node(send_soap);
 		if (!nlk_req)
@@ -438,7 +438,7 @@ bool_t xhttp_invoke_soap(xhand_t xhttp, link_t_ptr send_soap, link_t_ptr recv_so
 		sz_method = get_dom_node_name_ptr(nlk_req);
 		sz_nsurl = get_dom_node_nsurl_ptr(nlk_req);
 
-		if (!is_null(sz_nsurl))
+		if (!xsisnil(sz_nsurl))
 		{
 			nlen = xslen(sz_nsurl);
 			if (sz_nsurl[nlen - 1] == L'/')
@@ -671,7 +671,7 @@ bool_t get_wsdl_soap_info(link_t_ptr wsdl, const tchar_t* sz_srv, const tchar_t*
 			nlk = get_dom_next_sibling_node(nlk);
 		}
 
-		if (!is_null(sz_inmsg) || !is_null(sz_outmsg))
+		if (!xsisnil(sz_inmsg) || !xsisnil(sz_outmsg))
 			break;
 
 		nlk_port = get_dom_next_sibling_node(nlk_port);
@@ -690,7 +690,7 @@ bool_t get_wsdl_soap_info(link_t_ptr wsdl, const tchar_t* sz_srv, const tchar_t*
 					get_dom_node_attr(nlk_child, WSDL_ATTR_ELEMENT, -1, sz_inparam, RES_LEN);
 					trim_xmlns(sz_inparam, -1);
 
-					if (!is_null(sz_inparam))
+					if (!xsisnil(sz_inparam))
 						break;
 
 					get_dom_node_attr(nlk_child, WSDL_ATTR_NAME, -1, sz_paname, RES_LEN);
@@ -717,7 +717,7 @@ bool_t get_wsdl_soap_info(link_t_ptr wsdl, const tchar_t* sz_srv, const tchar_t*
 					get_dom_node_attr(nlk_child, WSDL_ATTR_ELEMENT, -1, sz_outparam, RES_LEN);
 					trim_xmlns(sz_outparam, -1);
 
-					if (!is_null(sz_outparam))
+					if (!xsisnil(sz_outparam))
 						break;
 
 					get_dom_node_attr(nlk_child, WSDL_ATTR_NAME, -1, sz_paname, RES_LEN);
@@ -735,13 +735,13 @@ bool_t get_wsdl_soap_info(link_t_ptr wsdl, const tchar_t* sz_srv, const tchar_t*
 			}
 		}
 
-		if (!is_null(sz_inparam) && !is_null(sz_outparam))
+		if (!xsisnil(sz_inparam) && !xsisnil(sz_outparam))
 			break;
 
 		nlk_message = get_wsdl_next_message_node(wsdl, nlk_message);
 	}
 
-	if (is_null(sz_inparam) && is_null(sz_outparam))
+	if (xsisnil(sz_inparam) && xsisnil(sz_outparam))
 		return 1;
 
 	nlk_types = get_wsdl_types_node(wsdl);
@@ -751,7 +751,7 @@ bool_t get_wsdl_soap_info(link_t_ptr wsdl, const tchar_t* sz_srv, const tchar_t*
 	nlk_schema = get_dom_first_child_node(nlk_types);
 	while (nlk_schema)
 	{
-		if (!is_null(sz_inparam) || !is_null(sz_outparam))
+		if (!xsisnil(sz_inparam) || !xsisnil(sz_outparam))
 		{
 			nlk_element = find_dom_node_by_name(nlk_schema, 1, WSDL_ATTR_ELEMENT, -1);
 			while (nlk_element)
@@ -822,7 +822,7 @@ void set_wsdl_soap_info(link_t_ptr wsdl, const tchar_t* sz_srv, const tchar_t* s
 	tchar_t sz_binding[RES_LEN + 1] = { 0 };
 	tchar_t sz_portname[RES_LEN + 1] = { 0 };
 
-	if (!is_null(sz_tns))
+	if (!xsisnil(sz_tns))
 	{
 		set_wsdl_default_xmlns(wsdl);
 

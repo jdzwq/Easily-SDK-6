@@ -299,7 +299,7 @@ void previewdlg_on_saveas(widget_t widget)
 	if (!shell_get_filename(widget, szPath, _T("svg view file(*.svg)\0*.svg\0"), _T("svg"), 1, szPath, PATH_LEN, szFile, PATH_LEN))
 		return;
 
-	xscat(szPath, _T("/"));
+	xsncat(szPath, SLASH_CHAR, 1);
 	xscat(szPath, szFile);
 
 	save_dom_doc_to_file(svg, NULL, szPath);
@@ -321,7 +321,7 @@ void previewdlg_on_save(widget_t widget)
 	if (!shell_get_filename(widget, szPath, _T("svg archive file(*.arch)\0*.arch\0"), _T("arch"), 1, szPath, PATH_LEN, szFile, PATH_LEN))
 		return;
 
-	xscat(szPath, _T("/"));
+	xsncat(szPath, SLASH_CHAR, 1);
 	xscat(szPath, szFile);
 
 	save_dom_doc_to_file(ptd->arch, NULL, szPath);
@@ -342,7 +342,7 @@ void previewdlg_on_open(widget_t widget)
 	if (!shell_get_filename(widget, szPath, _T("svg archive file(*.arch)\0*.arch\0"), _T("arch"), 0, szPath, PATH_LEN, szFile, PATH_LEN * 10))
 		return;
 
-	xscat(szPath, _T("/"));
+	xsncat(szPath, SLASH_CHAR, 1);
 	xscat(szPath, szFile);
 
 	svgctrl = widget_get_child(widget, IDC_PREVIEWDLG_SVGCTRL);

@@ -313,7 +313,7 @@ bool_t share_acp_init()
 	tchar_t fpath[PATH_LEN + 1] = { 0 };
 
 	get_runpath(NULL, fpath, PATH_LEN);
-	if (is_null(fpath))
+	if (xsisnil(fpath))
 		xscpy(fpath, _T("acp/gb2312.acp"));
 	else
 		xscat(fpath, _T("/acp/gb2312.acp"));
@@ -321,7 +321,7 @@ bool_t share_acp_init()
 	acp_gb2312 = share_load_acp_gb2312(fpath, SHARE_GB2312_CODEPAGE);
 
 	get_runpath(NULL, fpath, PATH_LEN);
-	if (is_null(fpath))
+	if (xsisnil(fpath))
 		xscpy(fpath, _T("acp/unicode.acp"));
 	else
 		xscat(fpath, _T("/acp/unicode.acp"));

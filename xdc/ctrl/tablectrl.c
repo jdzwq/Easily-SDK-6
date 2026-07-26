@@ -878,7 +878,7 @@ bool_t tablectrl_set_item_key_text(widget_t widget, link_t_ptr elk, const tchar_
 	XDK_ASSERT(is_string_entity(ptd->table, elk));
 #endif
 
-	if (is_null(token))
+	if (xsisnil(token))
 		return bool_false;
 
 	if (compare_text(get_string_entity_key_ptr(elk), -1, token, -1, 0) == 0)

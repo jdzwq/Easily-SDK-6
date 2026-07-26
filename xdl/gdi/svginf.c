@@ -26,7 +26,7 @@ LICENSE.GPL3 for more details.
 
 #include "svginf.h"
 
-#include "../xdlgdi.h"
+#include "../xdlsdi.h"
 #include "../xdlview.h"
 
 static if_drawing_t visual_drawing = {

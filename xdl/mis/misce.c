@@ -49,7 +49,7 @@ int format_shield(const tchar_t* sz, tchar_t* buf, int max)
 {
 	int bs, n = 0;
 
-	if (is_null(sz))
+	if (xsisnil(sz))
 		return 0;
 
 	while (n < max && *sz)
@@ -120,11 +120,11 @@ int compare_data(const tchar_t* szSrc, const tchar_t* szDes, const tchar_t* data
 	xdate_t md1 = { 0 };
 	xdate_t md2 = { 0 };
 
-	if (is_null(szSrc) && is_null(szDes))
+	if (xsisnil(szSrc) && xsisnil(szDes))
 		return 0;
-	else if (is_null(szSrc))
+	else if (xsisnil(szSrc))
 		return -1;
-	else if (is_null(szDes))
+	else if (xsisnil(szDes))
 		return 1;
 
 	if (xscmp(datatype, ATTR_DATA_TYPE_BOOLEAN) == 0)
@@ -184,7 +184,7 @@ int compare_data(const tchar_t* szSrc, const tchar_t* szDes, const tchar_t* data
 int verify_text(const tchar_t* str, const tchar_t* datatype, bool_t nullable, int len, const tchar_t* min, const tchar_t* max)
 {
 
-	if (is_null(str))
+	if (xsisnil(str))
 		return (nullable) ? veValid : veNull;
 
 	if (xscmp(datatype, ATTR_DATA_TYPE_BOOLEAN) == 0)
@@ -202,7 +202,7 @@ int verify_text(const tchar_t* str, const tchar_t* datatype, bool_t nullable, in
 	}
 	else if (xscmp(datatype, ATTR_DATA_TYPE_INTEGER) == 0 || xscmp(datatype, ATTR_DATA_TYPE_NUMERIC) == 0)
 	{
-		if (!is_numeric(str))
+		if (!xsisnum(str))
 			return veDatatype;
 	}
 	else if (xscmp(datatype, ATTR_DATA_TYPE_DATETIME) == 0 || xscmp(datatype, ATTR_DATA_TYPE_DATE) == 0)
@@ -212,13 +212,13 @@ int verify_text(const tchar_t* str, const tchar_t* datatype, bool_t nullable, in
 	}
 
 	//verify min and max value
-	if (!is_null(min))
+	if (!xsisnil(min))
 	{
 		if (compare_data(min, str, datatype) > 0)
 			return veOverflow;
 	}
 
-	if (!is_null(max))
+	if (!xsisnil(max))
 	{
 		if (compare_data(max, str, datatype) < 0)
 			return veOverflow;

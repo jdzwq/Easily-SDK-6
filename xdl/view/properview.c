@@ -25,7 +25,7 @@ LICENSE.GPL3 for more details.
 ***********************************************************************/
 #include "properview.h"
 
-#include "../xdlgdi.h"
+#include "../xdlsdi.h"
 #include "../xdldoc.h"
 
 
@@ -326,7 +326,7 @@ void draw_proper(const drawing_interface* pci, link_t_ptr ptr)
 		xr_draw.fw = xr.fw;
 		xr_draw.fh = ih;
 
-		if (is_null(shape))
+		if (xsisnil(shape))
 		{
 			(*pci->drw->pf_draw_rect)(pci->ctx, NULL, &xb_bar, &xr_draw);
 		}
@@ -383,7 +383,7 @@ void draw_proper(const drawing_interface* pci, link_t_ptr ptr)
 			xr_draw.fy = xr.fy;
 			xr_draw.fh = ih;
 
-			if (!is_null(shape))
+			if (!xsisnil(shape))
 			{
 				draw_shape(pci, &xp, NULL, &xr_draw, shape);
 			}
@@ -394,7 +394,7 @@ void draw_proper(const drawing_interface* pci, link_t_ptr ptr)
 			xr_draw.fy = xr.fy;
 			xr_draw.fh = ih;
 
-			if (!is_null(shape))
+			if (!xsisnil(shape))
 			{
 				draw_shape(pci, &xp, NULL, &xr_draw, shape);
 			}

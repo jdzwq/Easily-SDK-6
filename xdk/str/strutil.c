@@ -47,7 +47,7 @@ int w_parse_attrset_token(const wchar_t* attrset, int len, wchar_t** keyptr, int
 	if (len < 0)
 		len = w_xslen(attrset);
 
-	if (w_is_null(attrset) || !len)
+	if (w_xsisnil(attrset) || !len)
 		return 0;
 
 	token = attrset;
@@ -106,7 +106,7 @@ int a_parse_attrset_token(const schar_t* attrset, int len, schar_t** keyptr, int
 	if (len < 0)
 		len = a_xslen(attrset);
 
-	if (a_is_null(attrset) || !len)
+	if (a_xsisnil(attrset) || !len)
 		return 0;
 
 	token = attrset;
@@ -164,7 +164,7 @@ int w_parse_attrset_token_count(const wchar_t* attrset, int len)
 	if (len < 0)
 		len = w_xslen(attrset);
 
-	if (w_is_null(attrset) || !len)
+	if (w_xsisnil(attrset) || !len)
 		return 0;
 
 	while (n = w_parse_attrset_token((attrset + total), (len - total), &key, &klen, &val, &vlen))
@@ -186,7 +186,7 @@ int a_parse_attrset_token_count(const schar_t* attrset, int len)
 	if (len < 0)
 		len = a_xslen(attrset);
 
-	if (a_is_null(attrset) || !len)
+	if (a_xsisnil(attrset) || !len)
 		return 0;
 
 	while (n = a_parse_attrset_token((attrset + total), (len - total), &key, &klen, &val, &vlen))
@@ -209,7 +209,7 @@ int w_parse_options_token(const wchar_t* options, int len, wchar_t itemfeed, wch
 	if (len < 0)
 		len = w_xslen(options);
 
-	if (w_is_null(options) || !len)
+	if (w_xsisnil(options) || !len)
 		return 0;
 
 	token = options;
@@ -275,7 +275,7 @@ int a_parse_options_token(const schar_t* options, int len, schar_t itemfeed, sch
 	if (len < 0)
 		len = a_xslen(options);
 
-	if (a_is_null(options) || !len)
+	if (a_xsisnil(options) || !len)
 		return 0;
 
 	token = options;
@@ -340,7 +340,7 @@ int w_parse_options_token_count(const wchar_t* options,int len,wchar_t itemfeed,
 	if (len < 0)
 		len = w_xslen(options);
 
-	if (w_is_null(options) || !len)
+	if (w_xsisnil(options) || !len)
 		return 0;
 
 	while(n = w_parse_options_token((options + total),(len - total),itemfeed,linefeed,&key,&klen,&val,&vlen))
@@ -362,7 +362,7 @@ int a_parse_options_token_count(const schar_t* options, int len, schar_t itemfee
 	if (len < 0)
 		len = a_xslen(options);
 
-	if (a_is_null(options) || !len)
+	if (a_xsisnil(options) || !len)
 		return 0;
 
 	while (n = a_parse_options_token((options + total), (len - total), itemfeed, linefeed, &key, &klen, &val, &vlen))
@@ -384,7 +384,7 @@ int w_get_options_value(const wchar_t* options, int len, wchar_t itemfeed, wchar
 	if (len < 0)
 		len = w_xslen(options);
 
-	if (w_is_null(options) || !len)
+	if (w_xsisnil(options) || !len)
 		return 0;
 
 	while (n = w_parse_options_token((options + total), (len - total), itemfeed, linefeed, &key, &klen, &val, &vlen))
@@ -415,7 +415,7 @@ int a_get_options_value(const schar_t* options, int len, schar_t itemfeed, schar
 	if (len < 0)
 		len = a_xslen(options);
 
-	if (a_is_null(options) || !len)
+	if (a_xsisnil(options) || !len)
 		return 0;
 
 	while (n = a_parse_options_token((options + total), (len - total), itemfeed, linefeed, &key, &klen, &val, &vlen))
@@ -448,7 +448,7 @@ int w_parse_string_token(const wchar_t* tokens,int len, wchar_t itemfeed, wchar_
 	if (len < 0)
 		len = w_xslen(tokens);
 
-	if(w_is_null(tokens) || !len)
+	if(w_xsisnil(tokens) || !len)
 		return 0;
 
 	token = tokens;
@@ -490,7 +490,7 @@ int a_parse_string_token(const schar_t* tokens, int len, schar_t itemfeed, schar
 	if (len < 0)
 		len = a_xslen(tokens);
 
-	if (a_is_null(tokens) || !len)
+	if (a_xsisnil(tokens) || !len)
 		return 0;
 
 	token = tokens;
@@ -530,7 +530,7 @@ int w_parse_string_token_count(const wchar_t* tokens, int len, wchar_t itemfeed)
 	if (len < 0)
 		len = w_xslen(tokens);
 
-	if (w_is_null(tokens) || !len)
+	if (w_xsisnil(tokens) || !len)
 		return 0;
 
 	while(n = w_parse_string_token((tokens + total),(len - total),itemfeed,&key,&klen))
@@ -552,7 +552,7 @@ int a_parse_string_token_count(const schar_t* tokens, int len, schar_t itemfeed)
 	if (len < 0)
 		len = a_xslen(tokens);
 
-	if (a_is_null(tokens) || !len)
+	if (a_xsisnil(tokens) || !len)
 		return 0;
 
 	while (n = a_parse_string_token((tokens + total), (len - total), itemfeed, &key, &klen))
@@ -646,7 +646,7 @@ int w_parse_param_name(const wchar_t* param, int len, wchar_t itemdot, wchar_t**
 	if (len < 0)
 		len = w_xslen(param);
 
-	if (w_is_null(param) || !len)
+	if (w_xsisnil(param) || !len)
 		return 0;
 
 	token = param;
@@ -695,7 +695,7 @@ int a_parse_param_name(const schar_t* param, int len, schar_t itemdot, schar_t**
 	if (len < 0)
 		len = a_xslen(param);
 
-	if (a_is_null(param) || !len)
+	if (a_xsisnil(param) || !len)
 		return 0;
 
 	token = param;
@@ -742,7 +742,7 @@ int w_parse_param_name_count(const wchar_t* param, int len, wchar_t itemdot)
 	if (len < 0)
 		len = w_xslen(param);
 
-	if (w_is_null(param) || !len)
+	if (w_xsisnil(param) || !len)
 		return 0;
 
 	while (n = w_parse_param_name((param + total), (len - total), itemdot, &pkey, &plen))
@@ -764,7 +764,7 @@ int a_parse_param_name_count(const schar_t* param, int len, schar_t itemdot)
 	if (len < 0)
 		len = a_xslen(param);
 
-	if (a_is_null(param) || !len)
+	if (a_xsisnil(param) || !len)
 		return 0;
 
 	while (n = a_parse_param_name((param + total), (len - total), itemdot, &pkey, &plen))
@@ -784,7 +784,7 @@ dword_t w_parse_octet_string(const wchar_t* octet, int len, byte_t* buf, dword_t
 
 	if (len < 0) len = w_xslen(octet);
 
-	if (!len || w_is_null(octet))
+	if (!len || w_xsisnil(octet))
 		return 0;
 
 	while (total < len)
@@ -850,7 +850,7 @@ dword_t a_parse_octet_string(const schar_t* octet, int len, byte_t* buf, dword_t
 
 	if (len < 0) len = a_xslen(octet);
 
-	if (!len || a_is_null(octet))
+	if (!len || a_xsisnil(octet))
 		return 0;
 
 	while (total < len)

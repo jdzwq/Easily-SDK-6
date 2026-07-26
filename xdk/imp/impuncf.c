@@ -73,10 +73,10 @@ bool_t xuncf_file_info(const secu_desc_t* psd, const tchar_t* fname, tchar_t* ft
 	pos = _split_path_len(fname);
 	xsncpy(fpath, fname, pos);
 
-	if(is_null(fpath))
+	if(xsisnil(fpath))
 	{
 		get_runpath(NULL, fpath, PATH_LEN);
-		xscat(fpath,_T("/"));
+		xsncat(fpath, SLASH_CHAR, 1);
 		xscat(fpath, fname);
 	}else
 	{
@@ -118,10 +118,10 @@ int xuncf_file_encode(const secu_desc_t* psd, const tchar_t* fname)
 	pos = _split_path_len(fname);
 	xsncpy(fpath, fname, pos);
 
-	if(is_null(fpath))
+	if(xsisnil(fpath))
 	{
 		get_runpath(NULL, fpath, PATH_LEN);
-		xscat(fpath,_T("/"));
+		xsncat(fpath, SLASH_CHAR, 1);
 		xscat(fpath, fname);
 	}else
 	{
@@ -222,7 +222,7 @@ xhand_t xuncf_open_file(const secu_desc_t* psd, const tchar_t* fname, dword_t fm
 	pos = _split_path_len(fname);
 	xsncpy(fpath, fname, pos);
 
-	/*if(!is_null(fpath) && xsncmp(fpath,_T("."),1) != 0)
+	/*if(!xsisnil(fpath) && xsncmp(fpath,_T("."),1) != 0)
 	{
 		b_add = ((fmode & FILE_OPEN_CREATE) || (fmode & FILE_OPEN_APPEND)) ? 1 : 0;
 
@@ -232,10 +232,10 @@ xhand_t xuncf_open_file(const secu_desc_t* psd, const tchar_t* fname, dword_t fm
 		}
 	}*/
 
-	if(is_null(fpath))
+	if(xsisnil(fpath))
 	{
 		get_runpath(NULL, fpath, PATH_LEN);
-		xscat(fpath,_T("/"));
+		xsncat(fpath, SLASH_CHAR, 1);
 		xscat(fpath, fname);
 	}else
 	{
@@ -655,10 +655,10 @@ bool_t xuncf_delete_file(const secu_desc_t* psd, const tchar_t* fname)
 	pos = _split_path_len(fname);
 	xsncpy(fpath, fname, pos);
 
-	if(is_null(fpath))
+	if(xsisnil(fpath))
 	{
 		get_runpath(NULL, fpath, PATH_LEN);
-		xscat(fpath,_T("/"));
+		xsncat(fpath, SLASH_CHAR, 1);
 		xscat(fpath, fname);
 	}else
 	{

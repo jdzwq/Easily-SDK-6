@@ -26,7 +26,7 @@ LICENSE.GPL3 for more details.
 
 #include "topogview.h"
 
-#include "../xdlgdi.h"
+#include "../xdlsdi.h"
 #include "../xdldoc.h"
 
 

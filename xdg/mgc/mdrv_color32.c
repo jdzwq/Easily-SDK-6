@@ -32,16 +32,17 @@ LICENSE.GPL3 for more details.
 typedef struct _color32_driver_t{
 	handle_head head;
 
-	int	width;		/* X real reslution */
-	int	height;		/* Y real reslution */
+	int	width;		/* horz reslution */
+	int	height;		/* vert reslution */
+	dword_t line_bytes; /* bytes per line */
 
-	dword_t	size;		/* bytes of frame buffer */
-	byte_t* addr;		/* address of frame buffer */
-
-	int	line_dwords;	/* line length in dobule words */
+	int frame_width;	/* points of frame per line */
+	dword_t	frame_stride;	/* bytes of frame per line */
+	byte_t* frame_addr;	/* frame buffer address */
 }color32_driver_t;
 
-#define VALID_COORDINATE(x, y) ((x >= 0 && x < pdrv->width && y >= 0 && y < pdrv->height)? 1 : 0)
+#define VALID_COORDINATE(x, y) ((x >= 0 && x < pdrv->width && x < pdrv->frame_width && y >= 0 && y < pdrv->height)? 1 : 0)
+#define POINT_ADDRESS(x, y) (((ADDR32)(pdrv->frame_addr)) + y * pdrv->frame_width + x)
 
 #define BLUE_MASK		0x000000FF
 #define GREEN_MASK		0x0000FF00
@@ -53,6 +54,13 @@ typedef struct _color32_driver_t{
 
 #define PUT_COLOR32(r, g, b)	((((dword_t)r << 16) & RED_MASK) | (((dword_t)g << 8) & GREEN_MASK) | ((dword_t)b & BLUE_MASK))
 
+static dword_t need_size(int width, int height)
+{
+	int line_dwords = BMP_POINTS_BYTES(width, 32) / 4;
+	
+	return (line_dwords * 4 * height);
+}
+
 static driver_t open_driver(int width, int height)
 {
 	color32_driver_t* pdrv;
@@ -62,10 +70,7 @@ static driver_t open_driver(int width, int height)
 
 	pdrv->width = width;
 	pdrv->height = height;
-	pdrv->line_dwords = BMP_LINE_BYTES(pdrv->width, 32) / 4;
-
-	pdrv->size = pdrv->line_dwords * 4 * height;
-	pdrv->addr = (byte_t*)xmem_alloc(pdrv->size);
+	pdrv->line_bytes = BMP_POINTS_BYTES(width, 32);
 
 	return &(pdrv->head);
 }
@@ -76,17 +81,18 @@ static void close_driver(driver_t drv)
 
 	XDK_ASSERT(drv && drv->tag == _DRIVER_COLOR8888);
 
-	xmem_free(pdrv->addr);
 	xmem_free(pdrv);
 }
 
-static int get_points_perline(driver_t drv)
+static void attach_buffer(driver_t drv, byte_t* addr, dword_t stride)
 {
 	color32_driver_t* pdrv = (color32_driver_t*)drv;
 
 	XDK_ASSERT(drv && drv->tag == _DRIVER_COLOR8888);
 
-	return  pdrv->line_dwords;
+	pdrv->frame_width = BMP_BYTES_POINTS(stride, 32);
+	pdrv->frame_stride = stride;
+	pdrv->frame_addr = addr;
 }
 
 static int get_width(driver_t drv)
@@ -113,7 +119,7 @@ static bool_t valid_coordinate(driver_t drv, int x, int y)
 
 	XDK_ASSERT(drv && drv->tag == _DRIVER_COLOR8888);
 
-	return  (x >= 0 && x < pdrv->width && y >= 0 && y < pdrv->height) ? 1 : 0;
+	return  (x >= 0 && x < pdrv->width && x < pdrv->frame_width && y >= 0 && y < pdrv->height) ? 1 : 0;
 }
 
 static dword_t get_bytes(driver_t drv)
@@ -122,23 +128,27 @@ static dword_t get_bytes(driver_t drv)
 
 	XDK_ASSERT(drv && drv->tag == _DRIVER_COLOR8888);
 
-	return pdrv->size;
+	return (pdrv->line_bytes * pdrv->height);
 }
 
 static dword_t copy_bytes(driver_t drv, byte_t* buf, dword_t max)
 {
 	color32_driver_t* pdrv = (color32_driver_t*)drv;
+	dword_t total = 0;
+	int y;
 
 	XDK_ASSERT(drv && drv->tag == _DRIVER_COLOR8888);
 
-	max = (max < pdrv->size) ? max : pdrv->size;
-
-	if (buf)
+	for (y = 0; y < pdrv->height && total < max; y++)
 	{
-		xmem_copy((void*)(buf), (void*)(pdrv->addr), max);
+		if(buf)
+		{
+			xmem_copy((void *)(buf + y * pdrv->line_bytes), (void *)(pdrv->frame_addr + y * pdrv->frame_stride), pdrv->line_bytes);
+		}
+		total += pdrv->line_bytes;
 	}
 
-	return max;
+	return total;
 }
 
 static PIXELVAL get_pixel(driver_t drv, int x, int y)
@@ -155,7 +165,7 @@ static PIXELVAL get_pixel(driver_t drv, int x, int y)
 
 	if (VALID_COORDINATE(x, y))
 	{
-		addr = ((ADDR32)pdrv->addr) + x + y * pdrv->line_dwords;
+		addr = POINT_ADDRESS(x, y);
 
 		r = GET_COLOR32_R(*addr);
 		g = GET_COLOR32_G(*addr);
@@ -181,7 +191,7 @@ static PIXELVAL put_pixel(driver_t drv, int x, int y, PIXELVAL v, int rop)
 
 	if (VALID_COORDINATE(x, y))
 	{
-		addr = ((ADDR32)pdrv->addr) + x + y * pdrv->line_dwords;
+		addr = POINT_ADDRESS(x, y);
 
 		r = GET_COLOR32_R(*addr);
 		g = GET_COLOR32_G(*addr);
@@ -233,7 +243,7 @@ static int get_pixels(driver_t drv, int x, int y, int w, int h, PIXELVAL* val, i
 
 			if (VALID_COORDINATE(dx, dy))
 			{
-				addr = ((ADDR32)pdrv->addr) + dx + dy * pdrv->line_dwords;
+				addr = POINT_ADDRESS(dx, dy);
 				if (total < n)
 				{
 					r = GET_COLOR32_R(*addr);
@@ -286,7 +296,7 @@ static void set_pixels(driver_t drv, int x, int y, int w, int h, const PIXELVAL*
 
 			if (VALID_COORDINATE(dx, dy))
 			{
-				addr = ((ADDR32)pdrv->addr) + dx + dy * pdrv->line_dwords;
+				addr = POINT_ADDRESS(dx, dy);
 
 				r = GET_COLOR32_R(*addr);
 				g = GET_COLOR32_G(*addr);
@@ -318,9 +328,10 @@ mem_driver_interface color8888_driver = {
 	0,		/* summary colors */
 	PIXEL_DEPTH_COLOR32,	/* format of pixel value */
 
+	need_size,
 	open_driver,
 	close_driver,
-	get_points_perline,
+	attach_buffer,
 	get_height,
 	get_width,
 	get_bytes,

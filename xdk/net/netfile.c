@@ -210,14 +210,14 @@ static bool_t _http_read_file(netf_context* pfn, byte_t* buf, dword_t* pb, const
 		xhttp_set_request_header(xh, HTTP_HEADER_IFMODIFIEDSINCE, -1, pfn->ftime, DATE_LEN);
 	}
 
-	if (!is_null(range))
+	if (!xsisnil(range))
 	{
 		xhttp_set_request_header(xh, HTTP_HEADER_RANGE, -1, range, -1);
 	}
 
 	xhttp_set_request_header(xh, HTTP_HEADER_ACCEPTENCODING, -1, HTTP_HEADER_CONTENTENCODING_DEFLATE, -1);
 
-	if (!is_null(pfn->fsecu.scr_key))
+	if (!xsisnil(pfn->fsecu.scr_key))
 	{
 		xhttp_request_signature(xh, HTTP_HEADER_AUTHORIZATION_XDS, pfn->fsecu.scr_key, sz_hmac, HMAC_LEN);
 		xsprintf(sz_auth, _T("%s %s:%s"), HTTP_HEADER_AUTHORIZATION_XDS, pfn->fsecu.scr_uid, sz_hmac);
@@ -259,7 +259,7 @@ static bool_t _http_read_file(netf_context* pfn, byte_t* buf, dword_t* pb, const
 
 	n_size = xstol(fsize);
 
-	if (!is_null(frange))
+	if (!xsisnil(frange))
 	{
 		parse_bytes_range(frange, &hoff, &loff, &n_zip, &n_all);
 	}
@@ -399,7 +399,7 @@ static bool_t _http_write_file(netf_context* pfn, const byte_t* buf, dword_t* pb
 			xsprintf(fsize, _T("%d"), n_zip);
 			xhttp_set_request_header(xh, HTTP_HEADER_CONTENTLENGTH, -1, fsize, -1);
 
-			if (is_null(range))
+			if (xsisnil(range))
 			{
 				format_bytes_range(fsize, 0, 0, n_size, n_size);
 				xhttp_set_request_header(xh, HTTP_HEADER_CONTENTRANGE, -1, fsize, -1);
@@ -421,7 +421,7 @@ static bool_t _http_write_file(netf_context* pfn, const byte_t* buf, dword_t* pb
 		b_zip = 0;
 	}
 
-	if (!is_null(pfn->ftime))
+	if (!xsisnil(pfn->ftime))
 	{
 		xhttp_set_request_header(xh, HTTP_HEADER_LASTMODIFIED, -1, pfn->ftime, -1);
 	}
@@ -431,12 +431,12 @@ static bool_t _http_write_file(netf_context* pfn, const byte_t* buf, dword_t* pb
 		xhttp_set_request_header(xh, HTTP_HEADER_IFMODIFIEDSINCE, -1, pfn->ftime, -1);
 	}
 
-	if (!is_null(range))
+	if (!xsisnil(range))
 	{
 		xhttp_set_request_header(xh, HTTP_HEADER_CONTENTRANGE, -1, range, -1);
 	}
 
-	if (!is_null(pfn->fsecu.scr_uid))
+	if (!xsisnil(pfn->fsecu.scr_uid))
 	{
 		xhttp_request_signature(xh, HTTP_HEADER_AUTHORIZATION_XDS, pfn->fsecu.scr_key, sz_hmac, HMAC_LEN);
 		xsprintf(sz_auth, _T("%s %s:%s"), HTTP_HEADER_AUTHORIZATION_XDS, pfn->fsecu.scr_uid, sz_hmac);
@@ -491,7 +491,7 @@ static xhand_t http_open_file(const secu_desc_t* psd, const tchar_t* fname, dwor
 {
 	netf_context* pfn;
 
-	if (is_null(fname))
+	if (xsisnil(fname))
 		return NULL;
 
 	pfn = (netf_context*)xmem_alloc(sizeof(netf_context));
@@ -601,7 +601,7 @@ static bool_t http_delete_file(const secu_desc_t* psd, const tchar_t* fname)
 
 	xhttp_set_request_default_header(xh);
 
-	if (psd && !is_null(psd->scr_uid))
+	if (psd && !xsisnil(psd->scr_uid))
 	{
 		xhttp_request_signature(xh, HTTP_HEADER_AUTHORIZATION_XDS, psd->scr_key, sz_hmac, HMAC_LEN);
 		xsprintf(sz_auth, _T("%s %s:%s"), HTTP_HEADER_AUTHORIZATION_XDS, psd->scr_uid, sz_hmac);
@@ -659,7 +659,7 @@ static bool_t http_list_file(const secu_desc_t* psd, const tchar_t* path, PF_LIS
 	xhttp_set_request_default_header(xh);
 	xhttp_set_request_accept_type(xh, HTTP_HEADER_CONTENTTYPE_APPXML, -1);
 
-	if (psd && !is_null(psd->scr_uid))
+	if (psd && !xsisnil(psd->scr_uid))
 	{
 		xhttp_request_signature(xh, HTTP_HEADER_AUTHORIZATION_XDS, psd->scr_key, sz_hmac, HMAC_LEN);
 		xsprintf(sz_auth, _T("%s %s:%s"), HTTP_HEADER_AUTHORIZATION_XDS, psd->scr_uid, sz_hmac);
@@ -742,7 +742,7 @@ static bool_t http_file_info(const secu_desc_t* psd, const tchar_t* fname, tchar
 
 	xhttp_set_request_default_header(xh);
 
-	if (psd && !is_null(psd->scr_uid))
+	if (psd && !xsisnil(psd->scr_uid))
 	{
 		xhttp_request_signature(xh, HTTP_HEADER_AUTHORIZATION_XDS, psd->scr_key, sz_hmac, HMAC_LEN);
 		xsprintf(sz_auth, _T("%s %s:%s"), HTTP_HEADER_AUTHORIZATION_XDS, psd->scr_uid, sz_hmac);
@@ -792,7 +792,7 @@ static xhand_t tftp_open_file(const secu_desc_t* psd, const tchar_t* fname, dwor
 {
 	netf_context* pfn;
 
-	if (is_null(fname))
+	if (xsisnil(fname))
 		return NULL;
 
 	pfn = (netf_context*)xmem_alloc(sizeof(netf_context));

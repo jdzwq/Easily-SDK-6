@@ -86,7 +86,7 @@ bitmap_t xqCreateColorBitmap(visual_t rdc, const xcolor_t* pxc, int w, int h)
 
 	screen = DefaultScreen(g_display);
 
-	bytes_per_line = BMP_LINE_BYTES(w, deep);
+	bytes_per_line = BMP_POINTS_BYTES(w, deep);
 
 	bih.isize = BITMAPINFOHEAD_FIXED_SIZE;
 	bih.width = w;
@@ -136,7 +136,7 @@ bitmap_t xqCreatePatternBitmap(visual_t rdc, const xcolor_t* pxc_front, const xc
 
 	screen = DefaultScreen(g_display);
 
-	bytes_per_line = BMP_LINE_BYTES(w, deep);
+	bytes_per_line = BMP_POINTS_BYTES(w, deep);
 
 	bih.isize = BITMAPINFOHEAD_FIXED_SIZE;
 	bih.width = w;
@@ -186,7 +186,7 @@ bitmap_t xqCreateGradientBitmap(visual_t rdc, const xcolor_t* pxc_brim, const xc
 
 	screen = DefaultScreen(g_display);
 
-	bytes_per_line = BMP_LINE_BYTES(w, deep);
+	bytes_per_line = BMP_POINTS_BYTES(w, deep);
 
 	bih.isize = BITMAPINFOHEAD_FIXED_SIZE;
 	bih.width = w;
@@ -240,7 +240,7 @@ bitmap_t xqCreateCode128Bitmap(visual_t rdc, const xcolor_t* pxc_front, const xc
 	w = code128_units(bar_buf, bar_cols) * unit;
 	h = 10 * unit;
 
-	bytes_per_line = BMP_LINE_BYTES(w, deep);
+	bytes_per_line = BMP_POINTS_BYTES(w, deep);
 
 	bih.isize = BITMAPINFOHEAD_FIXED_SIZE;
 	bih.width = w;
@@ -294,7 +294,7 @@ bitmap_t xqCreatePDF417Bitmap(visual_t rdc, const xcolor_t* pxc_front, const xco
 	w = (pdf417_units(bar_buf, bar_rows, bar_cols) / bar_rows) * unit;
 	h = bar_rows * unit;
 
-	bytes_per_line = BMP_LINE_BYTES(w, deep);
+	bytes_per_line = BMP_POINTS_BYTES(w, deep);
 
 	bih.isize = BITMAPINFOHEAD_FIXED_SIZE;
 	bih.width = w;
@@ -348,7 +348,7 @@ bitmap_t xqCreateQRCodeBitmap(visual_t rdc, const xcolor_t* pxc_front, const xco
 	w = (qr_units(bar_buf, bar_rows, bar_cols) / bar_rows) * unit;
 	h = bar_rows * unit;
 
-	bytes_per_line = BMP_LINE_BYTES(w, deep);
+	bytes_per_line = BMP_POINTS_BYTES(w, deep);
 
 	bih.isize = BITMAPINFOHEAD_FIXED_SIZE;
 	bih.width = w;
@@ -437,7 +437,7 @@ bitmap_t xqCreateStorageBitmap(visual_t rdc, const tchar_t* fname)
 	}else if(*fname != _T('/'))
 	{
 		get_runpath(NULL, fpath, PATH_LEN);
-		xsncat(fpath, _T("/"), 1);
+		xsncat(fpath, SLASH_CHAR, 1);
 		xscat(fpath, fname);
 	}else
 	{

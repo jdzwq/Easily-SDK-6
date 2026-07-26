@@ -927,7 +927,7 @@ xhand_t xhttp_client(const tchar_t* method,const tchar_t* url)
 
 	TRY_CATCH;
 
-	if (is_null(url))
+	if (xsisnil(url))
 	{
 		raise_user_error(_T("xhttp_client"), _T("invalid url"));
 	}
@@ -972,7 +972,7 @@ xhand_t xhttp_client(const tchar_t* method,const tchar_t* url)
 		}
 	}
 
-	if(is_null(phttp->addr))
+	if(xsisnil(phttp->addr))
 	{
 		raise_user_error(_T("xhttp_client"), _T("invalid host address"));
 	}
@@ -1723,7 +1723,7 @@ void xhttp_set_request_default_header(xhand_t xhttp)
 	xhttp_get_url_host(xhttp, szHost, PATH_LEN);
 	xhttp_get_url_port(xhttp, szPort, NUM_LEN);
 	
-	if (!is_null(szPort) && xstos(szPort) != 80)
+	if (!xsisnil(szPort) && xstos(szPort) != 80)
 	{
 		xscat(szHost, _T(":"));
 		xscat(szHost, szPort);
@@ -1904,11 +1904,11 @@ int xhttp_get_response_content_type_charset(xhand_t xhttp, tchar_t* buf, int max
 		return 0;
 
 	str = get_string_entity_val_ptr(ent);
-	if (is_null(str))
+	if (xsisnil(str))
 		return 0;
 
 	str = xsistr(str, HTTP_HEADER_CONTENTTYPE_ENTITY_CHARSET);
-	if (is_null(str))
+	if (xsisnil(str))
 		return 0;
 
 	parse_options_token(str, -1, _T('='), _T(';'), &key, &klen, &val, &vlen);
@@ -1987,11 +1987,11 @@ int xhttp_get_request_content_type_charset(xhand_t xhttp, tchar_t* buf, int max)
 		return 0;
 
 	str = get_string_entity_val_ptr(ent);
-	if (is_null(str))
+	if (xsisnil(str))
 		return 0;
 
 	str = xsistr(str, HTTP_HEADER_CONTENTTYPE_ENTITY_CHARSET);
-	if (is_null(str))
+	if (xsisnil(str))
 		return 0;
 
 	parse_options_token(str, -1, _T('='), _T(';'), &key, &klen, &val, &vlen);
@@ -2483,7 +2483,7 @@ bool_t xhttp_send_response(xhand_t xhttp)
 			phttp->send_stream = stream_alloc(phttp->pif);
 
 			xhttp_get_response_content_type_charset(xhttp, token, INT_LEN);
-			if (!is_null(token))
+			if (!xsisnil(token))
 			{
 				stream_set_encode(phttp->send_stream, parse_charset(token));
 			}
@@ -2598,7 +2598,7 @@ bool_t xhttp_recv_response(xhand_t xhttp)
 			_xhttp_parse_response(phttp, buf_response, len_response);
 
 			xhttp_get_response_content_type_charset(xhttp, token, INT_LEN);
-			if (!is_null(token))
+			if (!xsisnil(token))
 			{
 				stream_set_encode(phttp->recv_stream, parse_charset(token));
 			}
@@ -2692,7 +2692,7 @@ bool_t xhttp_send_request(xhand_t xhttp)
 			phttp->send_stream = stream_alloc(phttp->pif);
 
 			xhttp_get_request_content_type_charset(xhttp, charset, INT_LEN);
-			if (!is_null(charset))
+			if (!xsisnil(charset))
 			{
 				stream_set_encode(phttp->send_stream, parse_charset(charset));
 			}
@@ -2824,7 +2824,7 @@ bool_t xhttp_recv_request(xhand_t xhttp)
 			_xhttp_parse_request(phttp, buf_request, len_request);
 
 			xhttp_get_request_content_type_charset(xhttp, charset, INT_LEN);
-			if (!is_null(charset))
+			if (!xsisnil(charset))
 			{
 				stream_set_encode(phttp->recv_stream, parse_charset(charset));
 			}

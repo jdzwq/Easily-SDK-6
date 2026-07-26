@@ -132,7 +132,7 @@ static dword_t _key_state(NSUInteger nsFlags)
     if (nsFlags & NSEventModifierFlagCapsLock)
         mask |= KS_WITH_CAPS;
     if (nsFlags & NSEventModifierFlagCommand)
-        mask |= KS_WITH_CMD;
+        mask |= KS_WITH_META;
 
     return mask;
 }
@@ -1595,7 +1595,7 @@ NSString *const UnHideNotification = @"UnHideNotification";
     NSUInteger nsFlags = [nsEvent modifierFlags];
     dword_t mask = _key_state(nsFlags);
 
-    if((mask & KS_WITH_CONTROL) || (mask & KS_WITH_CMD))
+    if((mask & KS_WITH_CONTROL) || (mask & KS_WITH_META))
     {
         switch(nsKey)
         {
@@ -1689,7 +1689,7 @@ NSString *const UnHideNotification = @"UnHideNotification";
     NSUInteger nsFlags = [nsEvent modifierFlags];
     dword_t mask = _key_state(nsFlags);
 
-     if((mask & KS_WITH_CONTROL) || (mask & KS_WITH_CMD))
+     if((mask & KS_WITH_CONTROL) || (mask & KS_WITH_META))
     {
         switch(nsKey)
         {
@@ -1960,7 +1960,7 @@ widget_t coWidgetCreate(const tchar_t* wname, dword_t wstyle, const xrect_t* wre
         [new_view setAutoresizingMask:0];
         
         [coc_window setContentView:new_view];
-        if(!is_null(wname))
+        if(!xsisnil(wname))
         {
             [coc_window setTitle:[NSString stringWithUTF8String:wname]];
         }

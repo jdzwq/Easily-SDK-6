@@ -223,7 +223,7 @@ tchar_t* macro_row_und(tchar_t** pa,int size)
 	if(size != 2)
 		return NULL;
 
-	if(is_null(pa[0]) || is_null(pa[1]))
+	if(xsisnil(pa[0]) || xsisnil(pa[1]))
 		return NULL;
 
 	xsprintf(fmt,_T("%c.%df"),_T('%'),xstol(pa[1]));
@@ -257,7 +257,7 @@ tchar_t* macro_fmt(tchar_t** pa,int size)
 	if(size != 3)
 		return NULL;
 
-	if(is_null(pa[0]) || is_null(pa[1]) || is_null(pa[2]))
+	if(xsisnil(pa[0]) || xsisnil(pa[1]) || xsisnil(pa[2]))
 		return NULL;
 
 	xsprintf(fmt,_T("%c%d.%df"),_T('%'),xstol(pa[1]),xstol(pa[2]));
@@ -281,7 +281,7 @@ tchar_t* macro_len(tchar_t** pa,int size)
 	if(size != 1)
 		return NULL;
 
-	if(is_null(pa[0]))
+	if(xsisnil(pa[0]))
 		return NULL;
 
 	token = (tchar_t*)xmem_alloc((NUM_LEN + 1)*sizeof(tchar_t));
@@ -297,7 +297,7 @@ tchar_t* macro_mid(tchar_t** pa,int size)
 	if(size != 3)
 		return NULL;
 
-	if(is_null(pa[0]) || is_null(pa[1]) || is_null(pa[2]))
+	if(xsisnil(pa[0]) || xsisnil(pa[1]) || xsisnil(pa[2]))
 		return NULL;
 
 	len = xslen(pa[0]);
@@ -326,14 +326,14 @@ tchar_t* macro_cat(tchar_t** pa,int size)
 	len = 0;
 	for(i=0;i<size;i++)
 	{
-		if(!is_null(pa[i]))
+		if(!xsisnil(pa[i]))
 			len += xslen(pa[i]);
 	}
 
 	token = xsalloc(len + 1);
 	for(i=0;i<size;i++)
 	{
-		if(!is_null(pa[i]))
+		if(!xsisnil(pa[i]))
 			xscat(token,pa[i]);
 	}
 
@@ -349,7 +349,7 @@ tchar_t* macro_empty(tchar_t** pa,int size)
 
 	token = (tchar_t*)xmem_alloc(2 * sizeof(tchar_t));
 
-	if(is_null(pa[0]))
+	if(xsisnil(pa[0]))
 		token[0] = _T('0');
 	else
 		token[0] = _T('1');
@@ -382,7 +382,7 @@ tchar_t* macro_if(tchar_t** pa,int size)
 	b = xstol(pa[0]);
 	if(b)
 	{
-		if(is_null(pa[1]))
+		if(xsisnil(pa[1]))
 			return NULL;
 		else
 		{
@@ -393,7 +393,7 @@ tchar_t* macro_if(tchar_t** pa,int size)
 		}
 	}else
 	{
-		if(is_null(pa[2]))
+		if(xsisnil(pa[2]))
 			return NULL;
 		else
 		{
@@ -413,7 +413,7 @@ tchar_t* macro_ltr(tchar_t** pa,int size)
 	if(size != 1)
 		return NULL;
 	
-	if(is_null(pa[0]))
+	if(xsisnil(pa[0]))
 		return NULL;
 
 	len = xslen(pa[0]);
@@ -436,7 +436,7 @@ tchar_t* macro_rtr(tchar_t** pa,int size)
 	if(size != 1)
 		return NULL;
 	
-	if(is_null(pa[0]))
+	if(xsisnil(pa[0]))
 		return NULL;
 
 	len = xslen(pa[0]);
@@ -459,7 +459,7 @@ tchar_t* macro_ctr(tchar_t** pa,int size)
 	if(size != 1)
 		return NULL;
 	
-	if(is_null(pa[0]))
+	if(xsisnil(pa[0]))
 		return NULL;
 
 	len = xslen(pa[0]);
@@ -708,7 +708,7 @@ void MacroNodeParse(link_t_ptr multi,link_t_ptr node,tchar_t* str,int len)
 	int type,tokenlen,sublen;
 	link_t_ptr child;
 
-	if(is_null(str))
+	if(xsisnil(str))
 		return ;
 
 	if(len == -1)
@@ -936,7 +936,7 @@ bool_t macro_parse(link_t_ptr ptr,const tchar_t* str,int len)
 	if (!ptr)
 		return 0;
 
-	if(is_null(str))
+	if(xsisnil(str))
 		return 0;
 
 	ht = get_multi_node_attr_table(ptr);
@@ -1048,7 +1048,7 @@ void macro_set_func(link_t_ptr ptr,const tchar_t* funcname,macro_func_ptr pf)
 {
 	link_t_ptr ht,elk;
 
-	if(is_null(funcname) || pf == NULL)
+	if(xsisnil(funcname) || pf == NULL)
 		return ;
 
 	ht = get_multi_node_attr_table(ptr);
@@ -1060,7 +1060,7 @@ macro_func_ptr macro_get_func(link_t_ptr ptr,const tchar_t* funcname)
 {
 	link_t_ptr ht,elk;
 
-	if(is_null(funcname))
+	if(xsisnil(funcname))
 		return NULL;
 
 	ht = get_multi_node_attr_table(ptr);

@@ -38,6 +38,8 @@ extern "C" {
 
 EXP_API visual_t create_mgc_visual(const tchar_t* devName, const tchar_t* formName, int width, int height, int dpi);
 
+EXP_API visual_t create_shm_visual(const tchar_t *devName, int width, int height, int dpi, void* shmBuffer, dword_t shmStride);
+
 EXP_API void destroy_mgc_visual(visual_t mgc);
 
 EXP_API mem_device_ptr mgc_get_device_interface(visual_t mgc, device_t* phand);

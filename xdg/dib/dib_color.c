@@ -75,7 +75,7 @@ dword_t fill_color_dibbits(const xcolor_t* pxc, const bitmap_info_head_t* pbi, c
 		quad = 0;
 	}
 
-	bytes_per_row = BMP_LINE_BYTES(pbi->width, pbi->clrbits);
+	bytes_per_row = BMP_POINTS_BYTES(pbi->width, pbi->clrbits);
 
 	for (row = (int)pbi->height - 1; (row >= 0) && (total + bytes_per_row <= max); row--)
 	{
@@ -184,7 +184,7 @@ dword_t fill_pattern_dibbits(const xcolor_t* pxc_front, const xcolor_t* pxc_back
 		quad_front = 0;
 	}
 
-	bytes_per_row = BMP_LINE_BYTES(pbi->width, pbi->clrbits);
+	bytes_per_row = BMP_POINTS_BYTES(pbi->width, pbi->clrbits);
 
 	for (row = (int)pbi->height - 1; (row >= 0) && (total + bytes_per_row <= max); row--)
 	{
@@ -314,7 +314,7 @@ static void _put_color_bits(int row, int col, const xcolor_t* pxc, const bitmap_
 	unsigned short rgb16;
 	unsigned int rgb32;
 
-	bytes_per_row = BMP_LINE_BYTES(w, clrbits);
+	bytes_per_row = BMP_POINTS_BYTES(w, clrbits);
 
 	pb += (h - row - 1)* bytes_per_row;
 
@@ -367,7 +367,7 @@ dword_t fill_gradient_dibbits(const xcolor_t* pxc_brim, const xcolor_t* pxc_core
 	xcolor_t xc;
 	float f;
 
-	bytes_per_row = BMP_LINE_BYTES(pbi->width, pbi->clrbits);
+	bytes_per_row = BMP_POINTS_BYTES(pbi->width, pbi->clrbits);
 
 	if (compare_text(lay, -1, GDI_ATTR_GRADIENT_HORZ, -1, 1) == 0)
 	{

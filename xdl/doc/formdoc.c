@@ -278,7 +278,7 @@ static tchar_t* _field_calc_func(const tchar_t* token,void* parm)
 		return NULL;
 	
 	tmp = (tchar_t*)get_field_text_ptr(flk);
-	if(is_null(tmp))
+	if(xsisnil(tmp))
 		return NULL;
 
 	len = xslen(tmp);
@@ -791,7 +791,7 @@ link_t_ptr get_field(link_t_ptr ptr,const tchar_t* fname)
 {
 	link_t_ptr flk;
 
-	if(is_null(fname))
+	if(xsisnil(fname))
 		return NULL;
 
 	flk = get_next_field(ptr,LINK_FIRST);
@@ -809,7 +809,7 @@ link_t_ptr get_field_by_id(link_t_ptr ptr, const tchar_t* fid)
 {
 	link_t_ptr flk;
 
-	if (is_null(fid))
+	if (xsisnil(fid))
 		return NULL;
 
 	flk = get_next_field(ptr, LINK_FIRST);
@@ -1275,7 +1275,7 @@ const tchar_t* get_field_options_text_ptr(link_t_ptr flk)
 	sz_text = get_field_text_ptr(flk);
 
 	sz_opt = get_dom_node_options_text_ptr(flk, sz_text, -1);
-	return (is_null(sz_opt)) ? sz_text : sz_opt;
+	return (xsisnil(sz_opt)) ? sz_text : sz_opt;
 }
 
 int calc_form_field(link_t_ptr ptr,link_t_ptr flk)
@@ -1289,7 +1289,7 @@ int calc_form_field(link_t_ptr ptr,link_t_ptr flk)
 	if(compare_text(cls,-1,DOC_FORM_TEXT,-1,0) == 0)
 	{
 		tmp = (tchar_t*)get_field_macro_ptr(flk);
-		if(!is_null(tmp))
+		if(!xsisnil(tmp))
 		{
 			macro = create_multi_tree();
 

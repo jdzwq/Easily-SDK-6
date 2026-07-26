@@ -1688,7 +1688,7 @@ const schar_t* a_xsscanf_arg(const schar_t* str, const schar_t* fmt, va_list* pa
 
 	schar_t* token = (schar_t*)fmt;
 
-	if (a_is_null(str))
+	if (a_xsisnil(str))
 		return NULL;
 
 	while (xs != XS_END)
@@ -1869,7 +1869,7 @@ const wchar_t* w_xsscanf_arg(const wchar_t* str, const wchar_t* fmt, va_list* pa
 
 	wchar_t* token = (wchar_t*)fmt;
 
-	if (w_is_null(str))
+	if (w_xsisnil(str))
 		return NULL;
 
 	while (xs != XS_END)

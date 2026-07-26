@@ -2,9 +2,10 @@
 #ifndef _XDLGDI_H
 #define _XDLGDI_H
 
-#include "sdi/svgcanv.h"
-#include "sdi/svggdi.h"
-#include "sdi/svginf.h"
+#include "sgc/svgcanv.h"
+#include "sgc/svggdi.h"
+
+#include "gdi/svginf.h"
 
 #include "scan/scanner.h"
 #include "scan/memoscan.h"

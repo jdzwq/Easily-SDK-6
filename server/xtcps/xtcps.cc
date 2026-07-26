@@ -55,7 +55,7 @@ static void _xtcps_get_config(const tchar_t* site, tchar_t* sz_path, tchar_t* sz
 	tchar_t sz_file[PATH_LEN + 1] = { 0 };
 
 	get_envvar(XSERVICE_ROOT, sz_root, PATH_LEN);
-	if (is_null(sz_root))
+	if (xsisnil(sz_root))
 	{
 		//xscpy(sz_root,_T("."));
 		get_runpath((res_modu_t)0, sz_root, PATH_LEN);
@@ -128,7 +128,7 @@ void _xtcps_dispatch(xhand_t bio, void* p)
 
 	get_envvar(XSERVICE_ROOT, sz_path, PATH_LEN);
 
-	if (is_null(sz_path))
+	if (xsisnil(sz_path))
 	{
 		//xscpy(sz_path,_T("."));
 		get_runpath((res_modu_t)0, sz_path, PATH_LEN);
@@ -141,12 +141,12 @@ void _xtcps_dispatch(xhand_t bio, void* p)
 
 	_xtcps_get_config(sz_site, sz_path, sz_proc);
 
-	if (is_null(sz_path))
+	if (xsisnil(sz_path))
 	{
 		raise_user_error(_T("_tcps_invoke"), _T("website not define service entry\n"));
 	}
 
-	if (is_null(sz_proc))
+	if (xsisnil(sz_proc))
 	{
 		raise_user_error(_T("_tcps_invoke"), _T("website not define service module\n"));
 	}

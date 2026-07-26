@@ -941,7 +941,7 @@ int designer_sub_keydown(widget_t widget, dword_t ks, int nKey, uid_t sid, vword
 
 	XDK_ASSERT(sid == IDS_DESIGNER && ptd);
 
-	b_ctl = ((ks & KS_WITH_CONTROL) || (ks & KS_WITH_CMD))? 1 : 0;
+	b_ctl = ((ks & KS_WITH_CONTROL) || (ks & KS_WITH_META))? 1 : 0;
 	b_sft = (ks & KS_WITH_SHIFT)? 1 : 0;
 
 	if (nKey == KEY_UP || nKey == KEY_DOWN || nKey == KEY_LEFT || nKey == KEY_RIGHT)

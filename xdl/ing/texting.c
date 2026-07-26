@@ -26,7 +26,7 @@ LICENSE.GPL3 for more details.
 
 #include "texting.h"
 
-#include "../xdlgdi.h"
+#include "../xdlsdi.h"
 #include "../xdldoc.h"
 #include "../xdlview.h"
 

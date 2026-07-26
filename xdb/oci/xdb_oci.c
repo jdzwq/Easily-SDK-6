@@ -473,7 +473,7 @@ bool_t STDCALL db_exec(xdb_t db, const tchar_t* sqlstr, int sqllen)
 	if (sqllen < 0)
 		sqllen = xslen(sqlstr);
 
-	if (!sqllen || is_null(sqlstr))
+	if (!sqllen || xsisnil(sqlstr))
 	{
 		return 1;
 	}
@@ -796,13 +796,13 @@ int STDCALL _db_fetch_row(xdb_oci_context* pdb, OCIStmt* stm, LINKPTR grid)
 			if (clk == NULL)
 				continue;
 
-			if (!is_null((tchar_t*)(pbuf[i - 1])))
+			if (!xsisnil((tchar_t*)(pbuf[i - 1])))
 			{
 				data_type = get_col_data_type_ptr(clk);
 				if (compare_text(data_type, -1, ATTR_DATA_TYPE_DATE, -1, 0) == 0 || compare_text(data_type, -1, ATTR_DATA_TYPE_DATETIME, -1, 0) == 0)
 				{
 					data_cast = get_col_field_cast_ptr(clk);
-					if (!is_null(data_cast))
+					if (!xsisnil(data_cast))
 					{
 						parse_datetime_ex(&dt, data_cast, (tchar_t*)(pbuf[i - 1]));
 						format_datetime(&dt, (tchar_t*)(pbuf[i - 1]));
@@ -933,7 +933,7 @@ bool_t STDCALL db_select(xdb_t db, LINKPTR grid, const tchar_t* sqlstr)
 	clear_grid_rowset(grid);
 	clear_grid_colset(grid);
 
-	if (is_null(sqlstr))
+	if (xsisnil(sqlstr))
 	{
 		raise_user_error(_T("-1"), _T("Empty sql statement"));
 	}
@@ -1051,7 +1051,7 @@ bool_t STDCALL db_schema(xdb_t db, LINKPTR grid, const tchar_t* sqlstr)
 	clear_grid_rowset(grid);
 	clear_grid_colset(grid);
 
-	if (is_null(sqlstr))
+	if (xsisnil(sqlstr))
 	{
 		raise_user_error(_T("-1"), _T("Empty sql statement"));
 	}
@@ -1156,7 +1156,7 @@ int _db_call_argv(xdb_oci_context* pdb, const tchar_t* procname, const tchar_t* 
 	int sqllen, pas, ind;
 	const tchar_t* token;
 
-	if (is_null(procname))
+	if (xsisnil(procname))
 		return 0;
 
 	TRY_CATCH;
@@ -1267,7 +1267,7 @@ int _db_call_argv(xdb_oci_context* pdb, const tchar_t* procname, const tchar_t* 
 				pdg[ind].len = (pdg[ind].len + 1) * sizeof(tchar_t);
 			pdg[ind].buf = xmem_alloc(pdg[ind].len);
 			xscpy((tchar_t*)pdg[ind].buf, (tchar_t*)pdg[ind].src);
-			if (is_null((tchar_t*)pdg[ind].src))
+			if (xsisnil((tchar_t*)pdg[ind].src))
 				pdg[ind].ind = -1;
 			else
 				pdg[ind].ind = pdg[ind].len;
@@ -1518,7 +1518,7 @@ bool_t STDCALL db_call_func(xdb_t db, LINKPTR func)
 			pdg[ind].buf = xmem_alloc(pdg[ind].len);
 			txt = get_func_param_text_ptr(flk);
 			xscpy((tchar_t*)pdg[ind].buf, txt);
-			if (is_null(txt))
+			if (xsisnil(txt))
 				pdg[ind].ind = -1;
 			else
 				pdg[ind].ind = pdg[ind].len;
@@ -1535,7 +1535,7 @@ bool_t STDCALL db_call_func(xdb_t db, LINKPTR func)
 				pdg[ind].len = (pdg[ind].len + 1) * sizeof(tchar_t);
 			pdg[ind].buf = xmem_alloc(pdg[ind].len);
 			xscpy((tchar_t*)pdg[ind].buf, txt);
-			if (is_null(txt))
+			if (xsisnil(txt))
 				pdg[ind].ind = -1;
 			else
 				pdg[ind].ind = pdg[ind].len;
@@ -1649,7 +1649,7 @@ bool_t STDCALL _db_prepare(xdb_oci_context* pdb, const tchar_t* sqlstr)
 
 	_db_reset(pdb);
 
-	if (is_null(sqlstr))
+	if (xsisnil(sqlstr))
 	{
 		raise_user_error(_T("-1"), _T("Empty sql statement"));
 	}

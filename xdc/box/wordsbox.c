@@ -704,7 +704,7 @@ void wordsbox_find(widget_t widget, link_t_ptr pos, const tchar_t* token)
 	if (!ptd->words)
 		return;
 
-	if (is_null(token))
+	if (xsisnil(token))
 	{
 		wordsbox_set_focus_item(widget, NULL);
 		return;
@@ -756,7 +756,7 @@ void wordsbox_filter(widget_t widget, const tchar_t* token)
 	{
 		b_hidden = 1;
 
-		if (is_null(token))
+		if (xsisnil(token))
 		{
 			b_hidden = 0;
 		}

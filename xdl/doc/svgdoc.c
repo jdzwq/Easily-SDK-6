@@ -194,7 +194,7 @@ void get_svg_viewbox(link_t_ptr ptr, xrect_t* pbox)
 	xmem_zero((void*)pbox, sizeof(xrect_t));
 
 	str = get_dom_node_attr_ptr(ptr, SVG_ATTR_VIEWBOX, -1);
-	if (is_null(str))
+	if (xsisnil(str))
 		return;
 
 	n = parse_string_token((str + total), -1, _T(' '), &key, &klen);
@@ -255,18 +255,18 @@ void write_xpen_to_svg_node(link_t_ptr nlk, const xpen_t* pxp)
 	if (is_null_xpen(pxp))
 		return;
 
-	if (!is_null(pxp->color))
+	if (!xsisnil(pxp->color))
 	{
 		set_dom_node_attr(nlk, SVG_ATTR_STROKE_COLOR, -1, pxp->color, -1);
 	}
 
-	if (!is_null(pxp->opacity))
+	if (!xsisnil(pxp->opacity))
 	{
 		xsprintf(token, _T("%.2f"), xstonum(pxp->opacity) / 255.0);
 		set_dom_node_attr(nlk, SVG_ATTR_STROKE_OPACITY, -1, token, -1);
 	}
 
-	if (!is_null(pxp->size))
+	if (!xsisnil(pxp->size))
 	{
 		set_dom_node_attr(nlk, SVG_ATTR_STROKE_WIDTH, -1, pxp->size, -1);
 	}
@@ -288,25 +288,25 @@ void read_xpen_from_svg_node(link_t_ptr nlk, xpen_t* pxp)
 	const tchar_t* token;
 
 	token = get_dom_node_attr_ptr(nlk, SVG_ATTR_STROKE_COLOR, -1);
-	if (!is_null(token))
+	if (!xsisnil(token))
 	{
 		xscpy(pxp->color, token);
 	}
 
 	token = get_dom_node_attr_ptr(nlk, SVG_ATTR_STROKE_OPACITY, -1);
-	if (!is_null(token))
+	if (!xsisnil(token))
 	{
 		xsprintf(pxp->opacity, _T("%d"), (int)(xstof(token) * 255.0));
 	}
 
 	token = get_dom_node_attr_ptr(nlk, SVG_ATTR_STROKE_WIDTH, -1);
-	if (!is_null(token))
+	if (!xsisnil(token))
 	{
 		xscpy(pxp->size, token);
 	}
 
 	token = get_dom_node_attr_ptr(nlk, SVG_ATTR_STROKE_DASHARRAY, -1);
-	if (!is_null(token))
+	if (!xsisnil(token))
 	{
 		if (xstol(pxp->size) == xstol(token))
 			xscpy(pxp->style, GDI_ATTR_STROKE_STYLE_DASH);
@@ -375,7 +375,7 @@ void write_xbrush_to_svg_node(link_t_ptr nlk, const xbrush_t* pxb)
 		nlk_sub = insert_dom_node(nlk_objs, LINK_LAST);
 		set_dom_node_name(nlk_sub, SVG_NODE_STOP, -1);
 		set_dom_node_attr(nlk_sub, _T("offset"), -1, _T("0%"), -1);
-		if (is_null(pxb->color))
+		if (xsisnil(pxb->color))
 		{
 			parse_xcolor(&xc, pxb->color);
 			lighten_xcolor(&xc, -20);
@@ -389,7 +389,7 @@ void write_xbrush_to_svg_node(link_t_ptr nlk, const xbrush_t* pxb)
 		nlk_sub = insert_dom_node(nlk_objs, LINK_LAST);
 		set_dom_node_name(nlk_sub, SVG_NODE_STOP, -1);
 		set_dom_node_attr(nlk_sub, _T("offset"), -1, _T("100%"), -1);
-		if (is_null(pxb->linear))
+		if (xsisnil(pxb->linear))
 		{
 			parse_xcolor(&xc, pxb->color);
 			lighten_xcolor(&xc, 20);
@@ -402,7 +402,7 @@ void write_xbrush_to_svg_node(link_t_ptr nlk, const xbrush_t* pxb)
 	}
 	else
 	{
-		if (!is_null(pxb->color))
+		if (!xsisnil(pxb->color))
 		{
 			set_dom_node_attr(nlk, SVG_ATTR_FILL_COLOR, -1, pxb->color, -1);
 		}
@@ -447,7 +447,7 @@ void write_xbrush_to_svg_node(link_t_ptr nlk, const xbrush_t* pxb)
 		set_dom_node_attr(nlk_sub, _T("mode"), -1, _T("normal"), -1);
 	}*/
 
-	if (!is_null(pxb->opacity))
+	if (!xsisnil(pxb->opacity))
 	{
 		xsprintf(token, _T("%.2f"), xstof(pxb->opacity) / 255.0);
 		set_dom_node_attr(nlk, SVG_ATTR_FILL_OPACITY, -1, token, -1);
@@ -513,13 +513,13 @@ void read_xbrush_from_svg_node(link_t_ptr nlk, xbrush_t* pxb)
 			}
 		}
 	}
-	else if (!is_null(token))
+	else if (!xsisnil(token))
 	{
 		xscpy(pxb->color, token);
 	}
 	
 	get_dom_node_attr(nlk, SVG_ATTR_FILL_OPACITY, -1, token, RES_LEN);
-	if (!is_null(token))
+	if (!xsisnil(token))
 	{
 		xsprintf(pxb->opacity, _T("%d"), (int)(xstof(token) * 255.0));
 	}
@@ -530,12 +530,12 @@ void write_xfont_to_svg_node(link_t_ptr nlk, const xfont_t* pxf)
 	if (is_null_xfont(pxf))
 		return;
 
-	if (!is_null(pxf->size))
+	if (!xsisnil(pxf->size))
 	{
 		set_dom_node_attr(nlk, SVG_ATTR_FONT_SIZE, -1, pxf->size, -1);
 	}
 
-	if (!is_null(pxf->family))
+	if (!xsisnil(pxf->family))
 	{
 		set_dom_node_attr(nlk, SVG_ATTR_FONT_FAMILY, -1, pxf->family, -1);
 	}
@@ -546,13 +546,13 @@ void read_xfont_from_svg_node(link_t_ptr nlk, xfont_t* pxf)
 	const tchar_t* token;
 
 	token = get_dom_node_attr_ptr(nlk, SVG_ATTR_FONT_SIZE, -1);
-	if (!is_null(token))
+	if (!xsisnil(token))
 	{
 		xscpy(pxf->size, token);
 	}
 
 	token = get_dom_node_attr_ptr(nlk, SVG_ATTR_FONT_FAMILY, -1);
-	if (!is_null(token))
+	if (!xsisnil(token))
 	{
 		xscpy(pxf->family, token);
 	}
@@ -565,12 +565,12 @@ void write_xface_to_svg_node(link_t_ptr nlk, const xface_t* pxa)
 	if (is_null_xface(pxa))
 		return;
 
-	if (!is_null(pxa->text_color))
+	if (!xsisnil(pxa->text_color))
 	{
 		set_dom_node_attr(nlk, SVG_ATTR_TEXT_COLOR, -1, pxa->text_color, -1);
 	}
 
-	if (!is_null(pxa->text_align))
+	if (!xsisnil(pxa->text_align))
 	{
 		if (compare_text(pxa->text_align, -1, GDI_ATTR_TEXT_ALIGN_FAR, -1, 1) == 0)
 			xscpy(token, SVG_ATTR_TEXT_ALIGN_FAR);
@@ -588,13 +588,13 @@ void read_xface_from_svg_node(link_t_ptr nlk, xface_t* pxa)
 	const tchar_t* token;
 
 	token = get_dom_node_attr_ptr(nlk, SVG_ATTR_TEXT_COLOR, -1);
-	if (!is_null(token))
+	if (!xsisnil(token))
 	{
 		xscpy(pxa->text_color, token);
 	}
 
 	token = get_dom_node_attr_ptr(nlk, SVG_ATTR_TEXT_ALIGN, -1);
-	if (!is_null(token))
+	if (!xsisnil(token))
 	{
 		if (compare_text(token, -1, SVG_ATTR_TEXT_ALIGN_FAR, -1, 1) == 0)
 			xscpy(pxa->text_align, GDI_ATTR_TEXT_ALIGN_FAR);
@@ -709,7 +709,7 @@ void write_polyline_to_svg_node(link_t_ptr glk,const xpen_t* pxp, const xpoint_t
 
 	set_dom_node_attr(glk, SVG_ATTR_FILL_COLOR, -1, _T("none"), -1);
 
-	if (is_null(pxp->color))
+	if (xsisnil(pxp->color))
 	{
 		set_dom_node_attr(glk, SVG_ATTR_STROKE_COLOR, -1, GDI_ATTR_RGB_BLACK, -1);
 	}
@@ -727,7 +727,7 @@ int read_polyline_from_svg_node(link_t_ptr glk,xpen_t* pxp,xpoint_t* ppt,int n)
 		return 0;
 
 	str = get_dom_node_attr_ptr(glk,SVG_ATTR_POINTS,-1);
-	if(is_null(str))
+	if(xsisnil(str))
 		return 0;
 
 	len = xslen(str);
@@ -812,7 +812,7 @@ int read_polygon_from_svg_node(link_t_ptr glk,xpen_t* pxp,xbrush_t* pxb,xpoint_t
 		return 0;
 
 	str = get_dom_node_attr_ptr(glk,SVG_ATTR_POINTS,-1);
-	if(is_null(str))
+	if(xsisnil(str))
 		return 0;
 
 	len = xslen(str);
@@ -1073,18 +1073,18 @@ void write_text_to_svg_node(link_t_ptr glk, const xfont_t* pxf, const xface_t* p
 		set_dom_node_attr(glk, SVG_ATTR_HEIGHT, -1, token, -1);
 	}
 
-	if (!is_null(pxa->text_color))
+	if (!xsisnil(pxa->text_color))
 	{
 		set_dom_node_attr(glk, SVG_ATTR_TEXT_COLOR, -1, pxa->text_color, -1);
 	}
 
-	if (!is_null(pxf->size))
+	if (!xsisnil(pxf->size))
 	{
 		xsprintf(token, _T("%spt"), pxf->size);
 		set_dom_node_attr(glk, SVG_ATTR_FONT_SIZE, -1, token, -1);
 	}
 
-	if (!is_null(pxf->family))
+	if (!xsisnil(pxf->family))
 	{
 		set_dom_node_attr(glk, SVG_ATTR_FONT_FAMILY, -1, pxf->family, -1);
 	}
@@ -1126,7 +1126,7 @@ const tchar_t* read_text_from_svg_node(link_t_ptr glk,xfont_t* pxf, xface_t* pxa
 	prt->h = (get_dom_node_attr_integer(glk, SVG_ATTR_HEIGHT));
 
 	token = get_dom_node_attr_ptr(glk, SVG_ATTR_TEXT_ALIGN, -1);
-	if (!is_null(token))
+	if (!xsisnil(token))
 	{
 		if (compare_text(token, -1, SVG_ATTR_TEXT_ALIGN_CENTER, -1, 1) == 0)
 			prt->x -= prt->w / 2;
@@ -1135,7 +1135,7 @@ const tchar_t* read_text_from_svg_node(link_t_ptr glk,xfont_t* pxf, xface_t* pxa
 	}
 
 	token = get_dom_node_attr_ptr(glk, SVG_ATTR_LINE_ALIGN, -1);
-	if (!is_null(token))
+	if (!xsisnil(token))
 	{
 		if (compare_text(token, -1, SVG_ATTR_TEXT_ALIGN_NEAR, -1, 1) == 0)
 			prt->y -= prt->h / 2;
@@ -1146,25 +1146,25 @@ const tchar_t* read_text_from_svg_node(link_t_ptr glk,xfont_t* pxf, xface_t* pxa
 	}
 
 	token = get_dom_node_attr_ptr(glk, SVG_ATTR_TEXT_COLOR, -1);
-	if (!is_null(token))
+	if (!xsisnil(token))
 	{
 		xscpy(pxa->text_color, token);
 	}
 
 	token = get_dom_node_attr_ptr(glk, SVG_ATTR_FONT_SIZE, -1);
-	if (!is_null(token))
+	if (!xsisnil(token))
 	{
 		xscpy(pxf->size, token);
 	}
 
 	token = get_dom_node_attr_ptr(glk, SVG_ATTR_FONT_FAMILY, -1);
-	if (!is_null(token))
+	if (!xsisnil(token))
 	{
 		xscpy(pxf->family, token);
 	}
 
 	token = get_dom_node_attr_ptr(glk, SVG_ATTR_TEXT_ALIGN, -1);
-	if (!is_null(token))
+	if (!xsisnil(token))
 	{
 		if (compare_text(token, -1, SVG_ATTR_TEXT_ALIGN_FAR, -1, 1) == 0)
 			xscpy(pxa->text_align, GDI_ATTR_TEXT_ALIGN_FAR);
@@ -1175,7 +1175,7 @@ const tchar_t* read_text_from_svg_node(link_t_ptr glk,xfont_t* pxf, xface_t* pxa
 	}
 
 	token = get_dom_node_attr_ptr(glk, SVG_ATTR_LINE_ALIGN, -1);
-	if (!is_null(token))
+	if (!xsisnil(token))
 	{
 		if (compare_text(token, -1, SVG_ATTR_TEXT_ALIGN_FAR, -1, 1) == 0)
 			xscpy(pxa->line_align, GDI_ATTR_TEXT_ALIGN_FAR);
@@ -1304,7 +1304,7 @@ bool_t svg_node_is_pie(link_t_ptr glk)
 		return 0;
 
 	token = get_dom_node_attr_ptr(glk, SVG_ATTR_D, -1);
-	if (is_null(token))
+	if (xsisnil(token))
 		return 0;
 
 	if (*token != _T('M'))
@@ -1372,7 +1372,7 @@ void read_pie_from_svg_node(link_t_ptr glk, xpen_t* pxp, xbrush_t* pxb, xrect_t*
 		return;
 
 	token = get_dom_node_attr_ptr(glk, SVG_ATTR_D, -1);
-	if (is_null(token))
+	if (xsisnil(token))
 		return;
 
 	xsscanf(token, _T("M%d %d L%d %d A%d %d %d %d %d %d %d Z"), &x1, &y1, &x2, &y2, &rx, &ry, &tan, &lar, &ccw, &x3, &y3);
@@ -1405,7 +1405,7 @@ bool_t svg_node_is_fan(link_t_ptr glk)
 		return 0;
 
 	token = get_dom_node_attr_ptr(glk, SVG_ATTR_D, -1);
-	if (is_null(token))
+	if (xsisnil(token))
 		return 0;
 
 	if (*token != _T('M'))
@@ -1472,7 +1472,7 @@ void read_sector_from_svg_node(link_t_ptr glk, xpen_t* pxp, xbrush_t* pxb, xpoin
 		return;
 
 	token = get_dom_node_attr_ptr(glk, SVG_ATTR_D, -1);
-	if (is_null(token))
+	if (xsisnil(token))
 		return;
 
 	xsscanf(token, _T("M%d %d A%d %d %d %d %d %d %d L%d %d A%d %d"), &x1, &y1, &r, &r, &tan, &lar, &ccw, &x2, &y2, &x3, &y3, &s, &s);
@@ -1504,7 +1504,7 @@ bool_t svg_node_is_arc(link_t_ptr glk)
 		return 0;
 
 	token = get_dom_node_attr_ptr(glk, SVG_ATTR_D, -1);
-	if (is_null(token))
+	if (xsisnil(token))
 		return 0;
 
 	if (*token != _T('M'))
@@ -1547,7 +1547,7 @@ void read_arc_from_svg_node(link_t_ptr glk, xpen_t* pxp, xpoint_t* ppt1, xpoint_
 		return;
 
 	token = get_dom_node_attr_ptr(glk, SVG_ATTR_D, -1);
-	if (is_null(token))
+	if (xsisnil(token))
 		return;
 
 	xsscanf(token, _T("M%d %d A%d %d %d %d %d %d %d"), &x1, &y1, &rx, &ry, &tan, &lar, &ccw, &x2, &y2);
@@ -2340,7 +2340,7 @@ void read_path_from_svg_node(link_t_ptr glk, xpen_t* pxp, xbrush_t* pxb, tchar_t
 		return;
 
 	token = get_dom_node_attr_ptr(glk, SVG_ATTR_D, -1);
-	if (is_null(token))
+	if (xsisnil(token))
 		return;
 
 	_svg_parse_path(token, -1, aa, an, pa, pn);

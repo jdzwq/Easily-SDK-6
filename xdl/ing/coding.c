@@ -26,7 +26,7 @@ LICENSE.GPL3 for more details.
 
 #include "coding.h"
 
-#include "../xdlgdi.h"
+#include "../xdlsdi.h"
 
 
 void draw_code128(const drawing_interface* pci, const xcolor_t* pxc, xrect_t* prt, const tchar_t* text, int len)

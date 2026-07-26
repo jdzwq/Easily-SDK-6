@@ -43,7 +43,7 @@ void xportd_start()
 		return ;
 
 	get_envvar(XSERVICE_ROOT, sz_root, PATH_LEN);
-	if(is_null(sz_root))
+	if(xsisnil(sz_root))
 	{
 		//xscpy(sz_root,_T("."));
 		get_runpath((res_modu_t)0, sz_root, PATH_LEN);
@@ -89,7 +89,7 @@ void xportd_start()
 					LINKPTR nlk_param = get_dom_first_child_node(nlk_child);
 					while (nlk_param)
 					{
-						if (!is_null(get_dom_node_text_ptr(nlk_param)))
+						if (!xsisnil(get_dom_node_text_ptr(nlk_param)))
 						{
 							xscat(phttps->sz_param, get_dom_node_name_ptr(nlk_param));
 							xscat(phttps->sz_param, _T(":"));
@@ -104,12 +104,12 @@ void xportd_start()
 				nlk_child = get_dom_next_sibling_node(nlk_child);
 			}
 
-			if (is_null(phttps->sz_mode))
+			if (xsisnil(phttps->sz_mode))
 			{
 				xscpy(phttps->sz_mode, XPORTD_MODE_PROCESS);
 			}
 
-			if (!is_null(sz_file))
+			if (!xsisnil(sz_file))
 			{
 				printf_path(phttps->sz_module, sz_file);
 			}
@@ -143,7 +143,7 @@ void xportd_start()
 					LINKPTR nlk_param = get_dom_first_child_node(nlk_child);
 					while (nlk_param)
 					{
-						if (!is_null(get_dom_node_text_ptr(nlk_param)))
+						if (!xsisnil(get_dom_node_text_ptr(nlk_param)))
 						{
 							xscat(ptcps->sz_param, get_dom_node_name_ptr(nlk_param));
 							xscat(ptcps->sz_param, _T(":"));
@@ -158,12 +158,12 @@ void xportd_start()
 				nlk_child = get_dom_next_sibling_node(nlk_child);
 			}
 
-			if (is_null(ptcps->sz_mode))
+			if (xsisnil(ptcps->sz_mode))
 			{
 				xscpy(ptcps->sz_mode, XPORTD_MODE_PROCESS);
 			}
 
-			if (!is_null(sz_file))
+			if (!xsisnil(sz_file))
 			{
 				printf_path(ptcps->sz_module, sz_file);
 			}
@@ -197,7 +197,7 @@ void xportd_start()
 					LINKPTR nlk_param = get_dom_first_child_node(nlk_child);
 					while (nlk_param)
 					{
-						if (!is_null(get_dom_node_text_ptr(nlk_param)))
+						if (!xsisnil(get_dom_node_text_ptr(nlk_param)))
 						{
 							xscat(pudps->sz_param, get_dom_node_name_ptr(nlk_param));
 							xscat(pudps->sz_param, _T(":"));
@@ -212,12 +212,12 @@ void xportd_start()
 				nlk_child = get_dom_next_sibling_node(nlk_child);
 			}
 
-			if (is_null(pudps->sz_mode))
+			if (xsisnil(pudps->sz_mode))
 			{
 				xscpy(pudps->sz_mode, XPORTD_MODE_PROCESS);
 			}
 
-			if (!is_null(sz_file))
+			if (!xsisnil(sz_file))
 			{
 				printf_path(pudps->sz_module, sz_file);
 			}

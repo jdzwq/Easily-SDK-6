@@ -25,7 +25,7 @@ LICENSE.GPL3 for more details.
 ***********************************************************************/
 #include "memoscan.h"
 
-#include "../xdlgdi.h"
+#include "../xdlsdi.h"
 #include "../xdldoc.h"
 
 
@@ -542,7 +542,7 @@ int call_memo_delete_words(void* ctx)
 		if (!nxt)
 		{
 			nxt = pscan->nlk;
-			if (get_memo_line_indent(nxt) == 0 && is_null(get_memo_line_text_ptr(nxt)))
+			if (get_memo_line_indent(nxt) == 0 && xsisnil(get_memo_line_text_ptr(nxt)))
 			{
 				pscan->nlk = get_memo_prev_line(pscan->memo, nxt);
 				delete_memo_line(nxt);

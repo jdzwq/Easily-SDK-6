@@ -96,7 +96,7 @@ static bool_t _invoke_get(const udps_block_t* pb, coap_block_t* pd)
 
 	split_topic(path + 1, cid, did, pid);
 
-	if (is_null(cid) || is_null(did))
+	if (xsisnil(cid) || xsisnil(did))
 	{
 		raise_user_error(_T("_invoke_get"), _T("unknown kv database"));
 	}
@@ -109,7 +109,7 @@ static bool_t _invoke_get(const udps_block_t* pb, coap_block_t* pd)
 		raise_user_error(_T("_invoke_get"), _T("open kv database failed"));
 	}
 
-	if (is_null(pid))
+	if (xsisnil(pid))
 	{
 		xscpy(pid, ZERO_NUID);
 	}
@@ -230,7 +230,7 @@ static bool_t _invoke_post(const udps_block_t* pb, coap_block_t* pd)
 
 	split_topic(path + 1, cid, did, pid);
 
-	if (is_null(cid) || is_null(did))
+	if (xsisnil(cid) || xsisnil(did))
 	{
 		raise_user_error(_T("_invoke_get"), _T("unknown kv database"));
 	}
@@ -243,7 +243,7 @@ static bool_t _invoke_post(const udps_block_t* pb, coap_block_t* pd)
 		raise_user_error(_T("_invoke_get"), _T("open kv database failed"));
 	}
 
-	if (is_null(pid))
+	if (xsisnil(pid))
 	{
 		xscpy(pid, ZERO_NUID);
 	}
@@ -340,7 +340,7 @@ static bool_t _invoke_put(const udps_block_t* pb, coap_block_t* pd)
 
 	split_topic(path + 1, cid, did, pid);
 
-	if (is_null(cid) || is_null(did))
+	if (xsisnil(cid) || xsisnil(did))
 	{
 		raise_user_error(_T("_invoke_put"), _T("unknown kv database"));
 	}
@@ -353,7 +353,7 @@ static bool_t _invoke_put(const udps_block_t* pb, coap_block_t* pd)
 		raise_user_error(_T("_invoke_put"), _T("open kv database failed"));
 	}
 
-	if (is_null(pid))
+	if (xsisnil(pid))
 	{
 		xscpy(pid, ZERO_NUID);
 	}
@@ -470,7 +470,7 @@ static bool_t _invoke_delete(const udps_block_t* pb, coap_block_t* pd)
 
 	split_topic(path + 1, cid, did, pid);
 
-	if (is_null(cid) || is_null(did))
+	if (xsisnil(cid) || xsisnil(did))
 	{
 		raise_user_error(_T("_invoke_delete"), _T("unknown kv database"));
 	}
@@ -483,7 +483,7 @@ static bool_t _invoke_delete(const udps_block_t* pb, coap_block_t* pd)
 		raise_user_error(_T("_invoke_delete"), _T("open kv database failed"));
 	}
 
-	if (is_null(pid))
+	if (xsisnil(pid))
 	{
 		xscpy(pid, ZERO_NUID);
 	}

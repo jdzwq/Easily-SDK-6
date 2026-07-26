@@ -92,7 +92,7 @@ bool_t get_glyph_metrix(const glyph_info_t* pgi, const tchar_t *str, glyph_metri
 	if (pmetr) pmetr->height = pgi->height;
 	if (pmetr) pmetr->ascent = pgi->ascent;
 
-	if (is_null(str)) return bool_true;
+	if (xsisnil(str)) return bool_true;
 
 	big_bytes(str, pch);
 

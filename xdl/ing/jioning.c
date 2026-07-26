@@ -26,7 +26,7 @@ LICENSE.GPL3 for more details.
 
 #include "jioning.h"
 
-#include "../xdlgdi.h"
+#include "../xdlsdi.h"
 #include "../xdlutil.h"
 
 

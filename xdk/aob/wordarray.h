@@ -33,64 +33,109 @@ LICENSE.GPL3 for more details.
 extern "C" {
 #endif
 
+/***********************************************************************
+@FUNCTION: alloc a words array.
+@RETURN: the words array object.
+***********************************************************************/
 EXP_API sword_t** words_alloc(void);
 
+/***********************************************************************
+@FUNCTION: realloc the words array due to array size changed.
+@INPUT: the original words array object.
+@INPUT: the number of words needed.
+@RETURN: the words array inner buffer.
+***********************************************************************/
 EXP_API sword_t* words_realloc(sword_t** pp, int count);
 
-/*
-@FUNCTION destroy_byte_array: destroy a byte array.
-@INPUT sword_t** ptr: the byte array address.
-@RETURN void: none.
-*/
+/***********************************************************************
+@FUNCTION: free the words array.
+@INPUT: the words array object.
+@RETURN: none.
+***********************************************************************/
 EXP_API void words_free(sword_t** sa);
 
-/*
-@FUNCTION clear_byte_array: delete all byte tokens.
-@INPUT sword_t** sa: the byte array address.
-@RETURN void: none.
-*/
+/***********************************************************************
+@FUNCTION: clear the words array content.
+@INPUT: the words array object.
+@RETURN: none.
+***********************************************************************/
 EXP_API void words_clear(sword_t** sa);
 
-/*
-@FUNCTION get_byte_array_size: get byte array tokenes.
-@INPUT sword_t** sa: the byte array address.
-@RETURN short: return the count of byte tokens.
-*/
+/***********************************************************************
+@FUNCTION: get the words array size.
+@INPUT: the words array object.
+@RETURN: the number of words in array.
+***********************************************************************/
 EXP_API int words_size(sword_t** sa);
 
-/*
-@FUNCTION get_byte: copy the byte token by index.
-@INPUT sword_t** sa: the byte array address.
-@INPUT short index: the zero based array index.
-@INPUT tchar_t* buf: the byte buf for copying.
-@INPUT short max: the size of buffer.
-@RETURN short: return characters copyed.
-*/
+/***********************************************************************
+@FUNCTION: get the words item by index.
+@INPUT: the words array object.
+@INPUT: the zero-based position.
+@RETURN: the words item at a valid index.
+***********************************************************************/
 EXP_API sword_t get_words(sword_t** sa, int index);
+
+/***********************************************************************
+@FUNCTION: get the words item safed.
+@INPUT: the words array object.
+@INPUT: the zero-based position.
+@INPUT: the default value.
+@RETURN: the words item at a valid index or the default value.
+@NOTE: if index is invalid then default value returned.
+***********************************************************************/
 EXP_API sword_t get_words_safe(sword_t** sa, int index, sword_t def);
 
+/***********************************************************************
+@FUNCTION: copy some words into words array object.
+@INPUT: the words array object.
+@INPUT: the zero-based position.
+@INPUT: the words array buffer.
+@INPUT: the numner of words array.
+@RETURN: the number of words copyed.
+@NOTE: the max words item can be copy into is (object size - index).
+***********************************************************************/
 EXP_API int words_copy(sword_t** sa, int index, sword_t* buf, int max);
 
-/*
-@FUNCTION insert_byte: insert the byte token before the position.
-@INPUT sword_t** sa: the byte array address.
-@INPUT short index: the zero based array index, -1 indicate insertting at last.
-@INPUT const tchar_t* token: the byte token to be inserted.
-@INPUT short len: the length of token.
-@RETURN void: none.
-*/
+/***********************************************************************
+@FUNCTION: insert some words into words array object.
+@INPUT: the words array object.
+@INPUT: the zero-based position.
+@INPUT: the words array buffer.
+@INPUT: the numner of words array.
+@RETURN: none.
+@NOTE: the new words array object size is (original size + count),
+	the words array may be expended.
+***********************************************************************/
 EXP_API void words_insert(sword_t** sa, int index, const sword_t* pa, int count);
 
-/*
-@FUNCTION delete_sword_token: delete the byte token.
-@INPUT sword_t** sa: the byte array address.
-@INPUT short index: the zero based array index, -1 indicate delete the last token.
-@RETURN void: none.
-*/
+/***********************************************************************
+@FUNCTION: delete some words from words array object.
+@INPUT: the words array object.
+@INPUT: the zero-based position.
+@INPUT: the numner of words will to delete.
+@RETURN: none.
+@NOTE: the max words item can be deleted is (object size - index),
+	the words array may be truncted.
+***********************************************************************/
 EXP_API void words_delete(sword_t** sa, int index, int count);
 
+/***********************************************************************
+@FUNCTION: attach a words buffer to the words array object.
+@INPUT: the words array object.
+@INPUT: the words buffer.
+@INPUT: the numner of words items.
+@RETURN: none.
+@NOTE: the words buffer of words array object is alloced outside,
+	it must be detached and freed outside.
+***********************************************************************/
 EXP_API void words_attach(sword_t** pp, sword_t* p, int len);
 
+/***********************************************************************
+@FUNCTION: detach words buffer from words array object.
+@INPUT: the words array object.
+@RETURN: the words buffer.
+***********************************************************************/
 EXP_API sword_t* words_detach(sword_t** pp);
 
 

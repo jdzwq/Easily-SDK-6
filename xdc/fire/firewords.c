@@ -146,7 +146,7 @@ static int sub_editbox_self_command(widget_t widget, int code, vword_t data, uid
 			text = editbox_get_text_ptr(widget);
 			wordsbox_filter(ctrl, text);
 
-			if (!is_null(text))
+			if (!xsisnil(text))
 			{
 				wordsbox_set_focus_item(ctrl, LINK_FIRST);
 			}

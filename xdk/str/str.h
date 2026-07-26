@@ -65,8 +65,8 @@ EXP_API wchar_t* w_xsnclone(const wchar_t* str, int len);
 EXP_API schar_t* a_xsclone(const schar_t* str);
 EXP_API wchar_t* w_xsclone(const wchar_t* str);
 
-EXP_API bool_t a_is_null(const schar_t* sz);
-EXP_API bool_t w_is_null(const wchar_t* sz);
+EXP_API bool_t a_xsisnil(const schar_t* sz);
+EXP_API bool_t w_xsisnil(const wchar_t* sz);
 
 EXP_API void a_xszero(schar_t* str,int len);
 EXP_API void w_xszero(wchar_t* str,int len);
@@ -80,8 +80,8 @@ EXP_API const wchar_t* w_xsnskip(const wchar_t* sz, int max);
 EXP_API const schar_t* a_xsskip(const schar_t* sz);
 EXP_API const wchar_t* w_xsskip(const wchar_t* sz);
 
-EXP_API bool_t a_is_numeric(const schar_t* sz);
-EXP_API bool_t w_is_numeric(const wchar_t* sz);
+EXP_API bool_t a_xsisnum(const schar_t* sz);
+EXP_API bool_t w_xsisnum(const wchar_t* sz);
 
 EXP_API short a_xsntos(const schar_t* sz, int n);
 EXP_API short w_xsntos(const wchar_t* sz, int n);
@@ -309,8 +309,8 @@ EXP_API void test_hexnum(void);
 #define xsnclone			w_xsnclone
 #define xsclone				w_xsclone
 #define xszero				w_xszero
-#define is_null				w_is_null
-#define is_numeric			w_is_numeric
+#define xsisnil				w_xsisnil
+#define xsisnum			w_xsisnum
 #define xsntos				w_xsntos
 #define xstos				w_xstos
 #define xstous				(unsigned short)w_xstos
@@ -395,8 +395,8 @@ EXP_API void test_hexnum(void);
 #define xsclone				a_xsclone
 #define xsnclone			a_xsnclone
 #define xszero				a_xszero
-#define is_null				a_is_null
-#define is_numeric			a_is_numeric
+#define xsisnil				a_xsisnil
+#define xsisnum			a_xsisnum
 #define xsntos				a_xsntos
 #define xstos				a_xstos
 #define xstous				(unsigned short)a_xstos

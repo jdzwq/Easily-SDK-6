@@ -180,7 +180,7 @@ void SQLPanel_OnSave(widget_t widget)
 
 	tchar_t szFile[PATH_LEN + 1] = { 0 };
 
-	if (is_null(pdt->szFile))
+	if (xsisnil(pdt->szFile))
 	{
 		tchar_t szPath[PATH_LEN + 1] = { 0 };
 
@@ -189,7 +189,7 @@ void SQLPanel_OnSave(widget_t widget)
 		if (!shell_get_filename(widget, szPath, _T("SQL Text File(*.sql)\0*.sql\0"), _T("sql"), 1, szPath, PATH_LEN, szFile, PATH_LEN))
 			return;
 
-		xscat(szPath, _T("/"));
+		xsncat(szPath, SLASH_CHAR, 1);
 		xscat(szPath, szFile);
 		xscpy(szFile, szPath);
 	}
@@ -214,7 +214,7 @@ void SQLPanel_OnSaveAs(widget_t widget)
 	if (!shell_get_filename(widget, szPath, _T("SQL Text File(*.sql)\0*.sql\0"), _T("sql"), 1, szPath, PATH_LEN, szFile, PATH_LEN))
 		return;
 
-	xscat(szPath, _T("/"));
+	xsncat(szPath, SLASH_CHAR, 1);
 	xscat(szPath, szFile);
 	xscpy(szFile, szPath);
 
@@ -240,7 +240,7 @@ void SQLPanel_OnSheet(widget_t widget)
 	if (!shell_get_filename(widget, szPath, _T("grid sheet file(*.sheet)\0*.sheet\0"), _T("sheet"), 1, szPath, PATH_LEN, szFile, PATH_LEN))
 		return;
 
-	xscat(szPath, _T("/"));
+	xsncat(szPath, SLASH_CHAR, 1);
 	xscat(szPath, szFile);
 	xscpy(szFile, szPath);
 
@@ -276,7 +276,7 @@ void SQLPanel_OnExport(widget_t widget)
 	if (!shell_get_filename(widget, szPath, _T("grid csv file(*.csv)\0*.csv\0"), _T("csv"), 1, szPath, PATH_LEN, szFile, PATH_LEN))
 		return;
 
-	xscat(szPath, _T("/"));
+	xsncat(szPath, SLASH_CHAR, 1);
 	xscat(szPath, szFile);
 	xscpy(szFile, szPath);
 
@@ -302,7 +302,7 @@ void SQLPanel_OnExecute(widget_t widget)
 
 	tchar_t sz_conn[PATH_LEN + 1] = { 0 };
 	Project_GetConfig(ptr_prj, _T("RDS"), sz_conn, PATH_LEN);
-	if (is_null(sz_conn))
+	if (xsisnil(sz_conn))
 	{
 		ShowMsg(MSGICO_TIP, _T("未定义数据连接服务！"));
 		return;
@@ -392,7 +392,7 @@ void SQLPanel_OnSelect(widget_t widget)
 
 	tchar_t sz_conn[PATH_LEN + 1] = { 0 };
 	Project_GetConfig(ptr_prj, _T("RDS"), sz_conn, PATH_LEN);
-	if (is_null(sz_conn))
+	if (xsisnil(sz_conn))
 	{
 		ShowMsg(MSGICO_TIP, _T("未定义数据连接服务！"));
 		return;
@@ -510,7 +510,7 @@ int SQLPanel_OnCreate(widget_t widget, void* data)
 
 	const tchar_t* szParam = (tchar_t*)data;
 
-	if (!is_null(szParam))
+	if (!xsisnil(szParam))
 	{
 		if (!SQLPanel_OpenFile(widget, szParam))
 			return -1;
@@ -673,7 +673,7 @@ void SQLPanel_OnParentCommand(widget_t widget, int code, vword_t data)
 		tchar_t szPath[PATH_LEN + 1], szExt[INT_LEN + 1];
 		const tchar_t* nname = (const tchar_t*)data;
 
-		if (!is_null(pdt->szFile) && !is_null(nname))
+		if (!xsisnil(pdt->szFile) && !xsisnil(nname))
 		{
 			split_path(pdt->szFile, szPath, NULL, szExt);
 			xsprintf(pdt->szFile, _T("%s/%s.%s"), szPath, nname, szExt);

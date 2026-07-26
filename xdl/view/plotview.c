@@ -27,7 +27,7 @@ LICENSE.GPL3 for more details.
 #include "plotview.h"
 
 #include "../xdlutil.h"
-#include "../xdlgdi.h"
+#include "../xdlsdi.h"
 #include "../xdldoc.h"
 
 
@@ -178,7 +178,7 @@ static void _plot_calendar(const drawing_interface* pci, const plot_t* plt, matr
 
 	//the inner frame
 	color = get_string_ptr(plt->y_colors, 0);
-	if (!is_null(color))
+	if (!xsisnil(color))
 	{
 		xsncpy(xp_dot.color, color, CLR_LEN);
 		xsncpy(xb_dot.color, color, CLR_LEN);
@@ -212,7 +212,7 @@ static void _plot_calendar(const drawing_interface* pci, const plot_t* plt, matr
 	(*pci->drw->pf_draw_path)(pci->ctx, &xp_dot, &xb_dot, sa, pa, 5);
 
 	label = get_string_ptr(plt->x_labels, 0);
-	if (is_null(label))
+	if (xsisnil(label))
 		get_loc_date(&dt);
 	else
 		parse_date(&dt, label);
@@ -365,7 +365,7 @@ static void _plot_indicator(const drawing_interface* pci, const plot_t* plt, mat
 			middx = pbox->fx + j * dx + dx / 2;
 
 			color = get_string_ptr(plt->y_colors, j);
-			if (!is_null(color))
+			if (!xsisnil(color))
 			{
 				xsncpy(xp_dot.color, color, CLR_LEN);
 				xsncpy(xb_dot.color, color, CLR_LEN);
@@ -387,7 +387,7 @@ static void _plot_indicator(const drawing_interface* pci, const plot_t* plt, mat
 			(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, label, -1);
 
 			shape = get_string_ptr(plt->y_shapes, j);
-			if (is_null(shape))
+			if (xsisnil(shape))
 				shape = ATTR_SHAPE_RECT;
 
 			xr.fx = middx - dx / 2 + 1.0f;
@@ -517,7 +517,7 @@ static void _plot_thermometer(const drawing_interface* pci, const plot_t* plt, m
 		(*pci->drw->pf_draw_path)(pci->ctx, &xp, &xb, sa, pa, 10);
 
 		color = get_string_ptr(plt->x_colors, i);
-		if (!is_null(color))
+		if (!xsisnil(color))
 		{
 			xscpy(xp_dot.color, color);
 			xscpy(xb_dot.color, color);
@@ -709,7 +709,7 @@ static void _plot_bargram(const drawing_interface* pci, const plot_t* plt, matri
 		(*pci->drw->pf_draw_pie)(pci->ctx, &xp, &xb, &xr_pi, XPI / 2, - XPI / 2);
 
 		color = get_string_ptr(plt->x_colors, i);
-		if (!is_null(color))
+		if (!xsisnil(color))
 		{
 			xscpy(xp_dot.color, color);
 			xscpy(xb_dot.color, color);
@@ -910,7 +910,7 @@ static void _plot_contragram(const drawing_interface* pci, const plot_t* plt, ma
 
 		//the inner bar
 		color = get_string_ptr(plt->y_colors, 0);
-		if (!is_null(color))
+		if (!xsisnil(color))
 		{
 			xscpy(xp_dot.color, color);
 			xscpy(xb_dot.color, color);
@@ -972,7 +972,7 @@ static void _plot_contragram(const drawing_interface* pci, const plot_t* plt, ma
 		(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, numstr, -1);
 
 		color = get_string_ptr(plt->y_colors, 1);
-		if (!is_null(color))
+		if (!xsisnil(color))
 		{
 			xscpy(xp_dot.color, color);
 			xscpy(xb_dot.color, color);
@@ -1245,7 +1245,7 @@ static void _plot_balancegram(const drawing_interface* pci, const plot_t* plt, m
 		(*pci->drw->pf_draw_path)(pci->ctx, &xp, &xb, sa, pa, 7);
 
 		color = get_string_ptr(plt->y_colors, 0);
-		if (!is_null(color))
+		if (!xsisnil(color))
 		{
 			xscpy(xp_dot.color, color);
 			xscpy(xb_dot.color, color);
@@ -1305,7 +1305,7 @@ static void _plot_balancegram(const drawing_interface* pci, const plot_t* plt, m
 		(*pci->drw->pf_draw_path)(pci->ctx, &xp, &xb, sa, pa, 7);
 
 		color = get_string_ptr(plt->y_colors, 1);
-		if (!is_null(color))
+		if (!xsisnil(color))
 		{
 			xscpy(xp_dot.color, color);
 			xscpy(xb_dot.color, color);
@@ -1454,7 +1454,7 @@ static void _plot_kpigram(const drawing_interface* pci, const plot_t* plt, matri
 		(*pci->drw->pf_text_out)(pci->ctx, &xa, &pt1, stage, -1);
 
 		color = get_string_ptr(plt->y_colors, i);
-		if (!is_null(color))
+		if (!xsisnil(color))
 		{
 			xscpy(xp_dot.color, color);
 		}
@@ -1649,7 +1649,7 @@ static void _plot_taskgram(const drawing_interface* pci, const plot_t* plt, matr
 		(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, label, -1);
 
 		color = get_string_ptr(plt->y_colors, i);
-		if (!is_null(color))
+		if (!xsisnil(color))
 		{
 			xscpy(xp_dot.color, color);
 			xscpy(xb_dot.color, color);
@@ -1681,7 +1681,7 @@ static void _plot_taskgram(const drawing_interface* pci, const plot_t* plt, matr
 		(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, label, -1);
 
 		color = get_string_ptr(plt->x_colors, i);
-		if (!is_null(color))
+		if (!xsisnil(color))
 		{
 			xscpy(xp_dot.color, color);
 			xscpy(xb_dot.color, color);
@@ -1877,7 +1877,7 @@ static void _plot_scattergram(const drawing_interface* pci, const plot_t* plt, m
 
 		// the y color indicator
 		color = get_string_ptr(plt->y_colors, i);
-		if (!is_null(color))
+		if (!xsisnil(color))
 		{
 			xscpy(xp_dot.color, color);
 			xscpy(xb_dot.color, color);
@@ -1939,7 +1939,7 @@ static void _plot_scattergram(const drawing_interface* pci, const plot_t* plt, m
 	for (i = 0; i < matrix_get_cols(mt); i++)
 	{
 		color = get_string_ptr(plt->y_colors, i);
-		if (!is_null(color))
+		if (!xsisnil(color))
 		{
 			xscpy(xb_dot.color, color);
 		}
@@ -2103,7 +2103,7 @@ static void _plot_mediangram(const drawing_interface* pci, const plot_t* plt, ma
 		(*pci->drw->pf_text_out)(pci->ctx, &xa, &pt1, stage, -1);
 
 		color = get_string_ptr(plt->y_colors, 0);
-		if (!is_null(color))
+		if (!xsisnil(color))
 		{
 			xscpy(xp_dot.color, color);
 		}
@@ -2221,7 +2221,7 @@ static void _plot_mediangram(const drawing_interface* pci, const plot_t* plt, ma
 	}
 
 	color = get_string_ptr(plt->y_colors, 0);
-	if (!is_null(color))
+	if (!xsisnil(color))
 	{
 		xscpy(xp_dot.color, color);
 		xscpy(xb_dot.color, color);
@@ -2259,7 +2259,7 @@ static void _plot_mediangram(const drawing_interface* pci, const plot_t* plt, ma
 	(*pci->drw->pf_draw_text)(pci->ctx, &xa, &xr, _T("得分值"), -1);
 
 	color = get_string_ptr(plt->y_colors, 1);
-	if (!is_null(color))
+	if (!xsisnil(color))
 	{
 		xscpy(xp_dot.color, color);
 		xscpy(xb_dot.color, color);
@@ -2474,7 +2474,7 @@ static void _plot_histogram(const drawing_interface* pci, const plot_t* plt, mat
 		}
 
 		color = get_string_ptr(plt->y_colors, i);
-		if (!is_null(color))
+		if (!xsisnil(color))
 		{
 			xscpy(xp_dot.color, color);
 			xscpy(xb_dot.color, color);
@@ -2514,7 +2514,7 @@ static void _plot_histogram(const drawing_interface* pci, const plot_t* plt, mat
 		(*pci->drw->pf_text_out)(pci->ctx, &xa, &pt1, stage, -1);
 
 		color = get_string_ptr(plt->y_colors, 0);
-		if (!is_null(color))
+		if (!xsisnil(color))
 		{
 			xscpy(xp_dot.color, color);
 		}
@@ -2569,7 +2569,7 @@ static void _plot_histogram(const drawing_interface* pci, const plot_t* plt, mat
 		for (j = 0; j < matrix_get_cols(mt); j++)
 		{
 			color = get_string_ptr(plt->y_colors, j);
-			if (!is_null(color))
+			if (!xsisnil(color))
 			{
 				xscpy(xp_dot.color, color);
 				xscpy(xb_dot.color, color);
@@ -2790,7 +2790,7 @@ static void _plot_trendgram(const drawing_interface* pci, const plot_t* plt, mat
 
 		//y colors
 		color = get_string_ptr(plt->y_colors, i);
-		if (!is_null(color))
+		if (!xsisnil(color))
 		{
 			xscpy(xp_dot.color, color);
 			xscpy(xb_dot.color, color);
@@ -2847,7 +2847,7 @@ static void _plot_trendgram(const drawing_interface* pci, const plot_t* plt, mat
 	for (i = 0; i < g_count; i++)
 	{
 		color = get_string_ptr(plt->y_colors, i);
-		if (!is_null(color))
+		if (!xsisnil(color))
 			xscpy(xp_dot.color, color);
 		else
 			xscpy(xp_dot.color, xp.color);
@@ -2877,7 +2877,7 @@ static void _plot_trendgram(const drawing_interface* pci, const plot_t* plt, mat
 		xr.fh = dy / 2;
 
 		label = get_string_ptr(plt->y_labels, i);
-		if (!is_null(label))
+		if (!xsisnil(label))
 		{
 			xscpy(numstr, label);
 			n = xslen(numstr);
@@ -2904,7 +2904,7 @@ static void _plot_trendgram(const drawing_interface* pci, const plot_t* plt, mat
 	for (i = 0; i < matrix_get_cols(mt); i++)
 	{
 		color = get_string_ptr(plt->y_colors, i);
-		if (!is_null(color))
+		if (!xsisnil(color))
 		{
 			xscpy(xp_dot.color, color);
 			xscpy(xb_dot.color, color);
@@ -2968,7 +2968,7 @@ static void _plot_trendgram(const drawing_interface* pci, const plot_t* plt, mat
 	{
 		color = get_string_ptr(plt->x_colors, i);
 
-		if (!is_null(color))
+		if (!xsisnil(color))
 		{
 			xscpy(xb.color, color);
 
@@ -3085,7 +3085,7 @@ static void _plot_pantogram(const drawing_interface* pci, const plot_t* plt, mat
 		{
 			color = get_string_ptr(plt->y_colors, j);
 			
-			if (!is_null(color))
+			if (!xsisnil(color))
 				xscpy(xb_dot.color, color);
 			else
 				xscpy(xb_dot.color, xb.color);
@@ -3229,7 +3229,7 @@ static void _plot_radargram(const drawing_interface* pci, const plot_t* plt, mat
 	for (i = 0; i < x_count; i++)
 	{
 		color = get_string_ptr(plt->x_colors, i);
-		if (!is_null(color))
+		if (!xsisnil(color))
 		{
 			xscpy(xp_dot.color, color);
 		}
@@ -3351,7 +3351,7 @@ static void _plot_radargram(const drawing_interface* pci, const plot_t* plt, mat
 	for (i = 0; i < matrix_get_rows(mt); i++)
 	{
 		color = get_string_ptr(plt->x_colors, i);
-		if (!is_null(color))
+		if (!xsisnil(color))
 		{
 			xscpy(xp_dot.color, color);
 			xscpy(xb_dot.color, color);
@@ -3529,7 +3529,7 @@ static void _plot_fuelgram(const drawing_interface* pci, const plot_t* plt, matr
 		for (j = 0; j < 7; j++)
 		{
 			color = get_string_ptr(plt->y_colors, j);
-			if (!is_null(color))
+			if (!xsisnil(color))
 			{
 				xscpy(xb_dot.color, color);
 			}

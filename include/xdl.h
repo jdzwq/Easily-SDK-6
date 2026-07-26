@@ -6,7 +6,7 @@
 #include "../xdl/xdlbio.h"
 #include "../xdl/xdloop.h"
 #include "../xdl/xdldoc.h"
-#include "../xdl/xdlgdi.h"
+#include "../xdl/xdlsdi.h"
 #include "../xdl/xdlview.h"
 #include "../xdl/xdlutil.h"
 

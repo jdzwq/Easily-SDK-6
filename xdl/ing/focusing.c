@@ -26,7 +26,7 @@ LICENSE.GPL3 for more details.
 
 #include "focusing.h"
 
-#include "../xdlgdi.h"
+#include "../xdlsdi.h"
 
 void draw_select_raw(const drawing_interface* pvi, const xcolor_t* pxc, const xrect_t* prt, int deep)
 {

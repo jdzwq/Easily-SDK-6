@@ -404,7 +404,7 @@ xdb_t STDCALL db_open(const tchar_t* srv, const tchar_t* dbn, const tchar_t* uid
 		*tk = '\0';
 	}
 
-	if(a_is_null(port))
+	if(a_xsisnil(port))
 		ctx = PQsetdbLogin(ssrv, NULL, NULL, NULL, sdbn, suid, spwd);
 	else
 		ctx = PQsetdbLogin(ssrv, port, NULL, NULL, sdbn, suid, spwd);
@@ -968,7 +968,7 @@ bool_t STDCALL db_select(xdb_t db, LINKPTR grid, const tchar_t* sqlstr)
 	clear_grid_rowset(grid);
 	clear_grid_colset(grid);
 
-	if (is_null(sqlstr))
+	if (xsisnil(sqlstr))
 	{
 		raise_user_error(_T("-1"), _T("Empty sql statement"));
 	}
@@ -1093,7 +1093,7 @@ bool_t STDCALL db_schema(xdb_t db, LINKPTR grid, const tchar_t* sqlstr)
     clear_grid_rowset(grid);
     clear_grid_colset(grid);
     
-    if (is_null(sqlstr))
+    if (xsisnil(sqlstr))
     {
         raise_user_error(_T("-1"), _T("Empty sql statement"));
     }
@@ -1599,7 +1599,7 @@ bool_t STDCALL _db_prepare(xdb_postgres_context* pdb, const tchar_t* sqlstr)
 
 	_db_reset(pdb);
 
-	if (is_null(sqlstr))
+	if (xsisnil(sqlstr))
 	{
 		raise_user_error(_T("-1"), _T("Empty sql statement"));
 	}

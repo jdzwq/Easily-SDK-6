@@ -3835,7 +3835,7 @@ static tls13_handshake_states _ssl_write_server_encrypted_extensions(ssl_context
 	PUT_SWORD_NET(prec->snd_msg, msglen, (unsigned short)(extlen));
 	msglen += 2;
 
-	if (!a_is_null(psec->host_cn))
+	if (!a_xsisnil(psec->host_cn))
 	{
 		// Extension type: Server name(0)
 		PUT_SWORD_NET(prec->snd_msg, msglen, SSL_EXTENSION_SERVERNAME);

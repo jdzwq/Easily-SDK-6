@@ -238,7 +238,7 @@ static void expr_parse_node(link_t_ptr multi,link_t_ptr parent,tchar_t* token,in
 
 bool_t expr_parse(link_t_ptr ptr,const tchar_t* str)
 {
-	if(is_null(str))
+	if(xsisnil(str))
 		return 1;
 
 	expr_parse_node(ptr,NULL,(tchar_t*)str,xslen(str));

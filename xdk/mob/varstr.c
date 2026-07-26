@@ -194,7 +194,7 @@ int	string_cat(string_t vs, const tchar_t* str, int len)
 	count = pvs->count;
 	vbuf = (tchar_t*)pvs->data;
 
-	if (is_null(str))
+	if (xsisnil(str))
 		return count;
 
 	dlen = (len < 0) ? xslen(str) : len;
@@ -432,6 +432,7 @@ void string_empty(string_t vs)
 	if (pvs->size > VARSTR_INC)
 	{
 		xmem_free(pvs->data);
+		pvs->data = NULL;
 		pvs->size = 0;
 	}
 	else

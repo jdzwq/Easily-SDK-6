@@ -512,7 +512,7 @@ widget_t _MainFrame_CreatePanel(widget_t widget, const tchar_t* wclass)
 
 	if (compare_text(wclass, -1, PANEL_CLASS_OWNER_GIZMO, -1, 0) == 0)
 	{
-		if (is_null(wname))
+		if (xsisnil(wname))
 			xscpy(wname, _T("Gizmo"));
 
 		hPanel = ownerctrl_create(_T("OwnerPanel"), WD_STYLE_CONTROL, &xr, widget);
@@ -521,7 +521,7 @@ widget_t _MainFrame_CreatePanel(widget_t widget, const tchar_t* wclass)
 		ownerctrl_redraw(hPanel);
 	}else if (compare_text(wclass, -1, PANEL_CLASS_OWNER_COLOR, -1, 0) == 0)
 	{
-		if (is_null(wname))
+		if (xsisnil(wname))
 			xscpy(wname, _T("Color"));
 
 		hPanel = ownerctrl_create(_T("ColorPanel"), WD_STYLE_CONTROL, &xr, widget);
@@ -531,7 +531,7 @@ widget_t _MainFrame_CreatePanel(widget_t widget, const tchar_t* wclass)
 	}
 	else if (compare_text(wclass, -1, PANEL_CLASS_CALENDAR, -1, 0) == 0)
 	{
-		if (is_null(wname))
+		if (xsisnil(wname))
 			xscpy(wname, _T("Calendar"));
 
 		hPanel = calendarctrl_create(_T("CalendarPanel"), WD_STYLE_CONTROL, &xr, widget);
@@ -551,7 +551,7 @@ widget_t _MainFrame_CreatePanel(widget_t widget, const tchar_t* wclass)
 	}
 	else if (compare_text(wclass, -1, PANEL_CLASS_NOTES, -1, 0) == 0)
 	{
-		if (is_null(wname))
+		if (xsisnil(wname))
 			xscpy(wname, _T("Note"));
 
 		hPanel = notesctrl_create(_T("NotesPanel"), WD_STYLE_CONTROL, &xr, widget);
@@ -580,7 +580,7 @@ widget_t _MainFrame_CreatePanel(widget_t widget, const tchar_t* wclass)
 	}
 	else if (compare_text(wclass, -1, PANEL_CLASS_PANEL, -1, 0) == 0)
 	{
-		if (is_null(wname))
+		if (xsisnil(wname))
 			xscpy(wname, _T("Panel"));
 
 		hPanel = panelctrl_create(_T("PanelPanel"), WD_STYLE_CONTROL, &xr, widget);
@@ -609,7 +609,7 @@ widget_t _MainFrame_CreatePanel(widget_t widget, const tchar_t* wclass)
 	}
 	else if (compare_text(wclass, -1, PANEL_CLASS_CURVE, -1, 0) == 0)
 	{
-		if (is_null(wname))
+		if (xsisnil(wname))
 			xscpy(wname, _T("Curve"));
 
 		hPanel = curvectrl_create(_T("CurvePanel"), WD_STYLE_CONTROL, &xr, widget);
@@ -619,7 +619,7 @@ widget_t _MainFrame_CreatePanel(widget_t widget, const tchar_t* wclass)
 	}
 	else if (compare_text(wclass, -1, PANEL_CLASS_MODEL, -1, 0) == 0)
 	{
-		if (is_null(wname))
+		if (xsisnil(wname))
 			xscpy(wname, _T("Model"));
 
 		hPanel = modelctrl_create(_T("ModelPanel"), WD_STYLE_CONTROL, &xr, widget);
@@ -633,7 +633,7 @@ widget_t _MainFrame_CreatePanel(widget_t widget, const tchar_t* wclass)
 	}
 	else if (compare_text(wclass, -1, PANEL_CLASS_PLOT_CALENDAR, -1, 0) == 0)
 	{
-		if (is_null(wname))
+		if (xsisnil(wname))
 			xscpy(wname, _T("calendar"));
 
 		hPanel = plotctrl_create(_T("PlotPanel"), WD_STYLE_CONTROL, &xr, widget);
@@ -652,7 +652,7 @@ widget_t _MainFrame_CreatePanel(widget_t widget, const tchar_t* wclass)
 	}
 	else if (compare_text(wclass, -1, PANEL_CLASS_PLOT_INDICATOR, -1, 0) == 0)
 	{
-		if (is_null(wname))
+		if (xsisnil(wname))
 			xscpy(wname, _T("indicator"));
 
 		hPanel = plotctrl_create(_T("PlotPanel"), WD_STYLE_CONTROL, &xr, widget);
@@ -677,7 +677,7 @@ widget_t _MainFrame_CreatePanel(widget_t widget, const tchar_t* wclass)
 	}
 	else if (compare_text(wclass, -1, PANEL_CLASS_PLOT_THERMOMETER, -1, 0) == 0)
 	{
-		if (is_null(wname))
+		if (xsisnil(wname))
 			xscpy(wname, _T("thermometer"));
 
 		hPanel = plotctrl_create(_T("PlotPanel"), WD_STYLE_CONTROL, &xr, widget);
@@ -703,7 +703,7 @@ widget_t _MainFrame_CreatePanel(widget_t widget, const tchar_t* wclass)
 	}
 	else if (compare_text(wclass, -1, PANEL_CLASS_PLOT_BARGRAM, -1, 0) == 0)
 	{
-		if (is_null(wname))
+		if (xsisnil(wname))
 			xscpy(wname, _T("bargram"));
 
 		hPanel = plotctrl_create(_T("PlotPanel"), WD_STYLE_CONTROL, &xr, widget);
@@ -729,7 +729,7 @@ widget_t _MainFrame_CreatePanel(widget_t widget, const tchar_t* wclass)
 	}
 	else if (compare_text(wclass, -1, PANEL_CLASS_PLOT_CONTRAGRAM, -1, 0) == 0)
 	{
-		if (is_null(wname))
+		if (xsisnil(wname))
 			xscpy(wname, _T("contragram"));
 
 		hPanel = plotctrl_create(_T("PlotPanel"), WD_STYLE_CONTROL, &xr, widget);
@@ -757,7 +757,7 @@ widget_t _MainFrame_CreatePanel(widget_t widget, const tchar_t* wclass)
 	}
 	else if (compare_text(wclass, -1, PANEL_CLASS_PLOT_BALANCEGRAM, -1, 0) == 0)
 	{
-		if (is_null(wname))
+		if (xsisnil(wname))
 			xscpy(wname, _T("balancegram"));
 
 		hPanel = plotctrl_create(_T("PlotPanel"), WD_STYLE_CONTROL, &xr, widget);
@@ -785,7 +785,7 @@ widget_t _MainFrame_CreatePanel(widget_t widget, const tchar_t* wclass)
 	}
 	else if (compare_text(wclass, -1, PANEL_CLASS_PLOT_KPIGRAM, -1, 0) == 0)
 	{
-		if (is_null(wname))
+		if (xsisnil(wname))
 			xscpy(wname, _T("kpigram"));
 
 		hPanel = plotctrl_create(_T("PlotPanel"), WD_STYLE_CONTROL, &xr, widget);
@@ -817,7 +817,7 @@ widget_t _MainFrame_CreatePanel(widget_t widget, const tchar_t* wclass)
 	}
 	else if (compare_text(wclass, -1, PANEL_CLASS_PLOT_TASKGRAM, -1, 0) == 0)
 	{
-		if (is_null(wname))
+		if (xsisnil(wname))
 			xscpy(wname, _T("taskgram"));
 
 		hPanel = plotctrl_create(_T("PlotPanel"), WD_STYLE_CONTROL, &xr, widget);
@@ -845,7 +845,7 @@ widget_t _MainFrame_CreatePanel(widget_t widget, const tchar_t* wclass)
 	}
 	else if (compare_text(wclass, -1, PANEL_CLASS_PLOT_SCATTERGRAM, -1, 0) == 0)
 	{
-		if (is_null(wname))
+		if (xsisnil(wname))
 			xscpy(wname, _T("scattergram"));
 
 		hPanel = plotctrl_create(_T("PlotPanel"), WD_STYLE_CONTROL, &xr, widget);
@@ -873,7 +873,7 @@ widget_t _MainFrame_CreatePanel(widget_t widget, const tchar_t* wclass)
 	}
 	else if (compare_text(wclass, -1, PANEL_CLASS_PLOT_MEDIANGRAM, -1, 0) == 0)
 	{
-		if (is_null(wname))
+		if (xsisnil(wname))
 			xscpy(wname, _T("mediangram"));
 
 		hPanel = plotctrl_create(_T("PlotPanel"), WD_STYLE_CONTROL, &xr, widget);
@@ -905,7 +905,7 @@ widget_t _MainFrame_CreatePanel(widget_t widget, const tchar_t* wclass)
 	}
 	else if (compare_text(wclass, -1, PANEL_CLASS_PLOT_HISTOGRAM, -1, 0) == 0)
 	{
-		if (is_null(wname))
+		if (xsisnil(wname))
 			xscpy(wname, _T("histogram"));
 
 		hPanel = plotctrl_create(_T("PlotPanel"), WD_STYLE_CONTROL, &xr, widget);
@@ -936,7 +936,7 @@ widget_t _MainFrame_CreatePanel(widget_t widget, const tchar_t* wclass)
 	}
 	else if (compare_text(wclass, -1, PANEL_CLASS_PLOT_TRENDGRAM, -1, 0) == 0)
 	{
-		if (is_null(wname))
+		if (xsisnil(wname))
 			xscpy(wname, _T("trendgram"));
 
 		hPanel = plotctrl_create(_T("PlotPanel"), WD_STYLE_CONTROL, &xr, widget);
@@ -967,7 +967,7 @@ widget_t _MainFrame_CreatePanel(widget_t widget, const tchar_t* wclass)
 	}
 	else if (compare_text(wclass, -1, PANEL_CLASS_PLOT_PANTOGRAM, -1, 0) == 0)
 	{
-		if (is_null(wname))
+		if (xsisnil(wname))
 			xscpy(wname, _T("pantogram"));
 
 		hPanel = plotctrl_create(_T("PlotPanel"), WD_STYLE_CONTROL, &xr, widget);
@@ -999,7 +999,7 @@ widget_t _MainFrame_CreatePanel(widget_t widget, const tchar_t* wclass)
 	}
 	else if (compare_text(wclass, -1, PANEL_CLASS_PLOT_RADARGRAM, -1, 0) == 0)
 	{
-		if (is_null(wname))
+		if (xsisnil(wname))
 			xscpy(wname, _T("radargram"));
 
 		hPanel = plotctrl_create(_T("PlotPanel"), WD_STYLE_CONTROL, &xr, widget);
@@ -1031,7 +1031,7 @@ widget_t _MainFrame_CreatePanel(widget_t widget, const tchar_t* wclass)
 	}
 	else if (compare_text(wclass, -1, PANEL_CLASS_PLOT_FUELGRAM, -1, 0) == 0)
 	{
-		if (is_null(wname))
+		if (xsisnil(wname))
 			xscpy(wname, _T("fuelgram"));
 
 		hPanel = plotctrl_create(_T("PlotPanel"), WD_STYLE_CONTROL, &xr, widget);

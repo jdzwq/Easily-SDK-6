@@ -176,7 +176,7 @@ void MainFrame_SaveProject(widget_t widget)
 	if (!pdt->bDirty)
 		return;
 
-	if (is_null(pdt->szFile))
+	if (xsisnil(pdt->szFile))
 	{
 		tchar_t szPath[PATH_LEN + 1] = { 0 };
 		tchar_t szFile[PATH_LEN + 1] = { 0 };
@@ -254,7 +254,7 @@ void MainFrame_CreateProject(widget_t widget)
 	if (!shell_get_filename(widget, szPath, _T("Project File(*.project)\0*.project\0"), _T("project"), 1, szPath, PATH_LEN, szFile, PATH_LEN))
 		return;
 
-	xscat(szPath, _T("/"));
+	xsncat(szPath, SLASH_CHAR, 1);
 	xscat(szPath, szFile);
 
 	pdt->ptrProject = Project_Alloc();
@@ -295,7 +295,7 @@ void MainFrame_OpenProject(widget_t widget)
 	tchar_t szPath[PATH_LEN + 1] = { 0 };
 	tchar_t szFile[PATH_LEN + 1] = { 0 };
 
-	if(is_null(pdt->szPath))
+	if(xsisnil(pdt->szPath))
 		shell_get_curpath(szPath, PATH_LEN);
 	else
 		xscpy(szPath, pdt->szPath);
@@ -303,7 +303,7 @@ void MainFrame_OpenProject(widget_t widget)
 	if (!shell_get_filename(widget, szPath, _T("Project File(*.project)\0*.project\0"), _T("project"), 0, szPath, PATH_LEN, szFile, PATH_LEN))
 		return;
 
-	xscat(szPath, _T("/"));
+	xsncat(szPath, SLASH_CHAR, 1);
 	xscat(szPath, szFile);
 
 	pdt->ptrProject = Project_Alloc();
@@ -505,7 +505,7 @@ void MainFrame_OpenFile(widget_t widget)
 	tchar_t szFile[PATH_LEN + 1] = { 0 };
 	tchar_t szFilter[] = _T("Sheet File(*.sheet)\0*.sheet\0Schema File(*.schema)\0*.schema\0Text File(*.txt)\0*.txt\0SQL File(*.sql)\0*.sql\0Xml File(*.xml)\0*.xml\0Json File(*.json)\0*.json\0");
 
-	if(is_null(pdt->szPath))
+	if(xsisnil(pdt->szPath))
 		shell_get_curpath(szPath, PATH_LEN);
 	else
 		xscpy(szPath, pdt->szPath);
@@ -513,7 +513,7 @@ void MainFrame_OpenFile(widget_t widget)
 	if (!shell_get_filename(widget, szPath, szFilter, _T("sheet"), 0, szPath, PATH_LEN, szFile, PATH_LEN))
 		return;
 
-	xscat(szPath, _T("/"));
+	xsncat(szPath, SLASH_CHAR, 1);
 	xscat(szPath, szFile);
 
 	tchar_t szClass[RES_LEN + 1] = { 0 };
@@ -535,7 +535,7 @@ void MainFrame_OpenFile(widget_t widget)
 			xscpy(szClass, PANEL_CLASS_JSON);
 	}
 
-	if (is_null(szClass))
+	if (xsisnil(szClass))
 	{
 		ShowMsg(MSGICO_ERR, _T("未知文档类型"));
 		return;
@@ -569,7 +569,7 @@ void MainFrame_AppendFile(widget_t widget)
 {
 	MainFrameDelta* pdt = GETMAINFRAMEDELTA(widget);
 
-	if (is_null(pdt->szFile))
+	if (xsisnil(pdt->szFile))
 	{
 		ShowMsg(MSGICO_TIP, _T("请先新建或打开工程！"));
 		return;
@@ -635,7 +635,7 @@ bool_t MainFrame_RenameFile(widget_t widget, const tchar_t* nname)
 	tchar_t szClass[RES_LEN + 1] = { 0 };
 
 	split_path(pdt->szFile, szOrg, NULL, NULL);
-	xscat(szOrg, _T("/"));
+	xscat(szOrg, SLASH_CHAR);
 	xscat(szOrg, get_tree_item_name_ptr(tlk));
 
 	_MainFrame_FileClass(szOrg, szClass);
@@ -643,7 +643,7 @@ bool_t MainFrame_RenameFile(widget_t widget, const tchar_t* nname)
 	split_path(get_tree_item_name_ptr(tlk), NULL, NULL, szExt);
 
 	split_path(pdt->szFile, szNew, NULL, NULL);
-	xscat(szNew, _T("/"));
+	xscat(szNew, SLASH_CHAR);
 	xscat(szNew, nname);
 	xscat(szNew, _T("."));
 	xscat(szNew, szExt);
@@ -702,12 +702,12 @@ void MainFrame_ShowFile(widget_t widget)
 	xscpy(szFile, get_tree_item_name_ptr(tlk));
 
 	split_path(pdt->szFile, szPath, NULL, NULL);
-	xscat(szPath, _T("/"));
+	xsncat(szPath, SLASH_CHAR, 1);
 	xscat(szPath, szFile);
 
 	_MainFrame_FileClass(szPath, szClass);
 
-	if (is_null(szClass))
+	if (xsisnil(szClass))
 	{
 		ShowMsg(MSGICO_ERR, _T("未知XML文档类型"));
 		return;
@@ -757,7 +757,7 @@ void MainFrame_SyncFile(widget_t widget)
 
 	destroy_string_table(ptr_str);
 
-	if (is_null(szSYN))
+	if (xsisnil(szSYN))
 	{
 		ShowMsg(MSGICO_ERR, _T("未设置文档同步服务！"));
 		return;
@@ -785,11 +785,11 @@ void MainFrame_SyncFile(widget_t widget)
 		{
 			split_path(pdt->szFile, szLoc, NULL, NULL);
 
-			xscat(szLoc, _T("/"));
+			xscat(szLoc, SLASH_CHAR);
 			xscat(szLoc, get_tree_item_name_ptr(tlk_file));
 
 			xscpy(szSrv, szSYN);
-			xscat(szSrv, _T("/"));
+			xscat(szSrv, SLASH_CHAR);
 			xscat(szSrv, get_tree_item_name_ptr(tlk_file));
 
 			if (xfile_info(NULL, szLoc, locTime, NULL, NULL, NULL))
@@ -986,7 +986,7 @@ void MainFrame_CheckObject(widget_t widget)
 
 	str_find_t fd = { 0 };
 	fd.sub_str = get_tree_item_name_ptr(tlk);
-	if (is_null(fd.sub_str))
+	if (xsisnil(fd.sub_str))
 		return;
 
 	widget_send_command(hPanel, COMMAND_FIND, IDC_PARENT, (vword_t)&fd);
@@ -1005,7 +1005,7 @@ void MainFrame_SetDataSource(widget_t widget)
 
 	LINKPTR ptr_str = create_string_table(0);
 
-	if (is_null(szRDS))
+	if (xsisnil(szRDS))
 	{
 		write_string_entity(ptr_str, _T("SERVICE"), -1, NULL, 0);
 		write_string_entity(ptr_str, _T("DATABASE"), -1, NULL, 0);
@@ -1057,7 +1057,7 @@ void MainFrame_SetDocServer(widget_t widget)
 
 	LINKPTR ptr_str = create_string_table(0);
 
-	if (is_null(szSYN))
+	if (xsisnil(szSYN))
 	{
 		write_string_entity(ptr_str, _T("SERVICE"), -1, NULL, 0);
 		write_string_entity(ptr_str, _T("SECRET-ID"), -1, NULL, 0);
@@ -1747,7 +1747,7 @@ widget_t _MainFrame_CreatePanel(widget_t widget, const tchar_t* wclass, const tc
 
 	if (compare_text(wclass, -1, PANEL_CLASS_FORM, -1, 0) == 0)
 	{
-		if (is_null(wname))
+		if (xsisnil(wname))
 			xscpy(wname, _T("NewForm"));
 
 		hPanel = FormPanel_Create(wname, &xr, fpath);
@@ -1756,7 +1756,7 @@ widget_t _MainFrame_CreatePanel(widget_t widget, const tchar_t* wclass, const tc
 	}
 	else if (compare_text(wclass, -1, PANEL_CLASS_GRID, -1, 0) == 0)
 	{
-		if (is_null(wname))
+		if (xsisnil(wname))
 			xscpy(wname, _T("NewGrid"));
 
 		hPanel = GridPanel_Create(wname, WD_STYLE_CONTROL, &xr, fpath);
@@ -1765,7 +1765,7 @@ widget_t _MainFrame_CreatePanel(widget_t widget, const tchar_t* wclass, const tc
 	}
 	else if (compare_text(wclass, -1, PANEL_CLASS_STATIS, -1, 0) == 0)
 	{
-		if (is_null(wname))
+		if (xsisnil(wname))
 			xscpy(wname, _T("NewStatis"));
 
 		hPanel = StatisPanel_Create(wname, WD_STYLE_CONTROL, &xr, fpath);
@@ -1774,7 +1774,7 @@ widget_t _MainFrame_CreatePanel(widget_t widget, const tchar_t* wclass, const tc
 	}
 	else if (compare_text(wclass, -1, PANEL_CLASS_RICH, -1, 0) == 0)
 	{
-		if (is_null(wname))
+		if (xsisnil(wname))
 			xscpy(wname, _T("NewRich"));
 
 		hPanel = RichPanel_Create(wname, WD_STYLE_CONTROL, &xr, fpath);
@@ -1783,7 +1783,7 @@ widget_t _MainFrame_CreatePanel(widget_t widget, const tchar_t* wclass, const tc
 	}
 	else if (compare_text(wclass, -1, PANEL_CLASS_SCHEMA, -1, 0) == 0)
 	{
-		if (is_null(wname))
+		if (xsisnil(wname))
 			xscpy(wname, _T("NewSchema"));
 
 		hPanel = SchemaPanel_Create(wname, WD_STYLE_CONTROL, &xr, fpath);
@@ -1792,7 +1792,7 @@ widget_t _MainFrame_CreatePanel(widget_t widget, const tchar_t* wclass, const tc
 	}
 	else if (compare_text(wclass, -1, PANEL_CLASS_TOPOG, -1, 0) == 0)
 	{
-		if (is_null(wname))
+		if (xsisnil(wname))
 			xscpy(wname, _T("NewTopog"));
 
 		hPanel = TopogPanel_Create(wname, WD_STYLE_CONTROL, &xr, fpath);
@@ -1801,7 +1801,7 @@ widget_t _MainFrame_CreatePanel(widget_t widget, const tchar_t* wclass, const tc
 	}
 	else if (compare_text(wclass, -1, PANEL_CLASS_IMAGE, -1, 0) == 0)
 	{
-		if (is_null(wname))
+		if (xsisnil(wname))
 			xscpy(wname, _T("NewImages"));
 
 		hPanel = ImagePanel_Create(wname, WD_STYLE_CONTROL, &xr, fpath);
@@ -1810,7 +1810,7 @@ widget_t _MainFrame_CreatePanel(widget_t widget, const tchar_t* wclass, const tc
 	}
 	else if (compare_text(wclass, -1, PANEL_CLASS_DIALOG, -1, 0) == 0)
 	{
-		if (is_null(wname))
+		if (xsisnil(wname))
 			xscpy(wname, _T("NewDialog"));
 
 		hPanel = DialogPanel_Create(wname, WD_STYLE_CONTROL, &xr, fpath);
@@ -1819,7 +1819,7 @@ widget_t _MainFrame_CreatePanel(widget_t widget, const tchar_t* wclass, const tc
 	}
 	else if (compare_text(wclass, -1, PANEL_CLASS_PLOT, -1, 0) == 0)
 	{
-		if (is_null(wname))
+		if (xsisnil(wname))
 			xscpy(wname, _T("NewPlot"));
 
 		hPanel = PlotPanel_Create(wname, WD_STYLE_CONTROL, &xr, fpath);
@@ -1828,7 +1828,7 @@ widget_t _MainFrame_CreatePanel(widget_t widget, const tchar_t* wclass, const tc
 	}
 	else if (compare_text(wclass, -1, PANEL_CLASS_SQL, -1, 0) == 0)
 	{
-		if (is_null(wname))
+		if (xsisnil(wname))
 			xscpy(wname, _T("NewSQL"));
 
 		hPanel = SQLPanel_Create(wname, WD_STYLE_CONTROL, &xr, fpath);
@@ -1837,7 +1837,7 @@ widget_t _MainFrame_CreatePanel(widget_t widget, const tchar_t* wclass, const tc
 	}
 	else if (compare_text(wclass, -1, PANEL_CLASS_XML, -1, 0) == 0)
 	{
-		if (is_null(wname))
+		if (xsisnil(wname))
 			xscpy(wname, _T("NewXML"));
 
 		hPanel = XMLPanel_Create(wname, WD_STYLE_CONTROL, &xr, fpath);
@@ -1846,7 +1846,7 @@ widget_t _MainFrame_CreatePanel(widget_t widget, const tchar_t* wclass, const tc
 	}
 	else if (compare_text(wclass, -1, PANEL_CLASS_JSON, -1, 0) == 0)
 	{
-		if (is_null(wname))
+		if (xsisnil(wname))
 			xscpy(wname, _T("NewJson"));
 
 		hPanel = JsonPanel_Create(wname, WD_STYLE_CONTROL, &xr, fpath);

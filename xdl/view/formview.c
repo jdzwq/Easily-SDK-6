@@ -25,7 +25,7 @@ LICENSE.GPL3 for more details.
 ***********************************************************************/
 #include "formview.h"
 
-#include "../xdlgdi.h"
+#include "../xdlsdi.h"
 #include "../xdldoc.h"
 #include "../xdlview.h"
 #include "../xdlbio.h"
@@ -134,7 +134,7 @@ void draw_form_page(const drawing_interface* pci, link_t_ptr ptr, int page)
 		ft_offset_rect(&xr, pbox->fx, pbox->fy);
 
 		sz_shape = get_field_shape_ptr(flk);
-		if (!is_null(sz_shape))
+		if (!xsisnil(sz_shape))
 		{
 			parse_xpen_from_style(&xp, style);
 			if (!b_print)
@@ -286,7 +286,7 @@ void draw_form_page(const drawing_interface* pci, link_t_ptr ptr, int page)
 		{
 			sz_text = get_field_text_ptr(flk);
 
-			if (!is_null(sz_text) && compare_text(sz_text, -1, get_field_value_ptr(flk), -1, 0) == 0)
+			if (!xsisnil(sz_text) && compare_text(sz_text, -1, get_field_value_ptr(flk), -1, 0) == 0)
 			{
 				parse_xface_from_style(&xa, style);
 				if (!b_print)
@@ -316,7 +316,7 @@ void draw_form_page(const drawing_interface* pci, link_t_ptr ptr, int page)
 		else if (compare_text(sz_class, -1, DOC_FORM_HREF, -1, 0) == 0)
 		{
 			sz_text = get_field_text_ptr(flk);
-			if (!is_null(sz_text))
+			if (!xsisnil(sz_text))
 			{
 				(*pci->drw->pf_draw_thumb)(pci->ctx, sz_text, &xr);
 
@@ -357,7 +357,7 @@ void draw_form_page(const drawing_interface* pci, link_t_ptr ptr, int page)
 			lighten_xbrush(&xb, DEF_SOFT_DARKEN);
 
 			sz_text = get_field_text_ptr(flk);
-			if (!is_null(sz_text))
+			if (!xsisnil(sz_text))
 			{
 				xmem_copy((void*)&cb, (void*)&pci->rect, sizeof(canvbox_t));
 				xmem_copy((void*)&pci->rect, (void*)&xr, sizeof(canvbox_t));
@@ -385,7 +385,7 @@ void draw_form_page(const drawing_interface* pci, link_t_ptr ptr, int page)
 			}
 
 			sz_text = get_field_text_ptr(flk);
-			if (!is_null(sz_text))
+			if (!xsisnil(sz_text))
 			{
 				obj = create_memo_doc();
 				parse_memo_doc(obj, sz_text, -1);
@@ -408,7 +408,7 @@ void draw_form_page(const drawing_interface* pci, link_t_ptr ptr, int page)
 			}
 
 			sz_text = get_field_text_ptr(flk);
-			if (!is_null(sz_text))
+			if (!xsisnil(sz_text))
 			{
 				obj = create_tag_doc();
 				parse_tag_doc(obj, sz_text, -1);
@@ -597,7 +597,7 @@ int calc_form_pages(const drawing_interface* pci, link_t_ptr form)
 			parse_xfont_from_style(&xf, style);
 
 			txt = get_field_text_ptr(flk);
-			if (!is_null(txt))
+			if (!xsisnil(txt))
 			{
 				obj = create_memo_doc();
 				parse_memo_doc(obj, txt, -1);

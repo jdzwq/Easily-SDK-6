@@ -101,7 +101,7 @@ static void _calc_point(const xpoint_t* pt, int r, double a, xpoint_t* pp)
 
 static void calc_penmode(const xpen_t* pxp, int* fs, int* ds)
 {
-	*fs = is_null(pxp->size) ? 1 : xstol(pxp->size);
+	*fs = xsisnil(pxp->size) ? 1 : xstol(pxp->size);
 
 	if (compare_text(pxp->style, -1, GDI_ATTR_STROKE_STYLE_DASH, -1, 1) == 0)
 		*ds = DOT_DASH;
@@ -182,7 +182,7 @@ void coGdiDrawLine(visual_t rdc,const xpen_t* pxp, const xpoint_t* ppt1, const x
 		xcolor_t xc = {0};
 		parse_xcolor(&xc, pxp->color);
 		CGContextSetRGBStrokeColor(ctx->context, (float)(xc.r) / 255.0f, (float)(xc.g) / 255.0f, (float)(xc.b) / 255.0f, 1.0); 
-    	CGContextSetLineWidth(ctx->context, (is_null(pxp->size) ? xstol(pxp->size) : 1)); 
+    	CGContextSetLineWidth(ctx->context, (xsisnil(pxp->size) ? xstol(pxp->size) : 1)); 
 	}
 	
 	CGContextMoveToPoint(ctx->context, point1.x, point1.y); 
@@ -214,7 +214,7 @@ void coGdiDrawPolyline(visual_t rdc,const xpen_t* pxp,const xpoint_t* ppt,int n)
 		xcolor_t xc = {0};
 		parse_xcolor(&xc, pxp->color);
 		CGContextSetRGBStrokeColor(ctx->context, (float)(xc.r) / 255.0f, (float)(xc.g) / 255.0f, (float)(xc.b) / 255.0f, 1.0); 
-    	CGContextSetLineWidth(ctx->context, (is_null(pxp->size) ? xstol(pxp->size) : 1)); 
+    	CGContextSetLineWidth(ctx->context, (xsisnil(pxp->size) ? xstol(pxp->size) : 1)); 
 	}
 
 	CGContextStrokePath(ctx->context);
@@ -248,7 +248,7 @@ void coGdiDrawArc(visual_t rdc, const xpen_t* pxp, const xpoint_t * ppt1, const 
 		xcolor_t xc = {0};
 		parse_xcolor(&xc, pxp->color);
 		CGContextSetRGBStrokeColor(ctx->context, (float)(xc.r) / 255.0f, (float)(xc.g) / 255.0f, (float)(xc.b) / 255.0f, 1.0); 
-    	CGContextSetLineWidth(ctx->context, (is_null(pxp->size) ? xstol(pxp->size) : 1)); 
+    	CGContextSetLineWidth(ctx->context, (xsisnil(pxp->size) ? xstol(pxp->size) : 1)); 
 	}
 
 	CGContextStrokePath(ctx->context);
@@ -276,7 +276,7 @@ void coGdiDrawBezier(visual_t rdc, const xpen_t* pxp, const xpoint_t* ppt1, cons
 		parse_xcolor(&xc, pxp->color);
 		CGContextSetRGBStrokeColor(ctx->context, (float)(xc.r) / 255.0f, (float)(xc.g) / 255.0f, (float)(xc.b) / 255.0f, 1.0); 
 
-    	CGContextSetLineWidth(ctx->context, (is_null(pxp->size) ? xstol(pxp->size) : 1)); 
+    	CGContextSetLineWidth(ctx->context, (xsisnil(pxp->size) ? xstol(pxp->size) : 1)); 
 	}
 
 	CGContextMoveToPoint(ctx->context, points[0].x, points[0].y);
@@ -302,7 +302,7 @@ void coGdiDrawCurve(visual_t rdc, const xpen_t* pxp, const xpoint_t* ppt, int pn
 		xcolor_t xc = {0};
 		parse_xcolor(&xc, pxp->color);
 		CGContextSetRGBStrokeColor(ctx->context, (float)(xc.r) / 255.0f, (float)(xc.g) / 255.0f, (float)(xc.b) / 255.0f, 1.0); 
-    	CGContextSetLineWidth(ctx->context, (is_null(pxp->size) ? xstol(pxp->size) : 1)); 
+    	CGContextSetLineWidth(ctx->context, (xsisnil(pxp->size) ? xstol(pxp->size) : 1)); 
 	}
 
 	CGContextMoveToPoint(ctx->context, points[0].x, points[0].y);
@@ -526,7 +526,7 @@ void coGdiDrawPath(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const t
 		xcolor_t xc = {0};
 		parse_xcolor(&xc, pxp->color);
 		CGContextSetRGBStrokeColor(ctx->context, (float)(xc.r) / 255.0f, (float)(xc.g) / 255.0f, (float)(xc.b) / 255.0f, 1.0); 
-		CGContextSetLineWidth(ctx->context, (is_null(pxp->size) ? xstol(pxp->size) : 1)); 
+		CGContextSetLineWidth(ctx->context, (xsisnil(pxp->size) ? xstol(pxp->size) : 1)); 
 	}
 
 	if(pxb)
@@ -561,7 +561,7 @@ void coGdiDrawRect(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const x
 		xcolor_t xc = {0};
 		parse_xcolor(&xc, pxp->color);
 		CGContextSetRGBStrokeColor(ctx->context, (float)(xc.r) / 255.0f, (float)(xc.g) / 255.0f, (float)(xc.b) / 255.0f, 1.0); 
-		CGContextSetLineWidth(ctx->context, (is_null(pxp->size) ? xstol(pxp->size) : 1)); 
+		CGContextSetLineWidth(ctx->context, (xsisnil(pxp->size) ? xstol(pxp->size) : 1)); 
 	}
 
 	if(pxb)
@@ -594,7 +594,7 @@ void coGdiDrawEllipse(visual_t rdc,const xpen_t* pxp,const xbrush_t* pxb,const x
 		xcolor_t xc = {0};
 		parse_xcolor(&xc, pxp->color);
 		CGContextSetRGBStrokeColor(ctx->context, (float)(xc.r) / 255.0f, (float)(xc.g) / 255.0f, (float)(xc.b) / 255.0f, 1.0); 
-		CGContextSetLineWidth(ctx->context, (is_null(pxp->size) ? xstol(pxp->size) : 1)); 
+		CGContextSetLineWidth(ctx->context, (xsisnil(pxp->size) ? xstol(pxp->size) : 1)); 
 	}
 
 	if(pxb)
@@ -674,7 +674,7 @@ void coGdiDrawRound(visual_t rdc,const xpen_t* pxp,const xbrush_t* pxb,const xre
 		xcolor_t xc = {0};
 		parse_xcolor(&xc, pxp->color);
 		CGContextSetRGBStrokeColor(ctx->context, (float)(xc.r) / 255.0f, (float)(xc.g) / 255.0f, (float)(xc.b) / 255.0f, 1.0); 
-		CGContextSetLineWidth(ctx->context, (is_null(pxp->size) ? xstol(pxp->size) : 1)); 
+		CGContextSetLineWidth(ctx->context, (xsisnil(pxp->size) ? xstol(pxp->size) : 1)); 
 	}
 
 	if(pxb)
@@ -711,7 +711,7 @@ void coGdiDrawPie(visual_t rdc, const xpen_t* pxp, const xbrush_t* pxb, const xr
 		xcolor_t xc = {0};
 		parse_xcolor(&xc, pxp->color);
 		CGContextSetRGBStrokeColor(ctx->context, (float)(xc.r) / 255.0f, (float)(xc.g) / 255.0f, (float)(xc.b) / 255.0f, 1.0); 
-    	CGContextSetLineWidth(ctx->context, (is_null(pxp->size) ? xstol(pxp->size) : 1)); 
+    	CGContextSetLineWidth(ctx->context, (xsisnil(pxp->size) ? xstol(pxp->size) : 1)); 
 	}
 
 	if(pxb)
@@ -754,7 +754,7 @@ void coGdiDrawPolygon(visual_t rdc, const xpen_t* pxp, const xbrush_t*pxb, const
 		xcolor_t xc = {0};
 		parse_xcolor(&xc, pxp->color);
 		CGContextSetRGBStrokeColor(ctx->context, (float)(xc.r) / 255.0f, (float)(xc.g) / 255.0f, (float)(xc.b) / 255.0f, 1.0); 
-    	CGContextSetLineWidth(ctx->context, (is_null(pxp->size) ? xstol(pxp->size) : 1)); 
+    	CGContextSetLineWidth(ctx->context, (xsisnil(pxp->size) ? xstol(pxp->size) : 1)); 
 	}
 
 	if(pxb)
@@ -916,7 +916,7 @@ void coGdiTextRect(visual_t rdc, const xfont_t* pxf, const xface_t* pxa, const t
 
 		if (!h)
 		{
-			if (is_null(pxa->line_height))
+			if (xsisnil(pxa->line_height))
 				h = se.h;
 			else
 				h = (int)((float)se.h * xstof(pxa->line_height));
@@ -926,7 +926,7 @@ void coGdiTextRect(visual_t rdc, const xfont_t* pxf, const xface_t* pxa, const t
 		{
 			if (pxr->w && (w + se.w > pxr->w))
 			{
-				if (is_null(pxa->line_height))
+				if (xsisnil(pxa->line_height))
 					h += se.h;
 				else
 					h += (int)((float)se.h * xstof(pxa->line_height));
@@ -944,7 +944,7 @@ void coGdiTextRect(visual_t rdc, const xfont_t* pxf, const xface_t* pxa, const t
 		{
 			if (pch[0] == _T('\n'))
 			{
-				if (is_null(pxa->line_height))
+				if (xsisnil(pxa->line_height))
 					h += se.h;
 				else
 					h += (int)((float)se.h * xstof(pxa->line_height));
@@ -953,7 +953,7 @@ void coGdiTextRect(visual_t rdc, const xfont_t* pxf, const xface_t* pxa, const t
 			}
 			else if (pxr->w && (w + se.w > pxr->w))
 			{
-				if (is_null(pxa->line_height))
+				if (xsisnil(pxa->line_height))
 					h += se.h;
 				else
 					h += (int)((float)se.h * xstof(pxa->line_height));

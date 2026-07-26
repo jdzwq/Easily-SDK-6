@@ -72,7 +72,7 @@ static int sub_editbox_self_command(widget_t widget, int code, vword_t data, uid
 		if (widget_is_valid(datebox))
 		{
 			text = editbox_get_text_ptr(widget);
-			if (is_null(text))
+			if (xsisnil(text))
 				get_loc_date(&dt);
 			else
 				parse_date(&dt, text);

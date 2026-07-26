@@ -29,7 +29,9 @@ LICENSE.GPL3 for more details.
 
 #include <wayland-client.h>
 #include <wayland-cursor.h>
+
 #include <xkbcommon/xkbcommon.h>
+#include <xkbcommon/xkbcommon-keysyms.h>
 
 #include "../../xdudef.h"
 #include "xdg-shell-client-protocol.h"
@@ -41,41 +43,65 @@ LICENSE.GPL3 for more details.
 #define WAYLAND_WINDOW_TITLE_HEIGHT 26
 #define WAYLAND_WINDOW_EDGE_WIDTH   1
 
-#define WAYLAND_STATE_SHIFT     0x20000000
-#define WAYLAND_STATE_CONTROL   0x40000000
-#define WAYLAND_STATE_ALT       0x80000000
+#define WAYLAND_WITH_LBUTTON	0x00010000
+#define WAYLAND_WITH_RBUTTON	0x00020000
+#define WAYLAND_WITH_MBUTTON	0x00040000
 
-#define WAYLAND_EVENT_MASK      0xEFFFFFFF
+#define WAYLAND_STATE_SHIFT     0x10000000
+#define WAYLAND_STATE_CONTROL   0x20000000
+#define WAYLAND_STATE_ALT       0x40000000
+#define WAYLAND_STATE_META      0x80000000
 
-#define WAYLAND_EVENTMAP(eid)     ((eid) & WAYLAND_EVENT_MASK)
-#define WAYLAND_STATEMAP(eid)     ((eid) & (~WAYLAND_EVENT_MASK))
+#define WAYLAND_EVENT_MASK_CONFIG   0x00010000
+#define WAYLAND_EVENT_MASK_ACTIVE   0x00020000
+#define WAYLAND_EVENT_MASK_MAPING   0x00040000
+#define WAYLAND_EVENT_MASK_EXPOSE   0x00080000
+#define WAYLAND_EVENT_MASK_POINTER  0x00100000
+#define WAYLAND_EVENT_MASK_KEYBOARD 0x00200000
+#define WAYLAND_EVENT_MASK_TOUCHPAD 0x00400000
+#define WAYLAND_EVENT_MASK_NOTIFY   0x00800000
+#define WAYLAND_EVENT_MASK_NOTCLI   0x10000000
 
-#define WAYLAND_EVENT_EXPOSE    0x10000000
-#define WAYLAND_EVENT_CREATE    0x10000001
-#define WAYLAND_EVENT_DESTROY   0x10000002
-#define WAYLAND_EVENT_CLOSE     0x10000004
-#define WAYLAND_EVENT_SHOW      0x10000008
-#define WAYLAND_EVENT_SIZE      0x10000010
-#define WAYLAND_EVENT_ACTIVATE  0x10000020
+#define WAYLAND_EVENT_CREATE    0x00010001
+#define WAYLAND_EVENT_DESTROY   0x00010002
+#define WAYLAND_EVENT_SIZE      0x00010004
 
-#define WAYLAND_EVENT_MOUSE_ENTER     0x10000100
-#define WAYLAND_EVENT_MOUSE_LEAVE     0x10000200
-#define WAYLAND_EVENT_MOUSE_MOVE      0x10000400
-#define WAYLAND_EVENT_MOUSE_WHEEL     0x10000800
-#define WAYLAND_EVENT_LBUTTON_DOWN    0x10001000
-#define WAYLAND_EVENT_LBUTTON_UP      0x10002000
-#define WAYLAND_EVENT_RBUTTON_DOWN    0x10004000
-#define WAYLAND_EVENT_RBUTTON_UP      0x10008000
+#define WAYLAND_EVENT_SHOW      0x00020001
+#define WAYLAND_EVENT_CLOSE     0x00020002
 
-#define WAYLAND_EVENT_SET_FOCUS       0x10010000
-#define WAYLAND_EVENT_KILL_FOCUS      0x10020000
-#define WAYLAND_EVENT_KEY_DOWN        0x10040000
-#define WAYLAND_EVENT_KEY_UP          0x10080000
+#define WAYLAND_EVENT_ACTIVATE  0x00040001
 
-#define WAYLAND_EVENT_WCHAR           0x10100000
-#define WAYLAND_EVENT_COMMAND         0x10200000
-#define WAYLAND_EVENT_NOTICE          0x10400000
-#define WAYLAND_EVENT_SCROLL          0x10800000
+#define WAYLAND_EVENT_EXPOSE    0x00080001
+
+#define WAYLAND_EVENT_MOUSE_ENTER     0x00100001
+#define WAYLAND_EVENT_MOUSE_LEAVE     0x00100002
+#define WAYLAND_EVENT_MOUSE_MOVE      0x00100004
+#define WAYLAND_EVENT_MOUSE_WHEEL     0x00100008
+#define WAYLAND_EVENT_LBUTTON_DOWN    0x00100010
+#define WAYLAND_EVENT_LBUTTON_UP      0x00100020
+#define WAYLAND_EVENT_RBUTTON_DOWN    0x00100040
+#define WAYLAND_EVENT_RBUTTON_UP      0x00100080
+
+#define WAYLAND_EVENT_SET_FOCUS       0x00200001
+#define WAYLAND_EVENT_KILL_FOCUS      0x00200002
+#define WAYLAND_EVENT_KEY_DOWN        0x00200004
+#define WAYLAND_EVENT_KEY_UP          0x00200008
+#define WAYLAND_EVENT_WCHAR           0x00200010
+
+#define WAYLAND_EVENT_SCROLL          0x00400001
+
+#define WAYLAND_EVENT_NOTICE          0x00800001
+#define WAYLAND_EVENT_COMMAND         0x00800002
+
+#define WAYLAND_EVENT_NCPAINT         0x10000001
+#define WAYLAND_EVENT_HITTEST         0x10000002
+#define WAYLAND_EVENT_NCMOUSE_MOVE      0x10000004
+#define WAYLAND_EVENT_NCLBUTTON_DOWN    0x10000010
+#define WAYLAND_EVENT_NCLBUTTON_UP      0x10000020
+#define WAYLAND_EVENT_NCRBUTTON_DOWN    0x10000040
+#define WAYLAND_EVENT_NCRBUTTON_UP      0x10000080
+
+#define WAYLAND_FIX_TO_INT(f) (int)((float)(f) / 256.0f)
 
 typedef struct _wayland_display* wayland_display_ptr;
 typedef struct _wayland_surface* wayland_surface_ptr;
@@ -91,30 +117,51 @@ typedef struct _wayland_display{
 
     struct wl_compositor *raw_comp;
     struct xdg_wm_base *xdg_base;
+    struct wl_subcompositor *sub_comp;
 
     struct wl_seat *raw_seat;
     struct wl_pointer *raw_mouse;
     struct wl_keyboard *raw_keybd;
 
-    uint32_t track_serial;
-    wayland_window_ptr track_focus;
+    struct wl_surface *track_mouse;
+    struct wl_surface *track_input;
 
     int track_mkey;
     int track_xpos;
     int track_ypos;
+
+    struct xkb_context *xkb_ctx;
+    struct xkb_keymap  *xkb_map;
+    struct xkb_state  *xkb_state;
+
+    wayland_window_ptr track_main;
     
     dev_cap_t dispcap;
     pix_cap_t pixcap;
-
 } wayland_display;
 
+typedef enum _WAYLAND_SURFACE_TYPE{
+    WAYLAND_WSURFACE_TYPE_TOP = 1,
+    WAYLAND_SURFACE_TYPE_POP = 2,
+    WAYLAND_SURFACE_TYPE_SUB = 3
+} WAYLAND_SURFACE_TYPE;
+
 typedef struct _wayland_surface{
+    wayland_surface_ptr parent;
     wayland_display* display;
     xrect_t frame;
 
+    int type;
     struct wl_buffer *raw_buff;
     struct wl_surface *raw_face;
-    struct xdg_surface *xdg_face;
+    union{
+        struct xdg_surface *xdg_face;
+        struct wl_subsurface *sub_face;
+    };
+    union{
+        struct xdg_toplevel *xdg_top;
+        struct xdg_popup *xdg_pop;
+    };
 } wayland_surface;
 
 typedef struct _wayland_window*    wayland_window_ptr;
@@ -145,23 +192,32 @@ typedef enum _WAYLAND_WINDOW_STATE{
     WAYLAND_WINDOW_STATE_FULLSCREEN = 4
 } WAYLAND_WINDOW_STATE;
 
+typedef enum _WAYLAND_RESULT{
+    WAYLAND_RESULT_ACCEPT = 0,
+    WAYLAND_RESULT_REJECT = 1,
+    WAYLAND_RESULT_IGNORE = 2
+} WAYLAND_RESULT;
+
+typedef int (CALLBACK *WaylandEventProc)(wayland_window_ptr window, dword_t event_id, dword_t event_code, vword_t event_data);
+
 typedef struct _wayland_window{
     wayland_window_ptr parent;
 
     wayland_surface* sur_client;
-    struct xdg_popup *xdg_pop;
-
     wayland_surface* sur_window;
-    struct xdg_toplevel *xdg_top;
 
 	int x,y,width,height;
     int edge_width;
     int title_height;
 
     int win_type;
-    dword_t evt_mask;
     int win_state;
+    
+    dword_t evt_mask;
+    WaylandEventProc evt_proc;
 
+    wayland_window_ptr track_focus;
+    
     int childs_count;
     wayland_window_ptr childs[WAYLAND_MAX_CHILDS];
     vword_t atoms[WAYLAND_MAX_ATOMS];
@@ -172,32 +228,33 @@ void WaylandDisconnect(void);
 wayland_display* WaylandCreateDisplay(void);
 void WaylandDestroyDisplay(wayland_display* disp);
 wayland_display* WaylandDefaultDisplay(void);
+bool_t WaylandDispatchDisplay(wayland_display* pdisp);
 void WaylandFlashDisplay(wayland_display* disp, bool_t bWait);
 void WaylandGetDeviceCap(wayland_display* disp, dev_cap_t* pcap);
 void WaylandGetPixelCap(wayland_display* disp, pix_cap_t* pcap);
 
-void WaylandEventsInit(void);
-void WaylandEventsUninit(void);
-int WaylandEventsPending(void);
-void WaylandEventsFlash(void);
-void WaylandEventsAdd(wayland_window* window, dword_t event_id, dword_t event_code, vword_t event_data);
-bool_t WaylandEventsFetch(wayland_window** pwindow, dword_t* pevent_id, dword_t* pevent_code, vword_t* pevent_data);
-bool_t WaylandEventsPeek(wayland_window** pwindow, dword_t* pevent_id, dword_t* pevent_code, vword_t* pevent_data);
-
-wayland_surface* WaylandCreateSurface(wayland_display* display, const xrect_t* pxr);
+wayland_surface* WaylandCreateTopSurface(wayland_display* display, const xrect_t* pxr);
+wayland_surface* WaylandCreatePopSurface(wayland_surface* parent, const xrect_t* pxr);
+wayland_surface* WaylandCreateSubSurface(wayland_surface* parent, const xrect_t* pxr);
 void WaylandDestroySurface(wayland_surface* surface);
+void WaylandAttachSurface(wayland_surface* surface);
+void WaylandDetchSurface(wayland_surface* surface);
+bool_t WaylandMinimizeSurface(wayland_surface* surface);
+bool_t WaylandMaximizeSurface(wayland_surface* surface);
+bool_t WaylandFullscreenSurface(wayland_surface* surface);
+void WaylandSizeSurface(wayland_surface* surface, const xsize_t* pxs);
+void WaylandMoveSurface(wayland_surface* surface, const offset_t* pof);
 void WaylandUpdateSurface(wayland_surface* surface, const xrect_t* pxr, bool_t flash);
 void WaylandFillSurface(wayland_surface* surface, int pixel, const xrect_t* pxr);
 
+void WaylandSetWindowProc(wayland_window* window, dword_t events, WaylandEventProc proc);
 void WaylandSetWindowProper(wayland_window* window, int atom, vword_t prop);
 vword_t WaylandGetWindowProper(wayland_window* window, int atom);
 vword_t WaylandDelWindowProper(wayland_window* window, int atom);
 
-wayland_window* WaylandCreateWindow(wayland_window* parent, int type, dword_t mask, const tchar_t* title, int x, int y, int width, int height);
+wayland_window* WaylandCreateWindow(wayland_window* parent, int type, const tchar_t* title, int x, int y, int width, int height);
 void WaylandDestroyWindow(wayland_window* window);
 bool_t WaylandIsWindow(wayland_window* window);
-void WaylandSetWindowProc(wayland_window* window, wayland_win_proc win_proc);
-wayland_win_proc WaylandGetWindowProc(wayland_window* window);
 void WaylandUpdateWindow(wayland_window* window);
 void WaylandInvalidRect(wayland_window* window, const xrect_t* pxr);
 wayland_surface* WaylandGetWindowSurface(wayland_window* window);
@@ -208,6 +265,11 @@ void WaylandClientToScreen(wayland_window* window, xpoint_t* ppt);
 void WaylandScreenToClient(wayland_window* window, xpoint_t* ppt);
 void WaylandClientToWindow(wayland_window* window, xpoint_t* ppt);
 void WaylandWindowToClient(wayland_window* window, xpoint_t* ppt);
+
+void WaylandSizeWindow(wayland_window* pwin, const xsize_t* pxs);
+void WaylandMoveWindow(wayland_window* pwin, const xpoint_t* pxp);
+void WaylandShowWindow(wayland_window* pwin, int nState);
+int WaylandWindowState(wayland_window* pwin);
 
 void WaylandGetScreenSize(xsize_t* pxs);
 void WaylandGetDesktopRect(xrect_t* prt);
